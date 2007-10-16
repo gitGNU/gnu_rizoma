@@ -1,0 +1,1 @@
+EXTRA_DIST = gtk-2.0.m4 postgresql.m4

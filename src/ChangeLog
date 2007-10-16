@@ -1,0 +1,128 @@
+2006-07-02  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (SearchBarcodeProduct): No nothing is showed if the
+	user hasn't put information to search. We prevent large search on
+	DB and information not requested.
+
+2006-06-28  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (CalcularPrecioFinal): Added a consideration of have
+	no IVA on all the conditionals.
+
+	* postgres-functions.c (SaveBuyProducts): Added 'if
+	(products->product->iva != -1)' to prevent the calc of IVA when
+	this isn't set it.
+
+2006-06-18  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* main.c (main): Modified the ask password window, added a lock
+	icon and re-ordered the entry for user and password.
+
+2006-06-03  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma-config.c (main): Enable the cancel button on all the
+	pages of the druid.
+
+2006-06-02  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* config_file.c (rizoma_read_conf): Fixed the bug produced when
+	the config file contained a blank line or a line started with #.
+
+2006-05-31  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* proveedores.c (proveedores_box): Fill with more data the
+	TreeView listing the suppliers.
+	(ModificarProveedor): Fixed the warning produced by the value
+	returned by gtk_entry_get_text () (const gchar *), used a cast.
+	(BuscarProveedor): Fixed the bug that the search was
+	discriminating between upper and lower case letters.
+
+2006-05-29  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* proveedores.c (proveedores_box): Changed the type of how the rut
+	of a supplier it's showed from an entry to a label.
+	(ModificarProveedor): Created to modify a supplier.
+
+2006-05-24  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* config_file.c (rizoma_save_file): Committed the line that
+	printed the Rizoma POS version on the config file. Possibly buggy.
+
+	* vale.c (PrintVale): Fixed the problem that printed confused
+	values on the ticket.
+
+2006-05-09  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (FillProveedores): Added an order to the list of
+	proveedores so we can search in a big list without problems.
+
+2006-05-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (CanjearProducto): Fixed the problem reported in Los Lagos.
+
+2006-05-06  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* manejo_productos.c (SearchProductByBarcode): The function
+	returned a product even if the product didn't exist on the list.
+
+2006-04-10  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (CheckCanjeables): We check if the compra->header
+	isn't NULL because this produce a segmentation fault.
+
+2006-04-09  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (ventas_box): Fixed the accelerator that was
+	overwritten a previous one for F6.
+
+	* postgres-functions.c (ReturnUsername): Added to get the username
+	just having the id.
+
+	* usuario.c (user_box): Set to false the visibility of the entry
+	boxes that change a user password.
+
+	* main.c (PutPoints): Created a new conditional to accept and
+	reject any NULL argument.
+
+2006-04-08  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (ventas_box): Commented the section that show the
+	"facturar" and "Guia" options.
+
+2006-04-04  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* main.c (MainWindow): Fixed the line 658 it were accepting the
+	wrong user level.
+	(MainWindow): Added a new condition in the line 718 so only a user
+	with level 0 can do the action.
+
+	* ventas.c (SearchBarcodeProduct): Dropped the ModfiedBarcode,
+	cause we do not need to put a '-' on the barcode.
+
+2006-03-27  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* encriptar.c (AcceptPassword): Modified the SQL sentence to check
+	if the user is already using the system.
+
+	* main.c (MainWindow): Changed "Gestion Total" by "Rizoma
+	Comercio" the real name :).
+
+2006-03-22  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* tipos.h (_user): Added the "level" member to know what is the
+	level of the current user.
+
+2006-03-19  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* vale.c: Created to store the ticket system.
+	(PrintVale): Print the given ticket.
+
+	* tiempo.c (CurrentTime): We need a function to get the current time
+
+	* vale.c (PrintVale): Created this funciton to print a ticket
+
+2006-03-15  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* main.c (PutPoints): Fixed the bug that put it two points or more
+	in the string number.
+

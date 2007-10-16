@@ -1,0 +1,357 @@
+CREATE TABLE deudas (
+    id serial NOT NULL,
+    id_venta integer,
+    rut_cliente integer,
+    vendedor integer,
+    pagada boolean DEFAULT false,
+    fecha_pagada timestamp without time zone
+);
+
+CREATE TABLE clientes (
+    id serial NOT NULL,
+    nombre character varying(60),
+    apellido_paterno character varying(60),
+    apellido_materno character varying(60),
+    rut integer,
+    verificador character varying(1),
+    direccion character varying(150),
+    telefono integer,
+    abonado integer,
+    credito integer,
+    credito_enable boolean DEFAULT true,
+    giro character varying(255)
+);
+
+CREATE TABLE users (
+    id serial NOT NULL,
+    usuario character varying(30),
+    passwd character varying(400),
+    rut integer,
+    nombre character varying(75),
+    apell_p character varying(75),
+    apell_m character varying(75),
+    fecha_ingreso timestamp without time zone,
+    level smallint
+);
+
+CREATE TABLE numeros_documentos (
+    num_boleta integer,
+    num_factura integer,
+    num_guias integer
+);
+
+CREATE TABLE documentos_emitidos (
+   id serial NOT NULL,
+   tipo_documento smallint,
+   forma_pago smallint,
+   num_documento integer,
+   fecha_emision timestamp without time zone
+);
+
+CREATE TABLE documentos_emitidos_detalle (
+   id serial NOT NULL,
+   id_documento integer,
+   barcode_product varchar(14),
+   precio integer,
+   cantidad double precision
+);
+
+CREATE TABLE compras (
+    id serial NOT NULL,
+    fecha timestamp without time zone,
+    rut_proveedor character varying(100),
+    pedido character varying(100),
+    forma_pago smallint,
+    ingresada boolean,
+    anulada boolean
+);
+
+CREATE TABLE ventas (
+    id serial NOT NULL,
+    monto bigint,
+    fecha timestamp without time zone,
+    maquina integer,
+    vendedor integer,
+    tipo_documento smallint,
+    tipo_venta smallint,
+    descuento smallint,
+    id_documento integer,
+    canceled boolean DEFAULT 'false'
+) WITHOUT OIDS;
+
+
+CREATE TABLE caja (
+    id serial NOT NULL,
+    fecha_inicio timestamp without time zone,
+    inicio integer,
+    fecha_termino timestamp without time zone,
+    termino integer,
+    perdida integer
+);
+
+
+CREATE TABLE abonos (
+    id serial NOT NULL,
+    rut_cliente integer,
+    monto_abonado integer,
+    fecha_abono timestamp without time zone
+);
+
+
+CREATE TABLE cheques (
+    id serial NOT NULL,
+    id_venta integer,
+    serie character varying(10),
+    numero integer,
+    banco character varying(50),
+    plaza character varying(50),
+    monto integer,
+    fecha timestamp without time zone
+);
+
+
+CREATE TABLE formas_pago (
+    id serial NOT NULL,
+    nombre character varying(50),
+    days smallint
+);
+
+CREATE TABLE productos_recividos (
+    id_dcto integer,
+    factura boolean,
+    id_compra integer,
+    barcode character varying(14),
+    cant_ingresada integer
+);
+
+
+CREATE TABLE pagos (
+    id_fact integer,
+    fecha timestamp without time zone,
+    caja boolean,
+    descip text
+);
+
+
+CREATE TABLE guias_compra (
+    id serial NOT NULL,
+    numero integer,
+    id_compra integer,
+    id_factura integer,
+    rut_proveedor character varying(20),
+    fecha_emicion timestamp without time zone
+);
+
+
+CREATE TABLE proveedores (
+    id serial NOT NULL,
+    nombre character varying(100),
+    rut character varying(20),
+    direccion character varying(100),
+    ciudad character varying(100),
+    comuna character varying(100),
+    telefono integer,
+    email character varying(300),
+    web character varying(300),
+    contacto character varying(100),
+    giro character varying(100)
+);
+
+
+CREATE TABLE products_sell_history (
+    id serial NOT NULL,
+    id_venta integer NOT NULL,
+    barcode character varying(14) NOT NULL,
+    descripcion character varying(35),
+    marca character varying(35),
+    contenido character varying(10),
+    unidad character varying(10),
+    cantidad double precision,
+    precio integer NOT NULL,
+    fifo integer NOT NULL,
+    iva integer,
+    otros integer
+);
+
+
+CREATE TABLE impuestos (
+    id serial NOT NULL,
+    descripcion character varying(250),
+    monto double precision
+);
+
+CREATE TABLE products_buy_history (
+    id serial NOT NULL,
+    id_compra integer NOT NULL,
+    cantidad double precision,
+    precio double precision NOT NULL,
+    precio_venta integer NOT NULL,
+    cantidad_ingresada double precision,
+    descuento smallint,
+    barcode_product character varying(14),
+    margen integer,
+    iva integer,
+    otros integer,
+    anulado boolean DEFAULT 'false',
+    canjeado double precision DEFAULT 0.0
+);
+
+
+CREATE TABLE productos (
+    codigo character varying(10),
+    barcode character varying(14),
+    descripcion character varying(50),
+    marca character varying(35),
+    contenido character varying(10),
+    unidad character varying(10),
+    stock double precision DEFAULT 0,
+    precio integer,
+    fifo integer,
+    vendidos double precision,
+    impuestos boolean,
+    otros integer,
+    familia smallint,
+    perecibles boolean,
+    stock_min double precision DEFAULT 0,
+    margen_promedio double precision DEFAULT 0,
+    merma_unid double precision DEFAULT 0.0,
+    fraccion boolean DEFAULT 'false',
+    canje boolean default 'false',
+    stock_pro double precision DEFAULT 0.0,
+    tasa_canje double precision DEFAULT 1.0,
+    precio_mayor integer,
+    cantidad_mayor integer,
+    mayorista boolean DEFAULT FALSE
+);
+
+
+CREATE TABLE documentos_detalle (
+    id serial NOT NULL,
+    numero integer,
+    id_compra integer,
+    barcode character varying(14),
+    cantidad double precision,
+    precio double precision,
+    fecha timestamp without time zone,
+    factura boolean NOT NULL,
+    elaboracion timestamp without time zone,
+    vencimiento timestamp without time zone,
+    iva integer,
+    otros integer
+);
+
+
+CREATE TABLE familias (
+    id serial NOT NULL,
+    nombre character varying(20)
+);
+
+
+CREATE TABLE egresos (
+    id serial NOT NULL,
+    monto integer,
+    tipo smallint,
+    fecha timestamp without time zone,
+    usuario integer
+);
+
+
+CREATE TABLE tarjetas (
+    id serial NOT NULL,
+    id_venta integer,
+    insti character varying(50),
+    numero character varying(20),
+    fecha_venc character varying(7)
+);
+
+
+CREATE TABLE tipo_ingreso (
+    id serial NOT NULL,
+    descrip character varying(20)
+);
+
+CREATE TABLE ingresos (
+    id serial NOT NULL,
+    monto integer,
+    tipo smallint,
+    fecha timestamp without time zone,
+    usuario integer
+);
+
+
+CREATE TABLE tipo_egreso (
+    id serial NOT NULL,
+    descrip character varying(20)
+);
+
+CREATE TABLE facturas_compras (
+    id serial NOT NULL,
+    id_compra integer,
+    rut_proveedor character varying(20),
+    num_factura integer,
+    fecha timestamp without time zone,
+    valor_neto integer,
+    valor_iva integer,
+    descuento integer,
+    pagada boolean,
+    monto bigint,
+    fecha_pago timestamp without time zone,
+    forma_pago integer
+);
+
+CREATE TABLE tipo_merma (
+    id serial NOT NULL,
+    nombre character varying(20)
+);
+
+CREATE TABLE merma (
+    id serial NOT NULL,
+    barcode character varying(14),
+    unidades double precision,
+    motivo smallint
+);
+
+CREATE TABLE asistencia (
+    id serial NOT NULL,
+    id_user smallint,
+    entrada timestamp without time zone,
+    salida timestamp without time zone DEFAULT NULL
+);
+
+CREATE TABLE negocio (
+	razon_social varchar(200),
+	rut varchar(8),
+	nombre varchar(200),
+	fono varchar(15),
+	fax varchar(15),
+	direccion varchar(200),
+	comuna varchar(50),
+	ciudad varchar(50),
+	giro varchar(100),
+	at varchar(100)
+);
+
+CREATE TABLE canje (
+	id serial NOT NULL,
+	fecha timestamp without time zone,
+	barcode character varying (14),
+	cantidad double precision
+);
+
+CREATE TABLE devoluciones (
+    id serial NOT NULL,
+    barcode_product character varying(14),
+    cantidad double precision,
+    cantidad_recivida double precision DEFAULT 0.0,
+    devuelto boolean DEFAULT FALSE
+);
+
+CREATE UNIQUE INDEX barcode_index ON  productos (barcode);
+CREATE UNIQUE INDEX ventas_id_index ON ventas (id);
+CREATE UNIQUE INDEX rut_proveedor_index ON proveedores (rut);
+CREATE UNIQUE INDEX users_id ON users (id);
+CREATE INDEX id_compra_index ON guias_compra (id_compra);
+CREATE INDEX id_compra_facts_index ON facturas_compras (id_compra);
+CREATE INDEX barcode_sell_index ON products_sell_history (id_venta,barcode);
+CREATE INDEX barcode_buy_index ON products_buy_history (id_compra,barcode_product);
+CREATE INDEX detail_doc_index ON documentos_detalle (numero, id_compra, barcode);

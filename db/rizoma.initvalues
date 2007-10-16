@@ -1,0 +1,19 @@
+INSERT INTO formas_pago VALUES (DEFAULT, 'Contado', 0);
+INSERT INTO formas_pago VALUES (DEFAULT, '30 Dias', 30);
+
+INSERT INTO impuestos VALUES (DEFAULT, 'Impuesto al Valor Agregado', 19); 
+INSERT INTO impuestos VALUES (DEFAULT, 'Bebidas', 15);
+INSERT INTO impuestos VALUES (DEFAULT, 'Piscos y Whisky', 27);
+INSERT INTO impuestos VALUES (DEFAULT, 'Vinos y Cervezas', 15);
+
+INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Sencillo');
+
+INSERT INTO tipo_egreso VALUES (DEFAULT, 'Retiro');
+INSERT INTO tipo_egreso VALUES (DEFAULT, 'Perdida');
+INSERT INTO tipo_egreso VALUES (DEFAULT, 'Gastos Corrientes');
+
+INSERT INTO tipo_merma VALUES (DEFAULT, 'Urto');
+INSERT INTO tipo_merma VALUES (DEFAULT, 'Vencimiento');
+INSERT INTO tipo_merma VALUES (DEFAULT, 'Destruccion o Falla');
+
+INSERT INTO numeros_documentos VALUES (0,0,0);

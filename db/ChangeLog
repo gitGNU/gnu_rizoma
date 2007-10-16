@@ -1,0 +1,6 @@
+2006-04-14  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma.structure: Replaced the integer type of compras and
+	ventas table for bigint so we can manage a very big integer as a
+	total.
+
