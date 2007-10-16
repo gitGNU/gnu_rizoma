@@ -1,0 +1,15 @@
+* Bug fixed y modificaciones en 0.0.2
+
+** Modificado el trato de los productos sin IVA para poder manejarlos
+   de mejor forma y no producir ivas negativos
+
+** Se previene la solicitud de busqueda en ventas cuando el usuario no
+   ingresa ningun dato, de esta forma se evitan demasiadas peticiones
+   a la BD y se reduce el riesgo de error al teclear
+
+* Cambios importantes version 0.0.1-11
+
+** Se agrega soporte completo para la configuracion, junto con crear
+   una interfaz de configuracion inicial mas una tableta en "Control"
+   para la modificacion en tiempo de ejecucion de los archivos de
+   configuracion.

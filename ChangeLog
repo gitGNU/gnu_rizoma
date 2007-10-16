@@ -1,0 +1,15 @@
+2006-05-24  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* configure.in: Changed the version to 0.0.1-12
+
+2006-05-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* configure.in: Change the version on to 0.1-10.
+
+2006-03-14  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* configure.in: Changed the AM_CHECK_GTK macros by AM_PATH_GTK_2_0
+	wich is has a better way to do it.
+
+	* acinclude.m4: Deleted the AM_CHECK_GTK macros. We don't need it anymore.
+

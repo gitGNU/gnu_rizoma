@@ -1,0 +1,68 @@
+TODO
+====
+  
+1.-  Consolidación de funcionalidades desarrolladas.
+
+Compras - Pagos. Funcionamiento En recuadro inferior de la ventana no
+   aparece el detalle de la factura que origina el pago. (Reparado: 02/05/06)
+Compras -  Compras.  Funcionamiento Cálculo de costo promedio es
+   inexacto. Ref.: rtcls001
+Compras - Ingreso de facturas  Funcionamiento Recuadro inferior de la
+   ventana no detalla  la guía seleccionada en el recuadro superior de
+   la ventana. (Reparado: 02/05/06)
+
+
+2,-  Adición de funcionalidades inmediatas o
+   modificaciones. (parcialmente desarrolladas o baja complejidad)
+
+
+Compras - Mercaderías   Nueva funcionalidad Crear lanzador para editar
+   atributos de una mercadería o cerar una nueva. (ya existe en
+   Compras - Compras) (Agregado: 02/05/06)
+
+Compras - Compras  Modificar Proceso La obligación de pago se debe
+   considerar a partir de la recepción de la mercadería. Actualmente
+   queda establecida al momento de pactar la compra.(1)
+
+Compras - Mercaderías   Nueva funcionalidad Crear  informe de compras
+   de mercaderías. Listado de mercaderías orden ascendente por días de
+   stock.
+
+Compras - Proveedores   Nueva funcionalidad Crear lazador para editar
+   la info de un proveedor ó ingresar uno nuevo.
+
+Compras - Ingreso de Compras Modificar Proceso Ventana de ingreso
+   parcial dice " Está completamente seguro de que no tiene mas
+   productos para ingresar parcialmente" Debe decir: "¿Desea ingresar
+   parcialmente otra mercadería?" OJO: SE INVIERTE LA LÓGICA DE
+   RESPUESTA. (Resuelto: 02/05/06)
+
+Facturación  Desarrollado parcialmente Ref.: 190406.odt
+
+
+3.-  Adición de funcionalidades complejas necesarias.
+
+ Compras - Mercaderías   Nueva funcionalidad Impresión de etiquetas o
+   rótulos de mercaderías (código de barras + descripción)
+
+ Instalador en GNU/LINUX (scriptgon creación de bases de datos,
+   tablas)
+
+Compras - Ingreso Mercaderías Nueva funcionalidad Creación de
+   funcionalidad de edición de ingreso de mercaderías Ref.: 190406.odt  
+
+Control - Vendedores Nueva funcionalidad Sistema de login de
+   vendedores en el sistema .
+
+4.-  Planeación de nuevas funcionalidades o módulos.
+
+Factura electrónica.
+Conexión a ERP
+
+
+
+(1)  El plazo de pago, ingresado en el momento de pactar una compra,
+   debe ser usado para establecer la fecha de pago de las mercaderías
+   que resultará de agregar el numero de días establecido en el
+   casillero "Plazo de pago" en Compras - Compras, a la fecha de
+   recepción de la mercadería.
