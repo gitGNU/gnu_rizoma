@@ -6,7 +6,7 @@ AC_DEFUN([AM_CHECK_PGSQL],[
 	if test "$PG_CONFIG" = "no"; then
 		AC_MSG_ERROR(Debes tener instalado pg_config)
 	else
-		AC_MSG_CHECKING( for PostgreSQL version >= 7.4)
+		AC_MSG_CHECKING( for PostgreSQL version >= 8.1)
 
 		PGSQL_LIBS="-lpq -lcrypt -lm"
 		LIBS="$LIBS $PGSQL_LIBS"
