@@ -150,7 +150,7 @@ END; ' language plpgsql;
 
 -- retorna TODOS los productos
 -- administracion_productos.c:1376
-create or replace function select_productos()
+create or replace function select_producto()
 returns setof record as '
 declare
 	
@@ -264,7 +264,9 @@ END; ' language plpgsql;
 
 -- esta funcion es util para obtener los datos de un barcode dado
 -- administracion_productos.c:1803
-create or replace function obtener_producto(varchar(14))
+-- postgres-functions.c:941, 964, 978, 990, 1197, 1432, 1480, 1530, 1652, 1853
+-- ventas.c:95, 1504, 3026, 3032, 
+create or replace function select_producto(varchar(14))
 returns setof record as '
 declare
 	
@@ -1403,7 +1405,7 @@ END; ' language plpgsql;
 
 -- retorna TODO los clientes
 -- credito.c:843
-create or replace function select_cliente()
+create or replace function select_clientes()
 returns setof record as '
 declare
 	
@@ -1613,3 +1615,1318 @@ SELECT codigo, barcode, descripcion, marca, contenido, unidad, precio, fifo, mar
 
 return;
 end; ' language plpgsql;
+
+-- borra un producto
+-- postgres-functions.c:181
+create or replace function delete_producto(int4)
+returns void as '
+begin
+DELETE FROM productos WHERE codigo=quote_literal($1);
+return;
+end; ' language plpgsql;
+
+-- inserta un nuevo documento emitido
+-- postgres-functions.c:194
+create or replace function insert_documentos_emitidos()
+returns setof record as '
+begin
+INSERT INTO documentos_emitidos (tipo_documento, forma_pago, num_documento, fecha_emision)
+					  VALUES (%d, %d, %d, NOW()), document_type, sell_type, get_ticket_number (document_type) + 1)
+
+return;
+end; ' language plpgsql;
+
+-- inserta una nueva venta
+-- postgres-functions.c:224
+create or replace function insert_venta()
+returns void as '
+begin
+INSERT INTO ventas (id, monto, fecha, maquina, vendedor, tipo_documento, tipo_venta, descuento, id_documento, canceled) VALUES "
+		"(DEFAULT, %d, NOW(), %d, %d, %d, %d, %s, '%d', '%d')",
+		total, machine, seller, tipo_documento, tipo_venta, CUT(discount), id_documento, (gint)canceled
+
+return;
+end; ' language plpgsql;
+
+-- retorna el id de la ultima venta
+-- postgres-functions:229
+create or replace function last_value_venta()
+returns int4 as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= ''SELECT last_value FROM ventas_id_seq'';
+FOR list IN EXECUTE query LOOP
+	return list.last_value;
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- debe retornar los campos pasados por parámetro en la fecha tambien pasada por parametro
+-- NPI como hacerlo
+-- postgres-functions.c:283
+create or replace function ()
+returns as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= '''';
+SELECT %s FROM ventas WHERE "
+						"date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND "
+						"date_part('day', fecha)=%d ORDER BY fecha DESC",
+						fields, from_year, from_month, from_day));
+FOR list IN EXECUTE query LOOP
+	return list.last_value;
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- debe retornar los campos pasados por parámetro en el rango de fecha tambien pasado por parametro
+-- NPI como hacerlo
+-- postgres-functions.c:289
+create or replace function ()
+returns as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= '''';
+"SELECT %s FROM ventas WHERE "
+						"%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
+						"%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') ORDER BY fecha DESC",
+						fields, date_column, from_day, from_month, from_year,
+						date_column, to_day+1, to_month, to_year));
+
+FOR list IN EXECUTE query LOOP
+	return list.last_value;
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:308
+create or replace function ()
+returns as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= '''';
+SELECT SUM ((SELECT SUM (cantidad * precio) FROM products_sell_history WHERE id_venta=ventas.id)), 
+	  "count (*) FROM ventas WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
+	  "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND (SELECT forma_pago FROM documentos_emitidos "
+	  "WHERE id=id_documento)=%d", from_day, from_month, from_year, to_day+1, to_month, to_year, CASH
+
+FOR list IN EXECUTE query LOOP
+	return list.last_value;
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:329
+create or replace function ()
+returns as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= '''';
+SELECT SUM((SELECT SUM(cantidad * precio) FROM products_sell_history WHERE id_venta=ventas.id)), "
+	  "count (*) FROM ventas WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
+	  "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND ((SELECT forma_pago FROM documentos_emitidos "
+	  "WHERE id=id_documento)=%d OR (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d)",
+	  from_day, from_month, from_year, to_day+1, to_month, to_year, CREDITO, TARJETA)
+
+FOR list IN EXECUTE query LOOP
+	return list.last_value;
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:351
+create or replace function ()
+returns as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= '''';
+SELECT SUM((SELECT SUM(cantidad * precio) FROM products_sell_history WHERE "
+					  "id_venta=ventas.id)), count (*) FROM ventas WHERE "
+					  "fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
+					  "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
+					  from_day, from_month, from_year, to_day+1, to_month, to_year
+
+FOR list IN EXECUTE query LOOP
+	return list.last_value;
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- inserta un nuevo cliente
+-- postgres-functions.c:372
+create or replace function insert_cliente(varchar(60), varchar(60), varchar(60), int4,
+					varchar(1), varchar(150), int4, int4, varchar(255))
+returns void as '
+
+begin
+INSERT INTO clientes VALUES(DEFAULT, quote_literal($1), 
+				quote_literal($2), 
+				quote_literal($3), 
+				quote_literal($4),
+				quote_literal($5),
+				quote_literal($6), 
+				quote_literal($7),
+				0,
+				quote_literal($8),
+				DEFAULT,
+				quote_literal($9));
+return;
+end; ' language plpgsql;
+
+-- retorna TRUE cuando el rut ya existe
+-- postgres-functions.c:388
+create or replace function existe_rut(int4)
+returns boolean as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= ''SELECT count(*) as suma FROM clientes WHERE rut='' || quote_literal($1);
+
+FOR list IN EXECUTE query LOOP
+	if list.suma > 0 then
+		return TRUE;
+	else
+		return FALSE;
+	end if;
+END LOOP;
+
+return TRUE;
+end; ' language plpgsql;
+
+-- inserta una nueva deuda
+-- postgres-functions:403
+create or replace function insert_deuda(int4, int4, int4)
+returns boolean as '
+begin
+INSERT INTO deudas VALUES (DEFAULT, $1, $2, $3, DEFAULT, DEFAULT);
+
+return;
+end; ' language plpgsql;
+
+-- retorna la deuda total de un cliente
+-- postgres-functions.c:415
+create or replace function deuda_total_cliente(int4)
+returns setof record as '
+declare
+	list record;
+	query text;
+begin
+query:= ''SELECT SUM (monto) as monto FROM ventas WHERE id IN (SELECT id_venta FROM deudas WHERE rut_cliente='' || quote_literal($1) || '' AND pagada=FALSE)'';
+
+FOR list IN EXECUTE query LOOP
+	return next list;	
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- retorna las deudas de un cliente
+-- postgres-functions.c:429
+create or replace function deudas_cliente(int4)
+returns setof record as '
+declare
+	list record;
+	query text;
+begin
+query:= ''SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
+	  "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
+	  "date_part ('second', fecha) FROM ventas WHERE id IN (SELECT id_venta FROM deudas WHERE "
+	  "rut_cliente=%d AND pagada='f')",rut'';
+
+FOR list IN EXECUTE query LOOP
+	return next list;	
+END LOOP;
+
+return;
+end; ' language plpgsql;
+
+-- marca como pagada una deuda dada
+-- postgres-functions.c:442
+create or replace function pagar_deuda(int4)
+returns void as '
+begin
+UPDATE deudas SET pagada='t' WHERE id_venta=$1;
+return;
+end; ' language plpgsql;
+
+-- inserta un nuevo abono
+-- postgres-functions.c:455
+create or replace function insert_abono(int4,int4)
+returns void as '
+begin
+INSERT INTO abonos VALUES (DEFAULT, $1, $2, NOW());
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions:457
+create or replace function (int4,int4)
+returns void as '
+begin
+SELECT * FROM ventas WHERE id IN "
+									  "(SELECT id_venta FROM deudas WHERE rut_cliente=%d AND pagada='f') ORDER BY fecha asc", rut
+return;
+end; ' language plpgsql;
+
+-- retorna la ficha de un cliente dado
+-- postgres-functions:493, 520, 531, 541, 551, 562, 578
+create or replace function obtener_cliente(int4)
+returns setof clientes as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= ''select * from clientes where rut = '' || quote_literal($1);
+
+for list in execute query loop
+	return next list;
+end loop
+return;
+end; ' language plpgsql;
+
+-- actualiza los abonado por un cliente
+-- postgres-functions:507
+create or replace function set_deuda_cliente(int4,int4)
+returns void as '
+declare
+	rut_cliente alias for $1;
+	nueva_deuda alias for $2
+begin
+update clientes set abonado=nueva_deuda where rut=rut_cliente;
+return;
+end; ' language plpgsql;
+
+-- retorna la password de un usuario dado
+-- postgres-functions.c:590, 603, 616, 626, 635, 
+create or replace function select_usuario(varchar(30))
+returns setof users as '
+declare
+	list record;
+	query varchar(255);
+begin
+query:= ''SELECT * FROM users WHERE usuario='' || quote_literal($1);
+
+for list in execute query loop
+	return next list;
+end loop
+return;
+end; ' language plpgsql;
+
+-- cambia la password de un usuario dado
+-- postgres-functions.c:637
+create or replace function cambiar_password(varchar(30),varchar(400))
+returns void as '
+begin
+update users SET passwd=md5(quote_literal($2))WHERE usuario=quote_literal($1);
+return;
+end; ' language plpgsql;
+
+-- retorna true cuando ya existe un vendedor/usuario con el id dado
+-- postgres-functions.c:664, 698
+create or replace function existe_usuario(int4)
+returns boolean as '
+declare
+	list record;
+	query varchar(255);
+begin
+query := ''SELECT count(*) as suma FROM users WHERE id='' || $1;
+
+for list in execute query loop
+	if list.suma > 0 then
+		return TRUE;
+	else
+		return FALSE;
+	end if
+end loop
+
+return TRUE;
+end; ' language plpgsql;
+
+-- inserta un nuevo usuario
+-- FIXME: revisar como hacerlo para dar la opcion de usar un id DEFAULT o un id pasado por parámetro
+-- postgres-functions.c:677
+create or replace function insert_usuario()
+returns void as '
+begin
+INSERT INTO users VALUES (%s, '%s', md5('%s'), %s, '%s', '%s', '%s', NOW(), 1)",
+	  strcmp (id, "") != 0 ? id : "DEFAULT", username, passwd, rut, nombre, apell_p, apell_m)
+
+return;
+end; ' language plpgsql;
+
+-- cambia el estado de credito de un cliente
+-- postgres-functions.c:711
+create or replace function cambiar_estado_credito(int4, boolean)
+returns void as '
+begin
+UPDATE clientes SET credito_enable=quote_literal($2) WHERE rut=quote_literal($1);
+
+return;
+end; ' language plpgsql;
+
+-- borra un cliente dado
+-- postgres-functions.c:720
+create or replace function delete_cliente(int4)
+returns void as '
+begin
+DELETE FROM clientes WHERE rut=quote_literal($1);
+
+return;
+end; ' language plpgsql;
+
+-- actualiza la información de un producto
+-- postgres-functions.c:733
+create or replace function update_producto(varchar(14),varchar(10), varchar(50), int4)
+begin
+UPDATE productos SET codigo=quote_literal($2), 
+			descripcion=quote_literal($3), 
+			precio=quote_literal($4)
+			WHERE barcode=quote_literal($1);
+return;
+end; ' language plpgsql;
+
+-- ??debe actualizar un producto
+-- postgres-functions.c:750
+create or replace function update_producto_completo()
+begin
+"UPDATE productos SET codigo='%s', descripcion='%s', marca='%s', unidad='%s', contenido='%s', precio=%d, "
+					  "impuestos='%d', otros=(SELECT id FROM impuestos WHERE descripcion='%s'), perecibles='%d', fraccion='%d' WHERE barcode='%s'",
+					  codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
+					  iva, otros, (gint)perecible, (gint)fraccion, barcode
+return;
+end; ' language plpgsql;
+
+-- inserta un nuevo producto con casi todos los campos
+-- FIXME: hay que definir los parámetros correctamente y armar la sentencia en base a ellos
+-- postgres-functions.c:764
+create or replace function insert_producto()
+returns void as '
+begin
+INSERT INTO productos (codigo, barcode, descripcion, marca, contenido, unidad, stock, precio, fifo, vendidos, "
+					  "impuestos, otros, perecibles, stock_min, margen_promedio, merma_unid, fraccion) VALUES ('%s', '%s', upper('%s'), upper('%s'), "
+					  "'%s', upper('%s'), '0', 0, 0, 0, '%d', (SELECT id FROM impuestos WHERE descripcion='%s'), '%d', 0, 0, 0, '%d')",
+					  codigo, barcode, SPE(description), SPE(marca), contenido, unidad, iva, otros, perecible, fraccion
+return;
+end; ' language plpgsql;
+
+-- inserta una nueva compra, y devuelve el id de la compra
+-- postgres-functions.c:778
+create or replace function insert_compra(varchar(100), varchar(100), int2)
+returns int4 as '
+declare 
+	l record;
+	q varchar(255);
+begin
+INSERT INTO compras VALUES (DEFAULT, NOW(), quote_literal($1),quote_literal($2), $3, FALSE, FALSE);
+
+q := ''SELECT last_value FROM compras_id_seq'';
+
+for l in execute q loop
+	return l.last_value;
+end loop;
+
+return -1;
+end; ' language plpgsql;
+
+-- inserta el detalle de una compra
+-- postgres-functions.c:808, 814
+create or replace function insert_detalle_compra(int4, float8, float8, int4, varchar(14), int4, int4, int4)
+returns void as '
+begin
+INSERT INTO products_buy_history VALUES (DEFAULT, $1, $2, $3, $4, 0, 0, quote_literal($5),$6, $7, $8);
+UPDATE productos SET precio=$4 WHERE barcode=quote_literal($5);
+return;
+end;' language plpgsql;
+
+-- marca una compra como ingresa
+-- postgres-functions.c:827
+create or replace function ingresa_compra()
+returns void as '
+begin
+UPDATE compras SET ingresada=TRUE WHERE id IN (SELECT id_compra FROM products_buy_history WHERE cantidad=cantidad_ingresada) AND ingresada=FALSE;
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:854
+create or replace function ()
+returns void as '
+begin
+INSERT INTO documentos_detalle (id, numero, id_compra, barcode, cantidad, precio, fecha, factura, elaboracion, vencimiento, iva, otros) "
+		"VALUES (DEFAULT, %d, %d, '%s', %s, %s, NOW(), '%d', NULL, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY'), %d, %d)",
+		doc, compra, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),
+		(gint)factura, product->venc_day, product->venc_month, product->venc_year, lround (iva), lround (otros)
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:861
+create or replace function ()
+returns void as '
+begin
+INSERT INTO documentos_detalle (id, numero, id_compra, barcode, cantidad, precio, fecha, factura, elaboracion, vencimiento, iva, otros) "
+		"VALUES (DEFAULT, %d, %d, '%s', %s, %s, NOW(), '%d', NULL, NULL, %d, %d)",
+		doc, compra, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),(gint)factura, lround (iva), lround (otros)
+
+return;
+end; ' language plpgsql;
+
+-- ingresa mercaderia
+-- postgres-functions.c:892
+create or replace function ()
+returns void as '
+begin
+UPDATE products_buy_history SET cantidad_ingresada=cantidad_ingresada+%s, canjeado=%s "
+					  "WHERE barcode_product IN (SELECT barcode  FROM productos WHERE barcode='%s'"
+					  " AND id_compra=%d)", cantidad, CUT (g_strdup_printf ("%.2f", canjeado)),product->barcode, compra
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:914
+create or replace function ()
+returns void as '
+begin
+UPDATE productos SET margen_promedio=%d, fifo=%d, stock=stock+%s, stock_pro=%s WHERE barcode='%s'
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:919
+create or replace function ()
+returns void as '
+begin
+UPDATE productos SET margen_promedio=%d, fifo=%d, stock=stock+%s WHERE barcode='%s'",
+		lround (margen_promedio), fifo, cantidad, product->barcode
+
+return;
+end; ' language plpgsql;
+
+-- setea el stock de un producto
+-- postgres-functions.c:944
+create or replace function set_stock_producto(varchar(14), float8)
+returns void as '
+begin
+UPDATE productos SET stock=$2 WHERE barcode=quote_literal($1);
+return;
+end; ' language plpgsql;
+
+-- ??la funcion FiFo podria hacer dentro de la base de datos y retornar el valor
+-- postgres-functions.c:1009
+create or replace function ()
+returns void as '
+begin
+SELECT cantidad, precio, cantidad_ingresada FROM products_buy_history, compras WHERE "
+	  "barcode_product='%s' AND compras.id=%d AND products_buy_history.id_compra=%d ORDER BY compras.fecha DESC
+return;
+end; ' language plpgsql;
+
+-- ??cuando se venden productos se ejecuta esta operacion (revisar codigo para reducir llamadas)
+-- postgres-functions.c:1075
+create or replace function (varchar(14), float8, float8)
+returns void as '
+begin
+UPDATE productos SET vendidos=vendidos+$2, stock=$2 WHERE barcode=quote_literal($1);
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1091
+create or replace function ()
+returns void as '
+begin
+INSERT INTO products_sell_history VALUES(DEFAULT, %d, '%s', '%s', '%s', '%d', '%s',"
+		  "'%s', %d, %d, %d, %d)", id_venta,
+		  products->product->barcode, SPE(products->product->producto), SPE(products->product->marca),
+		  products->product->contenido, products->product->unidad, cantidad, precio,
+		  products->product->fifo, lround (iva), lround (otros)
+return;
+end; ' language plpgsql;
+
+-- ??retorna el ranking de productos
+-- postgres-functions.c:1111
+create or replace function obtener_rankin_productos()
+returns void as '
+begin
+SELECT t1.descripcion, t1.marca, (SELECT contenido FROM productos WHERE "
+	  "barcode=t1.barcode),(SELECT unidad FROM productos WHERE barcode=t1.barcode), "
+	  "SUM(t1.cantidad), SUM((t1.cantidad*t1.precio)::integer), SUM ((t1.cantidad*t1.fifo)::integer), "
+	  "SUM(((precio*cantidad)-((iva+otros)+(fifo*cantidad)))::integer) FROM products_sell_history AS"
+	  " t1 WHERE id_venta IN (SELECT id FROM ventas WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', "
+	  "'DD MM YYYY') AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')) GROUP BY "
+	  "t1.descripcion, t1.marca, t1.barcode",
+	  from_day, from_month, from_year, to_day+1, to_month, to_year
+return;
+end; ' language plpgsql;
+
+-- ??inserta un nuevo proveedor a la base de datos
+-- postgres-functions.c:1133
+create or replace function insert_proveedor()
+returns void as '
+begin
+INSERT INTO proveedores VALUES (DEFAULT, '%s', '%s', '%s', "
+					  "'%s', '%s', %d, '%s', '%s', '%s', '%s')", nombre, rut, direccion, ciudad,
+					  comuna, atoi (telefono), email, web, contacto, giro
+return;
+end; ' language plpgsql;
+
+-- setea los productos ingresados
+-- postgres-functions.c:1149
+create or replace function set_productos_ingresados()
+returns void as '
+begin
+UPDATE products_buy_history SET ingresado='t' WHERE cantidad_ingresada=cantidad;
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1164
+create or replace function ()
+returns void as '
+begin
+"SELECT date_part ('day', (SELECT now() - fecha FROM compras WHERE id=t1.id_compra)) "
+		  "FROM products_buy_history AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' AND "
+		  "t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC", barcode, barcode
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1178
+create or replace function ()
+returns void as '
+begin
+SELECT t1.stock / (vendidos / %d) FROM productos AS t1 WHERE t1.barcode='%s'
+return;
+end; ' language plpgsql;
+
+-- ??inserta un nuevo cheque
+-- postgres-functions.c:1213
+create or replace function ()
+returns void as '
+begin
+INSERT INTO cheques VALUES (DEFAULT, %d, '%s', %d, '%s', '%s', %d, "
+					  "to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'))", id_venta, serie, number,
+					  banco, plaza, monto, day, month, year
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:
+create or replace function (int4)
+returns int4 as '
+begin
+SELECT count(*) FROM products_buy_history WHERE id_compra=quote_literal($1) AND cantidad_ingresada>0 AND cantidad_ingresada<cantidad
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1243
+create or replace function ()
+returns void as '
+begin
+SELECT * FROM proveedores WHERE rut=(SELECT rut_proveedor FROM compras"
+									  " WHERE id=%d", id_compra
+return;
+end; ' language plpgsql;
+
+-- ??inserta una nueva factura de compra de productos
+-- postgres-functions.c:1271
+create or replace function insert_factura_compra()
+returns void as '
+begin
+INSERT INTO facturas_compras (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
+	  " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', '%s', "
+	  "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'), 0, 0, 0,'f', %d)",
+	  id_compra, rut_proveedor, n_doc, atoi (d_emision), atoi (m_emision), atoi (y_emision),
+	  total)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1281
+create or replace function ()
+returns void as '
+begin
+UPDATE facturas_compras SET forma_pago=(SELECT compras.forma_pago FROM compras WHERE id=%d)"
+		  " WHERE id_compra=%d", id_compra, id_compra)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1285
+create or replace function ()
+returns void as '
+begin
+UPDATE facturas_compras SET fecha_pago=DATE(fecha)+(forma_pago) WHERE id_compra=%d", id_compra
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1292
+create or replace function ()
+returns void as '
+begin
+UPDATE facturas_compras SET forma_pago=(SELECT compras.forma_pago FROM compras WHERE id=(SELECT "
+		  "id_compra FROM guias_compra WHERE numero=%d AND rut_proveedor='%s')) WHERE num_factura='%s' AND "
+		  "rut_proveedor='%s'", guia, rut_proveedor, n_doc, rut_proveedor)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1298
+create or replace function ()
+returns void as '
+begin
+UPDATE facturas_compras SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura='%s'", n_doc
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:
+create or replace function insert_guia_compra()
+returns void as '
+begin
+"INSERT INTO guias_compra VALUES (DEFAULT, %s, %d, 0, (SELECT rut_proveedor FROM compras WHERE id=%d), "
+									  "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'))",
+									  n_doc, id_compra, id_compra, atoi (d_emision), atoi (m_emision), atoi (y_emision)
+return;
+end; ' language plpgsql;
+
+-- ??asigna una factura a una guia
+-- postgres-functions.c:1334
+create or replace function asignar_factura_a_guia()
+returns void as '
+begin
+UPDATE guias_compra SET id_factura=%d WHERE numero=%d
+return;
+end; ' language plpgsql;
+
+-- ??retorna los 'otros' impuestos de unproducto
+-- postgres-functions.c:1365, 1398, 1496
+create or replace function obtener_otros_impuestos(varchar(14))
+returns setof record as '
+begin
+SELECT impuestos.monto, impuestos.descripcion FROM productos, impuestos WHERE productos.barcode='%s' AND impuestos.id=productos.otros
+return;
+end; ' language plpgsql;
+
+-- ??obtener id de otros impuestos de un productos dado
+-- postgres-functions.c:1382
+create or replace function (varchar(14))
+returns void as '
+begin
+SELECT otros FROM productos WHERE barcode='%s'", barcode
+return;
+end; ' language plpgsql;
+
+-- ??retorna el prrecio neto de un producto
+-- postgres-functions.c:1414
+create or replace function (varchar(14))
+returns void as '
+begin
+SELECT  precio FROM products_buy_history WHERE "
+									  "barcode_product='%s' AND id_compra IN (SELECT id FROM "
+									  "compras ORDER BY fecha DESC)", barcode
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1448
+create or replace function ()
+returns void as '
+begin
+SELECT * from products_buy_history WHERE id_compra=%s AND cantidad_ingresada<cantidad", compra)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1464
+create or replace function ()
+returns void as '
+begin
+"SELECT * from products_buy_history WHERE id_compra=%s AND barcode_product='%s' AND cantidad_ingresada<cantidad", compra, barcode))
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1513
+create or replace function ()
+returns void as '
+begin
+SELECT nombre FROM familias WHERE id=(SELECT familia FROM productos WHERE barcode='%s')", barcode
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1555
+create or replace function ()
+returns void as '
+begin
+SELECT SUM(precio * cantidad) FROM products_buy_history "
+									  "WHERE barcode_product='%s'", barcode)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1572
+create or replace function ()
+returns void as '
+begin
+SELECT cantidad, date_part ('day', elaboracion), "
+					  "date_part ('month', elaboracion), date_part('year', elaboracion) FROM "
+					  "documentos_detalle WHERE barcode='%s' ORDER BY fecha ASC", barcode)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1614
+create or replace function ()
+returns void as '
+begin
+SELECT cantidad, date_part ('day', vencimiento), "
+					  "date_part ('month', vencimiento), date_part('year', vencimiento) FROM "
+					  "documentos_detalle WHERE barcode='%s' ORDER BY fecha DESC", barcode
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1656
+create or replace function ()
+returns void as '
+begin
+"SELECT precio, cantidad_ingresada, (precio * cantidad_ingresada)::integer FROM products_buy_history "
+									  "WHERE barcode_product='%s'", barcode
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1688
+create or replace function ()
+returns void as '
+begin
+"SELECT SUM (fifo * stock)::integer FROM productos
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1701
+create or replace function ()
+returns void as '
+begin
+"SELECT SUM (precio * stock)::integer FROM productos"
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1714
+create or replace function ()
+returns void as '
+begin
+SELECT SUM (round (fifo * (margen_promedio / 100))  * stock)::integer FROM productos
+return;
+end; ' language plpgsql;
+
+-- ??actualiza un producto
+-- postgres-functions.c:1729
+create or replace function ()
+returns void as '
+begin
+UPDATE productos SET stock_min=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
+					  "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
+					  stock_minimo, margen, new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
+					  (gint)mayorista, barcode
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1741
+create or replace function ()
+returns void as '
+begin
+INSERT INTO egresos VALUES (DEFAULT, %d, (SELECT id FROM tipo_egreso WHERE descrip='%s'), NOW(), %d)",
+									  monto, motivo, usuario)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1755
+create or replace function ()
+returns void as '
+begin
+INSERT INTO tarjetas VALUES (DEFAULT, %d, '%s', '%s', '%s')",
+					  id_venta, insti, numero, fecha_venc)
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1770
+create or replace function ()
+returns void as '
+begin
+"INSERT INTO ingresos VALUES (DEFAULT, %d, (SELECT id FROM tipo_ingreso WHERE descrip='%s'), NOW(), %d)",
+									  monto, motivo, usuario)
+return;
+end; ' language plpgsql;
+
+-- ??paga una factura
+-- postgres-functions.c:1784, 1788
+create or replace function pagar_factura(int4, varchar(20), text)
+returns void as '
+begin
+UPDATE facturas_compras SET pagada=TRUE WHERE num_factura=$1 AND rut_proveedor=quote_literal($2);
+
+INSERT INTO pagos VALUES ((SELECT id FROM facturas_compras WHERE num_factura=quote_literal($1) AND rut_proveedor=quote_literal($2)), NOW(), FALSE, quote_literal($3));
+
+return;
+end; ' language plpgsql;
+
+-- ??inserta una nueva merma
+-- postgres-functions.c:1804
+create or replace function insert_merma(varchar(14), float8, int2)
+returns void as '
+begin
+INSERT INTO merma VALUES (DEFAULT, quote_literal($1), $2, $3);
+UPDATE productos SET merma_unid=merma_unid+$2, stock=$2 WHERE barcode=quote_literal($1);
+
+return;
+end; ' language plpgsql;
+
+-- ??define la asistencia
+-- postgres-functions.c:1837
+create or replace function set_asistencia(userid, entrando boolean)
+returns void as '
+begin
+if entrando then
+	INSERT INTO asistencia VALUES (DEFAULT, userid, NOW(), to_timestamp('0','0'));
+else
+	UPDATE asistencia SET salida=NOW() WHERE id=(SELECT id FROM asistencia WHERE salida=to_timestamp('0','0') AND id_user=userid ORDER BY entrada DESC LIMIT 1);
+end if;
+return;
+end; ' language plpgsql;
+
+-- inserta una nueva forma de pago
+-- postgres-functions.c:1875
+create or replace function insert_forma_de_pago(varchar(50), int2)
+returns void as '
+begin
+INSERT INTO formas_pagos VALUES (DEFAULT, quote_literal($1), $2);
+return;
+end; ' language plpgsql;
+
+-- anula una compra
+-- postgres-functions.c:1888
+create or replace function anular_compra(int4)
+returns void as '
+begin
+UPDATE compras SET anulada=TRUE WHERE id=$1;
+UPDATE products_buy_history SET anulado=TRUE WHERE id_compra=$1;
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1905
+create or replace function canjear_producto(prod varchar(14), cant_a_cajear float8)
+returns void as '
+begin
+UPDATE productos SET stock=stock-cant_a_canjear, 
+		     stock_pro=stock_pro+cant_a_canjear
+		WHERE barcode=quote_literal(prod);
+
+INSERT INTO canje VALUES (DEFAULT, NOW (), quote_literal(prod), cant_a_canjear);
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1924
+create or replace function (prod varchar(14), cant float8)
+returns void as '
+begin
+UPDATE productos SET stock=stock-cant WHERE barcode=quote_literal(prod);
+INSERT INTO devoluciones (barcode_product, cantidad) VALUES (quote_literal(prod), cant);
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions:1944
+create or replace function (prod varchar(14), cant float8)
+returns void as '
+begin
+UPDATE productos SET stock=stock+cant WHERE barcode=quote_literal(prod);
+UPDATE devoluciones SET cantidad_recivida=cant, devuelto=TRUE WHERE id=(SELECT id FROM devoluciones WHERE barocde_product=quote_literal(prod) AND devuelto=FALSE);
+
+return;
+end; ' language plpgsql;
+
+-- ??
+-- postgres-functions.c:1965
+create or replace function update_proveedor()
+returns void as '
+begin
+UPDATE proveedores SET nombre='%s', direccion='%s', ciudad='%s', "
+					  "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s'"
+					  " WHERE rut='%s'", razon, direccion, ciudad,
+					  comuna, fono, email, web, contacto, giro, rut)
+
+return;
+end; ' language plpgsql;
+
+-- busca proveedores
+-- proveedor.c:71
+create or replace function buscar_proveedor(varchar(100))
+returns setof record as '
+declare 
+	q text;
+	l record;
+begin
+q := ''SELECT * FROM proveedores WHERE lower(nombre) LIKE lower('' || quote_literal($1) || '') ''
+	|| ''OR lower(rut) LIKE lower('' || quote_literal($1) || '')'';
+for l in execute q loop
+	return next l;
+end loop;
+return;
+end; ' language plpgsql;
+
+-- retorna todos los proveedores
+-- proveedores.c:98
+create or replace function select_proveedor()
+returns setof record as '
+declare
+	l record;
+	q varchar(255);
+begin
+q := ''SELECT * FROM proveedores ORDER BY nombre ASC'';
+
+for l in execute q loop
+	return next l;
+end loop;
+return;
+end; ' language plpgsql;
+
+-- retorna el proveedor con el rut dado
+-- proveedores.c:130, 186
+-- ventas_stats.c:118
+create or replace function select_proveedor(varchar(20))
+returns setof record as '
+declare
+	l record;
+	q varchar(255);
+begin
+q := ''SELECT * FROM proveedores WHERE rut='' || quote_literal($1);
+
+for l in execute q loop
+	return next l;
+end loop;
+return;
+end; ' language plpgsql;
+
+-- retorna todos los vendedores/usuarios
+-- usuario.c:37
+create or replace function select_usuario()
+returns setof record as '
+declare
+	l record;
+	q varchar(255);
+begin
+q := ''SELECT * FROM users ORDER BY id ASC'';
+
+for l in execute q loop
+	return next l;
+end loop;
+return;
+end; ' language plpgsql;
+
+-- ??
+-- usuario.c:75
+create or replace function ()
+returns setof record as '
+declare
+	l record;
+	q varchar(255);
+begin
+q := '''';
+"SELECT date_part ('year', t2.entrada), date_part ('month', t2.entrada), date_part ('day', t2.entrada), date_part('hour', t2.entrada), date_part ('minute', t2.entrada), date_part ('year', t2.salida), date_part ('month', t2.salida), date_part ('day', t2.salida), date_part('hour', t2.salida), date_part ('minute', t2.salida) FROM asistencia AS t2 WHERE id_user=%s ORDER BY entrada DESC LIMIT 1", PQgetvalue (res, i, 0)
+
+for l in execute q loop
+	return next l;
+end loop;
+return;
+end; ' language plpgsql;
+
+-- borra un usuario
+-- usuario.c:125
+create or replace function delete_usuario(int4)
+returns setof record as '
+begin
+DELETE FROM users WHERE id=quote_literal($1);
+return;
+end;' language plpgsql;
+
+-- busca productos
+-- ventas.c:3401
+create or replace function buscar_producto(patron varchar(100), es_venta boolean)
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+if es_venta then
+	q:= ''SELECT * FROM productos WHERE stock>0 AND lower (descripcion) LIKE lower(''
+	|| quote_literal(patron) || '') OR lower(marca) LIKE lower(''
+	|| quote_literal(patron= || '') ORDER BY descripcion ASC'';
+else
+	q:= ''SELECT * FROM productos WHERE stock>0 AND lower (descripcion) LIKE lower(''
+	|| quote_literal(patron) || '') OR lower(marca) LIKE lower(''
+	|| quote_literal(patron= || '') WHERE canje=TRUE ORDER BY descripcion ASC'';
+end if
+
+for l in execute q loop
+	return next l;
+end loop;
+
+return;
+end;' language plpgsql;
+
+
+-- busca productos
+-- ventas.c:3407
+create or replace function buscar_producto(es_venta boolean)
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+if es_venta then
+	q:= ''SELECT * FROM productos WHERE stock>0'';
+else
+	q:= ''SELECT * FROM productos WHERE stock>0 AND CANJE = TRUE'';
+end if
+
+for l in execute q loop
+	return next l;
+end loop;
+
+return;
+end;' language plpgsql;
+
+-- ??
+-- ventas.c3916
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT ventas.id, monto, users.usuario FROM ventas "
+						"INNER JOIN users ON users.id = ventas.vendedor "
+						"WHERE ventas.id = %s AND canceled = FALSE",
+						text
+for l in execute q loop
+	return next l;
+end loop;
+
+return;
+end;' language plpgsql;
+
+-- cancela una venta
+-- ventas.c:4020
+create or replace function cancelar_venta(integer)
+returns integer AS '
+declare
+	idventa_a_cancelar ALIAS FOR $1;
+	list record;
+	select_detalle_venta varchar(255);
+	update_stocks varchar(255);
+begin
+	EXECUTE ''UPDATE ventas SET canceled = TRUE WHERE id = '' 
+		|| quote_literal(idventa_a_cancelar);
+	
+	select_detalle_venta := ''SELECT * FROM products_sell_history WHERE id_venta = ''
+				|| quote_literal(idventa_a_cancelar)
+				|| '' ORDER BY id'';
+	
+	FOR list IN EXECUTE select_detalle_venta LOOP
+		update_stocks := ''UPDATE productos SET stock = stock + ''
+				|| list.cantidad
+				|| '' WHERE barcode = ''
+				|| list.barcode;
+		EXECUTE update_stocks;
+	END LOOP;
+	
+	RETURN 0;
+END;' language plpgsql
+
+-- ??
+-- ventas.c:4100
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+
+SELECT ventas.id, users.usuario,monto FROM ventas "
+						"INNER JOIN users ON users.id = ventas.vendedor "
+						"WHERE date_trunc('day',fecha) = '%.4d-%.2d-%.2d' AND canceled = FALSE",
+						year,month+1,day
+
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas.c:4158
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT descripcion || marca, cantidad, (precio * cantidad) "
+							"FROM products_sell_history WHERE id_venta=%s",
+							id_venta
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:87
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+
+SELECT descripcion, marca, contenido, unidad, (SELECT SUM(cantidad_ingresada) FROM products_buy_history WHERE barcode_product=barcode),vendidos FROM productos WHERE barcode IN (SELECT barcode_product FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor='%s') AND anulado='f' GROUP BY barcode_product)", rut
+
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:1933
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+
+SELECT descripcion, marca, contenido, unidad, cantidad, precio, (cantidad * precio) AS "
+	  "monto FROM products_sell_history WHERE id_venta=%s", idventa
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:1963
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT inicio, termino, date_part('day',fecha_inicio), date_part('month',fecha_inicio), "
+		     "date_part('year',fecha_inicio), date_part('day',fecha_termino), date_part('month',fecha_termino), "
+		     "date_part('year',fecha_termino), perdida FROM caja"
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:2048
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT nombre, rut, (SELECT SUM (cantidad_ingresada) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut)), (SELECT SUM (cantidad_ingresada * precio) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut))::integer, (SELECT SUM (margen) / COUNT (*) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut))::integer, (SELECT SUM (precio_venta - (precio * (margen / 100) +1))  FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut)) FROM proveedores
+
+return;
+
+end; ' language plpgsql;
+
+
+-- ??
+-- ventas_stats.c:2088
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM facturas_compras AS t1 WHERE pagada='f' ORDER BY pay_year, pay_month, pay_day ASC"
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:2138
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT numero, id_compra, id, date_part ('day', fecha_emicion), "
+	  "date_part ('month', fecha_emicion), date_part ('year', fecha_emicion), rut_proveedor FROM "
+	  "guias_compra WHERE id_factura=%s", PQgetvalue (res, i, 0)
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:2177
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM facturas_compras AS t1 WHERE pagada='t' ORDER BY pay_year, pay_month, pay_day ASC
+return;
+
+end; ' language plpgsql;
+
+-- ??
+-- ventas_stats.c:2227
+create or replace function ()
+returns setof record as '
+declare
+l record;
+q varchar(255);
+begin
+SELECT numero, id_compra, id, date_part ('day', fecha_emicion), "
+	  "date_part ('month', fecha_emicion), date_part ('year', fecha_emicion), rut_proveedor FROM "
+	  "guias_compra WHERE id_factura=%s", PQgetvalue (res, i, 0)
+return;
+
+end; ' language plpgsql;
+
