@@ -31,6 +31,8 @@
 #include"vale.h"
 #include"rizoma_errors.h"
 
+gint count_pgconnections = 0;
+
 PGconn *connection;
 
 gchar *
@@ -140,6 +142,7 @@ EjecutarSQL (gchar *sentencia)
 	  switch (status)
 	  {
 		  case CONNECTION_OK:
+		    g_print("conexiones: %d\n", ++count_pgconnections);
 			  res = PQexec (connection, sentencia);
 			  if( res == NULL ) {
 				  rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
