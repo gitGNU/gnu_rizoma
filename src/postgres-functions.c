@@ -31,6 +31,7 @@
 #include"vale.h"
 #include"rizoma_errors.h"
 
+PGconn *connection;
 
 gchar *
 CutComa (gchar *number)
@@ -102,7 +103,6 @@ SpecialChar (gchar *string)
 PGresult *
 EjecutarSQL (gchar *sentencia)
 {
-  PGconn *conection;
   PGresult *res;
   ConnStatusType status;
 
@@ -119,29 +119,43 @@ EjecutarSQL (gchar *sentencia)
   if (sslmode == NULL)
 	sslmode = g_strdup("require");
 
-  gchar *strconn = g_strdup_printf ("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
-									host, port, name, user, pass,sslmode);
+  status = PQstatus( connection );
 
-  conection = PQconnectdb (strconn);
+  if( status == CONNECTION_OK ) {
+	  res = PQexec (connection, sentencia);
+	  if( res == NULL ) {
+		  rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
+	  } else {
+		  return res;
+	  }
+  } else {
+	  gchar *strconn = g_strdup_printf ("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+										host, port, name, user, pass,sslmode);
 
-  status = PQstatus(conection);
+	  connection = PQconnectdb (strconn);
+	  g_free( strconn );
 
-  switch (status)
-	{
-	case CONNECTION_OK:
-	  res = PQexec (conection, sentencia);
-	  PQfinish (conection);
-	  g_free(strconn);
-	  return res;
-	  break;
-	case CONNECTION_BAD:
-	  rizoma_errors_set (PQerrorMessage (conection), "EjcutarSQL ()", ERROR);
-	  g_free(strconn);
-	  return NULL;
-	default:
-	  g_free(strconn);
-	  return NULL;
-    }
+	  status = PQstatus(connection);
+
+	  switch (status)
+	  {
+		  case CONNECTION_OK:
+			  res = PQexec (connection, sentencia);
+			  if( res == NULL ) {
+				  rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
+			  } else {
+				  return res;
+			  }
+			  break;
+		  case CONNECTION_BAD:
+ 			  rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
+			  break;
+		  default:
+			  return NULL;
+	  }
+  }
+
+  return NULL;
 }
 
 gboolean
