@@ -2,8 +2,8 @@
 
 BD_NAME=$1
 BD_USER=$2
-BD_HOST=localhost
-BD_PORT=5432
+BD_HOST=$3
+BD_PORT=$4
 
 
 echo -- tarjetas
@@ -30,16 +30,16 @@ echo tipo_merma > /dev/stderr
 echo COPY tipo_merma \(id, nombre\) FROM stdin NULL as \'NULL\'\;
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, nombre from tipo_merma" | awk -F'|' '{printf ("%s\011%s\n",$1,$2)}'
 echo \\.
-exit 0
+
 echo -- formas_pago
 echo formas_pago > /dev/stderr
-echo COPY formas_pago \(id, nombre, days\) FROM stdin;
+echo COPY formas_pago \(id, nombre, days\) FROM stdin NULL as \'NULL\'\;
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, nombre, days from formas_pago" | awk -F'|' '{printf ("%s\011%s\011%s\n",$1,$2,$3)}'
 echo \\.
 
 echo -- impuestos -\> impuesto
 echo impuestos > /dev/stderr
-echo COPY impuestos \(id, descripcion, monto\) FROM stdin NULL as \'NULL\'\;
+echo COPY impuesto \(id, descripcion, monto\) FROM stdin NULL as \'NULL\'\;
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, descripcion, monto from impuestos" | awk -F '|' '{printf ("%s\011%s\011%s\n",$1,$2,$3)}'
 echo \\.
 
@@ -72,7 +72,7 @@ echo \\.
 echo -- caja
 echo caja > /dev/stderr
 echo COPY caja \(id, id_vendedor, fecha_inicio, inicio, fecha_termino, termino, perdida\) FROM stdin NULL as \'NULL\'\;
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja" | awk -F'|' '{print ("%s\0111\011%s\011%s\011%s\011%s\011%s\n",$1,$2,$3,$4,$5,$6)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja" | awk -F'|' '{printf ("%s\0111\011%s\011%s\011%s\011%s\011%s\n",$1,$2,$3,$4,$5,$6)}'
 echo \\.
 
 echo -- proveedores -\> proveedor
@@ -102,7 +102,7 @@ echo \\.
 echo -- ventas -\> venta
 echo ventas > /dev/stderr
 echo COPY venta \(id, monto, fecha, maquina, vendedor, tipo_documento, tipo_venta, descuento, id_documento, canceled\) FROM stdin NULL as \'NULL\'\;
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, monto, fecha, maquina, vendedor, tipo_documento, tipo_documento, tipo_venta, descuento, id_documento, canceled from ventas" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, monto, fecha, maquina, vendedor, tipo_documento, tipo_venta, descuento, id_documento, canceled from ventas" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)}'
 echo \\.
 
 echo -- deudas -\> deuda
@@ -126,7 +126,7 @@ echo \\.
 echo -- compras -\> compra
 echo compras > /dev/stderr
 echo COPY compra \(id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada\) FROM stdin NULL as \'NULL\'\;
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada from compras" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\01%s\011%s\n", $1, $2, substr($1,0,length($3)-2), $4, $5, $6, $7)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada from compras" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\011%s\011%s\n", $1, $2, substr($1,0,length($3)-2), $4, $5, $6, $7)}'
 echo \\.
 
 echo -- devoluciones -\> devolucion
@@ -144,7 +144,7 @@ echo \\.
 echo -- documentos_emitidos
 echo documentos_emitidos > /dev/stderr
 echo COPY documentos_emitidos \(id, tipo_documento, forma_pago, num_documento, fecha_emision\) FROM stdin NULL as \'NULL\'\;
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, tipo_documento, forma_pago, num_documento, fecha_emision from documentos_emitidos" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\011\n", $1, $2, $3, $4, $5)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, tipo_documento, forma_pago, num_documento, fecha_emision from documentos_emitidos" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\n", $1, $2, $3, $4, $5)}'
 echo \\.
 
 echo -- documentos_emitidos_detalle
@@ -185,7 +185,7 @@ echo \\.
 
 echo -- merma
 echo merma > /dev/stderr
-echo COPY ingreso \(id, barcode, unidades, motivo\) FROM stdin NULL as \'NULL\'\;
+echo COPY merma \(id, barcode, unidades, motivo\) FROM stdin NULL as \'NULL\'\;
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, barcode, unidades, motivo from merma" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\n", $1, $2, $3, $4)}'
 echo \\.
 
