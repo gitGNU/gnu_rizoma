@@ -1,10 +1,10 @@
 INSERT INTO formas_pago VALUES (DEFAULT, 'Contado', 0);
 INSERT INTO formas_pago VALUES (DEFAULT, '30 Dias', 30);
 
-INSERT INTO impuestos VALUES (DEFAULT, 'Impuesto al Valor Agregado', 19); 
-INSERT INTO impuestos VALUES (DEFAULT, 'Bebidas', 15);
-INSERT INTO impuestos VALUES (DEFAULT, 'Piscos y Whisky', 27);
-INSERT INTO impuestos VALUES (DEFAULT, 'Vinos y Cervezas', 15);
+INSERT INTO impuesto VALUES (DEFAULT, 'Impuesto al Valor Agregado', 19); 
+INSERT INTO impuesto VALUES (DEFAULT, 'Bebidas', 15);
+INSERT INTO impuesto VALUES (DEFAULT, 'Piscos y Whisky', 27);
+INSERT INTO impuesto VALUES (DEFAULT, 'Vinos y Cervezas', 15);
 
 INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Sencillo');
 
