@@ -1476,7 +1476,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM products_sell_history WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE barcode='%s'", day, barcode));
+	 ("SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE barcode='%s'", day, barcode));
 
       stock = strtod (PUT (PQgetvalue (res, 0, 5)), (char **)NULL);
 
