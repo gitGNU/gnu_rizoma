@@ -57,21 +57,21 @@ ArqueoCajaLastDay (void)
 {
   PGresult *res;
   gint monto;
-  
+
   res = EjecutarSQL
-    (g_strdup_printf 
+    (g_strdup_printf
      ("SELECT (SELECT inicio FROM caja WHERE date_trunc ('day', fecha_inicio)=date_trunc('day', t1.fecha_inicio)) AS inicio, (SELECT SUM (monto) FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS ventas_doc, (SELECT SUM(monto_abonado) FROM abonos WHERE date_trunc('day', fecha_abono)=date_trunc('day', fecha_inicio)) AS pago_credit, (SELECT SUM(monto) FROM ingresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio)) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=1) AS retiros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS facturas, fecha_inicio FROM caja AS t1 WHERE t1.fecha_termino=to_timestamp('DD-MM-YY', '00-00-00')", CASH));
 
   if (res != NULL && PQntuples (res) != 0)
-    monto = ((atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) + 
-	     atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 3)) + 
-	     atoi (PQgetvalue (res, 0, 4))) - 
-	     (atoi (PQgetvalue (res, 0, 5)) + 
-	      atoi (PQgetvalue (res, 0, 6)) + atoi (PQgetvalue (res, 0, 7)) + 
+    monto = ((atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) +
+	     atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 3)) +
+	     atoi (PQgetvalue (res, 0, 4))) -
+	     (atoi (PQgetvalue (res, 0, 5)) +
+	      atoi (PQgetvalue (res, 0, 6)) + atoi (PQgetvalue (res, 0, 7)) +
 	      atoi (PQgetvalue (res, 0, 8))));
   else
     monto = 0;
-  
+
   return monto;
 }
 
@@ -80,23 +80,23 @@ ReturnSaldoCaja (void)
 {
   PGresult *res;
   gint caja;
-  
-  res = EjecutarSQL 
-    (g_strdup_printf 
+
+  res = EjecutarSQL
+    (g_strdup_printf
      ("SELECT (SELECT inicio FROM caja WHERE date_trunc ('day', fecha_inicio)=date_trunc('day', localtimestamp)) AS inicio, (SELECT SUM (monto) FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp))) AS ventas_doc, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo=1) AS retiros, (SELECT SUM(monto_abonado) FROM abonos WHERE date_trunc('day', fecha_abono)=date_trunc('day', localtimestamp)) AS pago_credit, (SELECT SUM(monto) FROM ingresos WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp)) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_trunc('day', fecha)=date_trunc('day', localtimestamp))) AS facturas", CASH));
-  
+
   if (res != NULL && PQntuples (res) != 0)
-    caja = atoi 
-      ((g_strdup_printf ("%d", 
-			 (atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) + 
-			  atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 4)) + 
-			  atoi (PQgetvalue (res, 0, 5))) - 
-			 (atoi (PQgetvalue (res, 0, 8)) + 
-			  atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) + 
+    caja = atoi
+      ((g_strdup_printf ("%d",
+			 (atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) +
+			  atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 4)) +
+			  atoi (PQgetvalue (res, 0, 5))) -
+			 (atoi (PQgetvalue (res, 0, 8)) +
+			  atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) +
 			  atoi (PQgetvalue (res, 0, 7))))));
   else
     caja = 0;
-  
+
   return caja;
 }
 
@@ -119,7 +119,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
 
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_ingreso));
   monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (data))));
-  
+
   if (active == -1)
     ErrorMSG (combo_ingreso, "Debe Seleccionar un tipo de ingreso");
   else if (monto == 0)
@@ -128,11 +128,11 @@ IngresarDinero (GtkWidget *widget, gpointer data)
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_ingreso));
       gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_ingreso), &iter);
-      
+
       gtk_tree_model_get (model, &iter,
 			  0, &motivo,
 			  -1);
-      
+
       Ingreso (monto, motivo, user_data->user_id);
       gtk_widget_destroy (gtk_widget_get_toplevel (widget));
       gtk_widget_set_sensitive (main_window, TRUE);
@@ -153,7 +153,7 @@ VentanaIngreso (GtkWidget *widget, gpointer data)
   gint tuples, i;
 
   gint ingreso = 0;
-  
+
   if (data != NULL )
     ingreso = (gint)data;
 
@@ -189,9 +189,9 @@ VentanaIngreso (GtkWidget *widget, gpointer data)
   gtk_window_set_focus (GTK_WINDOW (window), entry);
 
   res = EjecutarSQL ("SELECT * FROM tipo_ingreso");
-  
+
   tuples = PQntuples (res);
-  
+
   combo_ingreso = gtk_combo_box_new_text ();
   gtk_box_pack_start (GTK_BOX (vbox), combo_ingreso, FALSE, FALSE, 3);
   gtk_widget_show (combo_ingreso);
@@ -217,7 +217,7 @@ VentanaIngreso (GtkWidget *widget, gpointer data)
   button = gtk_button_new_from_stock (GTK_STOCK_OK);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (IngresarDinero), (gpointer)entry);
 
@@ -231,7 +231,7 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   gint active;
   gint monto;
   gchar *motivo;
-  
+
   GtkTreeModel *model;
   GtkTreeIter iter;
 
@@ -243,7 +243,7 @@ EgresarDinero (GtkWidget *widget, gpointer data)
     }
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_egreso));
   monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (data))));
-  
+
   if (active == -1)
     ErrorMSG (combo_egreso, "Debe Seleccionar un tipo de egreso");
   else if (monto == 0)
@@ -254,11 +254,11 @@ EgresarDinero (GtkWidget *widget, gpointer data)
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_egreso));
       gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_egreso), &iter);
-      
+
       gtk_tree_model_get (model, &iter,
 			  0, &motivo,
 			  -1);
-      
+
       Egresar (monto, motivo, user_data->user_id);
       gtk_widget_destroy (gtk_widget_get_toplevel (widget));
       gtk_widget_set_sensitive (main_window, TRUE);
@@ -315,9 +315,9 @@ VentanaEgreso (GtkWidget *widget, gpointer data)
   gtk_window_set_focus (GTK_WINDOW (window), entry);
 
   res = EjecutarSQL ("SELECT * FROM tipo_egreso");
-  
+
   tuples = PQntuples (res);
-  
+
   combo_egreso = gtk_combo_box_new_text ();
   gtk_box_pack_start (GTK_BOX (vbox), combo_egreso, FALSE, FALSE, 3);
   gtk_widget_show (combo_egreso);
@@ -340,7 +340,7 @@ VentanaEgreso (GtkWidget *widget, gpointer data)
   button = gtk_button_new_from_stock (GTK_STOCK_OK);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (EgresarDinero), (gpointer)entry);
 
@@ -375,16 +375,16 @@ FillCajaData (void)
 
   CleanCajaData ();
 
-  res = EjecutarSQL (g_strdup_printf 
+  res = EjecutarSQL (g_strdup_printf
 		     ("SELECT (SELECT inicio FROM caja WHERE date_part('year', fecha_inicio)=%d AND date_part('month', fecha_inicio)=%d AND date_part('day', fecha_inicio)=%d) AS inicio, (SELECT SUM (monto) FROM ventas WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND date_part('year', fecha)=date_part('year', t1.fecha) AND date_part('month', fecha)=date_part('month', t1.fecha) AND date_part('day', fecha)=date_part('day', t1.fecha))) AS ventas_doc, (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=1) AS retiros, (SELECT SUM(monto_abonado) FROM abonos WHERE date_part('year', fecha_abono)=%d AND date_part('month', fecha_abono)=%d AND date_part('day', fecha_abono)=%d) AS pago_credit, (SELECT SUM(monto) FROM ingresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d)) AS facturas",
-		      year, month+1, day, year, month+1, day, CASH, year, month+1, day, year, month+1, 
-		      day, year, month+1, day, year, month+1, day, year, month+1, day, year, 
+		      year, month+1, day, year, month+1, day, CASH, year, month+1, day, year, month+1,
+		      day, year, month+1, day, year, month+1, day, year, month+1, day, year,
 		      month+1, day, year, month+1, day));
-  
+
   if (res != NULL && PQntuples (res) != 0 && strcmp (PQgetvalue (res, 0, 0), "") != 0)
    {
      if (strcmp (PQgetvalue (res, 0, 0), "") != 0)
-       gtk_label_set_markup (GTK_LABEL (inicio_caja), 
+       gtk_label_set_markup (GTK_LABEL (inicio_caja),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 0))));
 
      if (strcmp (PQgetvalue (res, 0, 1), "") != 0)
@@ -394,9 +394,9 @@ FillCajaData (void)
      if (strcmp (PQgetvalue (res, 0, 2), "") != 0)
        gtk_label_set_markup (GTK_LABEL (ventas_doc),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 2))));
-     
+
      if (strcmp (PQgetvalue (res, 0, 4), "") != 0)
-       gtk_label_set_markup (GTK_LABEL (pago_ventas), 
+       gtk_label_set_markup (GTK_LABEL (pago_ventas),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 4))));
 
      if (strcmp (PQgetvalue (res, 0, 5), "") != 0)
@@ -404,51 +404,51 @@ FillCajaData (void)
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 5))));
 
      gtk_label_set_markup (GTK_LABEL (total_haberes),
-			   g_strdup_printf 
-			   ("<b>$\t%s</b>", PutPoints 
-			    (g_strdup_printf 
-			     ("%d", atoi (PQgetvalue (res, 0, 0)) + 
-			      atoi (PQgetvalue (res, 0, 1)) + atoi (PQgetvalue (res, 0, 2)) + 
+			   g_strdup_printf
+			   ("<b>$\t%s</b>", PutPoints
+			    (g_strdup_printf
+			     ("%d", atoi (PQgetvalue (res, 0, 0)) +
+			      atoi (PQgetvalue (res, 0, 1)) + atoi (PQgetvalue (res, 0, 2)) +
 			      atoi (PQgetvalue (res, 0, 4)) + atoi (PQgetvalue (res, 0, 5))))));
-     
+
      if (strcmp (PQgetvalue (res, 0, 8), "") != 0)
-       gtk_label_set_markup (GTK_LABEL (pagos), 
+       gtk_label_set_markup (GTK_LABEL (pagos),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 8))));
 
      if (strcmp (PQgetvalue (res, 0, 3), "") != 0)
-       gtk_label_set_markup (GTK_LABEL (retiros), 
+       gtk_label_set_markup (GTK_LABEL (retiros),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 3))));
-     
+
      if (strcmp (PQgetvalue (res, 0, 6), "") != 0)
-       gtk_label_set_markup (GTK_LABEL (gastos_corrientes), 
+       gtk_label_set_markup (GTK_LABEL (gastos_corrientes),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 6))));
-     
+
      if (strcmp (PQgetvalue (res, 0, 7), "") != 0)
-       gtk_label_set_markup (GTK_LABEL (otros_egresos), 
+       gtk_label_set_markup (GTK_LABEL (otros_egresos),
 			     g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 7))));
-     
+
      gtk_label_set_markup (GTK_LABEL (total_debitos),
-			   g_strdup_printf 
-			   ("<b>$\t%s</b>", PutPoints 
-			    (g_strdup_printf 
-			     ("%d", atoi (PQgetvalue (res, 0, 8)) + 
-			      atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) + 
+			   g_strdup_printf
+			   ("<b>$\t%s</b>", PutPoints
+			    (g_strdup_printf
+			     ("%d", atoi (PQgetvalue (res, 0, 8)) +
+			      atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) +
 			      atoi (PQgetvalue (res, 0, 7))))));
 
-     gtk_label_set_markup 
+     gtk_label_set_markup
        (GTK_LABEL (total_caja),
-	g_strdup_printf 
+	g_strdup_printf
 	("<span size=\"xx-large\"><b>$\t%s</b></span>",
-	 PutPoints 
-	 (g_strdup_printf 
-	  ("%d", 
-	   (atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) + 
-	    atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 4)) + 
-	    atoi (PQgetvalue (res, 0, 5))) - 
-	   (atoi (PQgetvalue (res, 0, 8)) + 
-	    atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) + 
+	 PutPoints
+	 (g_strdup_printf
+	  ("%d",
+	   (atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) +
+	    atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 4)) +
+	    atoi (PQgetvalue (res, 0, 5))) -
+	   (atoi (PQgetvalue (res, 0, 8)) +
+	    atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) +
 	    atoi (PQgetvalue (res, 0, 7)))))));
-     
+
 
     }
 }
@@ -461,12 +461,12 @@ SelectedCajaDate (GtkCalendar *calendar, gpointer data)
 
   if (calendar == NULL)
     calendar = GTK_CALENDAR (gtk_calendar_new ());
-  else    
+  else
       SetToggleMode (GTK_TOGGLE_BUTTON (data), NULL);
 
   gtk_calendar_get_date (calendar, &year, &month, &day);
-  
-  gtk_button_set_label (button, g_strdup_printf ("%.2u/%.2u/%.4u", day, month+1, year)); 
+
+  gtk_button_set_label (button, g_strdup_printf ("%.2u/%.2u/%.4u", day, month+1, year));
 
   if (pepe != NULL)
     FillCajaData ();
@@ -487,28 +487,28 @@ DisplayCajaDate (GtkToggleButton *widget, gpointer data)
   if (toggle == TRUE)
     {
       gdk_window_get_origin (GTK_WIDGET (widget)->window, &x, &y);
-      
+
       gtk_widget_size_request (GTK_WIDGET (widget), &req);
       h = req.height;
-      w = req.width;  
+      w = req.width;
 
       button_y = GTK_WIDGET (widget)->allocation.y;
       button_x = GTK_WIDGET (widget)->allocation.x;
-      
+
       calendar_win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
       gtk_window_set_screen (GTK_WINDOW (calendar_win), gtk_widget_get_screen (GTK_WIDGET (widget)));
-      
+
       gtk_container_set_border_width (GTK_CONTAINER (calendar_win), 5);
       gtk_window_set_type_hint (GTK_WINDOW (calendar_win), GDK_WINDOW_TYPE_HINT_DOCK);
       gtk_window_set_decorated (GTK_WINDOW (calendar_win), FALSE);
       gtk_window_set_resizable (GTK_WINDOW (calendar_win), FALSE);
       gtk_window_stick (GTK_WINDOW (calendar_win));
       gtk_window_set_title (GTK_WINDOW (calendar_win), "Calendario");
-      
+
       vbox = gtk_vbox_new (FALSE, 3);
       gtk_container_add (GTK_CONTAINER (calendar_win), vbox);
       gtk_widget_show (vbox);
-      
+
       calendar = GTK_CALENDAR (gtk_calendar_new ());
       gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (calendar), FALSE, FALSE, 0);
       gtk_widget_show (GTK_WIDGET (calendar));
@@ -521,12 +521,12 @@ DisplayCajaDate (GtkToggleButton *widget, gpointer data)
 	  gtk_calendar_select_day (calendar, day);
 	  gtk_calendar_select_month (calendar, month, year);
 	}
-      
+
       gtk_widget_show (calendar_win);
-            
+
       x = (x + button_x);
       y = (y + button_y) + h;
-      
+
       gtk_window_move (GTK_WINDOW (calendar_win), x, y);
       gtk_window_present (GTK_WINDOW (calendar_win));
     }
@@ -555,7 +555,7 @@ CajaTab (GtkWidget *main_box)
   label = gtk_label_new ("Preparado Al: ");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
-  
+
   caja_button = gtk_toggle_button_new_with_label ("\t\t");
   gtk_box_pack_start (GTK_BOX (hbox), caja_button, FALSE, FALSE, 3);
   gtk_widget_show (caja_button);
@@ -564,7 +564,7 @@ CajaTab (GtkWidget *main_box)
 
   g_signal_connect (G_OBJECT (caja_button), "toggled",
 		    G_CALLBACK (DisplayCajaDate), NULL);
-  
+
   table = gtk_table_new (8, 4, FALSE);
   gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 5);
   gtk_widget_show (table);
@@ -609,7 +609,7 @@ CajaTab (GtkWidget *main_box)
 			     1, 2,
 			     2, 3);
   gtk_widget_show (ventas_efect);
-  
+
   label = gtk_label_new ("");
   gtk_label_set_markup (GTK_LABEL (label), "<b>Ventas con Documentos</b>");
   gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
@@ -759,7 +759,7 @@ CajaTab (GtkWidget *main_box)
   gtk_widget_show (hbox);
 
   label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label), 
+  gtk_label_set_markup (GTK_LABEL (label),
 			"<span size=\"xx-large\"><b>Total en Caja:\t</b></span>");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
@@ -775,10 +775,10 @@ InicializarCaja (gint monto)
 {
   PGresult *res;
 
-  res = EjecutarSQL 
-    (g_strdup_printf 
+  res = EjecutarSQL
+    (g_strdup_printf
      ("INSERT INTO caja VALUES(DEFAULT, NOW(), %d, to_timestamp('DD-MM-YY', '00-00-00'))", monto));
-  
+
   if (res != NULL)
     return TRUE;
   else
@@ -791,15 +791,15 @@ ArqueoCaja (void)
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha_inicio) AS dia, date_part('month', fecha_inicio) AS mes, date_part('year', fecha_inicio) AS ano FROM caja WHERE id=(SELECT last_value FROM caja_id_seq)"));
-      
+
   if ((PQntuples (res)) == 0)
     return FALSE;
-  
+
   res = EjecutarSQL (g_strdup_printf ("SELECT ((SELECT inicio FROM caja WHERE date_part('year', fecha_inicio)=%s AND date_part('month', fecha_inicio)=%s AND date_part('day', fecha_inicio)=%s) + (SELECT SUM (monto) FROM ventas WHERE date_part('year', fecha)=%s AND date_part('month', fecha)=%s AND date_part('day', fecha)=%s AND tipo_venta=%d) + (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_part('year', fecha)=%s AND date_part('month', fecha)=%s AND date_part('day', fecha)=%s AND date_part('year', fecha)=date_part('year', t1.fecha) AND date_part('month', fecha)=date_part('month', t1.fecha) AND date_part('day', fecha)=date_part('day', t1.fecha))) + (SELECT SUM(monto_abonado) FROM abonos WHERE date_part('year', fecha_abono)=%s AND date_part('month', fecha_abono)=%s AND date_part('day', fecha_abono)=%s) + (SELECT SUM(monto) FROM ingresos WHERE date_part('year', fecha)=%s AND date_part('month', fecha)=%s AND date_part('day', fecha)=%s)) - ((SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%s AND date_part('month', fecha)=%s AND date_part('day', fecha)=%s AND tipo=1) + (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%s AND date_part('month', fecha)=%s AND date_part('day', fecha)=%s AND tipo=3) + (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%s AND date_part('month', fecha)=%s AND date_part('day', fecha)=%s AND tipo=2) + (SELECT monto FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t')))", PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), CASH, PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0), PQgetvalue (res, 0, 2), PQgetvalue (res, 0, 1), PQgetvalue (res, 0, 0)));
-  
+
   if ((PQntuples (res)) == 0)
     return FALSE;
-  
+
   return atoi (PQgetvalue (res, 0, 0));
 }
 
@@ -810,8 +810,8 @@ CerrarCaja (gint monto)
 
   if (monto == -1)
     monto = ArqueoCaja ();
-  
-  res = EjecutarSQL 
+
+  res = EjecutarSQL
     (g_strdup_printf ("UPDATE caja SET fecha_termino=NOW(), termino=%d WHERE id=(SELECT last_value"
 		      " FROM caja_id_seq)", monto));
 
@@ -827,16 +827,16 @@ CalcularPerdida (void)
   PGresult *res;
   gint perdida, cash_sell, cierre_caja;
 
-  cash_sell = atoi (GetDataByOne 
+  cash_sell = atoi (GetDataByOne
 		    (g_strdup_printf ("SELECT SUM (monto) as total_sell FROM ventas WHERE "
 				      "date_part('day', fecha)=date_part('day', CURRENT_DATE) "
-				      "AND date_part('month', fecha)=date_part('month', CURRENT_DATE) AND" 
-				      " date_part('year', fecha)=date_part('year', CURRENT_DATE) AND tipo_venta=%d", 
-				      CASH)));  
-  
+				      "AND date_part('month', fecha)=date_part('month', CURRENT_DATE) AND"
+				      " date_part('year', fecha)=date_part('year', CURRENT_DATE) AND tipo_venta=%d",
+				      CASH)));
+
   cierre_caja = atoi (GetDataByOne ("SELECT termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq)"));
-  
-  perdida = cash_sell - cierre_caja;  
+
+  perdida = cash_sell - cierre_caja;
 
   res = EjecutarSQL (g_strdup_printf ("INSERT INTO caja (perdida) VALUES(%d) WHERE id="
 				      "(SELECT last_value FROM caja_id_seq)", perdida));
@@ -856,14 +856,14 @@ check_caja (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL 
+  res = EjecutarSQL
     ("SELECT fecha_termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq) AND "
      "date_part('day', fecha_inicio)=date_part('day', NOW()) AND "
      "date_part('year', fecha_inicio)=date_part('year', NOW()) AND date_part('year', "
      "fecha_inicio)=date_part('year', NOW())");
 
   if (PQntuples (res) == 0)
-    return TRUE;  
+    return TRUE;
   else if (strcmp (PQgetvalue (res, 0, 0), "") == 0)
     return FALSE;
   else
@@ -877,7 +877,7 @@ CloseCajaWin (void)
     gtk_widget_destroy (caja->win);
 
   caja->win = NULL;
-  
+
   gtk_widget_set_sensitive (main_window, TRUE);
 
   gtk_window_set_focus (GTK_WINDOW (main_window), venta->barcode_entry);
@@ -891,7 +891,7 @@ InicializarCajaWin (void)
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *button;
-  
+
   gchar *inicio = "0";
   PGresult *res;
 
@@ -903,7 +903,7 @@ InicializarCajaWin (void)
   gtk_window_set_resizable (GTK_WINDOW (caja->win), FALSE);
   gtk_widget_set_size_request (caja->win, -1, 150);
   gtk_window_present (GTK_WINDOW (caja->win));
-  
+
   g_signal_connect (G_OBJECT (caja->win), "destroy",
 		    G_CALLBACK (CloseCajaWin), NULL);
 
@@ -943,7 +943,7 @@ InicializarCajaWin (void)
     inicio = "";
 
   label = gtk_label_new ("");
-  gtk_label_set_markup 
+  gtk_label_set_markup
     (GTK_LABEL (label),g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
 					PutPoints (inicio)));
   gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -968,14 +968,14 @@ InicializarCajaWin (void)
   button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (CloseCajaWin), NULL);
 
   button = gtk_button_new_from_stock (GTK_STOCK_OK);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (IniciarLaCaja), (gpointer) inicio);
 
@@ -1009,7 +1009,7 @@ CerrarCajaWin (void)
   GtkWidget *button;
 
   gint arqueo_caja;
-  
+
   gtk_widget_set_sensitive (main_window, FALSE);
 
   caja->win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -1039,7 +1039,7 @@ CerrarCajaWin (void)
   label = gtk_label_new ("Cerrar con: ");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
@@ -1052,7 +1052,7 @@ CerrarCajaWin (void)
   arqueo_caja = ArqueoCaja();
 
   label = gtk_label_new ("");
-  gtk_label_set_markup 
+  gtk_label_set_markup
     (GTK_LABEL (label),g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
 					PutPoints (g_strdup_printf ("%d", arqueo_caja))));
   gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -1065,14 +1065,14 @@ CerrarCajaWin (void)
   button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (CloseCajaWin), NULL);
 
   button = gtk_button_new_from_stock (GTK_STOCK_OK);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (CerrarLaCaja), (gpointer)label);
 }
