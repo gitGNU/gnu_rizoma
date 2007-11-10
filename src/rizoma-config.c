@@ -92,11 +92,6 @@ volcar_db (GtkWidget *button, gpointer user_data)
   gchar *path;
   gchar *command;
   gchar *sql;
-  gchar *strconn = g_strdup_printf( "host=%s port=5432 dbname=%s user=%s password=%s sslmod=require",
-								   host_pg, name_db, user_pg, pass_pg );
-
-  PGconn *connection;
-  PGresult *res;
 
   GtkWidget *window;
   GtkWidget *button2;
@@ -169,7 +164,7 @@ volcar_db (GtkWidget *button, gpointer user_data)
   else
     fclose (fp);
 
-  command = g_strdup_printf ("su - %s -c \"psql template1 -c \\\"CREATE DATABASE %s OWNER %s;\\\"\"", local_user_pg, name_db, user_pg);
+  command = g_strdup_printf ("su - %s -c \"psql template1 -c \\\"DROP DATABASE %s; CREATE DATABASE %s OWNER %s;\\\"\"", local_user_pg, name_db, name_db, user_pg);
   printf ("%s\n",command);
   if ((system (command)) != 0)
     {
@@ -256,7 +251,7 @@ volcar_db (GtkWidget *button, gpointer user_data)
   }
 
 
-  sql = g_strdup_printf ("INSERT INTO users VALUES (DEFAULT, '%s', md5('%s'), 0, 'Administrador', '', '', NOW(), 0);", user_admin, pass_admin);
+  sql = g_strdup_printf ("INSERT INTO users (id, usuario, passwd, rut, dv, nombre, apell_p, apell_m, fecha_ingreso, level ) VALUES (DEFAULT, '%s', md5('%s'), 0, 0, 'Administrador', '', '', NOW(), 0)", user_admin, pass_admin);
 
   command = g_strdup_printf ("su - %s -c \"psql -U %s %s -c \\\"%s\\\"\"", local_user_pg, user_pg, name_db, sql);
 
@@ -289,6 +284,17 @@ volcar_db (GtkWidget *button, gpointer user_data)
   }
 }
 
+gboolean
+get_db_user_info( GnomeDruidPage *page, GtkWidget *widget, gpointer user_data ) {
+
+	local_user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_local_user)));
+	host_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_host)));
+	user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_user)));
+	pass_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_pass)));
+
+	return FALSE;
+}
+
 void
 create_db_user (GtkWidget *button, gpointer user_data)
 {
@@ -300,11 +306,6 @@ create_db_user (GtkWidget *button, gpointer user_data)
   GtkWidget *label;
   GtkWidget *vbox;
   GtkWidget *hbox;
-
-  local_user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_local_user)));
-  host_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_host)));
-  user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_user)));
-  pass_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (pg_pass)));
 
   uid = getuid ();
 
@@ -451,6 +452,9 @@ int main (int argc, char *argv[])
 
   g_signal_connect (G_OBJECT (page), "cancel",
 		    G_CALLBACK (gtk_main_quit), NULL);
+
+  g_signal_connect( G_OBJECT( page ), "next",
+					G_CALLBACK( get_db_user_info ), (gpointer)page );
 
   /* The third page, the init data */
   page = gnome_druid_page_standard_new_with_vals ("Datos iniciales de la BD", NULL, NULL);
