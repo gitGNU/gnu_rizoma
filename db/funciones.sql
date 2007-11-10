@@ -1,3 +1,5 @@
+CREATE LANGUAGE plpgsql;
+
 -- estas son las funciones que deben ir en la base de datos
 -- algunas no estan con buena sintaxis
 
@@ -77,7 +79,7 @@ END; ' language plpgsql;
 create or replace function get_tipos_merma()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -100,23 +102,21 @@ returns void as '
 begin
 INSERT INTO productos VALUES (DEFAULT, quote_literal($1), quote_literal($2), quote_literal($3));
 RETURN;
-END; ' language plpgsql
+END; ' language plpgsql;
 
 -- revisa si existe un producto con el mismo código
 -- administracion_productos.c:1354
 create or replace function existe_producto_por_codigo(varchar(10))
 returns boolean as '
 declare
-	
 	list record;
 	query varchar(255);
-
 begin
 query := ''SELECT count(codigo) as suma FROM productos WHERE codigo='' || quote_literal($1) ;
 
 
 FOR list IN EXECUTE query LOOP
-	if list.suma > 0 then 
+	if list.suma > 0 then
 		return TRUE;
 	end if;
 END LOOP;
@@ -130,7 +130,7 @@ END; ' language plpgsql;
 create or replace function existe_producto_por_nombre()
 returns boolean as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -139,7 +139,7 @@ query := ''SELECT codigo FROM productos WHERE producto='' || quote_literal($1) ;
 
 
 FOR list IN EXECUTE query LOOP
-	if list.suma > 0 then 
+	if list.suma > 0 then
 		return TRUE;
 	end if;
 END LOOP;
@@ -153,7 +153,7 @@ END; ' language plpgsql;
 create or replace function select_producto()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -171,72 +171,72 @@ END; ' language plpgsql;
 
 -- ??
 -- administracion_productos.c:1464
-create or replace function ()
-returns setof record as '
-declare
-	
-	list record;
-	query varchar(255);
+-- create or replace function ()
+-- returns setof record as '
+-- declare
 
-begin
-SELECT date_part ('day', (SELECT NOW() - fecha FROM compras WHERE id=t1.id_compra)) "
-	  "FROM products_buy_history AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' "
-	  "AND t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC", 
-	  barcode, barcode)
-query := '''';
+-- 	list record;
+-- 	query varchar(255);
 
-
-FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
-END LOOP;
-
-RETURN;
-
-END; ' language plpgsql;
-
--- ??
--- administracion_productos.c:1479
-create or replace function ()
-returns setof record as '
-declare
-	
-	list record;
-	query varchar(255);
-
-begin
-SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM products_sell_history WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM products_sell_history WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM productos WHERE barcode='%s'", day, barcode)
-query := '''';
+-- begin
+-- SELECT date_part ('day', (SELECT NOW() - fecha FROM compras WHERE id=t1.id_compra)) "
+-- 	  "FROM products_buy_history AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' "
+-- 	  "AND t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC",
+-- 	  barcode, barcode)
+-- query := '''';
 
 
-FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
-END LOOP;
+-- FOR list IN EXECUTE query LOOP
+-- 	RETURN NEXT list;
+-- END LOOP;
 
-RETURN;
+-- RETURN;
 
-END; ' language plpgsql;
+-- END; ' language plpgsql;
 
--- ??
--- administracion_productos.c:1637
-create or replace function ()
-returns setof record as '
-declare
-	
-	list record;
-	query varchar(255);
+-- -- ??
+-- -- administracion_productos.c:1479
+-- create or replace function ()
+-- returns setof record as '
+-- declare
 
-begin
-"SELECT nombre FROM proveedores WHERE rut IN (SELECT rut_proveedor FROM compras WHERE id IN (SELECT id_compra FROM products_buy_history WHERE barcode_product='%s')) GROUP BY nombre", barcode)
-query := '''';
+-- 	list record;
+-- 	query varchar(255);
+
+-- begin
+-- SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM products_sell_history WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM products_sell_history WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM productos WHERE barcode='%s'", day, barcode)
+-- query := '''';
 
 
-FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
-END LOOP;
+-- FOR list IN EXECUTE query LOOP
+-- 	RETURN NEXT list;
+-- END LOOP;
 
-RETURN;
+-- RETURN;
 
-END; ' language plpgsql;
+-- END; ' language plpgsql;
+
+-- -- ??
+-- -- administracion_productos.c:1637
+-- create or replace function ()
+-- returns setof record as '
+-- declare
+
+-- 	list record;
+-- 	query varchar(255);
+
+-- begin
+-- "SELECT nombre FROM proveedores WHERE rut IN (SELECT rut_proveedor FROM compras WHERE id IN (SELECT id_compra FROM products_buy_history WHERE barcode_product='%s')) GROUP BY nombre", barcode)
+-- query := '''';
+
+
+-- FOR list IN EXECUTE query LOOP
+-- 	RETURN NEXT list;
+-- END LOOP;
+
+-- RETURN;
+
+-- END; ' language plpgsql;
 
 -- busca productos en base un patron con el formate de LIKE
 -- administracion_productos.c:1738
@@ -244,7 +244,7 @@ END; ' language plpgsql;
 create or replace function buscar_productos(varchar(255))
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -265,11 +265,11 @@ END; ' language plpgsql;
 -- esta funcion es util para obtener los datos de un barcode dado
 -- administracion_productos.c:1803
 -- postgres-functions.c:941, 964, 978, 990, 1197, 1432, 1480, 1530, 1652, 1853
--- ventas.c:95, 1504, 3026, 3032, 
+-- ventas.c:95, 1504, 3026, 3032,
 create or replace function select_producto(varchar(14))
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -290,7 +290,7 @@ END; ' language plpgsql;
 create or replace function obtener_impuestos()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -310,7 +310,7 @@ END; ' language plpgsql;
 create or replace function obtener_num_boleta()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -331,7 +331,7 @@ END; ' language plpgsql;
 create or replace function obtener_num_factura()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -352,7 +352,7 @@ END; ' language plpgsql;
 create or replace function obtener_num_guias()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -373,7 +373,7 @@ END; ' language plpgsql;
 create or replace function update_num_boleta(int4)
 returns void as '
 begin
-UPDATE numeros_documentos SET num_boleta=$1
+UPDATE numeros_documentos SET num_boleta=$1;
 
 RETURN;
 
@@ -384,7 +384,7 @@ END; ' language plpgsql;
 create or replace function update_num_factura(int4)
 returns void as '
 begin
-UPDATE numeros_documentos SET num_factura=$1
+UPDATE numeros_documentos SET num_factura=$1;
 
 RETURN;
 
@@ -395,7 +395,7 @@ END; ' language plpgsql;
 create or replace function update_num_guias(int4)
 returns void as '
 begin
-UPDATE numeros_documentos SET num_guias=$1
+UPDATE numeros_documentos SET num_guias=$1;
 
 RETURN;
 
@@ -403,16 +403,16 @@ END; ' language plpgsql;
 
 -- ??
 -- caja.c:63
-create or replace function ()
+create or replace function arqueo_caja_ultimo_dia()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
 begin
 query := '''';
-SELECT (SELECT inicio FROM caja WHERE date_trunc ('day', fecha_inicio)=date_trunc('day', t1.fecha_inicio)) AS inicio, (SELECT SUM (monto) FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS ventas_doc, (SELECT SUM(monto_abonado) FROM abonos WHERE date_trunc('day', fecha_abono)=date_trunc('day', fecha_inicio)) AS pago_credit, (SELECT SUM(monto) FROM ingresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio)) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=1) AS retiros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS facturas, fecha_inicio FROM caja AS t1 WHERE t1.fecha_termino=to_timestamp('DD-MM-YY', '00-00-00')", CASH
+SELECT (SELECT inicio FROM caja WHERE date_trunc ('day', fecha_inicio)=date_trunc('day', t1.fecha_inicio)) AS inicio, (SELECT SUM (monto) FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS ventas_doc, (SELECT SUM(monto_abonado) FROM abonos WHERE date_trunc('day', fecha_abono)=date_trunc('day', fecha_inicio)) AS pago_credit, (SELECT SUM(monto) FROM ingresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio)) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=1) AS retiros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS facturas, fecha_inicio FROM caja AS t1 WHERE t1.fecha_termino=to_timestamp('DD-MM-YY', '00-00-00')", CASH;
 
 FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
@@ -424,10 +424,10 @@ END; ' language plpgsql;
 
 -- ??
 -- caja.c:86
-create or replace function ()
+create or replace function saldo_caja()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -448,7 +448,7 @@ END; ' language plpgsql;
 create or replace function select_tipo_ingreso()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -469,7 +469,7 @@ END; ' language plpgsql;
 create or replace function select_tipo_egreso()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -490,15 +490,15 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
 begin
 query := '''';
 SELECT (SELECT inicio FROM caja WHERE date_part('year', fecha_inicio)=%d AND date_part('month', fecha_inicio)=%d AND date_part('day', fecha_inicio)=%d) AS inicio, (SELECT SUM (monto) FROM ventas WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND date_part('year', fecha)=date_part('year', t1.fecha) AND date_part('month', fecha)=date_part('month', t1.fecha) AND date_part('day', fecha)=date_part('day', t1.fecha))) AS ventas_doc, (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=1) AS retiros, (SELECT SUM(monto_abonado) FROM abonos WHERE date_part('year', fecha_abono)=%d AND date_part('month', fecha_abono)=%d AND date_part('day', fecha_abono)=%d) AS pago_credit, (SELECT SUM(monto) FROM ingresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM facturas_compras WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d)) AS facturas",
-		      year, month+1, day, year, month+1, day, CASH, year, month+1, day, year, month+1, 
-		      day, year, month+1, day, year, month+1, day, year, month+1, day, year, 
+		      year, month+1, day, year, month+1, day, CASH, year, month+1, day, year, month+1,
+		      day, year, month+1, day, year, month+1, day, year, month+1, day, year,
 		      month+1, day, year, month+1, day
 
 FOR list IN EXECUTE query LOOP
@@ -514,7 +514,7 @@ END; ' language plpgsql;
 create or replace function inicializar_caja(int4)
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -530,7 +530,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -551,7 +551,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -572,7 +572,7 @@ END; ' language plpgsql;
 create or replace function cerrar_caja(int4)
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -587,7 +587,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -595,8 +595,8 @@ begin
 query := '''';
 SELECT SUM (monto) as total_sell FROM ventas WHERE "
 				      "date_part('day', fecha)=date_part('day', CURRENT_DATE) "
-				      "AND date_part('month', fecha)=date_part('month', CURRENT_DATE) AND" 
-				      " date_part('year', fecha)=date_part('year', CURRENT_DATE) AND tipo_venta=%d", 
+				      "AND date_part('month', fecha)=date_part('month', CURRENT_DATE) AND"
+				      " date_part('year', fecha)=date_part('year', CURRENT_DATE) AND tipo_venta=%d",
 				      CASH)
 
 FOR list IN EXECUTE query LOOP
@@ -612,7 +612,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -632,7 +632,7 @@ END; ' language plpgsql;
 create or replace function insert_perdida (int4)
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -648,7 +648,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -672,7 +672,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -692,7 +692,7 @@ END; ' language plpgsql;
 create or replace function obtener_proveedor(varchar(20))
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -712,7 +712,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -733,7 +733,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -755,7 +755,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -776,7 +776,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -797,7 +797,7 @@ END; ' language plpgsql;
 create or replace function obtener_producto(varchar(14))
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -817,7 +817,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -837,7 +837,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -857,7 +857,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -877,7 +877,7 @@ END; ' language plpgsql;
 create or replace function codigo_corto_libre(varchar(10))
 returns boolean as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -901,7 +901,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -926,7 +926,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -947,7 +947,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -973,7 +973,7 @@ END; ' language plpgsql;
 create or replace function (int)
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -993,7 +993,7 @@ END; ' language plpgsql;
 create or replace function select_proveedores()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1013,7 +1013,7 @@ END; ' language plpgsql;
 create or replace function anular_compra(varchar(10),int4)
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1029,7 +1029,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1051,7 +1051,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1072,7 +1072,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1093,7 +1093,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1114,7 +1114,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1135,7 +1135,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1158,7 +1158,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1179,7 +1179,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1204,7 +1204,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1225,7 +1225,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1246,7 +1246,7 @@ END; ' language plpgsql;
 create or replace function buscar_proveedor(varchar(100))
 returns setof record as '
 declare
-	
+
 	list record;
 	query text;
 
@@ -1267,7 +1267,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1290,7 +1290,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1312,7 +1312,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1337,7 +1337,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1346,8 +1346,8 @@ query := '''';
 SELECT id, (SELECT nombre FROM proveedores WHERE rut=compras.rut_proveedor), rut_proveedor, "
 	"(SELECT SUM (cantidad*precio) FROM products_buy_history WHERE id_compra=compras.id) FROM compras "
 	"WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-	"fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') ORDER BY fecha DESC", 
-	ventastats->selected_from_day, ventastats->selected_from_month, ventastats->selected_from_year, 
+	"fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') ORDER BY fecha DESC",
+	ventastats->selected_from_day, ventastats->selected_from_month, ventastats->selected_from_year,
 	ventastats->selected_to_day, ventastats->selected_to_month, ventastats->selected_to_year
 
 FOR list IN EXECUTE query LOOP
@@ -1363,7 +1363,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1386,13 +1386,13 @@ END; ' language plpgsql;
 create or replace function buscar_cliente(varchar(255))
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
 begin
-query := ''SELECT * FROM clientes WHERE lower(nombre) LIKE lower('' || quote_literal($1) 
-	|| '') OR lower(apellido_paterno) LIKE lower('' || quote_literal($1) 
+query := ''SELECT * FROM clientes WHERE lower(nombre) LIKE lower('' || quote_literal($1)
+	|| '') OR lower(apellido_paterno) LIKE lower('' || quote_literal($1)
 	|| '') OR lower(apellido_materno) LIKE lower('' || quote_literal($1) || '')'';
 
 FOR list IN EXECUTE query LOOP
@@ -1408,7 +1408,7 @@ END; ' language plpgsql;
 create or replace function select_clientes()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 
@@ -1467,20 +1467,20 @@ END; ' language plpgsql;
 
 -- actualiza cliente, es necesario revisar que los parametros se pasen correctamente
 -- credito.c:1546
-create or replace function update_cliente(int4, varchar(60), varchar(60), varchar(60), 
+create or replace function update_cliente(int4, varchar(60), varchar(60), varchar(60),
 					varchar(150), int4, int4, varchar(255))
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 begin
-UPDATE clientes SET nombre=quote_literal($2), 
-		apellido_paterno=quote_literal($3), 
+UPDATE clientes SET nombre=quote_literal($2),
+		apellido_paterno=quote_literal($3),
 		apellido_materno=quote_literal($4),
-		direccion=quote_literal($5), 
-		telefono=$6, 
-		credito=$7, 
+		direccion=quote_literal($5),
+		telefono=$6,
+		credito=$7,
 		giro=quote_literal($8)
 		WHERE rut=quote_literal($1);
 RETURN;
@@ -1492,7 +1492,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 begin
@@ -1509,7 +1509,7 @@ END; ' language plpgsql;
 create or replace function ()
 returns setof record as '
 declare
-	
+
 	list record;
 	query varchar(255);
 begin
@@ -1717,7 +1717,7 @@ declare
 	query varchar(255);
 begin
 query:= '''';
-SELECT SUM ((SELECT SUM (cantidad * precio) FROM products_sell_history WHERE id_venta=ventas.id)), 
+SELECT SUM ((SELECT SUM (cantidad * precio) FROM products_sell_history WHERE id_venta=ventas.id)),
 	  "count (*) FROM ventas WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
 	  "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND (SELECT forma_pago FROM documentos_emitidos "
 	  "WHERE id=id_documento)=%d", from_day, from_month, from_year, to_day+1, to_month, to_year, CASH
@@ -1780,12 +1780,12 @@ create or replace function insert_cliente(varchar(60), varchar(60), varchar(60),
 returns void as '
 
 begin
-INSERT INTO clientes VALUES(DEFAULT, quote_literal($1), 
-				quote_literal($2), 
-				quote_literal($3), 
+INSERT INTO clientes VALUES(DEFAULT, quote_literal($1),
+				quote_literal($2),
+				quote_literal($3),
 				quote_literal($4),
 				quote_literal($5),
-				quote_literal($6), 
+				quote_literal($6),
 				quote_literal($7),
 				0,
 				quote_literal($8),
@@ -1836,7 +1836,7 @@ begin
 query:= ''SELECT SUM (monto) as monto FROM ventas WHERE id IN (SELECT id_venta FROM deudas WHERE rut_cliente='' || quote_literal($1) || '' AND pagada=FALSE)'';
 
 FOR list IN EXECUTE query LOOP
-	return next list;	
+	return next list;
 END LOOP;
 
 return;
@@ -1856,7 +1856,7 @@ query:= ''SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_par
 	  "rut_cliente=%d AND pagada='f')",rut'';
 
 FOR list IN EXECUTE query LOOP
-	return next list;	
+	return next list;
 END LOOP;
 
 return;
@@ -1919,7 +1919,7 @@ return;
 end; ' language plpgsql;
 
 -- retorna la password de un usuario dado
--- postgres-functions.c:590, 603, 616, 626, 635, 
+-- postgres-functions.c:590, 603, 616, 626, 635,
 create or replace function select_usuario(varchar(30))
 returns setof users as '
 declare
@@ -2000,8 +2000,8 @@ end; ' language plpgsql;
 -- postgres-functions.c:733
 create or replace function update_producto(varchar(14),varchar(10), varchar(50), int4)
 begin
-UPDATE productos SET codigo=quote_literal($2), 
-			descripcion=quote_literal($3), 
+UPDATE productos SET codigo=quote_literal($2),
+			descripcion=quote_literal($3),
 			precio=quote_literal($4)
 			WHERE barcode=quote_literal($1);
 return;
@@ -2035,7 +2035,7 @@ end; ' language plpgsql;
 -- postgres-functions.c:778
 create or replace function insert_compra(varchar(100), varchar(100), int2)
 returns int4 as '
-declare 
+declare
 	l record;
 	q varchar(255);
 begin
@@ -2553,7 +2553,7 @@ end; ' language plpgsql;
 create or replace function canjear_producto(prod varchar(14), cant_a_cajear float8)
 returns void as '
 begin
-UPDATE productos SET stock=stock-cant_a_canjear, 
+UPDATE productos SET stock=stock-cant_a_canjear,
 		     stock_pro=stock_pro+cant_a_canjear
 		WHERE barcode=quote_literal(prod);
 
@@ -2600,7 +2600,7 @@ end; ' language plpgsql;
 -- proveedor.c:71
 create or replace function buscar_proveedor(varchar(100))
 returns setof record as '
-declare 
+declare
 	q text;
 	l record;
 begin
@@ -2763,13 +2763,13 @@ declare
 	select_detalle_venta varchar(255);
 	update_stocks varchar(255);
 begin
-	EXECUTE ''UPDATE ventas SET canceled = TRUE WHERE id = '' 
+	EXECUTE ''UPDATE ventas SET canceled = TRUE WHERE id = ''
 		|| quote_literal(idventa_a_cancelar);
-	
+
 	select_detalle_venta := ''SELECT * FROM products_sell_history WHERE id_venta = ''
 				|| quote_literal(idventa_a_cancelar)
 				|| '' ORDER BY id'';
-	
+
 	FOR list IN EXECUTE select_detalle_venta LOOP
 		update_stocks := ''UPDATE productos SET stock = stock + ''
 				|| list.cantidad
@@ -2777,7 +2777,7 @@ begin
 				|| list.barcode;
 		EXECUTE update_stocks;
 	END LOOP;
-	
+
 	RETURN 0;
 END;' language plpgsql
 
