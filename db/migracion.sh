@@ -1,9 +1,9 @@
 #!/bin/bash
 
-BD_NAME=rizoma002
-BD_USER=rizoma
+BD_NAME=$1
+BD_USER=$2
 BD_HOST=localhost
-BD_PORT=5433
+BD_PORT=5432
 
 
 echo -- tarjetas
@@ -27,8 +27,9 @@ echo \\.
 
 echo -- tipo_merma
 echo tipo_merma > /dev/stderr
-echo COPY tipo_merma \(id, nombre\) FROM stdin DELIMITER AS \'	\' NULL as \'NULL\'\;
+echo COPY tipo_merma \(id, nombre\) FROM stdin NULL as \'NULL\'\;
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, nombre from tipo_merma" | awk -F'|' '{printf ("%s\011%s\n",$1,$2)}'
+echo \\.
 exit 0
 echo -- formas_pago
 echo formas_pago > /dev/stderr
