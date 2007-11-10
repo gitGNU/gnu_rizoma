@@ -6,6 +6,14 @@ BD_HOST=$3
 BD_PORT=$4
 
 
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER --command "
+update devoluciones set barcode_product = CAST( barcode_product as int8 ) where barcode_product in ( select barcode from productos where barcode in (select CAST(barcode as int8 ) from productos where barcode like '0%' ) );
+update productos_recividos set barcode = CAST( barcode as int8 ) where barcode in ( select barcode from productos where barcode in (select CAST(barcode as int8 ) from productos where barcode like '0%' ) );
+update products_buy_history set barcode_product = CAST( barcode_product as int8 ) where barcode_product in ( select barcode from productos where barcode in (select CAST(barcode as int8 ) from productos where barcode like '0%' ));
+update products_sell_history set barcode = CAST( barcode as int8 ) where barcode in ( select barcode from productos where barcode in (select CAST(barcode as int8 ) from productos where barcode like '0%' ));
+delete from productos where barcode in ( select barcode from productos where barcode in (select CAST(barcode as int8 ) from productos where barcode like '0%' ) );
+" > /dev/stderr
+
 echo -- tarjetas
 echo tarjetas > /dev/stderr
 echo COPY tarjetas\(id, id_venta, insti, numero, fecha_venc\) FROM stdin NULL as \'NULL\'\;
@@ -59,7 +67,7 @@ echo \\.
 echo -- users
 echo users > /dev/stderr
 echo COPY users \(id, rut, dv, usuario, passwd, nombre, apell_p, apell_m, fecha_ingreso, "level"\) FROM stdin NULL as \'NULL\'\;
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, rut, usuario, passwd, nombre, apell_p, apell_m, fecha_ingreso, \"level\" from users" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, rut, usuario, passwd, nombre, apell_p, apell_m, fecha_ingreso, \"level\" from users" | awk -F'|' '{printf ("%s\011%s\0110\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9)}'
 echo \\.
 
 
@@ -213,5 +221,3 @@ echo products_sell_history > /dev/stderr
 echo COPY venta_detalle \(id, id_venta, barcode, cantidad, precio, fifo, iva, otros\) FROM stdin NULL as \'NULL\'\;
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, id_venta, barcode, cantidad, precio, fifo, iva, otros from products_sell_history" | awk -F'|' '{printf ("%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n", $1, $2, $3, $4, $5, $6, $7, $8)}'
 echo \\.
-
-
