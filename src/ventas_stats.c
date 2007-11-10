@@ -84,7 +84,7 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT descripcion, marca, contenido, unidad, (SELECT SUM(cantidad_ingresada) FROM products_buy_history WHERE barcode_product=barcode),vendidos FROM productos WHERE barcode IN (SELECT barcode_product FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor='%s') AND anulado='f' GROUP BY barcode_product)", rut));
+     ("SELECT descripcion, marca, contenido, unidad, (SELECT SUM(cantidad_ingresada) FROM compra_detalle WHERE barcode_product=barcode),vendidos FROM producto WHERE barcode IN (SELECT barcode_product FROM products_buy_history WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor='%s') AND anulado='f' GROUP BY barcode_product)", rut));
 
   if (res == NULL)
     return;
@@ -116,7 +116,7 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
   gtk_label_set_text (GTK_LABEL (total_vendido), g_strdup_printf ("%.2f", total2));
 
   res = EjecutarSQL
-    (g_strdup_printf ("SELECT nombre, direccion, telefono, web, giro, comuna, email FROM proveedores WHERE rut='%s'", rut));
+    (g_strdup_printf ("SELECT nombre, direccion, telefono, web, giro, comuna, email FROM proveedor WHERE rut='%s'", rut));
 
   if (res == NULL)
     return;
@@ -1932,7 +1932,7 @@ ChangeVenta (void)
       res = EjecutarSQL
 	(g_strdup_printf
 	 ("SELECT descripcion, marca, contenido, unidad, cantidad, precio, (cantidad * precio) AS "
-	  "monto FROM products_sell_history WHERE id_venta=%s", idventa));
+	  "monto FROM venta_detalle WHERE id_venta=%s", idventa));
 
       tuples = PQntuples (res);
 
@@ -2045,7 +2045,7 @@ FillListProveedores (void)
   gint i, tuples, margen;
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT nombre, rut, (SELECT SUM (cantidad_ingresada) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut)), (SELECT SUM (cantidad_ingresada * precio) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut))::integer, (SELECT SUM (margen) / COUNT (*) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut))::integer, (SELECT SUM (precio_venta - (precio * (margen / 100) +1))  FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut)) FROM proveedores");
+  res = EjecutarSQL ("SELECT nombre, rut, (SELECT SUM (cantidad_ingresada) FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedores.rut)), (SELECT SUM (cantidad_ingresada * precio) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut))::integer, (SELECT SUM (margen) / COUNT (*) FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut))::integer, (SELECT SUM (precio_venta - (precio * (margen / 100) +1))  FROM products_buy_history WHERE id_compra IN (SELECT id FROM compras WHERE rut_proveedor=proveedores.rut)) FROM proveedor");
 
 
   tuples = PQntuples (res);
@@ -2085,7 +2085,7 @@ InformeFacturasShow (void)
   */
 
   res = EjecutarSQL
-    ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM facturas_compras AS t1 WHERE pagada='f' ORDER BY pay_year, pay_month, pay_day ASC");
+    ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM factura_compra AS t1 WHERE pagada='f' ORDER BY pay_year, pay_month, pay_day ASC");
 
   tuples = PQntuples (res);
 
@@ -2175,7 +2175,7 @@ InformeFacturasShow (void)
   */
 
    res = EjecutarSQL
-    ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM facturas_compras AS t1 WHERE pagada='t' ORDER BY pay_year, pay_month, pay_day ASC");
+    ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM factura_compra AS t1 WHERE pagada='t' ORDER BY pay_year, pay_month, pay_day ASC");
 
   tuples = PQntuples (res);
 

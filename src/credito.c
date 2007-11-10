@@ -45,7 +45,7 @@ search_client (GtkWidget *widget, gpointer data)
   gchar *enable;
 
   res = EjecutarSQL 
-    (g_strdup_printf ("SELECT * FROM clientes WHERE lower(nombre) LIKE lower('%s%%') OR "
+    (g_strdup_printf ("SELECT * FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
 		      "lower(apellido_paterno) LIKE lower('%s%%') OR lower(apellido_materno) LIKE lower('%s%%')", 
 		      string, string, string));
 
@@ -840,7 +840,7 @@ FillClientStore (GtkListStore *store)
   PGresult *res;
   gint tuples, i;
   gchar *enable;
-  res = EjecutarSQL ("SELECT * FROM clientes");
+  res = EjecutarSQL ("SELECT * FROM cliente");
 
   tuples = PQntuples (res);
 
@@ -951,7 +951,7 @@ ChangeDetalle (void)
 
       res = EjecutarSQL (g_strdup_printf 
 			 ("SELECT t2.codigo, t2.descripcion, t2.marca, t1.cantidad, t1.precio "
-			  "FROM products_sell_history AS t1, productos AS t2 WHERE "
+			  "FROM venta_detalle AS t1, productos AS t2 WHERE "
 			  "t1.id_venta=%d AND t2.barcode=t1.barcode", id_venta));
 
       tuples = PQntuples (res);
@@ -1102,14 +1102,14 @@ ModificarCliente (void)
 			  0, &rut,
 			  -1);
       
-      nombre = GetDataByOne (g_strdup_printf ("SELECT nombre FROM clientes WHERE rut=%d", rut));
-      apellido_materno = g_strdup (GetDataByOne (g_strdup_printf ("SELECT apellido_materno FROM clientes WHERE rut=%d", rut)));
-      apellido_paterno = g_strdup (GetDataByOne (g_strdup_printf ("SELECT apellido_paterno FROM clientes WHERE rut=%d", rut)));
-      fono = g_strdup (GetDataByOne (g_strdup_printf ("SELECT telefono FROM clientes WHERE rut=%d", rut)));
-      direccion = g_strdup (GetDataByOne (g_strdup_printf ("SELECT direccion FROM clientes WHERE rut=%d", rut)));
-      credito = g_strdup (GetDataByOne (g_strdup_printf ("SELECT credito FROM clientes WHERE rut=%d", rut)));
-      rut_ver = g_strdup (GetDataByOne (g_strdup_printf ("SELECT verificador FROM clientes WHERE rut=%d", rut)));
-      giro = g_strdup (GetDataByOne (g_strdup_printf ("SELECT giro FROM clientes WHERE rut=%d", rut)));
+      nombre = GetDataByOne (g_strdup_printf ("SELECT nombre FROM cliente WHERE rut=%d", rut));
+      apellido_materno = g_strdup (GetDataByOne (g_strdup_printf ("SELECT apellido_materno FROM cliente WHERE rut=%d", rut)));
+      apellido_paterno = g_strdup (GetDataByOne (g_strdup_printf ("SELECT apellido_paterno FROM cliente WHERE rut=%d", rut)));
+      fono = g_strdup (GetDataByOne (g_strdup_printf ("SELECT telefono FROM cliente WHERE rut=%d", rut)));
+      direccion = g_strdup (GetDataByOne (g_strdup_printf ("SELECT direccion FROM cliente WHERE rut=%d", rut)));
+      credito = g_strdup (GetDataByOne (g_strdup_printf ("SELECT credito FROM cliente WHERE rut=%d", rut)));
+      rut_ver = g_strdup (GetDataByOne (g_strdup_printf ("SELECT verificador FROM cliente WHERE rut=%d", rut)));
+      giro = g_strdup (GetDataByOne (g_strdup_printf ("SELECT giro FROM cliente WHERE rut=%d", rut)));
 
       modificar_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
       gtk_window_set_position (GTK_WINDOW (modificar_window), GTK_WIN_POS_CENTER_ALWAYS);
@@ -1563,7 +1563,7 @@ LimiteCredito (gchar *rut)
 {
   PGresult *res;
   
-  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM clientes WHERE rut='%s'", rut));
+  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente WHERE rut='%s'", rut));
   
   if (res != NULL)
     return atoi (PQgetvalue (res, 0, 0));

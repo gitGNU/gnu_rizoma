@@ -109,7 +109,7 @@ IngresarFakeCompra (void)
 
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT id FROM compras ORDER BY id DESC LIMIT 1");
+  res = EjecutarSQL ("SELECT id FROM compra ORDER BY id DESC LIMIT 1");
 
   id = atoi (PQgetvalue (res, 0, 0));
 
@@ -131,7 +131,7 @@ IngresarFakeCompra (void)
       
     }
 
-  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compras WHERE id=%d",
+  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d",
 						 id));
   
   
@@ -201,7 +201,7 @@ int main (int argc, char **argv)
 	printf ("%s\n", value);
 	*/
 	
-	if ((DataExist (g_strdup_printf ("SELECT barcode FROM productos WHERE barcode='%s", barcode))) == TRUE)
+	if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode='%s", barcode))) == TRUE)
 	  CompraAgregarALista (barcode, cant, precio, pcomp, margen, FALSE);
 	else
 	  printf ("El producto %s no esta en la bd\n", barcode);

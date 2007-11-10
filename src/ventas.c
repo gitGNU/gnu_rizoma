@@ -92,7 +92,7 @@ CanjearProducto (GtkWidget *widget, gpointer data)
 	{
 		gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (canje_entry)));
 
-		if ((GetDataByOne (g_strdup_printf ("SELECT barcode FROM productos WHERE barcode='%s'",
+		if ((GetDataByOne (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode='%s'",
 											barcode))) == NULL)
 		{
 			ErrorMSG (entry, "No existe el producto");
@@ -1502,7 +1502,7 @@ SearchProductByCode (void)
 	gint vendedor = atoi( rizoma_get_value( rizoma_config, "VENDEDOR" ) );
 
 	res = EjecutarSQL (g_strdup_printf ("SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, "
-										"precio_mayor, cantidad_mayor, mayorista, barcode FROM productos WHERE codigo='%s' "
+										"precio_mayor, cantidad_mayor, mayorista, barcode FROM producto WHERE codigo='%s' "
 										"AND stock!=0", codigo));
 	if (res != NULL && PQntuples (res) != 0)
 	{
@@ -1586,7 +1586,7 @@ SearchProductByCode (void)
 			  gtk_label_set_text (GTK_LABEL (venta->stock_label), "");*/
 			CleanSellLabels ();
 		}
-		/*      else if (GetCurrentStock (GetDataByOne (g_strdup_printf ("SELECT barcode FROM productos "
+		/*      else if (GetCurrentStock (GetDataByOne (g_strdup_printf ("SELECT barcode FROM producto "
 				"WHERE codigo='%s'", codigo))) == 0)
 				{
 				AlertMSG ("No ahi mercaderia en Stock.\nDebe ingresar mercaderia");
@@ -3025,12 +3025,12 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 	if (ventas != FALSE)
     	q = g_strdup_printf ("SELECT codigo, descripcion, marca, contenido, unidad, stock, "
 							 "precio, precio_mayor, cantidad_mayor, mayorista "
-							 "FROM productos "
+							 "FROM producto "
 							 "WHERE barcode='%s' AND stock!=0",
 							 barcode);
 	else
     	q = g_strdup_printf ("SELECT codigo, descripcion, marca, contenido, unidad, stock, "
-							 "precio, mayorista FROM productos "
+							 "precio, mayorista FROM producto "
 							 "WHERE barcode='%s' AND stock!=0 AND canje='t'",
 							 barcode);
 
@@ -3400,13 +3400,13 @@ SearchAndFill (void)
 	if (strcmp (string, "") != 0)
 		res = EjecutarSQL
 			(g_strdup_printf
-			 ("SELECT * FROM productos WHERE stock>0 AND lower (descripcion) LIKE lower('%%%s%%') OR "
+			 ("SELECT * FROM producto WHERE stock>0 AND lower (descripcion) LIKE lower('%%%s%%') OR "
 			  "lower(marca) LIKE lower('%%%s%%') %s ORDER BY descripcion ASC", string, string,
 			  ventas == FALSE ? "WHERE canje='t'" : ""));
 	else
 		res = EjecutarSQL
 			(g_strdup_printf
-			 ("SELECT * FROM productos WHERE stock>0 %s", ventas == FALSE ? "AND canje='t'": ""));
+			 ("SELECT * FROM producto WHERE stock>0 %s", ventas == FALSE ? "AND canje='t'": ""));
 
 	resultados = PQntuples (res);
 
@@ -3863,7 +3863,7 @@ AddDataEmisor (GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *colu
 							0, &code,
 							-1);
 
-		res = EjecutarSQL (g_strdup_printf ("SELECT * FROM clientes WHERE rut=%d", code));
+		res = EjecutarSQL (g_strdup_printf ("SELECT * FROM cliente WHERE rut=%d", code));
 
 		gtk_entry_set_text (GTK_ENTRY (venta->venta_rut),
 							g_strdup_printf ("%s-%s", PQgetvalue (res, 0, 4), PQgetvalue (res, 0, 5)));
@@ -3913,7 +3913,7 @@ FindCancelSell (GtkWidget *widget, gpointer data)
 	text = gtk_entry_get_text (GTK_ENTRY (data));
 	gchar *q = NULL;
 
-  	q = g_strdup_printf("SELECT ventas.id, monto, users.usuario FROM ventas "
+  	q = g_strdup_printf("SELECT ventas.id, monto, users.usuario FROM venta "
 						"INNER JOIN users ON users.id = ventas.vendedor "
 						"WHERE ventas.id = %s AND canceled = FALSE",
 						text);
@@ -3934,7 +3934,7 @@ FindCancelSell (GtkWidget *widget, gpointer data)
 							-1);
 		/*
 		  q = g_strdup_printf ("SELECT descripcion || marca, cantidad, (precio * cantidad) "
-		  "FROM products_sell_history "
+		  "FROM venta_detalle "
 		  "WHERE id_venta=%s",
 		  PQgetvalue (res, i, 0));
 		  res2 = EjecutarSQL (q);
@@ -3962,7 +3962,7 @@ FindCancelSell (GtkWidget *widget, gpointer data)
   PGresult *res, *res2;
   gint tuples, tuples2, i, j;
   return;
-  res = EjecutarSQL ("SELECT id, monto, (SELECT usuario FROM users WHERE id=ventas.vendedor) FROM ventas WHERE canceled='f'");
+  res = EjecutarSQL ("SELECT id, monto, (SELECT usuario FROM users WHERE id=ventas.vendedor) FROM venta WHERE canceled='f'");
 
   tuples = PQntuples (res);
 
@@ -3978,7 +3978,7 @@ FindCancelSell (GtkWidget *widget, gpointer data)
   -1);
 
 
-  res2 = EjecutarSQL (g_strdup_printf ("SELECT descripcion || marca, cantidad, (precio * cantidad) FROM products_sell_history WHERE id_venta=%s",
+  res2 = EjecutarSQL (g_strdup_printf ("SELECT descripcion || marca, cantidad, (precio * cantidad) FROM venta_detalle WHERE id_venta=%s",
   PQgetvalue (res, i, 0)));
 
   tuples2 = PQntuples (res2);
@@ -4094,7 +4094,7 @@ CancelSellDaySelected(GtkCalendar *calendar,gpointer data)
 
 
 	gchar *q = NULL;
-	q = g_strdup_printf("SELECT ventas.id, users.usuario,monto FROM ventas "
+	q = g_strdup_printf("SELECT ventas.id, users.usuario,monto FROM venta "
 						"INNER JOIN users ON users.id = ventas.vendedor "
 						"WHERE date_trunc('day',fecha) = '%.4d-%.2d-%.2d' AND canceled = FALSE",
 						year,month+1,day);
@@ -4116,7 +4116,7 @@ CancelSellDaySelected(GtkCalendar *calendar,gpointer data)
 							-1);
 		/*
 		  q = g_strdup_printf("SELECT descripcion || marca, cantidad, (precio * cantidad) "
-		  "FROM products_sell_history WHERE id_venta=%s",
+		  "FROM venta_detalle WHERE id_venta=%s",
 		  PQgetvalue (res, i, 0));
 
 		  res2 = EjecutarSQL (q);
@@ -4156,7 +4156,7 @@ CancelSellViewDetails(GtkTreeView *tree_view, gpointer user_data)
 							0, &id_venta,
 							-1);
 		q = g_strdup_printf("SELECT descripcion || marca, cantidad, (precio * cantidad) "
-							"FROM products_sell_history WHERE id_venta=%s",
+							"FROM venta_detalle WHERE id_venta=%s",
 							id_venta);
 
 		res = EjecutarSQL (q);

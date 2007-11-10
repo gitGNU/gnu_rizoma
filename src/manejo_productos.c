@@ -31,11 +31,11 @@ Productos *
 CreateNew (gchar *barcode, gdouble cantidad)
 {
   Productos *new = NULL;
-  //  PGresult *res = EjecutarSQL (g_strdup_printf ("SELECT productos* FROM productos WHERE barcode='%s'", barcode));
+  //  PGresult *res = EjecutarSQL (g_strdup_printf ("SELECT productos* FROM producto WHERE barcode='%s'", barcode));
   PGresult *res = EjecutarSQL
     (g_strdup_printf
      ("SELECT codigo, barcode, descripcion, marca, contenido, unidad, precio, fifo, margen_promedio, (SELECT monto FROM impuestos WHERE id=0 AND "
-      "productos.impuestos='t'), (SELECT monto FROM impuestos WHERE id=productos.otros), canje , stock_pro, precio_mayor, cantidad_mayor, mayorista FROM productos WHERE barcode='%s'", barcode));
+      "productos.impuestos='t'), (SELECT monto FROM impuestos WHERE id=productos.otros), canje , stock_pro, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE barcode='%s'", barcode));
 
   new = (Productos *) g_malloc (sizeof (Productos));
 
@@ -308,7 +308,7 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
 {
   Productos *new = NULL;
   PGresult *res = EjecutarSQL
-    (g_strdup_printf ("SELECT codigo, barcode, descripcion, marca, contenido, unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM productos "
+    (g_strdup_printf ("SELECT codigo, barcode, descripcion, marca, contenido, unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto "
 		      "WHERE barcode='%s'", barcode));
 
   new = (Productos *) g_malloc (sizeof (Productos));

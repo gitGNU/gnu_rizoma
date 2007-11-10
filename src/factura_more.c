@@ -43,12 +43,12 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   
   gchar *file_to_print = NULL;
   
-  client = GetDataByOne ("SELECT nombre || ' ' || apellido_paterno || ' ' || apellido_materno AS name FROM clientes");
-  address = GetDataByOne ("SELECT direccion FROM clientes");
-  giro = GetDataByOne ("SELECT giro FROM clientes");
+  client = GetDataByOne ("SELECT nombre || ' ' || apellido_paterno || ' ' || apellido_materno AS name FROM cliente");
+  address = GetDataByOne ("SELECT direccion FROM cliente");
+  giro = GetDataByOne ("SELECT giro FROM cliente");
   //  comuna = GetDataByOne ("SELECT co
   comuna = "Santiago";
-  fono = GetDataByOne ("SELECT telefono FROM clientes");
+  fono = GetDataByOne ("SELECT telefono FROM cliente");
 
   
   switch (sell_type)

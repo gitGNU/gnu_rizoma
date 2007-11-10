@@ -641,7 +641,7 @@ FillDetPagos (void)
       if (id == NULL)
 	return;
 
-      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedores WHERE rut='%s'", rut_proveedor));
+      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut_proveedor));
 
       gtk_entry_set_text (GTK_ENTRY (pago_proveedor), PQgetvalue (res, 0, 1));
 
@@ -683,8 +683,8 @@ FillDetPagos (void)
 	      (GTK_TREE_MODEL (compra->store_facturas), &iter) == FALSE)
 	    {
 	      res = EjecutarSQL (g_strdup_printf
-				 ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM facturas_compras WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM productos AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc));
-		  printf ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM facturas_compras WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM productos AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc);
+				 ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc));
+		  printf ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc);
 	      tuples = PQntuples (res);
 
 	      if (tuples == 0)
@@ -723,7 +723,7 @@ FillDetPagos (void)
 	      res = EjecutarSQL
 		(g_strdup_printf
 		 ("SELECT monto, date_part('day',fecha), date_part('month',fecha), "
-		  "date_part('year',fecha) FROM facturas_compras WHERE num_factura=%s",
+		  "date_part('year',fecha) FROM factura_compra WHERE num_factura=%s",
 		  doc));
 
 	      tuples = PQntuples (res);
@@ -747,7 +747,7 @@ FillDetPagos (void)
 	{
 
 	  res = EjecutarSQL (g_strdup_printf
-			     ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha) FROM productos AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM facturas_compras WHERE num_factura=%s AND rut_proveedor='%s' OR id=%s) AND t1.barcode=t2.barcode AND t2.numero=%s", doc, rut_proveedor, id, doc));
+			     ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM factura_compra WHERE num_factura=%s AND rut_proveedor='%s' OR id=%s) AND t1.barcode=t2.barcode AND t2.numero=%s", doc, rut_proveedor, id, doc));
 
 	  tuples = PQntuples (res);
 
@@ -2757,7 +2757,7 @@ SearchProductHistory (void)
       gtk_entry_set_text(GTK_ENTRY(compra->barcode_history_entry),barcode);
     }
 
-  if (DataExist (g_strdup_printf ("SELECT * FROM productos WHERE barcode='%s'", barcode)) == TRUE)
+  if (DataExist (g_strdup_printf ("SELECT * FROM producto WHERE barcode='%s'", barcode)) == TRUE)
     {
       gtk_widget_set_sensitive (see_button, TRUE);
 
@@ -2787,11 +2787,11 @@ SearchProductHistory (void)
 					     PutPoints (GetCurrentPrice (barcode))));
       gtk_label_set_markup (GTK_LABEL (compra->product),
 			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-					     GetDataByOne (g_strdup_printf ("SELECT descripcion FROM productos WHERE barcode='%s'", barcode))));
+					     GetDataByOne (g_strdup_printf ("SELECT descripcion FROM producto WHERE barcode='%s'", barcode))));
 
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("SELECT marca, fifo, canje, stock_pro FROM productos WHERE barcode='%s'", barcode));
+	 ("SELECT marca, fifo, canje, stock_pro FROM producto WHERE barcode='%s'", barcode));
 
       if (strcmp (PQgetvalue (res, 0, 2), "t") == 0)
 	{
@@ -2851,17 +2851,17 @@ ShowProductDescription (void)
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
 
   gchar *codigo = GetDataByOne (g_strdup_printf
-				("SELECT codigo FROM productos WHERE barcode='%s'", barcode));
+				("SELECT codigo FROM producto WHERE barcode='%s'", barcode));
   gchar *description = GetDataByOne
-    (g_strdup_printf ("SELECT descripcion FROM productos WHERE barcode='%s'", barcode));
+    (g_strdup_printf ("SELECT descripcion FROM producto WHERE barcode='%s'", barcode));
   gchar *marca = GetDataByOne (g_strdup_printf
-			       ("SELECT marca FROM productos WHERE barcode='%s'", barcode));
+			       ("SELECT marca FROM producto WHERE barcode='%s'", barcode));
   gchar *unidad = GetDataByOne (g_strdup_printf
-				("SELECT unidad FROM productos WHERE barcode='%s'", barcode));
+				("SELECT unidad FROM producto WHERE barcode='%s'", barcode));
   gchar *contenido = GetDataByOne
-    (g_strdup_printf ("SELECT contenido FROM productos WHERE barcode='%s'", barcode));
+    (g_strdup_printf ("SELECT contenido FROM producto WHERE barcode='%s'", barcode));
   gchar *precio = GetDataByOne (g_strdup_printf
-				("SELECT precio FROM productos WHERE barcode='%s'", barcode));
+				("SELECT precio FROM producto WHERE barcode='%s'", barcode));
   gchar *active_char;
 
   GtkWidget *hbox;
@@ -3722,7 +3722,7 @@ AddNew (GtkWidget *widget, gpointer data)
   else
     {
       if (DataExist
-	  (g_strdup_printf ("SELECT codigo FROM productos WHERE codigo='%s'", codigo)) == TRUE)
+	  (g_strdup_printf ("SELECT codigo FROM producto WHERE codigo='%s'", codigo)) == TRUE)
 	{
 	  ErrorMSG (compra->new_codigo, "Ya existe un producto con el mismo codigo corto");
 	  return;
@@ -4054,7 +4054,7 @@ SearchName (GtkEntry *widget, gpointer data)
 
 
   res = EjecutarSQL (g_strdup_printf
-		     ("SELECT * FROM productos WHERE lower(descripcion) LIKE lower('%s%%') OR "
+		     ("SELECT * FROM producto WHERE lower(descripcion) LIKE lower('%s%%') OR "
 		      "lower(marca) LIKE lower ('%s%%')",
 		      string, string));
   resultado = PQntuples (res);
@@ -4327,9 +4327,9 @@ ShowProductHistory (void)
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT (SELECT nombre FROM proveedores WHERE rut=t1.rut_proveedor), t2.precio, t2.cantidad,"
+     ("SELECT (SELECT nombre FROM proveedor WHERE rut=t1.rut_proveedor), t2.precio, t2.cantidad,"
       " date_part('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), "
-      "t1.id, t2.iva, t2.otros FROM compras AS t1, products_buy_history AS t2, productos WHERE "
+      "t1.id, t2.iva, t2.otros FROM compra AS t1, products_buy_history AS t2, productos WHERE "
       "productos.barcode='%s' AND t2.barcode_product=productos.barcode AND t1.id=t2.id_compra "
       "AND t2.anulado='f' ORDER BY t1.fecha DESC", barcode));
 
@@ -4400,7 +4400,7 @@ InsertarCompras (void)
   PGresult *res;
   gint tuples, i, id_venta;
 
-  res = EjecutarSQL ("SELECT t2.nombre, (SELECT SUM ((t2.cantidad - t2.cantidad_ingresada) * t2.precio) FROM products_buy_history AS t2 WHERE t2.id_compra=t1.id)::double precision AS precio, date_part('day', t1.fecha), date_part ('month', t1.fecha), date_part('year', t1.fecha), t1.id FROM compras AS t1, proveedores AS t2, products_buy_history AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad AND t1.anulada='f' AND t3.anulado='f' GROUP BY t1.id, t2.nombre, t1.fecha ORDER BY fecha DESC");
+  res = EjecutarSQL ("SELECT t2.nombre, (SELECT SUM ((t2.cantidad - t2.cantidad_ingresada) * t2.precio) FROM compra_detalle AS t2 WHERE t2.id_compra=t1.id)::double precision AS precio, date_part('day', t1.fecha), date_part ('month', t1.fecha), date_part('year', t1.fecha), t1.id FROM compra AS t1, proveedores AS t2, products_buy_history AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad AND t1.anulada='f' AND t3.anulado='f' GROUP BY t1.id, t2.nombre, t1.fecha ORDER BY fecha DESC");
 
   gtk_list_store_clear (compra->ingreso_store);
   gtk_list_store_clear (compra->compra_store);
@@ -4460,7 +4460,7 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
        (g_strdup_printf
 	("SELECT t2.codigo, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t1.precio, "
 	 "t1.cantidad, t1.cantidad_ingresada, (t1.precio * (t1.cantidad - t1.cantidad_ingresada))::bigint,"
-	 "t2.barcode, t1.precio_venta, t1.margen FROM products_buy_history AS t1, productos AS t2 "
+	 "t2.barcode, t1.precio_venta, t1.margen FROM compra_detalle AS t1, productos AS t2 "
 	 "WHERE t1.id_compra=%d AND t2.barcode=t1.barcode_product AND t1.cantidad_ingresada<t1.cantidad "
 	 "AND t1.anulado='f'", id));
 
@@ -4546,7 +4546,7 @@ IngresarCompra (void)
 
     }
 
-  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compras WHERE id=%d",
+  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d",
 						 id));
 
   if (compra->factura == TRUE)
@@ -4597,7 +4597,7 @@ FillProveedores ()
 
   GtkTreeIter iter;
 
-  res = EjecutarSQL ("SELECT * FROM proveedores ORDER BY nombre ASC");
+  res = EjecutarSQL ("SELECT * FROM proveedor ORDER BY nombre ASC");
 
   if (res == NULL)
     return;
@@ -4647,7 +4647,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
       return;
     }
   else if ((GetDataByOne
-	    (g_strdup_printf ("SELECT * FROM proveedores WHERE rut='%s-%s'", rut, rut_ver))) != NULL)
+	    (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s-%s'", rut, rut_ver))) != NULL)
     {
       ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
       return;
@@ -4942,7 +4942,7 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
       gtk_tree_model_get (GTK_TREE_MODEL (compra->store_prov), &iter,
 			  0, &value,
 			  -1);
-      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedores WHERE rut='%s'", value));
+      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", value));
 
       gtk_label_set_text (GTK_LABEL (compra->rut_label), PQgetvalue (res, 0, 2));
       gtk_label_set_text (GTK_LABEL (compra->nombre_label), PQgetvalue (res, 0, 1));
@@ -5183,10 +5183,10 @@ AnularProducto (void)
 			  -1);
 
 
-     res = EjecutarSQL (g_strdup_printf ("UPDATE products_buy_history SET anulado='t' WHERE barcode_product=(SELECT barcode FROM productos WHERE codigo='%s') AND id_compra=%d", codigo_producto, id_compra));
+     res = EjecutarSQL (g_strdup_printf ("UPDATE products_buy_history SET anulado='t' WHERE barcode_product=(SELECT barcode FROM producto WHERE codigo='%s') AND id_compra=%d", codigo_producto, id_compra));
 
       res = EjecutarSQL
-	(g_strdup_printf ("UPDATE compras SET anulada='t' WHERE id NOT IN (SELECT id_compra FROM products_buy_history WHERE id_compra=%d AND anulado='f') AND id=%d", id_compra, id_compra));
+	(g_strdup_printf ("UPDATE compras SET anulada='t' WHERE id NOT IN (SELECT id_compra FROM compra_detalle WHERE id_compra=%d AND anulado='f') AND id=%d", id_compra, id_compra));
 
       InsertarCompras ();
     }
@@ -5634,7 +5634,7 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
   gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->monto_documento)));
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), date_part('month', fecha), "
-				      "date_part('year', fecha) FROM compras WHERE id=%d", id));
+				      "date_part('year', fecha) FROM compra WHERE id=%d", id));
 
   if (atoi (fecha_y) < (atoi (PQgetvalue (res, 0, 2)) - 2000))
     {
@@ -5701,7 +5701,7 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
 	  }
 	else
 	  {
-	    if (DataExist (g_strdup_printf ("SELECT num_factura FROM facturas_compras WHERE rut_proveedor='%s' AND num_factura=%s", rut_proveedor, n_documento)) == TRUE)
+	    if (DataExist (g_strdup_printf ("SELECT num_factura FROM factura_compra WHERE rut_proveedor='%s' AND num_factura=%s", rut_proveedor, n_documento)) == TRUE)
 	      {
 		ErrorMSG (compra->n_documento, g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
 		return FALSE;
@@ -5763,10 +5763,10 @@ FillPagarFacturas (gchar *rut_proveedor)
   if (rut_proveedor != NULL)
     res = EjecutarSQL
       (g_strdup_printf
-       ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM facturas_compras AS t1 WHERE t1.rut_proveedor='%s' AND t1.pagada='f' ORDER BY pay_year, pay_month, pay_day ASC", rut_proveedor));
+       ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM factura_compra AS t1 WHERE t1.rut_proveedor='%s' AND t1.pagada='f' ORDER BY pay_year, pay_month, pay_day ASC", rut_proveedor));
   else
     res = EjecutarSQL
-      ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM facturas_compras AS t1 WHERE pagada='f' ORDER BY pay_year, pay_month, pay_day ASC");
+      ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t1.forma_pago, t1.id, t1.rut_proveedor FROM factura_compra AS t1 WHERE pagada='f' ORDER BY pay_year, pay_month, pay_day ASC");
 
   if (res == NULL)
     return;
@@ -5864,7 +5864,7 @@ FillGuias (gchar *proveedor)
 
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT t1.numero, t1.id_compra, date_part ('day', t1.fecha_emicion), date_part ('month', t1.fecha_emicion), date_part ('year', t1.fecha_emicion), (SELECT SUM (t2.cantidad * t2.precio) FROM documentos_detalle AS t2 WHERE t2.numero=t1.numero AND t2.id_compra=t1.id_compra), (SELECT nombre FROM formas_pago WHERE id=(SELECT forma_pago FROM compras WHERE id=t1.id_compra)) FROM guias_compra AS t1, products_buy_history AS t3 WHERE t1.rut_proveedor='%s' AND t3.id_compra=t1.id_compra AND t1.id_factura=0 GROUP BY t1.numero, t1.id_compra, t1.fecha_emicion", proveedor));
+  res = EjecutarSQL (g_strdup_printf ("SELECT t1.numero, t1.id_compra, date_part ('day', t1.fecha_emicion), date_part ('month', t1.fecha_emicion), date_part ('year', t1.fecha_emicion), (SELECT SUM (t2.cantidad * t2.precio) FROM documentos_detalle AS t2 WHERE t2.numero=t1.numero AND t2.id_compra=t1.id_compra), (SELECT nombre FROM formas_pago WHERE id=(SELECT forma_pago FROM compra WHERE id=t1.id_compra)) FROM guias_compra AS t1, products_buy_history AS t3 WHERE t1.rut_proveedor='%s' AND t3.id_compra=t1.id_compra AND t1.id_factura=0 GROUP BY t1.numero, t1.id_compra, t1.fecha_emicion", proveedor));
 
   tuples = PQntuples (res);
 
@@ -5907,7 +5907,7 @@ FillDetGuias (GtkTreeSelection *selection, gpointer data)
 	EjecutarSQL
 	(g_strdup_printf
 	 ("SELECT t1.codigo, t1.descripcion,  t2.cantidad, t2.precio, t2.cantidad * t2.precio AS "
-	  "total, t2.barcode, t2.id_compra, t1.marca, t1.contenido, t1.unidad FROM productos AS "
+	  "total, t2.barcode, t2.id_compra, t1.marca, t1.contenido, t1.unidad FROM producto AS "
 	  "t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra "
 	  "WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s",
 	  guia, rut_proveedor, guia));
@@ -6004,7 +6004,7 @@ DelGuia (GtkWidget *widget, gpointer data)
 
       gtk_tree_store_remove (compra->store_new_guias, &iter);
 
-      res = EjecutarSQL (g_strdup_printf ("SELECT t1.numero, t1.id_compra, date_part ('day', t1.fecha_emicion), date_part ('month', t1.fecha_emicion), date_part ('year', t1.fecha_emicion), (SELECT SUM (t2.cantidad * t2.precio) FROM documentos_detalle AS t2 WHERE t2.numero=t1.numero AND t2.id_compra=t1.id_compra), (SELECT nombre FROM formas_pago WHERE id=(SELECT forma_pago FROM compras WHERE id=t1.id_compra)) FROM guias_compra AS t1 WHERE numero=%s AND rut_proveedor='%s'", string, rut_proveedor));
+      res = EjecutarSQL (g_strdup_printf ("SELECT t1.numero, t1.id_compra, date_part ('day', t1.fecha_emicion), date_part ('month', t1.fecha_emicion), date_part ('year', t1.fecha_emicion), (SELECT SUM (t2.cantidad * t2.precio) FROM documentos_detalle AS t2 WHERE t2.numero=t1.numero AND t2.id_compra=t1.id_compra), (SELECT nombre FROM formas_pago WHERE id=(SELECT forma_pago FROM compra WHERE id=t1.id_compra)) FROM guias_compra AS t1 WHERE numero=%s AND rut_proveedor='%s'", string, rut_proveedor));
 
       gtk_tree_store_append (compra->store_guias, &iter, NULL);
       gtk_tree_store_set (compra->store_guias, &iter,
@@ -6165,7 +6165,7 @@ FoundProveedor (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
 
   res = EjecutarSQL (g_strdup_printf
-		     ("SELECT * FROM proveedores WHERE lower(nombre) LIKE lower('%%%s%%') "
+		     ("SELECT * FROM proveedor WHERE lower(nombre) LIKE lower('%%%s%%') "
 		      "OR rut LIKE '%%%s%%'", string, string));
 
   tuples = PQntuples (res);
@@ -6197,7 +6197,7 @@ FillProveedorData (GtkWidget *widget, gpointer data)
 			  0, &rut,
 			  -1);
 
-      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedores WHERE rut='%s'", rut));
+      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut));
 
       if (guias == TRUE)
 	{
@@ -6305,7 +6305,7 @@ AddFactura (void)
 
   res = EjecutarSQL (g_strdup_printf
 		     ("SELECT date_part('day', fecha), date_part('month', fecha), "
-		      "date_part('year', fecha) FROM compras WHERE id=(SELECT id_compra FROM "
+		      "date_part('year', fecha) FROM compra WHERE id=(SELECT id_compra FROM "
 		      "guias_compra WHERE numero=%s AND rut_proveedor='%s')", guia, rut));
 
   if (res == NULL || PQntuples (res) == 0)
@@ -6555,7 +6555,7 @@ CalcularTotalesGuias (void)
 
       while (1)
 	{
-	  res = EjecutarSQL (g_strdup_printf ("SELECT SUM (t1.precio * t2.cantidad) AS neto, SUM (t2.iva) AS iva, SUM (t2.otros) AS otros, SUM ((t1.precio * t2.cantidad) + t2.iva + t2.otros) AS total  FROM products_buy_history AS t1, documentos_detalle AS t2 WHERE t1.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t2.numero=%s AND t1.barcode_product=t2.barcode",
+	  res = EjecutarSQL (g_strdup_printf ("SELECT SUM (t1.precio * t2.cantidad) AS neto, SUM (t2.iva) AS iva, SUM (t2.otros) AS otros, SUM ((t1.precio * t2.cantidad) + t2.iva + t2.otros) AS total  FROM compra_detalle AS t1, documentos_detalle AS t2 WHERE t1.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t2.numero=%s AND t1.barcode_product=t2.barcode",
 					      guia, rut_proveedor, guia));
 
 	  total_neto += atoi (PQgetvalue (res, 0, 0));
@@ -7020,7 +7020,7 @@ AskElabVenc (GtkWidget *widget, gpointer data)
 		      0, &id,
 		      -1);
 
-  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compras WHERE id=%d", id));
+  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id));
 
   /*
      Las facturas y las guias ingresan en tablas distintas pero con estructura similar,
@@ -7182,16 +7182,16 @@ InformeComprasShow (void)
       ventastats->selected_from_year == ventastats->selected_to_year)
     res = EjecutarSQL
       (g_strdup_printf
-       ("SELECT id, (SELECT nombre FROM proveedores WHERE rut=compras.rut_proveedor), rut_proveedor, "
-	"(SELECT SUM (cantidad*precio) FROM products_buy_history WHERE id_compra=compras.id) FROM compras "
+       ("SELECT id, (SELECT nombre FROM proveedor WHERE rut=compras.rut_proveedor), rut_proveedor, "
+	"(SELECT SUM (cantidad*precio) FROM compra_detalle WHERE id_compra=compras.id) FROM compra "
 	"WHERE date_part ('day', fecha)=%d AND date_part ('month', fecha)=%d AND "
 	"date_part ('year', fecha)=%d ORDER BY fecha DESC", ventastats->selected_from_day,
 	ventastats->selected_from_month, ventastats->selected_from_year));
   else
     res = EjecutarSQL
       (g_strdup_printf
-       ("SELECT id, (SELECT nombre FROM proveedores WHERE rut=compras.rut_proveedor), rut_proveedor, "
-	"(SELECT SUM (cantidad*precio) FROM products_buy_history WHERE id_compra=compras.id) FROM compras "
+       ("SELECT id, (SELECT nombre FROM proveedor WHERE rut=compras.rut_proveedor), rut_proveedor, "
+	"(SELECT SUM (cantidad*precio) FROM compra_detalle WHERE id_compra=compras.id) FROM compra "
 	"WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
 	"fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') ORDER BY fecha DESC",
 	ventastats->selected_from_day, ventastats->selected_from_month, ventastats->selected_from_year,
@@ -7212,8 +7212,8 @@ InformeComprasShow (void)
 			  -1);
 
       res2 = EjecutarSQL (g_strdup_printf
-			  ("SELECT (SELECT descripcion FROM productos WHERE barcode=barcode_product), cantidad, precio "
-			   "FROM products_buy_history WHERE id_compra=%s", PQgetvalue (res, i, 0)));
+			  ("SELECT (SELECT descripcion FROM producto WHERE barcode=barcode_product), cantidad, precio "
+			   "FROM compra_detalle WHERE id_compra=%s", PQgetvalue (res, i, 0)));
 
       jtuples = PQntuples (res2);
 

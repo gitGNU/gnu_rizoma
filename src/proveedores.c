@@ -68,7 +68,7 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   gint tuples, i;
   gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (search_entry)));
   
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedores WHERE lower(nombre) LIKE lower('%%%s%%') "
+  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE lower(nombre) LIKE lower('%%%s%%') "
 				      "OR lower(rut) LIKE lower('%%%s%%')", string, string));
 
   tuples = PQntuples (res);
@@ -95,7 +95,7 @@ ListarProveedores (void)
   gint tuples, i;
   GtkTreeIter iter;
 
-  res = EjecutarSQL ("SELECT * FROM proveedores ORDER BY nombre ASC");
+  res = EjecutarSQL ("SELECT * FROM proveedor ORDER BY nombre ASC");
 
   tuples = PQntuples (res);
 
@@ -127,7 +127,7 @@ LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
 		      1, &rut_proveedor,
 		      -1);
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedores WHERE rut='%s'", rut_proveedor));
+  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut_proveedor));
 
   if (res == NULL || PQntuples (res) == 0)
     return;
@@ -183,7 +183,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
       return;
     }
   else if ((GetDataByOne 
-	    (g_strdup_printf ("SELECT * FROM proveedores WHERE rut='%s-%s'", rut_c, rut_ver))) != NULL)
+	    (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s-%s'", rut_c, rut_ver))) != NULL)
     {
       ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
       return;

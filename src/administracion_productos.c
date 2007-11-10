@@ -120,20 +120,20 @@ Recepcion (GtkWidget *widget, gpointer data)
       if (strcmp (cantidad, "") != 0)
 	{
 	  if (GetDataByOne
-	      (g_strdup_printf ("SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f'", barcode)) == NULL)
+	      (g_strdup_printf ("SELECT id FROM devolucion WHERE barcode_product='%s' AND devuelto='f'", barcode)) == NULL)
 	    {
 	      AlertMSG (entry_recivir, "No existe devoluciones de este producto");
 	      return;
 	    }
 
 	  if (strcmp (GetDataByOne
-		      (g_strdup_printf ("SELECT cantidad<%s FROM devoluciones WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f')",
+		      (g_strdup_printf ("SELECT cantidad<%s FROM devolucion WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f')",
 					CUT (cantidad), barcode)), "t") == 0)
 	    {
 	      AlertMSG (entry_recivir, g_strdup_printf
 			("En esta recepción no puede recibir mas de %s productos",
 			 GetDataByOne
-			 (g_strdup_printf ("SELECT cantidad FROM devoluciones WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f')", barcode))));
+			 (g_strdup_printf ("SELECT cantidad FROM devolucion WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f')", barcode))));
 	      return;
 	    }
 
@@ -1351,9 +1351,9 @@ Ingresar_Producto (gpointer data)
   g_snprintf (sentencia, 255, "INSERT INTO productos VALUES (DEFAULT, '%s', '%s', '%s')",
 	      product, codigo, precio);
 
-  if (DataExist (g_strdup_printf ("SELECT codigo FROM productos WHERE codigo=%s", codigo)) == TRUE)
+  if (DataExist (g_strdup_printf ("SELECT codigo FROM producto WHERE codigo=%s", codigo)) == TRUE)
     ErrorMSG (ingreso->codigo_entry, "Ya existe un producto con el mismo código!");
-  else if (DataExist (g_strdup_printf ("SELECT codigo FROM productos WHERE producto=%s", product)) == TRUE)
+  else if (DataExist (g_strdup_printf ("SELECT codigo FROM producto WHERE producto=%s", product)) == TRUE)
     ErrorMSG (ingreso->product_entry, "Ya existe un producto con el mismo nombre!");
   else
     {
@@ -1373,7 +1373,7 @@ ReturnProductsStore (GtkListStore *store)
   GtkTreeIter iter;
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT * FROM productos");
+  res = EjecutarSQL ("SELECT * FROM producto");
 
   tuples = PQntuples (res);
 
@@ -1461,8 +1461,8 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       day_char = GetDataByOne
 	(g_strdup_printf
-	 ("SELECT date_part ('day', (SELECT NOW() - fecha FROM compras WHERE id=t1.id_compra)) "
-	  "FROM products_buy_history AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' "
+	 ("SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=t1.id_compra)) "
+	  "FROM compra_detalle AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' "
 	  "AND t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC",
 	  barcode, barcode));
 
@@ -1476,7 +1476,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM products_sell_history WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM products_sell_history WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM productos WHERE barcode='%s'", day, barcode));
+	 ("SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM products_sell_history WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE barcode='%s'", day, barcode));
 
       stock = strtod (PUT (PQgetvalue (res, 0, 5)), (char **)NULL);
 
@@ -1634,7 +1634,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 	}
 
       res = EjecutarSQL
-	(g_strdup_printf ("SELECT nombre FROM proveedores WHERE rut IN (SELECT rut_proveedor FROM compras WHERE id IN (SELECT id_compra FROM products_buy_history WHERE barcode_product='%s')) GROUP BY nombre", barcode));
+	(g_strdup_printf ("SELECT nombre FROM proveedor WHERE rut IN (SELECT rut_proveedor FROM compra WHERE id IN (SELECT id_compra FROM compra_detalle WHERE barcode_product='%s')) GROUP BY nombre", barcode));
 
       tuples = PQntuples (res);
 
@@ -1735,7 +1735,7 @@ BuscarProductosParaListar (void)
   GtkTreeIter iter;
 
   res = EjecutarSQL
-    (g_strdup_printf ("SELECT * FROM productos WHERE lower(descripcion) LIKE lower('%s%%')"
+    (g_strdup_printf ("SELECT * FROM producto WHERE lower(descripcion) LIKE lower('%s%%')"
 		      "OR lower(marca) LIKE lower('%s%%')", string, string));
 
   resultados = PQntuples (res);
@@ -1800,12 +1800,12 @@ ModificarProducto (void)
       return;
     }
 
-  codigo = GetDataByOne (g_strdup_printf ("SELECT codigo FROM productos WHERE barcode='%s'", barcode));
-  description = GetDataByOne (g_strdup_printf ("SELECT descripcion FROM productos WHERE barcode='%s'", barcode));
-  marca = GetDataByOne (g_strdup_printf ("SELECT marca FROM productos WHERE barcode='%s'", barcode));
-  unidad = GetDataByOne (g_strdup_printf ("SELECT unidad FROM productos WHERE barcode='%s'", barcode));
-  contenido = GetDataByOne (g_strdup_printf ("SELECT contenido FROM productos WHERE barcode='%s'", barcode));
-  precio = GetDataByOne (g_strdup_printf ("SELECT precio FROM productos WHERE barcode='%s'", barcode));
+  codigo = GetDataByOne (g_strdup_printf ("SELECT codigo FROM producto WHERE barcode='%s'", barcode));
+  description = GetDataByOne (g_strdup_printf ("SELECT descripcion FROM producto WHERE barcode='%s'", barcode));
+  marca = GetDataByOne (g_strdup_printf ("SELECT marca FROM producto WHERE barcode='%s'", barcode));
+  unidad = GetDataByOne (g_strdup_printf ("SELECT unidad FROM producto WHERE barcode='%s'", barcode));
+  contenido = GetDataByOne (g_strdup_printf ("SELECT contenido FROM producto WHERE barcode='%s'", barcode));
+  precio = GetDataByOne (g_strdup_printf ("SELECT precio FROM producto WHERE barcode='%s'", barcode));
 
   compra->see_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_position (GTK_WINDOW (compra->see_window),GTK_WIN_POS_CENTER_ALWAYS);
