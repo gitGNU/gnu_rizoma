@@ -2663,31 +2663,43 @@ end loop;
 return;
 end; $$ language plpgsql;
 
--- ??
+-- retorna la última linea de asistencia
 -- usuario.c:75
-create or replace function ()
-returns setof record as '
+create or replace function select_asistencia(int)
+returns setof record as $$
 declare
+	id_usuario ALIAS FOR $1;
 	l record;
-	q varchar(255);
+	q text;
 begin
-q := '''';
-"SELECT date_part ('year', t2.entrada), date_part ('month', t2.entrada), date_part ('day', t2.entrada), date_part('hour', t2.entrada), date_part ('minute', t2.entrada), date_part ('year', t2.salida), date_part ('month', t2.salida), date_part ('day', t2.salida), date_part('hour', t2.salida), date_part ('minute', t2.salida) FROM asistencia AS t2 WHERE id_user=%s ORDER BY entrada DESC LIMIT 1", PQgetvalue (res, i, 0)
+q := $S$SELECT date_part ('year', entrada) as entrada_year, $S$
+	|| $S$date_part ('month', entrada) as entrada_month, $S$
+	|| $S$date_part ('day', entrada) as entrada_day, $S$
+	|| $S$date_part ('hour', entrada) as entrada_hour, $S$
+	|| $S$date_part ('minute', entrada) as entrada_min, $S$
+	|| $S$date_part ('year', salida) as salida_year, $S$
+	|| $S$date_part ('month', salida) as salida_month, $S$
+	|| $S$date_part ('day', salida) as salida_day, $S$
+	|| $S$date_part ('hour', salida) as salida_hour, $S$
+	|| $S$date_part ('minute', salida) as salida_min $S$
+	|| $S$FROM asistencia WHERE id_user=$S$
+	|| quote_literal(id_usuario) || $S$ ORDER BY entrada DESC LIMIT 1$S$;
 
 for l in execute q loop
 	return next l;
 end loop;
 return;
-end; ' language plpgsql;
+end; $$ language plpgsql;
 
 -- borra un usuario
 -- usuario.c:125
-create or replace function delete_usuario(int4)
-returns setof record as '
+create or replace function delete_user(id_usuario int4)
+returns void as $$
 begin
-DELETE FROM users WHERE id=quote_literal($1);
+DELETE FROM users WHERE id=id_usuario;
+
 return;
-end;' language plpgsql;
+end; $$ language plpgsql;
 
 -- busca productos
 -- ventas.c:3401

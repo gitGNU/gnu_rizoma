@@ -61,7 +61,12 @@ FillUsers (void)
   gchar *entrada, *salida;
 
   
-  res = EjecutarSQL ("SELECT t1.id, t1.rut, t1.nombre, t1.apell_p, t1.apell_m FROM users AS t1 ORDER BY t1.id ASC");
+  res = EjecutarSQL ("SELECT id, rut||'-'||dv, nombre, apell_p, apell_m "
+		     "FROM select_usuario() as "
+		     "(id int,rut int4, dv varchar(1),usuario varchar(30),"
+		     "passwd varchar(400),nombre varchar(75),"
+		     "apell_p varchar(75),apell_m varchar(75),"
+		     "fecha_ingreso timestamp,\"level\" int2);");
 
   tuples = PQntuples (res);
   
@@ -71,15 +76,25 @@ FillUsers (void)
 
       for (i = 0; i < tuples; i++)
 	{
-	  res2 = EjecutarSQL 
-	    (g_strdup_printf
-	     ("SELECT date_part ('year', t2.entrada), date_part ('month', t2.entrada), date_part ('day', t2.entrada), date_part('hour', t2.entrada), date_part ('minute', t2.entrada), date_part ('year', t2.salida), date_part ('month', t2.salida), date_part ('day', t2.salida), date_part('hour', t2.salida), date_part ('minute', t2.salida) FROM asistencia AS t2 WHERE id_user=%s ORDER BY entrada DESC LIMIT 1", PQgetvalue (res, i, 0)));
+	  res2 = EjecutarSQL (g_strdup_printf ("select * from "
+					       "select_asistencia(%s) as "
+					       "(entrada_year float8,"
+					       "entrada_month float8,"
+					       "entrada_day float8,"
+					       "entrada_hour float8,"
+					       "entrada_min float8,"
+					       "salida_year float8,"
+					       "salida_month float8,"
+					       "salida_day float8,"
+					       "salida_hour float8,"
+					       "salida_min float8);", 
+					       PQgetvalue (res, i, 0)));
 
 	  if (res2 != NULL && PQntuples (res2) != 0)
 	    {
 	      entrada = g_strdup_printf ("%s/%s/%s %s:%s", PQgetvalue (res2, 0, 2), PQgetvalue (res2, 0, 1), PQgetvalue (res2, 0, 2), PQgetvalue (res2, 0, 3), PQgetvalue (res2, 0, 4));
 	     
-	      if (strcmp (PQgetvalue (res2, 0, 5), "0") != 0)
+	      if (strcmp (PQgetvalue (res2, 0, 5), "-1") != 0)
 		salida = g_strdup_printf ("%s/%s/%s %s:%s", PQgetvalue (res2, 0, 7), PQgetvalue (res2, 0, 6), PQgetvalue (res2, 0, 5), PQgetvalue (res2, 0, 8), PQgetvalue (res2, 0, 9));
 	      else
 		salida = "Trabajando";
@@ -122,7 +137,7 @@ DeleteUser (GtkWidget *widget, gpointer data)
       
       if (strcmp (id, "1") != 0)
 	{
-	  res = EjecutarSQL (g_strdup_printf ("DELETE FROM users WHERE id=%s", id));
+	  res = EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
 	  
 	  FillUsers ();
 	}
