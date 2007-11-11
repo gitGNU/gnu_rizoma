@@ -13,7 +13,7 @@ declare
 	list record;
 
 begin
-query := ''SELECT id FROM devoluciones WHERE barcode_product=''
+query := ''SELECT id FROM devolucion WHERE barcode_product=''
 	|| quote_literal(prod)
 	|| '' AND devuelto=FALSE'';
 
@@ -2648,18 +2648,20 @@ end; ' language plpgsql;
 -- retorna todos los vendedores/usuarios
 -- usuario.c:37
 create or replace function select_usuario()
-returns setof record as '
+returns setof record as $$
 declare
 	l record;
 	q varchar(255);
 begin
-q := ''SELECT * FROM users ORDER BY id ASC'';
+q := 'SELECT id, rut, dv, usuario, passwd, '
+	|| 'nombre,apell_p,apell_m,fecha_ingreso,"level"'
+	|| 'FROM users ORDER BY id ASC';
 
 for l in execute q loop
 	return next l;
 end loop;
 return;
-end; ' language plpgsql;
+end; $$ language plpgsql;
 
 -- ??
 -- usuario.c:75
