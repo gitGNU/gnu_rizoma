@@ -308,36 +308,29 @@ END; ' language plpgsql;
 -- retorna los numeros de boleta
 -- boleta.c:36
 create or replace function obtener_num_boleta()
-returns setof record as '
+returns setof record as $$
 declare
-
 	list record;
 	query varchar(255);
-
 begin
-query := ''SELECT num_boleta FROM numeros_documentos'';
-
+query := 'SELECT num_boleta FROM numeros_documentos';
 
 FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
 END LOOP;
 
 RETURN;
-
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna los numeros de factura
 -- boleta.c:39
 create or replace function obtener_num_factura()
-returns setof record as '
+returns setof record as $$
 declare
-
 	list record;
 	query varchar(255);
-
 begin
-query := ''SELECT num_factura FROM numeros_documentos'';
-
+query := 'SELECT num_factura FROM numeros_documentos';
 
 FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
@@ -345,61 +338,52 @@ END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna los numeros de guia
 -- boleta.c:42
 create or replace function obtener_num_guias()
-returns setof record as '
+returns setof record as $$
 declare
-
 	list record;
 	query varchar(255);
-
 begin
-query := ''SELECT num_guias FROM numeros_documentos'';
-
+query := 'SELECT num_guias FROM numeros_documentos';
 
 FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
 END LOOP;
 
 RETURN;
-
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- actualiza el numero de boleta
 -- boleta.c:62
 create or replace function update_num_boleta(int4)
-returns void as '
+returns void as $$
 begin
 UPDATE numeros_documentos SET num_boleta=$1;
-
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- actualiza el numero de factura
 -- boleta.c:65
 create or replace function update_num_factura(int4)
-returns void as '
+returns void as $$
 begin
 UPDATE numeros_documentos SET num_factura=$1;
-
 RETURN;
-
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- actualiza el numero de guias
 -- boleta.c:68
 create or replace function update_num_guias(int4)
-returns void as '
+returns void as $$
 begin
 UPDATE numeros_documentos SET num_guias=$1;
-
 RETURN;
-
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- ??
 -- caja.c:63

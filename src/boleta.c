@@ -33,13 +33,13 @@ get_ticket_number (gint document_type)
   switch (document_type)
     {
     case SIMPLE:
-      res = EjecutarSQL ("SELECT num_boleta FROM numeros_documentos");
+      res = EjecutarSQL ("SELECT num_boleta FROM obtener_num_boleta as (num_boleta int4)");
       break;
     case FACTURA:
-      res = EjecutarSQL ("SELECT num_factura FROM numeros_documentos");
+      res = EjecutarSQL ("SELECT num_factura FROM obtener_num_factura as (num_factura int4)");
       break;
     case GUIA:
-      res = EjecutarSQL ("SELECT num_guias FROM numeros_documentos");
+      res = EjecutarSQL ("SELECT num_guias FROM obtener_num_guias as (num_guias int4)");
       break;
     default:
       return -1;
@@ -55,17 +55,24 @@ gboolean
 set_ticket_number (gint ticket_number, gint document_type)
 {
   PGresult *res;
+  gchar *q = NULL;
 
   switch (document_type)
     {
     case SIMPLE: 
-      res = EjecutarSQL (g_strdup_printf ("UPDATE numeros_documentos SET num_boleta=%d", ticket_number));
+      q = g_strdup_printf ("SELECT update_num_boleta(%d)", ticket_number);
+      res = EjecutarSQL (q);
+      g_free(q);
       break;
     case FACTURA:
-      res = EjecutarSQL (g_strdup_printf ("UPDATE numeros_documentos SET num_factura=%d", ticket_number));
+      q = g_strdup_printf ("SELECT update_num_factura(%d)", ticket_number);
+      res = EjecutarSQL (q);
+      g_free (q);
       break;
     case GUIA:
-      res = EjecutarSQL (g_strdup_printf ("SELECT numeros_documentos SET num_guias=%d", ticket_number));
+      q = g_strdup_printf ("SELECT update_num_guias(%d)", ticket_number);
+      res = EjecutarSQL (q);
+      g_free (q);
       break;
     default:
       return -1;
