@@ -106,6 +106,7 @@ void
 Recepcion (GtkWidget *widget, gpointer data)
 {
   gboolean out = (gboolean) data;
+  gchar *q;
 
   if (out == FALSE)
     {
@@ -119,21 +120,28 @@ Recepcion (GtkWidget *widget, gpointer data)
 
       if (strcmp (cantidad, "") != 0)
 	{
+	  q = g_strdup_printf ("SELECT id FROM hay_devolucion(%s) as (id int4)", barcode);
 	  if (GetDataByOne
-	      (g_strdup_printf ("SELECT id FROM devolucion WHERE barcode_product='%s' AND devuelto='f'", barcode)) == NULL)
+	      (q) == NULL)
 	    {
 	      AlertMSG (entry_recivir, "No existe devoluciones de este producto");
 	      return;
 	    }
-
-	  if (strcmp (GetDataByOne
-		      (g_strdup_printf ("SELECT cantidad<%s FROM devolucion WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f')",
-					CUT (cantidad), barcode)), "t") == 0)
+	  g_free(q);
+	  q = g_strdup_printf ("SELECT respuesta FROM puedo_devolver(%s,%s) as (respuesta bool)");
+	  if ((strcmp (GetDataByOne(q, CUT (cantidad), barcode)), "t") == 0)
 	    {
-	      AlertMSG (entry_recivir, g_strdup_printf
-			("En esta recepción no puede recibir mas de %s productos",
-			 GetDataByOne
-			 (g_strdup_printf ("SELECT cantidad FROM devolucion WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='%s' AND devuelto='f')", barcode))));
+	      g_free(q);
+	      q = g_strdup_printf ("SELECT cantidad FROM max_prods_a_devolver(%s)", barcode);
+	      
+	      gchar *msg;
+	      msg = g_strdup_printf("En esta recepción no puede recibir mas de %s productos", 
+				    GetDataByOne (q));
+	      
+	      AlertMSG (entry_recivir, msg);
+	      
+	      g_free(q);
+	      g_free(msg);
 	      return;
 	    }
 
@@ -393,7 +401,8 @@ AjusteWin (GtkWidget *widget, gpointer data)
 
       gtk_window_set_focus (GTK_WINDOW (window), entry);
 
-      res = EjecutarSQL ("SELECT * FROM tipo_merma");
+      res = EjecutarSQL ("SELECT id, nombre FROM select_tipo_merma() "
+			 "AS (id int4, nombre varchar(20))");
 
       tuples = PQntuples (res);
 
@@ -1343,25 +1352,35 @@ admini_box (GtkWidget *main_box)
 void
 Ingresar_Producto (gpointer data)
 {
-  gchar *sentencia = (gchar *) g_malloc0 (255);
+  gchar *sentencia, *q;
+  PGresult *res;
   gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso->codigo_entry)));
   gchar *product = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso->product_entry)));
   gchar *precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso->precio_entry)));
 
-  g_snprintf (sentencia, 255, "INSERT INTO productos VALUES (DEFAULT, '%s', '%s', '%s')",
-	      product, codigo, precio);
-
-  if (DataExist (g_strdup_printf ("SELECT codigo FROM producto WHERE codigo=%s", codigo)) == TRUE)
+  q = g_strdup_printf ("SELECT existe_producto('%s')", codigo);
+  res = EjecutarSQL(q);
+  if (g_str_equal (PQgetvalue (res,0,0), "t"))
     ErrorMSG (ingreso->codigo_entry, "Ya existe un producto con el mismo código!");
-  else if (DataExist (g_strdup_printf ("SELECT codigo FROM producto WHERE producto=%s", product)) == TRUE)
-    ErrorMSG (ingreso->product_entry, "Ya existe un producto con el mismo nombre!");
   else
     {
-      EjecutarSQL (sentencia);
-      gtk_entry_set_text (GTK_ENTRY (ingreso->codigo_entry), "");
-      gtk_entry_set_text (GTK_ENTRY (ingreso->product_entry), "");
-      gtk_entry_set_text (GTK_ENTRY (ingreso->precio_entry), "");
+      g_free (q);
+      q = g_strdup_printf ("SELECT existe_producto(%s)", product);
+      res = EjecutarSQL(q);
+      if (g_str_equal(PQgetvalue (res,0,0), "t"))
+	ErrorMSG (ingreso->product_entry, "Ya existe un producto con el mismo nombre!");
+      else
+	{
+	  sentencia = g_strdup_printf("SELECT insert_producto(%s,'%s',%s)",
+				      product,codigo,precio);
+	  EjecutarSQL (sentencia);
+	  g_free (sentencia);
+	  gtk_entry_set_text (GTK_ENTRY (ingreso->codigo_entry), "");
+	  gtk_entry_set_text (GTK_ENTRY (ingreso->product_entry), "");
+	  gtk_entry_set_text (GTK_ENTRY (ingreso->precio_entry), "");
+	}
     }
+  g_free (q);
 }
 
 
@@ -1373,7 +1392,34 @@ ReturnProductsStore (GtkListStore *store)
   GtkTreeIter iter;
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT * FROM producto");
+  // saca todos los productos dese la base de datos
+  //TODO: implementar conexion asincrónica para traer grandes
+  //cantidades de informacion, y mediante el uso de Threads
+
+  res = EjecutarSQL ("SELECT * FROM select_producto() as "
+		     "(codigo_corto varchar(10), "
+		     "barcode int8, "
+		     "descripcion varchar(50), "
+		     "marca varchar(35), "
+		     "contenido varchar(10), " 
+		     "unidad varchar(10), "
+		     "stock float8, "
+		     "precio int4, "
+		     "costo_promedio int4, "
+		     "vendidos float8, "
+		     "impuestos bool, "
+		     "otros int4, "
+		     "familia int2, "
+		     "perecibles bool, "
+		     "stock_min float8, "
+		     "margen_promedio float8, "
+		     "fraccion bool, "
+		     "canje bool, "
+		     "stock_pro float8, "
+		     "tasa_canje float8, "
+		     "precio_mayor int4, "
+		     "cantidad_mayor int4, "
+		     "mayorista bool)");
 
   tuples = PQntuples (res);
 

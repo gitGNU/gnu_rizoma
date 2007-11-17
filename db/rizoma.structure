@@ -131,7 +131,7 @@ drop table venta cascade ;
 
 -- Abono
 create table Abono (
-  id                        serial not null not null,
+  id                        serial not null,
   rut_cliente               int4,
   monto_abonado             int4,
   fecha_abono               timestamp,
@@ -140,7 +140,7 @@ create table Abono (
 
 -- Asistencia
 create table Asistencia (
-  id                        serial not null not null,
+  id                        serial not null,
   id_user                   int2,
   entrada                   timestamp,
   salida                    timestamp,
@@ -149,7 +149,7 @@ create table Asistencia (
 
 -- deuda
 create table deuda (
-  id                        serial not null not null,
+  id                        serial not null,
   id_venta                  int4 not null,
   rut_cliente               int4 not null,
   vendedor                  int4,
@@ -160,7 +160,7 @@ create table deuda (
 
 -- Documentos_emitidos
 create table Documentos_emitidos (
-  id                        serial not null not null,
+  id                        serial not null,
   tipo_documento            int2,
   forma_pago                int2,
   num_documento             int4,
@@ -170,8 +170,8 @@ create table Documentos_emitidos (
 
 -- documentos_emitidos_detalle
 create table documentos_emitidos_detalle (
-  id                        int4 not null not null,
-  id_documento              int4 not null not null,
+  id                        int4 not null,
+  id_documento              int4 not null,
   barcode_product           int8 not null,
   precio                    int4,
   cantidad                  float8,
@@ -180,7 +180,7 @@ create table documentos_emitidos_detalle (
 
 -- Cheques
 create table Cheques (
-  id                        serial not null not null,
+  id                        serial not null,
   id_venta                  int4 not null,
   serie                     varchar(10),
   numero                    int4,
@@ -193,7 +193,7 @@ create table Cheques (
 
 -- factura_compra
 create table factura_compra (
-  id                        serial not null not null,
+  id                        serial not null,
   id_compra                 int4 not null,
   rut_proveedor             int4 not null,
   num_factura               int4,
@@ -210,7 +210,7 @@ create table factura_compra (
 
 -- Devolucion
 create table Devolucion (
-  id                        serial not null not null,
+  id                        serial not null,
   barcode_product           int8 not null,
   cantidad                  float8,
   cantidad_recibida         float8 default 0.0,
@@ -241,7 +241,7 @@ create table Compra (
 
 -- Cliente
 create table Cliente (
-  rut                       int4 not null not null,
+  rut                       int4 not null,
   dv                        varchar(1) not null,
   nombre                    varchar(60),
   apell_p                   varchar(60),
@@ -275,7 +275,7 @@ create table documentos_detalle (
 
 -- Caja
 create table Caja (
-  id                        serial not null not null,
+  id                        serial not null,
   id_vendedor               int4 not null,
   fecha_inicio              timestamp,
   inicio                    int4,
@@ -287,7 +287,7 @@ create table Caja (
 
 -- Canje
 create table Canje (
-  id                        serial not null not null,
+  id                        serial not null,
   fecha                     timestamp,
   barcode                   int8 not null,
   cantidad                  float(8),
@@ -302,7 +302,7 @@ create table familias (
 
 -- formas_pago
 create table formas_pago (
-  id                        serial not null not null,
+  id                        serial not null,
   nombre                    varchar(50),
   days                      int2,
   constraint pk_Formas_pago primary key (id)
@@ -310,7 +310,7 @@ create table formas_pago (
 
 -- guias_compra
 create table guias_compra (
-  id                        serial not null not null,
+  id                        serial not null,
   numero                    int4,
   id_compra                 int4 not null,
   id_factura                int4,
@@ -351,7 +351,7 @@ create table negocio (
 
 -- merma
 create table merma (
-  id                        serial not null not null,
+  id                        serial not null,
   barcode                   int8,
   unidades                  float8,
   motivo                    int2,
@@ -360,7 +360,7 @@ create table merma (
 
 -- ingreso
 create table ingreso (
-  id                        serial not null not null,
+  id                        serial not null,
   monto                     int4,
   tipo                      int2 not null,
   fecha                     timestamp,
@@ -370,7 +370,7 @@ create table ingreso (
 
 -- impuesto
 create table impuesto (
-  id                        serial not null not null,
+  id                        serial not null,
   descripcion               varchar(250),
   monto                     float8,
   constraint pk_Impuesto primary key (id)
@@ -378,7 +378,7 @@ create table impuesto (
 
 -- producto
 create table producto (
-  barcode                   int8 not null not null,	-- llave primaria
+  barcode                   int8 not null,	-- llave primaria
   codigo_corto              varchar(10),	-- crear ckeck point
   marca                     varchar(35),
   descripcion               varchar(50),
@@ -416,8 +416,8 @@ create table producto_recibido (
 -- compra_detalle
 -- antes products_buy_history
 create table compra_detalle (
-  id                        int4 not null not null,
-  id_compra                 int4 not null not null,
+  id                        int4 not null,
+  id_compra                 int4 not null,
   cantidad                  float8,
   precio                    float8 not null,
   precio_venta              int4 not null,
@@ -435,8 +435,8 @@ create table compra_detalle (
 -- venta_detalle
 -- antes era products_sell_history
 create table venta_detalle (
-  id                        int4 not null not null,
-  id_venta                  int4 not null not null,
+  id                        int4 not null,
+  id_venta                  int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    int4 not null,
@@ -448,7 +448,7 @@ create table venta_detalle (
 
 -- proveedor
 create table proveedor (
-  rut                       int4 not null not null,
+  rut                       int4 not null,
   dv                        varchar(1) not null,
   nombre                    varchar(100),
   direccion                 varchar(100),
@@ -464,7 +464,7 @@ create table proveedor (
 
 -- Tarjetas
 create table Tarjetas (
-  id                        serial not null not null,
+  id                        serial not null,
   id_venta                  int4,
   insti                     varchar(50),
   numero                    varchar(20),
@@ -474,28 +474,28 @@ create table Tarjetas (
 
 -- tipo_egreso
 create table tipo_egreso (
-  id                        serial not null not null,
+  id                        serial not null,
   descrip                   varchar(20),
   constraint pk_Tipo_egreso primary key (id)
 ) ;
 
 -- tipo_ingreso
 create table tipo_ingreso (
-  id                        serial not null not null,
+  id                        serial not null,
   descrip                   varchar(20),
   constraint pk_Tipo_ingreso primary key (id)
 ) ;
 
 -- tipo_merma
 create table tipo_merma (
-  id                        serial not null not null,
+  id                        serial not null,
   nombre                    varchar(20),
   constraint pk_Tipo_merma primary key (id)
 ) ;
 
 -- users
 create table users (
-  id                        serial not null not null,
+  id                        serial not null,
   rut                       int4 not null,
   dv                        varchar(1) not null,
   usuario                   varchar(30) not null,
@@ -510,7 +510,7 @@ create table users (
 
 -- venta
 create table venta (
-  id                        serial not null not null,
+  id                        serial not null,
   monto                     int4,
   fecha                     timestamp,
   maquina                   int4,

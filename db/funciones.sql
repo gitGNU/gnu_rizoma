@@ -5,18 +5,16 @@ CREATE LANGUAGE plpgsql;
 
 -- revisa si hay devoluciones de un producto dado
 -- administracion_productos.c:123
-create or replace function hay_devolucion(varchar(14))
-returns setof record as '
+create or replace function hay_devolucion(int8)
+returns setof record as $$
 declare
 	prod ALIAS FOR $1;
 	query varchar(255);
 	list record;
-
 begin
-query := ''SELECT id FROM devolucion WHERE barcode_product=''
+query := 'SELECT id FROM devolucion WHERE barcode_product='
 	|| quote_literal(prod)
-	|| '' AND devuelto=FALSE'';
-
+	|| ' AND devuelto=FALSE';
 
 FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
@@ -24,12 +22,12 @@ END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- revisa si se puede devolver el producto
 -- administracion_productos.c:130
-create or replace function puedo_devolver(float8, varchar(14))
-returns setof record as '
+create or replace function puedo_devolver(float8, int8)
+returns setof record as $$
 declare
 	num_prods ALIAS FOR $1;
 	prod ALIAS FOR $2;
@@ -37,10 +35,11 @@ declare
 	query varchar(255);
 
 begin
-query := ''SELECT cantidad<'' || num_prods
-	|| '' FROM devoluciones WHERE id=(SELECT id FROM devoluciones WHERE barcode_product=''
+query := 'SELECT cantidad<' || quote_literal(num_prods)
+	|| ' as respuesta FROM devoluciones '
+	|| ' WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='
 	|| quote_literal(prod)
-	|| '' AND devuelto=FALSE)'';
+	|| ' AND devuelto=FALSE)';
 
 
 FOR list IN EXECUTE query LOOP
@@ -49,21 +48,21 @@ END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna el maximo de productos que se puede devolver
 -- administracion_productos.c:136
-create or replace function max_prods_a_devolver(varchar(14))
-returns setof record as '
+create or replace function max_prods_a_devolver(int8)
+returns setof record as $$
 declare
 	prod ALIAS FOR $1;
 	list record;
 	query varchar(255);
 
 begin
-query := ''SELECT cantidad FROM devoluciones WHERE id= ''
-	|| ''(SELECT id FROM devoluciones WHERE barcode_product=''
-	|| quote_literal(prod) || '' AND devuelto=FALSE)'';
+query := 'SELECT cantidad FROM devolucion WHERE id= '
+	|| '(SELECT id FROM devolucion WHERE barcode_product='
+	|| quote_literal(prod) || ' AND devuelto=FALSE)';
 
 
 FOR list IN EXECUTE query LOOP
@@ -72,19 +71,19 @@ END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna los tipos de merma existentes
 -- administracion_productos.c:396
-create or replace function get_tipos_merma()
-returns setof record as '
+create or replace function select_tipo_merma()
+returns setof record as $$
 declare
 
 	list record;
 	query varchar(255);
 
 begin
-query := ''SELECT * FROM tipo_merma'';
+query := 'SELECT * FROM tipo_merma';
 
 
 FOR list IN EXECUTE query LOOP
@@ -93,27 +92,29 @@ END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- inserta un nuevo producto
 -- administracion_productos.c:1351
-create or replace function insert_producto(varchar(255),varchar(255),varchar(255))
-returns void as '
+create or replace function insert_producto(prod_barcode int8, prod_codigo varchar(10),prod_precio int4)
+returns void as $$
 begin
-INSERT INTO productos VALUES (DEFAULT, quote_literal($1), quote_literal($2), quote_literal($3));
-RETURN;
-END; ' language plpgsql;
+INSERT INTO producto (barcode,codigo_corto,precio) VALUES (prod_barcode, 
+       quote_literal(prod_codigo), prod_precio);
+
+RETURN ;
+END; $$ language plpgsql;
 
 -- revisa si existe un producto con el mismo código
 -- administracion_productos.c:1354
-create or replace function existe_producto_por_codigo(varchar(10))
-returns boolean as '
+create or replace function existe_producto(prod_codigo_corto varchar(10))
+returns boolean as $$
 declare
 	list record;
 	query varchar(255);
 begin
-query := ''SELECT count(codigo) as suma FROM productos WHERE codigo='' || quote_literal($1) ;
-
+query := 'SELECT count(*) as suma FROM producto WHERE codigo_corto=' 
+      || quote_literal(prod_codigo_corto) ;
 
 FOR list IN EXECUTE query LOOP
 	if list.suma > 0 then
@@ -123,20 +124,20 @@ END LOOP;
 
 RETURN FALSE;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- revisa si existe un producto con el mismo nombre
 -- administracion_productos.c:1356
-create or replace function existe_producto_por_nombre()
-returns boolean as '
+create or replace function existe_producto(prod_barcode int8)
+returns boolean as $$
 declare
 
 	list record;
 	query varchar(255);
 
 begin
-query := ''SELECT codigo FROM productos WHERE producto='' || quote_literal($1) ;
-
+query := 'SELECT count(*) as suma FROM producto WHERE barcode=' 
+      || quote_literal(prod_barcode) ;
 
 FOR list IN EXECUTE query LOOP
 	if list.suma > 0 then
@@ -146,19 +147,45 @@ END LOOP;
 
 RETURN FALSE;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna TODOS los productos
 -- administracion_productos.c:1376
+-- NO RETORNA merma_unid
 create or replace function select_producto()
-returns setof record as '
+returns setof record as $$
 declare
 
 	list record;
-	query varchar(255);
+	query text;
 
 begin
-query := ''select * from productos'';
+query := 'SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, '
+      || 'stock, precio, costo_promedio, vendidos, impuestos, otros, familia, '
+      || 'perecibles, stock_min, margen_promedio, fraccion, canje, stock_pro, '
+      || 'tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto';
+
+FOR list IN EXECUTE query LOOP
+	RETURN NEXT list;
+END LOOP;
+
+RETURN;
+
+END; $$ language plpgsql;
+
+-- ??
+-- administracion_productos.c:1464
+create or replace function ()
+returns setof record as $$
+declare
+	list record;
+ 	query text;
+begin
+query:= $S$ SELECT date_part('day',NOW() - compras.fecha) FROM compras 
+inner join products_buy_history on compras.id=products_buy_history.id_compra 
+inner join productos on productos.barcode = products_buy_history.barcode_product 
+	and productos.barcode = '7802215302060'
+order by compras.fecha asc;
 
 
 FOR list IN EXECUTE query LOOP
@@ -167,32 +194,7 @@ END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
-
--- ??
--- administracion_productos.c:1464
--- create or replace function ()
--- returns setof record as '
--- declare
-
--- 	list record;
--- 	query varchar(255);
-
--- begin
--- SELECT date_part ('day', (SELECT NOW() - fecha FROM compras WHERE id=t1.id_compra)) "
--- 	  "FROM products_buy_history AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' "
--- 	  "AND t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC",
--- 	  barcode, barcode)
--- query := '''';
-
-
--- FOR list IN EXECUTE query LOOP
--- 	RETURN NEXT list;
--- END LOOP;
-
--- RETURN;
-
--- END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- -- ??
 -- -- administracion_productos.c:1479
