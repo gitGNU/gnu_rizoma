@@ -33,13 +33,16 @@ get_ticket_number (gint document_type)
   switch (document_type)
     {
     case SIMPLE:
-      res = EjecutarSQL ("SELECT num_boleta FROM obtener_num_boleta as (num_boleta int4)");
+      res = EjecutarSQL ("SELECT num_boleta FROM obtener_num_boleta() "
+			 "as (num_boleta int4)");
       break;
     case FACTURA:
-      res = EjecutarSQL ("SELECT num_factura FROM obtener_num_factura as (num_factura int4)");
+      res = EjecutarSQL ("SELECT num_factura FROM obtener_num_factura() "
+			 "as (num_factura int4)");
       break;
     case GUIA:
-      res = EjecutarSQL ("SELECT num_guias FROM obtener_num_guias as (num_guias int4)");
+      res = EjecutarSQL ("SELECT num_guias FROM obtener_num_guias() "
+			 "as (num_guias int4)");
       break;
     default:
       return -1;
