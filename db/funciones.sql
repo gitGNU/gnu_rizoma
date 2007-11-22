@@ -387,23 +387,73 @@ END; $$ language plpgsql;
 -- administracion_productos.c:1803
 -- postgres-functions.c:941, 964, 978, 990, 1197, 1432, 1480, 1530, 1652, 1853
 -- ventas.c:95, 1504, 3026, 3032,
-create or replace function select_producto(varchar(14))
-returns setof record as '
+create or replace function select_producto( IN prod_barcode int8,
+       	  	  	   		    OUT barcode int8,
+					    OUT codigo_corto varchar(10),
+					    OUT marca varchar(35),
+					    OUT descripcion varchar(50),
+					    OUT contenido varchar(10),
+					    OUT unidad varchar(10),
+					    OUT stock float8,
+					    OUT precio int4,
+					    OUT costo_promedio int4,
+					    OUT vendidos float8,
+					    OUT impuestos bool,
+					    OUT otros int4,
+					    OUT familia int2,
+					    OUT perecibles bool,
+					    OUT stock_min float8,
+					    OUT margen_promedio float8,
+					    OUT fraccion bool,
+					    OUT canje bool,
+					    OUT stock_pro float8,
+					    OUT tasa_canje float8,
+					    OUT precio_mayor int4,
+					    OUT cantidad_mayor int4,
+					    OUT mayorista bool)
+returns setof record as $$
 declare
-
 	list record;
-	query varchar(255);
-
+	query text;
 begin
-query := ''SELECT codigo FROM productos WHERE barcode=''
-	|| quote_literal($1);
+query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido, 
+      	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
+		    otros, familia, perecibles, stock_min, margen_promedio, 
+		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, 
+		    cantidad_mayor, mayorista
+             FROM producto WHERE barcode= $S$
+	     || quote_literal(prod_barcode);
+
 
 FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
+    barcode := list.barcode;
+    codigo_corto := list.codigo_corto;
+    marca := list.marca;
+    descripcion := list.descripcion;
+    contenido := list.contenido;
+    unidad := list.unidad;
+    stock := list.stock;
+    precio := list.precio;
+    costo_promedio := list.costo_promedio;
+    vendidos := list.vendidos;
+    impuestos := list.impuestos;
+    otros := list.otros;
+    familia := list.familia;
+    perecibles := list.perecibles;
+    stock_min := list.stock_min;
+    margen_promedio := list.margen_promedio;
+    fraccion := list.fraccion;
+    canje := list.canje;
+    stock_pro := list.stock_pro;
+    tasa_canje := list.tasa_canje;
+    precio_mayor := list.precio_mayor;
+    cantidad_mayor := list.cantidad_mayor;
+    mayorista := list.mayorista;
+    RETURN NEXT;
 END LOOP;
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna todos los impuestos menos el IVA
 -- administracion_productos.c:2099
