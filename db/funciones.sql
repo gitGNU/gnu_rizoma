@@ -175,12 +175,28 @@ END; $$ language plpgsql;
 
 -- Informacion de los productos para la ventana de Mercaderia
 -- administracion_productos.c:1508
-CREATE FUNCTION estadisticas_producto( IN codigo_barras bigint, OUT codigo_corto varchar(10), OUT descripcion varchar(50),
-		OUT marca varchar(35), OUT contenido varchar(10), OUT unidad varchar(10), OUT stock double precision,
-		OUT precio integer, OUT costo_promedio integer, OUT stock_min double precision, OUT margen_promedio double precision,
-		OUT merma_unid double precision, OUT contrib_agregada integer, OUT ventas_dia integer, OUT vendidos double precision,
-		OUT venta_neta integer, OUT canje boolean, OUT stock_pro double precision, OUT tasa_canje double precision,
-		OUT precio_mayor integer, OUT cantidad_mayor integer, OUT mayorista boolean)
+CREATE FUNCTION estadisticas_producto( IN codigo_barras bigint, 
+       				       OUT codigo_corto varchar(10), 
+				       OUT descripcion varchar(50),
+				       OUT marca varchar(35), 
+				       OUT contenido varchar(10), 
+				       OUT unidad varchar(10), 
+				       OUT stock double precision,
+				       OUT precio integer, 
+				       OUT costo_promedio integer, 
+				       OUT stock_min double precision, 
+				       OUT margen_promedio double precision,
+				       OUT merma_unid double precision, 
+				       OUT contrib_agregada integer, 
+				       OUT ventas_dia integer, 
+				       OUT vendidos double precision,
+				       OUT venta_neta integer, 
+				       OUT canje boolean, 
+				       OUT stock_pro double precision, 
+				       OUT tasa_canje double precision,
+				       OUT precio_mayor integer, 
+				       OUT cantidad_mayor integer, 
+				       OUT mayorista boolean)
 RETURNS SETOF record AS $$
 declare
 days double precision;
