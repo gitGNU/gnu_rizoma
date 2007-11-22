@@ -19,7 +19,8 @@
 # datos de 50MB, y el archivo de salida del script puede utilizar con facilidad
 # el triple de espacio de la base de datos original
 #
-
+# TODO: agregar las lineas que permiten actualizar las secuencias
+#       con algo como select setval('impuesto_id_seq', max(id)) FROM impuesto;
 BD_NAME=$1
 BD_USER=$2
 BD_HOST=$3
