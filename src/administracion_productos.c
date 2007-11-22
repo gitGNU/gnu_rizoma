@@ -1765,13 +1765,20 @@ void
 BuscarProductosParaListar (void)
 {
   PGresult *res;
-  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso->buscar_entry)));
+  gchar *q;
+  gchar *string;
   gint i, resultados;
   GtkTreeIter iter;
 
-  res = EjecutarSQL
-    (g_strdup_printf ("SELECT * FROM producto WHERE lower(descripcion) LIKE lower('%s%%')"
-		      "OR lower(marca) LIKE lower('%s%%')", string, string));
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso->buscar_entry)));
+  q = g_strdup_printf ("SELECT barcode, codigo_corto, marca, descripcion, "
+		       "contenido, unidad, stock, precio, costo_promedio, "
+		       "vendidos, impuestos, otros, familia, perecibles, "
+		       "stock_min, margen_promedio, fraccion, canje, stock_pro,"
+		       "tasa_canje, precio_mayor, cantidad_mayor, mayorista "
+		       "FROM buscar_productos('%s%%')", string);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   resultados = PQntuples (res);
 
