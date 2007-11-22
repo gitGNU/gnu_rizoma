@@ -99,7 +99,7 @@ END; $$ language plpgsql;
 create or replace function insert_producto(prod_barcode int8, prod_codigo varchar(10),prod_precio int4)
 returns void as $$
 begin
-INSERT INTO producto (barcode,codigo_corto,precio) VALUES (prod_barcode, 
+INSERT INTO producto (barcode,codigo_corto,precio) VALUES (prod_barcode,
        quote_literal(prod_codigo), prod_precio);
 
 RETURN ;
@@ -113,7 +113,7 @@ declare
 	list record;
 	query varchar(255);
 begin
-query := 'SELECT count(*) as suma FROM producto WHERE codigo_corto=' 
+query := 'SELECT count(*) as suma FROM producto WHERE codigo_corto='
       || quote_literal(prod_codigo_corto) ;
 
 FOR list IN EXECUTE query LOOP
@@ -136,7 +136,7 @@ declare
 	query varchar(255);
 
 begin
-query := 'SELECT count(*) as suma FROM producto WHERE barcode=' 
+query := 'SELECT count(*) as suma FROM producto WHERE barcode='
       || quote_literal(prod_barcode) ;
 
 FOR list IN EXECUTE query LOOP
@@ -173,50 +173,55 @@ RETURN;
 
 END; $$ language plpgsql;
 
--- ??
--- administracion_productos.c:1464
-create or replace function ()
-returns setof record as $$
+-- Informacion de los productos para la ventana de Mercaderia
+-- administracion_productos.c:1508
+CREATE FUNCTION estadisticas_producto( IN codigo_barras bigint, OUT codigo_corto varchar(10), OUT descripcion varchar(50),
+		OUT marca varchar(35), OUT contenido varchar(10), OUT unidad varchar(10), OUT stock double precision,
+		OUT precio integer, OUT costo_promedio integer, OUT stock_min double precision, OUT margen_promedio double precision,
+		OUT merma_unid double precision, OUT contrib_agregada integer, OUT ventas_dia integer, OUT vendidos double precision,
+		OUT venta_neta integer, OUT canje boolean, OUT stock_pro double precision, OUT tasa_canje double precision,
+		OUT precio_mayor integer, OUT cantidad_mayor integer, OUT mayorista boolean)
+RETURNS SETOF record AS $$
 declare
-	list record;
- 	query text;
-begin
-query:= $S$ SELECT date_part('day',NOW() - compras.fecha) FROM compras 
-inner join products_buy_history on compras.id=products_buy_history.id_compra 
-inner join productos on productos.barcode = products_buy_history.barcode_product 
-	and productos.barcode = '7802215302060'
-order by compras.fecha asc;
+days double precision;
+datos record;
+query varchar(500);
+BEGIN
 
+SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=t1.id_compra)) INTO days
+FROM compra_detalle AS t1, producto AS t2, compra AS t3 WHERE t2.barcode= $1 AND t1.barcode_product=t2.barcode
+AND t3.id=t1.id_compra ORDER BY t3.fecha ASC;
 
-FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
+IF NOT FOUND THEN
+days := 1;
+END IF;
+
+query := 'SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (producto.vendidos / '
+|| days
+|| ') AS merma, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) FROM producto WHERE barcode='
+|| $1;
+
+FOR datos IN EXECUTE query LOOP
+
+codigo_corto := datos.codigo_corto;
+descripcion := datos.descripcion;
+marca := datos.marca;
+contenido := datos.contenido;
+unidad := datos.unidad;
+stock := datos.stock;
+precio := datos.precio;
+costo_promedio := datos.costo_promedio;
+stock_min := datos.stock_min;
+margen_promedio := datos.margen_promedio;
+merma_unid := datos.merma_unid;
+contrib_agregada := datos.contrib_agregada;
+
+RETURN NEXT;
 END LOOP;
-
 RETURN;
+END;
 
-END; $$ language plpgsql;
-
--- -- ??
--- -- administracion_productos.c:1479
--- create or replace function ()
--- returns setof record as '
--- declare
-
--- 	list record;
--- 	query varchar(255);
-
--- begin
--- SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM products_sell_history WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM products_sell_history WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM productos WHERE barcode='%s'", day, barcode)
--- query := '''';
-
-
--- FOR list IN EXECUTE query LOOP
--- 	RETURN NEXT list;
--- END LOOP;
-
--- RETURN;
-
--- END; ' language plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- -- ??
 -- -- administracion_productos.c:1637

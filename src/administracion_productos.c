@@ -133,13 +133,13 @@ Recepcion (GtkWidget *widget, gpointer data)
 	    {
 	      g_free(q);
 	      q = g_strdup_printf ("SELECT cantidad FROM max_prods_a_devolver(%s)", barcode);
-	      
+
 	      gchar *msg;
-	      msg = g_strdup_printf("En esta recepción no puede recibir mas de %s productos", 
+	      msg = g_strdup_printf("En esta recepción no puede recibir mas de %s productos",
 				    GetDataByOne (q));
-	      
+
 	      AlertMSG (entry_recivir, msg);
-	      
+
 	      g_free(q);
 	      g_free(msg);
 	      return;
@@ -1401,7 +1401,7 @@ ReturnProductsStore (GtkListStore *store)
 		     "barcode int8, "
 		     "descripcion varchar(50), "
 		     "marca varchar(35), "
-		     "contenido varchar(10), " 
+		     "contenido varchar(10), "
 		     "unidad varchar(10), "
 		     "stock float8, "
 		     "precio int4, "
@@ -1505,24 +1505,9 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 			  1, &barcode,
 			  -1);
 
-      day_char = GetDataByOne
-	(g_strdup_printf
-	 ("SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=t1.id_compra)) "
-	  "FROM compra_detalle AS t1, productos AS t2, compras AS t3 WHERE t2.barcode='%s' "
-	  "AND t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC",
-	  barcode, barcode));
-
-      if (day_char == NULL)
-	day = 0;
-      else
-	day = atoi (day_char);
-
-      if (day == 0)
-	day = 1;
-
       res = EjecutarSQL
-	(g_strdup_printf
-	 ("SELECT codigo, descripcion, marca, contenido, unidad, stock, precio, fifo, stock_min, margen_promedio, merma_unid, (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=productos.barcode), (productos.vendidos / %d) AS merma, vendidos, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=productos.barcode), canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE barcode='%s'", day, barcode));
+		  (g_strdup_printf
+		   ("SELECT * from informacion_producto( %s )", barcode));
 
       stock = strtod (PUT (PQgetvalue (res, 0, 5)), (char **)NULL);
 
