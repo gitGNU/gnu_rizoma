@@ -1,3 +1,4 @@
+-- se debe ser superusuario para crear el lenguaje
 CREATE LANGUAGE plpgsql;
 
 -- estas son las funciones que deben ir en la base de datos
