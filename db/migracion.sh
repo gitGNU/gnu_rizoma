@@ -142,7 +142,7 @@ psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-a
 echo -- compras -\> compra
 echo compras > /dev/stderr
 echo 
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada from compras" | awk -F'|' '{printf ("COPY compra (id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, substr($1,0,length($3)-2), $4, $5, $6, $7)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada from compras" | awk -F'|' '{printf ("COPY compra (id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, substr($3,0,length($3)-2), $4, $5, $6, $7)}'
 
 
 echo -- devoluciones -\> devolucion
