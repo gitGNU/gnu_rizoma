@@ -239,27 +239,31 @@ END;
 
 $$ LANGUAGE plpgsql;
 
--- -- ??
--- -- administracion_productos.c:1637
--- create or replace function ()
--- returns setof record as '
--- declare
+-- retorna el nombre de los proveedores a los que se les ha comprado
+-- un producto dado
+-- administracion_productos.c:1637
+create or replace function select_proveedor_for_product(IN prod_barcode int8,
+            	  	  	     			OUT nombre varchar(100))
+returns setof varchar(100) as $$
+declare
+	list record;
+	query text;
+begin
+query := $S$SELECT nombre FROM proveedor
+      	 inner join compra on proveedor.rut = compra.rut_proveedor
+	 inner join compra_detalle on compra_detalle.id_compra = compra.id
+	 and barcode_product= $S$ || prod_barcode
+	 || $S$ GROUP BY proveedor.nombre $S$;
 
--- 	list record;
--- 	query varchar(255);
 
--- begin
--- "SELECT nombre FROM proveedores WHERE rut IN (SELECT rut_proveedor FROM compras WHERE id IN (SELECT id_compra FROM products_buy_history WHERE barcode_product='%s')) GROUP BY nombre", barcode)
--- query := '''';
+FOR list IN EXECUTE query LOOP
+	nombre := list.nombre;
+	RETURN NEXT;
+END LOOP;
 
+RETURN;
 
--- FOR list IN EXECUTE query LOOP
--- 	RETURN NEXT list;
--- END LOOP;
-
--- RETURN;
-
--- END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- busca productos en base un patron con el formate de LIKE
 -- administracion_productos.c:1738

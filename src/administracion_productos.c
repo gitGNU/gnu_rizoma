@@ -1498,6 +1498,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
   gint day;
   gint cantidad_mayorista, precio_mayorista;
   gchar *day_char;
+  gchar *q;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
@@ -1505,9 +1506,9 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 			  1, &barcode,
 			  -1);
 
-      res = EjecutarSQL
-		  (g_strdup_printf
-		   ("SELECT * from informacion_producto( %s )", barcode));
+      q = g_strdup_printf ("SELECT * from informacion_producto( %s )", barcode);
+      res = EjecutarSQL(q);
+      g_free(q);
 
       stock = strtod (PUT (PQgetvalue (res, 0, 5)), (char **)NULL);
 
@@ -1664,15 +1665,18 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mayor_buttons_f), TRUE);
 	}
 
-      res = EjecutarSQL
-	(g_strdup_printf ("SELECT nombre FROM proveedor WHERE rut IN (SELECT rut_proveedor FROM compra WHERE id IN (SELECT id_compra FROM compra_detalle WHERE barcode_product='%s')) GROUP BY nombre", barcode));
+      q = g_strdup_printf("SELECT nombre FROM select_proveedor_for_product(%s)",
+			  barcode);
+      res = EjecutarSQL (q);
+      g_free(q);
 
       tuples = PQntuples (res);
 
       model_proveedores = gtk_list_store_new (1,
 					      G_TYPE_STRING);
 
-      gtk_combo_box_set_model (GTK_COMBO_BOX (combo_proveedores), GTK_TREE_MODEL (model_proveedores));
+      gtk_combo_box_set_model (GTK_COMBO_BOX (combo_proveedores), 
+			       GTK_TREE_MODEL (model_proveedores));
 
       for (i = 0; i < tuples; i++)
 	gtk_combo_box_append_text (GTK_COMBO_BOX (combo_proveedores),
