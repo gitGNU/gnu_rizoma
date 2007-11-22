@@ -220,47 +220,47 @@ END; $$ language plpgsql;
 
 -- Informacion de los productos para la ventana de Mercaderia
 -- administracion_productos.c:1508
-CREATE FUNCTION informacion_producto( IN codigo_barras bigint,
-       				   OUT codigo_corto varchar(10),
-				       OUT descripcion varchar(50),
-				       OUT marca varchar(35),
-				       OUT contenido varchar(10),
-				       OUT unidad varchar(10),
-				       OUT stock double precision,
-				       OUT precio integer,
-				       OUT costo_promedio integer,
-				       OUT stock_min double precision,
-				       OUT margen_promedio double precision,
-				       OUT merma_unid double precision,
-				       OUT contrib_agregada integer,
-				       OUT ventas_dia integer,
-				       OUT vendidos double precision,
-				       OUT venta_neta integer,
-				       OUT canje boolean,
-				       OUT stock_pro double precision,
-				       OUT tasa_canje double precision,
-				       OUT precio_mayor integer,
-				       OUT cantidad_mayor integer,
-				       OUT mayorista boolean)
+CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
+       			   			 OUT codigo_corto varchar(10),
+				       		 OUT descripcion varchar(50),
+				       		 OUT marca varchar(35),
+				       		 OUT contenido varchar(10),
+				       		 OUT unidad varchar(10),
+				      		 OUT stock double precision,
+				       		 OUT precio integer,
+				       		 OUT costo_promedio integer,
+				       		 OUT stock_min double precision,
+				       		 OUT margen_promedio double precision,
+				       		 OUT merma_unid double precision,
+				       		 OUT contrib_agregada integer,
+				       		 OUT ventas_dia integer,
+				       		 OUT vendidos double precision,
+				       		 OUT venta_neta integer,
+				       		 OUT canje boolean,
+				       		 OUT stock_pro double precision,
+				       		 OUT tasa_canje double precision,
+				       		 OUT precio_mayor integer,
+				       		 OUT cantidad_mayor integer,
+				       		 OUT mayorista boolean)
 RETURNS SETOF record AS $$
 declare
-days double precision;
-datos record;
-query varchar(500);
+	days double precision;
+	datos record;
+	query varchar(500);
 BEGIN
 
 SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=t1.id_compra)) INTO days
-FROM compra_detalle AS t1, producto AS t2, compra AS t3 WHERE t2.barcode= $1 AND t1.barcode_product=t2.barcode
+FROM compra_detalle AS t1, producto AS t2, compra AS t3 WHERE t2.barcode= codigo_barras AND t1.barcode_product=t2.barcode
 AND t3.id=t1.id_compra ORDER BY t3.fecha ASC;
 
 IF NOT FOUND THEN
-days := 1;
+   days := 1;
 END IF;
 
-query := 'SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (producto.vendidos / '
+query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (producto.vendidos / $S$
 || days
-|| ') AS merma, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) FROM producto WHERE barcode='
-|| $1;
+|| $S$) AS merma, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) FROM producto WHERE barcode=$S$
+|| codigo_barras;
 
 FOR datos IN EXECUTE query LOOP
 
@@ -457,23 +457,26 @@ END; $$ language plpgsql;
 -- retorna todos los impuestos menos el IVA
 -- administracion_productos.c:2099
 -- compras.c:3170, 3679
-create or replace function obtener_impuestos()
-returns setof record as '
+create or replace function select_otros_impuestos (OUT id int4,
+       	  	  	   			   OUT descripcion varchar(250),
+						   OUT monto float8)
+returns setof record as $$
 declare
-
 	list record;
 	query varchar(255);
-
 begin
-query := ''SELECT * FROM impuestos WHERE id != 0'';
+query := 'SELECT id, descripcion, monto FROM impuesto WHERE id != 0';
 
 FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
+    id := list.id;
+    descripcion := list.descripcion;
+    monto := list.monto;
+    RETURN NEXT;
 END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna los numeros de boleta
 -- boleta.c:36
@@ -1717,27 +1720,40 @@ end; ' language plpgsql
 
 -- ??retorna TODOS los impuestos
 -- impuestos.c:48
-create or replace function ()
-returns setof record as '
+create or replace function select_impuesto( OUT id int4,
+       	  	  	   		    OUT descripcion varchar(250),
+					    OUT monto float8)
+returns setof record as $$
 declare
 	list record;
 	query varchar(255);
 begin
-SELECT * FROM impuestos ORDER BY id
 
-end; ' language plpgsql;
+query := 'SELECT id, descripcion, monto FROM impuesto ORDER BY id';
+
+for list in execute query loop
+    id = list.id;
+    descripcion := list.descripcion;
+    monto := list.monto;
+    return next;
+end loop;
+return;
+end; $$ language plpgsql;
 
 -- inserta un nuevo impuesto
 -- impuestos.c:76
-create or replace function insert_impuesto(varchar(250), float8)
-returns setof record as '
+create or replace function insert_impuesto (IN imp_descripcion varchar(250), 
+       	  	  	   		    IN imp_monto float8)
+returns void as $$
 declare
 	list record;
-	query varchar(255);
+	query text;
 begin
-INSERT INTO impuestos VALUES (DEFAULT, quote_literal($1), $2);
-returns;
-end: ' language plpgsql;
+	INSERT INTO impuesto VALUES (DEFAULT, 
+	       	    	      	     quote_literal(imp_descripcion), 
+				     imp_monto);
+return;
+end; $$ language plpgsql;
 
 -- borra un impuesto
 -- impuestos.c:110
