@@ -27,18 +27,17 @@ END; $$ language plpgsql;
 
 -- revisa si se puede devolver el producto
 -- administracion_productos.c:130
-create or replace function puedo_devolver(float8, int8)
+create or replace function puedo_devolver(IN num_prods float8, 
+       	  	  	   		  IN prod int8)
 returns setof record as $$
 declare
-	num_prods ALIAS FOR $1;
-	prod ALIAS FOR $2;
 	list record;
 	query varchar(255);
 
 begin
 query := 'SELECT cantidad<' || quote_literal(num_prods)
-	|| ' as respuesta FROM devoluciones '
-	|| ' WHERE id=(SELECT id FROM devoluciones WHERE barcode_product='
+	|| ' as respuesta FROM devolucion '
+	|| ' WHERE id=(SELECT id FROM devolucion WHERE barcode_product='
 	|| quote_literal(prod)
 	|| ' AND devuelto=FALSE)';
 
