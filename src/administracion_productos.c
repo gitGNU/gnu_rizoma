@@ -1863,8 +1863,10 @@ ModificarProducto (void)
   precio = PQgetvalue (res, 0, 5);
 
   compra->see_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (compra->see_window),GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_title (GTK_WINDOW (compra->see_window), "Descripcion Producto");
+  gtk_window_set_position (GTK_WINDOW (compra->see_window),
+			   GTK_WIN_POS_CENTER_ALWAYS);
+  gtk_window_set_title (GTK_WINDOW (compra->see_window), 
+			"Descripcion Producto");
 
   gtk_widget_show (compra->see_window);
   gtk_window_present (GTK_WINDOW (compra->see_window));
@@ -2151,7 +2153,8 @@ ModificarProducto (void)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
 
 
-  res = EjecutarSQL ("SELECT * FROM impuestos WHERE id!=0");
+  res = EjecutarSQL ("SELECT id, descripcion, monto "
+		     "FROM impuestos WHERE id!=0");
 
   tuples = PQntuples (res);
 
@@ -2166,7 +2169,8 @@ ModificarProducto (void)
   for (i = 0; i < tuples; i++)
     {
       gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp),
-				 g_strdup_printf ("%s", PQgetvalue (res, i, 1)));
+				 g_strdup_printf ("%s", 
+						  PQgetvalue (res, i, 1)));
 
       if (active_char != NULL)
 	{

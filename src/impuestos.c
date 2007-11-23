@@ -45,7 +45,7 @@ FillImpuestos (void)
   gint i, tuples;
   gtk_list_store_clear (store_tasks); 
       
-  res = EjecutarSQL ("SELECT * FROM impuestos ORDER BY id");
+  res = EjecutarSQL ("SELECT id, descripcion, monto FROM select_impuesto()");
 
   if (res != NULL)
     tuples = PQntuples (res);
@@ -73,7 +73,7 @@ AddImpuesto (void)
   gchar *task_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (impuesto_tasa)));
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO impuestos VALUES (DEFAULT, '%s', %s)", 
+  res = EjecutarSQL (g_strdup_printf ("SELECT insert_impuesto('%s', %s)",
 				      task_name, task_tasa));
 
   if (res != NULL)
