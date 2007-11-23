@@ -27,7 +27,7 @@ END; $$ language plpgsql;
 
 -- revisa si se puede devolver el producto
 -- administracion_productos.c:130
-create or replace function puedo_devolver(IN num_prods float8, 
+create or replace function puedo_devolver(IN num_prods float8,
        	  	  	   		  IN prod int8)
 returns setof record as $$
 declare
@@ -180,11 +180,11 @@ declare
 	list record;
 	query text;
 begin
-query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido, 
+query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
-		    otros, familia, perecibles, stock_min, margen_promedio, 
-		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, 
-		    cantidad_mayor, mayorista 
+		    otros, familia, perecibles, stock_min, margen_promedio,
+		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
+		    cantidad_mayor, mayorista
 		    FROM producto$S$;
 
 FOR list IN EXECUTE query LOOP
@@ -415,10 +415,10 @@ declare
 	list record;
 	query text;
 begin
-query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido, 
+query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
-		    otros, familia, perecibles, stock_min, margen_promedio, 
-		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, 
+		    otros, familia, perecibles, stock_min, margen_promedio,
+		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista
              FROM producto WHERE barcode= $S$
 	     || quote_literal(prod_barcode);
@@ -1742,15 +1742,15 @@ end; $$ language plpgsql;
 
 -- inserta un nuevo impuesto
 -- impuestos.c:76
-create or replace function insert_impuesto (IN imp_descripcion varchar(250), 
+create or replace function insert_impuesto (IN imp_descripcion varchar(250),
        	  	  	   		    IN imp_monto float8)
 returns void as $$
 declare
 	list record;
 	query text;
 begin
-	INSERT INTO impuesto VALUES (DEFAULT, 
-	       	    	      	     quote_literal(imp_descripcion), 
+	INSERT INTO impuesto VALUES (DEFAULT,
+	       	    	      	     quote_literal(imp_descripcion),
 				     imp_monto);
 return;
 end; $$ language plpgsql;
