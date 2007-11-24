@@ -730,12 +730,13 @@ FillDetPagos (void)
 	    }
 	  else
 	    {
-	      res = EjecutarSQL
-		(g_strdup_printf
-		 ("SELECT monto, date_part('day',fecha), date_part('month',fecha), "
-		  "date_part('year',fecha) FROM factura_compra WHERE num_factura=%s",
-		  doc));
-
+	      q = g_strdup_printf ("SELECT monto, date_part('day',fecha), "
+				   "date_part('month',fecha), "
+				   "date_part('year',fecha) FROM "
+				   "select_factura_compra_by_num_factura(%s)", 
+				   doc);
+	      res = EjecutarSQL (q);
+	      g_free (q);
 	      tuples = PQntuples (res);
 
 	      if (tuples == 0)

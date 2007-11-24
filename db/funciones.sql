@@ -894,10 +894,6 @@ create or replace function select_factura_compra_by_num_factura
 			   OUT rut_proveedor varchar(20),
 			   OUT num_factura int4,
 			   OUT fecha timestamp,
-			   OUT id_compra int4,
-			   OUT rut_proveedor varchar(20),
-			   OUT num_factura int4,
-			   OUT fecha timestamp,
 			   OUT valor_neto int4,
 			   OUT valor_iva int4,
 			   OUT descuento int4,
@@ -922,16 +918,7 @@ FOR list IN EXECUTE query LOOP
     rut_proveedor := list.rut_proveedor;
     num_factura	  := list.num_factura;
     fecha	  := list.fecha;
-    rut_proveedor := list.rut_proveedor;
-    num_factura	  := list.num_factura;
-    fecha	  := list.fecha;
     valor_neto	  := list.valor_neto;
-    valor_iva	  := list.valor_iva;
-    descuento	  := list.descuento;
-    pagada	  := list.pagada;
-    monto	  := list.monto;
-    fecha_pago	  := list.fecha_pago;
-    forma_pago	  := list.forma_pago;
     valor_iva	  := list.valor_iva;
     descuento	  := list.descuento;
     pagada	  := list.pagada;
