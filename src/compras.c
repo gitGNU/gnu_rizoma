@@ -756,7 +756,7 @@ FillDetPagos (void)
 	}
       else
 	{
-
+	  //TODO: hay que revisar esta sentencia y hacerla más sencilla
 	  res = EjecutarSQL (g_strdup_printf
 			     ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM factura_compra WHERE num_factura=%s AND rut_proveedor='%s' OR id=%s) AND t1.barcode=t2.barcode AND t2.numero=%s", doc, rut_proveedor, id, doc));
 
@@ -2757,13 +2757,15 @@ SearchProductHistory (void)
 
   gtk_entry_set_text (GTK_ENTRY (compra->barcode_history_entry), barcode);
 
-  gchar *q = g_strdup_printf("select barcode from productos where codigo = '%s'",barcode);
+  gchar *q = g_strdup_printf ("select barcode "
+			      "from codigo_corto_to_barcode('%s')",
+			      barcode);
   res = EjecutarSQL(q);
 
   if (PQntuples(res) == 1)
     {
       g_free (barcode);
-      barcode = g_strdup (PQgetvalue(res,0,0));
+      barcode = g_strdup (PQvaluebycol(res,0,"barcode"));
       PQclear(res);
       gtk_entry_set_text(GTK_ENTRY(compra->barcode_history_entry),barcode);
     }

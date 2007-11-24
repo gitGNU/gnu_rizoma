@@ -953,26 +953,35 @@ RETURN;
 
 END; ' language plpgsql;
 
--- ??revisar si se satisface con alguna funcion anterior
+-- retorna el (o los barcode) para un codigo corto dado
 -- compras.c:2749
-create or replace function ()
-returns setof record as '
+create or replace function codigo_corto_to_barcode
+       	  	  	   (IN prod_codigo_corto varchar(10),
+			   OUT barcode int8)
+returns setof int8 as $$
 declare
-
+	contador int;
 	list record;
 	query varchar(255);
-
 begin
-query := '''';
+contador := 0;
 -- esta sentencia creo que se puede satisfacer con una anterior
-"select barcode from productos where codigo = '%s'"
+query := 'select barcode from producto where codigo_corto = '
+      	 	 || quote_literal(prod_codigo_corto);
+
 FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
+    barcode := list.barcode;
+    IF contador > 0 THEN
+       RAISE NOTICE 'Retornando más de un barcode para el codigo corto: %', 
+       	     	    prod_codigo_corto;
+    END IF;
+    contador := contador + 1;
+    RETURN NEXT;
 END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- retorna todos los datos de un producto
 -- compras.c:2760, manejo_productos.c:311
