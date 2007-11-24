@@ -30,11 +30,15 @@
 
 #define SPE(string) SpecialChar (string)
 
+#define PQvaluebycol( res, fila, col ) PQgetvalue( res, fila, PQfnumber( res, col ) )
+
 gchar * CutComa (gchar *number);
 
 gchar * PutComa (gchar *number);
 
 PGresult * EjecutarSQL (gchar *sentencia);
+
+gchar * SQLgetvalue( PGresult *res, gint fila, const gchar *col );
 
 gint EjecutarSQLInsert (gchar *sentencia);
 
