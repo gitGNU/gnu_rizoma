@@ -885,7 +885,7 @@ RETURN;
 
 END; ' language plpgsql;
 
--- ??
+-- se retornan todas las filas que contengan el numero de factura dado
 -- compras.c:725
 create or replace function select_factura_compra_by_num_factura
        	  	  	   (IN factura_numero int4,
