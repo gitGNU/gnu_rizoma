@@ -625,6 +625,7 @@ FillDetPagos (void)
   PGresult *res;
   gchar *doc, *monto, *id;
   gchar *rut_proveedor;
+  gchar *q;
   gint tuples, i;
   //  gchar *iter_string;
 
@@ -640,8 +641,16 @@ FillDetPagos (void)
 
       if (id == NULL)
 	return;
-
-      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut_proveedor));
+      
+      //hay que testear si funciona este split
+      gchar **rut_split = g_strsplit (rut_proveedor, "-", 2);
+      q = g_strdup_printf ("SELECT nombre, rut || '-' || dv, direccion, ciudad,"
+			   "comuna, telefono, email, web, contacto, giro "
+			   "FROM select_proveedor(%s)", 
+			   rut_split[0]);
+      g_strfreev (rut_split); //libera el arreglo de strings
+      res = EjecutarSQL (q);
+      g_free (q); //libera el string
 
       gtk_entry_set_text (GTK_ENTRY (pago_proveedor), PQgetvalue (res, 0, 1));
 
@@ -681,7 +690,8 @@ FillDetPagos (void)
 	{
 	  if (gtk_tree_model_iter_has_child
 	      (GTK_TREE_MODEL (compra->store_facturas), &iter) == FALSE)
-	    {
+	    { //es necesario revisar esta sentencia SQL y
+	      //simplificarla 
 	      res = EjecutarSQL (g_strdup_printf
 				 ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc));
 		  printf ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc);
@@ -7271,7 +7281,7 @@ PagarDocumentoWin (GtkWidget *widget, gpointer data)
   GtkWidget *vbox;
   GtkWidget *vbox2;
   GtkWidget *hbox;
-  GtkWidget *frame;
+  //  GtkWidget *frame;
   GtkWidget *button;
   GtkWidget *button_ok;
   GtkWidget *label;

@@ -887,25 +887,63 @@ END; ' language plpgsql;
 
 -- ??
 -- compras.c:725
-create or replace function ()
-returns setof record as '
+create or replace function select_factura_compra_by_num_factura
+       	  	  	   (IN factura_numero int4,
+			   OUT id int4,
+			   OUT id_compra int4,
+			   OUT rut_proveedor varchar(20),
+			   OUT num_factura int4,
+			   OUT fecha timestamp,
+			   OUT id_compra int4,
+			   OUT rut_proveedor varchar(20),
+			   OUT num_factura int4,
+			   OUT fecha timestamp,
+			   OUT valor_neto int4,
+			   OUT valor_iva int4,
+			   OUT descuento int4,
+			   OUT pagada bool,
+			   OUT monto int4,
+			   OUT fecha_pago timestamp,
+			   OUT forma_pago int4)
+returns setof record as $$
 declare
-
 	list record;
-	query varchar(255);
-
+	query text;
 begin
-query := '''';
-SELECT monto, date_part('day',fecha), date_part('month',fecha), "
-		  "date_part('year',fecha) FROM facturas_compras WHERE num_factura=%s",
-		  doc
+query := $S$ SELECT id, id_compra, rut_proveedor, num_factura, fecha, 
+      	     	    valor_neto, valor_iva, descuento, pagada, monto,
+		    fecha_pago, forma_pago 
+		    FROM factura_compra
+		    WHERE num_factura=$S$ || factura_numero;
+
 FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
+    id            := list.id;
+    id_compra	  := list.id_compra;
+    rut_proveedor := list.rut_proveedor;
+    num_factura	  := list.num_factura;
+    fecha	  := list.fecha;
+    rut_proveedor := list.rut_proveedor;
+    num_factura	  := list.num_factura;
+    fecha	  := list.fecha;
+    valor_neto	  := list.valor_neto;
+    valor_iva	  := list.valor_iva;
+    descuento	  := list.descuento;
+    pagada	  := list.pagada;
+    monto	  := list.monto;
+    fecha_pago	  := list.fecha_pago;
+    forma_pago	  := list.forma_pago;
+    valor_iva	  := list.valor_iva;
+    descuento	  := list.descuento;
+    pagada	  := list.pagada;
+    monto	  := list.monto;
+    fecha_pago	  := list.fecha_pago;
+    forma_pago	  := list.forma_pago;
+    RETURN NEXT;
 END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- ??
 -- compras.c:750
@@ -2801,19 +2839,44 @@ end; ' language plpgsql;
 -- retorna el proveedor con el rut dado
 -- proveedores.c:130, 186
 -- ventas_stats.c:118
-create or replace function select_proveedor(varchar(20))
-returns setof record as '
+create or replace function select_proveedor (IN prov_rut int4,
+       	  	  	   		    OUT rut int4,
+					    OUT dv varchar(1),
+					    OUT nombre varchar(100),
+					    OUT direccion varchar(100),
+  					    OUT ciudad varchar(100),
+					    OUT comuna varchar(100),
+					    OUT telefono int4,
+					    OUT email varchar(300),
+					    OUT web varchar(300),
+					    OUT contacto varchar(100),
+					    OUT giro varchar(100))
+returns setof record as $$
 declare
-	l record;
-	q varchar(255);
+	list record;
+	query text;
 begin
-q := ''SELECT * FROM proveedores WHERE rut='' || quote_literal($1);
+query := 'SELECT rut,dv,nombre, direccion, ciudad, comuna, telefono, email,
+      	 	 web, contacto, giro FROM proveedor WHERE rut=' || prov_rut;
 
-for l in execute q loop
-	return next l;
+for list in execute query loop
+    rut       := list.rut;
+    dv	      := list.dv;
+    nombre    := list.nombre;
+    direccion := list.direccion;
+    ciudad    := list.ciudad;
+    comuna    := list.comuna;
+    telefono  := list.telefono;
+    email     := list.email;
+    web	      := list.web;
+    contacto  := list.contacto;
+    giro      := list.giro;
+    return next;
 end loop;
+
 return;
-end; ' language plpgsql;
+
+end; $$ language plpgsql;
 
 -- retorna todos los vendedores/usuarios
 -- usuario.c:37
