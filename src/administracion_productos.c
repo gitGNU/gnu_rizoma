@@ -1487,17 +1487,17 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       res = EjecutarSQL(q);
       g_free(q);
 
-		stock = strtod (PUT (PQvaluebycol( res, 0, "stock")), (char **)NULL);
+	  stock = strtod (PUT (PQvaluebycol( res, 0, "stock")), (char **)NULL);
 
-		margen = atoi (PQvaluebycol (res, 0, "margen_promedio"));
+	  margen = atoi (PQvaluebycol (res, 0, "margen_promedio"));
 
-		merma = (gdouble) atoi (PQvaluebycol (res, 0, "merma_unid"));
+	  merma = (gdouble) atoi (PQvaluebycol (res, 0, "merma_unid"));
 
-		fifo = atoi (PQvaluebycol (res, 0, "costo_promedio"));
+	  fifo = atoi (PQvaluebycol (res, 0, "costo_promedio"));
 
-		contri_unit = lround ((gdouble)fifo * (gdouble)margen / 100);
+	  contri_unit = lround ((gdouble)fifo * (gdouble)margen / 100);
 
-		contrib_agreg = atoi (PQvaluebycol (res, 0, "contrib_agregada"));
+	  contrib_agreg = atoi (PQvaluebycol (res, 0, "contrib_agregada"));
 
       compras_totales = GetTotalBuys (barcode);
 

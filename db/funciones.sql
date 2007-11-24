@@ -241,7 +241,8 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 				       		 OUT tasa_canje double precision,
 				       		 OUT precio_mayor integer,
 				       		 OUT cantidad_mayor integer,
-				       		 OUT mayorista boolean)
+				       		 OUT mayorista boolean,
+							 OUT unidades_merma double precision)
 RETURNS SETOF record AS $$
 declare
 	days double precision;
@@ -259,7 +260,7 @@ END IF;
 
 query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (producto.vendidos / $S$
 || days
-|| $S$) AS merma, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) FROM producto WHERE barcode=$S$
+|| $S$) AS merma, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode), select_merma( producto.barcode ) as unidades_merma FROM producto WHERE barcode=$S$
 || codigo_barras;
 
 FOR datos IN EXECUTE query LOOP
@@ -276,6 +277,7 @@ stock_min := datos.stock_min;
 margen_promedio := datos.margen_promedio;
 merma_unid := datos.merma_unid;
 contrib_agregada := datos.contrib_agregada;
+unidades_merma := datos.unidades_merma;
 
 RETURN NEXT;
 END LOOP;
@@ -283,6 +285,19 @@ RETURN;
 END;
 
 $$ LANGUAGE plpgsql;
+
+
+create or replace function select_merma( IN barcode bigint,
+		OUT unidades_merma double precision )
+returns double precision as $$
+declare
+   query varchar(100);
+BEGIN
+   unidades_merma := (SELECT unidades FROM merma WHERE barcode = $1);
+   RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
 
 -- retorna el nombre de los proveedores a los que se les ha comprado
 -- un producto dado

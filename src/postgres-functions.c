@@ -1741,7 +1741,7 @@ SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *margen, g
   PGresult *res;
 
   res = EjecutarSQL
-	(g_strdup_printf ("UPDATE productos SET stock_min=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
+	(g_strdup_printf ("UPDATE producto SET stock_min=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
 					  "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
 					  stock_minimo, margen, new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
 					  (gint)mayorista, barcode));
