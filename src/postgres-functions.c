@@ -1699,7 +1699,7 @@ InversionTotalStock (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT SUM (fifo * stock)::integer FROM producto");
+  res = EjecutarSQL ("SELECT SUM (costo_promedio * stock)::integer FROM producto");
 
   if (res != NULL)
 	return PQgetvalue (res, 0, 0);
@@ -1725,7 +1725,7 @@ ContriTotalStock (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT SUM (round (fifo * (margen_promedio / 100))  * stock)::integer FROM producto");
+  res = EjecutarSQL ("SELECT SUM (round (costo_promedio * (margen_promedio / 100))  * stock)::integer FROM producto");
 
   if (res != NULL)
 	return PQgetvalue (res, 0, 0);
