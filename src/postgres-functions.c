@@ -789,7 +789,7 @@ AgregarCompra (gchar *rut, gchar *nota, gint dias_pago)
   PGresult *res;
   gint id_compra;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO compras VALUES (DEFAULT, NOW(), '%s', '%s', %d, 'f', 'f')",
+  res = EjecutarSQL (g_strdup_printf ("INSERT INTO compra VALUES (DEFAULT, NOW(), '%s', '%s', %d, 'f', 'f')",
 									  rut, nota, dias_pago == 0 ? dias_pago - 1 : dias_pago));
 
   id_compra = atoi (GetDataByOne ("SELECT last_value FROM compra_id_seq"));

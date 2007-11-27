@@ -641,12 +641,12 @@ FillDetPagos (void)
 
       if (id == NULL)
 	return;
-      
+
       //hay que testear si funciona este split
       gchar **rut_split = g_strsplit (rut_proveedor, "-", 2);
       q = g_strdup_printf ("SELECT nombre, rut || '-' || dv, direccion, ciudad,"
 			   "comuna, telefono, email, web, contacto, giro "
-			   "FROM select_proveedor(%s)", 
+			   "FROM select_proveedor(%s)",
 			   rut_split[0]);
       g_strfreev (rut_split); //libera el arreglo de strings
       res = EjecutarSQL (q);
@@ -691,7 +691,7 @@ FillDetPagos (void)
 	  if (gtk_tree_model_iter_has_child
 	      (GTK_TREE_MODEL (compra->store_facturas), &iter) == FALSE)
 	    { //es necesario revisar esta sentencia SQL y
-	      //simplificarla 
+	      //simplificarla
 	      res = EjecutarSQL (g_strdup_printf
 				 ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc));
 		  printf ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc);
@@ -733,7 +733,7 @@ FillDetPagos (void)
 	      q = g_strdup_printf ("SELECT monto, date_part('day',fecha), "
 				   "date_part('month',fecha), "
 				   "date_part('year',fecha) FROM "
-				   "select_factura_compra_by_num_factura(%s)", 
+				   "select_factura_compra_by_num_factura(%s)",
 				   doc);
 	      res = EjecutarSQL (q);
 	      g_free (q);
@@ -2765,7 +2765,7 @@ SearchProductHistory (void)
   if (PQntuples(res) == 1)
     {
       g_free (barcode);
-      barcode = g_strdup (PQvaluebycol(res,0,"barcode"));
+      barcode = g_strdup (PQvaluebycol( res, 0, "barcode"));
       PQclear(res);
       gtk_entry_set_text(GTK_ENTRY(compra->barcode_history_entry),barcode);
     }
@@ -2804,27 +2804,27 @@ SearchProductHistory (void)
 
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("SELECT marca, fifo, canje, stock_pro FROM producto WHERE barcode='%s'", barcode));
+	 ("SELECT marca, costo_promedio, canje, stock_pro FROM producto WHERE barcode='%s'", barcode));
 
-      if (strcmp (PQgetvalue (res, 0, 2), "t") == 0)
+      if (strcmp (PQvaluebycol(res, 0, "canje"), "t") == 0)
 	{
 	  gtk_label_set_markup (GTK_LABEL (label_canje), "Stock Pro: ");
 	  gtk_label_set_markup
 	    (GTK_LABEL (label_stock_pro),
 	     g_strdup_printf ("<span weight=\"ultrabold\">%.3f</span>",
-			      strtod (PUT (PQgetvalue (res, 0, 3)), (char **)NULL)));
+			      strtod (PUT (PQvaluebycol(res, 0, "stock_pro")), (char **)NULL)));
 	}
 
       gtk_label_set_markup
 	(GTK_LABEL (compra->marca),
-	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQgetvalue (res, 0, 0)));
+	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol(res, 0, "marca")));
 
       gtk_label_set_markup (GTK_LABEL (compra->unidad),
 			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", GetUnit (barcode)));
 
       gtk_label_set_markup
 	(GTK_LABEL (compra->fifo),
-	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PutPoints (PQgetvalue (res, 0, 1))));
+	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
 
       gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
 
@@ -4623,8 +4623,8 @@ FillProveedores ()
     {
       gtk_list_store_append (compra->store_prov, &iter);
       gtk_list_store_set (compra->store_prov, &iter,
-			  0, PQgetvalue (res, i, 2),
-			  1, PQgetvalue (res, i, 1),
+			  0, PQvaluebycol(res, i, "rut"),
+			  1, PQvaluebycol(res, i, "nombre"),
 			  -1);
     }
 }
@@ -4957,8 +4957,8 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
 			  -1);
       res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", value));
 
-      gtk_label_set_text (GTK_LABEL (compra->rut_label), PQgetvalue (res, 0, 2));
-      gtk_label_set_text (GTK_LABEL (compra->nombre_label), PQgetvalue (res, 0, 1));
+      gtk_label_set_text (GTK_LABEL (compra->rut_label), PQvaluebycol( res, 0, "rut"));
+      gtk_label_set_text (GTK_LABEL (compra->nombre_label), PQvaluebycol( res, 0, "nombre"));
 
     }
 }
@@ -6189,8 +6189,8 @@ FoundProveedor (GtkWidget *widget, gpointer data)
     {
       gtk_list_store_append (compra->store_prov, &iter);
       gtk_list_store_set (compra->store_prov, &iter,
-			  0, PQgetvalue (res, i, 2),
-			  1, PQgetvalue (res, i, 1),
+			  0, PQvaluebycol (res, i, "rut"),
+			  1, PQvaluebycol (res, i, "nombre"),
 			  -1);
     }
 }
@@ -6213,86 +6213,86 @@ FillProveedorData (GtkWidget *widget, gpointer data)
       res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut));
 
       if (guias == TRUE)
-	{
-	  ClearFactData ();
+		{
+		  ClearFactData ();
 
-	  gtk_entry_set_text (GTK_ENTRY (compra->fact_proveedor), PQgetvalue (res, 0, 1));
+		  gtk_entry_set_text (GTK_ENTRY (compra->fact_proveedor), PQvaluebycol (res, 0, "nombre"));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_rut),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_rut),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_contacto),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 9)));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_contacto),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "contacto")));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_direccion),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 3)));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_direccion),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "direccion")));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_comuna),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 5)));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_comuna),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "comuna")));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_fono),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 6)));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_fono),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "telefono")));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_email),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 7)));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_email),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "email")));
 
-	  gtk_label_set_markup (GTK_LABEL (compra->fact_web),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 8)));
+		  gtk_label_set_markup (GTK_LABEL (compra->fact_web),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "web")));
 
-	  FillGuias (rut);
+		  FillGuias (rut);
 
-	  gtk_widget_set_sensitive (add_guia, TRUE);
-	  gtk_widget_set_sensitive (del_guia, TRUE);
-	}
+		  gtk_widget_set_sensitive (add_guia, TRUE);
+		  gtk_widget_set_sensitive (del_guia, TRUE);
+		}
       else if (guias == FALSE)
-	{
-	  ClearPagosData ();
+		{
+		  ClearPagosData ();
 
-	  gtk_entry_set_text (GTK_ENTRY (pago_proveedor), PQgetvalue (res, 0, 1));
+		  gtk_entry_set_text (GTK_ENTRY (pago_proveedor), PQvaluebycol (res, 0, "nombre"));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_rut),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
+		  gtk_label_set_markup (GTK_LABEL (pago_rut),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_contacto),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 9)));
+		  gtk_label_set_markup (GTK_LABEL (pago_contacto),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "contacto")));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_direccion),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 3)));
+		  gtk_label_set_markup (GTK_LABEL (pago_direccion),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "direccion")));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_comuna),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 5)));
+		  gtk_label_set_markup (GTK_LABEL (pago_comuna),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "comuna")));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_fono),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 6)));
+		  gtk_label_set_markup (GTK_LABEL (pago_fono),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "telefono")));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_email),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 7)));
+		  gtk_label_set_markup (GTK_LABEL (pago_email),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "email")));
 
-	  gtk_label_set_markup (GTK_LABEL (pago_web),
-				g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-						 PQgetvalue (res, 0, 8)));
+		  gtk_label_set_markup (GTK_LABEL (pago_web),
+								g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+												 PQvaluebycol (res, 0, "web")));
 
-	  FillPagarFacturas (rut);
+		  FillPagarFacturas (rut);
 
-	}
+		}
 
       CloseSelectProveedor (NULL, (gpointer)FALSE);
 
       if (guias == TRUE)
-	gtk_window_set_focus (GTK_WINDOW (main_window), compra->n_factura);
+		gtk_window_set_focus (GTK_WINDOW (main_window), compra->n_factura);
       else
-	gtk_window_set_focus (GTK_WINDOW (main_window), compra->tree_facturas);
+		gtk_window_set_focus (GTK_WINDOW (main_window), compra->tree_facturas);
     }
 }
 
