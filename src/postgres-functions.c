@@ -314,7 +314,8 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 				  guint to_year, guint to_month, guint to_day, gint *total)
 {
   PGresult *res;
-
+  //TODO: arreglar este select para ajustarse al nuevo esquema, hace
+  //que se vaya de segfault 
   res = EjecutarSQL
 	(g_strdup_printf
 	 ("SELECT SUM ((SELECT SUM (cantidad * precio) FROM venta_detalle WHERE id_venta=ventas.id)), "

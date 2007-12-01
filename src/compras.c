@@ -5643,8 +5643,11 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
   gchar *fecha_d = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_d)));
   gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->monto_documento)));
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), date_part('month', fecha), "
-				      "date_part('year', fecha) FROM compra WHERE id=%d", id));
+  
+  res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), "
+				      "date_part('month', fecha), "
+				      "date_part('year', fecha) "
+				      "FROM compra WHERE id=%d", id));
 
   if (atoi (fecha_y) < (atoi (PQgetvalue (res, 0, 2)) - 2000))
     {
@@ -7183,21 +7186,22 @@ InformeComprasShow (void)
   GtkTreeIter son;
   PGresult *res;
   PGresult *res2;
-
+  gchar *q2;
   gint tuples, i;
   gint jtuples, j;
 
   if (ventastats->selected_from_day == ventastats->selected_to_day &&
       ventastats->selected_from_month == ventastats->selected_to_month &&
       ventastats->selected_from_year == ventastats->selected_to_year)
-    res = EjecutarSQL
+    res = EjecutarSQL //TODO: hay que arreglar estas funciones, pero
+		      //son demasiado toxicas xD
       (g_strdup_printf
        ("SELECT id, (SELECT nombre FROM proveedor WHERE rut=compras.rut_proveedor), rut_proveedor, "
 	"(SELECT SUM (cantidad*precio) FROM compra_detalle WHERE id_compra=compras.id) FROM compra "
 	"WHERE date_part ('day', fecha)=%d AND date_part ('month', fecha)=%d AND "
 	"date_part ('year', fecha)=%d ORDER BY fecha DESC", ventastats->selected_from_day,
 	ventastats->selected_from_month, ventastats->selected_from_year));
-  else
+  else //TODO: arreglar esta sentencia que esta refea xD
     res = EjecutarSQL
       (g_strdup_printf
        ("SELECT id, (SELECT nombre FROM proveedor WHERE rut=compras.rut_proveedor), rut_proveedor, "
@@ -7220,10 +7224,15 @@ InformeComprasShow (void)
 			  2, PQgetvalue (res, i, 2),
 			  4, PQgetvalue (res, i, 3),
 			  -1);
-
-      res2 = EjecutarSQL (g_strdup_printf
-			  ("SELECT (SELECT descripcion FROM producto WHERE barcode=barcode_product), cantidad, precio "
-			   "FROM compra_detalle WHERE id_compra=%s", PQgetvalue (res, i, 0)));
+      q2 = g_strdup_printf ("SELECT producto.descripcion, cantidad, precio, "
+			   "precio*cantidad as subtotal "
+			   "FROM compra_detalle "
+			   "INNER JOIN producto "
+			   "ON producto.barcode = compra_detalle.barcode_product "
+			   " AND id_compra = %s",
+			   PQgetvalue (res, i, 0));
+      res2 = EjecutarSQL (q2);
+      g_free (q2);
 
       jtuples = PQntuples (res2);
 
@@ -7231,11 +7240,10 @@ InformeComprasShow (void)
       {
 	gtk_tree_store_append (GTK_TREE_STORE (compra->informe_store), &son, &father);
 	gtk_tree_store_set (GTK_TREE_STORE (compra->informe_store), &son,
-			    1, PQgetvalue (res2, j, 0),
-			    2, PQgetvalue (res2, j, 1),
-			    3, PQgetvalue (res2, j, 2),
-			    4, g_strdup_printf ("%d", atoi (PQgetvalue (res2, j, 1)) *
-						atoi (PQgetvalue (res2, j, 2))),
+			    1, PQvaluebycol (res2, j, "producto.descripcion"),
+			    2, PQvaluebycol (res2, j, "cantidad"),
+			    3, PQvaluebycol (res2, j, "precio"),
+			    4, PQvaluebycol (res2, j, "subtotal"),
 			    -1);
       }
 
