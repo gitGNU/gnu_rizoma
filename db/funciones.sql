@@ -1251,5 +1251,29 @@ begin
 	END LOOP;
 
 	RETURN 0;
-END;' language plpgsql
+END;' language plpgsql;
 
+-- Registrar una venta
+create or replace function registrar_venta( IN monto integer,
+	IN maquina integer,
+	IN vendedor integer,
+	IN tipo_documento smallint,
+	IN tipo_venta smallint,
+	IN descuento smallint,
+	IN id_documento integer,
+	IN canceled boolean,
+	OUT inserted_id integer)
+returns integer as $$
+declare
+	query varchar(255);
+	fool varchar(10);
+BEGIN
+	fool := canceled;
+	EXECUTE $S$ INSERT INTO venta( id, monto, fecha, maquina, vendedor, tipo_documento, tipo_venta, descuento, id_documento, canceled )
+	VALUES ( DEFAULT, $S$|| monto ||$S$, NOW(),$S$|| maquina ||$S$,$S$|| vendedor||$S$,$S$|| tipo_documento ||$S$,$S$||
+	tipo_venta||$S$,$S$|| descuento||$S$,$S$|| id_documento||$S$,'$S$|| fool ||$S$')$S$;
+
+	SELECT currval( 'venta_id_seq' ) INTO inserted_id;
+	
+	return;
+END; $$ language plpgsql;

@@ -219,7 +219,7 @@ InsertNewDocument (gint document_type, gint sell_type)
 
 gboolean
 SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount, gint boleta,
-		  gint tipo_documento, gchar *cheque_date, gboolean cheques, gboolean canceled)
+	  gint tipo_documento, gchar *cheque_date, gboolean cheques, gboolean canceled)
 {
   PGresult *res;
   gint venta_id, monto, id_documento;
@@ -233,14 +233,10 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (id_documento == -1)
 	return FALSE;
 
-  if (cheques == FALSE)
-	res = EjecutarSQL
-	  (g_strdup_printf
-	   ("INSERT INTO ventas (id, monto, fecha, maquina, vendedor, tipo_documento, tipo_venta, descuento, id_documento, canceled) VALUES "
-		"(DEFAULT, %d, NOW(), %d, %d, %d, %d, %s, '%d', '%d')",
-		total, machine, seller, tipo_documento, tipo_venta, CUT(discount), id_documento, (gint)canceled));
-
-  venta_id = atoi (GetDataByOne ("SELECT last_value FROM venta_id_seq"));
+  venta_id = atoi (GetDataByOne (
+		       g_strdup_printf( "SELECT inserted_id FROM registrar_venta( %d, %d, %d, %d::smallint, %d::smallint, %s::smallint, %d, '%d' )",
+					total, machine, seller, tipo_documento, tipo_venta, CUT(discount), id_documento,
+					canceled)));
 
   if (boleta != -1)
 	set_ticket_number (boleta, tipo_documento);
