@@ -604,26 +604,6 @@ RETURN;
 
 END; ' language plpgsql;
 
--- retorna los datos un proveedor dado
--- compras.c:644, 4650, 4945, 6200
-create or replace function obtener_proveedor(varchar(20))
-returns setof record as '
-declare
-
-	list record;
-	query varchar(255);
-
-begin
-query := ''SELECT * FROM proveedores WHERE rut='' || quote_literal($1);
-
-FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
-END LOOP;
-
-RETURN;
-
-END; ' language plpgsql;
-
 -- se retornan todas las filas que contengan el numero de factura dado
 -- compras.c:725
 create or replace function select_factura_compra_by_num_factura
