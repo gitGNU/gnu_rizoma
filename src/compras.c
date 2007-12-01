@@ -4085,7 +4085,8 @@ SearchName (GtkEntry *widget, gpointer data)
 
   GtkTreeIter iter;
 
-  q = g_strdup_printf ("SELECT * FROM buscar_productos('%s%%')", 
+  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, "
+		       "contenido, unidad, stock FROM buscar_productos('%s%%')", 
 		       g_strdup (gtk_entry_get_text (entry)));
   res = EjecutarSQL (q);
   g_free (q);
@@ -4101,13 +4102,13 @@ SearchName (GtkEntry *widget, gpointer data)
     {
       gtk_list_store_append (compra->find_store, &iter);
       gtk_list_store_set (compra->find_store, &iter,
-			  0, PQgetvalue (res, i, 0),
-			  1, PQgetvalue (res, i, 1),
-			  2, PQgetvalue (res, i, 2),
-			  3, PQgetvalue (res, i, 3),
-			  4, PQgetvalue (res, i, 4),
-			  5, PQgetvalue (res, i, 5),
-			  6, atoi (PQgetvalue (res, i, 6)),
+			  0, PQvaluebycol (res, i, "codigo_corto"),
+			  1, PQvaluebycol (res, i, "barcode"),
+			  2, PQvaluebycol (res, i, "descripcion"),
+			  3, PQvaluebycol (res, i, "marca"),
+			  4, PQvaluebycol (res, i, "contenido"),
+			  5, PQvaluebycol (res, i, "unidad"),
+			  6, atoi (PQvaluebycol (res, i, "stock")),
 			  -1);
     }
   if (resultado != 0)
