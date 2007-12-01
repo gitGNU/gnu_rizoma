@@ -4358,7 +4358,7 @@ ShowProductHistory (void)
 
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
   gint i, tuples, precio = 0;
-
+  //TODO: arreglar esta fea sentencia y hacerla mucho legible
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT (SELECT nombre FROM proveedor WHERE rut=t1.rut_proveedor), t2.precio, t2.cantidad,"
@@ -4433,7 +4433,7 @@ InsertarCompras (void)
 
   PGresult *res;
   gint tuples, i, id_venta;
-
+  //TODO: arreglar esta sentencia al nuevo modelo y hacerla legible
   res = EjecutarSQL ("SELECT t2.nombre, (SELECT SUM ((t2.cantidad - t2.cantidad_ingresada) * t2.precio) FROM compra_detalle AS t2 WHERE t2.id_compra=t1.id)::double precision AS precio, date_part('day', t1.fecha), date_part ('month', t1.fecha), date_part('year', t1.fecha), t1.id FROM compra AS t1, proveedores AS t2, products_buy_history AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad AND t1.anulada='f' AND t3.anulado='f' GROUP BY t1.id, t2.nombre, t1.fecha ORDER BY fecha DESC");
 
   gtk_list_store_clear (compra->ingreso_store);
@@ -4489,7 +4489,7 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
 
 
      gtk_list_store_clear (compra->compra_store);
-
+     //TODO: hacer esta sentencia legible y ajustarla al nuevo modelo
      res = EjecutarSQL
        (g_strdup_printf
 	("SELECT t2.codigo, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t1.precio, "
@@ -4552,6 +4552,7 @@ IngresarCompra (void)
   Productos *products = compra->header;
   gint id, doc;
   gchar *rut_proveedor;
+  gchar *q;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
   GtkTreeIter iter;
 
@@ -4579,9 +4580,10 @@ IngresarCompra (void)
       //      SetProductosIngresados ();
 
     }
-
-  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d",
-						 id));
+  //TODO: usar funcion plpgsql
+  q = g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id);
+  rut_proveedor = GetDataByOne (q);
+  g_free (q);
 
   if (compra->factura == TRUE)
     doc = IngresarFactura
