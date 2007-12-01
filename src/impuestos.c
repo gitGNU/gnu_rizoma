@@ -98,6 +98,7 @@ DelTask (void)
   GtkTreeIter iter;
   PGresult *res;
   gchar *id;
+  gchar *q;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
@@ -107,15 +108,13 @@ DelTask (void)
 
       if (strcmp (id, "0") != 0)
 	{
-	  res = EjecutarSQL (g_strdup_printf ("DELETE FROM impuestos WHERE id=%s", id));
-	  	  
+	  res = EjecutarSQL (g_strdup_printf ("DELETE FROM impuesto WHERE id=%s", id));
+
 	  if (res != NULL)
 	    {
 	      ExitoMSG (impuesto_name, "El impuesto se elimino con exito");
-	      
-	      res = EjecutarSQL 
-		(g_strdup_printf ("UPDATE productos SET otros=-1 WHERE otros=%s", id));
-
+	      q = g_strdup_printf ("UPDATE producto SET otros=-1 WHERE otros=%s", id);
+	      res = EjecutarSQL (q);
 	      FillImpuestos ();
 	    }
 	  else
@@ -144,10 +143,9 @@ EditTask (GtkWidget *widget, gpointer data)
 	  gtk_tree_model_get (GTK_TREE_MODEL (store_tasks), &iter,
 			      0, &id,
 			      -1);
-	  
-	  res = EjecutarSQL 
-	    (g_strdup_printf ("UPDATE impuestos SET descripcion='%s', monto=%s WHERE id=%s", 
-			      new_name, CUT(new_tasa), id));
+	  q = g_strdup_printf ("UPDATE impuestos SET descripcion='%s', "
+			       "monto=%s WHERE id=%s", new_name, CUT(new_tasa), id);
+	  res = EjecutarSQL (q);
 
 	  if (res != NULL)
 	    {
