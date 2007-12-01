@@ -285,9 +285,15 @@ Productos *
 CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble precio_compra, gint margen)
 {
   Productos *new = NULL;
-  PGresult *res = EjecutarSQL
-    (g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto "
-		      "WHERE barcode='%s'", barcode));
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
+		      "unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, "
+		      "cantidad_mayor, mayorista FROM select_producto (%s)", 
+		       barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   new = (Productos *) g_malloc (sizeof (Productos));
 
