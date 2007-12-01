@@ -4633,7 +4633,8 @@ FillProveedores ()
 
   GtkTreeIter iter;
 
-  res = EjecutarSQL ("SELECT * FROM proveedor ORDER BY nombre ASC");
+  res = EjecutarSQL ("SELECT rut || dv, nombre FROM select_proveedor() "
+		     "ORDER BY nombre ASC");
 
   if (res == NULL)
     return;
@@ -4688,32 +4689,32 @@ AddProveedor (GtkWidget *widget, gpointer data)
       ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
       return;
     }
-  else if (strcmp (rut_ver, "") == 0)
+  else if (g_str_equal (rut_ver, ""))
     {
       ErrorMSG (compra->rut_ver, "Debe ingresar el digito verificador del rut");
       return;
     }
-  else if (strcmp (nombre, "") == 0)
+  else if (g_str_equal (nombre, ""))
     {
       ErrorMSG (compra->nombre_add, "Debe escribir el nombre del proveedor");
       return;
     }
-  else if (strcmp (direccion, "") == 0)
+  else if (g_str_equal (direccion, ""))
     {
       ErrorMSG (compra->direccion_add, "Debe escribir la direccion");
       return;
     }
-  else if (strcmp (comuna, "") == 0)
+  else if (g_str_equal (comuna, ""))
     {
       ErrorMSG (compra->comuna_add, "Debe escribir la comuna");
       return;
     }
-  else if (strcmp (telefono, "") == 0)
+  else if (g_str_equal (telefono, ""))
     {
       ErrorMSG (compra->telefono_add, "Debe escribir el telefono");
       return;
     }
-  else if (strcmp (giro, "") == 0)
+  else if (g_str_equal (giro, ""))
     {
       ErrorMSG (compra->giro_add, "Debe escribir el giro");
       return;
@@ -4728,7 +4729,16 @@ AddProveedor (GtkWidget *widget, gpointer data)
   CloseAddProveedorWindow (NULL, data);
 
 
-  AddProveedorToDB (g_strdup_printf ("%s-%s", rut, rut_ver), nombre, direccion, ciudad, comuna, telefono, email, web, contacto, giro);
+  AddProveedorToDB (g_strdup_printf ("%s-%s", rut, rut_ver), 
+		    nombre, 
+		    direccion, 
+		    ciudad, 
+		    comuna, 
+		    telefono, 
+		    email, 
+		    web, 
+		    contacto, 
+		    giro);
 
   FillProveedores ();
 }

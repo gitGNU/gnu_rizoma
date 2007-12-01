@@ -1113,19 +1113,41 @@ end; ' language plpgsql;
 
 -- retorna todos los proveedores
 -- proveedores.c:98
-create or replace function select_proveedor()
-returns setof record as '
+create or replace function select_proveedor ( OUT rut int4,
+       	  	  	   		      OUT dv varchar(1),
+					      OUT nombre varchar(100),
+					      OUT direccion varchar(100),
+					      OUT ciudad varchar(100),
+					      OUT comuna varchar(100),
+					      OUT telefono int4,
+					      OUT email varchar(300),
+					      OUT web varchar(300),
+					      OUT contacto varchar(100),
+					      OUT giro varchar(100))
+returns setof record as $$
 declare
 	l record;
 	q varchar(255);
 begin
-q := ''SELECT * FROM proveedores ORDER BY nombre ASC'';
+q := 'SELECT rut, dv, nombre, direccion, ciudad, comuna, telefono,
+     email, web contacto, giro FROM proveedor';
 
 for l in execute q loop
-	return next l;
+    rut := l.rut;
+    dv := l.dv;
+    nombre := l.nombre;
+    direccion := l.direccion;
+    ciudad := l.ciudad;
+    comuna := l.comuna;
+    telefono := l.telefono;
+    email := l.email;
+    web := l.web;
+    contacto := l.contacto;
+    giro := l.giro;
+    return next;
 end loop;
 return;
-end; ' language plpgsql;
+end; $$ language plpgsql;
 
 -- retorna el proveedor con el rut dado
 -- proveedores.c:130, 186
