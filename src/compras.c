@@ -693,7 +693,7 @@ FillDetPagos (void)
 	{
 	  if (gtk_tree_model_iter_has_child
 	      (GTK_TREE_MODEL (compra->store_facturas), &iter) == FALSE)
-	    { //es necesario revisar esta sentencia SQL y
+	    { //TODO: es necesario revisar esta sentencia SQL y
 	      //simplificarla
 	      res = EjecutarSQL (g_strdup_printf
 				 ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc));
@@ -2767,13 +2767,14 @@ SearchProductHistory (void)
 
   if (PQntuples(res) == 1)
     {
-      g_free (barcode);
       barcode = g_strdup (PQvaluebycol( res, 0, "barcode"));
       PQclear(res);
       gtk_entry_set_text(GTK_ENTRY(compra->barcode_history_entry),barcode);
     }
+  g_free(q);
 
-  if (DataExist (g_strdup_printf ("SELECT * FROM producto WHERE barcode='%s'", barcode)) == TRUE)
+  q = g_strdup_printf ("SELECT existe_producto(%s)", barcode);
+  if (g_str_equal(GetDataByOne(q), "t"))
     {
       gtk_widget_set_sensitive (see_button, TRUE);
 
@@ -2793,41 +2794,48 @@ SearchProductHistory (void)
 					     GetCurrentStock (barcode)));
       if ((day_to_sell = GetDayToSell (barcode)) != 0)
 	gtk_label_set_markup (GTK_LABEL (compra->stockday),
-			      g_strdup_printf ("<span weight=\"ultrabold\">%.2f dias</span>", day_to_sell));
+			      g_strdup_printf ("<span weight=\"ultrabold\">%.2f dias"
+					       "</span>", 
+					       day_to_sell));
       else
 	gtk_label_set_markup (GTK_LABEL (compra->stockday),
-			      g_strdup_printf ("<span weight=\"ultrabold\">indefinidos dias</span>"));
+			      g_strdup_printf ("<span weight=\"ultrabold\">"
+					       "indefinidos dias</span>"));
 
       gtk_label_set_markup (GTK_LABEL (compra->current_price),
 			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
 					     PutPoints (GetCurrentPrice (barcode))));
+      g_free (q);
+      q = g_strdup_printf ("SELECT descripcion FROM select_producto(%s)", barcode);
       gtk_label_set_markup (GTK_LABEL (compra->product),
 			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-					     GetDataByOne (g_strdup_printf ("SELECT descripcion FROM producto WHERE barcode='%s'", barcode))));
-
-      res = EjecutarSQL
-	(g_strdup_printf
-	 ("SELECT marca, costo_promedio, canje, stock_pro FROM producto WHERE barcode='%s'", barcode));
-
-      if (strcmp (PQvaluebycol(res, 0, "canje"), "t") == 0)
+					     GetDataByOne (q)));
+      g_free(q);
+      q = g_strdup_printf ("SELECT marca, costo_promedio, canje, stock_pro "
+			   "FROM select_producto(%s)", 
+			   barcode);
+      res = EjecutarSQL	(q);
+      if (g_str_equal (PQvaluebycol(res, 0, "canje"), "t"))
 	{
 	  gtk_label_set_markup (GTK_LABEL (label_canje), "Stock Pro: ");
 	  gtk_label_set_markup
 	    (GTK_LABEL (label_stock_pro),
 	     g_strdup_printf ("<span weight=\"ultrabold\">%.3f</span>",
-			      strtod (PUT (PQvaluebycol(res, 0, "stock_pro")), (char **)NULL)));
+			      strtod (PUT (PQvaluebycol(res, 0, "stock_pro")), 
+				      (char **)NULL)));
 	}
 
-      gtk_label_set_markup
-	(GTK_LABEL (compra->marca),
-	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol(res, 0, "marca")));
+      gtk_label_set_markup (GTK_LABEL (compra->marca),
+			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", 
+					     PQvaluebycol(res, 0, "marca")));
 
       gtk_label_set_markup (GTK_LABEL (compra->unidad),
 			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", GetUnit (barcode)));
 
       gtk_label_set_markup
 	(GTK_LABEL (compra->fifo),
-	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
+	 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", 
+			  PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
 
       gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
 
@@ -2866,18 +2874,12 @@ ShowProductDescription (void)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
 
-  gchar *codigo = GetDataByOne (g_strdup_printf
-				("SELECT codigo FROM producto WHERE barcode='%s'", barcode));
-  gchar *description = GetDataByOne
-    (g_strdup_printf ("SELECT descripcion FROM producto WHERE barcode='%s'", barcode));
-  gchar *marca = GetDataByOne (g_strdup_printf
-			       ("SELECT marca FROM producto WHERE barcode='%s'", barcode));
-  gchar *unidad = GetDataByOne (g_strdup_printf
-				("SELECT unidad FROM producto WHERE barcode='%s'", barcode));
-  gchar *contenido = GetDataByOne
-    (g_strdup_printf ("SELECT contenido FROM producto WHERE barcode='%s'", barcode));
-  gchar *precio = GetDataByOne (g_strdup_printf
-				("SELECT precio FROM producto WHERE barcode='%s'", barcode));
+  gchar *codigo;
+  gchar *description;
+  gchar *marca;
+  gchar *unidad;
+  gchar *contenido;
+  gchar *precio;
   gchar *active_char;
 
   GtkWidget *hbox;
@@ -2888,9 +2890,23 @@ ShowProductDescription (void)
   gint active;
 
   PGresult *res;
+  PGresult *res_aux;
   gint tuples, i;
   GSList *group;
 
+  q = g_strdup_printf("SELECT codigo, descripcion, marca, unidad, contenido, precio "
+		      "FROM select_producto(%s)",
+		      barcode);
+  res_aux = EjecutarSQL(q);
+  g_free(q);
+
+  codigo = PQvaluebycol (res_aux, 0, "codigo");
+  descripcion = PQvaluebycol (res_aux, 0, "descripcion");
+  marca = PQvaluebycol (res_aux, 0, "marca");
+  unidad = PQvaluebycol (res_aux, 0, "unidad");
+  contenido = PQvaluebycol (res_aux, 0, "contenido");
+  precio = PQvaluebycol (res_aux, 0, "precio");
+  
   gtk_widget_set_sensitive (main_window, FALSE);
 
   compra->see_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -3183,7 +3199,7 @@ ShowProductDescription (void)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
 
 
-  res = EjecutarSQL ("SELECT * FROM impuestos WHERE id!=0");
+  res = EjecutarSQL ("SELECT id, descripcion, monto FROM select_otros_impuestos()");
 
   tuples = PQntuples (res);
 
@@ -3198,12 +3214,12 @@ ShowProductDescription (void)
   for (i = 0; i < tuples; i++)
     {
       gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp),
-				 g_strdup_printf ("%s", PQgetvalue (res, i, 1)));
+				 g_strdup_printf ("%s", PQvaluebycol (res, i, "descripcion")));
 
       if (active_char != NULL)
 	{
-	  if (strcmp (PQgetvalue (res, i, 1), active_char) == 0 &&
-	      strcmp (PQgetvalue (res, i, 1), ""))
+	  if (strcmp (PQvaluebycol (res, i, "descripcion"), active_char) == 0 &&
+	      strcmp (PQvaluebycol (res, i, "descripcion"), ""))
 	    active = i;
 	}
       else
@@ -3265,8 +3281,8 @@ Save (GtkWidget *widget, gpointer data)
 			  -1);
     }
   */
-  SaveModifications (codigo, description, marca, unidad, contenido, precio, iva, otros, barcode,
-		     familia, perecible, fraccion);
+  SaveModifications (codigo, description, marca, unidad, contenido, precio, 
+		     iva, otros, barcode, familia, perecible, fraccion);
 
   CloseProductDescription ();
 }
@@ -3692,7 +3708,7 @@ AddNewProduct(void)
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
 
 
-  res = EjecutarSQL ("SELECT * FROM impuestos WHERE id!=0");
+  res = EjecutarSQL ("SELECT descripcion FROM select_otros_impuestos()");
 
   tuples = PQntuples (res);
 
@@ -3703,7 +3719,8 @@ AddNewProduct(void)
   gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp), "Ninguno");
 
   for (i = 0; i < tuples; i++)
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp), PQgetvalue (res, i, 1));
+    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp), 
+			       PQvaluebycol (res, i, "descripcion"));
 
   gtk_combo_box_set_active (GTK_COMBO_BOX (combo_imp), 0);
 
@@ -3737,8 +3754,7 @@ AddNew (GtkWidget *widget, gpointer data)
     ErrorMSG (compra->new_unidad, "Debe Ingresar la Unidad del producto");
   else
     {
-      if (DataExist
-	  (g_strdup_printf ("SELECT codigo FROM producto WHERE codigo='%s'", codigo)) == TRUE)
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM select_producto('%s')", codigo)))
 	{
 	  ErrorMSG (compra->new_codigo, "Ya existe un producto con el mismo codigo corto");
 	  return;

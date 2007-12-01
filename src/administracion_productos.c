@@ -1886,15 +1886,15 @@ ModificarProducto (void)
 	gtk_widget_set_sensitive (main_window, FALSE);
 
 	if (gtk_tree_selection_get_selected (ingreso->selection, NULL, &iter) == TRUE)
-    {
-		gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
-							1, &barcode,
-							-1);
-    }
+	  {
+	    gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
+				1, &barcode,
+				-1);
+	  }
 	else
-    {
-		return;
-    }
+	  {
+	    return;
+	  }
 
 	q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, unidad, "
 						 "contenido, precio FROM select_producto(%s)", barcode);
@@ -1903,10 +1903,10 @@ ModificarProducto (void)
 	g_free(q);
 
 	if (PQresultStatus(res) != PGRES_TUPLES_OK)
-    {
-		g_printerr("error en %s\n%s",G_STRFUNC, PQresultErrorMessage(res));
-		return;
-    }
+	  {
+	    g_printerr("error en %s\n%s",G_STRFUNC, PQresultErrorMessage(res));
+	    return;
+	  }
 
 	codigo = PQgetvalue (res, 0, 0);
 	description = PQgetvalue(res, 0, 1);
