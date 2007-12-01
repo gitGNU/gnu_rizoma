@@ -1319,9 +1319,9 @@ begin
 	FOR i IN 1..array_upper( columnas, 1) LOOP
 	IF usar_like IS TRUE THEN
 	IF i > 1 THEN
-	query := query || $S$ and $S$;
+	query := query || $S$ or  $S$;
 	END IF;
-	query := query || $S$ upper( $S$ || columnas[i] || $S$ ) $S$ || $S$ = upper( '$S$ || expresion ||$S$' ) $S$;
+	query := query || $S$ upper( $S$ || columnas[i] || $S$ ) $S$ || $S$ like upper( '%$S$ || expresion ||$S$%' ) $S$;
 	ELSE
 	IF i > 1 THEN
 	query := query || $S$ and $S$;

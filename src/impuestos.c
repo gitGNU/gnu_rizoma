@@ -131,6 +131,7 @@ EditTask (GtkWidget *widget, gpointer data)
   gchar *new_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (edit_name)));
   gchar *new_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (edit_tasa)));
   PGresult *res;
+  gchar *q;
   gboolean edit = (gboolean) data;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_tasks));
   GtkTreeIter iter;

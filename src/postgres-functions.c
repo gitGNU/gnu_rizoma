@@ -206,8 +206,8 @@ InsertNewDocument (gint document_type, gint sell_type)
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf
-					 ("INSERT INTO documentos_emitidos (tipo_documento, forma_pago, num_documento, fecha_emision)"
-					  "VALUES (%d, %d, %d, NOW())", document_type, sell_type, get_ticket_number (document_type) + 1));
+		     ("INSERT INTO documentos_emitidos (tipo_documento, forma_pago, num_documento, fecha_emision)"
+		      "VALUES (%d, %d, %d, NOW())", document_type, sell_type, get_ticket_number (document_type) + 1));
 
   res = EjecutarSQL ("SELECT last_value FROM documentos_emitidos_id_seq");
 
