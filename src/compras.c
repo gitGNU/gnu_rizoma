@@ -7252,11 +7252,6 @@ InformeComprasShow (void)
 }
 
 void
-PagarDocuemnto (GtkWidget *widget, gpointer data)
-{
-}
-
-void
 ClosePagarDocumentoWin (GtkWidget *widget, gpointer data)
 {
   GtkWidget *window = gtk_widget_get_toplevel (widget);
