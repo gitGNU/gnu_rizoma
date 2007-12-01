@@ -5221,9 +5221,10 @@ AnularProducto (void)
   GtkTreeIter iter1, iter2;
   gint id_compra;
   gchar *codigo_producto;
+  gchar *q;
 
-  if (gtk_tree_selection_get_selected (selection1, NULL, &iter1) == TRUE &&
-      gtk_tree_selection_get_selected (selection2, NULL, &iter2) == TRUE)
+  if (gtk_tree_selection_get_selected (selection1, NULL, &iter1) &&
+      gtk_tree_selection_get_selected (selection2, NULL, &iter2))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter1,
 			  0, &id_compra,
@@ -5231,14 +5232,15 @@ AnularProducto (void)
      gtk_tree_model_get (GTK_TREE_MODEL (compra->compra_store), &iter2,
 			  0, &codigo_producto,
 			  -1);
-
-
-     res = EjecutarSQL (g_strdup_printf ("UPDATE products_buy_history SET anulado='t' WHERE barcode_product=(SELECT barcode FROM producto WHERE codigo='%s') AND id_compra=%d", codigo_producto, id_compra));
-
-      res = EjecutarSQL
-	(g_strdup_printf ("UPDATE compras SET anulada='t' WHERE id NOT IN (SELECT id_compra FROM compra_detalle WHERE id_compra=%d AND anulado='f') AND id=%d", id_compra, id_compra));
-
-      InsertarCompras ();
+     //TODO: pasar esto a funciones de la base pero por el momento funciona
+     q = g_strdup_printf ("UPDATE compra_detalle SET anulado='t' WHERE barcode_product=(SELECT barcode FROM producto WHERE codigo_corto='%s') AND id_compra=%d", codigo_producto, id_compra);
+     res = EjecutarSQL (q);
+     g_free (q);
+     q = g_strdup_printf ("UPDATE compra SET anulada='t' WHERE id NOT IN (SELECT id_compra FROM compra_detalle WHERE id_compra=%d AND anulado='f') AND id=%d", id_compra, id_compra);
+     res = EjecutarSQL (q);
+     g_free (q);
+     
+     InsertarCompras ();
     }
 }
 
