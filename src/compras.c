@@ -5106,9 +5106,6 @@ IngresoParcial (void)
   gtk_widget_show (button);
   gtk_box_pack_end (GTK_BOX (vbox2), button, FALSE, FALSE, 3);
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (IngresarProductoSeleccionado), (gpointer)window);
-
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
@@ -5349,45 +5346,6 @@ AskForCurrentPrice (gchar *barcode)
 
   gtk_window_set_focus (GTK_WINDOW (window), button);
 
-}
-
-gboolean
-IngresarProductoSeleccionado (GtkWidget *widget, gpointer data)
-{
-  /*  GtkWidget *window = (GtkWidget *) data;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->compra_tree));
-  GtkTreeIter iter;
-  gchar *codigo;
-  Productos *products = NULL;*/
-
-  /*
-    if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
-    {
-    gtk_tree_model_get (GTK_TREE_MODEL (compra->compra_store), &iter,
-    0, &codigo,
-			  -1);
-
-			  products = BuscarPorCodigo (codigo);
-
-			  IngresarProducto (products->product->barcode, products->product->cantidad,
-			  products->product->cantidad, products->product->precio);
-
-			  IngresoDetalle (NULL, NULL);
-
-			  CloseIngresoParcial (NULL, window);
-
-			  CompraIngresada ();
-			  InsertarCompras ();
-
-      return TRUE;
-      }
-      else
-      return FALSE;
-  */
-
-
-  //  CambiarStock (NULL, (gpointer) window);
-  return FALSE;
 }
 
 void
