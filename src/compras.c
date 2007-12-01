@@ -4981,6 +4981,7 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
 {
   GtkTreeIter iter;  gchar *value;
   PGresult *res;
+  gchar *q;
 
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
@@ -4988,11 +4989,14 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
       gtk_tree_model_get (GTK_TREE_MODEL (compra->store_prov), &iter,
 			  0, &value,
 			  -1);
-      res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", value));
+      q = g_strdup_printf ("SELECT rut, nombre FROM select_proveedor (%s)", value);
+      res = EjecutarSQL (q);
+      g_free (q);
 
-      gtk_label_set_text (GTK_LABEL (compra->rut_label), PQvaluebycol( res, 0, "rut"));
-      gtk_label_set_text (GTK_LABEL (compra->nombre_label), PQvaluebycol( res, 0, "nombre"));
-
+      gtk_label_set_text (GTK_LABEL (compra->rut_label), 
+			  PQvaluebycol( res, 0, "rut"));
+      gtk_label_set_text (GTK_LABEL (compra->nombre_label), 
+			  PQvaluebycol( res, 0, "nombre"));
     }
 }
 
