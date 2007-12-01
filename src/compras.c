@@ -505,8 +505,11 @@ Pagar (GtkWidget *widget, gpointer data)
 
       if (gtk_toggle_button_get_active (togglebutton) == TRUE)
 	{
-	  descrip = g_strdup_printf ("%s %s %s %s", gtk_entry_get_text (GTK_ENTRY (pago_banco)), gtk_entry_get_text (GTK_ENTRY (pago_serie)),
-				     gtk_entry_get_text (GTK_ENTRY (pago_fecha)), gtk_entry_get_text (GTK_ENTRY (pago_monto)));
+	  descrip = g_strdup_printf ("%s %s %s %s", 
+				     gtk_entry_get_text (GTK_ENTRY (pago_banco)), 
+				     gtk_entry_get_text (GTK_ENTRY (pago_serie)),
+				     gtk_entry_get_text (GTK_ENTRY (pago_fecha)), 
+				     gtk_entry_get_text (GTK_ENTRY (pago_monto)));
 	}
       else
 	descrip = g_strdup_printf ("%s", gtk_entry_get_text (GTK_ENTRY (pago_otro)));
