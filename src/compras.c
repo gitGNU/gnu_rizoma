@@ -2872,8 +2872,8 @@ CloseProductDescription (void)
 void
 ShowProductDescription (void)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
-
+  gchar *q;
+  gchar *barcode;
   gchar *codigo;
   gchar *description;
   gchar *marca;
@@ -2894,6 +2894,7 @@ ShowProductDescription (void)
   gint tuples, i;
   GSList *group;
 
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
   q = g_strdup_printf("SELECT codigo, descripcion, marca, unidad, contenido, precio "
 		      "FROM select_producto(%s)",
 		      barcode);
@@ -2901,7 +2902,7 @@ ShowProductDescription (void)
   g_free(q);
 
   codigo = PQvaluebycol (res_aux, 0, "codigo");
-  descripcion = PQvaluebycol (res_aux, 0, "descripcion");
+  description = PQvaluebycol (res_aux, 0, "descripcion");
   marca = PQvaluebycol (res_aux, 0, "marca");
   unidad = PQvaluebycol (res_aux, 0, "unidad");
   contenido = PQvaluebycol (res_aux, 0, "contenido");
@@ -4077,18 +4078,18 @@ void
 SearchName (GtkEntry *widget, gpointer data)
 {
   GtkEntry *entry = (GtkEntry *) data;
-  gchar *string = g_strdup (gtk_entry_get_text (entry));
+  gchar *q;
   PGresult *res;
   gint i, resultado;
   gint days;
 
   GtkTreeIter iter;
 
+  q = g_strdup_printf ("SELECT * FROM buscar_productos('%s%%')", 
+		       g_strdup (gtk_entry_get_text (entry)));
+  res = EjecutarSQL (q);
+  g_free (q);
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("SELECT * FROM producto WHERE lower(descripcion) LIKE lower('%s%%') OR "
-		      "lower(marca) LIKE lower ('%s%%')",
-		      string, string));
   resultado = PQntuples (res);
 
   gtk_label_set_markup (GTK_LABEL (label_found_compras),
