@@ -31,15 +31,22 @@ Productos *
 CreateNew (gchar *barcode, gdouble cantidad)
 {
   Productos *new = NULL;
-  PGresult *res = EjecutarSQL
-    (g_strdup_printf
-     ("SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, precio, costo_promedio, margen_promedio, (SELECT monto FROM impuesto WHERE id=0 AND "
-      "producto.impuestos='t') as impuesto_normal, (SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, canje , stock_pro, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE barcode='%s'", barcode));
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
+		       "unidad, precio, costo_promedio, margen_promedio, "
+		       "(SELECT monto FROM impuesto WHERE id=0 AND producto.impuestos='t') as impuesto_normal, "
+		       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
+		       "canje, stock_pro, precio_mayor, cantidad_mayor, mayorista "
+		       "FROM select_producto(%s) as producto",
+		       barcode);
+
+  res = EjecutarSQL (q);
+  g_free (q);
 
   new = (Productos *) g_malloc (sizeof (Productos));
-
   new->product = (Producto *) g_malloc (sizeof (Producto));
-
   new->product->cantidad = cantidad;
   new->product->codigo = PQvaluebycol (res, 0, "codigo_corto");
   new->product->barcode = PQvaluebycol (res, 0, "barcode");
@@ -214,34 +221,6 @@ ReturnTotalProducts (Productos *header)
   return total;
 }
 
-/*gchar *
-ReturnAllProductsCode (Productos *header)
-{
-  Productos *cal = header;
-  gchar *codes = (gchar *) g_malloc0 (600);
-  gchar *alter = (gchar *) g_malloc0 (600);
-
-  do
-    {
-      if (strcmp (codes, "") == 0)
-	{
-	  g_snprintf (codes, 600, "%s_% ", cal->product->codigo, cal->product->cantidad);
-	  g_snprintf (alter, 600, "%s", codes);
-	}
-      else
-	{
-	  g_snprintf (codes, 600, "%s%s_%d ", alter, cal->product->codigo, cal->product->cantidad);
-	  g_snprintf (alter, 600, "%s", codes);
-	}
-
-
-      cal = cal->next;
-    }
-  while (cal != header);
-
-  return codes;
-}
-*/
 gint
 ListClean (void)
 {
