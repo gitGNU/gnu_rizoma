@@ -1279,3 +1279,84 @@ BEGIN
 	
 	return;
 END; $$ language plpgsql;
+
+create or replace function buscar_producto(IN expresion varchar(255),
+	IN columnas varchar[],
+	IN usar_like boolean,
+       	OUT barcode int8,
+	OUT codigo_corto varchar(10),
+	OUT marca varchar(35),
+	OUT descripcion varchar(50),
+	OUT contenido varchar(10),
+	OUT unidad varchar(10),
+	OUT stock float8,
+	OUT precio int4,
+	OUT costo_promedio int4,
+	OUT vendidos float8,
+	OUT impuestos bool,
+	OUT otros int4,
+	OUT familia int2,
+	OUT perecibles bool,
+	OUT stock_min float8,
+	OUT margen_promedio float8,
+	OUT fraccion bool,
+	OUT canje bool,
+	OUT stock_pro float8,
+	OUT tasa_canje float8,
+	OUT precio_mayor int4,
+	OUT cantidad_mayor int4,
+	OUT mayorista bool)
+returns setof record as $$
+declare
+	list record;
+	query text;
+	i integer;
+begin
+	query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido, unidad, stock, precio, costo_promedio,
+	vendidos, impuestos, otros, familia, perecibles, stock_min, margen_promedio, fraccion, canje, stock_pro,
+	tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE $S$;
+	
+	FOR i IN 1..array_upper( columnas, 1) LOOP
+	IF usar_like IS TRUE THEN
+	IF i > 1 THEN
+	query := query || $S$ and $S$;
+	END IF;
+	query := query || $S$ upper( $S$ || columnas[i] || $S$ ) $S$ || $S$ = upper( '$S$ || expresion ||$S$' ) $S$;
+	ELSE
+	IF i > 1 THEN
+	query := query || $S$ and $S$;
+	END IF;
+	query := query || columnas[i] || $S$ = upper( '$S$ || expresion || $S$' ) $S$;
+	END IF;
+	END LOOP;
+
+	FOR list IN EXECUTE query LOOP
+	barcode := list.barcode;
+	codigo_corto := list.codigo_corto;
+	marca := list.marca;
+	descripcion := list.descripcion;
+	contenido := list.contenido;
+	unidad := list.unidad;
+	stock := list.stock;
+	precio := list.precio;
+	costo_promedio := list.costo_promedio;
+	vendidos := list.vendidos;
+	impuestos := list.impuestos;
+	otros := list.otros;
+	familia := list.familia;
+	perecibles := list.perecibles;
+	stock_min := list.stock_min;
+	margen_promedio := list.margen_promedio;
+	fraccion := list.fraccion;
+	canje := list.canje;
+	stock_pro := list.stock_pro;
+	tasa_canje := list.tasa_canje;
+	precio_mayor := list.precio_mayor;
+	cantidad_mayor := list.cantidad_mayor;
+	mayorista := list.mayorista;
+	RETURN NEXT;
+        END LOOP;
+	
+	RETURN;
+	
+END; $$ language plpgsql;
