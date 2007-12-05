@@ -992,22 +992,23 @@ end; ' language plpgsql;
 
 -- inserta una nueva compra, y devuelve el id de la compra
 -- postgres-functions.c:778
-create or replace function insert_compra(varchar(100), varchar(100), int2)
-returns int4 as '
+create or replace function insertar_compra(
+		IN proveedor integer,
+		IN n_pedido varchar(100),
+		IN dias_pago integer,
+		OUT id_compra integer)
+returns integer as $$
 declare
-	l record;
-	q varchar(255);
+		id_forma_pago integer;
 begin
-INSERT INTO compras VALUES (DEFAULT, NOW(), quote_literal($1),quote_literal($2), $3, FALSE, FALSE);
+		SELECT * INTO id_forma_pago FROM get_forma_pago_dias( dias_pago );
 
-q := ''SELECT last_value FROM compras_id_seq'';
+		INSERT INTO compra(id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada ) VALUES (DEFAULT, NOW(), proveedor, n_pedido, id_forma_pago, 'f', 'f' );
 
-for l in execute q loop
-	return l.last_value;
-end loop;
+		SELECT currval(  'compra_id_seq' ) INTO id_compra;
 
-return -1;
-end; ' language plpgsql;
+		return;
+end; $$ language plpgsql;
 
 -- inserta el detalle de una compra
 -- postgres-functions.c:808, 814
@@ -1045,12 +1046,30 @@ end; ' language plpgsql;
 
 -- inserta una nueva forma de pago
 -- postgres-functions.c:1875
-create or replace function insert_forma_de_pago(varchar(50), int2)
-returns void as '
+create or replace function insertar_forma_de_pago(
+		IN nombre_forma varchar(50),
+		IN dias integer,
+		OUT id_forma integer)
+returns integer as $$
+BEGIN
+		INSERT INTO formas_pago (id, nombre, days ) VALUES( DEFAULT, nombre_forma, dias );
+		SELECT currval( 'formas_pago_id_seq' ) INTO id_forma;
+
+		RETURN;
+END; $$ language plpgsql;
+
+create or replace function get_forma_pago_dias(
+	IN dias integer,
+	OUT id_forma integer)
+returns integer as $$
+declare
+	query varchar( 250 );
 begin
-INSERT INTO formas_pagos VALUES (DEFAULT, quote_literal($1), $2);
-return;
-end; ' language plpgsql;
+	SELECT id INTO id_forma FROM formas_pago WHERE days = dias;
+	IF NOT FOUND THEN
+	SELECT * INTO id_forma FROM insertar_forma_de_pago( dias || ' Dias', dias );
+	END IF;
+end; $$ language plpgsql;
 
 -- anula una compra
 -- postgres-functions.c:1888
@@ -1110,7 +1129,7 @@ declare
 	q varchar(255);
 begin
 q := 'SELECT rut, dv, nombre, direccion, ciudad, comuna, telefono,
-     email, web contacto, giro FROM proveedor';
+     email, web, contacto, giro FROM proveedor';
 
 for l in execute q loop
     rut := l.rut;
@@ -1360,3 +1379,12 @@ begin
 	RETURN;
 	
 END; $$ language plpgsql;
+
+create or replace function get_compras ()
+returns setof record as $$
+declare
+	query varchar(250);
+begin
+	query := $S$ select t2.nombre, SUM((t3.cantidad - t3.cantidad_ingresada) * t3.precio) as precio, date_part('day', t1.fecha), date_part ('month', t1.fecha), date_part('year', t1.fecha), t1.id from compra AS t1, proveedor AS t2, compra_detalle AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad  GROUP BY t1.id, t2.nombre, t1.fecha ORDER BY fecha DESC $S$;
+	
+end; $$ language plpgsql;
