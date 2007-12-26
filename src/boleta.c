@@ -23,6 +23,7 @@
 
 #include"tipos.h"
 #include"postgres-functions.h"
+#include"rizoma_errors.h"
 
 gint
 get_ticket_number (gint document_type)
@@ -49,9 +50,15 @@ get_ticket_number (gint document_type)
       break;
     }
 
-  ticket_number = atoi (PQgetvalue (res, 0, 0)) + 1;
-
-  return ticket_number;
+  if( PQntuples( res ) == 0 ) {
+	  rizoma_errors_set( "Ocurrio un error al intentar obtener el numero de documento", "get_ticket_number()", ALERT );
+	  rizoma_error_window( NULL );
+	  return 0;
+  } else {
+	  ticket_number = atoi (PQgetvalue (res, 0, 0)) + 1;
+	  
+	  return ticket_number;
+  }
 }
 
 gboolean

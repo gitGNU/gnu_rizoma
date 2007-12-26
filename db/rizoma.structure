@@ -416,7 +416,7 @@ create table producto_recibido (
 -- compra_detalle
 -- antes products_buy_history
 create table compra_detalle (
-  id                        int4 not null,
+  id                        serial not null,
   id_compra                 int4 not null,
   cantidad                  float8,
   precio                    float8 not null,

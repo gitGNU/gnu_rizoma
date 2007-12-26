@@ -74,10 +74,10 @@ rizoma_errors.c rizoma_errors.h
 
 rizoma_config_SOURCES = rizoma-config.c 
 
-rizoma_LDADD = $(GTK_LIBS) -lps
+rizoma_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
 
-fakebuy_LDADD = $(GTK_LIBS) -lps
+fakebuy_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
 
 rizoma_config_LDADD = $(GNOMEUI_LIBS)

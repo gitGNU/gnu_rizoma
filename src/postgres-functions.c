@@ -221,7 +221,6 @@ gboolean
 SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount, gint boleta,
 	  gint tipo_documento, gchar *cheque_date, gboolean cheques, gboolean canceled)
 {
-  PGresult *res;
   gint venta_id, monto, id_documento;
   gint day, month, year;
   gchar *serie, *numero, *banco, *plaza;
@@ -315,7 +314,7 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 {
   PGresult *res;
   //TODO: arreglar este select para ajustarse al nuevo esquema, hace
-  //que se vaya de segfault 
+  //que se vaya de segfault
   res = EjecutarSQL
 	(g_strdup_printf
 	 ("SELECT SUM ((SELECT SUM (cantidad * precio) FROM venta_detalle WHERE id_venta=ventas.id)), "
@@ -786,13 +785,12 @@ AgregarCompra (gchar *rut, gchar *nota, gint dias_pago)
   PGresult *res;
   gint id_compra;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO compra VALUES (DEFAULT, NOW(), '%s', '%s', %d, 'f', 'f')",
-									  rut, nota, dias_pago == 0 ? dias_pago - 1 : dias_pago));
-
-  id_compra = atoi (GetDataByOne ("SELECT last_value FROM compra_id_seq"));
+  id_compra = atoi(
+	  GetDataByOne (
+		  g_strdup_printf( "SELECT * FROM insertar_compra( '%s', '%s', '%d' )", rut, nota,
+						   dias_pago == 0 ? dias_pago - 1 : dias_pago ) ) );
 
   SaveBuyProducts (compra->header_compra, id_compra);
-
 }
 
 void
@@ -807,7 +805,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
     {
 
 	  if (products->product->iva != -1)
-		iva = (gdouble) (products->product->precio_compra * products->product->cantidad) *
+		  iva = (gdouble) (products->product->precio_compra * products->product->cantidad) *
 		  (gdouble)products->product->iva / 100;
 
 	  if (products->product->otros != -1)
@@ -816,13 +814,12 @@ SaveBuyProducts (Productos *header, gint id_compra)
 
 	  cantidad = CUT (g_strdup_printf ("%.2f", products->product->cantidad));
 
-	  res = EjecutarSQL (g_strdup_printf ("INSERT INTO products_buy_history VALUES (DEFAULT, %d, %s, "
-										  "%s, %d, 0, 0, '%s', %d, %d, %d)",
-										  id_compra, cantidad, CUT (g_strdup_printf ("%.2f", products->product->precio_compra)),
-										  products->product->precio, products->product->barcode,
-										  products->product->margen, lround (iva), lround (otros)));
-
-	  res = EjecutarSQL (g_strdup_printf ("UPDATE productos SET precio=%d WHERE barcode='%s'", products->product->precio, products->product->barcode));
+	  res = EjecutarSQL(
+		  g_strdup_printf(
+			  "SELECT * FROM insertar_detalle_compra(  %d, %s::double precision, %s::double precision, %d, 0::double precision, 0::smalint, %s, %d, %d, %d)",
+			  id_compra, cantidad, CUT (g_strdup_printf ("%.2f", products->product->precio_compra)),
+			  products->product->precio, products->product->barcode,
+			  products->product->margen, lround (iva), lround (otros)));
 
 	  products = products->next;
     }
@@ -1356,13 +1353,12 @@ GetIVA (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT impuestos.monto FROM producto, impuestos WHERE productos.barcode='%s' AND "
-									  "productos.impuestos='true' AND impuestos.id=0", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
 
   tuples = PQntuples (res);
 
   if (tuples != 0)
-	return strtod (PUT(PQgetvalue (res, 0, 0)), (char **)NULL);
+	return strtod (PUT(PQvaluebycol (res, 0, "valor")), (char **)NULL);
   else
 	return -1;
 }
@@ -1373,13 +1369,12 @@ GetOtros (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT impuestos.monto FROM producto, impuestos WHERE productos.barcode='%s' AND "
-									  "impuestos.id=productos.otros", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_otro_impuesto( %s )", barcode));
 
   tuples = PQntuples (res);
 
   if (tuples != 0)
-	return strtod (PUT(PQgetvalue (res, 0, 0)), (char **)NULL);
+	return strtod (PUT(PQvaluebycol (res, 0, "valor")), (char **)NULL);
   else
 	return -1;
 }

@@ -1012,13 +1012,25 @@ end; $$ language plpgsql;
 
 -- inserta el detalle de una compra
 -- postgres-functions.c:808, 814
-create or replace function insert_detalle_compra(int4, float8, float8, int4, varchar(14), int4, int4, int4)
-returns void as '
+create or replace function insertar_detalle_compra(
+		IN id_compra integer,
+		IN cantidad double precision,
+		IN precio double precision,
+		IN precio_venta integer,
+		IN cantidad_ingresada double precision,
+		IN descuento smallint,
+		IN barcode_product bigint,
+		IN margen integer,
+		IN iva integer,
+		IN otros_impuestos integer)
+returns void as $$
 begin
-INSERT INTO products_buy_history VALUES (DEFAULT, $1, $2, $3, $4, 0, 0, quote_literal($5),$6, $7, $8);
-UPDATE productos SET precio=$4 WHERE barcode=quote_literal($5);
-return;
-end;' language plpgsql;
+		EXECUTE $S$ INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos ) VALUES (DEFAULT,$S$|| id_compra ||$S$,$S$|| cantidad ||$S$,$S$|| precio ||$S$,$S$|| precio_venta ||$S$,$S$|| cantidad_ingresada ||$S$,$S$|| descuento ||$S$,$S$|| barcode_product ||$S$,$S$|| margen ||$S$,$S$|| iva ||$S$,$S$|| otros_impuestos ||$S$)$S$;
+
+		EXECUTE $S$ UPDATE producto SET precio=$S$|| precio_venta ||$S$ WHERE barcode=$S$|| barcode_product;
+
+		return;
+end; $$ language plpgsql;  
 
 
 -- ??paga una factura
@@ -1374,17 +1386,98 @@ begin
 	cantidad_mayor := list.cantidad_mayor;
 	mayorista := list.mayorista;
 	RETURN NEXT;
-        END LOOP;
+    END LOOP;
 	
 	RETURN;
 	
 END; $$ language plpgsql;
 
-create or replace function get_compras ()
+create or replace function get_compras (
+		OUT id_compra integer,
+		OUT nombre varchar(100),
+		OUT precio double precision,
+		OUT dia integer,
+		OUT mes integer,
+		OUT ano integer,
+		OUT completada smallint)
 returns setof record as $$
 declare
-	query varchar(250);
+		list record;
+		query text;
 begin
-	query := $S$ select t2.nombre, SUM((t3.cantidad - t3.cantidad_ingresada) * t3.precio) as precio, date_part('day', t1.fecha), date_part ('month', t1.fecha), date_part('year', t1.fecha), t1.id from compra AS t1, proveedor AS t2, compra_detalle AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad  GROUP BY t1.id, t2.nombre, t1.fecha ORDER BY fecha DESC $S$;
-	
+		query := $S$ select t1.id, t2.nombre, SUM((t3.cantidad - t3.cantidad_ingresada) * t3.precio) as precio, date_part('day', t1.fecha) as dia, date_part ('month', t1.fecha) as mes, date_part('year', t1.fecha) as ano, t1.id, t3.cantidad_ingresada, t3.cantidad from compra AS t1, proveedor AS t2, compra_detalle AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad and t3.anulado='f' GROUP BY t1.id, t2.nombre, t1.fecha, t3.cantidad_ingresada, t3.cantidad ORDER BY fecha DESC $S$;
+
+	FOR list IN EXECUTE query LOOP
+	id_compra := list.id;
+	nombre := list.nombre;
+	precio := list.precio;
+	dia := list.dia;
+	mes := list.mes;
+	ano := list.ano;
+	IF list.cantidad_ingresada > 0 AND list.cantidad > list.cantidad_ingresada THEN
+	completada := 1;
+	ELSE
+	completada := 0;
+	END IF;
+	RETURN NEXT;
+	END LOOP;
+
+end; $$ language plpgsql;
+
+create or replace function get_detalle_compra(
+		IN id_compra integer,
+		OUT codigo_corto integer,
+		OUT descripcion varchar(50),
+		OUT marca varchar(35),
+		OUT contenido varchar(10),
+		OUT unidad varchar(10),
+		OUT precio integer,
+		OUT cantidad double precision,
+		OUT cantidad_ingresada double precision,
+		OUT costo_ingresado bigint,
+		OUT barcode bigint,
+		OUT precio_venta integer,
+		OUT margen integer)
+returns setof record as $$
+declare
+		list record;
+		query text;
+begin
+		query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t1.precio, t1.cantidad, t1.cantidad_ingresada, (t1.precio * (t1.cantidad - t1.cantidad_ingresada))::bigint as costo_ingresado, t2.barcode, t1.precio_venta, t1.margen FROM compra_detalle AS t1, producto AS t2 WHERE t1.id_compra=$S$|| id_compra ||$S$ AND t2.barcode=t1.barcode_product AND t1.cantidad_ingresada<t1.cantidad AND t1.anulado='f'$S$;
+		
+		FOR list IN EXECUTE query LOOP
+		codigo_corto := list.codigo_corto;
+		descripcion := list.descripcion;
+		marca := list.marca;
+		contenido := list.contenido;
+		unidad := list.unidad;
+		precio := list.precio;
+		cantidad := list.cantidad;
+		cantidad_ingresada := list.cantidad_ingresada;
+		costo_ingresado := list.costo_ingresado;
+		barcode := list.barcode;
+		precio_venta := list.precio_venta;
+		margen := list.margen;
+		RETURN NEXT;
+		END LOOP;
+
+END; $$ LANGUAGE plpgsql;
+
+ 
+create or replace function get_iva(
+		IN barcode bigint,
+		OUT valor double precision)
+returns double precision as $$
+begin
+
+		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=0;
+
+end; $$ language plpgsql;
+
+create or replace function get_otro_impuesto(
+		IN barcode bigint,
+		OUT valor double precision)
+returns double precision as $$
+begin
+		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode AND impuesto.id=producto.otros;
 end; $$ language plpgsql;

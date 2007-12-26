@@ -92,7 +92,8 @@ rizoma_error_window (GtkWidget *widget)
   if (error_window != NULL)
     return -1;
 
-  gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
+  if( widget != NULL )
+	  gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
   
   error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (error_window, -1, -1);

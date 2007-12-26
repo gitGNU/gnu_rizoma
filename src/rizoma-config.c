@@ -282,6 +282,38 @@ volcar_db (GtkWidget *button, gpointer user_data)
     gtk_widget_show_all (window);
     return;
   }
+
+  path = g_strdup_printf ("%s/funciones.sql", sql_data);
+  command = g_strdup_printf ("su - %s -c \"psql -U %s %s -f %s\"", local_user_pg, user_pg, name_db, path);
+  g_print( command );
+    if ((system (command)) != 0)
+  {
+    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (gtk_widget_get_toplevel (button)));
+
+    vbox = gtk_hbox_new (FALSE, 3);
+    gtk_container_add (GTK_CONTAINER (window), vbox);
+
+    label = gtk_label_new (g_strdup_printf ("Hubo un problema desconocido mientras se creaban las funciones PL/SQL\n"
+											"Sin estas funciones el sistema no puede funcionar por lo que el problema debe ser resuelto.\n"
+											"Para crear las funciones ejecute el siguiente archivo en la base de datos:\n"
+											"\n%s\n", path ));
+    gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
+
+    hbox = gtk_hbox_new (FALSE, 3);
+    gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+
+    button2 = gtk_button_new_from_stock (GTK_STOCK_OK);
+    gtk_box_pack_end (GTK_BOX (hbox), button2, FALSE, FALSE, 3);
+
+    g_signal_connect (G_OBJECT (button2), "clicked",
+		      G_CALLBACK (close_window), NULL);
+
+    gtk_widget_show_all (window);
+    return;
+  }
+
+  
 }
 
 gboolean
