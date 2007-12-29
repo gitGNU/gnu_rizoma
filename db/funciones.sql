@@ -1494,3 +1494,44 @@ returns double precision as $$
 begin
 		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode AND impuesto.id=producto.otros;
 end; $$ language plpgsql;
+
+-- esta funcion es necesario que se probada, porque tiene variaciones en el 
+-- resultado respecto a la sentencia original 
+--
+create or replace function select_stats_proveedor(
+       	  	  IN rut int4,
+		  OUT barcode int8,
+		  OUT descripcion varchar(50),
+		  OUT marca varchar(35),
+		  OUT contenido varchar(10),
+		  OUT unidad varchar(10),
+		  OUT suma_cantingresada double precision,
+		  OUT vendidos float8)
+returns setof record as $$
+declare 
+	l record;
+	q text;
+begin
+q := $S$ select barcode, descripcion, marca, contenido, unidad,
+     	 	sum(cantidad_ingresada) as suma, vendidos
+		from compra inner join compra_detalle 
+		     on compra.id = compra_detalle.id_compra 
+		     inner join producto 
+		     on compra_detalle.barcode_product = producto.barcode 
+		where compra.rut_proveedor = $S$ || quote_literal(rut)
+		|| $S$ group by 1,2,3,4,5,7 $S$;
+
+for l in execute q loop
+    barcode := l.barcode;
+    descripcion := l.descripcion;
+    marca := l.marca;
+    contenido := l.contenido;
+    unidad := l.unidad;
+    suma_cantingresada := l.suma;
+    vendidos := l.vendidos;
+    return next;
+end loop;
+
+return;
+end; $$ language plpgsql;
+

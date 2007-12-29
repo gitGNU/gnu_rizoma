@@ -74,6 +74,7 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
   gchar *rut;
   gint tuples, i;
   gdouble total1 = 0, total2 = 0;
+  gchar *q;
 
   if ((gtk_tree_selection_get_selected (selection, &model, &iter)) == FALSE)
     return;
@@ -82,9 +83,12 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
 		      1, &rut,
 		      -1);
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("SELECT descripcion, marca, contenido, unidad, (SELECT SUM(cantidad_ingresada) FROM compra_detalle WHERE barcode_product=barcode),vendidos FROM producto WHERE barcode IN (SELECT barcode_product FROM products_buy_history WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor='%s') AND anulado='f' GROUP BY barcode_product)", rut));
+  q = g_strdup_printf("SELECT descripcion, marca, contenido, unidad, "
+		      "suma_cantingresada, vendidos "
+		      "FROM select_stats_proveedor(%s)", rut);
+  res = EjecutarSQL(q);
+
+  g_free(q);
 
   if (res == NULL)
     return;
@@ -102,21 +106,23 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
 
       gtk_tree_store_append (proveedores_store, &iter, NULL);
       gtk_tree_store_set (proveedores_store, &iter,
-			  0, PQgetvalue (res, i, 0),
-			  1, PQgetvalue (res, i, 1),
-			  2, PQgetvalue (res, i, 2),
-			  3, PQgetvalue (res, i, 3),
-			  4, strtod (PQgetvalue (res, i, 4), (char **)NULL),
-			  5, strtod (PQgetvalue (res, i, 5), (char **)NULL),
+			  0, PQvaluebycol(res, i, "descripcion"),
+			  1, PQvaluebycol(res, i, "marca"),
+			  2, PQvaluebycol(res, i, "contenido"),
+			  3, PQvaluebycol(res, i, "unidad"),
+			  4, strtod(PQvaluebycol(res, i, "suma_cantingresada"),
+				    (char **)NULL),
+			  5, strtod(PQvaluebycol(res, i, "vendidos"), 
+				    (char **)NULL),
 			  -1);
-
     }
 
   gtk_label_set_text (GTK_LABEL (total_comprado), g_strdup_printf ("%.2f", total1));
   gtk_label_set_text (GTK_LABEL (total_vendido), g_strdup_printf ("%.2f", total2));
 
-  res = EjecutarSQL
-    (g_strdup_printf ("SELECT nombre, direccion, telefono, web, giro, comuna, email FROM proveedor WHERE rut='%s'", rut));
+  q = g_strdup_printf("SELECT nombre, direccion, telefono, web, giro, comuna, email FROM select_proveedor(%s)", rut);
+  res = EjecutarSQL(q);
+  g_free(q);
 
   if (res == NULL)
     return;
