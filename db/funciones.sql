@@ -95,14 +95,27 @@ RETURN;
 END; $$ language plpgsql;
 
 -- inserta un nuevo producto
--- administracion_productos.c:1351
-create or replace function insert_producto(prod_barcode int8, prod_codigo varchar(10),prod_precio int4)
-returns void as $$
+create or replace function insertar_producto(
+		IN prod_barcode bigint,
+		IN prod_codigo varchar(10),
+		IN prod_marca varchar(35),
+		IN prod_descripcion varchar(50),
+		IN prod_contenido varchar(10),
+		IN prod_unidad varchar(10),
+		IN prod_iva boolean,
+		IN prod_otros integer,
+		IN prod_familia smallint,
+		IN prod_perecible boolean,
+		IN prod_fraccion boolean)
+returns integer as $$
 begin
-INSERT INTO producto (barcode,codigo_corto,precio) VALUES (prod_barcode,
-       quote_literal(prod_codigo), prod_precio);
-
-RETURN ;
+		INSERT INTO producto (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia, perecibles, fraccion) VALUES (prod_barcode, prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva, prod_otros, prod_familia, prod_perecible, prod_fraccion);
+		
+		IF FOUND IS TRUE THEN
+		RETURN 1;
+		ELSE
+		RETURN 0;
+		END IF;
 END; $$ language plpgsql;
 
 -- revisa si existe un producto con el mismo código

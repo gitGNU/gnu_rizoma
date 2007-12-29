@@ -3730,75 +3730,60 @@ AddNewProduct(void)
 void
 AddNew (GtkWidget *widget, gpointer data)
 {
-    GtkTreeModel *model;
-    GtkTreeIter iter;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  
+  gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_codigo)));
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_barcode)));
+  gchar *description = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_description)));
+  gchar *marca = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_marca)));
+  gchar *contenido = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_contenido)));
+  gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_unidad)));
+  gchar *otros, *familia;
 
-    gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_codigo)));
-    gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_barcode)));
-    gchar *description = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_description)));
-    gchar *marca = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_marca)));
-    gchar *contenido = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_contenido)));
-    gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_unidad)));
-    gchar *otros, *familia;
-
-    if (strcmp (codigo, "") == 0)
+  if (strcmp (codigo, "") == 0)
 	ErrorMSG (compra->new_codigo, "Debe ingresar un codigo corto");
-    else if (strcmp (barcode, "") == 0)
+  else if (strcmp (barcode, "") == 0)
 	ErrorMSG (compra->new_barcode, "Debe Ingresar un Codigo de Barras");
-    else if (strcmp (description, "") == 0)
+  else if (strcmp (description, "") == 0)
 	ErrorMSG (compra->new_description, "Debe Ingresar una Descripcion");
-    else if (strcmp (marca, "") == 0)
+  else if (strcmp (marca, "") == 0)
 	ErrorMSG (compra->new_marca, "Debe Ingresar al Marca del producto");
-    else if (strcmp (contenido, "") == 0)
+  else if (strcmp (contenido, "") == 0)
 	ErrorMSG (compra->new_contenido, "Debe Ingresar el Contenido del producto");
-    else if (strcmp (unidad, "") == 0)
-	ErrorMSG (compra->new_unidad, "Debe Ingresar la Unidad del producto");
-    else
+  else if (strcmp (unidad, "") == 0)
+	  ErrorMSG (compra->new_unidad, "Debe Ingresar la Unidad del producto");
+  else
     {
-	if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM select_producto('%s')", codigo)))
-	{
-	    ErrorMSG (compra->new_codigo, "Ya existe un producto con el mismo codigo corto");
-	    return;
-	}
+	  if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM select_producto('%s')", codigo)))
+		{
+		  ErrorMSG (compra->new_codigo, "Ya existe un producto con el mismo codigo corto");
+		  return;
+		}
 
-	if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_imp)) == 0)
+	  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_imp)) == 0)
 	    otros = "";
-	else
-	{
-	    model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_imp));
-	    gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_imp), &iter);
-
-	    gtk_tree_model_get (model, &iter,
-				0, &otros,
-				-1);
-	}
-
-	/*
-	  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_fami)) == -1)
-	  familia = "";
 	  else
-	  {
-	  model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_fami));
-	  gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_fami), &iter);
+		{
+		  model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_imp));
+		  gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_imp), &iter);
 
-	  gtk_tree_model_get (model, &iter,
-	  0, &familia,
-	  -1);
-	  }
-	*/
+		  gtk_tree_model_get (model, &iter,
+							  0, &otros,
+							  -1);
+		}
 
-	//      AddNewProductToDB (codigo, ModifieBarcode (barcode), description, marca,
-	AddNewProductToDB (codigo, barcode, description, marca,
-			   CUT (contenido), unidad, iva, otros, familia, perecible, fraccion);
+	  AddNewProductToDB (codigo, barcode, description, marca,
+						 CUT (contenido), unidad, iva, otros, familia, perecible, fraccion);
 
-	SearchProductHistory ();
+	  SearchProductHistory ();
 
-	CloseAddWindow (NULL, NULL);
+	  CloseAddWindow (NULL, NULL);
 
-	gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
+	  gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
     }
 
-    return;
+  return;
 }
 
 void
@@ -4540,7 +4525,7 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
 }
 
 void
-IngresarComprax (void)
+IngresarCompra (void)
 {
     Productos *products = compra->header;
     gint id, doc;

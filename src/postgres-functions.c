@@ -764,19 +764,26 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 
 }
 
-void
+gboolean
 AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca,
 				   gchar *contenido, gchar *unidad, gboolean iva, gchar *otros, gchar *familia,
 				   gboolean perecible, gboolean fraccion)
 {
-  PGresult *res;
-
-  res = EjecutarSQL (g_strdup_printf
-					 ("INSERT INTO productos (codigo, barcode, descripcion, marca, contenido, unidad, stock, precio, fifo, vendidos, "
-					  "impuestos, otros, perecibles, stock_min, margen_promedio, merma_unid, fraccion) VALUES ('%s', '%s', upper('%s'), upper('%s'), "
-					  "'%s', upper('%s'), '0', 0, 0, 0, '%d', (SELECT id FROM impuestos WHERE descripcion='%s'), '%d', 0, 0, 0, '%d')",
-					  codigo, barcode, SPE(description), SPE(marca), contenido, unidad, iva, otros, perecible, fraccion));
-
+  gint *insertado;
+  
+  insertado = atoi( GetDataByOne (
+								  g_strdup_printf
+								  ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, %s::varchar,"
+								   "upper('%s')::varchar, upper('%s')::varchar,%s::varchar, upper('%s')::varchar, "
+								   "%d::boolean, (SELECT id FROM impuesto WHERE descripcion='%s'),0::smallint, 0::boolean,"
+								   "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
+								   otros, perecible, fraccion)));
+  
+  if( insertado == 1 ) {
+	return TRUE;
+  } else {
+	return FALSE;
+  }
 }
 
 void
