@@ -230,3 +230,28 @@ echo products_sell_history > /dev/stderr
 echo 
 psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, id_venta, barcode, cantidad, precio, fifo, iva, otros from products_sell_history" | awk -F'|' '{printf ("COPY venta_detalle (id, id_venta, barcode, cantidad, precio, fifo, iva, otros) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, $3, $4, $5, $6, $7, $8)}'
 
+# actualiza las secuencias
+echo "select setval('compra_id_seq', max(id)) FROM compra;"
+echo "select setval('abono_id_seq', max(id)) FROM abono;"
+echo "select setval('asistencia_id_seq', max(id)) FROM asistencia;"
+echo "select setval('caja_id_seq', max(id)) FROM caja;"
+echo "select setval('canje_id_seq', max(id)) FROM canje;"
+echo "select setval('cheques_id_seq', max(id)) FROM cheques;"
+echo "select setval('compra_id_seq', max(id)) FROM compra;"
+echo "select setval('deuda_id_seq', max(id)) FROM deuda;"
+echo "select setval('devolucion_id_seq', max(id)) FROM devolucion;"
+echo "select setval('documentos_detalle_id_seq', max(id)) FROM documentos_detalle;"
+echo " select setval('documentos_emitidos_id_seq', max(id)) FROM documentos_emitidos;"
+echo "select setval('egreso_id_seq', max(id)) FROM egreso;"
+echo "select setval('factura_compra_id_seq', max(id)) FROM factura_compra;"
+echo "select setval('familias_id_seq', max(id)) FROM familias;"
+echo "select setval('formas_pago_id_seq', max(id)) FROM formas_pago;"
+echo "select setval('guias_compra_id_seq', max(id)) FROM guias_compra;"
+echo "select setval('impuesto_id_seq', max(id)) FROM impuesto;"
+echo "select setval('ingreso_id_seq', max(id)) FROM ingreso;"
+echo "select setval('merma_id_seq', max(id)) FROM merma;"
+echo "select setval('tarjetas_id_seq', max(id)) FROM tarjetas;"
+echo "select setval('tipo_egreso_id_seq', max(id)) FROM tipo_egreso;"
+echo "select setval('tipo_ingreso_id_seq', max(id)) FROM tipo_ingreso;"
+echo "select setval('tipo_merma_id_seq', max(id)) FROM tipo_merma;"
+echo "select setval('users_id_seq', max(id)) FROM users;"
