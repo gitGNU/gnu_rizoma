@@ -47,13 +47,9 @@ int read_conf (char *file, Parms parms[], int total);
 
 int read_dimensions (char *file, ParmsDimensions parms[], int total);
 
-RizomaConf * rizoma_read_conf (char *file);
+char * rizoma_get_value (char *var_name);
 
-char * rizoma_get_value (RizomaConf *header, char *var_name);
-
-int rizoma_set_value (RizomaConf *header, char *var_name, char *new_value);
-
-int rizoma_save_file (RizomaConf *header);
+int rizoma_set_value (char *var_name, char *new_value);
 
 int rizoma_extract_xy (char *value, float *x, float *y);
 

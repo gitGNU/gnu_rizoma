@@ -106,16 +106,16 @@ EjecutarSQL (gchar *sentencia)
   PGresult *res;
   ConnStatusType status;
 
-  char *host = rizoma_get_value (rizoma_config, "SERVER_HOST");
-  char *name = rizoma_get_value (rizoma_config, "DB_NAME");
-  char *user = rizoma_get_value (rizoma_config, "USER");
-  char *pass = rizoma_get_value (rizoma_config, "PASSWORD");
-  char *port = rizoma_get_value (rizoma_config, "PORT");
+  char *host = rizoma_get_value ("SERVER_HOST");
+  char *name = rizoma_get_value ("DB_NAME");
+  char *user = rizoma_get_value ("USER");
+  char *pass = rizoma_get_value ("PASSWORD");
+  char *port = rizoma_get_value ("PORT");
 
   if (port == NULL)
 	port = g_strdup("5432");
 
-  char *sslmode = rizoma_get_value (rizoma_config, "SSLMODE");
+  char *sslmode = rizoma_get_value ("SSLMODE");
   if (sslmode == NULL)
 	sslmode = g_strdup("require");
 
@@ -225,7 +225,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gint day, month, year;
   gchar *serie, *numero, *banco, *plaza;
   gchar *inst, *fecha;
-  gchar *vale_dir = rizoma_get_value (rizoma_config, "VALE_DIR");
+  gchar *vale_dir = rizoma_get_value ("VALE_DIR");
 
   id_documento = InsertNewDocument (tipo_documento, tipo_venta);
 
@@ -791,11 +791,13 @@ AgregarCompra (gchar *rut, gchar *nota, gint dias_pago)
 {
   PGresult *res;
   gint id_compra;
+  gchar *q;
 
-  id_compra = atoi(
-	  GetDataByOne (
-		  g_strdup_printf( "SELECT * FROM insertar_compra( '%s', '%s', '%d' )", rut, nota,
-						   dias_pago == 0 ? dias_pago - 1 : dias_pago ) ) );
+  q = g_strdup_printf("SELECT * FROM insertar_compra( '%s', '%s', '%d' )", 
+		      rut, nota, dias_pago == 0 ? dias_pago - 1 : dias_pago);
+  id_compra = atoi(GetDataByOne(q));
+
+  g_free(q);
 
   SaveBuyProducts (compra->header_compra, id_compra);
 }
@@ -807,28 +809,39 @@ SaveBuyProducts (Productos *header, gint id_compra)
   PGresult *res;
   gdouble iva, otros = 0;
   gchar *cantidad;
+  gchar *precio_compra;
+  gchar *q;
 
   do
     {
-
-	  if (products->product->iva != -1)
-		  iva = (gdouble) (products->product->precio_compra * products->product->cantidad) *
-		  (gdouble)products->product->iva / 100;
-
-	  if (products->product->otros != -1)
-		otros = (gdouble) (products->product->precio_compra * products->product->cantidad) *
-		  (gdouble)products->product->otros / 100;
-
-	  cantidad = CUT (g_strdup_printf ("%.2f", products->product->cantidad));
-
-	  res = EjecutarSQL(
-		  g_strdup_printf(
-			  "SELECT * FROM insertar_detalle_compra(  %d, %s::double precision, %s::double precision, %d, 0::double precision, 0::smalint, %s, %d, %d, %d)",
-			  id_compra, cantidad, CUT (g_strdup_printf ("%.2f", products->product->precio_compra)),
+      
+      if (products->product->iva != -1)
+	iva = (gdouble) (products->product->precio_compra * 
+			 products->product->cantidad) *	  
+	  (gdouble)products->product->iva / 100;
+      
+      if (products->product->otros != -1)
+	otros = (gdouble) (products->product->precio_compra * 
+			   products->product->cantidad) *
+	  (gdouble)products->product->otros / 100;
+      
+      cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
+      precio_compra=g_strdup_printf ("%.2f", products->product->precio_compra);
+      
+      q = g_strdup_printf("SELECT * FROM insertar_detalle_compra(%d, "
+			  "%s::double precision, %s::double precision, %d, "
+			  "0::double precision, 0::smallint, %s, %d, %d, %d)",
+			  id_compra, CUT(cantidad), CUT (precio_compra),
 			  products->product->precio, products->product->barcode,
-			  products->product->margen, lround (iva), lround (otros)));
+			  products->product->margen, lround (iva), 
+			  lround (otros));
+      res = EjecutarSQL(q);
 
-	  products = products->next;
+      g_free(precio_compra);
+      g_free(cantidad);
+      g_free(q);
+      
+      products = products->next;
     }
   while (products != header);
 }

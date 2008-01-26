@@ -60,7 +60,7 @@ PrintTree (GtkWidget *widget, gpointer data)
   gint columns = gtk_tree_model_get_n_columns (model);
   gint i;
   gint cols = 0;
-  gchar *temp_directory = rizoma_get_value (rizoma_config, "TEMP_FILES");
+  gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
   gchar *file;
   FILE *fp;
   
@@ -209,7 +209,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
   GType column_type;
   gint i, j;
   gint father_cols = 0, son_cols = 0;
-  gchar *temp_directory = rizoma_get_value (rizoma_config, "TEMP_FILES");
+  gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
   gchar *file;
   FILE *fp;
 

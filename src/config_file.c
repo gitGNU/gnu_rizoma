@@ -35,6 +35,7 @@
 /* We */
 #define COEF_PULGADA 0.3528
 
+
 /*
   We get a clean line, this means that the line doesn't start with #
   or isn't a clean line only with white space
@@ -280,132 +281,89 @@ read_dimensions (char *file, ParmsDimensions parms[], int total)
   return 0;
 }
 
-
-/* New */
-
-RizomaConf *
-rizoma_conf_new (void)
-{
-  RizomaConf *new;
-
-  new = (RizomaConf *)malloc (sizeof (RizomaConf));
-
-  new->back = NULL;
-
-  new->var_name = NULL;
-  new->valor = NULL;
-
-  new->next = NULL;
-
-  return new;
-}
-
-RizomaConf *
-rizoma_read_conf (char *file)
-{
-  FILE *fd;
-  char *line;
-  RizomaConf *header = NULL;
-  RizomaConf *current;
-  RizomaConf *new;
-
-  fd = fopen (file, "r");
-
-  if (fd == NULL)
-	return NULL;
-
-  do
-    {
-	  line = get_clean_line (fd);
-
-	  if (line != NULL && *line != '\0' && *line != ' ')
-		{
-
-		  if (header == NULL)
-			{
-			  header = rizoma_conf_new ();
-
-			  header->var_name = get_var_name (line);
-			  header->valor = get_value_var (line);
-			  header->next = header;
-			}
-		  else
-			{
-			  current = header;
-			  while (current->next != header)
-				current = current->next;
-
-			  new = rizoma_conf_new ();
-
-			  new->var_name = get_var_name (line);
-			  new->valor = get_value_var (line);
-
-			  current->next = new;
-			  new->back = current;
-			  new->next = header;
-			}
-		}
-    } while (line != NULL);
-
-  return header;
-}
-
+/**
+ * Esta funcion se utiliza para obtener el valor de una clave que se
+ * almacena el archivo de configuracion de rizoma
+ * @param var_name un string con el nombre de la clave que se quiere
+ * obtener el valor
+ * @return un string con el valor de la clave solicitada, en caso de
+ * que no se haya encontrado la clave retorna NULL
+ */
 char *
-rizoma_get_value (RizomaConf *header, char *var_name)
+rizoma_get_value (char *var_name)
 {
-  RizomaConf *current = header;
+  gchar *value = NULL;
+  GKeyFile *file;
+  gchar *rizoma_path;
+  gboolean res;
 
-  do
+  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
+  file = g_key_file_new();
+  
+  res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
+
+  if (!res)
     {
-	  if (strcasecmp (current->var_name, var_name) == 0)
-		return current->valor;
+      g_printerr("\n*** funcion %s: no pudo ser cargado el "
+		 "archivo de configuracion", G_STRFUNC);
+      g_printerr("\npath: %s", rizoma_path);
 
-	  current = current->next;
-    } while (current != header);
+      return NULL;
+    }
+  
+  if (!g_key_file_has_key(file, "DEFAULT", var_name, NULL))
+    {
+      g_printerr("\n*** funcion %s: el archivo de configuracion no tiene "
+		 "la clave %s", G_STRFUNC, var_name);
+      return NULL;
+    }
 
-  return NULL;
+  value = g_key_file_get_string(file, "DEFAULT", var_name, NULL);
+
+  g_key_file_free(file);
+
+  return(value);
 }
 
+/**
+ * Cambia el valor de una clave existente, si la clave no existe la
+ * crea automaticamente, los valores son escritos directamente al
+ * archivo de configuracion
+ * @param var_name es un string que contiene el nombre de la clave
+ * @param new_value es un string que contiene el nuevo valor que debe
+ * tener la clave
+ */
 int
-rizoma_set_value (RizomaConf *header, char *var_name, char *new_value)
+rizoma_set_value (char *var_name, char *new_value)
 {
-  RizomaConf *current = header;
-
-  do
-    {
-	  if (strcasecmp (current->var_name, var_name) == 0)
-		{
-		  g_free (current->valor);
-		  current->valor = g_strdup (new_value);
-		  return 0;
-		}
-
-	  current = current->next;
-    } while (current != header);
-
-  return -1;
-}
-
-int
-rizoma_save_file (RizomaConf *header)
-{
+  GKeyFile *file;
+  gchar *rizoma_path;
+  gboolean res;
   FILE *fp;
-  RizomaConf *current = header;
 
-  fp = fopen (g_strdup_printf ("%s/.rizoma", getenv ("HOME")), "w+");
+  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
+  file = g_key_file_new();
+  
+  res = g_key_file_load_from_file(file, rizoma_path, 
+				  G_KEY_FILE_KEEP_COMMENTS, NULL);
 
-  fprintf (fp, "# Rizoma Version %s\n", VERSION);
-
-  do
+  if (!res)
     {
-	  fprintf (fp, "%s = %s\n", current->var_name, current->valor);
+      g_printerr("\n*** funcion %s: no pudo ser cargado el "
+		 "archivo de configuracion", G_STRFUNC);
+      return NULL;
+    }
+  
+  g_key_file_set_string(file, "DEFAULT", var_name, new_value);
+  //TODO: usar glib para manipular el archivo, si bien esto funciona
+  //la idea es dejarlo consistente para que todo use glib
+  fp = fopen (g_strdup_printf ("%s/.rizoma", g_getenv ("HOME")), "w");
 
-	  current = current->next;
-    } while (current != header);
+  fprintf(fp, "%s", g_key_file_to_data(file, NULL, NULL));
 
-  fclose (fp);
-
-  return 0;
+  fflush(fp);
+  fclose(fp);  
+  return (0);
 }
 
 int

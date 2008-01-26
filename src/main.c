@@ -101,7 +101,6 @@ int main (int argc, char *argv[])
 	GtkWidget *image;
 	GtkWidget *label;
 	GtkWidget *button;
-	PangoAttrList *attrs;
 	char *config_file;
 
 	dimension = (Dimensions *) g_malloc (sizeof (Dimensions));
@@ -130,18 +129,15 @@ int main (int argc, char *argv[])
 	main_window = NULL;
 	passwd_window = NULL;
 
-	config_file = g_strdup_printf ("%s/.rizoma", getenv ("HOME"));
-
-	rizoma_config = rizoma_read_conf (config_file);
-
 	read_dimensions ("~/.rizoma_dimensions", dimensions, 17);
-
-	if (rizoma_config == NULL)
-		{
-			perror (g_strdup_printf ("Opening %s", config_file));
-			printf ("Para configurar su sistema debe ejecutar rizoma-config usando gksu(o similar) con la opcion -k\n");
-			exit (-1);
-		}
+	config_file = g_strconcat(g_getenv("HOME"),"/.rizoma");
+	if (!g_file_test(config_file, 
+			 G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
+	  {
+	    perror (g_strdup_printf ("Opening %s", config_file));
+	    printf ("Para configurar su sistema debe ejecutar rizoma-config usando gksu(o similar) con la opcion -k\n");
+	    exit (-1);
+	  }
 
 	gtk_init (&argc, &argv);
 
@@ -525,7 +521,7 @@ MainWindow (void)
 	    gtk_container_add (GTK_CONTAINER (scroll), treeview);
 	    gtk_widget_show (treeview);
 	    
-	    gchar *logo_path = rizoma_get_value(rizoma_config,"LOGO");
+	    gchar *logo_path = rizoma_get_value("LOGO");
 	    if (logo_path == NULL)
 	      image = Image (main_window, tux_xpm);
 	    else

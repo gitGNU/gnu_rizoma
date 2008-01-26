@@ -891,7 +891,7 @@ ventas_box (MainBox *module_box)
   GtkWidget *hbox;
   GtkWidget *table;
 
-  gchar *tipo_vendedor = rizoma_get_value (rizoma_config, "VENDEDOR");
+  gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
 
   if (module_box->new_box != NULL)
     gtk_widget_destroy (GTK_WIDGET (module_box->new_box));
@@ -1498,8 +1498,8 @@ SearchProductByCode (void)
   gdouble stockday;
   gdouble stock;
   PGresult *res;
-  gint venta_directa = atoi( rizoma_get_value( rizoma_config, "VENTA_DIRECTA" ) );
-  gint vendedor = atoi( rizoma_get_value( rizoma_config, "VENDEDOR" ) );
+  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
+  gint vendedor = atoi(rizoma_get_value("VENDEDOR"));
     
   res = EjecutarSQL (g_strdup_printf ("SELECT codigo_corto, descripcion, marca, contenido, unidad, stock, precio, "
 				      "precio_mayor, cantidad_mayor, mayorista, barcode FROM producto WHERE codigo_corto='%s' "
@@ -1851,7 +1851,7 @@ Vender (GtkButton *button, gpointer data)
   gchar *cheque_date = NULL;
   gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (venta->total_label)))));
   gchar *discount = "0";
-  gint maquina = atoi (rizoma_get_value (rizoma_config, "MAQUINA"));
+  gint maquina = atoi (rizoma_get_value ("MAQUINA"));
   gint vendedor = user_data->user_id;
   gint paga_con;
   gint ticket;
@@ -2132,7 +2132,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
   GtkWidget *frame;
   GtkWidget *label;
 
-  gchar *tipo_vendedor = rizoma_get_value (rizoma_config, "VENDEDOR");
+  gchar *tipo_vendedor = rizoma_get_value("VENDEDOR");
 
   if (venta->header == NULL)
     {
@@ -2994,7 +2994,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   gdouble stockday;
   gdouble stock;
   PGresult *res;
-  gint venta_directa = atoi( rizoma_get_value( rizoma_config, "VENTA_DIRECTA" ) );
+  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
   ventas = (gboolean) data;
 
@@ -3143,7 +3143,7 @@ void
 CloseBuscarWindow (GtkWidget *widget, gpointer data)
 {
   gboolean add = (gboolean) data;
-  gint venta_directa = atoi( rizoma_get_value( rizoma_config, "VENTA_DIRECTA" ) );
+  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
   gtk_widget_destroy (buscador_window);
 

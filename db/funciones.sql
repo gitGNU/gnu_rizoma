@@ -1028,8 +1028,9 @@ end; $$ language plpgsql;
 
 -- inserta el detalle de una compra
 -- postgres-functions.c:808, 814
+-- SELECT * FROM insertar_detalle_compra(5646, 1.00::double precision, 191.00::double precision, 300, 0::double precision, 0::smallint, 7654321, 20, 36, 23);
 create or replace function insertar_detalle_compra(
-		IN id_compra integer,
+		IN id_compra_in integer,
 		IN cantidad double precision,
 		IN precio double precision,
 		IN precio_venta integer,
@@ -1040,12 +1041,25 @@ create or replace function insertar_detalle_compra(
 		IN iva integer,
 		IN otros_impuestos integer)
 returns void as $$
+declare
+	aux int;
+	q text;
 begin
-		EXECUTE $S$ INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos ) VALUES (DEFAULT,$S$|| id_compra ||$S$,$S$|| cantidad ||$S$,$S$|| precio ||$S$,$S$|| precio_venta ||$S$,$S$|| cantidad_ingresada ||$S$,$S$|| descuento ||$S$,$S$|| barcode_product ||$S$,$S$|| margen ||$S$,$S$|| iva ||$S$,$S$|| otros_impuestos ||$S$)$S$;
+aux = (select max(id) from compra_detalle where id_compra=id_compra_in);
 
-		EXECUTE $S$ UPDATE producto SET precio=$S$|| precio_venta ||$S$ WHERE barcode=$S$|| barcode_product;
+if aux = NULL then
+   aux := 0;
+else
+   aux := aux + 1;
+end if;
 
-		return;
+EXECUTE 'INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos ) VALUES ('|| aux ||','|| id_compra_in ||','|| cantidad ||','|| precio ||','|| precio_venta ||','|| cantidad_ingresada ||','|| descuento ||','|| barcode_product ||','|| margen ||','|| iva ||','|| otros_impuestos ||');';
+
+q := $S$ UPDATE producto SET precio=$S$|| precio_venta ||$S$ WHERE barcode=$S$|| barcode_product;
+raise notice 'update ... %',q;
+execute q;
+
+return;
 end; $$ language plpgsql;  
 
 

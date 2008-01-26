@@ -26,6 +26,7 @@
 #include<sys/types.h>
 
 #include<libpq-fe.h>
+#include<confuse.h>
 
 /* The postgres entry */
 GtkWidget *pg_local_user;
@@ -51,9 +52,11 @@ gchar *sql_data;
 
 gchar *user;
 
+
 void
 create_config (void)
 {
+
   FILE *fp;
 
   name_db = g_strdup (gtk_entry_get_text (GTK_ENTRY (db_name)));

@@ -65,46 +65,40 @@ void
 guardar_parametros (GtkWidget *widget, gpointer user_data)
 {
   
-  if ((rizoma_set_value (rizoma_config, "DB_NAME", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_name_entry)))) != 0)
+  if ((rizoma_set_value ("DB_NAME", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_name_entry)))) != 0)
     {
       ErrorMSG (db_name_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
   
-  if ((rizoma_set_value (rizoma_config, "USER", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_user_entry)))) != 0)
+  if ((rizoma_set_value ("USER", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_user_entry)))) != 0)
     {
       ErrorMSG (db_user_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
-  if ((rizoma_set_value (rizoma_config, "PASSWORD", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_pass_entry)))) != 0)
+  if ((rizoma_set_value ("PASSWORD", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_pass_entry)))) != 0)
     {
       ErrorMSG (db_pass_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
-  if ((rizoma_set_value (rizoma_config, "SERVER_HOST", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_host_entry)))) != 0)
+  if ((rizoma_set_value ("SERVER_HOST", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_host_entry)))) != 0)
     {
       ErrorMSG (db_host_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
-  if ((rizoma_set_value (rizoma_config, "TEMP_FILES", (gchar *)gtk_entry_get_text (GTK_ENTRY (temp_entry)))) != 0)
+  if ((rizoma_set_value ("TEMP_FILES", (gchar *)gtk_entry_get_text (GTK_ENTRY (temp_entry)))) != 0)
     {
       ErrorMSG (temp_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
-  if ((rizoma_set_value (rizoma_config, "VALE_COPY", (gchar *)gtk_entry_get_text (GTK_ENTRY (copy_entry)))) != 0)
+  if ((rizoma_set_value ("VALE_COPY", (gchar *)gtk_entry_get_text (GTK_ENTRY (copy_entry)))) != 0)
     {
       ErrorMSG (copy_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
-  if ((rizoma_set_value (rizoma_config, "PRINT_COMMAND", (gchar *)gtk_entry_get_text (GTK_ENTRY (print_entry)))) != 0)
+  if ((rizoma_set_value ("PRINT_COMMAND", (gchar *)gtk_entry_get_text (GTK_ENTRY (print_entry)))) != 0)
     {
       ErrorMSG (print_entry, "Ocurrió un error mientras se modificaban los parametros");
-      return;
-    }
-
-  if ((rizoma_save_file (rizoma_config)) != 0)
-    {
-      ErrorMSG (widget, "Error mientras se guardaba el archivo de configuracion");
       return;
     }
 
@@ -133,7 +127,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   db_name_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_name_entry), rizoma_get_value (rizoma_config, "DB_NAME"));
+  gtk_entry_set_text (GTK_ENTRY (db_name_entry), rizoma_get_value ("DB_NAME"));
   gtk_widget_set_size_request (db_name_entry, 50, -1);
   gtk_box_pack_start (GTK_BOX (vbox), db_name_entry, FALSE, FALSE, 3);
   gtk_widget_show (db_name_entry);
@@ -147,7 +141,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   db_user_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_user_entry), rizoma_get_value (rizoma_config, "USER"));
+  gtk_entry_set_text (GTK_ENTRY (db_user_entry), rizoma_get_value ("USER"));
   gtk_widget_set_size_request (db_user_entry, 50, -1);
   gtk_box_pack_start (GTK_BOX (vbox), db_user_entry, FALSE, FALSE, 3);
   gtk_widget_show (db_user_entry);
@@ -161,7 +155,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   db_pass_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_pass_entry), rizoma_get_value (rizoma_config, "PASSWORD"));
+  gtk_entry_set_text (GTK_ENTRY (db_pass_entry), rizoma_get_value ("PASSWORD"));
   gtk_widget_set_size_request (db_pass_entry, 50, -1);
   gtk_box_pack_start (GTK_BOX (vbox), db_pass_entry, FALSE, FALSE, 3);
   gtk_widget_show (db_pass_entry);
@@ -175,7 +169,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   db_host_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_host_entry), rizoma_get_value (rizoma_config, "SERVER_HOST"));
+  gtk_entry_set_text (GTK_ENTRY (db_host_entry), rizoma_get_value ("SERVER_HOST"));
   gtk_widget_set_size_request (db_host_entry, 80, -1);
   gtk_box_pack_start (GTK_BOX (vbox), db_host_entry, FALSE, FALSE, 3);
   gtk_widget_show (db_host_entry);
@@ -189,7 +183,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   temp_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (temp_entry), rizoma_get_value (rizoma_config, "TEMP_FILES"));
+  gtk_entry_set_text (GTK_ENTRY (temp_entry), rizoma_get_value ("TEMP_FILES"));
   gtk_widget_set_size_request (temp_entry, 80, -1);
   gtk_box_pack_start (GTK_BOX (vbox), temp_entry, FALSE, FALSE, 3);
   gtk_widget_show (temp_entry);
@@ -204,7 +198,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   copy_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (copy_entry), rizoma_get_value (rizoma_config, "VALE_COPY"));
+  gtk_entry_set_text (GTK_ENTRY (copy_entry), rizoma_get_value ("VALE_COPY"));
   gtk_widget_set_size_request (copy_entry, 80, -1);
   gtk_box_pack_start (GTK_BOX (vbox), copy_entry, FALSE, FALSE, 3);
   gtk_widget_show (copy_entry);
@@ -222,7 +216,8 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   print_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (print_entry), rizoma_get_value (rizoma_config, "PRINT_COMMAND"));
+  gtk_entry_set_text (GTK_ENTRY (print_entry), 
+		      rizoma_get_value ("PRINT_COMMAND"));
   gtk_widget_set_size_request (print_entry, 80, -1);
   gtk_box_pack_start (GTK_BOX (vbox), print_entry, FALSE, FALSE, 3);
   gtk_widget_show (print_entry);

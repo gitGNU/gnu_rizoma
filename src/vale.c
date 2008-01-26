@@ -30,9 +30,9 @@ PrintVale (Productos *header, gint venta_id, gint total)
 {
   Productos *products = header;
   FILE *fp;
-  char *vale_dir = rizoma_get_value (rizoma_config, "VALE_DIR");
-  char *vale_copy = rizoma_get_value (rizoma_config, "VALE_COPY");
-  char *print_command = rizoma_get_value (rizoma_config, "PRINT_COMMAND");
+  char *vale_dir = rizoma_get_value ("VALE_DIR");
+  char *vale_copy = rizoma_get_value ("VALE_COPY");
+  char *print_command = rizoma_get_value ("PRINT_COMMAND");
   gchar *vale_file = g_strdup_printf ("%s/Vale%d.txt", vale_dir, venta_id);
   char start[] = {0x1B, 0x40, 0x0};
   char cut[] = {0x1B, 0x69, 0x0};

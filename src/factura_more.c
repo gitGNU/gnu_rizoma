@@ -84,8 +84,8 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   gfloat initial;
   gdouble precio, subtotal = 0, iva = 0, total;
   gint pepe;
-  gchar *temp_directory = rizoma_get_value (rizoma_config, "TEMP_FILES");
-  gchar *factura_prefix = rizoma_get_value (rizoma_config, "FACTURA_FILE_PREFIX");
+  gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
+  gchar *factura_prefix = rizoma_get_value ("FACTURA_FILE_PREFIX");
   gfloat x, y;
   gfloat x_codigo, x_cant, x_desc, x_uni, x_total;
 
@@ -101,8 +101,8 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   
   PS_open_file (psdoc, filename);
 
-  printf ("%s\n", rizoma_get_value (rizoma_config, "FACTURA_SIZE"));
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_SIZE"), &x, &y);
+  printf ("%s\n", rizoma_get_value ("FACTURA_SIZE"));
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_SIZE"), &x, &y);
   PS_set_info (psdoc, "BoundingBox", 
 	       g_strdup_printf ("0 0 %f %f", x, y));
 
@@ -111,16 +111,16 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   PS_begin_page (psdoc, x, y);
   PS_setfont (psdoc, psfont, 10);
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_CLIENTE"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_CLIENTE"), &x, &y);
   PS_show_xy (psdoc, client, x, y);
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_RUT"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_RUT"), &x, &y);
   PS_show_xy (psdoc, rut, x, y);
   
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_ADDRESS"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_ADDRESS"), &x, &y);
   PS_show_xy (psdoc, address, x, y);
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_GIRO"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_GIRO"), &x, &y);
   PS_show_xy (psdoc, giro, x, y);
   
   //  PS_show_xy (psdoc, comuna, dimension->factura_giro.x, dimension->factura_giro.y);
@@ -128,14 +128,14 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   //PS_show_xy (psdoc, fono, dimension->factura_fono->xizoma, dimension->factura_fono->y);
 
   /* We draw the products detail */
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_DETAIL"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_DETAIL"), &x, &y);
   initial = y;
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_CODIGO"), &x_codigo, &y);
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_DESCRIPCION"), &x_desc, &y);
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_CANT"), &x_cant, &y);
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_UNI"), &x_uni, &y);
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_TOTAL"), &x_total, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_CODIGO"), &x_codigo, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_DESCRIPCION"), &x_desc, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_CANT"), &x_cant, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_UNI"), &x_uni, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_TOTAL"), &x_total, &y);
   
   do 
     {
@@ -174,16 +174,16 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   
   /* Finished the products detail*/
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_SUTOTAL"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_SUTOTAL"), &x, &y);
   PS_show_xy (psdoc, g_strdup_printf ("%.0f", subtotal), x, y);
 
 
   total = subtotal + iva;
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_IVA"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_IVA"), &x, &y);
   PS_show_xy (psdoc, g_strdup_printf ("%.0f", iva), x, y);
 
-  rizoma_extract_xy (rizoma_get_value (rizoma_config, "FACTURA_TOTAL_FINAL"), &x, &y);
+  rizoma_extract_xy (rizoma_get_value ("FACTURA_TOTAL_FINAL"), &x, &y);
   PS_show_xy (psdoc, g_strdup_printf ("%.0f", total), x, y);
 
   PS_end_page (psdoc);

@@ -20,6 +20,7 @@
 */
 
 #include<gtk/gtk.h>
+#include<confuse.h>
 
 #ifndef TIPOS_H
 
@@ -713,3 +714,4 @@ Dimensions;
 Dimensions *dimension;
 
 #endif
+

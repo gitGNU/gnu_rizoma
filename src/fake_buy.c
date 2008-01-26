@@ -171,6 +171,10 @@ int main (int argc, char **argv)
   rizoma_config = rizoma_read_conf (config_file);
 
   if (rizoma_config == NULL)
+
+  config_file = g_strconcat(g_getenv("HOME"),"/.rizoma");
+  if (!g_file_test(config_file, 
+		   G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
     {
 	  perror (g_strdup_printf ("Opening %s", config_file));
 	  printf ("Para configurar su sistema debe ejecutar rizoma-config usando gksu(o similar) con la opcion -k");
