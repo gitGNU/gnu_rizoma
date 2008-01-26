@@ -1566,3 +1566,27 @@ begin
 RETURN;
 
 END; $$ language plpgsql;
+
+-- cancela una venta, en la tabla venta, columna canceled lo pone a TRUE
+-- y retorna TODAS las cantidades de la venta al stock de producto
+create or replace function cancelar_venta(IN idventa_a_cancelar int4)
+returns integer AS $$
+declare
+	list record;
+	select_detalle_venta varchar(255);
+	update_stocks varchar(255);
+begin
+EXECUTE 'UPDATE venta SET canceled = TRUE WHERE id = ' || quote_literal(idventa_a_cancelar);
+
+select_detalle_venta:= 'SELECT barcode, cantidad FROM venta_detalle WHERE id_venta = ' || quote_literal(idventa_a_cancelar);
+
+FOR list IN EXECUTE select_detalle_venta LOOP
+	update_stocks := 'UPDATE producto SET stock = stock + '
+			|| list.cantidad
+			|| ' WHERE barcode = '
+			|| list.barcode;
+	EXECUTE update_stocks;
+END LOOP;
+	
+RETURN 0;
+END;$$ language plpgsql;

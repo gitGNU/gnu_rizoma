@@ -4014,8 +4014,11 @@ CancelSell (GtkWidget *widget, gpointer data)
 	  gtk_tree_model_get (GTK_TREE_MODEL (venta->cancel_store), &iter,
 			      0, &id_venta,
 			      -1);
-	  res = EjecutarSQL (g_strdup_printf ("UPDATE ventas SET canceled='t' WHERE id=%s", id_venta));
+	  gchar *q;
+	  q = g_strdup_printf ("select cancelar_venta(%s)", id_venta);
+	  res = EjecutarSQL (q);
 	  g_free(id_venta);
+	  g_free(q);
 	  gtk_list_store_remove(venta->cancel_store,&iter);
 	}
     }
@@ -4078,7 +4081,10 @@ AskCancelSell (GtkWidget *widget, gpointer data)
 		    G_CALLBACK (CancelSell), (gpointer)1);
 
 }
-
+/*
+ * El callback asociado al calendario que se encuentra en la venta
+ * para cancelar ventas
+ */
 void
 CancelSellDaySelected(GtkCalendar *calendar,gpointer data)
 {
@@ -4091,9 +4097,10 @@ CancelSellDaySelected(GtkCalendar *calendar,gpointer data)
 
 
   gchar *q = NULL;
-  q = g_strdup_printf("SELECT ventas.id, users.usuario,monto FROM venta "
-		      "INNER JOIN users ON users.id = ventas.vendedor "
-		      "WHERE date_trunc('day',fecha) = '%.4d-%.2d-%.2d' AND canceled = FALSE",
+  q = g_strdup_printf("SELECT venta.id, users.usuario,monto FROM venta "
+		      "INNER JOIN users ON users.id = venta.vendedor "
+		      "WHERE date_trunc('day',fecha) = '%.4d-%.2d-%.2d' "
+		      "AND canceled = FALSE",
 		      year,month+1,day);
 
   res = EjecutarSQL (q);
@@ -4152,8 +4159,12 @@ CancelSellViewDetails(GtkTreeView *tree_view, gpointer user_data)
       gtk_tree_model_get (GTK_TREE_MODEL (venta->cancel_store), &iter,
 			  0, &id_venta,
 			  -1);
-      q = g_strdup_printf("SELECT descripcion || marca, cantidad, (precio * cantidad) "
-			  "FROM venta_detalle WHERE id_venta=%s",
+
+      q = g_strdup_printf("SELECT producto.descripcion || ' ' || producto.marca, "
+			  "cantidad, (venta_detalle.precio * cantidad) "
+			  "FROM venta_detalle inner join producto on "
+			  "venta_detalle.barcode = producto.barcode "
+			  "WHERE id_venta=%s",
 			  id_venta);
 
       res = EjecutarSQL (q);
