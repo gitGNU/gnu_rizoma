@@ -2895,13 +2895,13 @@ ShowProductDescription (void)
     GSList *group;
 
     barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
-    q = g_strdup_printf("SELECT codigo, descripcion, marca, unidad, contenido, precio "
+    q = g_strdup_printf("SELECT codigo_corto, descripcion, marca, unidad, contenido, precio "
 			"FROM select_producto(%s)",
 			barcode);
     res_aux = EjecutarSQL(q);
     g_free(q);
-
-    codigo = PQvaluebycol (res_aux, 0, "codigo");
+    
+    codigo = PQvaluebycol (res_aux, 0, "codigo_corto");
     description = PQvaluebycol (res_aux, 0, "descripcion");
     marca = PQvaluebycol (res_aux, 0, "marca");
     unidad = PQvaluebycol (res_aux, 0, "unidad");

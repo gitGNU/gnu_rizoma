@@ -755,13 +755,17 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 				   gchar *familia, gboolean perecible, gboolean fraccion)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-	(g_strdup_printf ("UPDATE productos SET codigo='%s', descripcion='%s', marca='%s', unidad='%s', contenido='%s', precio=%d, "
-					  "impuestos='%d', otros=(SELECT id FROM impuestos WHERE descripcion='%s'), perecibles='%d', fraccion='%d' WHERE barcode='%s'",
-					  codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
-					  iva, otros, (gint)perecible, (gint)fraccion, barcode));
-
+  q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
+		       "marca='%s', unidad='%s', contenido='%s', precio=%d, "
+		       "impuestos='%d', otros=(SELECT id FROM impuesto WHERE descripcion='%s'), "
+		       "perecibles='%d', fraccion='%d' WHERE barcode='%s'",
+		       codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
+		       iva, otros, (gint)perecible, (gint)fraccion, barcode);
+  printf("%s\n", q);
+  res = EjecutarSQL(q);
+  g_free(q);
 }
 
 gboolean
