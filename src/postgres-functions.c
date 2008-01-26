@@ -770,7 +770,7 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
 				   gboolean perecible, gboolean fraccion)
 {
   gint *insertado;
-  
+
   insertado = atoi( GetDataByOne (
 								  g_strdup_printf
 								  ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, %s::varchar,"
@@ -778,7 +778,7 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
 								   "%d::boolean, (SELECT id FROM impuesto WHERE descripcion='%s'),0::smallint, 0::boolean,"
 								   "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
 								   otros, perecible, fraccion)));
-  
+
   if( insertado == 1 ) {
 	return TRUE;
   } else {
@@ -1087,7 +1087,7 @@ SaveProductsSell (Productos *products, gint id_venta)
 
 	  res = EjecutarSQL
 		(g_strdup_printf
-		 ("UPDATE productos SET vendidos=vendidos+%s, stock=%s WHERE barcode='%s'",
+		 ("UPDATE producto SET vendidos = vendidos+%s, stock=%s WHERE barcode='%s'",
 		  cantidad, CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
 
 	  /*      res = EjecutarSQL (g_strdup_printf
@@ -1104,8 +1104,8 @@ SaveProductsSell (Productos *products, gint id_venta)
 
 	  res = EjecutarSQL
 		(g_strdup_printf
-		 ("INSERT INTO products_sell_history VALUES(DEFAULT, %d, '%s', '%s', '%s', '%d', '%s',"
-		  "'%s', %d, %d, %d, %d)", id_venta,
+		 ("INSERT INTO venta_detalle VALUES(DEFAULT, %d, %s, '%s', '%s', %d, '%s',"
+		  "%s, %d, %d, %d, %d)", id_venta,
 		  products->product->barcode, SPE(products->product->producto), SPE(products->product->marca),
 		  products->product->contenido, products->product->unidad, cantidad, precio,
 		  products->product->fifo, lround (iva), lround (otros)));

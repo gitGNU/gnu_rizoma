@@ -109,12 +109,15 @@ create or replace function insertar_producto(
 		IN prod_fraccion boolean)
 returns integer as $$
 begin
-		INSERT INTO producto (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia, perecibles, fraccion) VALUES (prod_barcode, prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva, prod_otros, prod_familia, prod_perecible, prod_fraccion);
+		INSERT INTO producto (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia,
+				perecibles, fraccion) 
+				VALUES (prod_barcode, prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva,
+				prod_otros, prod_familia, prod_perecible, prod_fraccion);
 		
 		IF FOUND IS TRUE THEN
-		RETURN 1;
+				RETURN 1;
 		ELSE
-		RETURN 0;
+				RETURN 0;
 		END IF;
 END; $$ language plpgsql;
 
@@ -1535,3 +1538,17 @@ end loop;
 return;
 end; $$ language plpgsql;
 
+-- ??retorna del rut del proveedor para una compra dada
+-- revisar si se puede satisfacer con alguna funcion anteriormente definida
+-- compras.c:4549, 7023
+create or replace function get_proveedor_compra( 
+		IN id_compra integer,
+		OUT proveedor integer)
+returns integer as $$
+begin
+
+		SELECT rut_proveedor INTO proveedor FROM compra WHERE id = id_compra;
+
+RETURN;
+
+END; $$ language plpgsql;

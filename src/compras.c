@@ -1,4 +1,4 @@
-/*compras.c
+/* compras.c
  *
  *    Copyright (C) 2004 Rizoma Tecnologia Limitada <jonathan@rizoma.cl>
  *
@@ -3732,7 +3732,7 @@ AddNew (GtkWidget *widget, gpointer data)
 {
   GtkTreeModel *model;
   GtkTreeIter iter;
-  
+
   gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_codigo)));
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_barcode)));
   gchar *description = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_description)));
@@ -4559,7 +4559,7 @@ IngresarCompra (void)
 
     }
     //TODO: usar funcion plpgsql
-    q = g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id);
+    q = g_strdup_printf ("SELECT proveedor FROM get_proveedor_compra( %d )", id);
     rut_proveedor = GetDataByOne (q);
     g_free (q);
 
@@ -6689,14 +6689,14 @@ CloseAskIngreso (GtkWidget *widget, gpointer data)
     gboolean answer = ((gboolean) data);
 
     if (GTK_WIDGET_TOPLEVEL (widget) == TRUE)
-	return;
+		return;
 
     if (answer == TRUE)
     {
-	CheckCanjeables ();
+		CheckCanjeables ();
     }
     else if (answer == FALSE)
-	gtk_widget_set_sensitive (main_window, TRUE);
+		gtk_widget_set_sensitive (main_window, TRUE);
 
     gtk_widget_destroy (ask_window);
 
