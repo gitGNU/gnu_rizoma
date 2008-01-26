@@ -26,7 +26,6 @@
 #include<sys/types.h>
 
 #include<libpq-fe.h>
-#include<confuse.h>
 
 /* The postgres entry */
 GtkWidget *pg_local_user;

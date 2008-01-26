@@ -168,8 +168,7 @@ int main (int argc, char **argv)
 
   config_file = g_strdup_printf ("%s/.rizoma", getenv ("HOME"));
 
-  rizoma_config = rizoma_read_conf (config_file);
-
+  
   if (rizoma_config == NULL)
 
   config_file = g_strconcat(g_getenv("HOME"),"/.rizoma");
