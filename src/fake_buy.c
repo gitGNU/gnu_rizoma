@@ -166,20 +166,6 @@ int main (int argc, char **argv)
   compra->products_compra = NULL;
   compra->current = NULL;
 
-  config_file = g_strdup_printf ("%s/.rizoma", getenv ("HOME"));
-
-  
-  if (rizoma_config == NULL)
-
-  config_file = g_strconcat(g_getenv("HOME"),"/.rizoma");
-  if (!g_file_test(config_file, 
-		   G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
-    {
-	  perror (g_strdup_printf ("Opening %s", config_file));
-	  printf ("Para configurar su sistema debe ejecutar rizoma-config usando gksu(o similar) con la opcion -k");
-	  exit (-1);
-    }
-
   do {
 
 	line = get_line (fp);
