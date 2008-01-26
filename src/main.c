@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
 	passwd_window = NULL;
 
 	read_dimensions ("~/.rizoma_dimensions", dimensions, 17);
-	config_file = g_strconcat(g_getenv("HOME"),"/.rizoma");
+	config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
 	if (!g_file_test(config_file, 
 			 G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
 	  {
