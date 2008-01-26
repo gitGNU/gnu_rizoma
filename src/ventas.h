@@ -88,4 +88,5 @@ void CancelWindow (GtkWidget *widget, gpointer data);
 
 void WindowChangeSeller ();
 
+void MoveFocus (GtkEntry *entry, gpointer data);
 #endif

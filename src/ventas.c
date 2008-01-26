@@ -1054,9 +1054,8 @@ ventas_box (MainBox *module_box)
   g_signal_connect (G_OBJECT (venta->cantidad_entry), "changed",
 		    G_CALLBACK (AumentarCantidad), (gpointer) FALSE);
 
-  g_signal_connect (G_OBJECT (venta->cantidad_entry), "activate",
-		    G_CALLBACK (AumentarCantidad), (gpointer) TRUE);
-
+  g_signal_connect(G_OBJECT(venta->cantidad_entry), "activate",
+		   G_CALLBACK(MoveFocus), NULL);
   label = gtk_label_new ("");
   gtk_label_set_markup (GTK_LABEL (label), "<b>Stock para: </b>");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -2082,6 +2081,12 @@ Vender (GtkButton *button, gpointer data)
 }
 
 void
+MoveFocus (GtkEntry *entry, gpointer data)
+{
+  gtk_window_set_focus(GTK_WINDOW(main_window), add_button);
+}
+
+void
 AumentarCantidad (GtkEntry *entry, gpointer data)
 {
   gboolean move = (gboolean) data;
@@ -2102,8 +2107,6 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
       gtk_label_set_markup (GTK_LABEL (venta->subtotal_label),
 			    g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
 					     PutPoints (g_strdup_printf ("%lu", subtotal))));
-
-      gtk_window_set_focus( GTK_WINDOW( main_window ), venta->barcode_entry );
     }
   else
     if (precio_mayor != 0 && mayorista == TRUE && cantidad >= cantidad_mayor)
@@ -2113,12 +2116,6 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
 	gtk_label_set_markup (GTK_LABEL (venta->subtotal_label),
 			      g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
 					       PutPoints (g_strdup_printf ("%u", subtotal))));
-	gtk_window_set_focus( GTK_WINDOW( main_window ), venta->barcode_entry );
-      }
-    else
-      {
-	if( move == TRUE )
-	  gtk_window_set_focus( GTK_WINDOW( main_window ), venta->barcode_entry );
       }
 }
 
