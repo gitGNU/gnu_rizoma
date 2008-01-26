@@ -34,7 +34,7 @@ else
 fi
 
 if autoconf --version > /dev/null 2>&1; then
-    
+
     if autoconf --version | grep '2.[570]' > /dev/null>&1; then
 	echo "autoconf   ... yes"
     else
@@ -48,8 +48,8 @@ else
 fi
 
 if automake --version > /dev/null 2>&1; then
-   
-    if automake --version | grep '1.[56789]' > /dev/null>&1; then
+
+    if automake --version | grep '1.[567890]*' > /dev/null>&1; then
 	echo "automake   ... yes"
     else
 	echo "automake   ... no"
@@ -62,8 +62,8 @@ else
 fi
 
 if aclocal --version > /dev/null 2>&1; then
-    
-    if aclocal --version | grep '1.[56789]' > /dev/null>&1; then
+
+    if aclocal --version | grep '1.[567890]*' > /dev/null>&1; then
 	echo "aclocal    ... yes"
     else
 	echo "aclocal    ... no"
@@ -76,7 +76,7 @@ else
 fi
 
 if autoheader --version> /dev/null 2>&1; then
-    
+
     if autoheader --version | grep '2.[5-9]' > /dev/null>&1; then
 	echo "autoheader ... yes"
     else
@@ -92,7 +92,7 @@ fi
 echo "Creating aclocal.m4"
 aclocal -I m4/
 echo "Creating config.h.in"
-autoheader 
+autoheader
 echo "Adding missing standards files to package"
 if [ "$ERROR" == "YES" ]; then
     automake --add-missing --copy
