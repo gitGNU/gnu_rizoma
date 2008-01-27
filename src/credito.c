@@ -840,7 +840,7 @@ FillClientStore (GtkListStore *store)
   PGresult *res;
   gint tuples, i;
   gchar *enable;
-  res = EjecutarSQL ("SELECT * FROM cliente");
+  res = EjecutarSQL ("SELECT rut, nombre, apell_p, apell_m, telefono, credito_enable FROM select_cliente()");
 
   tuples = PQntuples (res);
 
@@ -851,12 +851,12 @@ FillClientStore (GtkListStore *store)
       gtk_list_store_append (store, &iter);
       if (user_data->user_id == 1)
 	{
-	  enable = PQgetvalue (res, i, 10);
+	  enable = PQvaluebycol (res, i, "credito_enable");
 	  gtk_list_store_set (store, &iter,
-			      0, atoi (PQgetvalue (res, i, 4)),
-			      1, g_strdup_printf ("%s %s %s", PQgetvalue (res, i, 1),
-						  PQgetvalue (res, i, 2), PQgetvalue (res, i, 3)),
-			      2, atoi (PQgetvalue (res, i, 7)),
+			      0, atoi (PQvaluebycol(res, i, "rut")),
+			      1, g_strdup_printf ("%s %s %s", PQvaluebycol(res, i, "nombre"),
+						  PQvaluebycol(res, i, "apell_p"), PQvaluebycol(res, i, "apell_m")),
+			      2, atoi (PQvaluebycol (res, i, "telefono")),
 			      3, strcmp (enable, "t") ? FALSE : TRUE,
 			      -1);
 	}

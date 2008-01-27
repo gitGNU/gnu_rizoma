@@ -803,23 +803,49 @@ END; ' language plpgsql;
 
 -- retorna TODO los clientes
 -- credito.c:843
-create or replace function select_clientes()
-returns setof record as '
+create or replace function select_cliente(
+       OUT rut int4,
+       OUT dv varchar(1),
+       OUT nombre varchar(60),
+       OUT apell_p varchar(60),
+       OUT apell_m varchar(60),
+       OUT giro varchar(255),
+       OUT direccion varchar(150),
+       OUT telefono varchar(15),
+       OUT telefono_movil varchar(15),
+       OUT mail varchar(30),
+       OUT abonado int4,
+       OUT credito int4,
+       OUT credito_enable boolean)
+returns setof record as $$
 declare
-
-	list record;
+	l record;
 	query varchar(255);
-
 begin
-query := ''select * from clientes'';
+query := 'select rut, dv, nombre, apell_p, apell_m, giro, direccion, telefono,
+      	 	  telefono_movil, mail, abonado, credito, credito_enable 
+		  FROM cliente';
 
-FOR list IN EXECUTE query LOOP
-	RETURN NEXT list;
+FOR l IN EXECUTE query LOOP
+    rut = l.rut;
+    dv = l.dv;
+    nombre = l.nombre;
+    apell_p = l.apell_p;
+    apell_m = l.apell_m;
+    giro = l.giro;
+    direccion = l.direccion;
+    telefono = l.telefono;
+    telefono_movil = l.telefono_movil;
+    mail = l.mail;
+    abonado = l.abonado;
+    credito = l.credito;
+    credito_enable = l.credito_enable;
+    RETURN NEXT;
 END LOOP;
 
 RETURN;
 
-END; ' language plpgsql;
+END; $$ language plpgsql;
 
 -- actualiza cliente, es necesario revisar que los parametros se pasen correctamente
 -- credito.c:1546
