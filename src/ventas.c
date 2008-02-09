@@ -4076,7 +4076,7 @@ CancelSellViewDetails(GtkTreeView *tree_view, gpointer user_data)
 			  0, &id_venta,
 			  -1);
 
-      q = g_strdup_printf("SELECT producto.descripcion || ' ' || producto.marca, "
+      q = g_strdup_printf("SELECT producto.descripcion|| ' ' ||producto.marca, "
 			  "cantidad, (venta_detalle.precio * cantidad) "
 			  "FROM venta_detalle inner join producto on "
 			  "venta_detalle.barcode = producto.barcode "
@@ -4100,7 +4100,10 @@ CancelSellViewDetails(GtkTreeView *tree_view, gpointer user_data)
     }
 }
 
-/* costruccion de la ventana para cancelar una venta*/
+/* 
+ * callback asociado a boton 'cancelar venta' para la costruccion de
+ * la ventana para cancelar una venta
+ */
 void
 CancelWindow (GtkWidget *widget, gpointer data)
 {
@@ -4315,7 +4318,8 @@ ChangeSeller (GtkWidget *widget, gpointer data)
     }
   else
     {
-      ErrorMSG (widget, g_strdup_printf ("No existe un usuario con el identificador %d", id));
+      ErrorMSG (widget, g_strdup_printf 
+		("No existe un usuario con el identificador %d", id));
     }
 }
 
