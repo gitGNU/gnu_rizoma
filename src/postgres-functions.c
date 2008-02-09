@@ -225,6 +225,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gint day, month, year;
   gchar *serie, *numero, *banco, *plaza;
   gchar *inst, *fecha;
+  gchar *q;
   gchar *vale_dir = rizoma_get_value ("VALE_DIR");
 
   id_documento = InsertNewDocument (tipo_documento, tipo_venta);
@@ -232,10 +233,12 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (id_documento == -1)
 	return FALSE;
 
-  venta_id = atoi (GetDataByOne (
-		       g_strdup_printf( "SELECT inserted_id FROM registrar_venta( %d, %d, %d, %d::smallint, %d::smallint, %s::smallint, %d, '%d' )",
-					total, machine, seller, tipo_documento, tipo_venta, CUT(discount), id_documento,
-					canceled)));
+  q = g_strdup_printf( "SELECT inserted_id FROM registrar_venta( %d, %d, %d, "
+		       "%d::smallint, %d::smallint, %s::smallint, %d, '%d' )",
+		       total, machine, seller, tipo_documento, tipo_venta, 
+		       CUT(discount), id_documento, canceled);
+  venta_id = atoi (GetDataByOne (q));
+  g_free (q);
 
   if (boleta != -1)
 	set_ticket_number (boleta, tipo_documento);
