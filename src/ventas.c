@@ -3927,49 +3927,7 @@ FindCancelSell (GtkWidget *widget, gpointer data)
 			  -1);
     }
 }
-/*
-  void
-  FillCancelTree (void)
-  {
-  GtkTreeIter iter;
-  GtkTreeIter iter_son;
-  PGresult *res, *res2;
-  gint tuples, tuples2, i, j;
-  return;
-  res = EjecutarSQL ("SELECT id, monto, (SELECT usuario FROM users WHERE id=ventas.vendedor) FROM venta WHERE canceled='f'");
 
-  tuples = PQntuples (res);
-
-  gtk_tree_store_clear (venta->cancel_store);
-
-  for (i = 0; i < tuples; i++)
-  {
-  gtk_tree_store_append (venta->cancel_store, &iter, NULL);
-  gtk_tree_store_set (venta->cancel_store, &iter,
-  0, PQgetvalue (res, i, 0),
-  2, PQgetvalue (res, i, 2),
-  3, PQgetvalue (res, i, 1),
-  -1);
-
-
-  res2 = EjecutarSQL (g_strdup_printf ("SELECT descripcion || marca, cantidad, (precio * cantidad) FROM venta_detalle WHERE id_venta=%s",
-  PQgetvalue (res, i, 0)));
-
-  tuples2 = PQntuples (res2);
-
-  for (j = 0; j < tuples2; j++)
-  {
-  gtk_tree_store_append (venta->cancel_store, &iter_son, &iter);
-  gtk_tree_store_set (venta->cancel_store, &iter_son,
-  1, PQgetvalue (res2, j, 0),
-  2, PQgetvalue (res2, j, 1),
-  3, PQgetvalue (res2, j, 2),
-  -1);
-  }
-
-  }
-  }
-*/
 void
 CancelSell (GtkWidget *widget, gpointer data)
 {
@@ -4033,7 +3991,7 @@ AskCancelSell (GtkWidget *widget, gpointer data)
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
 
-  label = gtk_label_new ("Desea cancelar la venta?");
+  label = gtk_label_new ("¿Desea cancelar la venta?");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
 
