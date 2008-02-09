@@ -1498,8 +1498,7 @@ SearchProductByCode (void)
   gdouble stock;
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
-  gint vendedor = atoi(rizoma_get_value("VENDEDOR"));
-    
+      
   res = EjecutarSQL (g_strdup_printf ("SELECT codigo_corto, descripcion, marca, contenido, unidad, stock, precio, "
 				      "precio_mayor, cantidad_mayor, mayorista, barcode FROM producto WHERE codigo_corto='%s' "
 				      "AND stock!=0", codigo));
@@ -1846,9 +1845,9 @@ Vender (GtkButton *button, gpointer data)
   gboolean cheque = FALSE;
   gboolean tarjeta = FALSE;
   gchar *rut = NULL;
-  gchar *rut_1 = NULL;
   gchar *cheque_date = NULL;
-  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (venta->total_label)))));
+  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text 
+					  (GTK_LABEL (venta->total_label)))));
   gchar *discount = "0";
   gint maquina = atoi (rizoma_get_value ("MAQUINA"));
   gint vendedor = user_data->user_id;
@@ -2089,10 +2088,7 @@ MoveFocus (GtkEntry *entry, gpointer data)
 void
 AumentarCantidad (GtkEntry *entry, gpointer data)
 {
-  gboolean move = (gboolean) data;
-
-  gdouble cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text
-					      (GTK_ENTRY (venta->cantidad_entry)))), (char **)NULL);
+  gdouble cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cantidad_entry)))), (char **)NULL);
   gint precio = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (venta->precio_label)))));
   gint precio_mayor = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (venta->mayor_label)))));
   gdouble cantidad_mayor = strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (venta->mayor_cantidad)))),
