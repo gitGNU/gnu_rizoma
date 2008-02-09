@@ -3906,9 +3906,9 @@ FindCancelSell (GtkWidget *widget, gpointer data)
   text = gtk_entry_get_text (GTK_ENTRY (data));
   gchar *q = NULL;
 
-  q = g_strdup_printf("SELECT ventas.id, monto, users.usuario FROM venta "
-		      "INNER JOIN users ON users.id = ventas.vendedor "
-		      "WHERE ventas.id = %s AND canceled = FALSE",
+  q = g_strdup_printf("SELECT venta.id, monto, users.usuario FROM venta "
+		      "INNER JOIN users ON users.id = venta.vendedor "
+		      "WHERE venta.id = %s AND canceled = FALSE",
 		      text);
   res = EjecutarSQL (q);
   g_free(q);
@@ -3921,29 +3921,10 @@ FindCancelSell (GtkWidget *widget, gpointer data)
     {
       gtk_list_store_append (venta->cancel_store, &iter);
       gtk_list_store_set (venta->cancel_store, &iter,
-			  0, PQgetvalue (res, i, 0),
-			  2, PQgetvalue (res, i, 2),
-			  3, PQgetvalue (res, i, 1),
+			  0, PQvaluebycol (res, i, "id"),
+			  1, PQvaluebycol (res, i, "usuario"),
+			  2, PQvaluebycol (res, i, "monto"),
 			  -1);
-      /*
-	q = g_strdup_printf ("SELECT descripcion || marca, cantidad, (precio * cantidad) "
-	"FROM venta_detalle "
-	"WHERE id_venta=%s",
-	PQgetvalue (res, i, 0));
-	res2 = EjecutarSQL (q);
-	g_free(q);
-
-	tuples2 = PQntuples (res2);
-
-	for (j = 0; j < tuples2; j++)
-	{
-	gtk_tree_store_append (venta->cancel_store, &iter_son, &iter);
-	gtk_tree_store_set (venta->cancel_store, &iter_son,
-	1, PQgetvalue (res2, j, 0),
-	2, PQgetvalue (res2, j, 1),
-	3, PQgetvalue (res2, j, 2),
-	-1);
-	}*/
     }
 }
 /*
