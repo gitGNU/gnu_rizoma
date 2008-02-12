@@ -23,7 +23,8 @@ END LOOP;
 
 RETURN;
 
-END; $$ language plpgsql;
+END;
+$$ LANGUAGE plpgsql;
 
 -- revisa si se puede devolver el producto
 -- administracion_productos.c:130
@@ -110,10 +111,10 @@ create or replace function insertar_producto(
 returns integer as $$
 begin
 		INSERT INTO producto (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia,
-				perecibles, fraccion) 
+				perecibles, fraccion)
 				VALUES (prod_barcode, prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva,
 				prod_otros, prod_familia, prod_perecible, prod_fraccion);
-		
+
 		IF FOUND IS TRUE THEN
 				RETURN 1;
 		ELSE
@@ -823,7 +824,7 @@ declare
 	query varchar(255);
 begin
 query := 'select rut, dv, nombre, apell_p, apell_m, giro, direccion, telefono,
-      	 	  telefono_movil, mail, abonado, credito, credito_enable 
+      	 	  telefono_movil, mail, abonado, credito, credito_enable
 		  FROM cliente';
 
 FOR l IN EXECUTE query LOOP
@@ -1086,7 +1087,7 @@ raise notice 'update ... %',q;
 execute q;
 
 return;
-end; $$ language plpgsql;  
+end; $$ language plpgsql;
 
 
 -- ??paga una factura
@@ -1363,7 +1364,7 @@ BEGIN
 	tipo_venta||$S$,$S$|| descuento||$S$,$S$|| id_documento||$S$,'$S$|| fool ||$S$')$S$;
 
 	SELECT currval( 'venta_id_seq' ) INTO inserted_id;
-	
+
 	return;
 END; $$ language plpgsql;
 
@@ -1402,7 +1403,7 @@ begin
 	query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido, unidad, stock, precio, costo_promedio,
 	vendidos, impuestos, otros, familia, perecibles, stock_min, margen_promedio, fraccion, canje, stock_pro,
 	tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE $S$;
-	
+
 	FOR i IN 1..array_upper( columnas, 1) LOOP
 	IF usar_like IS TRUE THEN
 	IF i > 1 THEN
@@ -1443,9 +1444,9 @@ begin
 	mayorista := list.mayorista;
 	RETURN NEXT;
     END LOOP;
-	
+
 	RETURN;
-	
+
 END; $$ language plpgsql;
 
 create or replace function get_compras (
@@ -1500,7 +1501,7 @@ declare
 		query text;
 begin
 		query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t1.precio, t1.cantidad, t1.cantidad_ingresada, (t1.precio * (t1.cantidad - t1.cantidad_ingresada))::bigint as costo_ingresado, t2.barcode, t1.precio_venta, t1.margen FROM compra_detalle AS t1, producto AS t2 WHERE t1.id_compra=$S$|| id_compra ||$S$ AND t2.barcode=t1.barcode_product AND t1.cantidad_ingresada<t1.cantidad AND t1.anulado='f'$S$;
-		
+
 		FOR list IN EXECUTE query LOOP
 		codigo_corto := list.codigo_corto;
 		descripcion := list.descripcion;
@@ -1519,7 +1520,7 @@ begin
 
 END; $$ LANGUAGE plpgsql;
 
- 
+
 create or replace function get_iva(
 		IN barcode bigint,
 		OUT valor double precision)
@@ -1538,8 +1539,8 @@ begin
 		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode AND impuesto.id=producto.otros;
 end; $$ language plpgsql;
 
--- esta funcion es necesario que se probada, porque tiene variaciones en el 
--- resultado respecto a la sentencia original 
+-- esta funcion es necesario que se probada, porque tiene variaciones en el
+-- resultado respecto a la sentencia original
 --
 create or replace function select_stats_proveedor(
        	  	  IN rut int4,
@@ -1551,16 +1552,16 @@ create or replace function select_stats_proveedor(
 		  OUT suma_cantingresada double precision,
 		  OUT vendidos float8)
 returns setof record as $$
-declare 
+declare
 	l record;
 	q text;
 begin
 q := $S$ select barcode, descripcion, marca, contenido, unidad,
      	 	sum(cantidad_ingresada) as suma, vendidos
-		from compra inner join compra_detalle 
-		     on compra.id = compra_detalle.id_compra 
-		     inner join producto 
-		     on compra_detalle.barcode_product = producto.barcode 
+		from compra inner join compra_detalle
+		     on compra.id = compra_detalle.id_compra
+		     inner join producto
+		     on compra_detalle.barcode_product = producto.barcode
 		where compra.rut_proveedor = $S$ || quote_literal(rut)
 		|| $S$ group by 1,2,3,4,5,7 $S$;
 
@@ -1581,7 +1582,7 @@ end; $$ language plpgsql;
 -- ??retorna del rut del proveedor para una compra dada
 -- revisar si se puede satisfacer con alguna funcion anteriormente definida
 -- compras.c:4549, 7023
-create or replace function get_proveedor_compra( 
+create or replace function get_proveedor_compra(
 		IN id_compra integer,
 		OUT proveedor integer)
 returns integer as $$
@@ -1613,6 +1614,6 @@ FOR list IN EXECUTE select_detalle_venta LOOP
 			|| list.barcode;
 	EXECUTE update_stocks;
 END LOOP;
-	
+
 RETURN 0;
 END;$$ language plpgsql;
