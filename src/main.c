@@ -16,7 +16,7 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include<gtk/gtk.h>
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
 	read_dimensions ("~/.rizoma_dimensions", dimensions, 17);
 	config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
 
-	if (!g_file_test(config_file, 
+	if (!g_file_test(config_file,
 			 G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
 	  {
 	    perror (g_strdup_printf ("Opening %s", config_file));
@@ -412,10 +412,10 @@ MainWindow (void)
 	accel = NULL;
 
 	main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title (GTK_WINDOW (main_window), 
+	gtk_window_set_title (GTK_WINDOW (main_window),
 			      "Rizoma: " PACKAGE_VERSION);
 
-	gtk_window_set_position (GTK_WINDOW (main_window), 
+	gtk_window_set_position (GTK_WINDOW (main_window),
 				 GTK_WIN_POS_CENTER_ALWAYS);
 
 	gtk_window_set_decorated (GTK_WINDOW (main_window), FALSE);
@@ -438,13 +438,13 @@ MainWindow (void)
 	      Usamos una ventana de 800x600
 	    */
 	    gtk_widget_set_size_request (main_window,
-					 MAIN_WINDOW_WIDTH, 
+					 MAIN_WINDOW_WIDTH,
 					 MAIN_WINDOW_HEIGHT);
 
 	    vbox = gtk_vbox_new (FALSE, 0);
 	    gtk_container_add (GTK_CONTAINER (main_window), vbox);
 	    gtk_widget_show (vbox);
-	    
+
 	    hbox = gtk_hbox_new (FALSE, 0);
 	    gtk_widget_show (hbox);
 	    gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
@@ -453,28 +453,28 @@ MainWindow (void)
 	      button = gtk_button_new_from_stock (GTK_STOCK_QUIT);
 	      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
 	      gtk_widget_show (button);
-	      
+
 	      g_signal_connect (G_OBJECT (button), "clicked",
 	      G_CALLBACK (gtk_main_quit), NULL);
 	    */
-	    
+
 	    frame = gtk_frame_new ("Rizoma Comercio");
 	    gtk_widget_set_size_request (frame, MAIN_FRAME_WIDTH, MAIN_FRAME_HEIGHT);
 	    gtk_widget_show (frame);
 	    gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
-	    
+
 	    hbox = gtk_hbox_new (FALSE, 0);
 	    gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
 	    gtk_container_add (GTK_CONTAINER (frame), hbox);
 	    gtk_widget_show (hbox);
-	    
+
 	    vbox = gtk_vbox_new (FALSE, 0);
-	    gtk_widget_set_size_request (vbox, 
-					 MODULES_TREE_WIDTH, 
+	    gtk_widget_set_size_request (vbox,
+					 MODULES_TREE_WIDTH,
 					 MODULES_TREE_HEIGHT);
 	    gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 0);
 	    gtk_widget_show (vbox);
-	    
+
 	    store = gtk_list_store_new (3,
 					G_TYPE_STRING,
 					G_TYPE_INT,
@@ -491,7 +491,7 @@ MainWindow (void)
 					2, 1000,
 					-1);
 		  }
-		else if ((user_data->level != 0) && 
+		else if ((user_data->level != 0) &&
 			 (modulos[i].normal_user == TRUE))
 		  {
 		    gtk_list_store_append (store, &iter);
@@ -502,36 +502,36 @@ MainWindow (void)
 					-1);
 		  }
 	      }
-	    
+
 	    scroll = gtk_scrolled_window_new (NULL, NULL);
 	    gtk_widget_show (scroll);
 	    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
 					    GTK_POLICY_AUTOMATIC,
 					    GTK_POLICY_AUTOMATIC);
-	    gtk_widget_set_size_request (scroll, 
-					 MODULES_TREE_WIDTH, 
+	    gtk_widget_set_size_request (scroll,
+					 MODULES_TREE_WIDTH,
 					 MODULES_TREE_HEIGHT);
 
 	    gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 0);
 
 	    treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
 	    gtk_tree_view_set_search_column (GTK_TREE_VIEW (treeview), 0);
-	    gtk_widget_set_size_request (GTK_WIDGET (treeview), 
-					 MODULES_TREE_WIDTH, 
+	    gtk_widget_set_size_request (GTK_WIDGET (treeview),
+					 MODULES_TREE_WIDTH,
 					 MODULES_TREE_HEIGHT);
 	    gtk_container_add (GTK_CONTAINER (scroll), treeview);
 	    gtk_widget_show (treeview);
-	    
+
 	    gchar *logo_path = rizoma_get_value("LOGO");
 	    if (logo_path == NULL)
 	      image = Image (main_window, tux_xpm);
 	    else
 	      image = gtk_image_new_from_file(logo_path);
-	    
+
 	    gtk_widget_show (image);
 	    gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
-	    
-	    
+
+
 	    /*
 	      Todo dentro de hbox no se vera !!!
 	      Y es solo para el usuario admin
@@ -542,97 +542,97 @@ MainWindow (void)
 		gtk_box_pack_end (GTK_BOX (vbox), hbox2, FALSE, FALSE, 0);
 		gtk_widget_set_size_request (hbox2, 0, 0);
 		gtk_widget_show (hbox2);
-		
+
 		button = gtk_button_new ();
 		gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 0);
 		gtk_widget_set_size_request (button, 0, 0);
 		gtk_widget_show (button);
-		
+
 		GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-		
+
 		g_signal_connect (G_OBJECT (button), "clicked",
 				  G_CALLBACK (VentanaIngreso), NULL);
-		
-		gtk_widget_add_accelerator (button, "clicked", 
+
+		gtk_widget_add_accelerator (button, "clicked",
 					    accel_generales,
-					    GDK_F7, GDK_LOCK_MASK, 
+					    GDK_F7, GDK_LOCK_MASK,
 					    GTK_ACCEL_VISIBLE);
 
 		button = gtk_button_new ();
-		gtk_box_pack_end (GTK_BOX (hbox2), button, 
+		gtk_box_pack_end (GTK_BOX (hbox2), button,
 				  FALSE, FALSE, 0);
 		gtk_widget_set_size_request (button, 0, 0);
 		gtk_widget_show (button);
-		
+
 		GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-		
+
 		g_signal_connect (G_OBJECT (button), "clicked",
 				  G_CALLBACK (VentanaEgreso), NULL);
-		
-		gtk_widget_add_accelerator (button, "clicked", 
+
+		gtk_widget_add_accelerator (button, "clicked",
 					    accel_generales,
-					    GDK_F6, GDK_LOCK_MASK, 
+					    GDK_F6, GDK_LOCK_MASK,
 					    GTK_ACCEL_VISIBLE);
-		
+
 		for (i = 0; i < sizeof (modulos) / sizeof (modulos[0]); i++)
 		  {
 		    button = gtk_button_new ();
-		    gtk_box_pack_end (GTK_BOX (hbox2), button, 
+		    gtk_box_pack_end (GTK_BOX (hbox2), button,
 				      FALSE, FALSE, 0);
 		    gtk_widget_set_size_request (button, 0, 0);
 		    gtk_widget_show (button);
-		    
+
 		    GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-		    
+
 		    g_signal_connect (G_OBJECT (button), "clicked",
-				      G_CALLBACK (SelectMenu), 
+				      G_CALLBACK (SelectMenu),
 				      (gpointer)modulos[i].name);
-		    
-		    gtk_widget_add_accelerator (button, "clicked", 
+
+		    gtk_widget_add_accelerator (button, "clicked",
 						accel_generales,
-						modulos[i].accel_key, 
-						GDK_LOCK_MASK, 
+						modulos[i].accel_key,
+						GDK_LOCK_MASK,
 						GTK_ACCEL_VISIBLE);
 		  }
 	      }
-	    
+
 	    hour_label = gtk_label_new ("");
-	    gtk_box_pack_end (GTK_BOX (vbox), hour_label, 
+	    gtk_box_pack_end (GTK_BOX (vbox), hour_label,
 			      FALSE, FALSE, 0);
 	    gtk_widget_show (hour_label);
-	    
+
 	    date_label = show_date ();
-	    gtk_box_pack_end (GTK_BOX (vbox), date_label, 
+	    gtk_box_pack_end (GTK_BOX (vbox), date_label,
 			      FALSE, FALSE, 0);
 	    gtk_widget_show (date_label);
-	    
+
 	    RefreshTime (NULL);
-	    
+
 	    module_box->main_box = gtk_vbox_new (FALSE, 0);
-	    gtk_box_pack_start (GTK_BOX (hbox), 
-				module_box->main_box, 
+	    gtk_box_pack_start (GTK_BOX (hbox),
+				module_box->main_box,
 				FALSE, FALSE, 0);
-	    gtk_widget_set_size_request 
-	      (GTK_WIDGET (module_box->main_box), 
-	       MODULE_BOX_WIDTH-5, 
+	    gtk_widget_set_size_request
+	      (GTK_WIDGET (module_box->main_box),
+	       MODULE_BOX_WIDTH-5,
 	       MODULE_BOX_HEIGHT);
-	    
+
 	    gtk_widget_show (module_box->main_box);
-	    
-	    
+
+
 	    GTK_WIDGET_UNSET_FLAGS (treeview, GTK_CAN_FOCUS);
-	    
+
 	    selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
-	    
+
 	    g_signal_connect (G_OBJECT (selection), "changed",
-			      G_CALLBACK (show_selected), 
+			      G_CALLBACK (show_selected),
 			      (gpointer)module_box);
 
-	    gtk_tree_selection_select_path (selection, 
+	    gtk_tree_selection_select_path (selection,
 					    gtk_tree_path_new_from_string ("0"));
 
 	    renderer = gtk_cell_renderer_text_new ();
-	    columna = gtk_tree_view_column_new_with_attributes ("Menu", 
+	    columna = gtk_tree_view_column_new_with_attributes ("Menu",
 								renderer,
 								"text", 0,
 								"size", 1,
@@ -641,7 +641,7 @@ MainWindow (void)
 
 	    gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), columna);
 
-	    gtk_tree_selection_select_path (selection, 
+	    gtk_tree_selection_select_path (selection,
 					    gtk_tree_path_new_from_string ("0"));
 
 	  }
@@ -655,97 +655,97 @@ MainWindow (void)
 	      Usamos una ventana de 640x480
 	    */
 	    gtk_widget_set_size_request (main_window, 640, 480);
-	    
+
 	    vbox = gtk_vbox_new (FALSE, 0);
 	    gtk_container_add (GTK_CONTAINER (main_window), vbox);
 	    gtk_widget_show (vbox);
-	    
+
 	    hbox = gtk_hbox_new (FALSE, 0);
 	    gtk_widget_show (hbox);
 	    gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
-	    
+
 	    frame = gtk_frame_new ("Rizoma Comercio");
 	    gtk_widget_set_size_request (frame, MAIN_FRAME_WIDTH, MAIN_FRAME_HEIGHT);
 	    gtk_widget_show (frame);
 	    gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
-	    
+
 	    module_box->main_box = gtk_vbox_new (FALSE, 0);
 	    gtk_box_pack_start (GTK_BOX (hbox), module_box->main_box, FALSE, FALSE, 0);
 	    gtk_widget_set_size_request (GTK_WIDGET (module_box->main_box), MODULE_LITTLE_BOX_WIDTH, MODULE_LITTLE_BOX_HEIGHT);
 	    gtk_widget_show (module_box->main_box);
-	    
+
 	    modulos[0].func(module_box);
-	    
+
 	    hbox = gtk_hbox_new (FALSE, 0);
 	    gtk_box_pack_end (GTK_BOX (module_box->main_box), hbox, FALSE, FALSE, 0);
 	    gtk_widget_set_size_request (hbox, 0, 0);
 	    gtk_widget_show (hbox);
-	    
+
 	    button = gtk_button_new_with_label ("0");
 	    gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 	    gtk_widget_set_size_request (button, 0, 0);
 	    gtk_widget_show (button);
-	    
+
 	    GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-	    
+
 	    g_signal_connect (G_OBJECT (button), "clicked",
 			      G_CALLBACK (show_selected_in_button), (gpointer)module_box);
-	    
-	    gtk_widget_add_accelerator (button, "clicked", 
+
+	    gtk_widget_add_accelerator (button, "clicked",
 					accel_generales,
-					GDK_F1, GDK_LOCK_MASK, 
+					GDK_F1, GDK_LOCK_MASK,
 					GTK_ACCEL_VISIBLE);
 
 	    /* Solo el admnistrador tiene accesso */
-	    
+
 	    if (user_data->level == 0)
 	      {
 		button = gtk_button_new_with_label ("1");
 		gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 		gtk_widget_set_size_request (button, 0, 0);
 		gtk_widget_show (button);
-		
+
 		GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-		
+
 		g_signal_connect (G_OBJECT (button), "clicked",
-				  G_CALLBACK (show_selected_in_button), 
+				  G_CALLBACK (show_selected_in_button),
 				  (gpointer)module_box);
 
-		gtk_widget_add_accelerator (button, "clicked", 
+		gtk_widget_add_accelerator (button, "clicked",
 					    accel_generales,
-					    GDK_F2, GDK_LOCK_MASK, 
+					    GDK_F2, GDK_LOCK_MASK,
 					    GTK_ACCEL_VISIBLE);
 
 		button = gtk_button_new_with_label ("2");
 		gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 		gtk_widget_set_size_request (button, 0, 0);
 		gtk_widget_show (button);
-		
+
 		GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-		
+
 		g_signal_connect (G_OBJECT (button), "clicked",
-				  G_CALLBACK (show_selected_in_button), 
+				  G_CALLBACK (show_selected_in_button),
 				  (gpointer)module_box);
 
-		gtk_widget_add_accelerator (button, "clicked", 
+		gtk_widget_add_accelerator (button, "clicked",
 					    accel_generales,
-					    GDK_F3, GDK_LOCK_MASK, 
+					    GDK_F3, GDK_LOCK_MASK,
 					    GTK_ACCEL_VISIBLE);
 
 		button = gtk_button_new_with_label ("3");
 		gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
 		gtk_widget_set_size_request (button, 0, 0);
 		gtk_widget_show (button);
-		
+
 		GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-		
+
 		g_signal_connect (G_OBJECT (button), "clicked",
-				  G_CALLBACK (show_selected_in_button), 
+				  G_CALLBACK (show_selected_in_button),
 				  (gpointer)module_box);
 
-		gtk_widget_add_accelerator (button, "clicked", 
+		gtk_widget_add_accelerator (button, "clicked",
 					    accel_generales,
-					    GDK_F4, GDK_LOCK_MASK, 
+					    GDK_F4, GDK_LOCK_MASK,
 					    GTK_ACCEL_VISIBLE);
 	      }
 	  }
@@ -758,17 +758,17 @@ MainWindow (void)
 	GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
 
 	g_signal_connect (G_OBJECT (button), "clicked",
-			  G_CALLBACK (show_selected_in_button), 
+			  G_CALLBACK (show_selected_in_button),
 			  (gpointer)module_box);
 
-	gtk_widget_add_accelerator (button, "clicked", 
+	gtk_widget_add_accelerator (button, "clicked",
 				    accel_generales,
-				    GDK_F12, GDK_LOCK_MASK, 
+				    GDK_F12, GDK_LOCK_MASK,
 				    GTK_ACCEL_VISIBLE);
 
 
 	/*
-	  Necesitamos saber si la caja ha sido inicializada o no 
+	  Necesitamos saber si la caja ha sido inicializada o no
 	  pero solo si somos administradores
 	*/
 	if (check_caja () == FALSE && user_data->level == 0)
@@ -782,9 +782,9 @@ MainWindow (void)
 	    CerrarCaja (ArqueoCajaLastDay ());
 	    InicializarCajaWin ();
 	  }
-	
+
 	//  gtk_timeout_add (1000, RefreshTime, (gpointer)hour_label);
-	
+
 	/*
 	 * Usamos el reloj solo si estamos en una resolucion de 800x600 o mayor
 	 */
@@ -814,7 +814,7 @@ KillQuestionWindow (GtkWidget *widget, gpointer data)
 	gtk_widget_set_sensitive (main_window, TRUE);
 
 	current_menu = last_menu;
-	gtk_tree_selection_select_path 
+	gtk_tree_selection_select_path
 	  (gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
 	   gtk_tree_path_new_from_string (g_strdup_printf ("%d", last_menu)));
 

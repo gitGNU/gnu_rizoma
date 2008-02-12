@@ -16,7 +16,7 @@
 *
 *    You should have received a copy of the GNU General Public License
 *    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #include<gtk/gtk.h>
@@ -43,9 +43,9 @@ void
 ModificarNumber (GtkWidget *widget, gpointer data)
 {
   gint new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (boleta_entry))));
-  
+
   if ((set_ticket_number (new_number, SIMPLE)) == FALSE)
-    ErrorMSG (boleta_entry, "Ocurrió un error mientras se intento modificar el número.");  
+    ErrorMSG (boleta_entry, "Ocurrió un error mientras se intento modificar el número.");
   else
     ExitoMSG (boleta_entry, "Se modifico el folio con exito.");
 }
@@ -54,9 +54,9 @@ void
 ModificarNumberF (GtkWidget *widget, gpointer data)
 {
   gint new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (factura_entry))));
-  
+
   if ((set_ticket_number (new_number, FACTURA)) == FALSE)
-    ErrorMSG (factura_entry, "Ocurrió un error mientras se intento modificar el número.");  
+    ErrorMSG (factura_entry, "Ocurrió un error mientras se intento modificar el número.");
   else
     ExitoMSG (factura_entry, "Se modifico el folio con exito.");
 }
@@ -64,13 +64,13 @@ ModificarNumberF (GtkWidget *widget, gpointer data)
 void
 guardar_parametros (GtkWidget *widget, gpointer user_data)
 {
-  
+
   if ((rizoma_set_value ("DB_NAME", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_name_entry)))) != 0)
     {
       ErrorMSG (db_name_entry, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
-  
+
   if ((rizoma_set_value ("USER", (gchar *)gtk_entry_get_text (GTK_ENTRY (db_user_entry)))) != 0)
     {
       ErrorMSG (db_user_entry, "Ocurrió un error mientras se modificaban los parametros");
@@ -103,7 +103,7 @@ guardar_parametros (GtkWidget *widget, gpointer user_data)
     }
 
   ExitoMSG (db_name_entry, "Se modificaron los parametros con exito.");
-  
+
 }
 
 void
@@ -188,7 +188,7 @@ modificar_config (GtkWidget *box)
   gtk_box_pack_start (GTK_BOX (vbox), temp_entry, FALSE, FALSE, 3);
   gtk_widget_show (temp_entry);
 
-  
+
   vbox = gtk_vbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
   gtk_widget_show (vbox);
@@ -216,7 +216,7 @@ modificar_config (GtkWidget *box)
   gtk_widget_show (label);
 
   print_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (print_entry), 
+  gtk_entry_set_text (GTK_ENTRY (print_entry),
 		      rizoma_get_value ("PRINT_COMMAND"));
   gtk_widget_set_size_request (print_entry, 80, -1);
   gtk_box_pack_start (GTK_BOX (vbox), print_entry, FALSE, FALSE, 3);
@@ -225,14 +225,14 @@ modificar_config (GtkWidget *box)
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
-  
+
   button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (guardar_parametros), NULL);
-  
+
 }
 
 void
@@ -339,7 +339,7 @@ Parametros (GtkWidget *main_box)
   /*
     Configuracion
   */
-  
+
   frame = gtk_frame_new ("Modificar configuracion");
   gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 3);;
   gtk_widget_show (frame);

@@ -1,6 +1,6 @@
-/*config_file.c
+ /*config_file.c
  *
- *    Copyright 2004 Rizoma Tecnologia Limitada <jonathan@rizoma.cl>
+ *    Copyright 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
  *    This file is part of rizoma.
  *
@@ -16,7 +16,7 @@
  *
  *    You should have received a copy of the GNU General Public License
  *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include<glib.h>
@@ -138,69 +138,6 @@ get_value_var (char *line)
 }
 
 /*
- * We read the config file
- */
-int
-read_conf (char *file, Parms parms[], int total)
-{
-  /* The file descriptor to use */
-  FILE *fd;
-  /* We save the line returned bye get_clean_line ()*/
-  char *line;
-  /* A silly buffer */
-  char *buf;
-  /* The counter to run through the vars to get */
-  int i;
-  /* The lenght of the silly buffer ;)*/
-  int len;
-
-  /* We open the config file */
-  fd = fopen (file, "r");
-
-  if (fd == NULL)
-	return -1;
-
-  do
-    {
-	  line = get_clean_line (fd);
-
-	  if (line != NULL && *line != '\0' && *line != ' ')
-		{
-		  buf = get_var_name (line);
-
-		  for (i = 0; i < total; i++)
-			if (strcmp (parms[i].var_name, buf) == 0)
-			  {
-				g_free (buf);
-
-				buf = get_value_var (line);
-				/*
-				 * We get the len of the buffer + 1, because
-				 * we don't want to lose a character ;)
-				 */
-				len = strlen (buf) + 1;
-
-				*parms[i].value = (gchar *) g_malloc (sizeof (len));
-
-				g_snprintf (*parms[i].value, len, "%s", buf);
-
-				break;
-			  }
-
-		  g_free (buf);
-
-		  g_free (line);
-		}
-    } while (line != NULL);
-
-  /* We close the config file */
-  fclose (fd);
-
-  /* We return success */
-  return 0;
-}
-
-/*
   We extract the x and y values from buf, the format to take these values
   it's:
 
@@ -299,7 +236,7 @@ rizoma_get_value (char *var_name)
 
   rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
   file = g_key_file_new();
-  
+
   res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
 
   if (!res)
@@ -310,7 +247,7 @@ rizoma_get_value (char *var_name)
 
       return NULL;
     }
-  
+
   if (!g_key_file_has_key(file, "DEFAULT", var_name, NULL))
     {
       g_printerr("\n*** funcion %s: el archivo de configuracion no tiene "
@@ -343,8 +280,8 @@ rizoma_set_value (char *var_name, char *new_value)
 
   rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
   file = g_key_file_new();
-  
-  res = g_key_file_load_from_file(file, rizoma_path, 
+
+  res = g_key_file_load_from_file(file, rizoma_path,
 				  G_KEY_FILE_KEEP_COMMENTS, NULL);
 
   if (!res)
@@ -353,7 +290,7 @@ rizoma_set_value (char *var_name, char *new_value)
 		 "archivo de configuracion", G_STRFUNC);
       return NULL;
     }
-  
+
   g_key_file_set_string(file, "DEFAULT", var_name, new_value);
   //TODO: usar glib para manipular el archivo, si bien esto funciona
   //la idea es dejarlo consistente para que todo use glib
@@ -362,7 +299,7 @@ rizoma_set_value (char *var_name, char *new_value)
   fprintf(fp, "%s", g_key_file_to_data(file, NULL, NULL));
 
   fflush(fp);
-  fclose(fp);  
+  fclose(fp);
   return (0);
 }
 

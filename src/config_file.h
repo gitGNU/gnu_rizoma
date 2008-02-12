@@ -16,7 +16,7 @@
 *
 *    You should have received a copy of the GNU General Public License
 *    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 #ifndef _CONFIG_FILE_H
@@ -42,8 +42,6 @@ typedef struct __parms_dimensions {
 } ParmsDimensions;
 
 RizomaConf *rizoma_config;
-
-int read_conf (char *file, Parms parms[], int total);
 
 int read_dimensions (char *file, ParmsDimensions parms[], int total);
 
