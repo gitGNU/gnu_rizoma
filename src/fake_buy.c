@@ -9,190 +9,209 @@
 gchar *
 PutPoints (gchar *number)
 {
-  gchar *alt = g_malloc0 (15), *alt3 = g_malloc0 (15);
-  int len = strlen (number);
-  gint points;
-  gint i, unidad = 0, point = 0;
+	gchar *alt = g_malloc0 (15), *alt3 = g_malloc0 (15);
+	int len = strlen (number);
+	gint points;
+	gint i, unidad = 0, point = 0;
 
-  if (len <= 3)
-	return number;
+	if (len <= 3)
+		return number;
 
-  if ((len % 3) != 0)
-	points = len / 3;
-  else
-	points = (len / 3) - 1;
+	if ((len % 3) != 0)
+		points = len / 3;
+	else
+		points = (len / 3) - 1;
 
-  for (i = len; i >= 0; i--)
+	for (i = len; i >= 0; i--)
     {
-	  if (unidad == 3 && point < points && number[i] != '.')
+		if (unidad == 3 && point < points && number[i] != '.')
 		{
-		  g_snprintf (alt, 15, ".%c%s", number[i], alt3);
-		  unidad = 0;
-		  point++;
+			g_snprintf (alt, 15, ".%c%s", number[i], alt3);
+			unidad = 0;
+			point++;
 		}
-	  else
-		g_snprintf (alt, 15, "%c%s", number[i], alt3);
+		else
+			g_snprintf (alt, 15, "%c%s", number[i], alt3);
 
-	  strcpy (alt3, alt);
+		strcpy (alt3, alt);
 
-	  unidad++;
+		unidad++;
     }
 
-  return alt;
+	return alt;
 }
 
 gchar *
 CutPoints (gchar *number_points)
 {
-  gint len = strlen (number_points);
-  gchar *number = g_malloc0 (len);
-  gint i, o = 0;
+	gint len = strlen (number_points);
+	gchar *number = g_malloc0 (len);
+	gint i, o = 0;
 
-  if (strcmp (number_points, "") == 0)
-	return number_points;
+	if (strcmp (number_points, "") == 0)
+		return number_points;
 
-  for (i = 0; i <= len; i++)
-	if (number_points[i] != '.')
-	  number[o++] = number_points[i];
+	for (i = 0; i <= len; i++)
+		if (number_points[i] != '.')
+			number[o++] = number_points[i];
 
-  g_free (number_points);
+	g_free (number_points);
 
-  return number;
+	return number;
 }
 
 void
 SendCursorTo (GtkWidget *widget, gpointer data)
 {
-  GtkWindow *window = GTK_WINDOW (gtk_widget_get_toplevel ((GtkWidget *)data));
-  GtkWidget *destiny = (GtkWidget *) data;
+	GtkWindow *window = GTK_WINDOW (gtk_widget_get_toplevel ((GtkWidget *)data));
+	GtkWidget *destiny = (GtkWidget *) data;
 
-  gtk_window_set_focus (window, destiny);
+	gtk_window_set_focus (window, destiny);
 }
 
 
 char *
 get_line (FILE *fd)
 {
-  int c;
-  int i = 0;
-  char *line = (char *) malloc (255);
+	int c;
+	int i = 0;
+	char *line = (char *) malloc (255);
 
-  memset (line, '\0', 255);
+	memset (line, '\0', 255);
 
-  for (c = fgetc (fd); c != '#' && c != '\n' && c != EOF; c = fgetc (fd))
+	for (c = fgetc (fd); c != '#' && c != '\n' && c != EOF; c = fgetc (fd))
     {
-	  *line++ = c;
-	  i++;
+		*line++ = c;
+		i++;
     }
 
 
-  for (; c != '\n' && c != EOF; c = fgetc (fd));
+	for (; c != '\n' && c != EOF; c = fgetc (fd));
 
 
-  if (i > 0 || c != EOF)
+	if (i > 0 || c != EOF)
     {
-	  for (; i != 0; i--)
-		*line--;
+		for (; i != 0; i--)
+			*line--;
 
-	  return line;
+		return line;
     }
-  else
-	return NULL;
+	else
+		return NULL;
 }
 
 void
 IngresarFakeCompra (void)
 {
-  Productos *products = compra->header_compra;
-  gint id, doc;
-  gchar *rut_proveedor;
+	Productos *products = compra->header_compra;
+	gint id, doc;
+	gchar *rut_proveedor;
 
-  PGresult *res;
+	PGresult *res;
 
-  res = EjecutarSQL ("SELECT id FROM compra ORDER BY id DESC LIMIT 1");
+	res = EjecutarSQL ("SELECT id FROM compra ORDER BY id DESC LIMIT 1");
 
-  id = atoi (PQgetvalue (res, 0, 0));
+	id = atoi (PQgetvalue (res, 0, 0));
 
-  if (products != NULL)
+	if (products != NULL)
     {
-	  do {
+		do {
 
-		IngresarProducto (products->product, id);
+			IngresarProducto (products->product, id);
 
-		IngresarDetalleDocumento (products->product, id,
-								  -1,
-								  -1);
+			IngresarDetalleDocumento (products->product, id,
+									  -1,
+									  -1);
 
-		products = products->next;
-	  }
-	  while (products != compra->header_compra);
+			products = products->next;
+		}
+		while (products != compra->header_compra);
 
-	  //      SetProductosIngresados ();
+		//      SetProductosIngresados ();
 
     }
 
-  rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d",
-												 id));
+	rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d",
+												   id));
 
 
-  doc = IngresarFactura ("-1", id, rut_proveedor, -1, "25", "3", "06", 0);
+	doc = IngresarFactura ("-1", id, rut_proveedor, -1, "25", "3", "06", 0);
 
 
-  CompraIngresada ();
+	CompraIngresada ();
 
 }
 
 int main (int argc, char **argv)
 {
-  FILE *fp;
-  char *line = NULL;
-  char *value;
+	FILE *fp;
+	char *line = NULL;
+	char *value;
 
-  char *barcode;
-  double cant = 100.0;
-  double pcomp = 0.0;
-  int precio = 1000;
-  int margen = 20;
-  char * pEnd;
-  int config;
-  char *config_file;
+	char *barcode;
+	double cant = 100.0;
+	double pcomp = 0.0;
+	int precio = 1000;
+	double margen;
+	char * pEnd;
+	int config;
+//  char *config_file;
+	gdouble iva;
+	gdouble otros;
 
-  fp = fopen (argv[1], "r");
+	fp = fopen (argv[1], "r");
 
-  compra = (Compra *) g_malloc (sizeof (Compra));
-  compra->header = NULL;
-  compra->products_list = NULL;
-  compra->header_compra = NULL;
-  compra->products_compra = NULL;
-  compra->current = NULL;
+	compra = (Compra *) g_malloc (sizeof (Compra));
+	compra->header = NULL;
+	compra->products_list = NULL;
+	compra->header_compra = NULL;
+	compra->products_compra = NULL;
+	compra->current = NULL;
 
-  do {
+	do {
 
-	line = get_line (fp);
+		line = get_line (fp);
 
-	if (line != NULL)
-	  {
-		/*
-		  Codigo de Barras, Cantidad, Precio, Precio Compra
-		*/
-		barcode = strtok (line, ",");
-		cant = strtod( strtok( NULL, "," ), &pEnd );
-		precio = atoi( strtok( NULL, "," ) );
-		pcomp = strtod( strtok (NULL, ","), &pEnd );
-		//printf( "Barcode: %s\nCant: %f\nPrecio: %d\nPrecio Compra: %f\n", barcode, cant, precio, pcomp );
+		if (line != NULL)
+		{
+			/*
+			  Codigo de Barras, Cantidad, Precio, Precio Compra
+			*/
+			barcode = strtok (line, ",");
+			cant = strtod( strtok( NULL, "," ), &pEnd );
+			precio = atoi( strtok( NULL, "," ) );
+			pcomp = strtod( strtok (NULL, ","), &pEnd );
 
-		if( cant == 0 ) continue;
 
-		CompraAgregarALista (barcode, cant, precio, pcomp, margen, FALSE);
-	  }
+			if( cant == 0 ) continue;
 
-  } while (line != NULL);
+			/*if (otros == -1 && iva != -1)
+				margen = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
+			else if (iva != -1 && otros != -1)
+			{
+				iva = (gdouble) iva - 1;
+				otros = (gdouble) otros / 100;
 
-  AgregarCompra ("161736979", "", 0);
+				precio = (gdouble) precio_final / (gdouble)(iva + otros + 1);
+				ganancia = (gdouble) precio - ingresa;
+				margen = (gdouble)(ganancia / ingresa) * 100;
 
-  // IngresarFakeCompra ();
+			}
+			else if (iva == -1 && otros == -1)
+				margen = (gdouble) ((precio_final / ingresa) - 1) * 100;
+			*/
+			printf( "Barcode: %s\nCant: %f\nPrecio: %d\nPrecio Compra: %f\n", barcode, cant, precio, pcomp );
 
-  fclose (fp);
+			CompraAgregarALista (barcode, cant, precio, pcomp, margen, FALSE);
+		}
+		break;
+	} while (line != NULL);
 
-  return 0;
+	AgregarCompra ("161736979", "", 0);
+
+	// IngresarFakeCompra ();
+
+	fclose (fp);
+
+	return 0;
 }

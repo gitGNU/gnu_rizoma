@@ -72,7 +72,7 @@ comisiones.c comisiones.h \
 vale.c vale.h \
 rizoma_errors.c rizoma_errors.h
 
-rizoma_config_SOURCES = rizoma-config.c 
+rizoma_config_SOURCES = rizoma-config.c
 
 rizoma_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
@@ -80,7 +80,8 @@ INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
 fakebuy_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
 
-rizoma_config_LDADD = $(GNOMEUI_LIBS) $(CONFUSE_LIBS)
-INCLUDES = $(GNOMEUI_FLAGS) $(CONFUSE_FLAGS) -DDATADIR=\"$(pkgdatadir)\"
+rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS)
+rizoma_config_LDFLAGS = -Wl,--export-dynamic
+INCLUDES = $(CONFUSE_FLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ChangeLog
