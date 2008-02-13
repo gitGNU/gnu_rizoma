@@ -1,6 +1,6 @@
  /*config_file.c
  *
- *    Copyright 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
  *    This file is part of rizoma.
  *

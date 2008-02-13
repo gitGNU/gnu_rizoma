@@ -1,6 +1,6 @@
 #Makefile.am
 #
-#    Copyright (C) 2004 Rizoma Tecnologia Limitada <jonathan@rizoma.cl>
+#    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
 #
 #    This file is part of rizoma.
 #
@@ -80,8 +80,8 @@ INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
 fakebuy_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
 
-rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS)
+rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS) $(GKSU_LIBS)
 rizoma_config_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CONFUSE_FLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CONFUSE_FLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ChangeLog

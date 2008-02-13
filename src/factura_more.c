@@ -1,6 +1,6 @@
 /*facutra_more.c
 *
-*    Copyright (C) 2005 Rizoma Tecnologia Limitada <jonathan@rizoma.cl>
+*    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *    This file is part of rizoma.
 *

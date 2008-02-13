@@ -1,6 +1,6 @@
 /*encriptar.h
 *
-*    Copyright 2004 Rizoma Tecnologia Limitada <jonathan@rizoma.cl>
+*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *    This file is part of rizoma.
 *
