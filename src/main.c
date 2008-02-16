@@ -233,7 +233,6 @@ show_selected_in_button (GtkWidget *button, gpointer data)
 void
 check_passwd (GtkWidget *widget, gpointer data)
 {
-  GtkWindow *login_window = (GtkWindow *) data;
   gchar *passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
   gchar *user = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"user_entry")));
 
@@ -249,7 +248,7 @@ check_passwd (GtkWidget *widget, gpointer data)
 
 	  Asistencia (user_data->user_id, TRUE);
 
-	  gtk_widget_destroy ( (GtkWidget *)login_window);
+	  gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
 
 	  MainWindow ();
 
