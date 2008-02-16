@@ -72,6 +72,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "DEFAULT", "VENDEDOR", "1");
   g_key_file_set_string (file, "DEFAULT", "MAQUINA", "1");
   g_key_file_set_string (file, "DEFAULT", "VENTA_DIRECTA", "0");
+  g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
 
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
@@ -347,7 +348,7 @@ main (int argc, char *argv[])
 
   gtk_builder_connect_signals (builder, NULL);
 
-  asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
+  asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente");
 
   page = gtk_assistant_get_nth_page (asistente, 0 );
   gtk_assistant_set_page_complete (asistente, page, TRUE);

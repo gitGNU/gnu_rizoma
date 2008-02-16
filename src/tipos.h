@@ -27,8 +27,6 @@
 
 GtkWidget *main_window;
 
-GtkWidget *passwd_window;
-
 GtkWidget *hour_label;
 
 GtkWidget *date_label;

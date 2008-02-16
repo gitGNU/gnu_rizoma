@@ -1,6 +1,6 @@
 /*main.c
 *
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <zeus@emacs.cl>
+*    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <zeus@emacs.cl>
 *
 *       This program is free software; you can redistribute it and/or modify
 *    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ void show_selected (GtkTreeSelection *selection, gpointer data);
 
 void ClosePasswdWindow (void);
 
-void CheckPasswd (void);
+void check_passwd (GtkWidget *widget, gpointer data);
 
 void MainWindow (void);
 

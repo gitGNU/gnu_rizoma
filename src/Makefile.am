@@ -74,8 +74,9 @@ rizoma_errors.c rizoma_errors.h
 
 rizoma_config_SOURCES = rizoma-config.c
 
-rizoma_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
+rizoma_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_LDFLAGS = -Wl,--export-dynamic
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 fakebuy_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
