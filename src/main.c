@@ -150,7 +150,7 @@ int main (int argc, char *argv[])
 
   builder = gtk_builder_new ();
 
-  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.xml", &err);
+  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
   if (err) {
 	g_error ("ERROR: %s\n", err->message);
 	return -1;
