@@ -1,6 +1,6 @@
 /*boleta.c
 *
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <zeus@emacs.cl>
+*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *       This program is free software; you can redistribute it and/or modify
 *    it under the terms of the GNU General Public License as published by
