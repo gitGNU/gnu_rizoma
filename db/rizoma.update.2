@@ -1,6 +1,0 @@
-UPDATE compras SET forma_pago=-1 WHERE forma_pago=0;
-
-UPDATE facturas_compras SET forma_pago=(SELECT compras.forma_pago FROM compras WHERE id=facturas_compras.id_compra);
-
-UPDATE facturas_compras SET fecha_pago=(SELECT DATE(fecha)+(forma_pago+1) FROM compras WHERE id=facturas_compras.id_compra);
-

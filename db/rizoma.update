@@ -1,2 +1,0 @@
-ALTER TABLE ventas ADD COLUMN canceled boolean;
-ALTER TABLE ventas ALTER COLUMN canceled SET DEFAULT 'false';
