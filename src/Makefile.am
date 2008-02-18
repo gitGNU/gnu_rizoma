@@ -18,35 +18,9 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-bin_PROGRAMS = rizoma rizoma-config fakebuy
+bin_PROGRAMS = rizoma rizoma-config
 
 rizoma_SOURCES = main.c tipos.h main.h datos.h dimentions.h \
-ventas.c ventas.h \
-administracion_productos.c administracion_productos.h \
-postgres-functions.c postgres-functions.h \
-errors.c errors.h \
-manejo_productos.c manejo_productos.h \
-ventas_stats.c ventas_stats.h \
-credito.c credito.h \
-encriptar.c encriptar.h \
-usuario.c usuario.h \
-compras.c compras.h \
-boleta.c boleta.h \
-caja.c caja.h \
-tiempo.c tiempo.h \
-proveedores.c proveedores.h \
-control.c control.h \
-impuestos.c impuestos.h \
-datos_negocio.c datos_negocio.h \
-printing.c printing.h \
-config_file.c config_file.h \
-parametros.c parametros.h \
-factura_more.c factura_more.h \
-comisiones.c comisiones.h \
-vale.c vale.h \
-rizoma_errors.c rizoma_errors.h
-
-fakebuy_SOURCES = fake_buy.c \
 ventas.c ventas.h \
 administracion_productos.c administracion_productos.h \
 postgres-functions.c postgres-functions.h \
