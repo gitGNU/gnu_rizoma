@@ -270,7 +270,6 @@ MainWindow (void)
 
   GtkAccelGroup *accel_generales;
 
-  //  GtkWidget *main_window;
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *hbox2;
