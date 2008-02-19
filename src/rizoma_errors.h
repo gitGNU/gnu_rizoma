@@ -36,4 +36,6 @@ enum {APPLY, ERROR, ALERT};
 
 gint rizoma_errors_set (gchar *error, gchar *function, gint type);
 
+gint rizoma_error_window (GtkWidget *widget);
+
 #endif

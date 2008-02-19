@@ -1,6 +1,6 @@
 /*config_file.h
 *
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+*    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *    This file is part of rizoma.
 *
@@ -23,14 +23,6 @@
 
 #define _CONFIG_FILE_H
 
-typedef struct _rizoma_conf {
-  struct _rizoma_conf *back;
-  char *var_name;
-  char *valor;
-
-  struct _rizoma_conf *next;
-} RizomaConf;
-
 typedef struct __parms {
   char *var_name;
   char **value;
@@ -41,13 +33,13 @@ typedef struct __parms_dimensions {
   Position **values;
 } ParmsDimensions;
 
-RizomaConf *rizoma_config;
-
 int read_dimensions (char *file, ParmsDimensions parms[], int total);
 
 char * rizoma_get_value (char *var_name);
 
 int rizoma_set_value (char *var_name, char *new_value);
+
+void rizoma_set_profile (gchar *group_name);
 
 int rizoma_extract_xy (char *value, float *x, float *y);
 

@@ -47,7 +47,7 @@
 #include"control.h"
 #include"datos.h"
 #include"dimentions.h"
-#include<rizoma_errors.h>
+#include"rizoma_errors.h"
 #include"config_file.h"
 
 #include<libgksu.h>
@@ -96,47 +96,60 @@ Salir (GtkWidget *widget, gpointer data)
   gtk_main_quit ();
 }
 
-int main (int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
   GtkWindow *login_window;
   GError *err = NULL;
+
+  GtkComboBox *combo;
+  GtkListStore *model;
+  GtkTreeIter iter;
+  GtkCellRenderer *cell;
+
   char *config_file;
+  GKeyFile *key_file;
+  gchar **profiles;
 
-  dimension = (Dimensions *) g_malloc (sizeof (Dimensions));
-  //  dimension->factura_cliente = (Position *) g_malloc (sizeof (Position));
+  /* dimension = (Dimensions *) g_malloc (sizeof (Dimensions)); */
+  /* //  dimension->factura_cliente = (Position *) g_malloc (sizeof (Position)); */
 
-  ParmsDimensions dimensions[17] = {
-	{"factura_size", &dimension->factura_size},
-	{"factura_cliente", &dimension->factura_cliente},
-	{"factura_address", &dimension->factura_address},
-	{"factura_giro", &dimension->factura_giro},
-	{"factura_rut", &dimension->factura_rut},
-	{"factura_comuna", &dimension->factura_comuna},
-	{"factura_fono", &dimension->factura_fono},
-	{"factura_subtotal", &dimension->factura_subtotal},
-	{"factura_iva", &dimension->factura_iva},
-	{"factura_total", &dimension->factura_total},
-	{"factura_detail_begin", &dimension->factura_detail_begin},
-	{"factura_detail_end", &dimension->factura_detail_end},
-	{"factura_codigo", &dimension->factura_codigo},
-	{"factura_descripcion", &dimension->factura_descripcion},
-	{"factura_cantidad", &dimension->factura_cantidad},
-	{"factura_precio_uni", &dimension->factura_precio_uni},
-	{"factura_precio_total", &dimension->factura_precio_total},
-  };
+  /* ParmsDimensions dimensions[17] = { */
+  /* 	{"factura_size", &dimension->factura_size}, */
+  /* 	{"factura_cliente", &dimension->factura_cliente}, */
+  /* 	{"factura_address", &dimension->factura_address}, */
+  /* 	{"factura_giro", &dimension->factura_giro}, */
+  /* 	{"factura_rut", &dimension->factura_rut}, */
+  /* 	{"factura_comuna", &dimension->factura_comuna}, */
+  /* 	{"factura_fono", &dimension->factura_fono}, */
+  /* 	{"factura_subtotal", &dimension->factura_subtotal}, */
+  /* 	{"factura_iva", &dimension->factura_iva}, */
+  /* 	{"factura_total", &dimension->factura_total}, */
+  /* 	{"factura_detail_begin", &dimension->factura_detail_begin}, */
+  /* 	{"factura_detail_end", &dimension->factura_detail_end}, */
+  /* 	{"factura_codigo", &dimension->factura_codigo}, */
+  /* 	{"factura_descripcion", &dimension->factura_descripcion}, */
+  /* 	{"factura_cantidad", &dimension->factura_cantidad}, */
+  /* 	{"factura_precio_uni", &dimension->factura_precio_uni}, */
+  /* 	{"factura_precio_total", &dimension->factura_precio_total}, */
+  /* }; */
+  /* read_dimensions ("~/.rizoma_dimensions", dimensions, 17); */
+
 
   main_window = NULL;
 
-  read_dimensions ("~/.rizoma_dimensions", dimensions, 17);
+
   config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
 
   if (!g_file_test(config_file,
 				   G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
 	{
 	  perror (g_strdup_printf ("Opening %s", config_file));
-	  printf ("Para configurar su sistema debe ejecutar rizoma-config usando gksu(o similar) con la opcion -k\n");
+	  printf ("Para configurar su sistema debe ejecutar rizoma-config\n");
 	  exit (-1);
 	}
+  key_file = g_key_file_new ();
+  g_key_file_load_from_file(key_file, config_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
   gtk_init (&argc, &argv);
 
@@ -158,6 +171,37 @@ int main (int argc, char *argv[])
   gtk_builder_connect_signals (builder, NULL);
 
   login_window = (GtkWindow *) gtk_builder_get_object (builder, "login_window");
+
+  profiles = g_key_file_get_groups (key_file, NULL);
+  g_key_file_free (key_file);
+
+  model = gtk_list_store_new (1,
+  							  G_TYPE_STRING
+  							  );
+
+  combo = (GtkComboBox *) gtk_builder_get_object (builder, "combo_profile");
+
+  cell = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start ((GtkCellLayout *)combo, cell, TRUE);
+  gtk_cell_layout_set_attributes ((GtkCellLayout *)combo, cell,
+								  "text", 0,
+								  NULL);
+
+
+  do
+	{
+	  if (*profiles != NULL)
+		{
+		  gtk_list_store_append (model, &iter);
+		  gtk_list_store_set (model, &iter,
+		  					  0, *profiles,
+		  					  -1
+		  					  );
+		}
+	} while (*profiles++ != NULL);
+
+  gtk_combo_box_set_model (combo, (GtkTreeModel *)model);
+  gtk_combo_box_set_active (combo, 0);
 
   gtk_widget_show_all ((GtkWidget *)login_window);
 
@@ -233,8 +277,20 @@ show_selected_in_button (GtkWidget *button, gpointer data)
 void
 check_passwd (GtkWidget *widget, gpointer data)
 {
+  GtkTreeIter iter;
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "combo_profile");
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gchar *group_name;
+
   gchar *passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
   gchar *user = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"user_entry")));
+
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gtk_tree_model_get (model, &iter,
+					  0, &group_name,
+					  -1);
+
+  rizoma_set_profile (group_name);
 
   switch (AcceptPassword (passwd, user))
 	{
@@ -256,7 +312,7 @@ check_passwd (GtkWidget *widget, gpointer data)
 	case FALSE:
 	  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
 	  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
-	  rizoma_error_window (gtk_builder_get_object (builder,"user_entry"));
+	  rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
 	  break;
 	default:
 	  break;

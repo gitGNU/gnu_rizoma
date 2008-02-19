@@ -33,6 +33,8 @@ GtkWidget *date_label;
 
 GtkAccelGroup *accel;
 
+gchar *config_profile;
+
 /*
   Debemos saber por donde paso el usuario
  */
@@ -82,7 +84,7 @@ typedef struct _product
   */
   gboolean ingresar;
   gboolean perecible;
-  
+
   /*
     Elaboracion y Vencimiento
   */
@@ -108,12 +110,12 @@ typedef struct _product
   gint cuanto;
   gint tasa_canje;
 
-  /* 
+  /*
      Datos para cantidades mayoristas
   */
   gboolean mayorista;
   gint precio_mayor;
-  gint cantidad_mayorista;  
+  gint cantidad_mayorista;
 }
 Producto;
 
@@ -134,7 +136,7 @@ typedef struct _ventas
   Productos *products;
 
   Productos *product_check;
-  
+
   /*
     The widget for the entry of
     product code and description product
@@ -156,7 +158,7 @@ typedef struct _ventas
     The Widget for the "Precio" label
     and "Total" label
   */
-  
+
   GtkWidget *precio_label;
   GtkWidget *mayor_label;
   GtkWidget *mayor_cantidad;
@@ -171,7 +173,7 @@ typedef struct _ventas
    */
   GtkWidget *treeview_products;
   GtkListStore *store;
-  
+
   /*
     Sell type
    */
@@ -190,12 +192,12 @@ typedef struct _ventas
 
   GtkWidget *client_venta;
   GtkWidget *client_vender;
-  
+
 
   /*
    */
   GtkWidget *products_window;
-  
+
   GtkWidget *products_tree;
   GtkListStore *products_store;
 
@@ -204,7 +206,7 @@ typedef struct _ventas
    */
 
   GtkWidget *clients_window;
-  
+
   GtkWidget *clients_tree;
   GtkListStore *clients_store;
 
@@ -227,7 +229,7 @@ typedef struct _ventas
   /*
     Datos Venta;
   */
-  
+
   GtkWidget *venta_rut;
   GtkWidget *venta_nombre;
   GtkWidget *venta_direccion;
@@ -289,14 +291,14 @@ typedef struct _ingreso_producto
   GtkWidget *unidad_entry;
 
   /*
-    The widget for the window to 
+    The widget for the window to
     list the products
   */
   GtkWidget *products_window;
 
   GtkWidget *treeview_products;
   GtkListStore *store;
-  
+
   GtkWidget *buscar_entry;
 
   /*
@@ -319,7 +321,7 @@ typedef struct _ventas_stats
   Productos *products;
 
   GtkWidget *calendar;
-  
+
   GtkTreeStore *store_ventas_stats;
   GtkWidget *tree_ventas_stats;
 
@@ -366,14 +368,14 @@ typedef struct _ventas_stats
 
   GtkTreeStore *facturas_store;
   GtkWidget *facturas_tree;
-  
+
 
   GtkListStore *store_morosos;
   GtkWidget *tree_morosos;
 
   GtkTreeStore *pagar_store;
   GtkWidget *pagar_tree;
-  
+
   GtkTreeStore *pagadas_store;
   GtkWidget *pagadas_tree;
 }
@@ -385,7 +387,7 @@ typedef struct _creditos
 {
   GtkListStore *store;
   GtkWidget *tree;
-  
+
   GtkTreeSelection *selection;
 
   GtkWidget *search_entry;
@@ -394,10 +396,10 @@ typedef struct _creditos
     Entrys for the new client
     And the window
    */
-  
+
   GtkWidget *entry_nombres;
   GtkWidget *materno;
-  GtkWidget *paterno;  
+  GtkWidget *paterno;
   GtkWidget *rut;
   GtkWidget *rut_ver;
   GtkWidget *direccion;
@@ -406,14 +408,14 @@ typedef struct _creditos
   GtkWidget *credito;
 
   GtkWidget *window;
-  
+
   GtkWidget *deuda;
   GtkWidget *abono;
   GtkWidget *deuda_total;
 
   GtkListStore *detalle;
   GtkWidget *tree_detalle;
-  
+
   GtkListStore *ventas;
   GtkWidget *tree_ventas;
   GtkTreeSelection *selection_ventas;
@@ -463,13 +465,13 @@ typedef struct _compra
   GtkWidget *barcode_history_entry;
 
   GtkWidget *tree_history;
-  GtkListStore *store_history;  
+  GtkListStore *store_history;
 
   /*
     Product Window
    */
   GtkWidget *see_button;
-  
+
   GtkWidget *see_window;
   GtkWidget *see_codigo;
   GtkWidget *see_barcode;
@@ -486,7 +488,7 @@ typedef struct _compra
   GtkWidget *stockday;
   GtkWidget *current_price;
   GtkWidget *fifo;
-  
+
   /*
     Products List
    */
@@ -507,7 +509,7 @@ typedef struct _compra
     Add New Product
   */
   GtkWidget *new_window;
-  
+
   GtkWidget *new_codigo;
   GtkWidget *new_barcode;
   GtkWidget *new_description;
@@ -519,7 +521,7 @@ typedef struct _compra
     Buy Window
    */
   GtkWidget *buy_window;
-  
+
   GtkWidget *rut_label;
   GtkWidget *nombre_label;
   GtkWidget *nota_entry;
@@ -553,11 +555,11 @@ typedef struct _compra
 
   GtkWidget *rut;
   GtkWidget *proveedor;
-  
+
   /*
     Add Proveedores
    */
-  
+
   GtkWidget *rut_add;
   GtkWidget *rut_ver;
   GtkWidget *nombre_add;
@@ -572,7 +574,7 @@ typedef struct _compra
 
   /* Tipo de Documento de Ingreso */
   GtkWidget *documentos;
-  GtkWidget *n_documento;  
+  GtkWidget *n_documento;
   GtkWidget *fecha_emision_d;
   GtkWidget *fecha_emision_m;
   GtkWidget *fecha_emision_y;
@@ -595,7 +597,7 @@ typedef struct _compra
   /*
     Facturas
   */
-  
+
   GtkWidget *fact_proveedor;
   GtkWidget *fact_rut;
   GtkWidget *fact_contacto;
@@ -606,7 +608,7 @@ typedef struct _compra
   GtkWidget *fact_web;
   GtkWidget *win_proveedor;
   GtkWidget *n_factura;
-  
+
   GtkWidget *tree_guias;
   GtkTreeStore *store_guias;
 
@@ -631,7 +633,7 @@ typedef struct _compra
   GtkTreeStore *store_facturas;
 
   /*
-   Mensajes de Error 
+   Mensajes de Error
   */
 
   GtkWidget *guias_error;
@@ -665,9 +667,9 @@ Proveedor;
 typedef struct _caja
 {
   gint current; /* We got the current status of the "caja" */
-  
+
   GtkWidget *win;
-  GtkWidget *entry_inicio;  
+  GtkWidget *entry_inicio;
 }
 Caja;
 

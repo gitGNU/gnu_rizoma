@@ -57,18 +57,18 @@ void
 close_rizoma_error_window (GtkButton *button, gpointer data)
 {
   GtkWidget *widget = (GtkWidget *) data;
-  
+
   if (rizoma_error_closing == FALSE)
     {
       rizoma_error_closing = TRUE;
-      
+
       gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), TRUE);
-      
-      gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)), 
+
+      gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)),
 			    widget);
 
       gtk_widget_destroy (error_window);
-      
+
       error_window = NULL;
 
       rizoma_errors_clean ();
@@ -94,7 +94,7 @@ rizoma_error_window (GtkWidget *widget)
 
   if( widget != NULL )
 	  gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
-  
+
   error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (error_window, -1, -1);
   gtk_window_set_resizable (GTK_WINDOW (error_window), FALSE);
@@ -106,7 +106,7 @@ rizoma_error_window (GtkWidget *widget)
 
   g_signal_connect (G_OBJECT (error_window), "destroy",
 		    G_CALLBACK (close_rizoma_error_window), NULL);
-  
+
   vbox = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (vbox);
   gtk_container_add (GTK_CONTAINER (error_window), vbox);
@@ -130,10 +130,10 @@ rizoma_error_window (GtkWidget *widget)
       image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_ERROR, GTK_ICON_SIZE_DIALOG);
       break;
     }
-      
-  
+
+
   gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
-  gtk_widget_show (image);  
+  gtk_widget_show (image);
 
   label = gtk_label_new (rizoma_error->motivo);
   gtk_widget_show (label);
@@ -152,7 +152,7 @@ rizoma_error_window (GtkWidget *widget)
   label = gtk_label_new (trace);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
@@ -167,6 +167,6 @@ rizoma_error_window (GtkWidget *widget)
   gtk_window_set_focus (GTK_WINDOW (error_window), button);
 
   rizoma_errors_clean ();
-  
+
   return 0;
 }

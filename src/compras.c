@@ -3656,30 +3656,7 @@ AddNewProduct(void)
     g_signal_connect (G_OBJECT (button), "toggled",
 		      G_CALLBACK (ToggleSelect), (gpointer)"2");
 
-    /*
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (hbox);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-      label = gtk_label_new ("Familia del Producto: ");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-      res = EjecutarSQL ("SELECT * FROM familias");
-
-      tuples = PQntuples (res);
-
-      combo_fami = gtk_combo_box_new_text ();
-      gtk_box_pack_end (GTK_BOX (hbox), combo_fami, FALSE, FALSE, 3);
-      gtk_widget_show (combo_fami);
-
-      for (i = 0; i < tuples; i++)
-      gtk_combo_box_append_text (GTK_COMBO_BOX (combo_fami),
-      g_strdup_printf ("%s",
-      PQgetvalue (res, i, 1)));
-    */
-
-    hbox = gtk_hbox_new (FALSE, 3);
+	hbox = gtk_hbox_new (FALSE, 3);
     gtk_widget_show (hbox);
     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
 

@@ -248,14 +248,14 @@ rizoma_get_value (char *var_name)
       return NULL;
     }
 
-  if (!g_key_file_has_key(file, "DEFAULT", var_name, NULL))
+  if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
       g_printerr("\n*** funcion %s: el archivo de configuracion no tiene "
 		 "la clave %s", G_STRFUNC, var_name);
       return NULL;
     }
 
-  value = g_key_file_get_string(file, "DEFAULT", var_name, NULL);
+  value = g_key_file_get_string(file, config_profile, var_name, NULL);
 
   g_key_file_free(file);
 
@@ -291,7 +291,7 @@ rizoma_set_value (char *var_name, char *new_value)
       return NULL;
     }
 
-  g_key_file_set_string(file, "DEFAULT", var_name, new_value);
+  g_key_file_set_string(file, config_profile, var_name, new_value);
   //TODO: usar glib para manipular el archivo, si bien esto funciona
   //la idea es dejarlo consistente para que todo use glib
   fp = fopen (g_strdup_printf ("%s/.rizoma", g_getenv ("HOME")), "w");
@@ -301,6 +301,12 @@ rizoma_set_value (char *var_name, char *new_value)
   fflush(fp);
   fclose(fp);
   return (0);
+}
+
+void
+rizoma_set_profile (gchar *group_name)
+{
+  config_profile = group_name;
 }
 
 int
