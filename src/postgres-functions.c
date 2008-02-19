@@ -235,7 +235,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   q = g_strdup_printf( "SELECT inserted_id FROM registrar_venta( %d, %d, %d, "
 		       "%d::smallint, %d::smallint, %s::smallint, %d, '%d' )",
-		       total, machine, seller, tipo_documento, tipo_venta, 
+		       total, machine, seller, tipo_documento, tipo_venta,
 		       CUT(discount), id_documento, canceled);
   venta_id = atoi (GetDataByOne (q));
   g_free (q);
@@ -800,7 +800,7 @@ AgregarCompra (gchar *rut, gchar *nota, gint dias_pago)
   gint id_compra;
   gchar *q;
 
-  q = g_strdup_printf("SELECT * FROM insertar_compra( '%s', '%s', '%d' )", 
+  q = g_strdup_printf("SELECT * FROM insertar_compra( '%s', '%s', '%d' )",
 		      rut, nota, dias_pago == 0 ? dias_pago - 1 : dias_pago);
   id_compra = atoi(GetDataByOne(q));
 
@@ -821,33 +821,33 @@ SaveBuyProducts (Productos *header, gint id_compra)
 
   do
     {
-      
+
       if (products->product->iva != -1)
-	iva = (gdouble) (products->product->precio_compra * 
-			 products->product->cantidad) *	  
+	iva = (gdouble) (products->product->precio_compra *
+			 products->product->cantidad) *
 	  (gdouble)products->product->iva / 100;
-      
+
       if (products->product->otros != -1)
-	otros = (gdouble) (products->product->precio_compra * 
+	otros = (gdouble) (products->product->precio_compra *
 			   products->product->cantidad) *
 	  (gdouble)products->product->otros / 100;
-      
+
       cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
       precio_compra=g_strdup_printf ("%.2f", products->product->precio_compra);
-      
+
       q = g_strdup_printf("SELECT * FROM insertar_detalle_compra(%d, "
 			  "%s::double precision, %s::double precision, %d, "
 			  "0::double precision, 0::smallint, %s, %d, %d, %d)",
 			  id_compra, CUT(cantidad), CUT (precio_compra),
 			  products->product->precio, products->product->barcode,
-			  products->product->margen, lround (iva), 
+			  products->product->margen, lround (iva),
 			  lround (otros));
       res = EjecutarSQL(q);
 
       g_free(precio_compra);
       g_free(cantidad);
       g_free(q);
-      
+
       products = products->next;
     }
   while (products != header);

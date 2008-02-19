@@ -46,7 +46,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
   fprintf (fp, "%s", start);
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(), CurrentTime());
-  fprintf (fp, "Numero de venta: %d\n", venta_id); 
+  fprintf (fp, "Numero de venta: %d\n", venta_id);
   fprintf (fp, "Vendedor: %s\n", user_data->user);
   fprintf (fp, "==========================================\n\n");
 
@@ -61,18 +61,18 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
 	fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
 		 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
-	
+
 	civa += (double)(products->product->cantidad * precio);
       }
-	
+
     products = products->next;
-    
+
   } while (products != header);
 
   fprintf (fp, "\n\n");
 
   do {
-    
+
     if (products->product->iva == 0)
       {
 	if (products->product->mayorista == FALSE)
@@ -82,10 +82,10 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
 	fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
 		 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
-	
+
 	siva+= (double)(products->product->cantidad * precio);
       }
-    
+
     products = products->next;
 
   } while (products != header);
@@ -98,9 +98,9 @@ PrintVale (Productos *header, gint venta_id, gint total)
   fprintf (fp, "%s", cut); /* We cut the paper :) */
   fclose (fp);
 
-  
+
   for (i = 0; i < n_copy; i++)
     system (g_strdup_printf ("%s %s", print_command, vale_file));
-  
+
   system (g_strdup_printf ("rm %s", vale_file));
 }
