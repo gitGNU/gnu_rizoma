@@ -1092,18 +1092,34 @@ declare
 	aux int;
 	q text;
 begin
-aux = (select max(id) from compra_detalle where id_compra=id_compra_in);
+-- se revisa si existe algun detalle ingresado con el id_compra dado
+aux = (select count(*) from compra_detalle where id_compra=id_compra_in);
 
-if aux = NULL then
+if aux = 0 then -- si no existen detalles para ese id_compra se usa el id:=0
    aux := 0;
-else
+else -- en caso contrario se saca el mayor id ingresado para el id_compra dado y se incrementa
+   aux := (select max(id) from compra_detalle where id_compra=id_compra_in);
    aux := aux + 1;
 end if;
 
-EXECUTE 'INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos ) VALUES ('|| aux ||','|| id_compra_in ||','|| cantidad ||','|| precio ||','|| precio_venta ||','|| cantidad_ingresada ||','|| descuento ||','|| barcode_product ||','|| margen ||','|| iva ||','|| otros_impuestos ||');';
+q := $S$INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos) VALUES ($S$
+  || aux || $S$,$S$
+  || id_compra_in || $S$,$S$
+  || cantidad || $S$,$S$ 
+  || precio || $S$,$S$
+  || precio_venta || $S$,$S$
+  || cantidad_ingresada || $S$,$S$
+  || descuento || $S$,$S$
+  || barcode_product || $S$,$S$
+  || margen || $S$,$S$
+  || iva || $S$,$S$
+  || otros_impuestos || $S$)$S$;
+
+EXECUTE q;
+
 
 q := $S$ UPDATE producto SET precio=$S$|| precio_venta ||$S$ WHERE barcode=$S$|| barcode_product;
-raise notice 'update ... %',q;
+
 execute q;
 
 return;
@@ -1475,27 +1491,36 @@ create or replace function get_compras (
 		OUT precio double precision,
 		OUT dia integer,
 		OUT mes integer,
-		OUT ano integer,
-		OUT completada smallint)
+		OUT ano integer)
 returns setof record as $$
 declare
 		list record;
 		query text;
 begin
-		query := $S$ select t1.id, t2.nombre, SUM((t3.cantidad - t3.cantidad_ingresada) * t3.precio) as precio, date_part('day', t1.fecha) as dia, date_part ('month', t1.fecha) as mes, date_part('year', t1.fecha) as ano, t1.id, t3.cantidad_ingresada, t3.cantidad from compra AS t1, proveedor AS t2, compra_detalle AS t3 WHERE t2.rut=t1.rut_proveedor AND t3.id_compra=t1.id AND t3.cantidad_ingresada<t3.cantidad and t3.anulado='f' GROUP BY t1.id, t2.nombre, t1.fecha, t3.cantidad_ingresada, t3.cantidad ORDER BY fecha DESC $S$;
+		query := $S$ select compra.id,
+		      proveedor.nombre, 
+		      SUM((compra_detalle.cantidad - compra_detalle.cantidad_ingresada) * compra_detalle.precio) as monto,
+		      date_part('day', compra.fecha) as dia, 
+		      date_part ('month', compra.fecha) as mes, 
+		      date_part('year', compra.fecha) as ano
+
+		      FROM compra 
+		      	   inner join proveedor on compra.rut_proveedor = proveedor.rut
+			   inner join compra_detalle on compra.id = compra_detalle.id_compra
+		      
+		      WHERE compra_detalle.cantidad_ingresada<compra_detalle.cantidad 
+			    and compra_detalle.anulado='f'
+
+		      GROUP BY compra.id, proveedor.nombre, compra.fecha
+		      ORDER BY fecha DESC $S$;
 
 	FOR list IN EXECUTE query LOOP
 	id_compra := list.id;
 	nombre := list.nombre;
-	precio := list.precio;
+	precio := list.monto;
 	dia := list.dia;
 	mes := list.mes;
 	ano := list.ano;
-	IF list.cantidad_ingresada > 0 AND list.cantidad > list.cantidad_ingresada THEN
-	completada := 1;
-	ELSE
-	completada := 0;
-	END IF;
 	RETURN NEXT;
 	END LOOP;
 
@@ -1637,3 +1662,15 @@ END LOOP;
 
 RETURN 0;
 END;$$ language plpgsql;
+
+-- retorna el fifo o costo_promedio de un producto
+create or replace function get_fifo(in barcode_in int8)
+returns int as $$
+declare
+	resultado int;
+begin
+
+resultado := (select costo_promedio from producto where barcode=barcode_in);
+return resultado;
+
+end; $$ language plpgsql;
