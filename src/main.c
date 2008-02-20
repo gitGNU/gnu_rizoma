@@ -63,11 +63,35 @@ gint screen_width;
 gint screen_height;
 
 gboolean
-main_key_handler (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+main_key_handler (GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
   if (event->keyval == GDK_F12)
 	{
 	  Question ();
+	}
+
+  if (user_data->level == 0)
+	{
+	  if (event->keyval == GDK_F7)
+		{
+		  VentanaIngreso (NULL, NULL);
+		}
+	  else if (event->keyval == GDK_F6)
+		{
+		  VentanaEgreso (NULL, NULL);
+		}
+	  else if (event->keyval == GDK_F1)
+		{
+		  SelectMenu (NULL, "Ventas");
+		}
+	  else if (event->keyval == GDK_F2)
+		{
+		  SelectMenu (NULL, "Compras");
+		}
+	  else if (event->keyval == GDK_F3)
+		{
+		  SelectMenu (NULL, "Informes");
+		}
 	}
 
   return FALSE;
@@ -314,8 +338,8 @@ check_passwd (GtkWidget *widget, gpointer data)
 	  Asistencia (user_data->user_id, TRUE);
 
 	  gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
-	  /* gtk_object_destroy ( builder); */
-	  /* builder = NULL; */
+	  g_object_unref ((gpointer) builder);
+	  builder = NULL;
 
 	  MainWindow ();
 
@@ -454,70 +478,6 @@ MainWindow (void)
 		  gtk_image_set_from_file (image, image_path);
 		}
 
-	  /*
-		Todo dentro de hbox no se vera !!!
-		Y es solo para el usuario admin
-	  */
-	  if (user_data->level == 0)
-		{
-	  /* 	  hbox2 = gtk_hbox_new (FALSE, 0); */
-	  /* 	  gtk_box_pack_end (GTK_BOX (vbox), hbox2, FALSE, FALSE, 0); */
-	  /* 	  gtk_widget_set_size_request (hbox2, 0, 0); */
-	  /* 	  gtk_widget_show (hbox2); */
-
-	  /* 	  button = gtk_button_new (); */
-	  /* 	  gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 0); */
-	  /* 	  gtk_widget_set_size_request (button, 0, 0); */
-	  /* 	  gtk_widget_show (button); */
-
-	  /* 	  GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-	  /* 	  g_signal_connect (G_OBJECT (button), "clicked", */
-	  /* 						G_CALLBACK (VentanaIngreso), NULL); */
-
-	  /* 	  gtk_widget_add_accelerator (button, "clicked", */
-	  /* 								  accel_generales, */
-	  /* 								  GDK_F7, GDK_LOCK_MASK, */
-	  /* 								  GTK_ACCEL_VISIBLE); */
-
-	  /* 	  button = gtk_button_new (); */
-	  /* 	  gtk_box_pack_end (GTK_BOX (hbox2), button, */
-	  /* 						FALSE, FALSE, 0); */
-	  /* 	  gtk_widget_set_size_request (button, 0, 0); */
-	  /* 	  gtk_widget_show (button); */
-
-	  /* 	  GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-	  /* 	  g_signal_connect (G_OBJECT (button), "clicked", */
-	  /* 						G_CALLBACK (VentanaEgreso), NULL); */
-
-	  /* 	  gtk_widget_add_accelerator (button, "clicked", */
-	  /* 								  accel_generales, */
-	  /* 								  GDK_F6, GDK_LOCK_MASK, */
-	  /* 								  GTK_ACCEL_VISIBLE); */
-
-	  /* 	  for (i = 0; i < sizeof (modulos) / sizeof (modulos[0]); i++) */
-	  /* 		{ */
-	  /* 		  button = gtk_button_new (); */
-	  /* 		  gtk_box_pack_end (GTK_BOX (hbox2), button, */
-	  /* 							FALSE, FALSE, 0); */
-	  /* 		  gtk_widget_set_size_request (button, 0, 0); */
-	  /* 		  gtk_widget_show (button); */
-
-	  /* 		  GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-	  /* 		  g_signal_connect (G_OBJECT (button), "clicked", */
-	  /* 							G_CALLBACK (SelectMenu), */
-	  /* 							(gpointer)modulos[i].name); */
-
-	  /* 		  gtk_widget_add_accelerator (button, "clicked", */
-	  /* 									  accel_generales, */
-	  /* 									  modulos[i].accel_key, */
-	  /* 									  GDK_LOCK_MASK, */
-	  /* 									  GTK_ACCEL_VISIBLE); */
-	  /* 		} */
-	   	}
-
 	  hour_label = GTK_WIDGET (gtk_builder_get_object (builder, "hour_label"));
 	  date_label = GTK_WIDGET (gtk_builder_get_object (builder, "date_label"));
 
@@ -565,94 +525,7 @@ MainWindow (void)
 
 	  modulos[0].func(module_box);
 
-
-	  /* button = gtk_button_new_with_label ("0"); */
-	  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
-	  /* gtk_widget_set_size_request (button, 0, 0); */
-	  /* gtk_widget_show (button); */
-
-	  /* GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-	  /* g_signal_connect (G_OBJECT (button), "clicked", */
-	  /* 					G_CALLBACK (show_selected_in_button), (gpointer)module_box); */
-
-	  /* gtk_widget_add_accelerator (button, "clicked", */
-	  /* 							  accel_generales, */
-	  /* 							  GDK_F1, GDK_LOCK_MASK, */
-	  /* 							  GTK_ACCEL_VISIBLE); */
-
-	  /* Solo el admnistrador tiene accesso */
-
-	  if (user_data->level == 0)
-		{
-		  /* button = gtk_button_new_with_label ("1"); */
-		  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
-		  /* gtk_widget_set_size_request (button, 0, 0); */
-		  /* gtk_widget_show (button); */
-
-		  /* GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-		  /* g_signal_connect (G_OBJECT (button), "clicked", */
-		  /* 					G_CALLBACK (show_selected_in_button), */
-		  /* 					(gpointer)module_box); */
-
-		  /* gtk_widget_add_accelerator (button, "clicked", */
-		  /* 							  accel_generales, */
-		  /* 							  GDK_F2, GDK_LOCK_MASK, */
-		  /* 							  GTK_ACCEL_VISIBLE); */
-
-		  /* button = gtk_button_new_with_label ("2"); */
-		  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
-		  /* gtk_widget_set_size_request (button, 0, 0); */
-		  /* gtk_widget_show (button); */
-
-		  /* GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-		  /* g_signal_connect (G_OBJECT (button), "clicked", */
-		  /* 					G_CALLBACK (show_selected_in_button), */
-		  /* 					(gpointer)module_box); */
-
-		  /* gtk_widget_add_accelerator (button, "clicked", */
-		  /* 							  accel_generales, */
-		  /* 							  GDK_F3, GDK_LOCK_MASK, */
-		  /* 							  GTK_ACCEL_VISIBLE); */
-
-		  /* button = gtk_button_new_with_label ("3"); */
-		  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
-		  /* gtk_widget_set_size_request (button, 0, 0); */
-		  /* gtk_widget_show (button); */
-
-		  /* GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-		  /* g_signal_connect (G_OBJECT (button), "clicked", */
-		  /* 					G_CALLBACK (show_selected_in_button), */
-		  /* 					(gpointer)module_box); */
-
-		  /* gtk_widget_add_accelerator (button, "clicked", */
-		  /* 							  accel_generales, */
-		  /* 							  GDK_F4, GDK_LOCK_MASK, */
-		  /* 							  GTK_ACCEL_VISIBLE); */
-		}
 	}
-
-  /* button = gtk_button_new_with_label ("4"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
-  /* gtk_widget_set_size_request (button, 0, 0); */
-  /* gtk_widget_show (button); */
-
-  /* GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /* 					G_CALLBACK (show_selected_in_button), */
-  /* 					(gpointer)module_box); */
-
-
-  /* gtk_widget_add_accelerator (button, "clicked", */
-  /* 							  accel_generales, */
-  /* 							  GDK_F12, GDK_LOCK_MASK, */
-  /* 							  GTK_ACCEL_VISIBLE); */
-
-
   /*
 	Necesitamos saber si la caja ha sido inicializada o no
 	pero solo si somos administradores
