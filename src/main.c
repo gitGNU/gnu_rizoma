@@ -101,7 +101,7 @@ SelectMenu (GtkWidget *widget, gpointer data)
 void
 Salir (GtkWidget *widget, gpointer data)
 {
-  Asistencia (user_data->user_id, FALSE);g_print("aqui\n");
+  Asistencia (user_data->user_id, FALSE);
   gtk_main_quit ();
 }
 
