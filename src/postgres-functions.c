@@ -912,7 +912,7 @@ IngresarProducto (Producto *product, gint compra)
   gint fifo;
   gdouble stock_pro, canjeado;
   gdouble imps, ganancia, margen_promedio;
-
+  gchar *q;
   gchar *cantidad;
 
   cantidad = CUT (g_strdup_printf ("%.2f", product->cantidad));
@@ -924,10 +924,10 @@ IngresarProducto (Producto *product, gint compra)
   /*
 	Calculamos el margen Promedio
   */
-  res = EjecutarSQL
-	(g_strdup_printf ("UPDATE products_buy_history SET cantidad_ingresada=cantidad_ingresada+%s, canjeado=%s "
-					  "WHERE barcode_product IN (SELECT barcode  FROM producto WHERE barcode='%s'"
-					  " AND id_compra=%d)", cantidad, CUT (g_strdup_printf ("%.2f", canjeado)),product->barcode, compra));
+  q = g_strdup_printf ("UPDATE compra_detalle SET cantidad_ingresada=cantidad_ingresada+%s, canjeado=%s "
+		       "WHERE barcode_product IN (SELECT barcode  FROM producto WHERE barcode='%s' AND id_compra=%d)",
+		       cantidad, CUT (g_strdup_printf ("%.2f", canjeado)),product->barcode, compra);
+  res = EjecutarSQL (q);
 
   /*
 	Calculamos el precio ponderado
@@ -945,15 +945,19 @@ IngresarProducto (Producto *product, gint compra)
   margen_promedio = (gdouble)((ganancia - fifo) / fifo) * 100;
 
   if (product->canjear == TRUE)
-	res = EjecutarSQL
-	  (g_strdup_printf
-	   ("UPDATE productos SET margen_promedio=%d, fifo=%d, stock=stock+%s, stock_pro=%s WHERE barcode='%s'",
-		lround (margen_promedio), fifo, cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode));
+    {
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s, stock_pro=%s WHERE barcode='%s'",
+			   lround (margen_promedio), fifo, cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+    }
   else
-	res = EjecutarSQL
-	  (g_strdup_printf
-	   ("UPDATE productos SET margen_promedio=%d, fifo=%d, stock=stock+%s WHERE barcode='%s'",
-		lround (margen_promedio), fifo, cantidad, product->barcode));
+    {
+      q = g_strdup_printf ("UPDATE productos SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s WHERE barcode='%s'",
+			   lround (margen_promedio), fifo, cantidad, product->barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+    }
 
   if (res != NULL)
 	return TRUE;
@@ -1035,16 +1039,20 @@ FiFo (gchar *barcode, gint compra)
 {
 
   PGresult *res;
+  gchar *q;
   gint suma = 0;
   gint fifo = GetFiFo (barcode);
 
   gdouble current_stock = GetCurrentStock (barcode);
 
-  res = EjecutarSQL
-	(g_strdup_printf
-	 ("SELECT cantidad, precio, cantidad_ingresada FROM compra_detalle, compras WHERE "
-	  "barcode_product='%s' AND compras.id=%d AND products_buy_history.id_compra=%d ORDER BY compras.fecha DESC",
-	  barcode, compra, compra));
+  q = g_strdup_printf ("SELECT cantidad, precio, cantidad_ingresada "
+		       "FROM compra_detalle, compra WHERE "
+		       "barcode_product='%s' AND compra.id=%d AND "
+		       "compra_detalle.id_compra=%d "
+		       "ORDER BY compra.fecha DESC",
+		       barcode, compra, compra);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   suma += current_stock * fifo;
 
@@ -1428,7 +1436,7 @@ GetOtrosName (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT descripcion FROM impuestos WHERE id=(SELECT otros FROM producto WHERE barcode='%s')", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT descripcion FROM impuesto WHERE id=(SELECT otros FROM producto WHERE barcode='%s')", barcode));
 
   tuples = PQntuples (res);
 
@@ -1462,7 +1470,7 @@ GetFiFo (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT fifo FROM producto WHERE barcode='%s'", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT get_fifo(%s)", barcode));
 
   tuples = PQntuples (res);
 
@@ -1478,9 +1486,9 @@ CheckCompraIntegrity (gchar *compra)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * from products_buy_history WHERE id_compra=%s AND cantidad_ingresada<cantidad", compra));
+  res = EjecutarSQL (g_strdup_printf ("SELECT count(*) from compra_detalle WHERE id_compra=%s AND cantidad_ingresada<cantidad", compra));
 
-  tuples = PQntuples (res);
+  tuples = atoi (PQgetvalue (res, 0, 0));
 
   if (tuples != 0)
 	return FALSE;
@@ -1494,9 +1502,9 @@ CheckProductIntegrity (gchar *compra, gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * from products_buy_history WHERE id_compra=%s AND barcode_product='%s' AND cantidad_ingresada<cantidad", compra, barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT count(*) from compra_detalle WHERE id_compra=%s AND barcode_product='%s' AND cantidad_ingresada<cantidad", compra, barcode));
 
-  tuples = PQntuples (res);
+  tuples = atoi (PQgetvalue (res, 0, 0));
 
   if (tuples != 0)
 	return FALSE;
