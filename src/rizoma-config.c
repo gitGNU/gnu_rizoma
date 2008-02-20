@@ -96,11 +96,11 @@ create_config (GtkAssistant *asistente, gpointer data_user)
 void
 dialog_close (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
-  if (response_id == -7 || response_id == -9)
+  if (response_id == GTK_RESPONSE_CLOSE || response_id == GTK_RESPONSE_NO)
 	{
 	  gtk_widget_hide ( (GtkWidget *) dialog);
 	}
-  else if (response_id == -8 || response_id == -5)
+  else if (response_id == GTK_RESPONSE_YES || response_id == GTK_RESPONSE_OK)
 	{
 	  GtkAssistant *asistente;
 	  GtkWidget *page;

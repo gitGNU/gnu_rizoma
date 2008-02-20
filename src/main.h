@@ -35,12 +35,11 @@ void MainWindow (void);
 
 void SendCursorTo (GtkWidget *widget, gpointer data);
 
-void Question (MainBox *module_box);
+void Question ();
 
 gchar * PutPoints (gchar *number);
 
 gchar * CutPoints (gchar *number_points);
 
-GtkWidget * Image (GtkWidget * win, char **nombre);
 
 #endif

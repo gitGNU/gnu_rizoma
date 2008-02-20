@@ -62,6 +62,17 @@ GtkWidget *hour_label;
 gint screen_width;
 gint screen_height;
 
+gboolean
+main_key_handler (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+  if (event->keyval == GDK_F12)
+	{
+	  Question ();
+	}
+
+  return FALSE;
+}
+
 void
 SelectMenu (GtkWidget *widget, gpointer data)
 {
@@ -90,7 +101,7 @@ SelectMenu (GtkWidget *widget, gpointer data)
 void
 Salir (GtkWidget *widget, gpointer data)
 {
-  Asistencia (user_data->user_id, FALSE);
+  Asistencia (user_data->user_id, FALSE);g_print("aqui\n");
   gtk_main_quit ();
 }
 
@@ -385,6 +396,7 @@ MainWindow (void)
 	g_error ("ERROR: %s\n", err->message);
 	return;
   }
+  gtk_builder_connect_signals (builder, NULL);
 
   /*
    * En el caso de usemos una ventan de 800x600 la configuracion sigue abajo
@@ -679,82 +691,30 @@ SendCursorTo (GtkWidget *widget, gpointer data)
 }
 
 void
-KillQuestionWindow (GtkWidget *widget, gpointer data)
+exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
-  if (window != NULL)
-	gtk_widget_destroy (window);
-  window = NULL;
-
-  gtk_widget_set_sensitive (main_window, TRUE);
-
-  current_menu = last_menu;
-  gtk_tree_selection_select_path
-	(gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
-	 gtk_tree_path_new_from_string (g_strdup_printf ("%d", last_menu)));
-
+  if (response_id == GTK_RESPONSE_YES)
+	{
+	  Salir (NULL, NULL);
+	}
+  else if (response_id == GTK_RESPONSE_NO)
+	{
+	  gtk_widget_hide (GTK_WIDGET (dialog));
+	  current_menu = last_menu;
+	  gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
+									  gtk_tree_path_new_from_string (g_strdup_printf ("%d", last_menu)));
+	}
 }
 
 void
-Question (MainBox *module_box)
+Question ()
 {
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *label;
-  GtkWidget *image;
-  GtkWidget *button;
+  GtkWidget *window;
 
-  gtk_widget_set_sensitive (main_window, FALSE);
+  window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+  gtk_window_set_keep_above (GTK_WINDOW (window), TRUE);
 
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Confirmación de Salida");
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-  gtk_widget_set_size_request (window, 550, 130);
-  gtk_window_present (GTK_WINDOW (window));
-  //  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-  gtk_widget_show (window);
-
-  g_signal_connect (G_OBJECT (window), "destroy",
-					G_CALLBACK (KillQuestionWindow), NULL);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG);
-  gtk_widget_show (image);
-  gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label),
-						"<span size=\"20000\">Â¿Realmente desea salir del sistema?</span>");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_NO);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-					G_CALLBACK (KillQuestionWindow), (gpointer)module_box);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_YES);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-					G_CALLBACK (Salir), NULL);
-
-  gtk_window_set_focus (GTK_WINDOW (window), button);
-
+  gtk_widget_show_all (window);
 }
 
 gchar *
