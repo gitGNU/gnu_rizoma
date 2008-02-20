@@ -1,5 +1,5 @@
 
-SUBDIRS = src m4 db pixmaps ui
+SUBDIRS = src m4 db ui
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = debian

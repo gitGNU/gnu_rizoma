@@ -34,7 +34,7 @@ static struct _modulos
 modulos[] =
   {
     {"Ventas", ventas_box, TRUE, GDK_F1},
-    {"Compras", compras_box, FALSE, GDK_F2},   
+    {"Compras", compras_box, FALSE, GDK_F2},
     {"Informes", ventas_stats_box, FALSE, GDK_F3},
     {"Control", MainControl, FALSE, GDK_F4},
     {"Salir", Question, TRUE, GDK_F12},

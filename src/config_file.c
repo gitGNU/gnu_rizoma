@@ -250,8 +250,7 @@ rizoma_get_value (char *var_name)
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
-      g_printerr("\n*** funcion %s: el archivo de configuracion no tiene "
-		 "la clave %s", G_STRFUNC, var_name);
+      g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
       return NULL;
     }
 
@@ -286,8 +285,7 @@ rizoma_set_value (char *var_name, char *new_value)
 
   if (!res)
     {
-      g_printerr("\n*** funcion %s: no pudo ser cargado el "
-		 "archivo de configuracion", G_STRFUNC);
+      g_printerr("\n*** funcion %s: no pudo ser cargado el archivo de configuracion", G_STRFUNC);
       return NULL;
     }
 

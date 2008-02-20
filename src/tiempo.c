@@ -74,15 +74,15 @@ show_date (void)
   time (&t);
 
   fecha = localtime (&t);
-  
+
   date = gtk_label_new ("");
   gtk_label_set_markup (GTK_LABEL (date),
-			g_strdup_printf ("<span size=\"xx-large\"><b>%s %d\n%s\n%d</b></span>", 
-					 days[fecha->tm_wday].name, fecha->tm_mday,  
+			g_strdup_printf ("<span size=\"xx-large\"><b>%s %d\n%s\n%d</b></span>",
+					 days[fecha->tm_wday].name, fecha->tm_mday,
 					 months[fecha->tm_mon].name, YEAR (fecha->tm_year)));
 
   gtk_label_set_justify (GTK_LABEL (date), GTK_JUSTIFY_CENTER);
-  
+
   day = fecha->tm_mday;
   month = fecha->tm_mon;
   year = fecha->tm_year;
@@ -92,24 +92,24 @@ show_date (void)
 
 gboolean
 RefreshTime (gpointer data)
-{  
+{
   time_t t;
   struct tm *hora;
 
   time (&t);
 
   hora = localtime (&t);
-  
-  
-  gtk_label_set_markup (GTK_LABEL (hour_label), 
+
+
+  gtk_label_set_markup (GTK_LABEL (hour_label),
 			g_strdup_printf ("<span size=\"xx-large\"><b>%2.2d:%2.2d:%2.2d</b></span>",
 					 hora->tm_hour, hora->tm_min, hora->tm_sec));
-  
+
   if (hora->tm_mday != day || hora->tm_mon != month || hora->tm_year != year)
     {
       gtk_label_set_markup (GTK_LABEL (date_label),
-			    g_strdup_printf ("<span size=\"xx-large\"><b>%s %d\n%s\n%d</b></span>", 
-					     days[hora->tm_wday].name, hora->tm_mday,  
+			    g_strdup_printf ("<span size=\"xx-large\"><b>%s %d\n%s\n%d</b></span>",
+					     days[hora->tm_wday].name, hora->tm_mday,
 					     months[hora->tm_mon].name, YEAR (hora->tm_year)));
     }
 
@@ -135,7 +135,7 @@ CurrentTime (void)
   struct tm *hora;
 
   time (&t);
-  
+
   hora = localtime (&t);
 
   return g_strdup_printf ("%2.2d:%2.2d:%2.2d", hora->tm_hour, hora->tm_min, hora->tm_sec);
