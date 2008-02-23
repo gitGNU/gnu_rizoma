@@ -1208,7 +1208,7 @@ AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gc
   PGresult *res;
 
   res = EjecutarSQL
-    (g_strdup_printf ("INSERT INTO proveedores VALUES (DEFAULT, '%s', '%s', '%s', "
+    (g_strdup_printf ("INSERT INTO proveedor VALUES (DEFAULT, '%s', '%s', '%s', "
 		      "'%s', '%s', %d, '%s', '%s', '%s', '%s')", nombre, rut, direccion, ciudad,
 		      comuna, atoi (telefono), email, web, contacto, giro));
 
@@ -1223,7 +1223,7 @@ SetProductosIngresados (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("UPDATE products_buy_history SET ingresado='t' WHERE cantidad_ingresada=cantidad");
+  res = EjecutarSQL ("UPDATE compra_detalle SET ingresado='t' WHERE cantidad_ingresada=cantidad");
 
   return TRUE;
 }
@@ -1285,11 +1285,13 @@ SaveDataCheque (gint id_venta, gchar *serie, gint number, gchar *banco, gchar *p
 		gint day, gint month, gint year)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("INSERT INTO cheques VALUES (DEFAULT, %d, '%s', %d, '%s', '%s', %d, "
-		      "to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'))", id_venta, serie, number,
-		      banco, plaza, monto, day, month, year));
+  q = g_strdup_printf ("INSERT INTO cheques VALUES (DEFAULT, %d, '%s', %d, '%s', '%s', %d, "
+		       "to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'))", id_venta, serie, number,
+		       banco, plaza, monto, day, month, year);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1343,37 +1345,38 @@ IngresarFactura (gchar *n_doc, gint id_compra, gchar *rut_proveedor, gint total,
 		 gchar *d_emision, gchar *m_emision, gchar *y_emision, gint guia)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
-      " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', '%s', "
-      "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'), 0, 0, 0,'f', %d)",
-      id_compra, rut_proveedor, n_doc, atoi (d_emision), atoi (m_emision), atoi (y_emision),
-      total));
+  q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
+		       " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', '%s', "
+		       "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'), 0, 0, 0,'f', %d)",
+		       id_compra, rut_proveedor, n_doc, atoi (d_emision), atoi (m_emision), atoi (y_emision),
+		       total);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (id_compra != 0)
     {
-      res = EjecutarSQL
-	(g_strdup_printf
-	 ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=%d)"
-	  " WHERE id_compra=%d", id_compra, id_compra));
+      q = g_strdup_printf ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=%d)"
+	  " WHERE id_compra=%d", id_compra, id_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
 
-      res = EjecutarSQL
-	(g_strdup_printf
-	 ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE id_compra=%d", id_compra));
+      q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE id_compra=%d", id_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
     }
   else
     {
-      res = EjecutarSQL
-	(g_strdup_printf
-	 ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=(SELECT "
-	  "id_compra FROM guias_compra WHERE numero=%d AND rut_proveedor='%s')) WHERE num_factura='%s' AND "
-	  "rut_proveedor='%s'", guia, rut_proveedor, n_doc, rut_proveedor));
+      q = g_strdup_printf ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=(SELECT "
+			   "id_compra FROM guias_compra WHERE numero=%d AND rut_proveedor='%s')) WHERE num_factura='%s' AND "
+			   "rut_proveedor='%s'", guia, rut_proveedor, n_doc, rut_proveedor)
+      res = EjecutarSQL	(q);
+      g_free (q);
 
-      res = EjecutarSQL
-	(g_strdup_printf
-	 ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura='%s'", n_doc));
+      q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura='%s'", n_doc);
+      res = EjecutarSQL	(q);
+      g_free (q);
     }
 
   res = EjecutarSQL ("SELECT last_value FROM factura_compra_id_seq");
