@@ -66,33 +66,33 @@ gboolean
 main_key_handler (GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
   if (event->keyval == GDK_F12)
-	{
-	  Question ();
-	}
+    {
+      Question ();
+    }
 
   if (user_data->level == 0)
+    {
+      if (event->keyval == GDK_F7)
 	{
-	  if (event->keyval == GDK_F7)
-		{
-		  VentanaIngreso (NULL, NULL);
-		}
-	  else if (event->keyval == GDK_F6)
-		{
-		  VentanaEgreso (NULL, NULL);
-		}
-	  else if (event->keyval == GDK_F1)
-		{
-		  SelectMenu (NULL, "Ventas");
-		}
-	  else if (event->keyval == GDK_F2)
-		{
-		  SelectMenu (NULL, "Compras");
-		}
-	  else if (event->keyval == GDK_F3)
-		{
-		  SelectMenu (NULL, "Informes");
-		}
+	  VentanaIngreso (NULL, NULL);
 	}
+      else if (event->keyval == GDK_F6)
+	{
+	  VentanaEgreso (NULL, NULL);
+	}
+      else if (event->keyval == GDK_F1)
+	{
+	  SelectMenu (NULL, "Ventas");
+	}
+      else if (event->keyval == GDK_F2)
+	{
+	  SelectMenu (NULL, "Compras");
+	}
+      else if (event->keyval == GDK_F3)
+	{
+	  SelectMenu (NULL, "Informes");
+	}
+    }
 
   return FALSE;
 }
@@ -105,21 +105,21 @@ SelectMenu (GtkWidget *widget, gpointer data)
   gint i;
 
   if (strcmp (name, "Informes") != 0)
+    {
+      if (calendar_from != NULL || calendar_to != NULL)
 	{
-	  if (calendar_from != NULL || calendar_to != NULL)
-		{
-		  if (calendar_from != NULL)
-			gtk_widget_destroy (calendar_from);
-		  if (calendar_to != NULL)
-			gtk_widget_destroy (calendar_to);
-		}
+	  if (calendar_from != NULL)
+	    gtk_widget_destroy (calendar_from);
+	  if (calendar_to != NULL)
+	    gtk_widget_destroy (calendar_to);
 	}
+    }
 
   for (i = 0; i < sizeof modulos / sizeof modulos[0]; i++)
-	if (strcmp (modulos[i].name, name) == 0)
-	  gtk_tree_selection_select_path (selection,
-									  gtk_tree_path_new_from_string
-									  (g_strdup_printf ("%d", i)));
+    if (strcmp (modulos[i].name, name) == 0)
+      gtk_tree_selection_select_path (selection,
+				      gtk_tree_path_new_from_string
+				      (g_strdup_printf ("%d", i)));
 }
 
 void
@@ -175,12 +175,12 @@ main (int argc, char *argv[])
   config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
 
   if (!g_file_test(config_file,
-				   G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
-	{
-	  perror (g_strdup_printf ("Opening %s", config_file));
-	  printf ("Para configurar su sistema debe ejecutar rizoma-config\n");
-	  exit (-1);
-	}
+		   G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
+    {
+      perror (g_strdup_printf ("Opening %s", config_file));
+      printf ("Para configurar su sistema debe ejecutar rizoma-config\n");
+      exit (-1);
+    }
   key_file = g_key_file_new ();
   g_key_file_load_from_file(key_file, config_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
@@ -190,16 +190,16 @@ main (int argc, char *argv[])
   screen_height = gdk_screen_height ();
 
   if (screen_width == 640 && screen_height == 480)
-	solo_venta = TRUE;
+    solo_venta = TRUE;
   else
-	solo_venta = FALSE;
+    solo_venta = FALSE;
 
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
   if (err) {
-	g_error ("ERROR: %s\n", err->message);
-	return -1;
+    g_error ("ERROR: %s\n", err->message);
+    return -1;
   }
   gtk_builder_connect_signals (builder, NULL);
 
@@ -209,29 +209,28 @@ main (int argc, char *argv[])
   g_key_file_free (key_file);
 
   model = gtk_list_store_new (1,
-  							  G_TYPE_STRING
-  							  );
+			      G_TYPE_STRING);
 
   combo = (GtkComboBox *) gtk_builder_get_object (builder, "combo_profile");
 
   cell = gtk_cell_renderer_text_new ();
   gtk_cell_layout_pack_start ((GtkCellLayout *)combo, cell, TRUE);
   gtk_cell_layout_set_attributes ((GtkCellLayout *)combo, cell,
-								  "text", 0,
-								  NULL);
+				  "text", 0,
+				  NULL);
 
 
   do
+    {
+      if (*profiles != NULL)
 	{
-	  if (*profiles != NULL)
-		{
-		  gtk_list_store_append (model, &iter);
-		  gtk_list_store_set (model, &iter,
-		  					  0, *profiles,
-		  					  -1
-		  					  );
-		}
-	} while (*profiles++ != NULL);
+	  gtk_list_store_append (model, &iter);
+	  gtk_list_store_set (model, &iter,
+			      0, *profiles,
+			      -1
+			      );
+	}
+    } while (*profiles++ != NULL);
 
   gtk_combo_box_set_model (combo, (GtkTreeModel *)model);
   gtk_combo_box_set_active (combo, 0);
@@ -254,34 +253,34 @@ show_selected (GtkTreeSelection *selection, gpointer data)
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
-	{
-	  gtk_tree_model_get (model, &iter,
-						  0, &value,
-						  -1);
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &value,
+			  -1);
 
-	  if (strcmp (value, "Informes") != 0)
-		if (calendar_from != NULL || calendar_to != NULL)
-		  {
-			if (calendar_from != NULL)
-			  {
-				gtk_widget_destroy (calendar_from);
-				calendar_from = NULL;
-			  }
-			if (calendar_to != NULL)
-			  {
-				gtk_widget_destroy (calendar_to);
-				calendar_to = NULL;
-			  }
-		  }
+      if (strcmp (value, "Informes") != 0)
+	if (calendar_from != NULL || calendar_to != NULL)
+	  {
+	    if (calendar_from != NULL)
+	      {
+		gtk_widget_destroy (calendar_from);
+		calendar_from = NULL;
+	      }
+	    if (calendar_to != NULL)
+	      {
+		gtk_widget_destroy (calendar_to);
+		calendar_to = NULL;
+	      }
+	  }
 
-	  for (i = 0; i < sizeof modulos / sizeof modulos[0]; i++)
-		if (strcmp (modulos[i].name, value) == 0)
-		  {
-			modulos[i].func((MainBox *) data);
-			last_menu = current_menu;
-			current_menu = i;
-		  }
-	}
+      for (i = 0; i < sizeof modulos / sizeof modulos[0]; i++)
+	if (strcmp (modulos[i].name, value) == 0)
+	  {
+	    modulos[i].func((MainBox *) data);
+	    last_menu = current_menu;
+	    current_menu = i;
+	  }
+    }
 }
 
 void
@@ -290,18 +289,18 @@ show_selected_in_button (GtkWidget *button, gpointer data)
   gint num = atoi (g_strdup (gtk_button_get_label (GTK_BUTTON (button))));
 
   if (calendar_from != NULL || calendar_to != NULL)
+    {
+      if (calendar_from != NULL)
 	{
-	  if (calendar_from != NULL)
-		{
-		  gtk_widget_destroy (calendar_from);
-		  calendar_from = NULL;
-		}
-	  if (calendar_to != NULL)
-		{
-		  gtk_widget_destroy (calendar_to);
-		  calendar_to = NULL;
-		}
+	  gtk_widget_destroy (calendar_from);
+	  calendar_from = NULL;
 	}
+      if (calendar_to != NULL)
+	{
+	  gtk_widget_destroy (calendar_to);
+	  calendar_to = NULL;
+	}
+    }
 
   modulos[num].func((MainBox *)data);
 }
@@ -320,38 +319,38 @@ check_passwd (GtkWidget *widget, gpointer data)
 
   gtk_combo_box_get_active_iter (combo, &iter);
   gtk_tree_model_get (model, &iter,
-					  0, &group_name,
-					  -1);
+		      0, &group_name,
+		      -1);
 
   rizoma_set_profile (group_name);
 
   switch (AcceptPassword (passwd, user))
-	{
-	case TRUE:
+    {
+    case TRUE:
 
-	  user_data = (User *) g_malloc (sizeof (User));
+      user_data = (User *) g_malloc (sizeof (User));
 
-	  user_data->user_id = ReturnUserId (user);
-	  user_data->level = ReturnUserLevel (user);
-	  user_data->user = user;
+      user_data->user_id = ReturnUserId (user);
+      user_data->level = ReturnUserLevel (user);
+      user_data->user = user;
 
-	  Asistencia (user_data->user_id, TRUE);
+      Asistencia (user_data->user_id, TRUE);
 
-	  gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
-	  g_object_unref ((gpointer) builder);
-	  builder = NULL;
+      gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
+      g_object_unref ((gpointer) builder);
+      builder = NULL;
 
-	  MainWindow ();
+      MainWindow ();
 
-	  break;
-	case FALSE:
-	  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
-	  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
-	  rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
-	  break;
-	default:
-	  break;
-	}
+      break;
+    case FALSE:
+      gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
+      gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
+      rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
+      break;
+    default:
+      break;
+    }
 }
 
 void
@@ -408,7 +407,7 @@ MainWindow (void)
   g_type_init ();
 
   /*
-	Seteamos el Accel group en NULL
+    Seteamos el Accel group en NULL
   */
 
   accel = NULL;
@@ -417,8 +416,8 @@ MainWindow (void)
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma.ui", &err);
   if (err) {
-	g_error ("ERROR: %s\n", err->message);
-	return;
+    g_error ("ERROR: %s\n", err->message);
+    return;
   }
   gtk_builder_connect_signals (builder, NULL);
 
@@ -426,121 +425,121 @@ MainWindow (void)
    * En el caso de usemos una ventan de 800x600 la configuracion sigue abajo
    */
   if (solo_venta == FALSE)
+    {
+      /*
+	Usamos una ventana de >= 800x600
+      */
+      main_window = GTK_WIDGET (gtk_builder_get_object (builder, "main_window"));
+      gtk_widget_show_all (main_window);
+
+      accel_generales = gtk_accel_group_new ();
+      gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_generales);
+
+
+      store = gtk_list_store_new (3,
+				  G_TYPE_STRING,
+				  G_TYPE_INT,
+				  G_TYPE_INT
+				  );
+
+      for (i = 0; i < sizeof modulos / sizeof modulos[0]; i++)
 	{
-	  /*
-		Usamos una ventana de >= 800x600
-	  */
-	  main_window = GTK_WIDGET (gtk_builder_get_object (builder, "main_window"));
-	  gtk_widget_show_all (main_window);
-
-	  accel_generales = gtk_accel_group_new ();
-	  gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_generales);
-
-
-	  store = gtk_list_store_new (3,
-	  							  G_TYPE_STRING,
-								  G_TYPE_INT,
-								  G_TYPE_INT
-	  							  );
-
-	  for (i = 0; i < sizeof modulos / sizeof modulos[0]; i++)
-		{
-		  if (user_data->level == 0)
-			{
-			  gtk_list_store_append (store, &iter);
-			  gtk_list_store_set (store, &iter,
-								  0, modulos[i].name,
-								  1, 15000,
-								  2, 1000,
-								  -1);
-			}
-		  else if ((user_data->level != 0) && (modulos[i].normal_user == TRUE))
-			{
-			  gtk_list_store_append (store, &iter);
-			  gtk_list_store_set (store, &iter,
-								  0, modulos[i].name,
-								  1, 15000,
-								  2, 1000,
-								  -1);
-			}
-		}
-
-	  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "menu_treeview"));
-
-	  gtk_tree_view_set_model (treeview, NULL);
-	  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
-
-	  image_path = rizoma_get_value ("LOGO");
-
-	  if (image_path != NULL)
-		{
-		  image = GTK_IMAGE (gtk_builder_get_object (builder, "logo_image"));
-		  gtk_image_set_from_file (image, image_path);
-		}
-
-	  hour_label = GTK_WIDGET (gtk_builder_get_object (builder, "hour_label"));
-	  date_label = GTK_WIDGET (gtk_builder_get_object (builder, "date_label"));
-
-	  RefreshTime (NULL);
-
-	  module_box->main_box = GTK_WIDGET (gtk_builder_get_object (builder, "main_box"));
-
-	  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
-
-	  g_signal_connect (G_OBJECT (selection), "changed",
-	  					G_CALLBACK (show_selected),
-	  					(gpointer)module_box);
-
-
-	  renderer = gtk_cell_renderer_text_new ();
-	  columna = gtk_tree_view_column_new_with_attributes ("Menu",
-	  													  renderer,
-														  "text", 0,
-	  													  "size", 1,
-	  													  "weight", 2,
-	  													  NULL);
-
-	  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), columna);
-
-	  gtk_tree_selection_select_path (selection, gtk_tree_path_new_from_string ("0"));
-
+	  if (user_data->level == 0)
+	    {
+	      gtk_list_store_append (store, &iter);
+	      gtk_list_store_set (store, &iter,
+				  0, modulos[i].name,
+				  1, 15000,
+				  2, 1000,
+				  -1);
+	    }
+	  else if ((user_data->level != 0) && (modulos[i].normal_user == TRUE))
+	    {
+	      gtk_list_store_append (store, &iter);
+	      gtk_list_store_set (store, &iter,
+				  0, modulos[i].name,
+				  1, 15000,
+				  2, 1000,
+				  -1);
+	    }
 	}
+
+      treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "menu_treeview"));
+
+      gtk_tree_view_set_model (treeview, NULL);
+      gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+      image_path = rizoma_get_value ("LOGO");
+
+      if (image_path != NULL)
+	{
+	  image = GTK_IMAGE (gtk_builder_get_object (builder, "logo_image"));
+	  gtk_image_set_from_file (image, image_path);
+	}
+
+      hour_label = GTK_WIDGET (gtk_builder_get_object (builder, "hour_label"));
+      date_label = GTK_WIDGET (gtk_builder_get_object (builder, "date_label"));
+
+      RefreshTime (NULL);
+
+      module_box->main_box = GTK_WIDGET (gtk_builder_get_object (builder, "main_box"));
+
+      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
+
+      g_signal_connect (G_OBJECT (selection), "changed",
+			G_CALLBACK (show_selected),
+			(gpointer)module_box);
+
+
+      renderer = gtk_cell_renderer_text_new ();
+      columna = gtk_tree_view_column_new_with_attributes ("Menu",
+							  renderer,
+							  "text", 0,
+							  "size", 1,
+							  "weight", 2,
+							  NULL);
+
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), columna);
+
+      gtk_tree_selection_select_path (selection, gtk_tree_path_new_from_string ("0"));
+
+    }
   /*
    * Resulta que tenemos una ventana de 640x480, y esta tiene espacio solo para vender
    * por lo que necesita rediseñarse enterita :)
    */
   else if (solo_venta == TRUE)
-	{
-	  /*
-		Usamos una ventana de 640x480
-	  */
+    {
+      /*
+	Usamos una ventana de 640x480
+      */
 
-	  main_window = GTK_WIDGET (gtk_builder_get_object (builder, "main_window_chica"));
-	  gtk_widget_show_all (main_window);
+      main_window = GTK_WIDGET (gtk_builder_get_object (builder, "main_window_chica"));
+      gtk_widget_show_all (main_window);
 
-	  accel_generales = gtk_accel_group_new ();
-	  gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_generales);
+      accel_generales = gtk_accel_group_new ();
+      gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_generales);
 
-	  module_box->main_box = GTK_WIDGET (gtk_builder_get_object (builder, "main_box_chico"));
+      module_box->main_box = GTK_WIDGET (gtk_builder_get_object (builder, "main_box_chico"));
 
-	  modulos[0].func(module_box);
+      modulos[0].func(module_box);
 
-	}
+    }
   /*
-	Necesitamos saber si la caja ha sido inicializada o no
-	pero solo si somos administradores
+    Necesitamos saber si la caja ha sido inicializada o no
+    pero solo si somos administradores
   */
   if (check_caja () == FALSE && user_data->level == 0)
-	{
-	  if (caja->win == NULL)
-		ErrorMSG (main_window, "La caja ha sido inicializada, "
-				  "pero nunca cerrada");
-	}
+    {
+      if (caja->win == NULL)
+	ErrorMSG (main_window, "La caja ha sido inicializada, "
+		  "pero nunca cerrada");
+    }
   else if (check_caja () == TRUE && user_data->level == 0)
-	{
-	  CerrarCaja (ArqueoCajaLastDay ());
-	  InicializarCajaWin ();
-	}
+    {
+      CerrarCaja (ArqueoCajaLastDay ());
+      InicializarCajaWin ();
+    }
 
   gtk_timeout_add (1000, RefreshTime, (gpointer)hour_label);
 
@@ -548,7 +547,7 @@ MainWindow (void)
    * Usamos el reloj solo si estamos en una resolucion de 800x600 o mayor
    */
   if (solo_venta == FALSE)
-	gtk_timeout_add (1000, RefreshTime, NULL);
+    gtk_timeout_add (1000, RefreshTime, NULL);
 
   gtk_main();
 
@@ -567,16 +566,16 @@ void
 exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
   if (response_id == GTK_RESPONSE_YES)
-	{
-	  Salir (NULL, NULL);
-	}
+    {
+      Salir (NULL, NULL);
+    }
   else if (response_id == GTK_RESPONSE_NO)
-	{
-	  gtk_widget_hide (GTK_WIDGET (dialog));
-	  current_menu = last_menu;
-	  gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
-									  gtk_tree_path_new_from_string (g_strdup_printf ("%d", last_menu)));
-	}
+    {
+      gtk_widget_hide (GTK_WIDGET (dialog));
+      current_menu = last_menu;
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
+				      gtk_tree_path_new_from_string (g_strdup_printf ("%d", last_menu)));
+    }
 }
 
 void
@@ -599,33 +598,33 @@ PutPoints (gchar *number)
   gint i, unidad = 0, point = 0;
 
   if (number == NULL)
-	return "";
+    return "";
 
   len = strlen (number);
 
   if (len <= 3)
-	return number;
+    return number;
 
   if ((len % 3) != 0)
-	points = len / 3;
+    points = len / 3;
   else
-	points = (len / 3) - 1;
+    points = (len / 3) - 1;
 
   for (i = len; i >= 0; i--)
+    {
+      if (unidad == 3 && point < points && number[i] != '.' && number[i] != ',')
 	{
-	  if (unidad == 3 && point < points && number[i] != '.' && number[i] != ',')
-		{
-		  g_snprintf (alt, 15, ".%c%s", number[i], alt3);
-		  unidad = 0;
-		  point++;
-		}
-	  else
-		g_snprintf (alt, 15, "%c%s", number[i], alt3);
-
-	  strcpy (alt3, alt);
-
-	  unidad++;
+	  g_snprintf (alt, 15, ".%c%s", number[i], alt3);
+	  unidad = 0;
+	  point++;
 	}
+      else
+	g_snprintf (alt, 15, "%c%s", number[i], alt3);
+
+      strcpy (alt3, alt);
+
+      unidad++;
+    }
 
   return alt;
 }
@@ -638,11 +637,11 @@ CutPoints (gchar *number_points)
   gint i, o = 0;
 
   if (strcmp (number_points, "") == 0)
-	return number_points;
+    return number_points;
 
   for (i = 0; i <= len; i++)
-	if (number_points[i] != '.')
-	  number[o++] = number_points[i];
+    if (number_points[i] != '.')
+      number[o++] = number_points[i];
 
   g_free (number_points);
 
