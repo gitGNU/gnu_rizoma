@@ -121,39 +121,44 @@ EjecutarSQL (gchar *sentencia)
 
   status = PQstatus( connection );
 
-  if( status == CONNECTION_OK ) {
-    res = PQexec (connection, sentencia);
-    if( res == NULL ) {
-      rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
-    } else {
-      return res;
-    }
-  } else {
-    gchar *strconn = g_strdup_printf ("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
-				      host, port, name, user, pass,sslmode);
-
-    connection = PQconnectdb (strconn);
-    g_free( strconn );
-
-    status = PQstatus(connection);
-
-    switch (status)
-      {
-      case CONNECTION_OK:
-	res = PQexec (connection, sentencia);
-	if( res == NULL ) {
-	  rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
-	} else {
+  if( status == CONNECTION_OK )
+    {
+      res = PQexec (connection, sentencia);
+      if( res == NULL )
+	{
+	  rizoma_errors_set (PQerrorMessage (connection), G_STRFUNC, ERROR);
+	}
+      else
+	{
 	  return res;
 	}
-	break;
-      case CONNECTION_BAD:
-	rizoma_errors_set (PQerrorMessage (connection), "EjcutarSQL ()", ERROR);
-	break;
-      default:
-	return NULL;
-      }
-  }
+    }
+  else
+    {
+      gchar *strconn = g_strdup_printf ("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+					host, port, name, user, pass,sslmode);
+
+      connection = PQconnectdb (strconn);
+      g_free( strconn );
+
+      status = PQstatus(connection);
+
+      switch (status)
+	{
+	case CONNECTION_OK:
+	  res = PQexec (connection, sentencia);
+	  if( res == NULL )
+	      rizoma_errors_set (PQerrorMessage (connection), G_STRFUNC, ERROR);
+	  else
+	      return res;
+	  break;
+	case CONNECTION_BAD:
+	  rizoma_errors_set (PQerrorMessage (connection), G_STRFUNC, ERROR);
+	  break;
+	default:
+	  return NULL;
+	}
+    }
 
   return NULL;
 }
@@ -187,6 +192,10 @@ GetDataByOne (gchar *setencia)
     return NULL;
 }
 
+/*
+ * Borrar un producto de la tabla 'producto' en base a su barcode
+ * @oaram codigo de barras del producto que quiere ser borrado
+ */
 gboolean
 DeleteProduct (gchar *codigo)
 {
@@ -383,7 +392,7 @@ InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar 
   PGresult *res;
 
   res = EjecutarSQL
-    (g_strdup_printf ("INSERT INTO clientes VALUES(DEFAULT, '%s', '%s', '%s', '%s', '%s', '%s', "
+    (g_strdup_printf ("INSERT INTO cliente VALUES(DEFAULT, '%s', '%s', '%s', '%s', '%s', '%s', "
 		      "'%s', 0, %d, DEFAULT, '%s')", nombres, paterno, materno, rut, ver,
 		      direccion, fono, credito, giro));
 
@@ -413,7 +422,7 @@ InsertDeuda (gint id_venta, gint rut, gint vendedor)
 {
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO deudas VALUES (DEFAULT, %d, %d, %d, DEFAULT, DEFAULT)",
+  res = EjecutarSQL (g_strdup_printf ("INSERT INTO deuda VALUES (DEFAULT, %d, %d, %d, DEFAULT, DEFAULT)",
 				      id_venta, rut, vendedor));
 
   return 0;
@@ -438,13 +447,14 @@ PGresult *
 SearchDeudasCliente (gint rut)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
-      "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
-      "date_part ('second', fecha) FROM venta WHERE id IN (SELECT id_venta FROM deuda WHERE "
-      "rut_cliente=%d AND pagada='f')", rut));
+  q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
+		       "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
+		       "date_part ('second', fecha) FROM venta WHERE id IN (SELECT id_venta FROM deuda WHERE "
+		       "rut_cliente=%d AND pagada='f')", rut);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   return res;
 }
