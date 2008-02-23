@@ -880,7 +880,7 @@ CloseCajaWin (void)
 
   gtk_widget_set_sensitive (main_window, TRUE);
 
-  gtk_window_set_focus (GTK_WINDOW (main_window), venta->barcode_entry);
+  gtk_window_set_focus (GTK_WINDOW (main_window), GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
 }
 

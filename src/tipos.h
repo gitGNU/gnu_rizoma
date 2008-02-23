@@ -25,6 +25,8 @@
 
 #define TIPOS_H
 
+GtkBuilder *builder;
+
 GtkWidget *main_window;
 
 GtkWidget *hour_label;

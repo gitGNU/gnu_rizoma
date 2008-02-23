@@ -53,6 +53,5 @@ AC_OUTPUT([Makefile
 	   src/Makefile
 	   m4/Makefile
 	   db/Makefile
-	   pixmaps/Makefile
 	   ui/Makefile
 	   ])

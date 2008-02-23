@@ -258,28 +258,30 @@ END; $$ language plpgsql;
 -- Informacion de los productos para la ventana de Mercaderia
 -- administracion_productos.c:1508
 CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
-       			   			 OUT codigo_corto varchar(10),
-				       		 OUT descripcion varchar(50),
-				       		 OUT marca varchar(35),
-				       		 OUT contenido varchar(10),
-				       		 OUT unidad varchar(10),
-				      		 OUT stock double precision,
-				       		 OUT precio integer,
-				       		 OUT costo_promedio integer,
-				       		 OUT stock_min double precision,
-				       		 OUT margen_promedio double precision,
-				       		 OUT merma_unid double precision,
-				       		 OUT contrib_agregada integer,
-				       		 OUT ventas_dia integer,
-				       		 OUT vendidos double precision,
-				       		 OUT venta_neta integer,
-				       		 OUT canje boolean,
-				       		 OUT stock_pro double precision,
-				       		 OUT tasa_canje double precision,
-				       		 OUT precio_mayor integer,
-				       		 OUT cantidad_mayor integer,
-				       		 OUT mayorista boolean,
-							 OUT unidades_merma double precision)
+		IN in_codigo_corto varchar(10),
+		OUT codigo_corto varchar(10),
+		OUT descripcion varchar(50),
+		OUT marca varchar(35),
+		OUT contenido varchar(10),
+		OUT unidad varchar(10),
+		OUT stock double precision,
+		OUT precio integer,
+		OUT costo_promedio integer,
+		OUT stock_min double precision,
+		OUT margen_promedio double precision,
+		OUT merma_unid double precision,
+		OUT contrib_agregada integer,
+		OUT ventas_dia integer,
+		OUT vendidos double precision,
+		OUT venta_neta integer,
+		OUT canje boolean,
+		OUT stock_pro double precision,
+		OUT tasa_canje double precision,
+		OUT precio_mayor integer,
+		OUT cantidad_mayor integer,
+		OUT mayorista boolean,
+		OUT unidades_merma double precision,
+		OUT stock_day double precision)
 RETURNS SETOF record AS $$
 declare
 	days double precision;
@@ -295,10 +297,16 @@ IF NOT FOUND THEN
    days := 1;
 END IF;
 
-query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (producto.vendidos / $S$
+
+query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (stock / (vendidos / $S$
 || days
-|| $S$) AS merma, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode), select_merma( producto.barcode ) as unidades_merma FROM producto WHERE barcode=$S$
-|| codigo_barras;
+|| $S$)) AS stock_day, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode), select_merma( producto.barcode ) as unidades_merma FROM producto WHERE $S$;
+
+IF codigo_barras != 0 THEN
+query := query || $S$ barcode=$S$ || codigo_barras;
+ELSE
+query := query || $S$ codigo_corto='$S$ || in_codigo_corto ||$S$'$S$;
+END IF;
 
 FOR datos IN EXECUTE query LOOP
 
