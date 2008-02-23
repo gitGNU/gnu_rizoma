@@ -671,6 +671,7 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
 	      gchar *username, gchar *passwd, gchar *id)
 {
   PGresult *res;
+  gchar *q;
 
   if (strcmp (id, "") != 0)
     {
@@ -686,7 +687,7 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
     }
 
   q = g_strdup_printf ("INSERT INTO user VALUES (%s, '%s', md5('%s'), %s, '%s', '%s', '%s', NOW(), 1)",
-		       strcmp (id, "") != 0 ? id : "DEFAULT", 
+		       strcmp (id, "") != 0 ? id : "DEFAULT",
 		       username, passwd, rut, nombre, apell_p, apell_m);
   res = EjecutarSQL (q);
   g_free (q);
