@@ -857,9 +857,14 @@ gboolean
 CompraIngresada (void)
 {
   PGresult *res;
-
-  //  res = EjecutarSQL (g_strdup_printf ("UPDATE compras SET ingresada='t' WHERE id=%d", id));
-  res = EjecutarSQL (g_strdup_printf ("UPDATE compras SET ingresada='t' WHERE id IN (SELECT id_compra FROM compra_detalle WHERE cantidad=cantidad_ingresada) AND ingresada='f'"));
+  gchar *q;
+  //  res = EjecutarSQL (g_strdup_printf ("UPDATE compras SET
+  //  ingresada='t' WHERE id=%d", id));
+  q = g_strdup_printf ("UPDATE compra SET ingresada='t' WHERE id IN "
+		       "(SELECT id_compra FROM compra_detalle WHERE cantidad=cantidad_ingresada) "
+		       "AND ingresada='f'");
+  res = EjecutarSQL (q);
+  g_free(q);
 
   if (res != NULL)
 	return TRUE;
