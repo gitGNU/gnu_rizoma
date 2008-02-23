@@ -546,7 +546,7 @@ MainWindow (void)
    * Usamos el reloj solo si estamos en una resolucion de 800x600 o mayor
    */
   if (solo_venta == FALSE)
-    gtk_timeout_add (1000, RefreshTime, NULL);
+    g_timeout_add (1000, RefreshTime, NULL);
 
   gtk_main();
 
