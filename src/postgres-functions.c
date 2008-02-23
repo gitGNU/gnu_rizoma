@@ -452,7 +452,10 @@ SearchDeudasCliente (gint rut)
 gint
 PagarDeuda (gchar *id_venta)
 {
-  EjecutarSQL (g_strdup_printf ("UPDATE deudas SET pagada='t' WHERE id_venta=%s", id_venta));
+  gchar *q;
+
+  q = g_strdup_printf ("UPDATE deuda SET pagada='t' WHERE id_venta=%s", id_venta);
+  EjecutarSQL (q);
 
   return 0;
 }
