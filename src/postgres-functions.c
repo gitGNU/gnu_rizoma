@@ -946,14 +946,14 @@ IngresarProducto (Producto *product, gint compra)
 
   if (product->canjear == TRUE)
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s, stock_pro=%s WHERE barcode='%s'",
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
 			   lround (margen_promedio), fifo, cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
   else
     {
-      q = g_strdup_printf ("UPDATE productos SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s WHERE barcode='%s'",
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s WHERE barcode=%s",
 			   lround (margen_promedio), fifo, cantidad, product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
