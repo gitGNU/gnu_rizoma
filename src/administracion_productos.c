@@ -1480,7 +1480,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
     if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
 	gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
-			    1, &barcode,
+			    0, &barcode,
 			    -1);
 
 	q = g_strdup_printf ("SELECT * FROM informacion_producto( %s )", barcode);
