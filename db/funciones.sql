@@ -260,6 +260,7 @@ END; $$ language plpgsql;
 CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		IN in_codigo_corto varchar(10),
 		OUT codigo_corto varchar(10),
+                OUT barcode bigint,
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
@@ -323,7 +324,7 @@ margen_promedio := datos.margen_promedio;
 merma_unid := datos.merma_unid;
 contrib_agregada := datos.contrib_agregada;
 unidades_merma := datos.unidades_merma;
-
+mayorista := datos.mayorista;
 RETURN NEXT;
 END LOOP;
 RETURN;
@@ -1422,6 +1423,7 @@ END; $$ language plpgsql;
 create or replace function buscar_producto(IN expresion varchar(255),
 	IN columnas varchar[],
 	IN usar_like boolean,
+        IN con_stock boolean,
        	OUT barcode int8,
 	OUT codigo_corto varchar(10),
 	OUT marca varchar(35),
@@ -1455,6 +1457,12 @@ begin
 	vendidos, impuestos, otros, familia, perecibles, stock_min, margen_promedio, fraccion, canje, stock_pro,
 	tasa_canje, precio_mayor, cantidad_mayor, mayorista FROM producto WHERE $S$;
 
+        IF con_stock IS TRUE THEN
+        query := query || $S$ stock > 0 and $S$;
+        END IF;
+
+        query := query || $S$($S$;
+
 	FOR i IN 1..array_upper( columnas, 1) LOOP
 	IF usar_like IS TRUE THEN
 	IF i > 1 THEN
@@ -1468,6 +1476,8 @@ begin
 	query := query || columnas[i] || $S$ = upper( '$S$ || expresion || $S$' ) $S$;
 	END IF;
 	END LOOP;
+
+        query := query || $S$)$S$;
 
 	FOR list IN EXECUTE query LOOP
 	barcode := list.barcode;

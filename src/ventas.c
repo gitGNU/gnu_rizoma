@@ -932,7 +932,6 @@ ventas_box (MainBox *module_box)
 	  else
 	    precio = fill->product->precio;
 
-	  //gtk_list_store_append (venta->store, &iter);
 	  gtk_list_store_insert_after (venta->store, &iter, NULL);
 	  gtk_list_store_set (venta->store, &iter,
 			      0, fill->product->codigo,
@@ -1729,7 +1728,8 @@ MoveFocus (GtkEntry *entry, gpointer data)
 void
 AumentarCantidad (GtkEntry *entry, gpointer data)
 {
-  gdouble cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), (char **)NULL);
+  gchar *test = NULL;
+  gdouble cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), test);
   gint precio = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))));
   gint precio_mayor = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor"))))));
   gdouble cantidad_mayor = strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad"))))),
@@ -3066,11 +3066,7 @@ SearchAndFill (void)
   if (strcmp (string, "") != 0)
     res = EjecutarSQL
       (g_strdup_printf
-       ("SELECT * FROM buscar_productos ( '%s' )", string));
-  else
-    res = EjecutarSQL
-      (g_strdup_printf
-       ("SELECT * FROM producto WHERE stock>0 %s"));
+       ("SELECT * FROM buscar_producto ( '%s', '{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}', true, true )", string));
 
   resultados = PQntuples (res);
 
@@ -3146,7 +3142,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
                                 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%u", atoi (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))) *
                                                                              atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))))));
- 
+
 	  //gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), codigo);
 	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), barcode);
 
@@ -4093,7 +4089,7 @@ FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *conten
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
 			g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
-					 stock));
+					  strtod (stock, (char **)NULL)));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
 			g_strdup_printf
