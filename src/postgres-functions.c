@@ -680,7 +680,7 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
 
       if (PQntuples (res) != 0)
 	{
-	  rizoma_errors_set (g_strdup_printf ("Ya existe un vendedor con el id: %s", id), "AddNewSeller()", ERROR);
+	  rizoma_errors_set (g_strdup_printf ("Ya existe un vendedor con el id: %s", id), G_STRFUNC, ERROR);
 
 	  return FALSE;
 	}
