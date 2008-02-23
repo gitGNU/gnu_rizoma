@@ -710,19 +710,22 @@ ReturnUserExist (gchar *user)
 
   res = EjecutarSQL (g_strdup_printf ("SELECT usuario FROM users WHERE usuario='%s'", user));
 
-  if (PQntuples (res) == 0)
-    return FALSE;
-  else
+  if (PQntuples (res) == 1)
     return TRUE;
+  else
+    return FALSE;
 }
 
 void
 ChangeEnableCredit (gboolean status, gint rut)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE clientes SET credito_enable='%d' WHERE rut=%d",
-				      (gint) status, rut));
+  q = g_strdup_printf ("UPDATE cliente SET credito_enable='%d' WHERE rut=%d",
+		       (gint) status, rut);
+  res = EjecutarSQL (q);
+  g_free (q);
 }
 
 gboolean
@@ -742,9 +745,12 @@ gboolean
 DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, gint precio)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE productos SET codigo='%s', descripcion='%s', precio=%d WHERE barcode='%s'",
-				      codigo, SPE(description), precio, barcode));
+  q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s', precio=%d WHERE barcode='%s'",
+		       codigo, SPE(description), precio, barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
