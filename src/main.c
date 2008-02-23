@@ -203,7 +203,7 @@ main (int argc, char *argv[])
   }
   gtk_builder_connect_signals (builder, NULL);
 
-  login_window = (GtkWindow *) gtk_builder_get_object (builder, "login_window");
+  login_window = GTK_WIDGET(gtk_builder_get_object (builder, "login_window"));
 
   profiles = g_key_file_get_groups (key_file, NULL);
   g_key_file_free (key_file);
@@ -466,7 +466,6 @@ MainWindow (void)
 
       treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "menu_treeview"));
 
-      gtk_tree_view_set_model (treeview, NULL);
       gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
 
       image_path = rizoma_get_value ("LOGO");
