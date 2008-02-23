@@ -203,7 +203,7 @@ main (int argc, char *argv[])
   }
   gtk_builder_connect_signals (builder, NULL);
 
-  login_window = GTK_WIDGET(gtk_builder_get_object (builder, "login_window"));
+  login_window = GTK_WINDOW(gtk_builder_get_object (builder, "login_window"));
 
   profiles = g_key_file_get_groups (key_file, NULL);
   g_key_file_free (key_file);

@@ -895,6 +895,7 @@ ventas_box (MainBox *module_box)
     }
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", NULL);
+  gtk_builder_connect_signals (builder, NULL);
 
   module_box->new_box = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_box"));
   gtk_container_remove (GTK_CONTAINER (gtk_builder_get_object (builder, "ventas_gui")), module_box->new_box);
