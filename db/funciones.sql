@@ -324,14 +324,21 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-create or replace function select_merma( IN barcode bigint,
+create or replace function select_merma( IN barcode_in bigint,
 		OUT unidades_merma double precision )
 returns double precision as $$
 declare
-   query varchar(100);
+   aux int;
 BEGIN
-   unidades_merma := (SELECT unidades FROM merma WHERE barcode = $1);
-   RETURN;
+
+  aux := (SELECT count(*) FROM merma WHERE barcode = barcode_in);
+  IF aux = 0 THEN
+     unidades_merma := 0;
+  ELSE
+     unidades_merma := (SELECT unidades FROM merma WHERE barcode = barcode_in);
+  END IF;
+
+RETURN;
 END;
 $$ LANGUAGE plpgsql;
 
