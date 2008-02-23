@@ -693,12 +693,12 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
 
   if (res != NULL)
     {
-      rizoma_errors_set ("El vendedor se ha agregado con exito", "AddNewSeller()", APPLY);
+      rizoma_errors_set ("El vendedor se ha agregado con exito", G_STRFUNC, APPLY);
       return TRUE;
     }
   else
     {
-      rizoma_errors_set ("Error al intentar agregar un nuevo vendedor", "AddNewSeller()", ERROR);
+      rizoma_errors_set ("Error al intentar agregar un nuevo vendedor", G_STRFUNC, ERROR);
       return FALSE;
     }
 }
