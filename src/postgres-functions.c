@@ -1207,10 +1207,11 @@ AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gc
 {
   PGresult *res;
 
-  res = EjecutarSQL
-    (g_strdup_printf ("INSERT INTO proveedor VALUES (DEFAULT, '%s', '%s', '%s', "
-		      "'%s', '%s', %d, '%s', '%s', '%s', '%s')", nombre, rut, direccion, ciudad,
-		      comuna, atoi (telefono), email, web, contacto, giro));
+  q = g_strdup_printf ("INSERT INTO proveedor VALUES (DEFAULT, '%s', '%s', '%s', "
+		       "'%s', '%s', %d, '%s', '%s', '%s', '%s')", nombre, rut, direccion, ciudad,
+		       comuna, atoi (telefono), email, web, contacto, giro);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
