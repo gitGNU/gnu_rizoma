@@ -35,7 +35,7 @@ void MainWindow (void);
 
 void SendCursorTo (GtkWidget *widget, gpointer data);
 
-void Question ();
+gboolean Question ();
 
 gchar * PutPoints (gchar *number);
 

@@ -577,15 +577,15 @@ exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
     }
 }
 
-void
+gboolean
 Question ()
 {
   GtkWidget *window;
 
   window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
-  gtk_window_set_keep_above (GTK_WINDOW (window), TRUE);
 
   gtk_widget_show_all (window);
+  return TRUE;
 }
 
 gchar *
