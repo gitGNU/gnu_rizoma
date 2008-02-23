@@ -464,11 +464,16 @@ CancelarDeudas (gint abonar, gint rut)
   //  gint deuda = DeudaTotalCliente (rut);
   gint monto_venta;
   gint i, tuples;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO abonos VALUES (DEFAULT, %d, %d, NOW())", rut, abonar));
+  q = g_strdup_printf ("INSERT INTO abono VALUES (DEFAULT, %d, %d, NOW())", rut, abonar);
+  res = EjecutarSQL (q);
+  g_free (q);
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM venta WHERE id IN "
-				      "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') ORDER BY fecha asc", rut));
+  q = g_strdup_printf ("SELECT * FROM venta WHERE id IN "
+		       "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') ORDER BY fecha asc", rut);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   abonar += GetResto (rut);
 
@@ -517,7 +522,7 @@ SaveResto (gint resto, gint rut)
 
   //  resto += GetResto (rut);
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE clientes SET abonado=%d WHERE rut=%d", resto, rut));
+  res = EjecutarSQL (g_strdup_printf ("UPDATE cliente SET abonado=%d WHERE rut=%d", resto, rut));
 
   if (res != NULL)
     return TRUE;
