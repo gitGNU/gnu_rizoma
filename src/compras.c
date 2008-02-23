@@ -1692,13 +1692,6 @@ compras_box (MainBox *module_box)
   g_signal_connect (G_OBJECT (recv_button), "clicked",
 		    G_CALLBACK (CheckCanjeables), NULL);
 
-  /*  button = gtk_button_new_with_label ("Ingreso Parcial");
-      gtk_widget_show (button);
-      gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 3);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-      G_CALLBACK (IngresoParcial), NULL);
-  */
   /*
     Caja Inferior de Anulciones
   */
