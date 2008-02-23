@@ -1346,7 +1346,7 @@ IngresarFactura (gchar *n_doc, gint id_compra, gchar *rut_proveedor, gint total,
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("INSERT INTO facturas_compras (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
+     ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
       " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', '%s', "
       "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'), 0, 0, 0,'f', %d)",
       id_compra, rut_proveedor, n_doc, atoi (d_emision), atoi (m_emision), atoi (y_emision),
@@ -1356,24 +1356,24 @@ IngresarFactura (gchar *n_doc, gint id_compra, gchar *rut_proveedor, gint total,
     {
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("UPDATE facturas_compras SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=%d)"
+	 ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=%d)"
 	  " WHERE id_compra=%d", id_compra, id_compra));
 
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("UPDATE facturas_compras SET fecha_pago=DATE(fecha)+(forma_pago) WHERE id_compra=%d", id_compra));
+	 ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE id_compra=%d", id_compra));
     }
   else
     {
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("UPDATE facturas_compras SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=(SELECT "
+	 ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=(SELECT "
 	  "id_compra FROM guias_compra WHERE numero=%d AND rut_proveedor='%s')) WHERE num_factura='%s' AND "
 	  "rut_proveedor='%s'", guia, rut_proveedor, n_doc, rut_proveedor));
 
       res = EjecutarSQL
 	(g_strdup_printf
-	 ("UPDATE facturas_compras SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura='%s'", n_doc));
+	 ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura='%s'", n_doc));
     }
 
   res = EjecutarSQL ("SELECT last_value FROM factura_compra_id_seq");
@@ -1568,7 +1568,7 @@ GetLabelImpuesto (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT descripcion FROM impuestos WHERE id=(SELECT otros FROM producto WHERE barcode='%s')", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT descripcion FROM impuesto WHERE id=(SELECT otros FROM producto WHERE barcode='%s')", barcode));
 
   tuples = PQntuples (res);
 
@@ -1626,9 +1626,12 @@ gint
 GetTotalBuys (gchar *barcode)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT SUM(precio * cantidad) FROM compra_detalle "
-				      "WHERE barcode_product='%s'", barcode));
+  q = g_strdup_printf ("SELECT SUM(precio * cantidad) FROM compra_detalle "
+		       "WHERE barcode_product='%s'", barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return atoi (PQgetvalue (res, 0, 0));
@@ -1643,11 +1646,13 @@ GetElabDate (gchar *barcode, gint current_stock)
   gint tuples;
   //  gint stock = 0;
   gchar *date = NULL;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("SELECT cantidad, date_part ('day', elaboracion), "
-		      "date_part ('month', elaboracion), date_part('year', elaboracion) FROM "
-		      "documentos_detalle WHERE barcode='%s' ORDER BY fecha ASC", barcode));
+  q = g_strdup_printf ("SELECT cantidad, date_part ('day', elaboracion), "
+		       "date_part ('month', elaboracion), date_part('year', elaboracion) FROM "
+		       "documentos_detalle WHERE barcode='%s' ORDER BY fecha ASC", barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res == NULL)
     return "";
@@ -1800,21 +1805,26 @@ SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *margen, g
 			   gint cantidad_mayorista)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf ("UPDATE producto SET stock_min=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
-		      "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
-		      stock_minimo, margen, new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
-		      (gint)mayorista, barcode));
+  q = g_strdup_printf ("UPDATE producto SET stock_min=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
+		       "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
+		       stock_minimo, margen, new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
+		       (gint)mayorista, barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 }
 
 gboolean
 Egresar (gint monto, gchar *motivo, gint usuario)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO egresos VALUES (DEFAULT, %d, (SELECT id FROM tipo_egreso WHERE descrip='%s'), NOW(), %d)",
-				      monto, motivo, usuario));
+  q = g_strdup_printf ("INSERT INTO egreso VALUES (DEFAULT, %d, (SELECT id FROM tipo_egreso WHERE descrip='%s'), NOW(), %d)",
+		       monto, motivo, usuario);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1826,10 +1836,12 @@ gboolean
 SaveVentaTarjeta (gint id_venta, gchar *insti, gchar *numero, gchar *fecha_venc)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("INSERT INTO tarjetas VALUES (DEFAULT, %d, '%s', '%s', '%s')",
-		      id_venta, insti, numero, fecha_venc));
+  q = g_strdup_printf ("INSERT INTO tarjetas VALUES (DEFAULT, %d, '%s', '%s', '%s')",
+		       id_venta, insti, numero, fecha_venc);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1841,9 +1853,12 @@ gboolean
 Ingreso (gint monto, gchar *motivo, gint usuario)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO ingresos VALUES (DEFAULT, %d, (SELECT id FROM tipo_ingreso WHERE descrip='%s'), NOW(), %d)",
-				      monto, motivo, usuario));
+  q = g_strdup_printf ("INSERT INTO ingreso VALUES (DEFAULT, %d, (SELECT id FROM tipo_ingreso WHERE descrip='%s'), NOW(), %d)",
+		       monto, motivo, usuario);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1855,14 +1870,18 @@ gboolean
 PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE facturas_compras SET pagada='t' WHERE num_factura=%s AND rut_proveedor='%s'",
-				      num_fact, rut_proveedor));
+  q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE num_factura=%s AND rut_proveedor='%s'",
+		       num_fact, rut_proveedor):
+  res = EjecutarSQL (q);
+  g_free (q);
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')",
-      num_fact, rut_proveedor,descrip));
+  q = g_strdup_printf ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra "
+		       "WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')",
+		       num_fact, rut_proveedor,descrip);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1875,23 +1894,26 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
 {
   PGresult *res;
   gdouble stock = GetCurrentStock (barcode);
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d)",
-				      barcode, CUT (g_strdup_printf ("%f", cantidad)), motivo));
+  q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d)",
+		       barcode, CUT (g_strdup_printf ("%f", cantidad)), motivo);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (cantidad == 0)
-    res = EjecutarSQL
-      (g_strdup_printf
-       ("UPDATE productos SET merma_unid=merma_unid+%s, stock=0 WHERE barcode='%s'",
-	CUT (g_strdup_printf ("%f", cantidad)), barcode));
+    {
+      q = g_strdup_printf ("UPDATE producto SET stock=0 WHERE barcode='%s'", barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+    }
   else
     {
       gchar *new = CUT (g_strdup_printf ("%f", stock - cantidad));
-
-      res = EjecutarSQL
-	(g_strdup_printf
-	 ("UPDATE productos SET merma_unid=merma_unid+%s, stock=stock-%s WHERE barcode='%s'",
-	  new, new, barcode));
+      q = g_strdup_printf ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'",
+			   new, new, barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
     }
 }
 
@@ -1899,11 +1921,21 @@ gboolean
 Asistencia (gint user_id, gboolean entrada)
 {
   PGresult *res;
+  gchar *q;
 
   if (entrada == TRUE)
-    res = EjecutarSQL (g_strdup_printf ("INSERT INTO asistencia VALUES (DEFAULT, %d, NOW(), to_timestamp('0','0'))", user_id));
+    {
+      q = g_strdup_printf ("INSERT INTO asistencia VALUES (DEFAULT, %d, NOW(), to_timestamp('0','0'))", user_id);
+      res = EjecutarSQL (q);
+    }
   else
-    res = EjecutarSQL (g_strdup_printf ("UPDATE asistencia SET salida=NOW() WHERE id=(SELECT id FROM asistencia WHERE salida=to_timestamp('0','0') AND id_user=%d ORDER BY entrada DESC LIMIT 1)", user_id));
+    {
+      q = g_strdup_printf ("UPDATE asistencia SET salida=NOW() WHERE id="
+			   "(SELECT id FROM asistencia WHERE salida=to_timestamp('0','0') "
+			   "AND id_user=%d ORDER BY entrada DESC LIMIT 1)", user_id);
+      res = EjecutarSQL (q);
+    }
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1916,9 +1948,11 @@ VentaFraccion (gchar *barcode)
 {
   PGresult *res;
   gchar *res_char;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("SELECT fraccion FROM producto WHERE barcode='%s'", barcode));
+  q = g_strdup_printf ("SELECT fraccion FROM producto WHERE barcode='%s'", barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL && PQntuples (res) != 0)
     res_char = PQgetvalue (res, 0, 0);
@@ -1937,9 +1971,11 @@ int
 AddFormaPagoDB (gchar *forma_name, gchar *forma_days)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("INSERT INTO formas_pagos VALUES (DEFAULT, '%s', %s)", forma_name, forma_days));
+  q = g_strdup_printf ("INSERT INTO formas_pago VALUES (DEFAULT, '%s', %s)", forma_name, forma_days);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return 0;
@@ -1951,12 +1987,15 @@ gint
 AnularCompraDB (gint id_compra)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("UPDATE compras SET anulada='t' WHERE id=%d", id_compra));
+  q = g_strdup_printf ("UPDATE compra SET anulada='t' WHERE id=%d", id_compra);
+  res = EjecutarSQL ();
+  g_free (q);
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("UPDATE products_buy_history SET anulado='t' WHERE id_compra=%d", id_compra));
+  q = g_strdup_printf ("UPDATE compra_detalle SET anulado='t' WHERE id_compra=%d", id_compra);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return 1;
@@ -1970,7 +2009,7 @@ CanjearProduct (gchar *barcode, gdouble cantidad)
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf
-		     ("UPDATE productos SET stock=stock-%s, stock_pro=stock_pro+%s WHERE barcode='%s'",
+		     ("UPDATE producto SET stock=stock-%s, stock_pro=stock_pro+%s WHERE barcode=%s",
 		      CUT (g_strdup_printf ("%.2f", cantidad)), CUT (g_strdup_printf ("%2.f", cantidad)), barcode));
 
   res = EjecutarSQL (g_strdup_printf
@@ -1987,14 +2026,17 @@ gboolean
 Devolver (gchar *barcode, gchar *cantidad)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
-		      CUT (cantidad), barcode));
+  q = g_strdup_printf ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'",
+		       CUT (cantidad), barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("INSERT INTO devoluciones (barcode_product, cantidad) VALUES ('%s', %s)",
-		      barcode, CUT (cantidad)));
+  q = g_strdup_printf ("INSERT INTO devolucion (barcode_product, cantidad) VALUES ('%s', %s)",
+		       barcode, CUT (cantidad));
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -2006,15 +2048,18 @@ gboolean
 Recivir (gchar *barcode, gchar *cantidad)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-		     ("UPDATE productos SET stock=stock+%s WHERE barcode='%s'",
-		      CUT (cantidad), barcode));
+  q = g_strdup_printf ("UPDATE producto SET stock=stock+%s WHERE barcode=%s",
+		       CUT (cantidad), barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("UPDATE devoluciones SET cantidad_recivida=%s, devuelto='t' WHERE id=(SELECT id FROM devolucion WHERE barocde_product='%s' AND devuelto='f')",
-      CUT (cantidad), barcode));
+  q = g_strdup_printf ("UPDATE devolucion SET cantidad_recibida=%s, devuelto='t' "
+		       "WHERE id=(SELECT id FROM devolucion WHERE barcode_product=%s AND devuelto='f')",
+		       CUT (cantidad), barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -2028,12 +2073,14 @@ SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *c
 			    gchar *email, gchar *giro)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf ("UPDATE proveedores SET nombre='%s', direccion='%s', ciudad='%s', "
+  q = g_strdup_printf ("UPDATE proveedor SET nombre='%s', direccion='%s', ciudad='%s', "
 		      "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s'"
 		      " WHERE rut='%s'", razon, direccion, ciudad,
-		      comuna, fono, email, web, contacto, giro, rut));
+		       comuna, fono, email, web, contacto, giro, rut);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   return 0;
 }
