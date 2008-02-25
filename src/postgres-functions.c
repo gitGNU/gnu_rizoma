@@ -1206,6 +1206,7 @@ AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gc
 		  gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro)
 {
   PGresult *res;
+  gchar *q;
 
   q = g_strdup_printf ("INSERT INTO proveedor VALUES (DEFAULT, '%s', '%s', '%s', "
 		       "'%s', '%s', %d, '%s', '%s', '%s', '%s')", nombre, rut, direccion, ciudad,
@@ -1371,12 +1372,12 @@ IngresarFactura (gchar *n_doc, gint id_compra, gchar *rut_proveedor, gint total,
     {
       q = g_strdup_printf ("UPDATE factura_compra SET forma_pago=(SELECT compras.forma_pago FROM compra WHERE id=(SELECT "
 			   "id_compra FROM guias_compra WHERE numero=%d AND rut_proveedor='%s')) WHERE num_factura='%s' AND "
-			   "rut_proveedor='%s'", guia, rut_proveedor, n_doc, rut_proveedor)
-      res = EjecutarSQL	(q);
+			   "rut_proveedor='%s'", guia, rut_proveedor, n_doc, rut_proveedor);
+      res = EjecutarSQL (q);
       g_free (q);
 
       q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura='%s'", n_doc);
-      res = EjecutarSQL	(q);
+      res = EjecutarSQL (q);
       g_free (q);
     }
 
@@ -1877,7 +1878,7 @@ PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip)
   gchar *q;
 
   q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE num_factura=%s AND rut_proveedor='%s'",
-		       num_fact, rut_proveedor):
+		       num_fact, rut_proveedor);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1994,7 +1995,7 @@ AnularCompraDB (gint id_compra)
   gchar *q;
 
   q = g_strdup_printf ("UPDATE compra SET anulada='t' WHERE id=%d", id_compra);
-  res = EjecutarSQL ();
+  res = EjecutarSQL (q);
   g_free (q);
 
   q = g_strdup_printf ("UPDATE compra_detalle SET anulado='t' WHERE id_compra=%d", id_compra);
