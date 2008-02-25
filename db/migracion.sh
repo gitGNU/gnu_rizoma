@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-# Este script usa un método sumamente lento para hacer la migracion
+# Este script usa un metodo sumamente lento para hacer la migracion
 # Primero hace un select sobre la tabla original para extraer los datos
 # A continuacion se formaten para que cumplan con la nueva estructura de la
 # de la base de datos, para generar via stdout una serie de comandos
