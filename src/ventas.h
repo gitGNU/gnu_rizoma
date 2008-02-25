@@ -39,9 +39,9 @@ void CleanSellLabels (void);
 
 void CleanEntryAndLabelData (void);
 
-gint TipoVenta (GtkWidget *widget, gpointer data);
+void TipoVenta (GtkWidget *widget, gpointer data);
 
-void CloseSellWindow (void);
+void CloseSellWindow (GtkWidget *widget, gpointer user_data);
 
 void CambiarTipoVenta (GtkToggleButton *button, gpointer user_data);
 

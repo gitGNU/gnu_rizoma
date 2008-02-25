@@ -376,11 +376,6 @@ MainWindow (void)
 
   module_box->new_box = NULL;
 
-  venta = (Venta *) g_malloc (sizeof (Venta));
-  venta->header = NULL;
-  venta->products = NULL;
-  venta->window = NULL;
-
   ingreso = (IngresoProducto *) g_malloc (sizeof (IngresoProducto));
 
   ingreso->products_window = NULL;

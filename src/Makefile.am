@@ -60,7 +60,8 @@ utils.c utils.h \
 factura_more.c factura_more.h \
 caja.c caja.h \
 vale.c vale.h \
-tiempo.c tiempo.h
+tiempo.c tiempo.h \
+encriptar.c encriptar.h
 
 rizoma_config_SOURCES = rizoma-config.c
 
