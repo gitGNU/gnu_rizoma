@@ -25,6 +25,30 @@
 #include<string.h>
 
 void
+SetToggleMode (GtkToggleButton *widget, gpointer data)
+{
+
+  if (gtk_toggle_button_get_active (widget) == TRUE)
+    gtk_toggle_button_set_active (widget, FALSE);
+  else
+    gtk_toggle_button_set_active (widget, TRUE);
+}
+
+gboolean
+HaveCharacters (gchar *string)
+{
+  gint i, len = strlen (string);
+
+  for (i = 0; i <= len; i++)
+    {
+      if (g_ascii_isalpha (string[i]) == TRUE)
+	return TRUE;
+    }
+
+  return FALSE;
+}
+
+void
 SendCursorTo (GtkWidget *widget, gpointer data)
 {
   /* GtkWindow *window = GTK_WINDOW (gtk_widget_get_toplevel ((GtkWidget *)data));

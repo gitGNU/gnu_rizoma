@@ -43,6 +43,7 @@
 #include"caja.h"
 #include"dimentions.h"
 #include"printing.h"
+#include"utils.h"
 
 GtkWidget *see_button;
 GtkWidget *add_button;
@@ -2716,20 +2717,6 @@ compras_box (MainBox *module_box)
     Fin Cajas
   */
 
-}
-
-gboolean
-HaveCharacters (gchar *string)
-{
-  gint i, len = strlen (string);
-
-  for (i = 0; i <= len; i++)
-    {
-      if (g_ascii_isalpha (string[i]) == TRUE)
-	return TRUE;
-    }
-
-  return FALSE;
 }
 
 void

@@ -22,6 +22,10 @@
 #ifndef UTILS_H_
 # define UTILS_H_
 
+void SetToggleMode (GtkToggleButton *widget, gpointer data);
+
+gboolean HaveCharacters (gchar *string);
+
 void SendCursorTo (GtkWidget *widget, gpointer data);
 
 gchar * PutPoints (gchar *number);

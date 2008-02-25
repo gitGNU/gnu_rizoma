@@ -31,13 +31,10 @@
 #include"tipos.h"
 #include"main.h"
 #include"ventas.h"
-#include"ventas_stats.h"
 #include"credito.h"
-#include"compras.h"
 #include"postgres-functions.h"
 #include"errors.h"
 #include"manejo_productos.h"
-#include"administracion_productos.h"
 #include"boleta.h"
 #include"config_file.h"
 #include"dimentions.h"
@@ -879,7 +876,7 @@ TiposVenta (GtkWidget *widget, gpointer data)
 }
 
 void
-ventas_box (MainBox *module_box)
+ventas_win ()
 {
   Productos *fill = venta->header;
 
@@ -4185,3 +4182,49 @@ main (int argc, char *argv[])
 }
 
 
+void
+check_passwd (GtkWidget *widget, gpointer data)
+{
+  GtkTreeIter iter;
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "combo_profile");
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gchar *group_name;
+
+  gchar *passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
+  gchar *user = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"user_entry")));
+
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gtk_tree_model_get (model, &iter,
+                      0, &group_name,
+                      -1);
+
+  rizoma_set_profile (group_name);
+
+  switch (AcceptPassword (passwd, user))
+    {
+    case TRUE:
+
+      user_data = (User *) g_malloc (sizeof (User));
+
+      user_data->user_id = ReturnUserId (user);
+      user_data->level = ReturnUserLevel (user);
+      user_data->user = user;
+
+      Asistencia (user_data->user_id, TRUE);
+
+      gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
+      g_object_unref ((gpointer) builder);
+      builder = NULL;
+
+      ventas_win();
+
+      break;
+    case FALSE:
+      gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
+      gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
+      rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
+      break;
+    default:
+      break;
+    }
+}

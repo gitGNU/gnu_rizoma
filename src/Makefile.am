@@ -46,7 +46,6 @@ rizoma_errors.c rizoma_errors.h \
 utils.c utils.h
 
 rizoma_ventas_SOURCES = ventas.c ventas.h  dimentions.h tipos.h\
-ventas_stats.c ventas_stats.h \
 credito.c credito.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
@@ -57,7 +56,11 @@ printing.c printing.h \
 config_file.c config_file.h \
 parametros.c parametros.h \
 rizoma_errors.c rizoma_errors.h \
-utils.c utils.h
+utils.c utils.h \
+factura_more.c factura_more.h \
+caja.c caja.h \
+vale.c vale.h \
+tiempo.c tiempo.h
 
 rizoma_config_SOURCES = rizoma-config.c
 
