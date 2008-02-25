@@ -40,8 +40,13 @@
 #include"administracion_productos.h"
 #include"boleta.h"
 #include"config_file.h"
-
 #include"dimentions.h"
+#include"utils.h"
+
+GtkBuilder *builder;
+
+gint screen_width;
+gint screen_height;
 
 GtkWidget *add_button;
 GtkWidget *vuelto_button;
@@ -4095,3 +4100,88 @@ FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *conten
 
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), codigo_corto);
 }
+
+int
+main (int argc, char *argv[])
+{
+  GtkWindow *login_window;
+  GError *err = NULL;
+
+  GtkComboBox *combo;
+  GtkListStore *model;
+  GtkTreeIter iter;
+  GtkCellRenderer *cell;
+
+  char *config_file;
+  GKeyFile *key_file;
+  gchar **profiles;
+
+  config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
+
+  if (!g_file_test(config_file,
+		   G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
+    {
+      perror (g_strdup_printf ("Opening %s", config_file));
+      printf ("Para configurar su sistema debe ejecutar rizoma-config\n");
+      exit (-1);
+    }
+  key_file = g_key_file_new ();
+  g_key_file_load_from_file(key_file, config_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
+
+  gtk_init (&argc, &argv);
+
+  screen_width = gdk_screen_width ();
+  screen_height = gdk_screen_height ();
+
+  if (screen_width == 640 && screen_height == 480)
+    solo_venta = TRUE;
+  else
+    solo_venta = FALSE;
+
+  builder = gtk_builder_new ();
+
+  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
+  if (err) {
+    g_error ("ERROR: %s\n", err->message);
+    return -1;
+  }
+  gtk_builder_connect_signals (builder, NULL);
+
+  login_window = GTK_WINDOW(gtk_builder_get_object (builder, "login_window"));
+
+  profiles = g_key_file_get_groups (key_file, NULL);
+  g_key_file_free (key_file);
+
+  model = gtk_list_store_new (1,
+			      G_TYPE_STRING);
+
+  combo = (GtkComboBox *) gtk_builder_get_object (builder, "combo_profile");
+
+  cell = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start ((GtkCellLayout *)combo, cell, TRUE);
+  gtk_cell_layout_set_attributes ((GtkCellLayout *)combo, cell,
+				  "text", 0,
+				  NULL);
+  do
+    {
+      if (*profiles != NULL)
+	{
+	  gtk_list_store_append (model, &iter);
+	  gtk_list_store_set (model, &iter,
+			      0, *profiles,
+			      -1
+			      );
+	}
+    } while (*profiles++ != NULL);
+
+  gtk_combo_box_set_model (combo, (GtkTreeModel *)model);
+  gtk_combo_box_set_active (combo, 0);
+
+  gtk_widget_show_all ((GtkWidget *)login_window);
+
+  gtk_main();
+
+  return 0;
+}
+
+

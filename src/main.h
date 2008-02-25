@@ -33,13 +33,8 @@ void check_passwd (GtkWidget *widget, gpointer data);
 
 void MainWindow (void);
 
-void SendCursorTo (GtkWidget *widget, gpointer data);
+void Question (MainBox *module_box);
 
-gboolean Question ();
-
-gchar * PutPoints (gchar *number);
-
-gchar * CutPoints (gchar *number_points);
-
+void Salir (MainBox *module_box);
 
 #endif
