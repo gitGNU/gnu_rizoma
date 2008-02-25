@@ -1,3 +1,4 @@
+*.[ao]
 configure
 Makefile.in
 config.log
