@@ -1393,16 +1393,11 @@ AgregarProducto (GtkButton *button, gpointer data)
       */
       total = llround (CalcularTotal (venta->header));
 
-      /*
-	gtk_label_set_markup (GTK_LABEL (venta->sub_total_label),
-	g_strdup_printf ("<span size=\"40000\">%s</span>",
-	PutPoints (g_strdup_printf ("%d", total))));
-      */
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
 			    g_strdup_printf ("<span size=\"40000\">%s</span>",
 					     PutPoints (g_strdup_printf ("%lu", total))));
 
-      gtk_window_set_focus( GTK_WINDOW( main_window ), GTK_WIDGET (gtk_builder_get_object (builder, "label_total")));
+      //      gtk_window_set_focus( GTK_WINDOW( main_window ), GTK_WIDGET (gtk_builder_get_object (builder, "label_total")));
     }
 
   return TRUE;
@@ -1431,15 +1426,11 @@ CleanEntryAndLabelData (void)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")), "");
-  //  gtk_label_set_text (GTK_LABEL (venta->sub_total_label), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
 
-  gtk_widget_set_sensitive (add_button, FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), FALSE);
 
-  //  gtk_entry_set_text (GTK_ENTRY (venta->discount_entry), "0");
-  //  gtk_label_set_text (GTK_LABEL (venta->discount_label), "0");
-
-  gtk_window_set_focus (GTK_WINDOW (main_window), gtk_builder_get_object (builder, "barcode_entry"));
+  gtk_window_set_focus (GTK_WINDOW (main_window), GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 }
 
 void
@@ -1722,7 +1713,7 @@ Vender (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 {
-  gtk_window_set_focus(GTK_WINDOW(main_window), add_button);
+  gtk_window_set_focus(GTK_WINDOW(main_window), gtk_builder_get_object (builder, "sell_add_button"));
 }
 
 void
@@ -1733,7 +1724,7 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
   gint precio = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))));
   gint precio_mayor = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor"))))));
   gdouble cantidad_mayor = strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad"))))),
-				   (char **)NULL);
+                                   (char **)NULL);
   guint32 subtotal;
 
   if (precio != 0 && ((mayorista == FALSE || cantidad < cantidad_mayor) ||
@@ -1779,7 +1770,15 @@ TipoVenta (GtkWidget *widget, gpointer data)
 
   gtk_widget_set_sensitive (main_window, FALSE);
 
-  tipo_documento = (gint) data;
+  if (strcmp (tipo_vendedor, "1") == 0)
+    {
+      tipo_documento = SIMPLE;
+    }
+  else
+    {
+      tipo_documento = VENTA;
+    }
+
 
   venta->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   if (tipo_documento == SIMPLE)
@@ -2167,10 +2166,6 @@ TipoVenta (GtkWidget *widget, gpointer data)
 			G_CALLBACK (Descuento), (gpointer) FALSE);
     }
   else if (tipo_documento == VENTA)
-    {
-
-    }
-  else
     {
       frame = gtk_frame_new ("Descuentos");
       gtk_widget_show (frame);
