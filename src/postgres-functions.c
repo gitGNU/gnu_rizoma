@@ -105,7 +105,7 @@ EjecutarSQL (gchar *sentencia)
 {
   PGresult *res;
   ConnStatusType status;
-  ExecStatusType status;
+  ExecStatusType status_res;
 
   char *host = rizoma_get_value ("SERVER_HOST");
   char *name = rizoma_get_value ("DB_NAME");
@@ -125,12 +125,12 @@ EjecutarSQL (gchar *sentencia)
   if( status == CONNECTION_OK )
     {
       res = PQexec (connection, sentencia);
-      status = PQresultStatus(res);
+      status_res = PQresultStatus(res);
 
-      if ((status != PGRES_COMMAND_OK) && (status != PGRES_TUPLES_OK))
+      if ((status_res != PGRES_COMMAND_OK) && (status_res != PGRES_TUPLES_OK))
 	g_printerr("SQL: %s\nErr: %s\nMsg: %s",
 		   sentencia,
-		   PQresStatus(status),
+		   PQresStatus(status_res),
 		   PQresultErrorMessage(res));
 
       if( res == NULL )
@@ -154,8 +154,7 @@ EjecutarSQL (gchar *sentencia)
 
       switch (status)
 	{
-	case CONNECTION_OK:
-	  res = PQexec (connection, sentencia);
+	case CONNECTION_OK:	  res = PQexec (connection, sentencia);
 	  if( res == NULL )
 	      rizoma_errors_set (PQerrorMessage (connection), G_STRFUNC, ERROR);
 	  else
