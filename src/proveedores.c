@@ -1,23 +1,23 @@
 /*proveedores.c
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<gtk/gtk.h>
 
@@ -67,14 +67,14 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   PGresult *res;
   gint tuples, i;
   gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (search_entry)));
-  
+
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE lower(nombre) LIKE lower('%%%s%%') "
 				      "OR lower(rut) LIKE lower('%%%s%%')", string, string));
 
   tuples = PQntuples (res);
 
   gtk_tree_store_clear (proveedores_store);
-  
+
   for (i = 0; i < tuples; i++)
     {
       gtk_tree_store_append (GTK_TREE_STORE (proveedores_store), &iter, NULL);
@@ -85,7 +85,7 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
 			  3, PQgetvalue (res, i, 9),
 			  -1);
     }
-  
+
 }
 
 void
@@ -108,9 +108,9 @@ ListarProveedores (void)
 			  0, PQgetvalue (res, i, 1),
 			  1, PQgetvalue (res, i, 2),
 			  2, PQgetvalue (res, i, 10),
-			  3, PQgetvalue (res, i, 9),			  
+			  3, PQgetvalue (res, i, 9),
 			  -1);
-    }  
+    }
 }
 
 void
@@ -135,22 +135,22 @@ LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
   gtk_entry_set_text (GTK_ENTRY (razon), PQgetvalue (res, 0, 1));
 
   gtk_label_set_text (GTK_LABEL (rut), PQgetvalue (res, 0, 2));
-  
+
   gtk_entry_set_text (GTK_ENTRY (direccion), PQgetvalue (res, 0, 3));
-  
+
   gtk_entry_set_text (GTK_ENTRY (ciudad), PQgetvalue (res, 0, 4));
 
   gtk_entry_set_text (GTK_ENTRY (comuna), PQgetvalue (res, 0, 5));
-  
+
   gtk_entry_set_text (GTK_ENTRY (fono), PQgetvalue (res, 0, 6));
-  
+
   gtk_entry_set_text (GTK_ENTRY (web), PQgetvalue (res, 0, 8));
-  
+
   gtk_entry_set_text (GTK_ENTRY (contacto), PQgetvalue (res, 0, 9));
 
   gtk_entry_set_text (GTK_ENTRY (email), PQgetvalue (res, 0, 7));
 
-  gtk_entry_set_text (GTK_ENTRY (giro), PQgetvalue (res, 0, 10)); 
+  gtk_entry_set_text (GTK_ENTRY (giro), PQgetvalue (res, 0, 10));
 
 }
 
@@ -177,12 +177,12 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
   gchar *contacto_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
   gchar *giro_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
 
-   if (strcmp (rut_c, "") == 0)
+  if (strcmp (rut_c, "") == 0)
     {
       ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
       return;
     }
-  else if ((GetDataByOne 
+  else if ((GetDataByOne
 	    (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s-%s'", rut_c, rut_ver))) != NULL)
     {
       ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
@@ -255,20 +255,20 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Cajas
-   */
+  */
 
   /*
     Rut Proveedor
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("Rut: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  
+
   compra->rut_ver = gtk_entry_new_with_max_length (1);
   gtk_widget_set_size_request (compra->rut_ver, 20, -1);
   gtk_widget_show (compra->rut_ver);
@@ -282,7 +282,7 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   gtk_widget_set_size_request (compra->rut_add, 75, -1);
   gtk_widget_show (compra->rut_add);
   gtk_box_pack_end (GTK_BOX (hbox), compra->rut_add, FALSE, FALSE, 3);
-  
+
   gtk_window_set_focus (GTK_WINDOW (window), compra->rut_add);
 
   /*
@@ -292,7 +292,7 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("*Nombre: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -303,12 +303,12 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Direccion
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("*Direccion: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -318,13 +318,13 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   gtk_box_pack_end (GTK_BOX (hbox), compra->direccion_add, FALSE, FALSE, 3);
 
   /*
-    Ciudad 
-   */
-  
+    Ciudad
+  */
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("*Ciudad: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -333,15 +333,15 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   gtk_widget_show (compra->ciudad_add);
   gtk_box_pack_end (GTK_BOX (hbox), compra->ciudad_add, FALSE, FALSE, 3);
 
-  
+
   /*
     Comuna
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("*Comuna: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -352,12 +352,12 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Telefono
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("*Telefono: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -368,12 +368,12 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     E-Mail
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("E-Mail: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -384,12 +384,12 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Web
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("Web: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -400,12 +400,12 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Contacto
-   */
+  */
 
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("Contacto: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -416,12 +416,12 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Giro
-   */
-  
+  */
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  
+
   label = gtk_label_new ("*Giro: ");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
@@ -432,11 +432,11 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   /*
     Fin Cajas
-   */
+  */
 
   /*
     Mensaje Inferior
-   */
+  */
   label = gtk_label_new ("Los datos con * son obligatorios");
   gtk_widget_show (label);
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
@@ -455,7 +455,7 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (AgregarProveedor), (gpointer)window);
-  
+
   button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
@@ -465,7 +465,7 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
 }
 
-void 
+void
 ModificarProveedor (void)
 {
   gchar *rut_c = (gchar *) gtk_label_get_text (GTK_LABEL (rut));
@@ -481,7 +481,7 @@ ModificarProveedor (void)
 
   SetModificacionesProveedor (rut_c, razon_c, direccion_c, comuna_c, ciudad_c, fono_c,
 			      web_c, contacto_c, email_c, giro_c);
-  
+
 
 }
 
@@ -493,7 +493,7 @@ proveedores_box (GtkWidget *main_box)
   GtkWidget *hbox;
   GtkWidget *box;
   GtkWidget *frame;
-  
+
   GtkWidget *button;
 
   GtkWidget *label;
@@ -508,7 +508,7 @@ proveedores_box (GtkWidget *main_box)
   vbox = gtk_vbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (main_box), vbox, FALSE, FALSE, 3);
   gtk_widget_show (vbox);
- 
+
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
@@ -525,14 +525,14 @@ proveedores_box (GtkWidget *main_box)
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (BuscarProveedor), NULL); 
+		    G_CALLBACK (BuscarProveedor), NULL);
 
   button = gtk_button_new_from_stock (GTK_STOCK_ADD);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (AgregarProveedorWindow), NULL); 
+		    G_CALLBACK (AgregarProveedorWindow), NULL);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -545,42 +545,42 @@ proveedores_box (GtkWidget *main_box)
 				  GTK_POLICY_AUTOMATIC,
 				  GTK_POLICY_AUTOMATIC);
   gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3);
-  
+
   proveedores_store = gtk_tree_store_new (4,
 					  G_TYPE_STRING,
 					  G_TYPE_STRING,
 					  G_TYPE_STRING,
 					  G_TYPE_STRING);
 
-  
+
   proveedores_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (proveedores_store));
   gtk_container_add (GTK_CONTAINER (scroll), proveedores_tree);
   gtk_widget_show (proveedores_tree);
 
-  g_signal_connect (G_OBJECT (gtk_tree_view_get_selection 
+  g_signal_connect (G_OBJECT (gtk_tree_view_get_selection
 			      (GTK_TREE_VIEW (proveedores_tree))), "changed",
 		    G_CALLBACK (LlenarDatosProveedor), NULL);
-		    
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
 						     "text", 0,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
 						     "text", 1,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
-  gtk_tree_view_column_set_resizable (column, FALSE); 
-  
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Giro", renderer,
 						     "text", 2,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
-  gtk_tree_view_column_set_resizable (column, FALSE); 
+  gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Contacto", renderer,
@@ -600,7 +600,7 @@ proveedores_box (GtkWidget *main_box)
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  
+
   box = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (box);
   gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
@@ -610,7 +610,7 @@ proveedores_box (GtkWidget *main_box)
   rut = gtk_label_new ("\t\t\t");
   gtk_box_pack_start (GTK_BOX (box), rut, FALSE, FALSE, 0);
   gtk_widget_show (rut);
-  
+
   box = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (box);
   gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
@@ -632,7 +632,7 @@ proveedores_box (GtkWidget *main_box)
   gtk_widget_show (direccion);
   gtk_widget_set_size_request (GTK_WIDGET (direccion), 200, -1);
   gtk_box_pack_start (GTK_BOX (box), direccion, FALSE, FALSE, 0);
-  
+
   box = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (box);
   gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
@@ -725,149 +725,149 @@ proveedores_box (GtkWidget *main_box)
 		    G_CALLBACK (ModificarProveedor), NULL);
 
   /*
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_widget_show (hbox);
+    gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Compras Totales");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  compras_totales = gtk_label_new ("");
-  gtk_widget_show (compras_totales);
-  //  gtk_widget_set_size_request (GTK_WIDGET (compras_totales), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), compras_totales, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Compras Totales");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    compras_totales = gtk_label_new ("");
+    gtk_widget_show (compras_totales);
+    //  gtk_widget_set_size_request (GTK_WIDGET (compras_totales), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), compras_totales, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contribucion Total Real");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  contrib_total = gtk_label_new ("");
-  gtk_widget_show (contrib_total);
-  //  gtk_widget_set_size_request (GTK_WIDGET (contrib_total), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), contrib_total, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Contribucion Total Real");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    contrib_total = gtk_label_new ("");
+    gtk_widget_show (contrib_total);
+    //  gtk_widget_set_size_request (GTK_WIDGET (contrib_total), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), contrib_total, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contribucion Proyectada");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  contrib_proyect = gtk_label_new ("");
-  gtk_widget_show (contrib_proyect);
-  //  gtk_widget_set_size_request (GTK_WIDGET (contrib_proyect), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), contrib_proyect, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Contribucion Proyectada");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    contrib_proyect = gtk_label_new ("");
+    gtk_widget_show (contrib_proyect);
+    //  gtk_widget_set_size_request (GTK_WIDGET (contrib_proyect), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), contrib_proyect, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Incidencia Compras");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  inci_compras = gtk_label_new ("");
-  gtk_widget_show (inci_compras);
-  //  gtk_widget_set_size_request (GTK_WIDGET (inci_compras), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), inci_compras, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Incidencia Compras");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    inci_compras = gtk_label_new ("");
+    gtk_widget_show (inci_compras);
+    //  gtk_widget_set_size_request (GTK_WIDGET (inci_compras), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), inci_compras, FALSE, FALSE, 0);
 
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_widget_show (hbox);
+    gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Stock Valorizado");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  stock_valorizado = gtk_label_new ("");
-  gtk_widget_show (stock_valorizado);
-  //  gtk_widget_set_size_request (GTK_WIDGET (stock_valorizado), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), stock_valorizado, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Stock Valorizado");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    stock_valorizado = gtk_label_new ("");
+    gtk_widget_show (stock_valorizado);
+    //  gtk_widget_set_size_request (GTK_WIDGET (stock_valorizado), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), stock_valorizado, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Merma Unid.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  merma_uni = gtk_label_new ("");
-  gtk_widget_show (merma_uni);
-  //  gtk_widget_set_size_request (GTK_WIDGET (merma_uni), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), merma_uni, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Merma Unid.");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    merma_uni = gtk_label_new ("");
+    gtk_widget_show (merma_uni);
+    //  gtk_widget_set_size_request (GTK_WIDGET (merma_uni), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), merma_uni, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Merma %");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  merma_porc = gtk_label_new ("");
-  gtk_widget_show (merma_porc);
-  //  gtk_widget_set_size_request (GTK_WIDGET (merma_porc), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), merma_porc, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Merma %");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    merma_porc = gtk_label_new ("");
+    gtk_widget_show (merma_porc);
+    //  gtk_widget_set_size_request (GTK_WIDGET (merma_porc), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), merma_porc, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Ventas Totales");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ventas_totales = gtk_label_new ("");
-  gtk_widget_show (ventas_totales);
-  //  gtk_widget_set_size_request (GTK_WIDGET (ventas_totales), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), ventas_totales, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Ventas Totales");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    ventas_totales = gtk_label_new ("");
+    gtk_widget_show (ventas_totales);
+    //  gtk_widget_set_size_request (GTK_WIDGET (ventas_totales), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), ventas_totales, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contrib. Agreg.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  contrib_agreg = gtk_label_new ("");
-  gtk_widget_show (contrib_agreg);
-  //  gtk_widget_set_size_request (GTK_WIDGET (contrib_agreg), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), contrib_agreg, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Contrib. Agreg.");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    contrib_agreg = gtk_label_new ("");
+    gtk_widget_show (contrib_agreg);
+    //  gtk_widget_set_size_request (GTK_WIDGET (contrib_agreg), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), contrib_agreg, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Incidencia Ventas");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  inci_ventas = gtk_label_new ("");
-  gtk_widget_show (inci_ventas);
-  //  gtk_widget_set_size_request (GTK_WIDGET (inci_ventas), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), inci_ventas, FALSE, FALSE, 0);
-  
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Incidencia Ventas");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    inci_ventas = gtk_label_new ("");
+    gtk_widget_show (inci_ventas);
+    //  gtk_widget_set_size_request (GTK_WIDGET (inci_ventas), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), inci_ventas, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Total Facturas Pendientes");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  total_pen_fact = gtk_label_new ("");
-  gtk_widget_show (total_pen_fact);
-  //  gtk_widget_set_size_request (GTK_WIDGET (total_pen_fact), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), total_pen_fact, FALSE, FALSE, 0);
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_widget_show (hbox);
+    gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Indice T");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  indice_t = gtk_label_new ("");
-  gtk_widget_show (indice_t);
-  //  gtk_widget_set_size_request (GTK_WIDGET (indice_t), 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), indice_t, FALSE, FALSE, 0);
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Total Facturas Pendientes");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    total_pen_fact = gtk_label_new ("");
+    gtk_widget_show (total_pen_fact);
+    //  gtk_widget_set_size_request (GTK_WIDGET (total_pen_fact), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), total_pen_fact, FALSE, FALSE, 0);
+
+    box = gtk_vbox_new (FALSE, 3);
+    gtk_widget_show (box);
+    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+    label = gtk_label_new ("Indice T");
+    gtk_widget_show (label);
+    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+    indice_t = gtk_label_new ("");
+    gtk_widget_show (indice_t);
+    //  gtk_widget_set_size_request (GTK_WIDGET (indice_t), 80, -1);
+    gtk_box_pack_start (GTK_BOX (box), indice_t, FALSE, FALSE, 0);
   */
 
   hbox = gtk_hbox_new (FALSE, 3);
