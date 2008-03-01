@@ -145,16 +145,6 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
 }
 
 void
-SetToggleMode (GtkToggleButton *widget, gpointer data)
-{
-
-  if (gtk_toggle_button_get_active (widget) == TRUE)
-    gtk_toggle_button_set_active (widget, FALSE);
-  else
-    gtk_toggle_button_set_active (widget, TRUE);
-}
-
-void
 DisplayCal (GtkToggleButton *widget, gpointer data)
 {
   GtkWidget *window;

@@ -18,20 +18,19 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-bin_PROGRAMS = rizoma rizoma-config
+bin_PROGRAMS = rizoma-admin rizoma-config rizoma-ventas
 
-rizoma_SOURCES = main.c tipos.h main.h datos.h dimentions.h \
-ventas.c ventas.h \
+rizoma_admin_SOURCES = main.c tipos.h main.h datos.h dimentions.h \
 administracion_productos.c administracion_productos.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
 manejo_productos.c manejo_productos.h \
+boleta.c boleta.h \
 ventas_stats.c ventas_stats.h \
 credito.c credito.h \
 encriptar.c encriptar.h \
 usuario.c usuario.h \
 compras.c compras.h \
-boleta.c boleta.h \
 caja.c caja.h \
 tiempo.c tiempo.h \
 proveedores.c proveedores.h \
@@ -41,19 +40,38 @@ datos_negocio.c datos_negocio.h \
 printing.c printing.h \
 config_file.c config_file.h \
 parametros.c parametros.h \
-factura_more.c factura_more.h \
-comisiones.c comisiones.h \
 vale.c vale.h \
-rizoma_errors.c rizoma_errors.h
+comisiones.c comisiones.h \
+rizoma_errors.c rizoma_errors.h \
+utils.c utils.h
+
+rizoma_ventas_SOURCES = ventas.c ventas.h  dimentions.h tipos.h\
+credito.c credito.h \
+postgres-functions.c postgres-functions.h \
+errors.c errors.h \
+manejo_productos.c manejo_productos.h \
+boleta.c boleta.h \
+datos_negocio.c datos_negocio.h \
+printing.c printing.h \
+config_file.c config_file.h \
+parametros.c parametros.h \
+rizoma_errors.c rizoma_errors.h \
+utils.c utils.h \
+factura_more.c factura_more.h \
+caja.c caja.h \
+vale.c vale.h \
+tiempo.c tiempo.h \
+encriptar.c encriptar.h
 
 rizoma_config_SOURCES = rizoma-config.c
 
-rizoma_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
-rizoma_LDFLAGS = -Wl,--export-dynamic
+rizoma_admin_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_admin_LDFLAGS = -Wl,--export-dynamic
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
-fakebuy_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS)
+rizoma_ventas_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_ventas_LDFLAGS = -Wl,--export-dynamic
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS) $(GKSU_LIBS)
 rizoma_config_LDFLAGS = -Wl,--export-dynamic

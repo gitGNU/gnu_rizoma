@@ -67,7 +67,7 @@ main_key_handler (GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
   if (event->keyval == GDK_F12)
     {
-      Question ();
+      Question (NULL);
     }
 
   if (user_data->level == 0)
@@ -123,7 +123,7 @@ SelectMenu (GtkWidget *widget, gpointer data)
 }
 
 void
-Salir (GtkWidget *widget, gpointer data)
+Salir (MainBox *module_box)
 {
   Asistencia (user_data->user_id, FALSE);
   gtk_main_quit ();
@@ -376,11 +376,6 @@ MainWindow (void)
 
   module_box->new_box = NULL;
 
-  venta = (Venta *) g_malloc (sizeof (Venta));
-  venta->header = NULL;
-  venta->products = NULL;
-  venta->window = NULL;
-
   ingreso = (IngresoProducto *) g_malloc (sizeof (IngresoProducto));
 
   ingreso->products_window = NULL;
@@ -553,20 +548,11 @@ MainWindow (void)
 }
 
 void
-SendCursorTo (GtkWidget *widget, gpointer data)
-{
-  GtkWindow *window = GTK_WINDOW (gtk_widget_get_toplevel ((GtkWidget *)data));
-  GtkWidget *destiny = (GtkWidget *) data;
-
-  gtk_window_set_focus (window, destiny);
-}
-
-void
 exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
   if (response_id == GTK_RESPONSE_YES)
     {
-      Salir (NULL, NULL);
+      Salir (NULL);
     }
   else if (response_id == GTK_RESPONSE_NO)
     {
@@ -577,72 +563,13 @@ exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
     }
 }
 
-gboolean
-Question ()
+void
+Question (MainBox *module_box)
 {
   GtkWidget *window;
 
   window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
 
   gtk_widget_show_all (window);
-  return TRUE;
 }
 
-gchar *
-PutPoints (gchar *number)
-{
-  gchar *alt = g_malloc0 (15), *alt3 = g_malloc0 (15);
-  int len;
-  gint points;
-  gint i, unidad = 0, point = 0;
-
-  if (number == NULL)
-    return "";
-
-  len = strlen (number);
-
-  if (len <= 3)
-    return number;
-
-  if ((len % 3) != 0)
-    points = len / 3;
-  else
-    points = (len / 3) - 1;
-
-  for (i = len; i >= 0; i--)
-    {
-      if (unidad == 3 && point < points && number[i] != '.' && number[i] != ',')
-	{
-	  g_snprintf (alt, 15, ".%c%s", number[i], alt3);
-	  unidad = 0;
-	  point++;
-	}
-      else
-	g_snprintf (alt, 15, "%c%s", number[i], alt3);
-
-      strcpy (alt3, alt);
-
-      unidad++;
-    }
-
-  return alt;
-}
-
-gchar *
-CutPoints (gchar *number_points)
-{
-  gint len = strlen (number_points);
-  gchar *number = g_malloc0 (len);
-  gint i, o = 0;
-
-  if (strcmp (number_points, "") == 0)
-    return number_points;
-
-  for (i = 0; i <= len; i++)
-    if (number_points[i] != '.')
-      number[o++] = number_points[i];
-
-  g_free (number_points);
-
-  return number;
-}
