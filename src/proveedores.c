@@ -66,10 +66,15 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
   PGresult *res;
   gint tuples, i;
+  gchar *str_axu;
+  gchar *q;
   gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (search_entry)));
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE lower(nombre) LIKE lower('%%%s%%') "
-				      "OR lower(rut) LIKE lower('%%%s%%')", string, string));
+  q = g_strdup_printf ("SELECT rut, dv, nombre, giro, contacto "
+		       "FROM buscar_proveedor('%%%s%%')",
+		       string);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   tuples = PQntuples (res);
 
@@ -77,15 +82,17 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
 
   for (i = 0; i < tuples; i++)
     {
+      str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
+			    PQvaluebycol (res, i, "dv"), NULL);
       gtk_tree_store_append (GTK_TREE_STORE (proveedores_store), &iter, NULL);
       gtk_tree_store_set (GTK_TREE_STORE (proveedores_store), &iter,
-			  0, PQgetvalue (res, i, 1),
-			  1, PQgetvalue (res, i, 2),
-			  2, PQgetvalue (res, i, 10),
-			  3, PQgetvalue (res, i, 9),
+			  0, str_axu,
+			  1, PQvaluebycol (res, i, "nombre"),
+			  2, PQvaluebycol (res, i, "giro"),
+			  3, PQvaluebycol (res, i, "contacto"),
 			  -1);
+      g_free (str_axu);
     }
-
 }
 
 void
@@ -94,8 +101,9 @@ ListarProveedores (void)
   PGresult *res;
   gint tuples, i;
   GtkTreeIter iter;
+  gchar *str_axu;
 
-  res = EjecutarSQL ("SELECT * FROM proveedor ORDER BY nombre ASC");
+  res = EjecutarSQL ("SELECT rut, dv, nombre, giro, contacto FROM buscar_proveedor('%') ORDER BY nombre ASC");
 
   tuples = PQntuples (res);
 
@@ -103,13 +111,15 @@ ListarProveedores (void)
 
   for (i = 0; i < tuples; i++)
     {
+      str_axu = g_strconcat(PQvaluebycol(res, i, "rut"), "-", PQvaluebycol(res, i, "dv"), NULL);
       gtk_tree_store_append (GTK_TREE_STORE (proveedores_store), &iter, NULL);
       gtk_tree_store_set (GTK_TREE_STORE (proveedores_store), &iter,
-			  0, PQgetvalue (res, i, 1),
-			  1, PQgetvalue (res, i, 2),
-			  2, PQgetvalue (res, i, 10),
-			  3, PQgetvalue (res, i, 9),
+			  0, str_axu,
+			  1, PQvaluebycol (res, i, "nombre"),
+			  2, PQvaluebycol (res, i, "giro"),
+			  3, PQvaluebycol (res, i, "contacto"),
 			  -1);
+      g_free (str_axu);
     }
 }
 
