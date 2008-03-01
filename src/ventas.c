@@ -20,8 +20,6 @@
  */
 
 #define _XOPEN_SOURCE 600
-#define  _ISOC99_SOURCE
-
 #include<features.h>
 
 #include<gtk/gtk.h>
@@ -1001,8 +999,8 @@ ventas_win ()
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_min_width (column, 75);
-  gtk_tree_view_column_set_max_width (column, 75);
+  /* gtk_tree_view_column_set_min_width (column, 75); */
+  /* gtk_tree_view_column_set_max_width (column, 75); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1012,8 +1010,9 @@ ventas_win ()
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
-  gtk_tree_view_column_set_min_width (column, 170);
-  gtk_tree_view_column_set_max_width (column, 170);
+
+  /* gtk_tree_view_column_set_min_width (column, 170); */
+  /* gtk_tree_view_column_set_max_width (column, 170); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1022,8 +1021,8 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 90);
-  gtk_tree_view_column_set_max_width (column, 90);
+  /* gtk_tree_view_column_set_min_width (column, 90); */
+  /* gtk_tree_view_column_set_max_width (column, 90); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1032,8 +1031,8 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 35);
-  gtk_tree_view_column_set_max_width (column, 35);
+  /* gtk_tree_view_column_set_min_width (column, 35); */
+  /* gtk_tree_view_column_set_max_width (column, 35); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1042,8 +1041,8 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_min_width (column, 30);
-  gtk_tree_view_column_set_max_width (column, 30);
+  /* gtk_tree_view_column_set_min_width (column, 30); */
+  /* gtk_tree_view_column_set_max_width (column, 30); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1053,8 +1052,8 @@ ventas_win ()
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_min_width (column, 50);
-  gtk_tree_view_column_set_max_width (column, 50);
+  /* gtk_tree_view_column_set_min_width (column, 50); */
+  /* gtk_tree_view_column_set_max_width (column, 50); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1064,8 +1063,8 @@ ventas_win ()
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_min_width (column, 70);
-  gtk_tree_view_column_set_max_width (column, 70);
+  /* gtk_tree_view_column_set_min_width (column, 70); */
+  /* gtk_tree_view_column_set_max_width (column, 70); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -1075,8 +1074,8 @@ ventas_win ()
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_min_width (column, 70);
-  gtk_tree_view_column_set_max_width (column, 70);
+  /* gtk_tree_view_column_set_min_width (column, 70); */
+  /* gtk_tree_view_column_set_max_width (column, 70); */
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   if (venta->header != NULL)
