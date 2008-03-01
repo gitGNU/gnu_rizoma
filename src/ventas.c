@@ -1352,7 +1352,7 @@ EliminarProducto (GtkButton *button, gpointer data)
         g_strdup_printf ("<span size=\"40000\">%d</span>", CalcularTotal ()));
       */
 
-      //      gtk_entry_set_text (GTK_ENTRY (venta->discount_entry), "0");
+      //      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0");
       //      Descuento ();
     }
 }
@@ -1508,7 +1508,7 @@ Vender (GtkButton *button, gpointer data)
     }
 
   if (tipo_documento != VENTA)
-    discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
+    discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))));
 
   switch (tipo_documento)
     {
@@ -1879,14 +1879,14 @@ TipoVenta (GtkWidget *widget, gpointer data)
   /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
   /*     gtk_widget_show (label); */
 
-  /*     venta->discount_entry = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (venta->discount_entry, 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->discount_entry, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->discount_entry); */
+  /*     gtk_builder_get_object (builder, "discount_entry") = gtk_entry_new (); */
+  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "discount_entry"), 100, -1); */
+  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "discount_entry"), FALSE, FALSE, 3); */
+  /*     gtk_widget_show (gtk_builder_get_object (builder, "discount_entry")); */
 
-  /*     gtk_entry_set_text (GTK_ENTRY (venta->discount_entry), "0"); */
+  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0"); */
 
-  /*     g_signal_connect (G_OBJECT (venta->discount_entry), "activate", */
+  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
   /*       G_CALLBACK (Descuento), (gpointer) FALSE); */
   /*   } */
   /* else if (tipo_documento == GUIA) */
@@ -2032,14 +2032,14 @@ TipoVenta (GtkWidget *widget, gpointer data)
   /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
   /*     gtk_widget_show (label); */
 
-  /*     venta->discount_entry = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (venta->discount_entry, 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->discount_entry, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->discount_entry); */
+  /*     gtk_builder_get_object (builder, "discount_entry") = gtk_entry_new (); */
+  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "discount_entry"), 100, -1); */
+  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "discount_entry"), FALSE, FALSE, 3); */
+  /*     gtk_widget_show (gtk_builder_get_object (builder, "discount_entry")); */
 
-  /*     gtk_entry_set_text (GTK_ENTRY (venta->discount_entry), "0"); */
+  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0"); */
 
-  /*     g_signal_connect (G_OBJECT (venta->discount_entry), "activate", */
+  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
   /*       G_CALLBACK (Descuento), (gpointer) FALSE); */
   /*   } */
   /* else if (tipo_documento == VENTA) */
@@ -2066,19 +2066,19 @@ TipoVenta (GtkWidget *widget, gpointer data)
   /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
   /*     gtk_widget_show (hbox); */
 
-  /*     venta->sencillo = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (venta->sencillo, 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->sencillo, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->sencillo); */
+  /*     gtk_builder_get_object (builder, "sencillo_entry") = gtk_entry_new (); */
+  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "sencillo_entry"), 100, -1); */
+  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "sencillo_entry"), FALSE, FALSE, 3); */
+  /*     gtk_widget_show (gtk_builder_get_object (builder, "sencillo_entry")); */
 
-  /*     gtk_entry_set_text (GTK_ENTRY (venta->sencillo), "0"); */
+  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), "0"); */
 
   /*     if (tipo_documento != FACTURA) */
-  /*       gtk_window_set_focus (GTK_WINDOW (venta->window), venta->sencillo); */
+  /*       gtk_window_set_focus (GTK_WINDOW (venta->window), gtk_builder_get_object (builder, "sencillo_entry")); */
 
-  /*     gtk_editable_select_region (GTK_EDITABLE (venta->sencillo), 0, -1); */
+  /*     gtk_editable_select_region (GTK_EDITABLE (gtk_builder_get_object (builder, "sencillo_entry")), 0, -1); */
 
-  /*     g_signal_connect (G_OBJECT (venta->sencillo), "activate", */
+  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "sencillo_entry")), "activate", */
   /*       G_CALLBACK (Descuento), (gpointer) TRUE); */
 
   /*     hbox = gtk_hbox_new (FALSE, 3); */
@@ -2093,14 +2093,14 @@ TipoVenta (GtkWidget *widget, gpointer data)
   /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
   /*     gtk_widget_show (hbox); */
 
-  /*     venta->discount_entry = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (venta->discount_entry, 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->discount_entry, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->discount_entry); */
+  /*     gtk_builder_get_object (builder, "discount_entry") = gtk_entry_new (); */
+  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "discount_entry"), 100, -1); */
+  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "discount_entry"), FALSE, FALSE, 3); */
+  /*     gtk_widget_show (gtk_builder_get_object (builder, "discount_entry")); */
 
-  /*     gtk_entry_set_text (GTK_ENTRY (venta->discount_entry), "0"); */
+  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0"); */
 
-  /*     g_signal_connect (G_OBJECT (venta->discount_entry), "activate", */
+  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
   /*       G_CALLBACK (Descuento), (gpointer) FALSE); */
   /*   } */
 
@@ -2142,11 +2142,11 @@ TipoVenta (GtkWidget *widget, gpointer data)
   /*     gtk_widget_show (venta->entry_paga); */
 
   /*     if (tipo_documento == SIMPLE) */
-  /*       g_signal_connect (G_OBJECT (venta->discount_entry), "activate", */
+  /*       g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
   /*         G_CALLBACK (SendCursorTo), (gpointer)venta->entry_paga); */
 
   /*     if (tipo_documento != FACTURA && tipo_documento != GUIA && tipo_documento != VENTA) */
-  /*       g_signal_connect (G_OBJECT (venta->sencillo), "activate", */
+  /*       g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "sencillo_entry")), "activate", */
   /*         G_CALLBACK (SendCursorTo), (gpointer)venta->entry_paga); */
 
   /*     if (tipo_documento == FACTURA || tipo_documento == GUIA) */
@@ -2234,10 +2234,8 @@ CalcularVuelto (void)
     {
       if (paga_con < total)
         {
-          //  gtk_label_set_text (GTK_LABEL (venta->label_vuelto), "No es dinero suficiente");
           gtk_label_set_markup (GTK_LABEL (venta->label_vuelto),
                                 "<span size=\"30000\">Monto Insuficiente</span>");
-
           gtk_widget_set_sensitive (venta->sell_button, FALSE);
 
           return;
@@ -3038,13 +3036,13 @@ Descuento (GtkWidget *widget, gpointer data)
 {
   gboolean money_discount = (gboolean) data;
   gint money;
-  gdouble discount = strtod (CUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)))), (char **)NULL);
+  gdouble discount = strtod (CUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))))), (char **)NULL);
   gint total;
   gint plata;
   gdouble porcentaje;
 
   if (tipo_documento != FACTURA && tipo_documento != GUIA)
-    money = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->sencillo))));
+    money = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
 
   CalcularVentas (venta->header);
 
@@ -3054,7 +3052,7 @@ Descuento (GtkWidget *widget, gpointer data)
     {
       porcentaje = (gdouble)(100 * money) / total;
 
-      gtk_entry_set_text (GTK_ENTRY (venta->discount_entry),
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")),
                           g_strdup_printf ("%.2f", porcentaje));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
@@ -3066,7 +3064,7 @@ Descuento (GtkWidget *widget, gpointer data)
       plata = lround ((gdouble)(total * discount) / 100);
 
       if (tipo_documento != FACTURA)
-        gtk_entry_set_text (GTK_ENTRY (venta->sencillo),
+        gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")),
                             g_strdup_printf ("%d", plata));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
@@ -3423,7 +3421,7 @@ AddDataEmisor (GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *colu
         }
 
       if (tipo_documento == FACTURA || tipo_documento == GUIA)
-        gtk_window_set_focus (GTK_WINDOW (venta->window), venta->discount_entry);
+        gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "discount_entry")));
     }
 }
 

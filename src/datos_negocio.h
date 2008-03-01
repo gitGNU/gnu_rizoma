@@ -25,4 +25,6 @@
 
 void datos_box (GtkWidget *main_box);
 
-#endif 
+int get_datos (void);
+
+#endif

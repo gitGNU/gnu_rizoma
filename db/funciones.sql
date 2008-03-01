@@ -37,7 +37,7 @@ query := 'SELECT id FROM devolucion WHERE barcode_product='
 	|| quote_literal(prod)
 	|| ' AND devuelto=FALSE';
 
-FOR list IN EXECUTE query LOOPu
+FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
 END LOOP;
 
@@ -282,7 +282,8 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT cantidad_mayor integer,
 		OUT mayorista boolean,
 		OUT unidades_merma double precision,
-		OUT stock_day double precision)
+		OUT stock_day double precision,
+                OUT total_vendido double precision)
 RETURNS SETOF record AS $$
 declare
 	days double precision;
@@ -301,7 +302,7 @@ END IF;
 
 query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (stock / (vendidos / $S$
 || days
-|| $S$)) AS stock_day, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode), select_merma( producto.barcode ) as unidades_merma FROM producto WHERE $S$;
+|| $S$)) AS stock_day, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido, select_merma( producto.barcode ) as unidades_merma FROM producto WHERE $S$;
 
 IF codigo_barras != 0 THEN
 query := query || $S$ barcode=$S$ || codigo_barras;
@@ -325,6 +326,7 @@ merma_unid := datos.merma_unid;
 contrib_agregada := datos.contrib_agregada;
 unidades_merma := datos.unidades_merma;
 mayorista := datos.mayorista;
+total_vendido := datos.total_vendido;
 RETURN NEXT;
 END LOOP;
 RETURN;

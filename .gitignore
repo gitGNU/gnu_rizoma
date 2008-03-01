@@ -1,4 +1,6 @@
 *.[ao]
+*~
+cscope*
 configure
 Makefile.in
 config.log

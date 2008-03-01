@@ -26,6 +26,7 @@
 #include"tipos.h"
 #include"postgres-functions.h"
 #include"errors.h"
+#include"datos_negocio.h"
 
 GtkWidget *razon_red;
 GtkWidget *razon_social;
@@ -58,18 +59,19 @@ GtkWidget *at_red;
 GtkWidget *at;
 char *at_value = NULL;
 
+void
 refresh_labels (void)
 {
   /* We get all the new data */
-  
+
   get_datos ();
-  
+
   /* We refresh all labesl */
 
   if (razon_social_value != NULL)
     gtk_label_set (GTK_LABEL (razon_red), "*Razón Social");
   else
-    gtk_label_set_markup (GTK_LABEL (razon_red), 
+    gtk_label_set_markup (GTK_LABEL (razon_red),
 			  "<span color=\"red\">*Razón Social</span>");
 
   if (rut_value != NULL)
@@ -111,13 +113,13 @@ refresh_labels (void)
   else
     gtk_label_set_markup (GTK_LABEL (fax_red),
 			  "<span color=\"red\">Fax</span>");
-  
+
   if (giro_value != NULL)
     gtk_label_set (GTK_LABEL (giro_red), "*Giro");
   else
     gtk_label_set_markup (GTK_LABEL (giro_red),
 			  "<span color=\"red\">*Giro</span>");
-  
+
   if (at_value != NULL)
     gtk_label_set (GTK_LABEL (at_red), "A.T.");
   else
@@ -129,7 +131,7 @@ void
 SaveDatosNegocio (GtkWidget *widget, gpointer data)
 {
   PGresult *res;
-  
+
   razon_social_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (razon_social)));
   rut_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (rut)));
   nombre_fantasia_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (nombre_fantasia)));
@@ -140,21 +142,21 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
   fax_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (fax)));
   giro_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (giro)));
   at_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (at)));
-  
+
   res = EjecutarSQL ("SELECT * FROM negocio");
-  
+
   if (PQntuples (res) == 0)
     {
-      res = EjecutarSQL 
-	(g_strdup_printf 
+      res = EjecutarSQL
+	(g_strdup_printf
 	 ("INSERT INTO negocio (razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at) "
 	  "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", razon_social_value, rut_value, nombre_fantasia_value,
 	  fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
     }
   else
     {
-      res = EjecutarSQL 
-	(g_strdup_printf 
+      res = EjecutarSQL
+	(g_strdup_printf
 	 ("UPDATE negocio SET razon_social='%s', rut='%s', nombre='%s', fono='%s', fax='%s', "
 	  "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, rut_value, nombre_fantasia_value,
 	  fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
@@ -172,7 +174,7 @@ int
 get_datos (void)
 {
   PGresult *res;
-  
+
   res = EjecutarSQL ("SELECT razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at "
 		     "FROM negocio");
 
@@ -180,7 +182,7 @@ get_datos (void)
     return -1;
 
   if (strcmp (PQgetvalue (res, 0, 0), "") != 0)
-    razon_social_value = PQgetvalue (res, 0, 0);  
+    razon_social_value = PQgetvalue (res, 0, 0);
   else
     razon_social_value = NULL;
   if (strcmp (PQgetvalue (res, 0, 1), "") != 0)
@@ -204,7 +206,7 @@ get_datos (void)
   else
     direccion_value = NULL;
   if (strcmp (PQgetvalue (res, 0, 6), "") != 0)
-    comuna_value = PQgetvalue (res, 0, 6);  
+    comuna_value = PQgetvalue (res, 0, 6);
   else
     comuna_value = NULL;
   if (strcmp (PQgetvalue (res, 0, 7), "") != 0)
@@ -230,7 +232,6 @@ datos_box (GtkWidget *main_box)
   GtkWidget *hbox;
   GtkWidget *box;
   GtkWidget *frame;
-  GtkWidget *label;
   GtkWidget *button;
 
   get_datos ();
@@ -242,11 +243,11 @@ datos_box (GtkWidget *main_box)
   frame = gtk_frame_new ("Datos del Negocio");
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
   gtk_widget_show (frame);
-  
+
   vbox = gtk_vbox_new (FALSE, 3);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
   gtk_widget_show (vbox);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
@@ -256,7 +257,7 @@ datos_box (GtkWidget *main_box)
   gtk_widget_show (box);
   razon_red = gtk_label_new ("*Razón Social");
   gtk_widget_show (razon_red);
-  gtk_box_pack_start (GTK_BOX (box), razon_red, FALSE, FALSE, 0); 
+  gtk_box_pack_start (GTK_BOX (box), razon_red, FALSE, FALSE, 0);
   razon_social = gtk_entry_new_with_max_length (200);
 
   if (razon_social_value != NULL)
@@ -265,13 +266,13 @@ datos_box (GtkWidget *main_box)
       //      g_free (razon_social_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (razon_red), 
+    gtk_label_set_markup (GTK_LABEL (razon_red),
 			  "<span color=\"red\">*Razón Social</span>");
 
   gtk_widget_set_size_request (razon_social, 150, -1);
   gtk_box_pack_start (GTK_BOX (box), razon_social, FALSE, FALSE, 0);
   gtk_widget_show (razon_social);
-  
+
   box = gtk_vbox_new (TRUE, 2);
   gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
   gtk_widget_show (box);
@@ -333,7 +334,7 @@ datos_box (GtkWidget *main_box)
   else
     gtk_label_set_markup (GTK_LABEL (direccion_red),
 			  "<span color=\"red\">*Dirección</span>");
-  
+
   gtk_widget_set_size_request (direccion, 150, -1);
   gtk_box_pack_start (GTK_BOX (box), direccion, FALSE, FALSE, 0);
   gtk_widget_show (direccion);
@@ -395,7 +396,7 @@ datos_box (GtkWidget *main_box)
   else
     gtk_label_set_markup (GTK_LABEL (fono_red),
 			  "<span color=\"red\">*Fono</span>");
-  
+
   gtk_widget_set_size_request (fono, 150, -1);
   gtk_box_pack_start (GTK_BOX (box), fono, FALSE, FALSE, 0);
   gtk_widget_show (fono);
@@ -424,7 +425,7 @@ datos_box (GtkWidget *main_box)
   gtk_widget_set_size_request (fax, 150, -1);
   gtk_box_pack_start (GTK_BOX (box), fax, FALSE, FALSE, 0);
   gtk_widget_show (fax);
-  
+
   box = gtk_vbox_new (TRUE, 2);
   gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
   gtk_widget_show (box);
