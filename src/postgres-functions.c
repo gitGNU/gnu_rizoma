@@ -262,7 +262,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   SaveProductsSell (venta->header, venta_id);
 
-  if (vale_dir != "" || vale_dir != NULL)
+  if (g_str_equal(vale_dir, NULL) || g_str_equal(vale_dir, ""))
     {
       PrintVale (venta->header, venta_id, total);
     }
@@ -1215,10 +1215,15 @@ AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gc
 {
   PGresult *res;
   gchar *q;
+  gchar **aux;
 
-  q = g_strdup_printf ("INSERT INTO proveedor VALUES (DEFAULT, '%s', '%s', '%s', "
-		       "'%s', '%s', %d, '%s', '%s', '%s', '%s')", nombre, rut, direccion, ciudad,
-		       comuna, atoi (telefono), email, web, contacto, giro);
+  aux = g_strsplit(rut, "-", 0);
+
+  q = g_strdup_printf ("INSERT INTO proveedor(rut, dv, nombre, direccion, ciudad,"
+		       "comuna, telefono, email, web, contacto, giro) VALUES "
+		       "(%s, '%s', '%s', '%s', '%s', '%s', %s, '%s', '%s', '%s', '%s')",
+		       aux[0], aux[1], nombre, direccion, ciudad,
+		       comuna, telefono, email, web, contacto, giro);
   res = EjecutarSQL (q);
   g_free (q);
 

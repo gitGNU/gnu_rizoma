@@ -86,7 +86,8 @@ CanjearProducto (GtkWidget *widget, gpointer data)
 
       gtk_widget_destroy (gtk_widget_get_toplevel (widget));
 
-      gtk_window_set_focus (GTK_WINDOW (main_window), gtk_builder_get_object (builder, "barcode_entry"));
+      gtk_window_set_focus (GTK_WINDOW (main_window),
+			    GTK_WIDGET(gtk_builder_get_object (builder, "barcode_entry")));
     }
   else
     {
