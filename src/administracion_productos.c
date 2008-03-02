@@ -1761,8 +1761,8 @@ BuscarProductosParaListar (void)
     {
 	gtk_list_store_append (ingreso->store, &iter);
 	gtk_list_store_set (ingreso->store, &iter,
-			    0, PQvaluebycol (res, i, "barcode"),
-			    1, PQvaluebycol (res, i, "codigo_corto"),
+			    0, PQvaluebycol (res, i, "codigo_corto"),
+			    1, PQvaluebycol (res, i, "barcode"),
 			    2, PQvaluebycol (res, i, "marca"),
 			    3, PQvaluebycol (res, i, "descripcion"),
 			    4, atoi (PQvaluebycol (res, i, "contenido")),
