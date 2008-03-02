@@ -1480,7 +1480,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
     if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
 	gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
-			    0, &barcode,
+			    1, &barcode,
 			    -1);
 
 	q = g_strdup_printf ("SELECT * FROM informacion_producto( %s )", barcode);
@@ -1515,82 +1515,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 	    ici_total = (gdouble) contrib_agreg / InversionAgregada (barcode);
 	else
 	    ici_total = 0;
-
-	valor_stock = fifo * stock;
-
-	precio_mayorista = atoi (PQgetvalue (res, 0, 18));
-
-	cantidad_mayorista = atoi (PQgetvalue (res, 0, 19));
-
-	gtk_list_store_set (GTK_LIST_STORE (ingreso->store), &iter,
-			    6, atoi (PQgetvalue (res, 0, 5)),
-			    7, atoi (PQgetvalue (res, 0, 6)),
-			    8, (stock <= atoi (PQgetvalue (res, 0, 8)) &&
-				atoi (PQgetvalue (res, 0, 8)) != 0) ? "Red" : "Black",
-			    -1);
-
-
-	gtk_label_set_markup (GTK_LABEL (barcode_entry),
-			      g_strdup_printf ("<b>%s</b>", barcode));
-
-	gtk_label_set_markup (GTK_LABEL (ingreso->codigo_entry),
-			      g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 0)));
-	gtk_label_set_markup (GTK_LABEL (ingreso->product_entry),
-			      g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 1)));
-	gtk_label_set_markup (GTK_LABEL (ingreso->marca_entry),
-			      g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 2)));
-	gtk_label_set_markup (GTK_LABEL (ingreso->cantidad_entry),
-			      g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 3)));
-	gtk_label_set_markup (GTK_LABEL (ingreso->unidad_entry),
-			      g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 4)));
-
-	gtk_label_set_markup (GTK_LABEL (total_unidades_vendidas),
-			      g_strdup_printf ("<b>%d</b>", vendidos));
-
-	gtk_label_set_markup (GTK_LABEL (ingreso->stock_entry),
-			      g_strdup_printf ("<b>%.2f</b>", stock));
-
-	gtk_label_set_markup (GTK_LABEL (ventas_dias),
-			      g_strdup_printf ("<b>%.2f</b>", strtod (PUT (PQgetvalue (res, 0, 12)), (char **)NULL)));
-
-	gtk_label_set_markup (GTK_LABEL (stock_dias),
-			      g_strdup_printf ("<b>%.2f</b>", GetDayToSell (barcode)));
-
-	gtk_entry_set_text (GTK_ENTRY (stock_min), PQgetvalue (res, 0, 8));
-
-	gtk_label_set_markup (GTK_LABEL (costo_promedio),
-			      g_strdup_printf ("<b>%d</b>", fifo));
-
-	gtk_label_set_markup (GTK_LABEL (impuesto_adic),
-			      g_strdup_printf ("<b>%s</b>", GetLabelImpuesto (barcode)));
-	gtk_misc_set_alignment (GTK_MISC (impuesto_adic), 0.5, 0.5);
-
-	/*
-	  gtk_label_set_markup (GTK_LABEL (familia),
-	  g_strdup_printf ("<b>%s</b>", GetLabelFamilia (barcode)));
-	*/
-	gtk_label_set_markup (GTK_LABEL (perecible),
-			      g_strdup_printf ("<b>%s</b>", GetPerecible (barcode)));
-
-	gtk_entry_set_text (GTK_ENTRY (margen_entry),
-			    g_strdup_printf ("%d", margen));
-
-	gtk_label_set_markup (GTK_LABEL (contrib_unit),
-			      g_strdup_printf ("<b>$%d</b>", contri_unit));
-
-	gtk_entry_set_text (GTK_ENTRY (precio_venta), PQgetvalue (res, 0, 6));
-
-	gtk_label_set_markup (GTK_LABEL (stock_valor),
-			      g_strdup_printf ("<b>$%d</b>", valor_stock));
-
-	gtk_label_set_markup (GTK_LABEL (mermita),
-			      g_strdup_printf ("<b>%.2f</b>", merma));
-
-	gtk_label_set_markup (GTK_LABEL (mermata),
-			      g_strdup_printf ("<b>%.2f %%</b>", mermaporc));
-
-	gtk_label_set_markup (GTK_LABEL (ici),
-			      g_strdup_printf ("<b>%.2f%%</b>", ici_total));
 
 	valor_stock = fifo * stock;
 
@@ -1641,10 +1565,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 			      g_strdup_printf ("<b>%s</b>", GetLabelImpuesto (barcode)));
 	gtk_misc_set_alignment (GTK_MISC (impuesto_adic), 0.5, 0.5);
 
-	/*
-	  gtk_label_set_markup (GTK_LABEL (familia),
-	  g_strdup_printf ("<b>%s</b>", GetLabelFamilia (barcode)));
-	*/
 	gtk_label_set_markup (GTK_LABEL (perecible),
 			      g_strdup_printf ("<b>%s</b>", GetPerecible (barcode)));
 
@@ -1675,7 +1595,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 	    gtk_label_set_markup (GTK_LABEL (total_vendido), "");
 	else
 	    gtk_label_set_markup (GTK_LABEL (total_vendido),
-				  g_strdup_printf ("<b>$%s</b>", PQvaluebycol (res, 0, 14)));
+				  g_strdup_printf ("<b>$%s</b>", PQvaluebycol (res, 0, "vendidos")));
 
 	gtk_label_set_markup (GTK_LABEL (contri_agr),
 			      g_strdup_printf ("<b>$%d</b>", contrib_agreg));
