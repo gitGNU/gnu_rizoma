@@ -28,3 +28,4 @@ src/.deps
 src/Makefile
 src/rizoma-config
 src/rizoma
+*.out
