@@ -1653,7 +1653,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
 	for (i = 0; i < tuples; i++)
 	    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_proveedores),
-				       PQvaluebycol (res, i, "codigo_corto"));
+				       PQvaluebycol (res, i, "nombre"));
 
 	gtk_combo_box_set_active (GTK_COMBO_BOX (combo_proveedores), 0);
 
