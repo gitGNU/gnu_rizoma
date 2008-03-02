@@ -270,11 +270,10 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT costo_promedio integer,
 		OUT stock_min double precision,
 		OUT margen_promedio double precision,
-		OUT merma_unid double precision,
 		OUT contrib_agregada integer,
-		OUT ventas_dia integer,
+		OUT ventas_dia double precision,
 		OUT vendidos double precision,
-		OUT venta_neta integer,
+		OUT venta_neta double precision,
 		OUT canje boolean,
 		OUT stock_pro double precision,
 		OUT tasa_canje double precision,
@@ -290,41 +289,57 @@ declare
 	query varchar(500);
 BEGIN
 
-SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=t1.id_compra)) INTO days
-FROM compra_detalle AS t1, producto AS t2, compra AS t3 WHERE t2.barcode= codigo_barras AND t1.barcode_product=t2.barcode
-AND t3.id=t1.id_compra ORDER BY t3.fecha ASC;
+SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
+       FROM compra_detalle, producto, compra 
+       WHERE producto.barcode= codigo_barras AND compra_detalle.barcode_product=producto.barcode
+       AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
 
 IF NOT FOUND THEN
    days := 1;
 END IF;
 
 
-query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (stock / (vendidos / $S$
-|| days
-|| $S$)) AS stock_day, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode), select_merma( producto.barcode ) as unidades_merma FROM producto WHERE $S$;
+
+query := $S$ SELECT *,
+      	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad)))
+		    	     FROM venta_detalle 
+		    	    WHERE barcode=producto.barcode) as contrib_agregada, 
+		    (stock / (vendidos / $S$ || days || $S$)) AS stock_day, 
+		    (SELECT SUM ((cantidad * precio) - (iva + otros)) 
+		    	    FROM venta_detalle 
+			    WHERE barcode=producto.barcode) as venta_neta, 
+		    select_merma( producto.barcode ) as unidades_merma 
+	    FROM producto WHERE $S$;
 
 IF codigo_barras != 0 THEN
-query := query || $S$ barcode=$S$ || codigo_barras;
+   query := query || $S$ barcode=$S$ || codigo_barras;
 ELSE
-query := query || $S$ codigo_corto='$S$ || in_codigo_corto ||$S$'$S$;
+   query := query || $S$ codigo_corto=$S$ || quote_literal(in_codigo_corto);
 END IF;
 
 FOR datos IN EXECUTE query LOOP
-
-codigo_corto := datos.codigo_corto;
-descripcion := datos.descripcion;
-marca := datos.marca;
-contenido := datos.contenido;
-unidad := datos.unidad;
-stock := datos.stock;
-precio := datos.precio;
-costo_promedio := datos.costo_promedio;
-stock_min := datos.stock_min;
-margen_promedio := datos.margen_promedio;
-merma_unid := datos.merma_unid;
-contrib_agregada := datos.contrib_agregada;
-unidades_merma := datos.unidades_merma;
-mayorista := datos.mayorista;
+    codigo_corto := datos.codigo_corto;
+    barcode := datos.barcode;
+    descripcion := datos.descripcion;
+    marca := datos.marca;
+    contenido := datos.contenido;
+    unidad := datos.unidad;
+    stock := datos.stock;
+    precio := datos.precio;
+    costo_promedio := datos.costo_promedio;
+    stock_min := datos.stock_min;
+    margen_promedio := datos.margen_promedio;
+    contrib_agregada := round(datos.contrib_agregada);
+    vendidos := datos.vendidos;
+    canje := datos.canje;
+    stock_pro := datos.stock_pro;
+    tasa_canje := datos.tasa_canje;
+    precio_mayor := datos.precio_mayor;
+    cantidad_mayor := datos.cantidad_mayor;
+    unidades_merma := datos.unidades_merma;
+    ventas_dia := datos.stock_day; -- 
+    venta_neta := datos.venta_neta; -- 
+    mayorista := datos.mayorista;
 RETURN NEXT;
 END LOOP;
 RETURN;
@@ -344,7 +359,7 @@ BEGIN
   IF aux = 0 THEN
      unidades_merma := 0;
   ELSE
-     unidades_merma := (SELECT unidades FROM merma WHERE barcode = barcode_in);
+     unidades_merma := (SELECT sum(unidades) FROM merma WHERE barcode = barcode_in);
   END IF;
 
 RETURN;

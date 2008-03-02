@@ -1473,7 +1473,8 @@ FillFields(GtkTreeSelection *selection, gpointer data)
     gint contrib_agreg;
     gint contrib_proyect;
     gint valor_stock;
-    gint margen, fifo;
+    gint fifo;
+    gdouble margen;
     gint cantidad_mayorista, precio_mayorista;
     gchar *q;
 
@@ -1483,15 +1484,15 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 			    1, &barcode,
 			    -1);
 
-	q = g_strdup_printf ("SELECT * FROM informacion_producto( %s )", barcode);
+	q = g_strdup_printf ("SELECT * FROM informacion_producto(%s,'')", barcode);
 	res = EjecutarSQL(q);
 	g_free(q);
 
 	stock = strtod (PUT (PQvaluebycol( res, 0, "stock")), (char **)NULL);
 
-	margen = atoi (PQvaluebycol (res, 0, "margen_promedio"));
+	margen = strtod (PUT(PQvaluebycol (res, 0, "margen_promedio")), (char **)NULL);
 
-	merma = (gdouble) atoi (PQvaluebycol (res, 0, "merma_unid"));
+	merma = strtod (PUT(PQvaluebycol (res, 0, "unidades_merma")), (char **)NULL);
 
 	fifo = atoi (PQvaluebycol (res, 0, "costo_promedio"));
 
@@ -1569,7 +1570,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 			      g_strdup_printf ("<b>%s</b>", GetPerecible (barcode)));
 
 	gtk_entry_set_text (GTK_ENTRY (margen_entry),
-			    g_strdup_printf ("%d", margen));
+			    g_strdup_printf ("%g", margen));
 
 	gtk_label_set_markup (GTK_LABEL (contrib_unit),
 			      g_strdup_printf ("<b>$%d</b>", contri_unit));
