@@ -1217,19 +1217,44 @@ end; ' language plpgsql;
 
 -- busca proveedores
 -- proveedor.c:71
-create or replace function buscar_proveedor(varchar(100))
-returns setof record as '
+create or replace function buscar_proveedor(
+       in pattern varchar(100),
+       out rut integer,
+       out dv varchar(1),
+       out nombre varchar(100),
+       out direccion varchar(100),
+       out ciudad varchar(100),
+       out comuna varchar(100),
+       out telefono integer,
+       out email varchar(300),
+       out web varchar(300),
+       out contacto varchar(100),
+       out giro varchar(100))
+returns setof record as $$
 declare
 	q text;
 	l record;
 begin
-q := ''SELECT * FROM proveedores WHERE lower(nombre) LIKE lower('' || quote_literal($1) || '') ''
-	|| ''OR lower(rut) LIKE lower('' || quote_literal($1) || '')'';
+q := 'SELECT rut,dv,nombre,direccion,ciudad,comuna,telefono,email,web,contacto,giro 
+     	     FROM proveedor WHERE lower(nombre) LIKE lower(' 
+	     || quote_literal($1) || ') '
+	     || 'OR lower(rut) LIKE lower(' || quote_literal($1) || ')';
 for l in execute q loop
-	return next l;
+    rut = l.rut;
+    dv = l.dv;
+    nombre = l.nombre;
+    direccion = l.direccion;
+    ciudad = l.ciudad;
+    comuna = l.comuna;
+    telefono = l.telefono;
+    email = l.email;
+    web = l.web;
+    contacto = l.contacto;
+    giro = l.giro;
+    return next;
 end loop;
 return;
-end; ' language plpgsql;
+end; $$ language plpgsql;
 
 -- retorna todos los proveedores
 -- proveedores.c:98
