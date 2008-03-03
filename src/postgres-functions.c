@@ -2093,13 +2093,17 @@ SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *c
 {
   PGresult *res;
   gchar *q;
+  gchar **aux;
+
+  aux = g_strsplit(rut, "-", 0);
 
   q = g_strdup_printf ("UPDATE proveedor SET nombre='%s', direccion='%s', ciudad='%s', "
 		      "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s'"
-		      " WHERE rut='%s'", razon, direccion, ciudad,
-		       comuna, fono, email, web, contacto, giro, rut);
+		      " WHERE rut=%s", razon, direccion, ciudad,
+		       comuna, fono, email, web, contacto, giro, aux[0]);
   res = EjecutarSQL (q);
   g_free (q);
+  g_strfreev(aux);
 
   return 0;
 }

@@ -129,38 +129,45 @@ LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
   PGresult *res;
   GtkTreeIter iter;
   gchar *rut_proveedor;
+  gchar **aux, *q;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
 
   gtk_tree_model_get (GTK_TREE_MODEL (proveedores_store), &iter,
-		      1, &rut_proveedor,
+		      0, &rut_proveedor,
 		      -1);
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut_proveedor));
+  aux = g_strsplit(rut_proveedor, "-", 0);
+  q = g_strdup_printf ("SELECT * FROM select_proveedor(%s)", aux[0]);
+  res = EjecutarSQL (q);
+  g_free (q);
+  g_strfreev(aux);
 
   if (res == NULL || PQntuples (res) == 0)
     return;
 
-  gtk_entry_set_text (GTK_ENTRY (razon), PQgetvalue (res, 0, 1));
+  gtk_entry_set_text (GTK_ENTRY (razon), PQvaluebycol (res, 0, "nombre"));
 
-  gtk_label_set_text (GTK_LABEL (rut), PQgetvalue (res, 0, 2));
+  q = g_strconcat(PQvaluebycol (res, 0, "rut"), "-", PQvaluebycol(res, 0, "dv"), NULL);
+  gtk_label_set_text (GTK_LABEL (rut), q);
+  g_free (q);
 
-  gtk_entry_set_text (GTK_ENTRY (direccion), PQgetvalue (res, 0, 3));
+  gtk_entry_set_text (GTK_ENTRY (direccion), PQvaluebycol (res, 0, "direccion"));
 
-  gtk_entry_set_text (GTK_ENTRY (ciudad), PQgetvalue (res, 0, 4));
+  gtk_entry_set_text (GTK_ENTRY (ciudad), PQvaluebycol (res, 0, "ciudad"));
 
-  gtk_entry_set_text (GTK_ENTRY (comuna), PQgetvalue (res, 0, 5));
+  gtk_entry_set_text (GTK_ENTRY (comuna), PQvaluebycol (res, 0, "comuna"));
 
-  gtk_entry_set_text (GTK_ENTRY (fono), PQgetvalue (res, 0, 6));
+  gtk_entry_set_text (GTK_ENTRY (fono), PQvaluebycol (res, 0, "telefono"));
 
-  gtk_entry_set_text (GTK_ENTRY (web), PQgetvalue (res, 0, 8));
+  gtk_entry_set_text (GTK_ENTRY (web), PQvaluebycol (res, 0, "web"));
 
-  gtk_entry_set_text (GTK_ENTRY (contacto), PQgetvalue (res, 0, 9));
+  gtk_entry_set_text (GTK_ENTRY (contacto), PQvaluebycol (res, 0, "contacto"));
 
-  gtk_entry_set_text (GTK_ENTRY (email), PQgetvalue (res, 0, 7));
+  gtk_entry_set_text (GTK_ENTRY (email), PQvaluebycol (res, 0, "email"));
 
-  gtk_entry_set_text (GTK_ENTRY (giro), PQgetvalue (res, 0, 10));
+  gtk_entry_set_text (GTK_ENTRY (giro), PQvaluebycol (res, 0, "giro"));
 
 }
 
