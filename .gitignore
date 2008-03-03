@@ -31,3 +31,4 @@ src/Makefile
 src/rizoma-config
 src/rizoma
 src/rizoma-ventas
+src/rizoma-admin
