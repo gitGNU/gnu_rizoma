@@ -1179,10 +1179,7 @@ SaveProductsSell (Productos *products, gint id_venta)
 
       res = EjecutarSQL
         (g_strdup_printf
-         ("INSERT INTO venta_detalle VALUES(DEFAULT, %d, %s, '%s', '%s', %d, '%s',"
-          "%s, %d, %d, %d, %d)", id_venta,
-          products->product->barcode, SPE(products->product->producto), SPE(products->product->marca),
-          products->product->contenido, products->product->unidad, cantidad, precio,
+         ("INSERT INTO venta_detalle VALUES(DEFAULT, %d, %s, %s, %d, %d, %ld, %ld)", id_venta, products->product->barcode, cantidad, precio,
           products->product->fifo, lround (iva), lround (otros)));
 
       products = products->next;
@@ -1504,9 +1501,9 @@ GetNeto (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT  precio FROM compra_detalle WHERE "
+  res = EjecutarSQL (g_strdup_printf ("SELECT precio FROM compra_detalle WHERE "
                                       "barcode_product='%s' AND id_compra IN (SELECT id FROM "
-                                      "compras ORDER BY fecha DESC)", barcode));
+                                      "compra ORDER BY fecha DESC)", barcode));
 
   tuples = PQntuples (res);
 
