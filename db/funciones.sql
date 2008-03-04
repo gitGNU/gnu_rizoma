@@ -313,6 +313,7 @@ END IF;
 FOR datos IN EXECUTE query LOOP
 
 codigo_corto := datos.codigo_corto;
+barcode := datos.barcode;
 descripcion := datos.descripcion;
 marca := datos.marca;
 contenido := datos.contenido;
