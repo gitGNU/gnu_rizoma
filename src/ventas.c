@@ -942,8 +942,7 @@ ventas_win ()
 
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui")));
 
-  venta->vendedor = GTK_WIDGET (gtk_builder_get_object (builder, "label_seller_name"));
-  gtk_label_set_markup (GTK_LABEL (venta->vendedor),
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                         g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
@@ -1574,8 +1573,6 @@ Vender (GtkButton *button, gpointer data)
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
-  gtk_widget_set_sensitive (main_window, TRUE);
-
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
   if (monto >= 180 && ticket != -1)
@@ -1585,7 +1582,7 @@ Vender (GtkButton *button, gpointer data)
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
                           g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
 
-  PrintDocument (tipo_documento, rut, monto, ticket, venta->products);
+  //  PrintDocument (tipo_documento, rut, monto, ticket, venta->products);
 
   ListClean ();
 
@@ -3829,12 +3826,9 @@ CancelWindow (GtkWidget *widget, gpointer data)
 void
 CloseWindowChangeSeller (GtkWidget *widget, gpointer data)
 {
-  gtk_widget_destroy (window_seller);
-
-  gtk_widget_set_sensitive (main_window, TRUE);
+  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "window_change_seller")));
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-
 }
 
 void
@@ -3852,7 +3846,7 @@ ChangeSeller (GtkWidget *widget, gpointer data)
       user_data->user = ReturnUsername (id);
       user_data->level = ReturnUserLevel (user_name);
 
-      gtk_label_set_markup (GTK_LABEL (venta->vendedor),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                             g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
 
       CloseWindowChangeSeller (widget, NULL);
@@ -3867,71 +3861,10 @@ ChangeSeller (GtkWidget *widget, gpointer data)
 void
 WindowChangeSeller ()
 {
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *label;
-  GtkWidget *entry;
-  GtkWidget *button;
   GtkWindow *window;
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "window_change_seller"));
   gtk_widget_show_all (GTK_WIDGET (window));
-
-  /*  gtk_widget_set_sensitive (main_window, FALSE);
-
-  window_seller = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window_seller), "Ingresar ID Vendedor");
-  gtk_window_set_position (GTK_WINDOW (window_seller), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_resizable (GTK_WINDOW (window_seller), FALSE);
-  gtk_widget_show (window_seller);
-  gtk_window_present (GTK_WINDOW (window_seller));
-
-  g_signal_connect (G_OBJECT (window_seller), "destroy",
-                    G_CALLBACK (CloseWindowChangeSeller), NULL);
-
-  vbox = gtk_vbox_new (3, FALSE);
-  gtk_container_add (GTK_CONTAINER (window_seller), vbox);
-  gtk_widget_show (vbox);
-
-  hbox = gtk_hbox_new (3, FALSE);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Ingrese el ID de vendedor: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  entry = gtk_entry_new_with_max_length (3);
-  gtk_box_pack_end (GTK_BOX (hbox), entry, FALSE, FALSE, 3);
-  gtk_widget_show (entry);
-
-  gtk_window_set_focus (GTK_WINDOW (window_seller), entry);
-
-  g_signal_connect (G_OBJECT (entry), "changed",
-                    G_CALLBACK (ChangeSeller), (gpointer) entry);
-
-  g_signal_connect (G_OBJECT (entry), "activate",
-                    G_CALLBACK (ChangeSeller), (gpointer) entry);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseWindowChangeSeller), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (ChangeSeller), (gpointer) entry);
-  */
 }
 
 int
