@@ -150,4 +150,8 @@ void PagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 void PagarDocumento (GtkWidget *widget, gpointer data);
 
+void ClearPagosData (void);
+
+void ClosePagarDocumentoWin (GtkWidget *widget, gpointer data);
+
 #endif
