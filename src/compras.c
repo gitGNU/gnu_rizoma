@@ -34,7 +34,6 @@
 #include"main.h"
 #include"ventas.h"
 #include"credito.h"
-#include"ventas_stats.h"
 #include"administracion_productos.h"
 #include"postgres-functions.h"
 #include"manejo_productos.h"

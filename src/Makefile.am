@@ -26,7 +26,6 @@ postgres-functions.c postgres-functions.h \
 errors.c errors.h \
 manejo_productos.c manejo_productos.h \
 boleta.c boleta.h \
-ventas_stats.c ventas_stats.h \
 credito.c credito.h \
 encriptar.c encriptar.h \
 usuario.c usuario.h \

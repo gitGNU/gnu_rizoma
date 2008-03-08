@@ -26,7 +26,6 @@
 
 #include"postgres-functions.h"
 
-#include"ventas_stats.h"
 #include"errors.h"
 #include"caja.h"
 #include"utils.h"

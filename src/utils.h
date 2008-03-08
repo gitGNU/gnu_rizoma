@@ -32,4 +32,6 @@ gchar * PutPoints (gchar *number);
 
 gchar * CutPoints (gchar *number_points);
 
+void control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer user_data);
+
 #endif

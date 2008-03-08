@@ -1,23 +1,23 @@
 /*utils.h
-*
-*    Copyright (C) 2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<glib.h>
 #include<gtk/gtk.h>
@@ -42,7 +42,7 @@ HaveCharacters (gchar *string)
   for (i = 0; i <= len; i++)
     {
       if (g_ascii_isalpha (string[i]) == TRUE)
-	return TRUE;
+        return TRUE;
     }
 
   return FALSE;
@@ -52,9 +52,9 @@ void
 SendCursorTo (GtkWidget *widget, gpointer data)
 {
   /* GtkWindow *window = GTK_WINDOW (gtk_widget_get_toplevel ((GtkWidget *)data));
-  GtkWidget *destiny = (GtkWidget *) data;
+     GtkWidget *destiny = (GtkWidget *) data;
 
-  gtk_window_set_focus (window, destiny);*/
+     gtk_window_set_focus (window, destiny);*/
   gtk_widget_grab_focus (GTK_WIDGET (data));
 }
 
@@ -82,13 +82,13 @@ PutPoints (gchar *number)
   for (i = len; i >= 0; i--)
     {
       if (unidad == 3 && point < points && number[i] != '.' && number[i] != ',')
-	{
-	  g_snprintf (alt, 15, ".%c%s", number[i], alt3);
-	  unidad = 0;
-	  point++;
-	}
+        {
+          g_snprintf (alt, 15, ".%c%s", number[i], alt3);
+          unidad = 0;
+          point++;
+        }
       else
-	g_snprintf (alt, 15, "%c%s", number[i], alt3);
+        g_snprintf (alt, 15, "%c%s", number[i], alt3);
 
       strcpy (alt3, alt);
 
@@ -115,4 +115,36 @@ CutPoints (gchar *number_points)
   g_free (number_points);
 
   return number;
+}
+
+void
+control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model,
+                 GtkTreeIter *iter, gpointer user_data)
+{
+  gint column = (gint) user_data;
+  gchar  buf[20];
+  GType column_type = gtk_tree_model_get_column_type (model, column);
+
+  switch (column_type)
+    {
+    case G_TYPE_DOUBLE:
+      {
+        gdouble number;
+        gtk_tree_model_get(model, iter, column, &number, -1);
+        g_snprintf (buf, sizeof (buf), "%.3f", number);
+        g_object_set(renderer, "text", buf, NULL);
+      }
+      break;
+    case G_TYPE_INT:
+      {
+        gint number;
+        gtk_tree_model_get(model, iter, column, &number, -1);
+        g_snprintf (buf, sizeof (buf), "%d", number);
+        g_object_set(renderer, "text", PutPoints (buf), NULL);
+      }
+      break;
+    default:
+      break;
+    }
+
 }
