@@ -1371,28 +1371,48 @@ end; $$ language plpgsql;
 
 -- retorna la última linea de asistencia
 -- usuario.c:75
-create or replace function select_asistencia(int)
+create or replace function select_asistencia(
+       in in_id_user int,
+       out entrada_year float8,
+       out entrada_month float8,
+       out entrada_day float8,
+       out entrada_hour float8,
+       out entrada_min float8,
+       out salida_year float8,
+       out salida_month float8,
+       out salida_day float8,
+       out salida_hour float8,
+       out salida_min float8)
 returns setof record as $$
 declare
-	id_usuario ALIAS FOR $1;
 	l record;
 	q text;
 begin
-q := $S$SELECT date_part ('year', entrada) as entrada_year, $S$
-	|| $S$date_part ('month', entrada) as entrada_month, $S$
-	|| $S$date_part ('day', entrada) as entrada_day, $S$
-	|| $S$date_part ('hour', entrada) as entrada_hour, $S$
-	|| $S$date_part ('minute', entrada) as entrada_min, $S$
-	|| $S$date_part ('year', salida) as salida_year, $S$
-	|| $S$date_part ('month', salida) as salida_month, $S$
-	|| $S$date_part ('day', salida) as salida_day, $S$
-	|| $S$date_part ('hour', salida) as salida_hour, $S$
-	|| $S$date_part ('minute', salida) as salida_min $S$
-	|| $S$FROM asistencia WHERE id_user=$S$
-	|| quote_literal(id_usuario) || $S$ ORDER BY entrada DESC LIMIT 1$S$;
+q := $S$SELECT date_part ('year', entrada) as entrada_year,
+     	       date_part ('month', entrada) as entrada_month,
+	       date_part ('day', entrada) as entrada_day,
+	       date_part ('hour', entrada) as entrada_hour,
+	       date_part ('minute', entrada) as entrada_min,
+	       date_part ('year', salida) as salida_year,
+	       date_part ('month', salida) as salida_month,
+	       date_part ('day', salida) as salida_day,
+	       date_part ('hour', salida) as salida_hour,
+	       date_part ('minute', salida) as salida_min
+	FROM asistencia WHERE id_user=$S$
+	|| quote_literal(in_id_user) || $S$ ORDER BY entrada DESC LIMIT 1$S$;
 
 for l in execute q loop
-	return next l;
+       entrada_year := l.entrada_year;
+       entrada_month := l.entrada_month;
+       entrada_day := l.entrada_day;
+       entrada_hour := l.entrada_hour;
+       entrada_min := l.entrada_min;
+       salida_year := l.salida_year;
+       salida_month := l.salida_month;
+       salida_day := l.salida_day;
+       salida_hour := l.salida_hour;
+       salida_min := l.salida_min;
+       return next;
 end loop;
 return;
 end; $$ language plpgsql;
