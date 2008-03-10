@@ -59,7 +59,7 @@ FillUsers (void)
   PGresult *res2;
   gint i, tuples;
   gchar *entrada, *salida;
-
+  gchar *q;
 
   res = EjecutarSQL ("SELECT id, rut||'-'||dv, nombre, apell_p, apell_m "
 		     "FROM select_usuario() as "
@@ -76,26 +76,27 @@ FillUsers (void)
 
       for (i = 0; i < tuples; i++)
 	{
-	  res2 = EjecutarSQL (g_strdup_printf ("select * from "
-					       "select_asistencia(%s) as "
-					       "(entrada_year float8,"
-					       "entrada_month float8,"
-					       "entrada_day float8,"
-					       "entrada_hour float8,"
-					       "entrada_min float8,"
-					       "salida_year float8,"
-					       "salida_month float8,"
-					       "salida_day float8,"
-					       "salida_hour float8,"
-					       "salida_min float8);",
-					       PQgetvalue (res, i, 0)));
+	  q = g_strdup_printf ("select * from select_asistencia(%s)",
+			       PQgetvalue (res, i, 0));
+	  res2 = EjecutarSQL (q);
+	  g_free (q)
 
 	  if (res2 != NULL && PQntuples (res2) != 0)
 	    {
-	      entrada = g_strdup_printf ("%s/%s/%s %s:%s", PQgetvalue (res2, 0, 2), PQgetvalue (res2, 0, 1), PQgetvalue (res2, 0, 2), PQgetvalue (res2, 0, 3), PQgetvalue (res2, 0, 4));
+	      entrada = g_strdup_printf ("%s/%s/%s %s:%s",
+					 PQvaluebycol (res2, 0, "entrada_day"),
+					 PQvaluebycol (res2, 0, "entrada_month"),
+					 PQvaluebycol (res2, 0, "entrada_year"),
+					 PQvaluebycol (res2, 0, "entrada_hour"),
+					 PQvaluebycol (res2, 0, "entrada_min"));
 
-	      if (strcmp (PQgetvalue (res2, 0, 5), "-1") != 0)
-		salida = g_strdup_printf ("%s/%s/%s %s:%s", PQgetvalue (res2, 0, 7), PQgetvalue (res2, 0, 6), PQgetvalue (res2, 0, 5), PQgetvalue (res2, 0, 8), PQgetvalue (res2, 0, 9));
+	      if !(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1"))
+		salida = g_strdup_printf ("%s/%s/%s %s:%s",
+					  PQvaluebycol (res2, 0, "salida_day"),
+					  PQvaluebycol (res2, 0, "salida_month"),
+					  PQvaluebycol (res2, 0, "salida_year"),
+					  PQvaluebycol (res2, 0, "salida_hour"),
+					  PQvaluebycol (res2, 0, "salida_min"));
 	      else
 		salida = "Trabajando";
 	    }
