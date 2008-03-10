@@ -60,7 +60,7 @@ FillUsers (void)
   gint i, tuples;
   gchar *entrada, *salida;
 
-  
+
   res = EjecutarSQL ("SELECT id, rut||'-'||dv, nombre, apell_p, apell_m "
 		     "FROM select_usuario() as "
 		     "(id int,rut int4, dv varchar(1),usuario varchar(30),"
@@ -69,7 +69,7 @@ FillUsers (void)
 		     "fecha_ingreso timestamp,\"level\" int2);");
 
   tuples = PQntuples (res);
-  
+
   if (res != NULL && tuples != 0)
     {
       gtk_list_store_clear (store_users);
@@ -87,13 +87,13 @@ FillUsers (void)
 					       "salida_month float8,"
 					       "salida_day float8,"
 					       "salida_hour float8,"
-					       "salida_min float8);", 
+					       "salida_min float8);",
 					       PQgetvalue (res, i, 0)));
 
 	  if (res2 != NULL && PQntuples (res2) != 0)
 	    {
 	      entrada = g_strdup_printf ("%s/%s/%s %s:%s", PQgetvalue (res2, 0, 2), PQgetvalue (res2, 0, 1), PQgetvalue (res2, 0, 2), PQgetvalue (res2, 0, 3), PQgetvalue (res2, 0, 4));
-	     
+
 	      if (strcmp (PQgetvalue (res2, 0, 5), "-1") != 0)
 		salida = g_strdup_printf ("%s/%s/%s %s:%s", PQgetvalue (res2, 0, 7), PQgetvalue (res2, 0, 6), PQgetvalue (res2, 0, 5), PQgetvalue (res2, 0, 8), PQgetvalue (res2, 0, 9));
 	      else
@@ -116,7 +116,7 @@ FillUsers (void)
 			      6, salida,
 			      -1);
 	}
-    }  
+    }
 }
 
 void
@@ -134,16 +134,16 @@ DeleteUser (GtkWidget *widget, gpointer data)
       gtk_tree_model_get (GTK_TREE_MODEL (store_users), &iter,
 			  0, &id,
 			  -1);
-      
+
       if (strcmp (id, "1") != 0)
 	{
 	  res = EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
-	  
+
 	  FillUsers ();
 	}
       else
 	AlertMSG (GTK_WIDGET (store_users), "No se puede elminar el usuario admin");
-      
+
       gtk_widget_destroy (gtk_widget_get_toplevel (widget));
     }
   else
@@ -161,7 +161,7 @@ AskDelete (void)
   GtkWidget *button;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_users));
   GtkTreeIter iter;
-  
+
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -169,23 +169,23 @@ AskDelete (void)
       gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
       //      gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
       gtk_widget_show (window);
-      
+
       vbox = gtk_vbox_new (FALSE, 3);
       gtk_container_add (GTK_CONTAINER (window), vbox);
       gtk_widget_show (vbox);
-      
+
       hbox = gtk_hbox_new (FALSE, 3);
       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
       gtk_widget_show (hbox);
-      
+
       image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG);
       gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
       gtk_widget_show (image);
-      
-      label = gtk_label_new ("Desea eliminar al usuario");     
+
+      label = gtk_label_new ("Desea eliminar al usuario");
       gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
       gtk_widget_show (label);
-      
+
       hbox = gtk_hbox_new (FALSE, 3);
       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
       gtk_widget_show (hbox);
@@ -200,7 +200,7 @@ AskDelete (void)
       button = gtk_button_new_from_stock (GTK_STOCK_YES);
       gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
       gtk_widget_show (button);
-      
+
       g_signal_connect (G_OBJECT (button), "clicked",
 			G_CALLBACK (DeleteUser), (gpointer)TRUE);
     }
@@ -214,7 +214,7 @@ user_box (GtkWidget *main_box)
 
   GtkWidget *vbox2;
   GtkWidget *hbox2;
-  
+
   GtkWidget *frame;
   GtkWidget *label;
   GtkWidget *button;
@@ -238,11 +238,11 @@ user_box (GtkWidget *main_box)
   frame = gtk_frame_new ("Agregar Vendedor");
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-  
+
   vbox2 = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (vbox2);
   gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
@@ -280,9 +280,9 @@ user_box (GtkWidget *main_box)
   gtk_widget_set_size_request (username, 30, -1);
   gtk_box_pack_start (GTK_BOX (hbox2), username, FALSE, FALSE, 0);
   gtk_widget_show (username);
-  
+
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  
+
   hbox2 = gtk_vbox_new (TRUE, 2);
   gtk_widget_show (hbox2);
   label = gtk_label_new ("Nombre: ");
@@ -294,7 +294,7 @@ user_box (GtkWidget *main_box)
   gtk_widget_show (nombre);
 
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  
+
   hbox2 = gtk_vbox_new (TRUE, 2);
   gtk_widget_show (hbox2);
   label = gtk_label_new ("Apellido P.: ");
@@ -317,7 +317,7 @@ user_box (GtkWidget *main_box)
   gtk_box_pack_start (GTK_BOX (hbox2), apell_m, FALSE, FALSE, 0);
   gtk_widget_show (apell_m);
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
@@ -332,9 +332,9 @@ user_box (GtkWidget *main_box)
   gtk_widget_set_size_request (new_pass1, 100, -1);
   gtk_box_pack_start (GTK_BOX (hbox2), new_pass1, FALSE, FALSE, 0);
   gtk_widget_show (new_pass1);
-  
+
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  
+
   hbox2 = gtk_vbox_new (TRUE, 2);
   gtk_widget_show (hbox2);
   label = gtk_label_new ("Repetir Password: ");
@@ -359,7 +359,7 @@ user_box (GtkWidget *main_box)
   gtk_widget_show (id_box);
 
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  
+
   /*hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
@@ -367,7 +367,7 @@ user_box (GtkWidget *main_box)
   button = gtk_button_new_from_stock (GTK_STOCK_ADD);
   gtk_widget_show (button);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (AddSeller), NULL);
 
@@ -378,7 +378,7 @@ user_box (GtkWidget *main_box)
   vbox2 = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (vbox2);
   gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
@@ -491,7 +491,7 @@ user_box (GtkWidget *main_box)
   button = gtk_button_new_from_stock (GTK_STOCK_DELETE);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (AskDelete), NULL);
 
@@ -519,26 +519,26 @@ user_box (GtkWidget *main_box)
   combo = gtk_combo_box_new_text ();
   gtk_box_pack_start (GTK_BOX (hbox2), combo, FALSE, FALSE, 3);
   gtk_widget_show (combo);
-  
+
   res = EjecutarSQL ("SELECT usuario FROM users");
 
   tuples = PQntuples (res);
 
-  for (i = 0; i < tuples; i++)    
+  for (i = 0; i < tuples; i++)
     gtk_combo_box_append_text (GTK_COMBO_BOX (combo),
 			       PQgetvalue (res, i, 0));
-  
+
   hbox2 = gtk_vbox_new (FALSE, 2);
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
   gtk_widget_show (hbox2);
-  
+
   label = gtk_label_new ("Nueva Contraseña");
   gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
 
   new_pass_1 = gtk_entry_new_with_max_length (20);
   gtk_entry_set_visibility (GTK_ENTRY (new_pass_1), FALSE);
-  gtk_widget_set_size_request (new_pass_1, 100, -1);  
+  gtk_widget_set_size_request (new_pass_1, 100, -1);
   gtk_box_pack_start (GTK_BOX (hbox2), new_pass_1, FALSE, FALSE, 3);
   gtk_widget_show (new_pass_1);
 
@@ -549,20 +549,20 @@ user_box (GtkWidget *main_box)
   label = gtk_label_new ("Repetir Contraseña");
   gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
-  
+
   new_pass_2 = gtk_entry_new_with_max_length (20);
   gtk_entry_set_visibility (GTK_ENTRY (new_pass_2), FALSE);
   gtk_widget_set_size_request (new_pass_2, 100, -1);
   gtk_box_pack_start (GTK_BOX (hbox2), new_pass_2, FALSE, FALSE, 3);
   gtk_widget_show (new_pass_2);
 
-  
+
   button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (ChangePasswd), (gpointer)combo);  
+		    G_CALLBACK (ChangePasswd), (gpointer)combo);
 }
 
 gint
@@ -609,7 +609,7 @@ ChangePasswd (GtkWidget *widget, gpointer data)
       gtk_entry_set_text (GTK_ENTRY (old_pass), "");
       gtk_entry_set_text (GTK_ENTRY (new_pass_1), "");
       gtk_entry_set_text (GTK_ENTRY (new_pass_2), "");
-      ErrorMSG (main_window, "No se pudo cambiar su password");	
+      ErrorMSG (main_window, "No se pudo cambiar su password");
     }
 
   return 0;
@@ -666,7 +666,7 @@ AddSeller (void)
   if (g_ascii_isdigit (id[0]) ==  FALSE && strcmp (id, "") != 0)
     {
       rizoma_errors_set ("El identificador debe ser un numero", "AddSeller()", ALERT);
-      
+
       rizoma_error_window (id_box);
 
       return -1;
@@ -686,7 +686,7 @@ AddSeller (void)
      gtk_entry_set_text (GTK_ENTRY (new_pass1), "");
      gtk_entry_set_text (GTK_ENTRY (new_pass2), "");
      gtk_entry_set_text (GTK_ENTRY (id_box), "");
-     
+
      FillUsers ();
    }
  else
@@ -704,6 +704,6 @@ AddSeller (void)
      gtk_entry_set_text (GTK_ENTRY (new_pass2), "");
      gtk_entry_set_text (GTK_ENTRY (id_box), "");
    }
-  
+
   return 0;
 }
