@@ -1,7 +1,7 @@
 
 /*datos.h
 *
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+*    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *    This file is part of rizoma.
 *
@@ -33,9 +33,7 @@ static struct _modulos
 }
 modulos[] =
   {
-    {"Ventas", ventas_box, TRUE, GDK_F1},
     {"Compras", compras_box, FALSE, GDK_F2},
-    {"Informes", ventas_stats_box, FALSE, GDK_F3},
     {"Control", MainControl, FALSE, GDK_F4},
     {"Salir", Question, TRUE, GDK_F12},
   };

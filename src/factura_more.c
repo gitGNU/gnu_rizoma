@@ -18,11 +18,15 @@
 *    along with this program; if not, write to the Free Software
 *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
+#define _XOPEN_SOURCE 600
+#include<features.h>
 
 #include<gtk/gtk.h>
 #include<libps/pslib.h>
 
 #include<locale.h>
+
+#include<math.h>
 
 //#include<libgnomeprint/gnome-print.h>
 //#include<libgnomeprint/gnome-print-job.h>
@@ -39,10 +43,9 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
 {
   //  GnomePrintJob *job;
   gchar *client, *address, *giro, *comuna, *fono;
-  gint subtotal, iva;
-  
+
   gchar *file_to_print = NULL;
-  
+
   client = GetDataByOne ("SELECT nombre || ' ' || apellido_paterno || ' ' || apellido_materno AS name FROM cliente");
   address = GetDataByOne ("SELECT direccion FROM cliente");
   giro = GetDataByOne ("SELECT giro FROM cliente");
@@ -50,24 +53,24 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   comuna = "Santiago";
   fono = GetDataByOne ("SELECT telefono FROM cliente");
 
-  
+
   switch (sell_type)
     {
     case FACTURA:
       {
-	file_to_print = PrintFactura 
+	file_to_print = PrintFactura
 	  (client, rut, address, giro, comuna, fono, products, num);
 	break;
       }
       }
-  
-  /*  
+
+  /*
   if (file_to_print != NULL)
     {
       job = gnome_print_job_new (NULL);
-      
+
       gnome_print_job_set_file (job, file_to_print);
-      
+
       gnome_print_job_print (job);
     }
   */
@@ -98,12 +101,12 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   PS_boot ();
 
   psdoc = PS_new ();
-  
+
   PS_open_file (psdoc, filename);
 
   printf ("%s\n", rizoma_get_value ("FACTURA_SIZE"));
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_SIZE"), &x, &y);
-  PS_set_info (psdoc, "BoundingBox", 
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_SIZE"), &x, &y); */
+  PS_set_info (psdoc, "BoundingBox",
 	       g_strdup_printf ("0 0 %f %f", x, y));
 
   psfont = PS_findfont (psdoc, "Helvetica", "", 0);
@@ -111,38 +114,38 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   PS_begin_page (psdoc, x, y);
   PS_setfont (psdoc, psfont, 10);
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_CLIENTE"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_CLIENTE"), &x, &y); */
   PS_show_xy (psdoc, client, x, y);
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_RUT"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_RUT"), &x, &y); */
   PS_show_xy (psdoc, rut, x, y);
-  
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_ADDRESS"), &x, &y);
+
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_ADDRESS"), &x, &y); */
   PS_show_xy (psdoc, address, x, y);
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_GIRO"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_GIRO"), &x, &y); */
   PS_show_xy (psdoc, giro, x, y);
-  
+
   //  PS_show_xy (psdoc, comuna, dimension->factura_giro.x, dimension->factura_giro.y);
-  
+
   //PS_show_xy (psdoc, fono, dimension->factura_fono->xizoma, dimension->factura_fono->y);
 
   /* We draw the products detail */
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_DETAIL"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_DETAIL"), &x, &y); */
   initial = y;
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_CODIGO"), &x_codigo, &y);
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_DESCRIPCION"), &x_desc, &y);
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_CANT"), &x_cant, &y);
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_UNI"), &x_uni, &y);
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_TOTAL"), &x_total, &y);
-  
-  do 
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_CODIGO"), &x_codigo, &y); */
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_DESCRIPCION"), &x_desc, &y); */
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_CANT"), &x_cant, &y); */
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_UNI"), &x_uni, &y); */
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_TOTAL"), &x_total, &y); */
+
+  do
     {
       PS_show_xy (psdoc, products->product->codigo, x_codigo, initial);
 
       PS_show_xy (psdoc, products->product->producto, x_desc, initial);
-      
+
       PS_show_xy (psdoc, g_strdup_printf ("%.3f", products->product->cantidad),
 		  x_cant, initial);
 
@@ -152,16 +155,16 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
       else
 	precio = products->product->precio_mayor;///(((gdouble)products->product->iva/100)+1);
 
-      
+
       PS_show_xy (psdoc, g_strdup_printf ("%.0f", precio),
 		  x_uni, initial);
-      
+
       PS_show_xy (psdoc, g_strdup_printf ("%.0f", products->product->cantidad * precio),
-		  x_total, initial);      
-      
+		  x_total, initial);
+
       pepe = lround ((gdouble)precio/1.19);
-      
-      
+
+
       subtotal += pepe * products->product->cantidad;
 
       iva += (precio - pepe) * products->product->cantidad;
@@ -169,26 +172,26 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
       initial -= 10;
 
       products = products->next;
-      
+
     } while (products != header);
-  
+
   /* Finished the products detail*/
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_SUTOTAL"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_SUTOTAL"), &x, &y); */
   PS_show_xy (psdoc, g_strdup_printf ("%.0f", subtotal), x, y);
 
 
   total = subtotal + iva;
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_IVA"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_IVA"), &x, &y); */
   PS_show_xy (psdoc, g_strdup_printf ("%.0f", iva), x, y);
 
-  rizoma_extract_xy (rizoma_get_value ("FACTURA_TOTAL_FINAL"), &x, &y);
+  /* rizoma_extract_xy (rizoma_get_value ("FACTURA_TOTAL_FINAL"), &x, &y); */
   PS_show_xy (psdoc, g_strdup_printf ("%.0f", total), x, y);
 
   PS_end_page (psdoc);
   PS_delete (psdoc);
   PS_shutdown ();
-  
+
   return filename;
 }

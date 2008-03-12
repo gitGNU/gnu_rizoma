@@ -1,4 +1,6 @@
 *.[ao]
+*~
+cscope*
 configure
 Makefile.in
 config.log
@@ -29,3 +31,5 @@ src/Makefile
 src/rizoma-config
 src/rizoma
 *.out
+src/rizoma-ventas
+src/rizoma-admin

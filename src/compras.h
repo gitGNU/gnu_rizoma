@@ -53,8 +53,6 @@ void SearchByName (GtkEntry *entry);
 
 void Comprar (GtkWidget *widget, gpointer data);
 
-gboolean HaveCharacters (gchar *string);
-
 void ShowProductHistory (void);
 
 void ClearAllCompraData (void);
@@ -151,5 +149,9 @@ void InformeComprasShow (void);
 void PagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 void PagarDocumento (GtkWidget *widget, gpointer data);
+
+void ClearPagosData (void);
+
+void ClosePagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 #endif

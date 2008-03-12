@@ -1,6 +1,6 @@
-/*main.c
+/*utils.h
 *
-*    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
+*    Copyright (C) 2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *    This file is part of rizoma.
 *
@@ -19,22 +19,19 @@
 *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef MAIN_H
+#ifndef UTILS_H_
+# define UTILS_H_
 
-#define MAIN_H
+void SetToggleMode (GtkToggleButton *widget, gpointer data);
 
-void SelectMenu (GtkWidget *widget, gpointer data);
+gboolean HaveCharacters (gchar *string);
 
-void show_selected (GtkTreeSelection *selection, gpointer data);
+void SendCursorTo (GtkWidget *widget, gpointer data);
 
-void ClosePasswdWindow (void);
+gchar * PutPoints (gchar *number);
 
-void check_passwd (GtkWidget *widget, gpointer data);
+gchar * CutPoints (gchar *number_points);
 
-void MainWindow (void);
-
-void Question (MainBox *module_box);
-
-void Salir (MainBox *module_box);
+void control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer user_data);
 
 #endif

@@ -37,7 +37,7 @@ query := 'SELECT id FROM devolucion WHERE barcode_product='
 	|| quote_literal(prod)
 	|| ' AND devuelto=FALSE';
 
-FOR list IN EXECUTE query LOOPu
+FOR list IN EXECUTE query LOOP
 	RETURN NEXT list;
 END LOOP;
 
@@ -281,7 +281,8 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT cantidad_mayor integer,
 		OUT mayorista boolean,
 		OUT unidades_merma double precision,
-		OUT stock_day double precision)
+		OUT stock_day double precision,
+                OUT total_vendido double precision)
 RETURNS SETOF record AS $$
 declare
 	days double precision;
@@ -298,18 +299,9 @@ IF NOT FOUND THEN
    days := 1;
 END IF;
 
-
-
-query := $S$ SELECT *,
-      	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad)))
-		    	     FROM venta_detalle 
-		    	    WHERE barcode=producto.barcode) as contrib_agregada, 
-		    (stock / (vendidos / $S$ || days || $S$)) AS stock_day, 
-		    (SELECT SUM ((cantidad * precio) - (iva + otros)) 
-		    	    FROM venta_detalle 
-			    WHERE barcode=producto.barcode) as venta_neta, 
-		    select_merma( producto.barcode ) as unidades_merma 
-	    FROM producto WHERE $S$;
+query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (stock / (vendidos / $S$
+|| days
+|| $S$)) AS stock_day, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido, select_merma( producto.barcode ) as unidades_merma FROM producto WHERE $S$;
 
 IF codigo_barras != 0 THEN
    query := query || $S$ barcode=$S$ || codigo_barras;
@@ -318,28 +310,22 @@ ELSE
 END IF;
 
 FOR datos IN EXECUTE query LOOP
-    codigo_corto := datos.codigo_corto;
-    barcode := datos.barcode;
-    descripcion := datos.descripcion;
-    marca := datos.marca;
-    contenido := datos.contenido;
-    unidad := datos.unidad;
-    stock := datos.stock;
-    precio := datos.precio;
-    costo_promedio := datos.costo_promedio;
-    stock_min := datos.stock_min;
-    margen_promedio := datos.margen_promedio;
-    contrib_agregada := round(datos.contrib_agregada);
-    vendidos := datos.vendidos;
-    canje := datos.canje;
-    stock_pro := datos.stock_pro;
-    tasa_canje := datos.tasa_canje;
-    precio_mayor := datos.precio_mayor;
-    cantidad_mayor := datos.cantidad_mayor;
-    unidades_merma := datos.unidades_merma;
-    ventas_dia := datos.stock_day; -- 
-    venta_neta := datos.venta_neta; -- 
-    mayorista := datos.mayorista;
+codigo_corto := datos.codigo_corto;
+barcode := datos.barcode;
+descripcion := datos.descripcion;
+marca := datos.marca;
+contenido := datos.contenido;
+unidad := datos.unidad;
+stock := datos.stock;
+precio := datos.precio;
+costo_promedio := datos.costo_promedio;
+stock_min := datos.stock_min;
+margen_promedio := datos.margen_promedio;
+merma_unid := datos.merma_unid;
+contrib_agregada := datos.contrib_agregada;
+unidades_merma := datos.unidades_merma;
+mayorista := datos.mayorista;
+total_vendido := datos.total_vendido;
 RETURN NEXT;
 END LOOP;
 RETURN;

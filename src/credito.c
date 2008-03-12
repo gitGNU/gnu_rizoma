@@ -31,6 +31,7 @@
 #include"main.h"
 #include"printing.h"
 #include"dimentions.h"
+#include"utils.h"
 
 GtkWidget *modificar_window;
 

@@ -18,14 +18,18 @@
 *    along with this program; if not, write to the Free Software
 *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
+#define _XOPEN_SOURCE 600
+#include<features.h>
 
 #include<math.h>
+#include<stdlib.h>
+
 #include"tipos.h"
 #include"config_file.h"
 
 #include"tiempo.h"
 
-int
+void
 PrintVale (Productos *header, gint venta_id, gint total)
 {
   Productos *products = header;
@@ -91,7 +95,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
   } while (products != header);
 
   fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
-  fprintf (fp, "Sub Total afecto:      \t\t%s$ %u %s\n", size2, lround(civa), size1);
+  fprintf (fp, "Sub Total afecto:      \t\t%s$ %ld %s\n", size2, lround(civa), size1);
   fprintf (fp, "\n\n");
   fprintf (fp, "Total Venta: \t\t\t%s$ %d %s\n", size2, total, size1);
   fprintf (fp, "\n\n\n\n\n");
