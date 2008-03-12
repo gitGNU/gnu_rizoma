@@ -26,10 +26,9 @@
 
 #include"postgres-functions.h"
 
-#include"main.h"
-#include"ventas_stats.h"
 #include"errors.h"
 #include"caja.h"
+#include"utils.h"
 
 GtkWidget *calendar_win;
 guint day, month, year;
@@ -540,7 +539,6 @@ CajaTab (GtkWidget *main_box)
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *label;
-  GtkWidget *button;
 
   GtkWidget *table;
 

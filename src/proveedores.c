@@ -27,6 +27,8 @@
 #include"printing.h"
 #include"dimentions.h"
 #include"compras.h"
+#include"credito.h"
+#include"errors.h"
 
 GtkWidget *rut;
 GtkWidget *razon;
@@ -168,7 +170,6 @@ LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
   gtk_entry_set_text (GTK_ENTRY (email), PQvaluebycol (res, 0, "email"));
 
   gtk_entry_set_text (GTK_ENTRY (giro), PQvaluebycol (res, 0, "giro"));
-
 }
 
 void
@@ -478,7 +479,7 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (CloseAgregarProveedorWindow), (gpointer)window);
+                    G_CALLBACK (CloseAgregarProveedorWindow), (gpointer)window);
 
 }
 
@@ -497,9 +498,7 @@ ModificarProveedor (void)
   gchar *giro_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (giro));
 
   SetModificacionesProveedor (rut_c, razon_c, direccion_c, comuna_c, ciudad_c, fono_c,
-			      web_c, contacto_c, email_c, giro_c);
-
-
+                              web_c, contacto_c, email_c, giro_c);
 }
 
 void
@@ -535,21 +534,21 @@ proveedores_box (GtkWidget *main_box)
   gtk_widget_show (search_entry);
 
   g_signal_connect (G_OBJECT (search_entry), "activate",
-		    G_CALLBACK (BuscarProveedor), NULL);
+                    G_CALLBACK (BuscarProveedor), NULL);
 
   button = gtk_button_new_from_stock (GTK_STOCK_FIND);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (BuscarProveedor), NULL);
+                    G_CALLBACK (BuscarProveedor), NULL);
 
   button = gtk_button_new_from_stock (GTK_STOCK_ADD);
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (AgregarProveedorWindow), NULL);
+                    G_CALLBACK (AgregarProveedorWindow), NULL);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox);
@@ -559,50 +558,49 @@ proveedores_box (GtkWidget *main_box)
   gtk_widget_show (scroll);
   gtk_widget_set_size_request (scroll, MODULE_BOX_WIDTH - 10, 200);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-				  GTK_POLICY_AUTOMATIC,
-				  GTK_POLICY_AUTOMATIC);
+                                  GTK_POLICY_AUTOMATIC,
+                                  GTK_POLICY_AUTOMATIC);
   gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3);
 
   proveedores_store = gtk_tree_store_new (4,
-					  G_TYPE_STRING,
-					  G_TYPE_STRING,
-					  G_TYPE_STRING,
-					  G_TYPE_STRING);
-
+                                          G_TYPE_STRING,
+                                          G_TYPE_STRING,
+                                          G_TYPE_STRING,
+                                          G_TYPE_STRING);
 
   proveedores_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (proveedores_store));
   gtk_container_add (GTK_CONTAINER (scroll), proveedores_tree);
   gtk_widget_show (proveedores_tree);
 
   g_signal_connect (G_OBJECT (gtk_tree_view_get_selection
-			      (GTK_TREE_VIEW (proveedores_tree))), "changed",
-		    G_CALLBACK (LlenarDatosProveedor), NULL);
+                              (GTK_TREE_VIEW (proveedores_tree))), "changed",
+                    G_CALLBACK (LlenarDatosProveedor), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
-						     "text", 0,
-						     NULL);
+                                                     "text", 0,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
-						     "text", 1,
-						     NULL);
+                                                     "text", 1,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Giro", renderer,
-						     "text", 2,
-						     NULL);
+                                                     "text", 2,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Contacto", renderer,
-						     "text", 3,
-						     NULL);
+                                                     "text", 3,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
@@ -739,7 +737,7 @@ proveedores_box (GtkWidget *main_box)
   gtk_widget_show (button);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (ModificarProveedor), NULL);
+                    G_CALLBACK (ModificarProveedor), NULL);
 
   /*
     hbox = gtk_hbox_new (FALSE, 0);
@@ -906,6 +904,6 @@ proveedores_box (GtkWidget *main_box)
   proveedores_print->cols[2].name = NULL;
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (PrintTree), (gpointer)proveedores_print);
+                    G_CALLBACK (PrintTree), (gpointer)proveedores_print);
 
 }

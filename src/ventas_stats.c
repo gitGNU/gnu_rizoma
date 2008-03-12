@@ -145,16 +145,6 @@ FillProductsProveedor (GtkTreeSelection *selection, gpointer data)
 }
 
 void
-SetToggleMode (GtkToggleButton *widget, gpointer data)
-{
-
-  if (gtk_toggle_button_get_active (widget) == TRUE)
-    gtk_toggle_button_set_active (widget, FALSE);
-  else
-    gtk_toggle_button_set_active (widget, TRUE);
-}
-
-void
 DisplayCal (GtkToggleButton *widget, gpointer data)
 {
   GtkWidget *window;
@@ -285,37 +275,6 @@ SetDate (GtkCalendar *calendar, gpointer data)
     }
 }
 
-void
-control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model,
-		 GtkTreeIter *iter, gpointer user_data)
-{
-  gint column = (gint) user_data;
-  gchar  buf[20];
-  GType column_type = gtk_tree_model_get_column_type (model, column);
-
-  switch (column_type)
-    {
-    case G_TYPE_DOUBLE:
-      {
-	gdouble number;
-	gtk_tree_model_get(model, iter, column, &number, -1);
-	g_snprintf (buf, sizeof (buf), "%.3f", number);
-	g_object_set(renderer, "text", buf, NULL);
-      }
-      break;
-    case G_TYPE_INT:
-      {
-	gint number;
-	gtk_tree_model_get(model, iter, column, &number, -1);
-	g_snprintf (buf, sizeof (buf), "%d", number);
-	g_object_set(renderer, "text", PutPoints (buf), NULL);
-      }
-      break;
-    default:
-      break;
-    }
-
-}
 
 void
 ventas_stats_box (MainBox *module_box)

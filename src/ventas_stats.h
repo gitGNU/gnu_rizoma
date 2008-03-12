@@ -27,8 +27,6 @@
 GtkWidget *calendar_from;
 GtkWidget *calendar_to;
 
-void SetToggleMode (GtkToggleButton *widget, gpointer data);
-
 void ask_date (MainBox *module_box);
 
 void SetDate (GtkCalendar *calendar, gpointer data);
