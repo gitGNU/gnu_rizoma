@@ -79,7 +79,7 @@ FillUsers (void)
 	  q = g_strdup_printf ("select * from select_asistencia(%s)",
 			       PQgetvalue (res, i, 0));
 	  res2 = EjecutarSQL (q);
-	  g_free (q)
+	  g_free (q);
 
 	  if (res2 != NULL && PQntuples (res2) != 0)
 	    {
@@ -90,7 +90,7 @@ FillUsers (void)
 					 PQvaluebycol (res2, 0, "entrada_hour"),
 					 PQvaluebycol (res2, 0, "entrada_min"));
 
-	      if !(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1"))
+	      if (!(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1")))
 		salida = g_strdup_printf ("%s/%s/%s %s:%s",
 					  PQvaluebycol (res2, 0, "salida_day"),
 					  PQvaluebycol (res2, 0, "salida_month"),
