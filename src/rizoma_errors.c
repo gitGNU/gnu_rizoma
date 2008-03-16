@@ -30,7 +30,7 @@ GtkWidget *error_window;
 gboolean rizoma_error_closing = FALSE;
 
 gint
-rizoma_errors_set (gchar *error, gchar *function, gint type)
+rizoma_errors_set (gchar *error, const gchar *function, gint type)
 {
   if (rizoma_error == NULL)
     {

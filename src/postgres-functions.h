@@ -24,10 +24,6 @@
 
 #define POSTGRES_FUNCTIONS_H
 
-#define CUT(num) CutComa (num)
-
-#define PUT(num) PutComa (num)
-
 #define SPE(string) SpecialChar (string)
 
 #define PQvaluebycol( res, fila, col ) PQgetvalue( res, fila, PQfnumber( res, col ) )

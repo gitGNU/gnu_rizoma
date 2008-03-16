@@ -195,7 +195,8 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
   gchar *contacto_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
   gchar *giro_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
 
-  if (strcmp (rut_c, "") == 0)
+
+if (g_strcmp0 (rut_c, "") == 0)
     {
       ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
       return;
@@ -206,32 +207,32 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
       ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
       return;
     }
-  else if (strcmp (rut_ver, "") == 0)
+  else if (g_strcmp0 (rut_ver, "") == 0)
     {
       ErrorMSG (compra->rut_ver, "Debe ingresar el digito verificador del rut");
       return;
     }
-  else if (strcmp (nombre_c, "") == 0)
+  else if (g_strcmp0 (nombre_c, "") == 0)
     {
       ErrorMSG (compra->nombre_add, "Debe escribir el nombre del proveedor");
       return;
     }
-  else if (strcmp (direccion_c, "") == 0)
+  else if (g_strcmp0 (direccion_c, "") == 0)
     {
       ErrorMSG (compra->direccion_add, "Debe escribir la direccion");
       return;
     }
-  else if (strcmp (comuna_c, "") == 0)
+  else if (g_strcmp0 (comuna_c, "") == 0)
     {
       ErrorMSG (compra->comuna_add, "Debe escribir la comuna");
       return;
     }
-  else if (strcmp (telefono_c, "") == 0)
+  else if (g_strcmp0 (telefono_c, "") == 0)
     {
       ErrorMSG (compra->telefono_add, "Debe escribir el telefono");
       return;
     }
-  else if (strcmp (giro_c, "") == 0)
+  else if (g_strcmp0 (giro_c, "") == 0)
     {
       ErrorMSG (compra->giro_add, "Debe escribir el giro");
       return;

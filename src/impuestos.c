@@ -27,6 +27,7 @@
 #include"postgres-functions.h"
 #include"errors.h"
 #include"dimentions.h"
+#include"utils.h"
 
 GtkWidget *impuesto_tasa;
 GtkWidget *impuesto_name;

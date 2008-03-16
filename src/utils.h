@@ -22,6 +22,10 @@
 #ifndef UTILS_H_
 # define UTILS_H_
 
+#define CUT(num) CutComa (num)
+
+#define PUT(num) PutComa (num)
+
 void SetToggleMode (GtkToggleButton *widget, gpointer data);
 
 gboolean HaveCharacters (gchar *string);

@@ -34,6 +34,7 @@
 #include"boleta.h"
 #include"vale.h"
 #include"rizoma_errors.h"
+#include"utils.h"
 
 PGconn *connection;
 
@@ -814,12 +815,12 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
                    gchar *contenido, gchar *unidad, gboolean iva, gchar *otros, gchar *familia,
                    gboolean perecible, gboolean fraccion)
 {
-  gint *insertado;
+  gint insertado;
   gchar *q;
 
   q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, %s::varchar,"
                        "upper('%s')::varchar, upper('%s')::varchar,%s::varchar, upper('%s')::varchar, "
-                       "%d::boolean, (SELECT id FROM impuesto WHERE descripcion='%s'),0::smallint, 0::boolean,"
+                       "%d::boolean, (SELECT id FROM impuesto WHERE descripcion='%s'),0::smallint, %d::boolean,"
                        "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
                        otros, perecible, fraccion);
   insertado = atoi (GetDataByOne (q));
@@ -838,7 +839,6 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
 void
 AgregarCompra (gchar *rut, gchar *nota, gint dias_pago)
 {
-  PGresult *res;
   gint id_compra;
   gchar *q;
 
@@ -879,7 +879,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
 
       q = g_strdup_printf("SELECT * FROM insertar_detalle_compra(%d, "
                           "%s::double precision, %s::double precision, %d, "
-                          "0::double precision, 0::smallint, %s, %d, %d, %d)",
+                          "0::double precision, 0::smallint, %s, %d, %ld, %ld)",
                           id_compra, CUT(cantidad), CUT (precio_compra),
                           products->product->precio, products->product->barcode,
                           products->product->margen, lround (iva),
@@ -935,14 +935,14 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
     res = EjecutarSQL
       (g_strdup_printf
        ("INSERT INTO documentos_detalle (id, numero, id_compra, barcode, cantidad, precio, fecha, factura, elaboracion, vencimiento, iva, otros) "
-        "VALUES (DEFAULT, %d, %d, '%s', %s, %s, NOW(), '%d', NULL, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY'), %d, %d)",
+        "VALUES (DEFAULT, %d, %d, '%s', %s, %s, NOW(), '%d', NULL, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY'), %ld, %ld)",
         doc, compra, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),
         (gint)factura, product->venc_day, product->venc_month, product->venc_year, lround (iva), lround (otros)));
   else
     res = EjecutarSQL
       (g_strdup_printf
        ("INSERT INTO documentos_detalle (id, numero, id_compra, barcode, cantidad, precio, fecha, factura, elaboracion, vencimiento, iva, otros) "
-        "VALUES (DEFAULT, %d, %d, '%s', %s, %s, NOW(), '%d', NULL, NULL, %d, %d)",
+        "VALUES (DEFAULT, %d, %d, '%s', %s, %s, NOW(), '%d', NULL, NULL, %ld, %ld)",
         doc, compra, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),(gint)factura, lround (iva), lround (otros)));
 
   if (res != NULL)
@@ -993,14 +993,14 @@ IngresarProducto (Producto *product, gint compra)
 
   if (product->canjear == TRUE)
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%d, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
                            lround (margen_promedio), fifo, cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
   else
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%d, costo_promedio=%d, stock=stock+%s WHERE barcode=%s",
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%d, stock=stock+%s WHERE barcode=%s",
                            lround (margen_promedio), fifo, cantidad, product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
@@ -1931,8 +1931,7 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
   else
     {
       gchar *new = CUT (g_strdup_printf ("%f", stock - cantidad));
-      q = g_strdup_printf ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'",
-                           new, new, barcode);
+      q = g_strdup_printf ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'", new, barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }

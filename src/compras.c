@@ -5077,7 +5077,7 @@ void
 CambiarStock (GtkWidget *widget, gpointer data)
 {
   //  gint new_stock = atoi (gtk_entry_get_text (GTK_ENTRY (entry_stock)));
-  gdouble new_stock = strtod (PUT (gtk_entry_get_text (GTK_ENTRY (entry_stock))), (char **)NULL);
+  gdouble new_stock = strtod (PUT ((gchar *)gtk_entry_get_text (GTK_ENTRY (entry_stock))), (char **)NULL);
   gchar *codigo;
   GtkWidget *window = (GtkWidget *) data;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->compra_tree));

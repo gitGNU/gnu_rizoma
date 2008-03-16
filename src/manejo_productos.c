@@ -1,23 +1,23 @@
 /*manejo_productos.c
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<gtk/gtk.h>
 #include<string.h>
@@ -26,6 +26,7 @@
 
 #include"tipos.h"
 #include"postgres-functions.h"
+#include"utils.h"
 
 Productos *
 CreateNew (gchar *barcode, gdouble cantidad)
@@ -35,12 +36,12 @@ CreateNew (gchar *barcode, gdouble cantidad)
   gchar *q;
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
-		       "unidad, precio, costo_promedio, margen_promedio, "
-		       "(SELECT monto FROM impuesto WHERE id=0 AND producto.impuestos='t') as impuesto_normal, "
-		       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
-		       "canje, stock_pro, precio_mayor, cantidad_mayor, mayorista "
-		       "FROM select_producto(%s) as producto",
-		       barcode);
+                       "unidad, precio, costo_promedio, margen_promedio, "
+                       "(SELECT monto FROM impuesto WHERE id=0 AND producto.impuestos='t') as impuesto_normal, "
+                       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
+                       "canje, stock_pro, precio_mayor, cantidad_mayor, mayorista "
+                       "FROM select_producto(%s) as producto",
+                       barcode);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -74,18 +75,18 @@ void
 FreeProduct (Productos *productos)
 {
   /*
-  Producto *producto = productos->product;
+    Producto *producto = productos->product;
 
-  free (producto->codigo);
+    free (producto->codigo);
 
-  g_free (producto->producto);
-  g_free (producto->marca);
-  g_free (producto->unidad);
-  g_free (producto->barcode);
-  g_free (producto);
+    g_free (producto->producto);
+    g_free (producto->marca);
+    g_free (producto->unidad);
+    g_free (producto->barcode);
+    g_free (producto);
 
-  g_free (productos->product);
-  g_free (productos);
+    g_free (productos->product);
+    g_free (productos);
   */
 }
 
@@ -113,7 +114,7 @@ AgregarALista (gchar *codigo, gchar *barcode, gdouble cantidad)
       new = CreateNew (barcode, cantidad);
 
       while (end->next != venta->header)
-	end = end->next;
+        end = end->next;
 
       new->back = end;
 
@@ -136,7 +137,7 @@ EliminarDeLista (gchar *codigo, gint position)
   Productos *end = venta->header;
 
   /*
-     Must be re-write it, to fix and prevent any kind of error
+    Must be re-write it, to fix and prevent any kind of error
   */
 
   while (strcmp (find->product->codigo, codigo) != 0)
@@ -191,11 +192,11 @@ CalcularTotal (Productos *header)
   do
     {
       if (cal->product->mayorista == FALSE && cal->product->cantidad < cal->product->cantidad_mayorista)
-	total += (gdouble)(cal->product->precio * cal->product->cantidad);
+        total += (gdouble)(cal->product->precio * cal->product->cantidad);
       else if (cal->product->mayorista == TRUE && cal->product->cantidad >= cal->product->cantidad_mayorista)
-	total += (gdouble)(cal->product->precio_mayor * cal->product->cantidad);
+        total += (gdouble)(cal->product->precio_mayor * cal->product->cantidad);
       else
-	total += (gdouble)(cal->product->precio * cal->product->cantidad);
+        total += (gdouble)(cal->product->precio * cal->product->cantidad);
 
       cal = cal->next;
     }
@@ -252,11 +253,11 @@ CompraListClean (void)
   //  gint i;
 
   /*
-  for (i = 0; i < total; i++)
+    for (i = 0; i < total; i++)
     {
-      tofree = alter;
-      alter = tofree->next;
-      FreeProduct (tofree);
+    tofree = alter;
+    alter = tofree->next;
+    FreeProduct (tofree);
     }
   */
 
@@ -289,9 +290,9 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   gchar *q;
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
-		      "unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, "
-		      "cantidad_mayor, mayorista FROM select_producto (%s)", 
-		       barcode);
+                       "unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, "
+                       "cantidad_mayor, mayorista FROM select_producto (%s)", 
+                       barcode);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -330,71 +331,71 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
 
 gint
 CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdouble precio_compra,
-		     gint margen, gboolean ingreso)
+                     gint margen, gboolean ingreso)
 {
   Productos *new = NULL;
 
   if (ingreso == TRUE)
     {
       if (compra->header == NULL)
-	{
-	  new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
-	  compra->header = new;
+        {
+          new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+          compra->header = new;
 
-	  compra->products_list = new;
+          compra->products_list = new;
 
-	  new->back = NULL;
-	  new->next = compra->header;
-	}
+          new->back = NULL;
+          new->next = compra->header;
+        }
       else
-	{
-	  Productos *end = compra->header;
+        {
+          Productos *end = compra->header;
 
-	  new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+          new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
 
-	  while (end->next != compra->header)
-	    end = end->next;
+          while (end->next != compra->header)
+            end = end->next;
 
-	  new->back = end;
+          new->back = end;
 
-	  end->next = new;
+          end->next = new;
 
-	  new->next = compra->header;
+          new->next = compra->header;
 
-	  compra->products_list = new;
-	}
+          compra->products_list = new;
+        }
     }
   else if (ingreso == FALSE)
     {
       if (compra->header_compra == NULL)
-	{
-	  new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
-	  compra->header_compra = new;
+        {
+          new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+          compra->header_compra = new;
 
-	  compra->products_compra = new;
+          compra->products_compra = new;
 
-	  new->back = NULL;
-	  new->next = compra->header_compra;
-	  compra->current = new->product;
-	}
+          new->back = NULL;
+          new->next = compra->header_compra;
+          compra->current = new->product;
+        }
       else
-	{
-	  Productos *end = compra->header_compra;
+        {
+          Productos *end = compra->header_compra;
 
-	  new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+          new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
 
-	  while (end->next != compra->header_compra)
-	    end = end->next;
+          while (end->next != compra->header_compra)
+            end = end->next;
 
-	  new->back = end;
+          new->back = end;
 
-	  end->next = new;
+          end->next = new;
 
-	  new->next = compra->header_compra;
+          new->next = compra->header_compra;
 
-	  compra->products_compra = new;
-	  compra->current = new->product;
-	}
+          compra->products_compra = new;
+          compra->current = new->product;
+        }
     }
 
   return 0;
@@ -463,9 +464,9 @@ SearchProductByBarcode (gchar *barcode, gboolean ingreso)
   do
     {
       if (strcmp (find->product->barcode, barcode) == 0)
-	return find->product;
+        return find->product;
       else
-	find = find->next;
+        find = find->next;
     }
   while (find != control);
 
@@ -489,9 +490,9 @@ BuscarPorCodigo (Productos *header, gchar *code)
   do
     {
       if (strcmp (find->product->codigo, code) == 0)
-	return find;
+        return find;
       else
-	find = find->next;
+        find = find->next;
     }
   while (find != header);
 
@@ -512,7 +513,7 @@ CalcularTotalCompra (Productos *header)
       //      if (cal->product->precio_compra == 0)
       total += (cal->product->precio_compra * cal->product->cantidad);
       /*      else
-	      total += (cal->product->precio_compra * cal->product->cantidad);
+              total += (cal->product->precio_compra * cal->product->cantidad);
       */
       cal = cal->next;
     }
@@ -529,7 +530,7 @@ LookCanjeable (Productos *header)
   do
     {
       if (look->product->canjeable == TRUE)
-	return TRUE;
+        return TRUE;
 
       look = look->next;
     }
