@@ -29,7 +29,6 @@ src/fakebuy
 src/.deps
 src/Makefile
 src/rizoma-config
-src/rizoma
 *.out
 src/rizoma-ventas
 src/rizoma-admin
