@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: f; c-basic-offset: 4 -*- */
 /*facutra_more.h
 *
 *    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>
