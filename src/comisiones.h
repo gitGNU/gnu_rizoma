@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: f; c-basic-offset: 4 -*- */
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*comisiones.h
 *
 *    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>
