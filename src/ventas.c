@@ -1595,7 +1595,10 @@ Vender (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 {
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")));
+	GtkWidget *button;
+	button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
+	gtk_widget_set_sensitive(button, TRUE);
+	gtk_widget_grab_focus (button);
 }
 
 void
