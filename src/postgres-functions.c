@@ -1024,10 +1024,10 @@ DiscountStock (Productos *header)
     {
       cantidad = CUT (g_strdup_printf ("%.2f", products->product->cantidad));
 
-      stock = atoi (GetDataByOne (g_strdup_printf ("SELECT stock FROM producto WHERE barcode='%s'",
+      stock = atoi (GetDataByOne (g_strdup_printf ("SELECT stock FROM select_producto(%s)",
                                                    products->product->barcode)));
 
-      res = EjecutarSQL (g_strdup_printf ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
+      res = EjecutarSQL (g_strdup_printf ("UPDATE productos SET stock=stock-%s WHERE barcode=%s",
                                           cantidad, products->product->barcode));
 
       if (res == NULL)
@@ -1047,10 +1047,11 @@ GetUnit (gchar *barcode)
   PGresult *res;
   char *unit;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT contenido, unidad FROM producto WHERE barcode='%s'", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT contenido, unidad FROM select_producto(%s)", barcode));
 
-  unit = g_strdup_printf ("%s %s", PQgetvalue (res, 0, 0),
-                          PQgetvalue (res, 0, 1));
+  unit = g_strdup_printf ("%s %s",
+			  PQvaluebycol (res, 0, "contenido"),
+                          PQvaluebycol (res, 0, "unidad"));
 
   return unit;
 }
@@ -1068,17 +1069,26 @@ GetCurrentStock (gchar *barcode)
   return stock;
 }
 
+/*
+ * Returns the current price of the product
+ * @param barcode barcode of the product that must return the price
+ * @return the price, if the could not be found the price returns -1
+ */
 char *
 GetCurrentPrice (gchar *barcode)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT precio FROM producto WHERE barcode='%s'", barcode));
+  q = g_strdup_printf ("SELECT precio FROM select_producto(%s)",
+		       barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL && PQntuples (res) != 0)
     return PQgetvalue (res, 0, 0);
   else
-    return "0";
+    return "-1";
 }
 
 gint
