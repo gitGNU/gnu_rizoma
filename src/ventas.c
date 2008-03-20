@@ -2524,7 +2524,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
 
   //  if (ventas != FALSE)
-  q = g_strdup_printf ("SELECT * FROM informacion_producto (%s)", barcode);
+  q = g_strdup_printf ("SELECT * FROM informacion_producto (%s,'')", barcode);
   /* else */
   /*   q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, contenido, unidad, stock, " */
   /*  "precio, mayorista FROM producto " */
