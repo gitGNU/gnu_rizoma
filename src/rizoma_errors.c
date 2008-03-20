@@ -1,4 +1,5 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
+       c-indentation-style: gnu -*- */
 /*rizoma_errors.c
 *
 *    Copyright (C) 2006 Rizoma Tecnologia Limitada <info@rizoma.cl>

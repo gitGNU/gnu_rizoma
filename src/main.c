@@ -1,4 +1,5 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
+       c-indentation-style: gnu -*- */
 /*main.c
  *
  *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -531,5 +532,3 @@ Question (MainBox *module_box)
 
   gtk_widget_show_all (window);
 }
-
-
