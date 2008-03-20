@@ -270,10 +270,8 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   SaveProductsSell (venta->header, venta_id);
 
-  if (g_str_equal(vale_dir, NULL) || g_str_equal(vale_dir, ""))
-    {
+  if ((vale_dir == NULL) || g_str_equal(vale_dir, ""))
       PrintVale (venta->header, venta_id, total);
-    }
 
   if (tipo_venta == CHEQUE)
     {
@@ -1123,7 +1121,7 @@ SaveProductsSell (Productos *products, gint id_venta)
   gint margen;
   gchar *cantidad;
   gint precio;
-
+  gchar *q;
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
@@ -1178,11 +1176,11 @@ SaveProductsSell (Productos *products, gint id_venta)
         precio = products->product->precio_mayor;
       else
         precio = products->product->precio;
-
-      res = EjecutarSQL
-        (g_strdup_printf
-         ("INSERT INTO venta_detalle VALUES(DEFAULT, %d, %s, %s, %d, %d, %ld, %ld)", id_venta, products->product->barcode, cantidad, precio,
-          products->product->fifo, lround (iva), lround (otros)));
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %d, %ld, %ld)",
+			   id_venta, products->product->barcode, cantidad, precio,
+			   products->product->fifo, lround (iva), lround (otros));
+      res = EjecutarSQL (q);
+      g_free (q);
 
       products = products->next;
     }

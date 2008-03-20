@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Thu Mar 20 01:35:53 2008 -->
+<!--Generated with glade3 3.4.1 on Thu Mar 20 19:30:43 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>
@@ -748,7 +748,7 @@
               </widget>
             </child>
             <child>
-              <widget class="GtkEntry" id="entry1">
+              <widget class="GtkEntry" id="entry_id_vendedor">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -787,7 +787,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="activate" handler="ChangeSeller"/>
+                <signal name="activate" handler="ChangeSeller" object="entry_id_vendedor"/>
               </widget>
               <packing>
                 <property name="position">1</property>
@@ -808,6 +808,7 @@
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="destroy_with_parent">True</property>
+    <property name="transient_for">ventas_gui</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>

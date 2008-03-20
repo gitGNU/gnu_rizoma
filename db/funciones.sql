@@ -1466,6 +1466,48 @@ BEGIN
 	return;
 END; $$ language plpgsql;
 
+create or replace function registrar_venta_detalle(
+       in in_id_venta int,
+       in in_barcode bigint,
+       in in_cantidad double precision,
+       in in_precio int,
+       in in_fifo int,
+       in in_iva int,
+       in in_otros int)
+returns void as $$
+declare
+aux int;
+num_linea int;
+begin
+	aux := (select count(*) from venta_detalle where id_venta = in_id_venta);
+	
+	if aux = 0 then
+	   num_linea := 0;
+	else
+	   num_linea := (select max(id) from venta_detalle where id_venta = in_id_venta);
+	   num_linea := num_linea + 1;
+	end if;
+	INSERT INTO venta_detalle(id, 
+	       	    		  id_venta, 
+				  barcode, 
+				  cantidad, 
+				  precio, 
+				  fifo, 
+				  iva, 
+				  otros)
+	       	    VALUES(num_linea, 
+		    	   in_id_venta, 
+			   in_barcode, 
+			   in_cantidad, 
+			   in_precio, 
+			   in_fifo, 
+			   in_iva, 
+			   in_otros);
+
+end;$$ language plpgsql;
+
+       
+
 create or replace function buscar_producto(IN expresion varchar(255),
 	IN columnas varchar[],
 	IN usar_like boolean,

@@ -3335,7 +3335,7 @@ CloseWindowChangeSeller (GtkWidget *widget, gpointer data)
 void
 ChangeSeller (GtkWidget *widget, gpointer data)
 {
-  GtkEntry *entry = (GtkEntry *) data;
+  GtkEntry *entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_id_vendedor"));
   gint id = atoi (gtk_entry_get_text (entry));
   gchar *user_name;
 
