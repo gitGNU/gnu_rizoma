@@ -2615,7 +2615,8 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 void
 BuscarProducto (GtkWidget *widget, gpointer data)
 {
-
+	GtkWidget *aux_widget;
+	GtkWidget *entry;
   GtkWindow *window;
 
   GtkListStore *store;
@@ -2625,10 +2626,14 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "ventas_buscar_entry")),
-                      gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder,
+												  "ventas_buscar_entry"));
+  entry = GTK_WIDGET(gtk_builder_get_object (builder, "barcode_entry"));
 
-  if (gtk_tree_view_get_model (treeview) == NULL )
+  gtk_entry_set_text (GTK_ENTRY (aux_widget),
+                      gtk_entry_get_text (GTK_ENTRY (entry)));
+
+  if (gtk_tree_view_get_model (GTK_TREE_VIEW(treeview)) == NULL )
     {
       store = gtk_list_store_new (10,
                                   G_TYPE_STRING,
@@ -2658,7 +2663,8 @@ BuscarProducto (GtkWidget *widget, gpointer data)
       if (solo_venta != TRUE)
         {
           renderer = gtk_cell_renderer_text_new ();
-          column = gtk_tree_view_column_new_with_attributes ("Código de Barras", renderer,
+          column = gtk_tree_view_column_new_with_attributes ("Código de Barras",
+															 renderer,
                                                              "text", 1,
                                                              NULL);
           gtk_tree_view_append_column (treeview, column);
@@ -2668,7 +2674,8 @@ BuscarProducto (GtkWidget *widget, gpointer data)
         }
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Descripción",
+														 renderer,
                                                          "text", 2,
                                                          "foreground", 8,
                                                          "foreground-set", 9,
