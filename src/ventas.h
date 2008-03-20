@@ -90,4 +90,6 @@ void CancelWindow (GtkWidget *widget, gpointer data);
 void WindowChangeSeller ();
 
 void MoveFocus (GtkEntry *entry, gpointer data);
+gboolean on_delete_ventas_gui (GtkWidget *widget, GdkEvent  *event, gpointer   user_data);
+void exit_response (GtkDialog *dialog, gint response_id, gpointer user_data);
 #endif
