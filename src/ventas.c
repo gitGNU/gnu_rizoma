@@ -930,6 +930,8 @@ ventas_win ()
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
   GtkTreeIter iter;
+  GtkWidget *ventas_gui;
+  gchar *fullscreen_opt = NULL;
 
   venta = (Venta *) g_malloc (sizeof (Venta));
   venta->header = NULL;
@@ -942,7 +944,14 @@ ventas_win ()
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", NULL);
   gtk_builder_connect_signals (builder, NULL);
 
-  gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui")));
+  ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
+
+  // check if the window must be set to fullscreen
+  fullscreen_opt = rizoma_get_value("FULLSCREEN");
+  if ((fullscreen_opt != NULL) && (g_str_equal(fullscreen_opt, "YES")))
+      gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
+
+  gtk_widget_show_all (ventas_gui);
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                         g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
@@ -3993,7 +4002,7 @@ check_passwd (GtkWidget *widget, gpointer data)
 
       Asistencia (user_data->user_id, TRUE);
 
-      gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
+      gtk_widget_destroy (GTK_WIDGET(gtk_builder_get_object (builder,"login_window")));
       g_object_unref ((gpointer) builder);
       builder = NULL;
 
