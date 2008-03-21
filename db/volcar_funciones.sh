@@ -31,7 +31,10 @@ fi
 echo "$DB_HOST:$DB_PORT:$DB_NAME:$DB_USER:" > ~/.pgpass
 chmod 0600 ~/.pgpass
 
-psql $DB_NAME < `psql rizoma -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}'`
+psql rizoma -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}' >  /tmp/drop_functions.sql
+
+psql -f /tmp/drop_functions.sql $DB_NAME
+rm /tmp/drop_fucntions.sql
 
 psql $DB_NAME < funciones.sql
 
