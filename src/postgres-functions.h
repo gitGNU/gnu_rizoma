@@ -1,24 +1,24 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*postgres-functions.h
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<libpq-fe.h>
 #ifndef POSTGRES_FUNCTIONS_H
@@ -46,23 +46,23 @@ gchar * GetDataByOne (gchar *setencia);
 gboolean DeleteProduct (gchar *codigo);
 
 gint SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount,
-	       gint boleta, gint tipo_documento, gchar *cheque_date,  gboolean cheques, gboolean canceled);
+               gint boleta, gint tipo_documento, gchar *cheque_date,  gboolean cheques, gboolean canceled);
 
 PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
-			       gint to_year, gint to_month, gint to_day,
-			       gchar *date_column, gchar *fields);
+                               gint to_year, gint to_month, gint to_day,
+                               gchar *date_column, gchar *fields);
 
 gint GetTotalCashSell (guint from_year, guint from_month, guint from_day,
-		       guint to_year, guint to_month, guint to_day, gint *total);
+                       guint to_year, guint to_month, guint to_day, gint *total);
 
 gint GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
-			 guint to_year, guint to_month, guint to_day, gint *total);
+                         guint to_year, guint to_month, guint to_day, gint *total);
 
 gint GetTotalSell (guint from_year, guint from_month, guint from_day,
-		   guint to_year, guint to_month, guint to_day, gint *total);
+                   guint to_year, guint to_month, guint to_day, gint *total);
 
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-		       gchar *direccion, gchar *fono, gint credito, gchar *giro);
+                       gchar *direccion, gchar *fono, gint credito, gchar *giro);
 
 gboolean RutExist (gchar *rut);
 
@@ -103,7 +103,7 @@ gchar * ReturnUsername (gint id);
 gboolean SaveNewPassword (gchar *passwd, gchar *user);
 
 gboolean AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
-		       gchar *username, gchar *passwd, gchar *id);
+                       gchar *username, gchar *passwd, gchar *id);
 
 gboolean ReturnUserExist (gchar *user);
 
@@ -116,12 +116,12 @@ gboolean DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, g
 gboolean ExistProductHistory (gchar *barcode);
 
 void SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unidad,
-			gchar *contenido, gchar *precio, gboolean iva, gchar *otros, gchar *barcode,
-			gchar *familia, gboolean perecible, gboolean fraccion);
+                        gchar *contenido, gchar *precio, gboolean iva, gchar *otros, gchar *barcode,
+                        gchar *familia, gboolean perecible, gboolean fraccion);
 
 gboolean AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca, char *contenido,
-							gchar *unidad, gboolean iva, gchar *otros, gchar *familia, gboolean perecible,
-							gboolean fraccion);
+                            gchar *unidad, gboolean iva, gchar *otros, gchar *familia, gboolean perecible,
+                            gboolean fraccion);
 
 void AgregarCompra (gchar *rut, gchar *nota, gint dias_pago);
 
@@ -150,7 +150,7 @@ gboolean SaveProductsSell (Productos *products, gint id_venta);
 PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day);
 
 gboolean AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gchar *comuna,
-			   gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro);
+                           gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro);
 
 gboolean SetProductosIngresados (void);
 
@@ -159,17 +159,17 @@ gdouble GetDayToSell (gchar *barcode);
 gint GetMinStock (gchar *barcode);
 
 gboolean SaveDataCheque (gint id_venta, gchar *serie, gint number, gchar *banco, gchar *plaza,
-			 gint monto, gint day, gint month, gint year);
+                         gint monto, gint day, gint month, gint year);
 
 gint ReturnIncompletProducts (gint id_venta);
 
 Proveedor * ReturnProveedor (gint id_compra);
 
 gint IngresarFactura (gchar *n_doc, gint id_compra, gchar *rut_proveedor, gint total,
-		      gchar *d_emision, gchar *m_emision, gchar *y_emision, gint guia);
+                      gchar *d_emision, gchar *m_emision, gchar *y_emision, gint guia);
 
 gint IngresarGuia (gchar *n_doc, gint id_compra, gint total,
-		   gchar *d_emision, gchar *m_emision, gchar *y_emision);
+                   gchar *d_emision, gchar *m_emision, gchar *y_emision);
 
 gboolean AsignarFactAGuia (gint n_guia, gint id_factura);
 
@@ -212,8 +212,8 @@ gchar * ValorTotalStock (void);
 gchar * ContriTotalStock (void);
 
 void SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *margen, gchar *new_venta,
-				gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
-				gint cantidad_mayorista);
+                                gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
+                                gint cantidad_mayorista);
 
 gboolean Egresar (gint monto, gchar *motivo, gint usuario);
 
@@ -238,6 +238,6 @@ gboolean Devolver (gchar *barcode, gchar *cantidad);
 gboolean Recivir (gchar *barcode, gchar *cantidad);
 
 gint SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *comuna,
-				 gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,
-				 gchar *email, gchar *giro);
+                                 gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,
+                                 gchar *email, gchar *giro);
 #endif

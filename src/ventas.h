@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*ventas.h
 *
 *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -41,8 +41,6 @@ void CleanSellLabels (void);
 void CleanEntryAndLabelData (void);
 
 void TipoVenta (GtkWidget *widget, gpointer data);
-
-void CloseSellWindow (GtkWidget *widget, gpointer user_data);
 
 void CambiarTipoVenta (GtkToggleButton *button, gpointer user_data);
 

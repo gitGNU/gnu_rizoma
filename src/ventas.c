@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
    c-indentation-style: gnu -*- */
 /*ventas.c
  *
@@ -174,7 +174,6 @@ CanjearProductoWin (GtkWidget *widget, gpointer data)
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *label;
-  //  GtkWidget *entry;
   GtkWidget *button;
 
   gtk_widget_set_sensitive (main_window, FALSE);
@@ -183,7 +182,6 @@ CanjearProductoWin (GtkWidget *widget, gpointer data)
   gtk_window_set_title (GTK_WINDOW (window), "Canjear Producto");
   gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
   gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-  //  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (gtk_widget_get_toplevel (widget)));
   gtk_window_present (GTK_WINDOW (window));
   gtk_widget_show (window);
 
@@ -340,8 +338,6 @@ SelectChequeDate (GtkToggleButton *widget, gpointer data)
     {
       gtk_widget_destroy (calendar_window);
     }
-
-  //  SetToggleMode (widget, NULL);
 }
 
 void
@@ -1375,7 +1371,7 @@ Vender (GtkButton *button, gpointer data)
   gint maquina = atoi (rizoma_get_value ("MAQUINA"));
   gint vendedor = user_data->user_id;
   gint paga_con;
-  gint ticket;
+  gint ticket = 0;
   gboolean canceled;
 
   if (tipo_documento != VENTA && tipo_documento != FACTURA)
@@ -1571,7 +1567,8 @@ Vender (GtkButton *button, gpointer data)
       monto_cheque = 0;
     }
 
-  CloseSellWindow (NULL, NULL);
+  gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
   gtk_list_store_clear (venta->store);
 
@@ -1581,12 +1578,10 @@ Vender (GtkButton *button, gpointer data)
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
-  /* if (monto >= 180 && ticket != -1) */
-  /*   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
-  /*                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number)); */
-  /* else */
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+
+  PrintDocument (tipo_documento, rut, monto, ticket, venta->products);
 
   ListClean ();
 
@@ -1648,27 +1643,21 @@ TipoVenta (GtkWidget *widget, gpointer data)
 
   if (strcmp (tipo_vendedor, "1") == 0)
     {
-      tipo_documento = SIMPLE;
+      tipo_documento = VENTA;
+      window = GTK_WINDOW (gtk_builder_get_object (builder, "vendedor_venta"));
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "button_imprimir")));
+      gtk_widget_show_all (GTK_WIDGET (window));
     }
   else
     {
+      tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "tipo_venta_win_venta"));
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0");
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), "");
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")), "");
       gtk_widget_show_all (GTK_WIDGET (window));
-      return;
     }
-}
-
-void
-CloseSellWindow (GtkWidget *widget, gpointer user_data)
-{
-  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "tipo_venta_win_venta")));
-
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-
-  CalcularVentas (venta->header);
+  return;
 }
 
 void
@@ -3320,7 +3309,7 @@ ChangeSeller (GtkWidget *widget, gpointer data)
   else
     {
       ErrorMSG (widget, g_strdup_printf
-                ("No existe un usuario con el identificador %d", id));
+                ("No existe un usuario con el indentificador %d", id));
     }
 }
 

@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
        c-indentation-style: gnu -*- */
 /*usuarios.c
 *
@@ -668,7 +668,7 @@ AddSeller (void)
     }
   if (g_ascii_isdigit (id[0]) ==  FALSE && strcmp (id, "") != 0)
     {
-      rizoma_errors_set ("El identificador debe ser un numero", "AddSeller()", ALERT);
+      rizoma_errors_set ("El indentificador debe ser un numero", "AddSeller()", ALERT);
 
       rizoma_error_window (id_box);
 

@@ -1,25 +1,25 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
+   c-indentation-style: gnu -*- */
 /*vale.c
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a 1copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a 1copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #define _XOPEN_SOURCE 600
 #include<features.h>
 
@@ -60,15 +60,15 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
     if (products->product->iva != 0)
       {
-	if (products->product->mayorista == FALSE)
-	  precio = products->product->precio;
-	else
-	  precio = products->product->precio_mayor;
+        if (products->product->mayorista == FALSE)
+          precio = products->product->precio;
+        else
+          precio = products->product->precio_mayor;
 
-	fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
-		 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
+        fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
+                 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
 
-	civa += (double)(products->product->cantidad * precio);
+        civa += (double)(products->product->cantidad * precio);
       }
 
     products = products->next;
@@ -81,15 +81,15 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
     if (products->product->iva == 0)
       {
-	if (products->product->mayorista == FALSE)
-	  precio = products->product->precio;
-	else
-	  precio = products->product->precio_mayor;
+        if (products->product->mayorista == FALSE)
+          precio = products->product->precio;
+        else
+          precio = products->product->precio_mayor;
 
-	fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
-		 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
+        fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
+                 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
 
-	siva+= (double)(products->product->cantidad * precio);
+        siva+= (double)(products->product->cantidad * precio);
       }
 
     products = products->next;
