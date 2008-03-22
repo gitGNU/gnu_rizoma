@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.3 on Sat Mar 22 13:48:34 2008 -->
+<!--Generated with glade3 3.4.3 on Sat Mar 22 13:28:01 2008 -->
 <interface>
   <object class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>

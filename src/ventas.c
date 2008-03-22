@@ -88,6 +88,7 @@ void
 FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
                  gchar *precio, gchar *precio_mayor, gchar *cantidad_mayor, gchar *codigo_corto)
 {
+
   GtkWidget *widget;
 
   //caja de producto

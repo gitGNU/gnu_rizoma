@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sat Mar 22 13:48:45 2008 -->
+<!--Generated with glade3 3.4.3 on Sat Mar 22 13:28:01 2008 -->
+
 <glade-interface>
   <widget class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>
