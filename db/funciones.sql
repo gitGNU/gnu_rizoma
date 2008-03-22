@@ -291,7 +291,7 @@ declare
 BEGIN
 
 SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
-       FROM compra_detalle, producto, compra 
+       FROM compra_detalle, producto, compra
        WHERE producto.barcode= codigo_barras AND compra_detalle.barcode_product=producto.barcode
        AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
 
@@ -321,7 +321,7 @@ precio := datos.precio;
 costo_promedio := datos.costo_promedio;
 stock_min := datos.stock_min;
 margen_promedio := datos.margen_promedio;
-merma_unid := datos.merma_unid;
+unidades_merma := datos.merma_unid;
 contrib_agregada := datos.contrib_agregada;
 unidades_merma := datos.unidades_merma;
 mayorista := datos.mayorista;
@@ -1122,7 +1122,7 @@ end if;
 q := $S$INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos) VALUES ($S$
   || aux || $S$,$S$
   || id_compra_in || $S$,$S$
-  || cantidad || $S$,$S$ 
+  || cantidad || $S$,$S$
   || precio || $S$,$S$
   || precio_venta || $S$,$S$
   || cantidad_ingresada || $S$,$S$
@@ -1236,8 +1236,8 @@ declare
 	q text;
 	l record;
 begin
-q := 'SELECT rut,dv,nombre,direccion,ciudad,comuna,telefono,email,web,contacto,giro 
-     	     FROM proveedor WHERE lower(nombre) LIKE lower(' 
+q := 'SELECT rut,dv,nombre,direccion,ciudad,comuna,telefono,email,web,contacto,giro
+     	     FROM proveedor WHERE lower(nombre) LIKE lower('
 	     || quote_literal($1) || ') '
 	     || 'OR lower(rut) LIKE lower(' || quote_literal($1) || ')';
 for l in execute q loop
@@ -1480,33 +1480,33 @@ aux int;
 num_linea int;
 begin
 	aux := (select count(*) from venta_detalle where id_venta = in_id_venta);
-	
+
 	if aux = 0 then
 	   num_linea := 0;
 	else
 	   num_linea := (select max(id) from venta_detalle where id_venta = in_id_venta);
 	   num_linea := num_linea + 1;
 	end if;
-	INSERT INTO venta_detalle(id, 
-	       	    		  id_venta, 
-				  barcode, 
-				  cantidad, 
-				  precio, 
-				  fifo, 
-				  iva, 
+	INSERT INTO venta_detalle(id,
+	       	    		  id_venta,
+				  barcode,
+				  cantidad,
+				  precio,
+				  fifo,
+				  iva,
 				  otros)
-	       	    VALUES(num_linea, 
-		    	   in_id_venta, 
-			   in_barcode, 
-			   in_cantidad, 
-			   in_precio, 
-			   in_fifo, 
-			   in_iva, 
+	       	    VALUES(num_linea,
+		    	   in_id_venta,
+			   in_barcode,
+			   in_cantidad,
+			   in_precio,
+			   in_fifo,
+			   in_iva,
 			   in_otros);
 
 end;$$ language plpgsql;
 
-       
+
 
 create or replace function buscar_producto(IN expresion varchar(255),
 	IN columnas varchar[],
@@ -1611,17 +1611,17 @@ declare
 		query text;
 begin
 		query := $S$ select compra.id,
-		      proveedor.nombre, 
+		      proveedor.nombre,
 		      SUM((compra_detalle.cantidad - compra_detalle.cantidad_ingresada) * compra_detalle.precio) as monto,
-		      date_part('day', compra.fecha) as dia, 
-		      date_part ('month', compra.fecha) as mes, 
+		      date_part('day', compra.fecha) as dia,
+		      date_part ('month', compra.fecha) as mes,
 		      date_part('year', compra.fecha) as ano
 
-		      FROM compra 
+		      FROM compra
 		      	   inner join proveedor on compra.rut_proveedor = proveedor.rut
 			   inner join compra_detalle on compra.id = compra_detalle.id_compra
-		      
-		      WHERE compra_detalle.cantidad_ingresada<compra_detalle.cantidad 
+
+		      WHERE compra_detalle.cantidad_ingresada<compra_detalle.cantidad
 			    and compra_detalle.anulado='f'
 
 		      GROUP BY compra.id, proveedor.nombre, compra.fecha
