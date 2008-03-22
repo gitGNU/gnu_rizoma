@@ -1167,7 +1167,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   cantidad = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))),
                      (char **)NULL);
 
-  if (cantidad <= 0 && VentaFraccion (barcode) == FALSE)
+  if (cantidad <= 0)
     {
       aux_widget = gtk_builder_get_object (builder, "cantidad_entry");
       AlertMSG (aux_widget, "No puede vender una cantidad 0 o menor");
