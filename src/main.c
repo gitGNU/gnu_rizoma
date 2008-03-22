@@ -133,33 +133,7 @@ main (int argc, char *argv[])
   GKeyFile *key_file;
   gchar **profiles;
 
-  /* dimension = (Dimensions *) g_malloc (sizeof (Dimensions)); */
-  /* //  dimension->factura_cliente = (Position *) g_malloc (sizeof (Position)); */
-
-  /* ParmsDimensions dimensions[17] = { */
-  /* {"factura_size", &dimension->factura_size}, */
-  /* {"factura_cliente", &dimension->factura_cliente}, */
-  /* {"factura_address", &dimension->factura_address}, */
-  /* {"factura_giro", &dimension->factura_giro}, */
-  /* {"factura_rut", &dimension->factura_rut}, */
-  /* {"factura_comuna", &dimension->factura_comuna}, */
-  /* {"factura_fono", &dimension->factura_fono}, */
-  /* {"factura_subtotal", &dimension->factura_subtotal}, */
-  /* {"factura_iva", &dimension->factura_iva}, */
-  /* {"factura_total", &dimension->factura_total}, */
-  /* {"factura_detail_begin", &dimension->factura_detail_begin}, */
-  /* {"factura_detail_end", &dimension->factura_detail_end}, */
-  /* {"factura_codigo", &dimension->factura_codigo}, */
-  /* {"factura_descripcion", &dimension->factura_descripcion}, */
-  /* {"factura_cantidad", &dimension->factura_cantidad}, */
-  /* {"factura_precio_uni", &dimension->factura_precio_uni}, */
-  /* {"factura_precio_total", &dimension->factura_precio_total}, */
-  /* }; */
-  /* read_dimensions ("~/.rizoma_dimensions", dimensions, 17); */
-
-
   main_window = NULL;
-
 
   config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
 
