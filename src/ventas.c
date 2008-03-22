@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*ventas.c
  *
  *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -953,7 +953,7 @@ ventas_win ()
   // check if the window must be set to fullscreen
   fullscreen_opt = rizoma_get_value("FULLSCREEN");
   if ((fullscreen_opt != NULL) && (g_str_equal(fullscreen_opt, "YES")))
-      gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
+    gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
 
   gtk_widget_show_all (ventas_gui);
 
@@ -1547,14 +1547,11 @@ Vender (GtkButton *button, gpointer data)
 
   if (data != NULL && (venta->tipo_venta == TARJETA || venta->tipo_venta == CREDITO ||
                        (cheque == TRUE && monto_cheque >= monto) || venta->tipo_venta == FACTURA))
-    //gtk_widget_destroy ((GtkWidget *)data);
     CancelarTipo ((GtkWidget *)data, (gpointer)FALSE);
-  /* else if (tipos_window != NULL && monto_cheque >= monto)
-     gtk_widget_destroy (tipos_window);*/
+
   else if (monto > monto_cheque && venta->tipo_venta == CHEQUE)
     {
       if (data != NULL)
-        //gtk_widget_destroy ((GtkWidget *)data);
         CancelarTipo ((GtkWidget *)data, (gpointer)FALSE);
 
       FillDatosVenta (NULL, (gpointer)tipo_venta);
@@ -1569,11 +1566,6 @@ Vender (GtkButton *button, gpointer data)
       monto_cheque = 0;
     }
 
-  /*
-    if (cheque == TRUE)
-    CloseChequeWindow ();
-  */
-
   CloseSellWindow (NULL, NULL);
 
   gtk_list_store_clear (venta->store);
@@ -1584,14 +1576,12 @@ Vender (GtkButton *button, gpointer data)
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
-  if (monto >= 180 && ticket != -1)
-    gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                          g_strdup_printf ("<b><big>%.6d</big></b>", ticket+1));
-  else
-    gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                          g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
-
-  //  PrintDocument (tipo_documento, rut, monto, ticket, venta->products);
+  /* if (monto >= 180 && ticket != -1) */
+  /*   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
+  /*                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number)); */
+  /* else */
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
 
   ListClean ();
 
@@ -1603,10 +1593,10 @@ Vender (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 {
-	GtkWidget *button;
-	button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
-	gtk_widget_set_sensitive(button, TRUE);
-	gtk_widget_grab_focus (button);
+  GtkWidget *button;
+  button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
+  gtk_widget_set_sensitive(button, TRUE);
+  gtk_widget_grab_focus (button);
 }
 
 void
@@ -1643,7 +1633,7 @@ void
 TipoVenta (GtkWidget *widget, gpointer data)
 {
   GtkWindow *window;
-  gchar *tipo_vendedor = rizoma_get_value("VENDEDOR");
+  gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
 
   if (venta->header == NULL)
     {
@@ -1669,45 +1659,12 @@ TipoVenta (GtkWidget *widget, gpointer data)
 void
 CloseSellWindow (GtkWidget *widget, gpointer user_data)
 {
-  //  gchar *name_window = (gchar *) user_data;
-  /*
-    gtk_widget_destroy (venta->window);
-    venta->window = NULL;
-
-    gtk_widget_set_sensitive (main_window, TRUE);
-  */
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "tipo_venta_win_venta")));
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
   CalcularVentas (venta->header);
-
 }
-
-/* void */
-/* CambiarTipoVenta (GtkToggleButton *button, */
-/*   gpointer data) */
-/* { */
-/*   gboolean state = gtk_toggle_button_get_active (button); */
-
-/*   gtk_widget_set_sensitive (venta->entry_rut, state); */
-/*   gtk_widget_set_sensitive (venta->find_button, state); */
-
-/*   gtk_widget_set_sensitive (venta->sell_button, FALSE); */
-
-/*   if (state == TRUE) */
-/*     { */
-/*       gtk_widget_set_sensitive (gtk_builder_get_object (builder, "sencillo_entry"), FALSE); */
-/*       //      gtk_widget_set_sensitive (vuelto_button, FALSE); */
-/*     } */
-/*   else */
-/*     { */
-/*       gtk_widget_set_sensitive (gtk_builder_get_object (builder, "sencillo_entry"), TRUE); */
-/*       //      gtk_widget_set_sensitive (vuelto_button, TRUE); */
-/*     } */
-
-/*   venta->tipo_venta = state; */
-/* } */
 
 void
 CalcularVuelto (void)
@@ -2154,7 +2111,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
         {
           renderer = gtk_cell_renderer_text_new ();
           column = gtk_tree_view_column_new_with_attributes ("Código de Barras",
-															 renderer,
+                                                             renderer,
                                                              "text", 1,
                                                              NULL);
           gtk_tree_view_append_column (treeview, column);
@@ -2165,7 +2122,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
 
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Descripción",
-														 renderer,
+                                                         renderer,
                                                          "text", 2,
                                                          "foreground", 8,
                                                          "foreground-set", 9,
@@ -2542,28 +2499,28 @@ Descuento (GtkWidget *widget, gpointer data)
   total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
 
   /*  if (money_discount == TRUE)
-    {
+      {
       porcentaje = (gdouble)(100 * money) / total;
 
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")),
-                          g_strdup_printf ("%.2f", porcentaje));
+      g_strdup_printf ("%.2f", porcentaje));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-                            g_strdup_printf ("<span size=\"40000\">%s</span>",
-                                             PutPoints (g_strdup_printf ("%u", total - money))));
-    }
-  else if (money_discount == FALSE)
-  {*/
-      plata = lround ((gdouble)(total * discount) / 100);
+      g_strdup_printf ("<span size=\"40000\">%s</span>",
+      PutPoints (g_strdup_printf ("%u", total - money))));
+      }
+      else if (money_discount == FALSE)
+      {*/
+  plata = lround ((gdouble)(total * discount) / 100);
 
-      if (tipo_documento != FACTURA)
-        gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")),
-                            g_strdup_printf ("%d", plata));
+  if (tipo_documento != FACTURA)
+    gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")),
+                        g_strdup_printf ("%d", plata));
 
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-                            g_strdup_printf ("<span size=\"40000\">%s</span>",
-                                             PutPoints (g_strdup_printf ("%u", total - plata))));
-      //}
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+                        g_strdup_printf ("<span size=\"40000\">%s</span>",
+                                         PutPoints (g_strdup_printf ("%u", total - plata))));
+  //}
 }
 
 gboolean
