@@ -1207,7 +1207,7 @@ AgregarProducto (GtkButton *button, gpointer data)
         }
     }
 
-  if (g_str_equal ("", codigo))
+  if (!(g_str_equal ("", codigo)))
     {
       /*
         Nos aseguramos de tener un subtotal
