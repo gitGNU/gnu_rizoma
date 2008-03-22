@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.1 on Sat Mar 22 17:10:13 2008 -->
+<!--Generated with glade3 3.4.1 on Sat Mar 22 17:39:09 2008 -->
 <interface>
   <object class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>
@@ -487,9 +487,36 @@
             <property name="homogeneous">True</property>
             <property name="layout_style">GTK_BUTTONBOX_START</property>
             <child>
-              <object class="GtkButton" id="button4">
+              <object class="GtkButton" id="button_delete_product">
                 <property name="visible">True</property>
-                <property context="yes" name="label" translatable="yes">Eliminar Producto</property>
+                <signal handler="EliminarProducto" name="activate"/>
+                <child>
+                  <object class="GtkHBox" id="hbox3">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <child>
+                      <object class="GtkImage" id="image1">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="stock">gtk-remove</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label21">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="label" translatable="yes">Quitar Producto</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
