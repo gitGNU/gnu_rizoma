@@ -21,9 +21,6 @@
 -- se debe ser superusuario para crear el lenguaje
 CREATE LANGUAGE plpgsql;
 
--- estas son las funciones que deben ir en la base de datos
--- algunas no estan con buena sintaxis
-
 -- revisa si hay devoluciones de un producto dado
 -- administracion_productos.c:123
 create or replace function hay_devolucion(int8)
