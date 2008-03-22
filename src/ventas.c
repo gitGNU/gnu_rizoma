@@ -34,7 +34,6 @@
 #include<time.h>
 
 #include"tipos.h"
-#include"main.h"
 #include"ventas.h"
 #include"credito.h"
 #include"postgres-functions.h"
@@ -89,8 +88,14 @@ void
 FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
                  gchar *precio, gchar *precio_mayor, gchar *cantidad_mayor, gchar *codigo_corto)
 {
+  GtkWidget *widget;
+
   //caja de producto
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
+  gtk_entry_set_text(GTK_ENTRY(widget), barcode);
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_entry")),
+
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")),
                       g_strdup_printf ("%s  %s  %s  %s", codigo_corto, marca, contenido, unidad));
 
   if (atoi (stock) <= GetMinStock (barcode))
@@ -125,7 +130,7 @@ FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *conten
                                           strtod (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))), (char **)NULL) *
                                           atoi (precio))));
 
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), codigo_corto);
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), codigo_corto);
 }
 
 void
@@ -1094,7 +1099,7 @@ ventas_win ()
 gboolean
 SearchProductByCode (void)
 {
-  gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto"))));
+  gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
@@ -1152,7 +1157,7 @@ SearchProductByCode (void)
 gboolean
 AgregarProducto (GtkButton *button, gpointer data)
 {
-  gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto"))));
+  gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
   guint32 total;
   gdouble stock = GetCurrentStock (barcode);
@@ -1300,8 +1305,8 @@ AgregarProducto (GtkButton *button, gpointer data)
 void
 CleanSellLabels (void)
 {
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), "");
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_entry")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")), "");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
@@ -1311,8 +1316,8 @@ CleanSellLabels (void)
 void
 CleanEntryAndLabelData (void)
 {
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_entry")), "");
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), "");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")), "1");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")), "");
@@ -1770,7 +1775,7 @@ AddProduct (void)
                           0, &value,
                           -1);
 
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")),
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")),
                           g_strdup_printf ("%d", value));
 
       SearchProductByCode ();
@@ -1996,16 +2001,15 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   if (strcmp (barcode, "") == 0)
     return 0;
 
-  if (HaveCharacters (barcode) == TRUE || strcmp (barcode, "") == 0)
+  if (HaveCharacters (barcode) == TRUE || g_str_equal (barcode, ""))
     {
       BuscarProducto (NULL, NULL);
-
       return 0;
     }
 
   if (strlen (barcode) <= 5)
     {
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), barcode);
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), barcode);
 
       SearchProductByCode ();
 
@@ -2108,8 +2112,8 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 void
 BuscarProducto (GtkWidget *widget, gpointer data)
 {
-	GtkWidget *aux_widget;
-	GtkWidget *entry;
+  GtkWidget *aux_widget;
+  GtkWidget *entry;
   GtkWindow *window;
 
   GtkListStore *store;
@@ -2120,7 +2124,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   GtkTreeViewColumn *column;
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object (builder,
-												  "ventas_buscar_entry"));
+						  "ventas_buscar_entry"));
   entry = GTK_WIDGET(gtk_builder_get_object (builder, "barcode_entry"));
 
   gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -2504,7 +2508,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
       if (ventas == TRUE)
         {
 
-          gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_entry")), product);
+          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")), product);
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
                                 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
@@ -2514,7 +2518,6 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
                                                  PutPoints (g_strdup_printf ("%u", atoi (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))) *
                                                                              atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))))));
 
-          //gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "codigo_corto")), codigo);
           gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), barcode);
 
           SearchBarcodeProduct (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), (gpointer)TRUE);
@@ -3500,24 +3503,24 @@ check_passwd (GtkWidget *widget, gpointer data)
 }
 
 gboolean
-on_delete_ventas_gui (GtkWidget *widget, GdkEvent  *event, gpointer   user_data)
+on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
-	GtkWidget *window;
-	window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
-	gtk_widget_show_all (window);
-	return TRUE;
+  GtkWidget *window;
+  window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+  gtk_widget_show_all (window);
+  return TRUE;
 }
 
 void
 exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
   if (response_id == GTK_RESPONSE_YES)
-	  {
-		  //TODO: find out how to get the user id
-		  //Asistencia (user_data->user_id, FALSE);
-		  gtk_main_quit();
-	  }
+    {
+      //TODO: find out how to get the user id
+      //Asistencia (user_data->user_id, FALSE);
+      gtk_main_quit();
+    }
   else
-	  if (response_id == GTK_RESPONSE_NO)
-		  gtk_widget_hide (GTK_WIDGET (dialog));
+    if (response_id == GTK_RESPONSE_NO)
+      gtk_widget_hide (GTK_WIDGET (dialog));
 }

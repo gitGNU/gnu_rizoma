@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*rizoma-config.c
  *
  *    Copyright (C) 2006,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -76,21 +76,23 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "DEFAULT", "VENTA_DIRECTA", "0");
   g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
   g_key_file_set_string (file, "DEFAULT", "PRINT_COMMAND", "lpr");
+  g_key_file_set_string (file, "DEFAULT", "LOGO", "");
+  g_key_file_set_string (file, "DEFAULT", "FULLSCREEN", "no");
 
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
-	{
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_config_file");
+    {
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_config_file");
 
-	  gtk_widget_show_all ( (GtkWidget *)dialog);
-	}
+      gtk_widget_show_all ( (GtkWidget *)dialog);
+    }
   else
-	{
-	  g_remove (g_strdup_printf ("%s/.pgpass", g_getenv ("HOME")));
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_config_file");
+    {
+      g_remove (g_strdup_printf ("%s/.pgpass", g_getenv ("HOME")));
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_config_file");
 
-	  gtk_widget_show_all ( (GtkWidget *)dialog);
-	}
+      gtk_widget_show_all ( (GtkWidget *)dialog);
+    }
 
 }
 
@@ -99,23 +101,23 @@ void
 dialog_close (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
   if (response_id == GTK_RESPONSE_CLOSE || response_id == GTK_RESPONSE_NO)
-	{
-	  gtk_widget_hide ( (GtkWidget *) dialog);
-	}
+    {
+      gtk_widget_hide ( (GtkWidget *) dialog);
+    }
   else if (response_id == GTK_RESPONSE_YES || response_id == GTK_RESPONSE_OK)
-	{
-	  GtkAssistant *asistente;
-	  GtkWidget *page;
-	  gint current_page;
+    {
+      GtkAssistant *asistente;
+      GtkWidget *page;
+      gint current_page;
 
-	  asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
+      asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
 
-	  current_page = gtk_assistant_get_current_page (asistente);
-	  page = gtk_assistant_get_nth_page (asistente, current_page);
-	  gtk_assistant_set_page_complete (asistente, page, TRUE);
+      current_page = gtk_assistant_get_current_page (asistente);
+      page = gtk_assistant_get_nth_page (asistente, current_page);
+      gtk_assistant_set_page_complete (asistente, page, TRUE);
 
-	  gtk_widget_hide ( (GtkWidget *) dialog);
-	}
+      gtk_widget_hide ( (GtkWidget *) dialog);
+    }
 }
 
 gboolean
@@ -134,14 +136,14 @@ run_gksu_command (gchar *command)
   gksu_su_full (context, NULL, NULL, NULL, NULL, &error);
   gksu_context_free (context);
   if (error != NULL )
-	{
-	  g_print ("error: %s\n", error->message);
-	  return FALSE;
-	}
+    {
+      g_print ("error: %s\n", error->message);
+      return FALSE;
+    }
   else
-	{
-	  return TRUE;
-	}
+    {
+      return TRUE;
+    }
 }
 
 void
@@ -160,90 +162,90 @@ volcar_db (GtkWidget *button, gpointer user_data)
   sql_data = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "ruta_sql"))));
 
   if( g_ascii_strcasecmp (user_admin, "") == 0 || g_ascii_strcasecmp (pass_admin, "") == 0 || g_ascii_strcasecmp (name_db, "") == 0 || g_ascii_strcasecmp (sql_data, "") == 0 )
-	{
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "missing_data");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
-	  return;
-	}
+    {
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "missing_data");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
+      return;
+    }
 
   command = g_strdup_printf ("su - %s -c \\\"dropdb %s; createdb -O %s %s;\\\"",
-							 local_user_pg, name_db, user_pg, name_db);
+                             local_user_pg, name_db, user_pg, name_db);
   if (!run_gksu_command (command))
     {
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_db");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_db");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
 
-	  return;
+      return;
     }
 
   path = g_strdup_printf ("%s/rizoma.structure", sql_data);
   fp = fopen (path, "r");
 
   if (fp == NULL)
-	{
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_data_schema");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
-	  return;
-	}
+    {
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_data_schema");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
+      return;
+    }
   else
-	{
-	  fclose (fp);
+    {
+      fclose (fp);
 
-	  command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
-	  if (system (command) != 0)
-		{
-		  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_create_schema");
-		  gtk_widget_show_all ( (GtkWidget *) dialog );
-		  return;
-		}
-	}
+      command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
+      if (system (command) != 0)
+        {
+          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_create_schema");
+          gtk_widget_show_all ( (GtkWidget *) dialog );
+          return;
+        }
+    }
 
   path = g_strdup_printf ("%s/rizoma.initvalues", sql_data);
 
   fp = fopen (path, "r");
   if (fp == NULL)
     {
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_data_values");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_data_values");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
 
-	  return;
+      return;
     }
   else
-	{
-	  fclose (fp);
+    {
+      fclose (fp);
 
-	  command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
-	  if (system (command) != 0)
-		{
-		  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_insert_values");
-		  gtk_widget_show_all ( (GtkWidget *) dialog );
+      command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
+      if (system (command) != 0)
+        {
+          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_insert_values");
+          gtk_widget_show_all ( (GtkWidget *) dialog );
 
-		  return;
-		}
-	}
+          return;
+        }
+    }
 
   sql = g_strdup_printf ("INSERT INTO users (id, usuario, passwd, rut, dv, nombre, apell_p, apell_m, fecha_ingreso, level )"
-						 " VALUES (DEFAULT, '%s', md5('%s'), 0, 0, 'Administrador', '', '', NOW(), 0)",
-						 user_admin, pass_admin);
+                         " VALUES (DEFAULT, '%s', md5('%s'), 0, 0, 'Administrador', '', '', NOW(), 0)",
+                         user_admin, pass_admin);
 
   command = g_strdup_printf ("psql -f %s -d %s -c \"%s\"", path, name_db, sql);
   if (system (command) != 0)
-	{
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_admin_user");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
+    {
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_admin_user");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
 
-	  return;
-	}
+      return;
+    }
 
   path = g_strdup_printf ("%s/funciones.sql", sql_data);
   command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
   if (system (command) != 0)
-	{
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_plsql");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
+    {
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_plsql");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
 
-	  return;
-	}
+      return;
+    }
 
   dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_volcado");
   gtk_widget_show_all ( (GtkWidget *) dialog );
@@ -279,29 +281,29 @@ create_db_user (GtkWidget *button, gpointer user_data)
   pass_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "pass_pg"))));
 
   if( g_ascii_strcasecmp (local_user_pg, "") == 0|| g_ascii_strcasecmp (user_pg, "") == 0 )
-	{
-	  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "missing_data");
-	  gtk_widget_show_all ( (GtkWidget *) dialog );
-	}
+    {
+      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "missing_data");
+      gtk_widget_show_all ( (GtkWidget *) dialog );
+    }
   else
-	{
-	  command = g_strdup_printf ("su %s -c \\\"psql template1 -c \\\\\\\"CREATE USER %s ENCRYPTED PASSWORD \'%s\' CREATEDB NOCREATEUSER;\\\\\\\"\\\"",
-								 local_user_pg, user_pg, pass_pg);
+    {
+      command = g_strdup_printf ("su %s -c \\\"psql template1 -c \\\\\\\"CREATE USER %s ENCRYPTED PASSWORD \'%s\' CREATEDB NOCREATEUSER;\\\\\\\"\\\"",
+                                 local_user_pg, user_pg, pass_pg);
 
-	  pgpass_string = g_strdup_printf ("%s:%s:*:%s:%s", host_pg, port_pg, user_pg, pass_pg);
+      pgpass_string = g_strdup_printf ("%s:%s:*:%s:%s", host_pg, port_pg, user_pg, pass_pg);
 
-	  if (run_gksu_command (command) && g_file_set_contents (g_strdup_printf ("%s/.pgpass", g_getenv ("HOME")), pgpass_string, -1, NULL))
-		{
-		  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_pg_user");
-		  gtk_widget_show_all ( (GtkWidget *) dialog );
+      if (run_gksu_command (command) && g_file_set_contents (g_strdup_printf ("%s/.pgpass", g_getenv ("HOME")), pgpass_string, -1, NULL))
+        {
+          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_pg_user");
+          gtk_widget_show_all ( (GtkWidget *) dialog );
 
-		}
-	  else
-		{
-		  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_pg_user");
-		  gtk_widget_show_all ( (GtkWidget *) dialog );
-		}
-	}
+        }
+      else
+        {
+          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_pg_user");
+          gtk_widget_show_all ( (GtkWidget *) dialog );
+        }
+    }
 }
 
 void
@@ -312,24 +314,24 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
   current_page = gtk_assistant_get_current_page (assistant);
 
   if (current_page == 2)
-	{
-	  GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
+    {
+      GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
 
-	  gtk_entry_set_text (ruta_sql, DATADIR);
-	}
+      gtk_entry_set_text (ruta_sql, DATADIR);
+    }
 
   if (current_page == 3)
-	{
-	  GtkAssistant *asistente;
-	  GtkWidget *page;
-	  gint current_page;
+    {
+      GtkAssistant *asistente;
+      GtkWidget *page;
+      gint current_page;
 
-	  asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
+      asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
 
-	  current_page = gtk_assistant_get_current_page (asistente);
-	  page = gtk_assistant_get_nth_page (asistente, current_page);
-	  gtk_assistant_set_page_complete (asistente, page, TRUE);
-	}
+      current_page = gtk_assistant_get_current_page (asistente);
+      page = gtk_assistant_get_nth_page (asistente, current_page);
+      gtk_assistant_set_page_complete (asistente, page, TRUE);
+    }
 }
 
 int
@@ -345,8 +347,8 @@ main (int argc, char *argv[])
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-config.ui", &err);
   if (err) {
-	g_error ("ERROR: %s\n", err->message);
-	return -1;
+    g_error ("ERROR: %s\n", err->message);
+    return -1;
   }
 
   gtk_builder_connect_signals (builder, NULL);

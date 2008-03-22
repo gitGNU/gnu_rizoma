@@ -1062,7 +1062,7 @@ GetCurrentStock (gchar *barcode)
   PGresult *res;
   gdouble stock;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM producto WHERE barcode='%s'", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM select_producto(%s)", barcode));
 
   stock = strtod (PUT (PQgetvalue (res, 0, 0)), (char **)NULL);
 
@@ -1106,7 +1106,7 @@ FiFo (gchar *barcode, gint compra)
                        "FROM compra_detalle, compra WHERE "
                        "barcode_product='%s' AND compra.id=%d AND "
                        "compra_detalle.id_compra=%d "
-                       "ORDER BY compra.fecha DESC",
+                       "ORDER BY compra.fecha DESC LIMIT 1",
                        barcode, compra, compra);
   res = EjecutarSQL (q);
   g_free (q);
