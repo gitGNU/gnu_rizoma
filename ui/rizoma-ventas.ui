@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.3 on Sat Mar 22 13:48:34 2008 -->
+<!--Generated with glade3 3.4.3 on Sat Mar 22 15:04:36 2008 -->
 <interface>
   <object class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>
     <property name="receives_default">True</property>
+    <property name="border_width">5</property>
     <property name="title" translatable="yes">POS Rizoma Comercio</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <signal handler="on_delete_ventas_gui" name="delete_event"/>
@@ -40,185 +41,12 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkHButtonBox" id="hbuttonbox1">
-                <property name="width_request">1</property>
-                <property name="visible">True</property>
-                <property name="spacing">5</property>
-                <property name="layout_style">GTK_BUTTONBOX_CENTER</property>
-                <child>
-                  <object class="GtkButton" id="sell_add_button">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property context="yes" name="label">gtk-add</property>
-                    <property name="use_stock">True</property>
-                    <signal handler="AgregarProducto" name="clicked"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="button2">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label">gtk-clear</property>
-                    <property name="use_stock">True</property>
-                    <signal handler="CleanEntryAndLabelData" name="clicked"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="right_attach">3</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-                <property name="x_options"/>
-                <property name="y_options"/>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkTable" id="table1">
-                <property name="visible">True</property>
-                <property name="n_rows">2</property>
-                <property name="n_columns">6</property>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label_subtotal">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">5</property>
-                    <property name="right_attach">6</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label_mayor_cantidad">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">3</property>
-                    <property name="right_attach">4</property>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label_stock">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">3</property>
-                    <property name="right_attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label_mayor">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label_precio">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label5">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Total</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">4</property>
-                    <property name="right_attach">5</property>
-                    <property name="x_options"/>
-                    <property name="y_options"/>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label6">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Cant. Mayorista</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="right_attach">3</property>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
-                    <property name="x_options"/>
-                    <property name="y_options"/>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label7">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Stock</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">2</property>
-                    <property name="right_attach">3</property>
-                    <property name="x_options"/>
-                    <property name="y_options"/>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label8">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Precio Mayor</property>
-                  </object>
-                  <packing>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
-                    <property name="x_options"/>
-                    <property name="y_options"/>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label9">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Precio Unitario</property>
-                  </object>
-                  <packing>
-                    <property name="x_options"/>
-                    <property name="y_options"/>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox17">
+              <object class="GtkHBox" id="hbox11">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkLabel" id="label13">
+                  <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">&lt;b&gt;Stock para&lt;/b&gt;</property>
+                    <property context="yes" name="label" translatable="yes">&lt;b&gt;&lt;big&gt;Vendedor:&lt;/big&gt;&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -227,7 +55,34 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label_stockday">
+                  <object class="GtkLabel" id="label_seller_name">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox13">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="label3">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">&lt;b&gt;&lt;big&gt;Boleta N&#xBA;&lt;/big&gt;&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_ticket_number">
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                   </object>
@@ -235,7 +90,6 @@
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="padding">5</property>
-                    <property name="pack_type">GTK_PACK_END</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -243,104 +97,6 @@
               <packing>
                 <property name="left_attach">2</property>
                 <property name="right_attach">3</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox2">
-                <property name="visible">True</property>
-                <child>
-                  <object class="GtkLabel" id="label12">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Cantidad</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="cantidad_entry">
-                    <property name="width_request">50</property>
-                    <property name="visible">True</property>
-                    <property context="yes" name="text" translatable="yes">1</property>
-                    <signal handler="AumentarCantidad" name="changed"/>
-                    <signal handler="MoveFocus" name="activate"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="padding">6</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox16">
-                <property name="visible">True</property>
-                <child>
-                  <object class="GtkLabel" id="label11">
-                    <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">Producto</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="product_label">
-                    <property name="visible">True</property>
-                  </object>
-                  <packing>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox15">
-                <property name="visible">True</property>
-                <child>
-                  <object class="GtkLabel" id="label16">
-                    <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property context="yes" name="label" translatable="yes">Codigo Simple</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="codigo_corto">
-                    <property name="visible">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="padding">5</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
               </packing>
             </child>
             <child>
@@ -396,13 +152,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkHBox" id="hbox13">
+              <object class="GtkHBox" id="hbox15">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkLabel" id="label3">
+                  <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">&lt;b&gt;&lt;big&gt;Boleta N&#xBA;&lt;/big&gt;&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property context="yes" name="label" translatable="yes">Codigo Simple</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -410,9 +166,8 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label_ticket_number">
+                  <object class="GtkLabel" id="codigo_corto">
                     <property name="visible">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -423,17 +178,82 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">2</property>
-                <property name="right_attach">3</property>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
               </packing>
             </child>
             <child>
-              <object class="GtkHBox" id="hbox11">
+              <object class="GtkHBox" id="hbox16">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkLabel" id="label2">
+                  <object class="GtkLabel" id="label11">
                     <property name="visible">True</property>
-                    <property context="yes" name="label" translatable="yes">&lt;b&gt;&lt;big&gt;Vendedor:&lt;/big&gt;&lt;/b&gt;</property>
+                    <property context="yes" name="label" translatable="yes">Producto</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="product_label">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="label12">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">Cantidad</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="cantidad_entry">
+                    <property name="width_request">50</property>
+                    <property name="visible">True</property>
+                    <property context="yes" name="text" translatable="yes">1</property>
+                    <signal handler="AumentarCantidad" name="changed"/>
+                    <signal handler="MoveFocus" name="activate"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">6</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox17">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkLabel" id="label13">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">&lt;b&gt;Stock para&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -442,9 +262,182 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label_seller_name">
+                  <object class="GtkLabel" id="label_stockday">
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">5</property>
+                    <property name="pack_type">GTK_PACK_END</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="right_attach">3</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkTable" id="table1">
+                <property name="visible">True</property>
+                <property name="n_rows">2</property>
+                <property name="n_columns">6</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label9">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">Precio Unitario</property>
+                  </object>
+                  <packing>
+                    <property name="x_options"/>
+                    <property name="y_options"/>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label8">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">Precio Mayor</property>
+                  </object>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="x_options"/>
+                    <property name="y_options"/>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label7">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">Stock</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="x_options"/>
+                    <property name="y_options"/>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label6">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">Cant. Mayorista</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="x_options"/>
+                    <property name="y_options"/>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label5">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label" translatable="yes">Total</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="x_options"/>
+                    <property name="y_options"/>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_precio">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_mayor">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_stock">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_mayor_cantidad">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_subtotal">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHButtonBox" id="hbuttonbox1">
+                <property name="width_request">1</property>
+                <property name="visible">True</property>
+                <property name="spacing">5</property>
+                <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
+                <child>
+                  <object class="GtkButton" id="button2">
+                    <property name="visible">True</property>
+                    <property context="yes" name="label">gtk-clear</property>
+                    <property name="use_stock">True</property>
+                    <signal handler="CleanEntryAndLabelData" name="clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="sell_add_button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property context="yes" name="label">gtk-add</property>
+                    <property name="use_stock">True</property>
+                    <signal handler="AgregarProducto" name="clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -453,6 +446,14 @@
                   </packing>
                 </child>
               </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="right_attach">3</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+                <property name="x_options"/>
+                <property name="y_options"/>
+              </packing>
             </child>
           </object>
           <packing>
@@ -615,7 +616,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-quit</property>
+                <property context="yes" name="label" translatable="yes">gtk-quit</property>
                 <property name="use_stock">True</property>
                 <signal handler="on_delete_ventas_gui" name="clicked"/>
                 <accelerator key="F12" modifiers="" signal="clicked"/>
@@ -667,15 +668,19 @@
                     <property name="n_rows">2</property>
                     <property name="n_columns">2</property>
                     <child>
-                      <object class="GtkEntry" id="entry2">
+                      <object class="GtkLabel" id="label17">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <signal handler="Descuento" name="activate"/>
+                        <property context="yes" name="label" translatable="yes">Ajuste Sencillo</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label18">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property context="yes" name="label" translatable="yes">Descuento %</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
                       </packing>
@@ -693,22 +698,18 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label18">
+                      <object class="GtkEntry" id="entry2">
                         <property name="visible">True</property>
+                        <property name="can_focus">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property context="yes" name="label" translatable="yes">Descuento %</property>
+                        <signal handler="Descuento" name="activate"/>
                       </object>
                       <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
                       </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label17">
-                        <property name="visible">True</property>
-                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property context="yes" name="label" translatable="yes">Ajuste Sencillo</property>
-                      </object>
                     </child>
                   </object>
                 </child>
