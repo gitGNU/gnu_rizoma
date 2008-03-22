@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*parametros.h
 *
 *    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>

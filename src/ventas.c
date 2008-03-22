@@ -1,3 +1,5 @@
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
+       c-indentation-style: gnu -*- */
 /*ventas.c
  *
  *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -928,6 +930,8 @@ ventas_win ()
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
   GtkTreeIter iter;
+  GtkWidget *ventas_gui;
+  gchar *fullscreen_opt = NULL;
 
   venta = (Venta *) g_malloc (sizeof (Venta));
   venta->header = NULL;
@@ -940,7 +944,14 @@ ventas_win ()
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", NULL);
   gtk_builder_connect_signals (builder, NULL);
 
-  gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui")));
+  ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
+
+  // check if the window must be set to fullscreen
+  fullscreen_opt = rizoma_get_value("FULLSCREEN");
+  if ((fullscreen_opt != NULL) && (g_str_equal(fullscreen_opt, "YES")))
+      gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
+
+  gtk_widget_show_all (ventas_gui);
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                         g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
@@ -1594,7 +1605,10 @@ Vender (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 {
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")));
+	GtkWidget *button;
+	button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
+	gtk_widget_set_sensitive(button, TRUE);
+	gtk_widget_grab_focus (button);
 }
 
 void
@@ -1652,526 +1666,6 @@ TipoVenta (GtkWidget *widget, gpointer data)
       gtk_widget_show_all (GTK_WIDGET (window));
       return;
     }
-
-
-  /* venta->window = gtk_window_new (GTK_WINDOW_TOPLEVEL); */
-  /* if (tipo_documento == SIMPLE) */
-  /*   gtk_window_set_title (GTK_WINDOW (venta->window), "Tipo de Venta: Boleta"); */
-  /* else if (tipo_documento == FACTURA) */
-  /*   gtk_window_set_title (GTK_WINDOW (venta->window), "Tipo de Venta: Factura"); */
-
-  /* gtk_window_set_position (GTK_WINDOW (venta->window), GTK_WIN_POS_CENTER_ALWAYS); */
-  /* gtk_widget_show (venta->window); */
-  /* gtk_window_present (GTK_WINDOW (venta->window)); */
-  /* gtk_window_set_resizable (GTK_WINDOW (venta->window), FALSE); */
-  /* gtk_widget_set_size_request (venta->window, 220, -1); */
-
-  /* g_signal_connect (G_OBJECT (venta->window), "destroy", */
-  /*           G_CALLBACK (CloseSellWindow), NULL); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-  /* gtk_container_add (GTK_CONTAINER (venta->window), vbox2); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox); */
-  /* gtk_box_pack_end (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3); */
-
-  /* if (strcmp (tipo_vendedor, "1") == 0) */
-  /*   { */
-  /*     venta->sell_button = gtk_button_new_with_mnemonic ("_Imprimir"); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->sell_button, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->sell_button); */
-
-  /*     SendCursorTo (NULL, venta->sell_button); */
-
-  /*     g_signal_connect (G_OBJECT (venta->sell_button), "clicked", */
-  /*       G_CALLBACK (Vender), NULL); */
-  /*   } */
-  /* else */
-  /*   { */
-  /*     venta->sell_button = gtk_button_new_with_mnemonic ("_Vender"); */
-  /*     gtk_widget_show (venta->sell_button); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->sell_button, FALSE, FALSE, 3); */
-
-  /*     gtk_widget_set_sensitive (venta->sell_button, FALSE); */
-
-  /*     g_signal_connect (G_OBJECT (venta->sell_button), "clicked", */
-  /*       G_CALLBACK (Vender), NULL); */
-  /*   } */
-
-  /*  if (user_data->level == 0)
-      {
-      venta->sell_button = gtk_button_new_with_mnemonic ("_Vender");
-      gtk_widget_show (venta->sell_button);
-      gtk_box_pack_end (GTK_BOX (hbox), venta->sell_button, FALSE, FALSE, 3);
-
-      gtk_widget_set_sensitive (venta->sell_button, FALSE);
-
-      g_signal_connect (G_OBJECT (venta->sell_button), "clicked",
-      G_CALLBACK (Vender), NULL);
-      }
-      else
-      {
-      venta->sell_button = gtk_button_new_with_mnemonic ("_Imprimir");
-      gtk_box_pack_end (GTK_BOX (hbox), venta->sell_button, FALSE, FALSE, 3);
-      gtk_widget_show (venta->sell_button);
-
-      SendCursorTo (NULL, venta->sell_button);
-
-      g_signal_connect (G_OBJECT (venta->sell_button), "clicked",
-      G_CALLBACK (Vender), NULL);
-      }
-  */
-  /* button = gtk_button_new_from_stock (GTK_STOCK_CANCEL); */
-  /* gtk_widget_show (button); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*           G_CALLBACK (CloseSellWindow), NULL); */
-
-  /* venta->tipo_venta = CASH; */
-
-  /* if (tipo_documento == FACTURA) */
-  /*   { */
-  /*     frame = gtk_frame_new ("Datos Cliente"); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (frame); */
-
-
-  /*     vbox = gtk_vbox_new (FALSE, 3); */
-  /*     gtk_container_add (GTK_CONTAINER (frame), vbox); */
-  /*     gtk_widget_show (vbox); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Rut: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     venta->venta_rut = gtk_entry_new (); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->venta_rut, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_rut); */
-
-  /*     gtk_entry_set_editable (GTK_ENTRY (venta->venta_rut), FALSE); */
-
-  /*     g_signal_connect (G_OBJECT (venta->venta_rut), "activate", */
-  /*       G_CALLBACK (SelectClient), NULL); */
-
-  /*     gtk_window_set_focus (GTK_WINDOW (venta->window), venta->venta_rut); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Nombre: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->venta_nombre = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->venta_nombre, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_nombre); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Dirección: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->venta_direccion = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->venta_direccion, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_direccion); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Fono: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->venta_fono = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->venta_fono, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_fono); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Giro: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->factura_giro = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->factura_giro, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->factura_giro); */
-
-  /*     frame = gtk_frame_new ("Pago"); */
-  /*     gtk_widget_show (frame); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-
-  /*     gtk_widget_set_size_request (frame, 215, -1); */
-
-  /*     vbox = gtk_vbox_new (FALSE, 3); */
-  /*     gtk_widget_show (vbox); */
-  /*     gtk_container_add (GTK_CONTAINER (frame), vbox); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Forma de pago:"); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     venta->venta_pago = gtk_label_new (""); */
-  /*     gtk_label_set_markup (GTK_LABEL (venta->venta_pago), "<b>Contado</b>"); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->venta_pago, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_pago); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Dias de Pago: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     venta->forma_pago = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (venta->forma_pago, 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->forma_pago, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->forma_pago); */
-
-  /*     gtk_widget_set_sensitive (venta->forma_pago, FALSE); */
-
-  /*     g_signal_connect (G_OBJECT (venta->forma_pago), "activate", */
-  /*       G_CALLBACK (SendCursorTo), (gpointer)venta->sell_button); */
-
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Descuento %: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     gtk_builder_get_object (builder, "discount_entry") = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "discount_entry"), 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "discount_entry"), FALSE, FALSE, 3); */
-  /*     gtk_widget_show (gtk_builder_get_object (builder, "discount_entry")); */
-
-  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0"); */
-
-  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
-  /*       G_CALLBACK (Descuento), (gpointer) FALSE); */
-  /*   } */
-  /* else if (tipo_documento == GUIA) */
-  /*   { */
-  /*     frame = gtk_frame_new ("Datos Cliente"); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (frame); */
-
-  /*     vbox = gtk_vbox_new (FALSE, 3); */
-  /*     gtk_container_add (GTK_CONTAINER (frame), vbox); */
-  /*     gtk_widget_show (vbox); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Rut: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     venta->venta_rut = gtk_entry_new (); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->venta_rut, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_rut); */
-
-  /*     gtk_entry_set_editable (GTK_ENTRY (venta->venta_rut), FALSE); */
-
-  /*     g_signal_connect (G_OBJECT (venta->venta_rut), "activate", */
-  /*       G_CALLBACK (SelectClient), NULL); */
-
-  /*     gtk_window_set_focus (GTK_WINDOW (venta->window), venta->venta_rut); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Nombre: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->venta_nombre = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->venta_nombre, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_nombre); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Dirección: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->venta_direccion = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->venta_direccion, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_direccion); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Fono: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->venta_fono = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->venta_fono, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_fono); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Giro: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     venta->factura_giro = gtk_label_new (""); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), venta->factura_giro, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->factura_giro); */
-
-  /*     frame = gtk_frame_new ("Pago"); */
-  /*     gtk_widget_show (frame); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-
-  /*     gtk_widget_set_size_request (frame, 215, -1); */
-
-  /*     vbox = gtk_vbox_new (FALSE, 3); */
-  /*     gtk_widget_show (vbox); */
-  /*     gtk_container_add (GTK_CONTAINER (frame), vbox); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Forma de pago:"); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     venta->venta_pago = gtk_label_new (""); */
-  /*     gtk_label_set_markup (GTK_LABEL (venta->venta_pago), "<b>Contado</b>"); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->venta_pago, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->venta_pago); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Dias de Pago: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     venta->forma_pago = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (venta->forma_pago, 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), venta->forma_pago, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (venta->forma_pago); */
-
-  /*     gtk_widget_set_sensitive (venta->forma_pago, FALSE); */
-
-  /*     g_signal_connect (G_OBJECT (venta->forma_pago), "activate", */
-  /*       G_CALLBACK (SendCursorTo), (gpointer)venta->sell_button); */
-
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Descuento %: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     gtk_builder_get_object (builder, "discount_entry") = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "discount_entry"), 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "discount_entry"), FALSE, FALSE, 3); */
-  /*     gtk_widget_show (gtk_builder_get_object (builder, "discount_entry")); */
-
-  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0"); */
-
-  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
-  /*       G_CALLBACK (Descuento), (gpointer) FALSE); */
-  /*   } */
-  /* else if (tipo_documento == VENTA) */
-  /*   { */
-  /*     frame = gtk_frame_new ("Descuentos"); */
-  /*     gtk_widget_show (frame); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-
-  /*     gtk_widget_set_size_request (frame, 215, -1); */
-
-  /*     vbox = gtk_vbox_new (FALSE, 3); */
-  /*     gtk_widget_show (vbox); */
-  /*     gtk_container_add (GTK_CONTAINER (frame), vbox); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Ajuste Sencillo: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     gtk_builder_get_object (builder, "sencillo_entry") = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "sencillo_entry"), 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "sencillo_entry"), FALSE, FALSE, 3); */
-  /*     gtk_widget_show (gtk_builder_get_object (builder, "sencillo_entry")); */
-
-  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), "0"); */
-
-  /*     if (tipo_documento != FACTURA) */
-  /*       gtk_window_set_focus (GTK_WINDOW (venta->window), gtk_builder_get_object (builder, "sencillo_entry")); */
-
-  /*     gtk_editable_select_region (GTK_EDITABLE (gtk_builder_get_object (builder, "sencillo_entry")), 0, -1); */
-
-  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "sencillo_entry")), "activate", */
-  /*       G_CALLBACK (Descuento), (gpointer) TRUE); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Descuento %: "); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     gtk_builder_get_object (builder, "discount_entry") = gtk_entry_new (); */
-  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "discount_entry"), 100, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), gtk_builder_get_object (builder, "discount_entry"), FALSE, FALSE, 3); */
-  /*     gtk_widget_show (gtk_builder_get_object (builder, "discount_entry")); */
-
-  /*     gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0"); */
-
-  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
-  /*       G_CALLBACK (Descuento), (gpointer) FALSE); */
-  /*   } */
-
-  /* //  if (user_data->level == 0) */
-  /* if (strcmp (tipo_vendedor, "0") == 0) */
-  /*   { */
-  /*     frame = gtk_frame_new ("Pago Contado"); */
-  /*     gtk_widget_show (frame); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-
-  /*     gtk_widget_set_size_request (frame, 215, -1); */
-
-  /*     vbox = gtk_vbox_new (FALSE, 3); */
-  /*     gtk_widget_show (vbox); */
-  /*     gtk_container_add (GTK_CONTAINER (frame), vbox); */
-
-  /*     hbox = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (hbox); */
-
-  /*     label = gtk_label_new ("Efectivo"); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (label); */
-
-  /*     /\* */
-  /*       label = gtk_label_new ("Cheque"); */
-  /*       gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /*       gtk_widget_show (label); */
-
-  /*       hbox = gtk_hbox_new (FALSE, 3); */
-  /*       gtk_widget_show (hbox); */
-  /*       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /*     *\/ */
-
-  /*     gtk_builder_get_object (builder, "sencillo_entry") = gtk_entry_new (); */
-  /*     gtk_entry_set_alignment (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), 1); */
-  /*     gtk_widget_set_size_request (gtk_builder_get_object (builder, "sencillo_entry"), 130, -1); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), gtk_builder_get_object (builder, "sencillo_entry"), FALSE, FALSE, 3); */
-  /*     gtk_widget_show (gtk_builder_get_object (builder, "sencillo_entry")); */
-
-  /*     if (tipo_documento == SIMPLE) */
-  /*       g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "discount_entry")), "activate", */
-  /*         G_CALLBACK (SendCursorTo), (gpointer)gtk_builder_get_object (builder, "sencillo_entry")); */
-
-  /*     if (tipo_documento != FACTURA && tipo_documento != GUIA && tipo_documento != VENTA) */
-  /*       g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "sencillo_entry")), "activate", */
-  /*         G_CALLBACK (SendCursorTo), (gpointer)gtk_builder_get_object (builder, "sencillo_entry")); */
-
-  /*     if (tipo_documento == FACTURA || tipo_documento == GUIA) */
-  /*       g_signal_connect (G_OBJECT (venta->forma_pago), "activate", */
-  /*         G_CALLBACK (SendCursorTo), (gpointer)gtk_builder_get_object (builder, "sencillo_entry")); */
-
-  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "sencillo_entry")), "changed", */
-  /*       G_CALLBACK (CalcularVuelto), NULL); */
-
-  /*     g_signal_connect (G_OBJECT (gtk_builder_get_object (builder, "sencillo_entry")), "activate", */
-  /*       G_CALLBACK (TiposVenta), (gpointer) venta->sell_button); */
-
-
-  /*     /\*  button = gtk_button_new_with_mnemonic ("C_heque"); */
-  /*         gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
-  /*         gtk_widget_show (button); */
-
-  /*         g_signal_connect (G_OBJECT (button), "clicked", */
-  /*         G_CALLBACK (PagoCheque), NULL); */
-  /*     *\/ */
-  /*     gtk_builder_get_object (builder, "vuelto_label") = gtk_label_new (""); */
-  /*     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")), */
-  /*           "<span size=\"30000\"> </span>"); */
-  /*     gtk_widget_show (gtk_builder_get_object (builder, "vuelto_label")); */
-  /*     gtk_box_pack_start (GTK_BOX (vbox), gtk_builder_get_object (builder, "vuelto_label"), FALSE, FALSE, 3); */
-  /*   } */
-
-  /* return 0; */
 }
 
 void
@@ -2523,7 +2017,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
 
   //  if (ventas != FALSE)
-  q = g_strdup_printf ("SELECT * FROM informacion_producto (%s)", barcode);
+  q = g_strdup_printf ("SELECT * FROM informacion_producto (%s,'')", barcode);
   /* else */
   /*   q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, contenido, unidad, stock, " */
   /*  "precio, mayorista FROM producto " */
@@ -2614,7 +2108,8 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 void
 BuscarProducto (GtkWidget *widget, gpointer data)
 {
-
+	GtkWidget *aux_widget;
+	GtkWidget *entry;
   GtkWindow *window;
 
   GtkListStore *store;
@@ -2624,10 +2119,14 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "ventas_buscar_entry")),
-                      gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder,
+												  "ventas_buscar_entry"));
+  entry = GTK_WIDGET(gtk_builder_get_object (builder, "barcode_entry"));
 
-  if (gtk_tree_view_get_model (treeview) == NULL )
+  gtk_entry_set_text (GTK_ENTRY (aux_widget),
+                      gtk_entry_get_text (GTK_ENTRY (entry)));
+
+  if (gtk_tree_view_get_model (GTK_TREE_VIEW(treeview)) == NULL )
     {
       store = gtk_list_store_new (10,
                                   G_TYPE_STRING,
@@ -2657,7 +2156,8 @@ BuscarProducto (GtkWidget *widget, gpointer data)
       if (solo_venta != TRUE)
         {
           renderer = gtk_cell_renderer_text_new ();
-          column = gtk_tree_view_column_new_with_attributes ("Código de Barras", renderer,
+          column = gtk_tree_view_column_new_with_attributes ("Código de Barras",
+															 renderer,
                                                              "text", 1,
                                                              NULL);
           gtk_tree_view_append_column (treeview, column);
@@ -2667,7 +2167,8 @@ BuscarProducto (GtkWidget *widget, gpointer data)
         }
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Descripción",
+														 renderer,
                                                          "text", 2,
                                                          "foreground", 8,
                                                          "foreground-set", 9,
@@ -3834,7 +3335,7 @@ CloseWindowChangeSeller (GtkWidget *widget, gpointer data)
 void
 ChangeSeller (GtkWidget *widget, gpointer data)
 {
-  GtkEntry *entry = (GtkEntry *) data;
+  GtkEntry *entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_id_vendedor"));
   gint id = atoi (gtk_entry_get_text (entry));
   gchar *user_name;
 
@@ -3981,7 +3482,7 @@ check_passwd (GtkWidget *widget, gpointer data)
 
       Asistencia (user_data->user_id, TRUE);
 
-      gtk_widget_destroy ( (GtkWidget *) gtk_builder_get_object (builder,"login_window"));
+      gtk_widget_destroy (GTK_WIDGET(gtk_builder_get_object (builder,"login_window")));
       g_object_unref ((gpointer) builder);
       builder = NULL;
 
@@ -3996,4 +3497,27 @@ check_passwd (GtkWidget *widget, gpointer data)
     default:
       break;
     }
+}
+
+gboolean
+on_delete_ventas_gui (GtkWidget *widget, GdkEvent  *event, gpointer   user_data)
+{
+	GtkWidget *window;
+	window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+	gtk_widget_show_all (window);
+	return TRUE;
+}
+
+void
+exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
+{
+  if (response_id == GTK_RESPONSE_YES)
+	  {
+		  //TODO: find out how to get the user id
+		  //Asistencia (user_data->user_id, FALSE);
+		  gtk_main_quit();
+	  }
+  else
+	  if (response_id == GTK_RESPONSE_NO)
+		  gtk_widget_hide (GTK_WIDGET (dialog));
 }

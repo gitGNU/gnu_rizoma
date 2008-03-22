@@ -1,3 +1,4 @@
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*ventas.h
 *
 *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -89,4 +90,6 @@ void CancelWindow (GtkWidget *widget, gpointer data);
 void WindowChangeSeller ();
 
 void MoveFocus (GtkEntry *entry, gpointer data);
+gboolean on_delete_ventas_gui (GtkWidget *widget, GdkEvent  *event, gpointer   user_data);
+void exit_response (GtkDialog *dialog, gint response_id, gpointer user_data);
 #endif

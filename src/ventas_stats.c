@@ -1,3 +1,5 @@
+/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
+       c-indentation-style: gnu -*- */
 /*ventas_stats.c
 *
 *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
