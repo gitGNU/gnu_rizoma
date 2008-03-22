@@ -1510,9 +1510,9 @@ Vender (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA)
     discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))));
 
-  if (g_strlen (discount) == 0 )
+  if (strlen (discount) == 0 )
     {
-      dictount = "0";
+      discount = "0";
     }
 
   switch (tipo_documento)
