@@ -88,6 +88,12 @@ void
 FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
                  gchar *precio, gchar *precio_mayor, gchar *cantidad_mayor, gchar *codigo_corto)
 {
+  GtkWidget *widget;
+
+  //caja de producto
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
+  gtk_entry_set_text(GTK_ENTRY(widget), barcode);
+
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
                       g_strdup_printf ("%s  %s  %s  %s", codigo_corto, marca, contenido, unidad));
 
@@ -1988,10 +1994,9 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   if (strcmp (barcode, "") == 0)
     return 0;
 
-  if (HaveCharacters (barcode) == TRUE || strcmp (barcode, "") == 0)
+  if (HaveCharacters (barcode) == TRUE || g_str_equal (barcode, ""))
     {
       BuscarProducto (NULL, NULL);
-
       return 0;
     }
 
@@ -2100,8 +2105,8 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 void
 BuscarProducto (GtkWidget *widget, gpointer data)
 {
-	GtkWidget *aux_widget;
-	GtkWidget *entry;
+  GtkWidget *aux_widget;
+  GtkWidget *entry;
   GtkWindow *window;
 
   GtkListStore *store;
@@ -2112,7 +2117,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   GtkTreeViewColumn *column;
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object (builder,
-												  "ventas_buscar_entry"));
+						  "ventas_buscar_entry"));
   entry = GTK_WIDGET(gtk_builder_get_object (builder, "barcode_entry"));
 
   gtk_entry_set_text (GTK_ENTRY (aux_widget),
