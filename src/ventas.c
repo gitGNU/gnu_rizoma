@@ -1169,24 +1169,25 @@ AgregarProducto (GtkButton *button, gpointer data)
 
   if (cantidad <= 0)
     {
-      aux_widget = gtk_builder_get_object (builder, "cantidad_entry");
+      aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "cantidad_entry"));
       AlertMSG (aux_widget, "No puede vender una cantidad 0 o menor");
       return FALSE;
     }
 
-  if ((strcmp ("0", CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))) == 0)
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "label_precio"));
+  if (g_str_equal ("0", CutPoints (g_strdup (gtk_label_get_text (aux_widget)))))
     {
       AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No se pueden vender productos con precio 0");
-
       CleanEntryAndLabelData ();
-
       return FALSE;
     }
   else if (cantidad > stock)
     {
-      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")), "No puede vender mas productos de los que tiene en stock");
+      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
+      AlertMSG (aux_widget, "No puede vender mas productos de los que tiene en stock");
 
-      gtk_window_set_focus (GTK_WINDOW (main_window), GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
+      gtk_window_grab_focus (aux_widget);
 
       return FALSE;
     }
