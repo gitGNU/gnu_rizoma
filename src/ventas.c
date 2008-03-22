@@ -1175,7 +1175,7 @@ AgregarProducto (GtkButton *button, gpointer data)
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "label_precio"));
-  if (g_str_equal ("0", CutPoints (g_strdup (gtk_label_get_text (aux_widget)))))
+  if (g_str_equal ("0", CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL(aux_widget))))))
     {
       AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No se pueden vender productos con precio 0");
       CleanEntryAndLabelData ();
@@ -1187,7 +1187,7 @@ AgregarProducto (GtkButton *button, gpointer data)
       AlertMSG (aux_widget, "No puede vender mas productos de los que tiene en stock");
 
       aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
-      gtk_window_grab_focus (aux_widget);
+      gtk_widget_grab_focus (aux_widget);
 
       return FALSE;
     }
@@ -1201,7 +1201,7 @@ AgregarProducto (GtkButton *button, gpointer data)
                     "Este producto no se puede vender por fracción de producto");
 
 	  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
-          gtk_window_grab_focus (aux_widget);
+          gtk_widget_grab_focus (aux_widget);
 
           return FALSE;
         }
@@ -1339,10 +1339,11 @@ void
 EliminarProducto (GtkButton *button, gpointer data)
 {
   GtkTreeIter iter;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW
-                                                             (venta->treeview_products));
+  GtkTreeSelection *selection;
   gchar *value;
   gint position;
+
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (venta->treeview_products));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
