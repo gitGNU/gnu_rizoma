@@ -28,15 +28,9 @@ if [ -z $1 ] ; then
     exit -1
 fi
 
-echo "$DB_HOST:$DB_PORT:$DB_NAME:$DB_USER:" > ~/.pgpass
-chmod 0600 ~/.pgpass
+psql -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}' >  /tmp/drop_functions.sql
 
-psql rizoma -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}' >  /tmp/drop_functions.sql
-
-psql -f /tmp/drop_functions.sql $DB_NAME
+psql -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W <  /tmp/drop_functions.sql
 rm /tmp/drop_functions.sql
 
-psql $DB_NAME < funciones.sql
-
-rm ~/.pgpass
-
+psql -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W < funciones.sql
