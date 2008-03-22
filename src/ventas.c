@@ -88,7 +88,7 @@ void
 FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
                  gchar *precio, gchar *precio_mayor, gchar *cantidad_mayor, gchar *codigo_corto)
 {
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")),
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
                       g_strdup_printf ("%s  %s  %s  %s", codigo_corto, marca, contenido, unidad));
 
   if (atoi (stock) <= GetMinStock (barcode))
@@ -1299,7 +1299,7 @@ void
 CleanSellLabels (void)
 {
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), "");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
@@ -1309,7 +1309,7 @@ CleanSellLabels (void)
 void
 CleanEntryAndLabelData (void)
 {
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), "");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")), "1");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), "");
@@ -1348,17 +1348,6 @@ EliminarProducto (GtkButton *button, gpointer data)
 
       CalcularVentas (venta->header);
 
-      /*
-        gtk_label_set_markup (GTK_LABEL (venta->sub_total_label),
-        g_strdup_printf ("<span size=\"40000\">%s</span>",
-        PutPoints (g_strdup_printf ("%d", CalcularTotal (venta->header)))));
-
-        gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-        g_strdup_printf ("<span size=\"40000\">%d</span>", CalcularTotal ()));
-      */
-
-      //      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0");
-      //      Descuento ();
     }
 }
 
@@ -1514,6 +1503,11 @@ Vender (GtkButton *button, gpointer data)
 
   if (tipo_documento != VENTA)
     discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))));
+
+  if (g_strlen (discount) == 0 )
+    {
+      dictount = "0";
+    }
 
   switch (tipo_documento)
     {
@@ -1749,7 +1743,7 @@ CalcularVuelto (void)
 void
 SearchProductByName (void)
 {
-  //  gchar *producto = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_entry"))));
+  //  gchar *producto = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_label"))));
 
   //  if (strcmp (producto, "") == 0)
   //    WindowProductSelect ();
@@ -2502,7 +2496,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
       if (ventas == TRUE)
         {
 
-          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_entry")), product);
+          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), product);
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
                                 g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
