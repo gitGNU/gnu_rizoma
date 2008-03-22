@@ -1196,9 +1196,13 @@ AgregarProducto (GtkButton *button, gpointer data)
     {
       if (VentaFraccion (barcode) == FALSE)
         {
-          AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")),
+	  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
+          AlertMSG (aux_widget,
                     "Este producto no se puede vender por fracción de producto");
-          gtk_window_set_focus (GTK_WINDOW (main_window), GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+
+	  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
+          gtk_window_grab_focus (aux_widget);
+
           return FALSE;
         }
     }
