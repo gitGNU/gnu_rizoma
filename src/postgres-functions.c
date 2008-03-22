@@ -1,5 +1,5 @@
-/* -*- Mode: C; tab-width: 4; ident-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
+   c-indentation-style: gnu -*- */
 /*postgres-functions.c
  *
  *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -271,7 +271,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   SaveProductsSell (venta->header, venta_id);
 
   if ((vale_dir == NULL) || g_str_equal(vale_dir, ""))
-      PrintVale (venta->header, venta_id, total);
+    PrintVale (venta->header, venta_id, total);
 
   if (tipo_venta == CHEQUE)
     {
