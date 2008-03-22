@@ -1102,7 +1102,7 @@ SearchProductByCode (void)
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM informacion_producto (0, '%s')", codigo));
+  res = EjecutarSQL (g_strdup_printf ("SELECT *  FROM informacion_producto (0, '%s')", codigo));
 
   if (res != NULL && PQntuples (res) != 0)
     {
@@ -1162,17 +1162,18 @@ AgregarProducto (GtkButton *button, gpointer data)
   gdouble stock = GetCurrentStock (barcode);
   gdouble cantidad;
   GtkTreeIter iter;
+  GtkWidget *aux_widget;
 
   cantidad = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))),
                      (char **)NULL);
 
   if (cantidad <= 0 && VentaFraccion (barcode) == FALSE)
     {
-      /*AlertMSG (gtk_builder_get_object (builder, "cantidad_entry"), "No puede vender una cantidad 0 o menor");
-
-        return FALSE;*/
-
+      aux_widget = gtk_builder_get_object (builder, "cantidad_entry");
+      AlertMSG (aux_widget, "No puede vender una cantidad 0 o menor");
+      return FALSE;
     }
+
   if ((strcmp ("0", CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))) == 0)
     {
       AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No se pueden vender productos con precio 0");
