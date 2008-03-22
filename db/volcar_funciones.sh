@@ -34,7 +34,7 @@ chmod 0600 ~/.pgpass
 psql rizoma -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}' >  /tmp/drop_functions.sql
 
 psql -f /tmp/drop_functions.sql $DB_NAME
-rm /tmp/drop_fucntions.sql
+rm /tmp/drop_functions.sql
 
 psql $DB_NAME < funciones.sql
 
