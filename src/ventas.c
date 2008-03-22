@@ -3285,9 +3285,16 @@ CancelWindow (GtkWidget *widget, gpointer data)
 void
 CloseWindowChangeSeller (GtkWidget *widget, gpointer data)
 {
-  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "window_change_seller")));
+  GtkWidget *aux_widget;
 
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "window_change_seller"));
+  gtk_widget_hide (aux_widget);
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_id_vendedor"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"));
+  gtk_widget_grab_focus (aux_widget);
 }
 
 void
