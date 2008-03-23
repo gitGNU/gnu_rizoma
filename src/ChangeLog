@@ -2,6 +2,8 @@
 
 	* compras.c (compras_win): Commented all the old code. Added the
 	use of GtkBuilder to build the gui.
+	(on_barcode_entry_activate|on_buy_barcode_entry_activate): Added
+	functions. Doesn't do anything yet
 
 	* config_file.c (rizoma_get_value): Changed the return and input
 	types from char * to gchar *.

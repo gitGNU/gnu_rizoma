@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sun Mar 23 19:31:13 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Mar 23 19:49:39 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="compras_gui">
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
@@ -36,9 +36,10 @@
                           </widget>
                         </child>
                         <child>
-                          <widget class="GtkEntry" id="entry1">
+                          <widget class="GtkEntry" id="buy_barcode_entry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <signal name="activate" handler="on_buy_barcode_entry_activate"/>
                           </widget>
                           <packing>
                             <property name="left_attach">1</property>

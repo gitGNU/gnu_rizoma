@@ -2,7 +2,7 @@
    c-indentation-style: gnu -*- */
 /* compras.c
  *
- *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
  *    This file is part of rizoma.
  *
@@ -7442,4 +7442,15 @@ check_passwd (GtkWidget *widget, gpointer data)
     default:
       break;
     }
+}
+
+void
+on_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
+{
+}
+
+void
+on_buy_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
+{
+
 }
