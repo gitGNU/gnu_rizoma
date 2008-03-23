@@ -371,8 +371,8 @@ DatosCheque (void)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Vender), (gpointer)window);
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                   G_CALLBACK (Vender), (gpointer)window); */
 
   frame = gtk_frame_new ("Datos Cheque");
   gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
@@ -673,8 +673,8 @@ FillDatosVenta (GtkWidget *widget, gpointer data)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Vender), (gpointer)window);
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                   G_CALLBACK (Vender), (gpointer)window); */
 
   if (strcmp (tipo_venta, "cheque") == 0)
     {
@@ -1358,11 +1358,12 @@ EliminarProducto (GtkButton *button, gpointer data)
     }
 }
 
+/*
+ * callback para venta con efectivo, boleta o vale(VENTA)
+ */
 gint
-Vender (GtkButton *button, gpointer data)
+on_sell_button_clicked (GtkButton *button, gpointer data)
 {
-  gboolean cheque = FALSE;
-  gboolean tarjeta = FALSE;
   gchar *rut = NULL;
   gchar *cheque_date = NULL;
   gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
@@ -1377,144 +1378,17 @@ Vender (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA && tipo_documento != FACTURA)
     paga_con = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
 
-  if (data != NULL)
-    {
-      rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->venta_rut)));
-
-      if (strcmp (rut, "") == 0)
-        {
-          ErrorMSG (venta->venta_rut, "Debe ingresar un cliente");
-          return 0;
-        }
-
-      if (strcmp (tipo_venta, "cheque") == 0)
-        {
-          venta->tipo_venta = CHEQUE;
-          cheque = TRUE;
-          tarjeta = FALSE;
-        }
-      else if (strcmp (tipo_venta, "tarjeta") == 0)
-        {
-          venta->tipo_venta = tarjeta;
-          cheque = FALSE;
-          tarjeta = TRUE;
-        }
-    }
-
-  if (venta->tipo_venta == CHEQUE)
-    {
-      if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->cheque_serie)), "") == 0)
-        {
-          ErrorMSG (venta->cheque_serie, "Debe Ingresar la serie del cheque");
-          return 0;
-        }
-      else if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->cheque_numero)), "") == 0)
-        {
-          ErrorMSG (venta->cheque_numero, "Debe Ingresar el Nmero del Cheque");
-          return 0;
-        }
-      else if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->cheque_banco)), "") == 0)
-        {
-          ErrorMSG (venta->cheque_banco, "Debe Ingresar el Banco al que pertenece el Cheque");
-          return 0;
-        }
-      else if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->cheque_plaza)), "") == 0)
-        {
-          ErrorMSG (venta->cheque_plaza, "Debe Ingresar la Plaza del cheque");
-          return 0;
-        }
-
-      cheque_date = g_strdup (gtk_button_get_label (GTK_BUTTON (button_cheque)));
-
-      monto_cheque += atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_monto))));
-
-    }
-  else if (venta->tipo_venta == TARJETA)
-    {
-      if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_inst)), "") == 0)
-        {
-          ErrorMSG (venta->tarjeta_inst, "Debe Ingresar la Institución emisora de la Tarjeta");
-          return 0;
-        }
-      else if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_numero)), "") == 0)
-        {
-          ErrorMSG (venta->tarjeta_numero, "Debe Ingresar el número de la tarjeta");
-          return 0;
-        }
-      else if (strcmp (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_fecha)), "") == 0)
-        {
-          ErrorMSG (venta->tarjeta_fecha, "Debe Ingresar la fecha de Vencimiento de la tarjeta");
-          return 0;
-        }
-    }
-  else if (venta->tipo_venta == CREDITO)
-    {
-      rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->venta_rut)));
-
-      if (strcmp (rut, "") == 0)
-        {
-          ErrorMSG (venta->venta_rut, "En la venta a crédito el RUT no puede estar vacio");
-          return 0;
-        }
-      if (RutExist (rut) == FALSE)
-        {
-          ErrorMSG (venta->venta_rut, "No existe un cliente con ese Rut");
-          return 0;
-        }
-
-      if (LimiteCredito (rut) < (DeudaTotalCliente (atoi (rut)) + monto))
-        {
-          ErrorMSG (venta->venta_rut, "El cliente sobrepasa su limite de Credito");
-          return 0;
-        }
-    }
-  else if (tipo_documento != VENTA && tipo_documento != FACTURA && paga_con < monto)
+  if (tipo_documento != VENTA && paga_con < monto)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "sencillo_entry")), "No esta pagando con el dinero suficiente");
       return 0;
-    }
-
-  if (tipo_documento == FACTURA)
-    {
-      rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->venta_rut)));
-
-      if (strcmp (rut, "") == 0)
-        {
-          ErrorMSG (venta->venta_rut, "En la venta con factura el RUT es un dato obligatorio");
-          return 0;
-        }
-      if (RutExist (rut) == FALSE)
-        {
-          ErrorMSG (venta->venta_rut, g_strdup_printf ("No existe un cliente con el rut: %s",
-                                                       rut));
-          return 0;
-        }
-    }
-
-  if (tipo_documento == GUIA)
-    {
-      rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->venta_rut)));
-
-      if (strcmp (rut, "") == 0)
-        {
-          ErrorMSG (venta->venta_rut, "En la venta con guia el RUT es un dato obligatorio");
-          return 0;
-        }
-      if (RutExist (rut) == FALSE)
-        {
-          ErrorMSG (venta->venta_rut, g_strdup_printf ("No existe un cliente con el rut: %s",
-                                                       rut));
-          return 0;
-        }
     }
 
   if (tipo_documento != VENTA)
     discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))));
 
   if (strlen (discount) == 0 )
-    {
       discount = "0";
-    }
 
   switch (tipo_documento)
     {
@@ -1522,17 +1396,13 @@ Vender (GtkButton *button, gpointer data)
       if (monto >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
-        ticket = -1;
-      break;
-    case FACTURA:
-      ticket = get_ticket_number (tipo_documento);
-      break;
-    case GUIA:
-      ticket = get_ticket_number (tipo_documento);
+	ticket = -1;
       break;
     case VENTA:
       ticket = -1;
       break;
+    default:
+      g_printerr("Could not be found the document type %s", G_STRFUNC);
     }
 
   //  DiscountStock (venta->header);
@@ -1545,28 +1415,6 @@ Vender (GtkButton *button, gpointer data)
   SaveSell (monto, maquina, vendedor, venta->tipo_venta, rut, discount, ticket, tipo_documento,
             cheque_date, cheques, canceled);
 
-
-  if (data != NULL && (venta->tipo_venta == TARJETA || venta->tipo_venta == CREDITO ||
-                       (cheque == TRUE && monto_cheque >= monto) || venta->tipo_venta == FACTURA))
-    CancelarTipo ((GtkWidget *)data, (gpointer)FALSE);
-
-  else if (monto > monto_cheque && venta->tipo_venta == CHEQUE)
-    {
-      if (data != NULL)
-        CancelarTipo ((GtkWidget *)data, (gpointer)FALSE);
-
-      FillDatosVenta (NULL, (gpointer)tipo_venta);
-
-      cheques = TRUE;
-
-      return 0;
-    }
-  else if (monto_cheque >= monto && venta->tipo_venta == CHEQUE)
-    {
-      cheques = FALSE;
-      monto_cheque = 0;
-    }
-
   gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
@@ -1576,17 +1424,11 @@ Vender (GtkButton *button, gpointer data)
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
 
   PrintDocument (tipo_documento, rut, monto, ticket, venta->products);
-
   ListClean ();
-
-  WindowChangeSeller();
-
   return 0;
 }
 
@@ -2713,8 +2555,8 @@ PagoCheque (void)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Vender), (gpointer)TRUE);
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                   G_CALLBACK (Vender), (gpointer)TRUE); */
 }
 
 void
