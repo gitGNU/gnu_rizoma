@@ -2680,36 +2680,22 @@ compras_win ()
 }
 
 void
-SearchProductHistory (void)
+SearchProductHistory (GtkEntry *entry, gchar *barcode)
 {
-  gchar *barcodebrutus = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
-  gchar *barcode = barcodebrutus;
   gdouble day_to_sell;
 
   PGresult *res;
-
-  if (HaveCharacters (barcodebrutus) == TRUE || strcmp (barcodebrutus, "") == 0)
-    {
-      SearchByName (GTK_ENTRY (compra->barcode_history_entry));
-      return;
-    }
-
-  //barcode = ModifieBarcode (barcodebrutus);
-
-
-
-  gtk_entry_set_text (GTK_ENTRY (compra->barcode_history_entry), barcode);
 
   gchar *q = g_strdup_printf ("select barcode "
                               "from codigo_corto_to_barcode('%s')",
                               barcode);
   res = EjecutarSQL(q);
 
-  if (PQntuples(res) == 1)
+  if (PQntuples (res) == 1)
     {
       barcode = g_strdup (PQvaluebycol( res, 0, "barcode"));
-      PQclear(res);
-      gtk_entry_set_text(GTK_ENTRY(compra->barcode_history_entry),barcode);
+      PQclear (res);
+      gtk_entry_set_text (GTK_ENTRY (entry),barcode);
     }
   g_free(q);
 
@@ -3693,7 +3679,7 @@ AddNew (GtkWidget *widget, gpointer data)
       AddNewProductToDB (codigo, barcode, description, marca,
                          CUT (contenido), unidad, iva, otros, familia, perecible, fraccion);
 
-      SearchProductHistory ();
+      //      SearchProductHistory (NULL, "");
 
       CloseAddWindow (NULL, NULL);
 
@@ -3968,7 +3954,7 @@ AddFoundProduct (void)
 
       gtk_entry_set_text (GTK_ENTRY (compra->barcode_history_entry), barcode);
 
-      SearchProductHistory ();
+      //SearchProductHistory ();
 
       CloseSearchByName ();
 
@@ -7447,10 +7433,20 @@ check_passwd (GtkWidget *widget, gpointer data)
 void
 on_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
 {
+
 }
 
 void
 on_buy_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
 {
+  gchar *barcode = g_strdup (gtk_entry_get_text (entry));
 
+  if (HaveCharacters (barcode) == TRUE || g_str_equal (barcode, ""))
+    {
+      SearchByName (entry);
+    }
+  else
+    {
+      SearchProductHistory (entry, barcode);
+    }
 }

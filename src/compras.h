@@ -24,7 +24,7 @@
 
 #define COMPRAS_H
 
-void SearchProductHistory (void);
+void SearchProductHistory (GtkEntry *entry, gchar *barcode);
 
 void CloseProductDescription (void);
 

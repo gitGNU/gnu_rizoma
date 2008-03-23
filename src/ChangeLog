@@ -4,6 +4,8 @@
 	use of GtkBuilder to build the gui.
 	(on_barcode_entry_activate|on_buy_barcode_entry_activate): Added
 	functions. Doesn't do anything yet
+	(AddNew|AddFoundProduct): Commented line that run the SearchProductHistory, this
+	should not happend?.
 
 	* config_file.c (rizoma_get_value): Changed the return and input
 	types from char * to gchar *.
