@@ -49,9 +49,6 @@
 
 GtkBuilder *builder;
 
-gint screen_width;
-gint screen_height;
-
 GtkWidget *add_button;
 GtkWidget *vuelto_button;
 
@@ -1192,11 +1189,11 @@ AgregarProducto (GtkButton *button, gpointer data)
     {
       if (VentaFraccion (barcode) == FALSE)
         {
-	  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
+          aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
           AlertMSG (aux_widget,
                     "Este producto no se puede vender por fracción de producto");
 
-	  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
+          aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
           gtk_widget_grab_focus (aux_widget);
 
           return FALSE;
@@ -1388,7 +1385,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
     discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))));
 
   if (strlen (discount) == 0 )
-      discount = "0";
+    discount = "0";
 
   switch (tipo_documento)
     {
@@ -1396,7 +1393,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
       if (monto >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
-	ticket = -1;
+        ticket = -1;
       break;
     case VENTA:
       ticket = -1;
@@ -1910,7 +1907,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   GtkTreeViewColumn *column;
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object (builder,
-						  "ventas_buscar_entry"));
+                                                  "ventas_buscar_entry"));
   entry = GTK_WIDGET(gtk_builder_get_object (builder, "barcode_entry"));
 
   gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -3165,7 +3162,7 @@ WindowChangeSeller ()
 }
 
 int
-main (int argc, char *argv[])
+main (int argc, char **argv)
 {
   GtkWindow *login_window;
   GError *err = NULL;
@@ -3192,14 +3189,6 @@ main (int argc, char *argv[])
   g_key_file_load_from_file(key_file, config_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
   gtk_init (&argc, &argv);
-
-  screen_width = gdk_screen_width ();
-  screen_height = gdk_screen_height ();
-
-  if (screen_width == 640 && screen_height == 480)
-    solo_venta = TRUE;
-  else
-    solo_venta = FALSE;
 
   builder = gtk_builder_new ();
 

@@ -1,3 +1,19 @@
+2008-03-23  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (compras_win): Commented all the old code. Added the
+	use of GtkBuilder to build the gui.
+
+	* config_file.c (rizoma_get_value): Changed the return and input
+	types from char * to gchar *.
+	Deleted all the tabs and re-indent.
+
+	* Makefile.am (bin_PROGRAMS): Eliminated the creation of
+	rizoma-admin while we finish the creation of rizoma-compras.
+
+	* ventas.c (main): Changed the type of *argv[] to **argv. Just style.
+	(main): Deleted the code that get the screen size.
+	Deleted gint screen_width and gint screen_height.
+
 2006-07-02  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (SearchBarcodeProduct): No nothing is showed if the

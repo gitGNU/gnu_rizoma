@@ -32,4 +32,5 @@ src/rizoma-config
 *.out
 src/rizoma-ventas
 src/rizoma-admin
+src/rizoma-compras
 doc/*

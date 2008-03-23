@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
- /*config_file.c
+   c-indentation-style: gnu -*- */
+/*config_file.c
  *
  *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
@@ -40,8 +40,8 @@
  * @return un string con el valor de la clave solicitada, en caso de
  * que no se haya encontrado la clave retorna NULL
  */
-char *
-rizoma_get_value (char *var_name)
+gchar *
+rizoma_get_value (gchar *var_name)
 {
   gchar *value = NULL;
   GKeyFile *file;
@@ -56,7 +56,7 @@ rizoma_get_value (char *var_name)
   if (!res)
     {
       g_printerr("\n*** funcion %s: no pudo ser cargado el "
-		 "archivo de configuracion", G_STRFUNC);
+                 "archivo de configuracion", G_STRFUNC);
       g_printerr("\npath: %s", rizoma_path);
 
       return NULL;
@@ -95,7 +95,7 @@ rizoma_set_value (char *var_name, char *new_value)
   file = g_key_file_new();
 
   res = g_key_file_load_from_file(file, rizoma_path,
-				  G_KEY_FILE_KEEP_COMMENTS, NULL);
+                                  G_KEY_FILE_KEEP_COMMENTS, NULL);
 
   if (!res)
     {

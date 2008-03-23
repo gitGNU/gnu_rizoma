@@ -24,8 +24,6 @@
 
 #define COMPRAS_H
 
-void compras_box (MainBox *module_box);
-
 void SearchProductHistory (void);
 
 void CloseProductDescription (void);
