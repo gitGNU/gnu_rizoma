@@ -1,3 +1,4 @@
+# you must put the ignore files patterns here
 *.[ao]
 *~
 cscope*
