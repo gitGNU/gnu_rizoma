@@ -23,16 +23,14 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
 
+import sys
 import os
 import time
 import tempfile
 
 CHANGELOG = 'ChangeLog'
 
-f_status = os.popen('git status', 'r')
-
-i=0
-keep=False
+f_status = os.popen('git-diff-index --cached HEAD', 'r')
 
 curr_date = time.localtime(time.time())
 change_date = change_date = str(curr_date[0]) + '-' +\
@@ -48,27 +46,22 @@ author_email = f_author_email[:len(f_author_email)-1]
 modified_files = list()
 
 for line in f_status.readlines():
-    if ((i==4) or (keep)):
-        if len(line) == 2:
-            keep=False
-        else:
-            l = line.split(' ')
-            f_file = l[len(l)-1]
-            f_file = f_file[:len(f_file)-1]
-            modified_files.append(f_file)
-            keep=True
-    i += 1
+    l = line.split('\t')
+    f_file = l[len(l)-1]
+    f_file = f_file[:len(f_file)-1]
+    modified_files.append(f_file)
 
 if len(l) == 0:
     print "There is no files waiting for commit"
-else:
-    header = change_date + "  " + author_name + "  <" + author_email + ">"
-    header += "\n\n"
+    sys.exit(-1)
 
-    for l in modified_files:
-        header +="\t* " + l + ": \n"
+header = change_date + "  " + author_name + "  <" + author_email + ">"
+header += "\n\n"
 
-    header += "\n"
+for l in modified_files:
+    header +="\t* " + l + ": \n"
+
+header += "\n"
 
 tmp_dir = tempfile.mkdtemp()
 os.system('cp ' + CHANGELOG + ' ' + tmp_dir)
