@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Tue Mar 25 21:00:09 2008 -->
+<!--Generated with glade3 3.4.1 on Tue Mar 25 21:15:00 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>
@@ -494,7 +494,7 @@
               <widget class="GtkButton" id="button_delete_product">
                 <property name="visible">True</property>
                 <property name="response_id">0</property>
-                <signal name="activate" handler="EliminarProducto"/>
+                <signal name="clicked" handler="EliminarProducto"/>
                 <child>
                   <widget class="GtkHBox" id="hbox3">
                     <property name="visible">True</property>
