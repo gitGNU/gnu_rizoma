@@ -1493,7 +1493,10 @@ TipoVenta (GtkWidget *widget, gpointer data)
     {
       tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "tipo_venta_win_venta"));
+
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0");
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "discount_entry")));
+
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), "");
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")), "");
       gtk_widget_show_all (GTK_WIDGET (window));
