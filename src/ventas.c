@@ -554,9 +554,6 @@ FillDatosVenta (GtkWidget *widget, gpointer data)
 
           break;
         }
-
-      //      gtk_widget_set_sensitive (venta->window, TRUE);
-
       return;
     }
 
@@ -1099,6 +1096,10 @@ SearchProductByCode (void)
 
   if (res != NULL && PQntuples (res) != 0)
     {
+      if (PQntuples(res) > 1)
+	g_printerr("%s: the plpgsql function informacion_producto(0,'%s') returned more than 1 tuple",
+		   G_STRFUNC, codigo);
+
       mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
       FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "contenido"),
