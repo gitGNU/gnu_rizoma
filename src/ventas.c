@@ -1382,7 +1382,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA && paga_con < monto)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "sencillo_entry")), "No esta pagando con el dinero suficiente");
-      return 0;
+      return;
     }
 
   if (tipo_documento != VENTA)
@@ -1429,7 +1429,6 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
 
   ListClean ();
-  return 0;
 }
 
 void
@@ -1483,7 +1482,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
       return;
     }
 
-  if (strcmp (tipo_vendedor, "1") == 0)
+  if (g_str_equal (tipo_vendedor, "1"))
     {
       tipo_documento = VENTA;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "vendedor_venta"));
