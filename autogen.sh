@@ -106,4 +106,4 @@ else
     autoconf > /dev/null 2>&1;
 fi
 echo "Now we going to run the configure script"
-./configure
+./configure $@

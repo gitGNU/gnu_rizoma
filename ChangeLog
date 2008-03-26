@@ -1,5 +1,9 @@
 2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
 
+	* autogen.sh: added $@ to pass the parameters to the configure script
+
+2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
+
 	* src/ventas.c: added comments to on_sell_button_clicked and
 	changed the signature
 
