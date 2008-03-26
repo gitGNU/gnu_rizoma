@@ -2268,12 +2268,7 @@ SearchAndFill (void)
                               7, atoi (PQvaluebycol (res, i, "precio")),
                               -1);
         }
-      //gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (venta->buscar_entry)),
-      //GTK_WIDGET (gtk_tree_selection_get_tree_view (venta->search_selection)));
     }
-
-  //gtk_tree_selection_select_path (venta->search_selection, gtk_tree_path_new_from_string ("0"));
-
 }
 
 void
