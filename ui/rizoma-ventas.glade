@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.1 on Tue Mar 25 20:48:03 2008 -->
+<!--Generated with glade3 3.4.1 on Tue Mar 25 21:00:09 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="ventas_gui">
     <property name="visible">True</property>
@@ -683,7 +683,7 @@
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <property name="destroy_with_parent">True</property>
     <property name="transient_for">ventas_gui</property>
-    <signal name="delete_event" handler="CloseSellWindow"/>
+    <signal name="delete_event" handler="gtk_widget_hide_on_delete" object="tipo_venta_win_venta"/>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -735,7 +735,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkEntry" id="entry2">
+                      <widget class="GtkEntry" id="entry_percent_discount">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -844,14 +844,14 @@
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
             <child>
-              <widget class="GtkButton" id="button15">
+              <widget class="GtkButton" id="btn_close_win">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="CloseSellWindow"/>
+                <signal name="clicked" handler="gtk_widget_hide" object="tipo_venta_win_venta"/>
               </widget>
             </child>
             <child>
@@ -1165,7 +1165,7 @@
             <property name="label" translatable="yes" context="yes">gtk-print</property>
             <property name="use_stock">True</property>
             <property name="response_id">0</property>
-            <signal name="clicked" handler="Vender"/>
+            <signal name="clicked" handler="on_sell_button_clicked"/>
           </widget>
           <packing>
             <property name="position">1</property>

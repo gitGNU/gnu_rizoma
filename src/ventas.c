@@ -2325,6 +2325,7 @@ Descuento (GtkWidget *widget, gpointer data)
   gdouble discount = strtod (CUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))))), (char **)NULL);
   gint total;
   gint plata;
+  GtkWidget *aux_widget;
 
   if (tipo_documento != FACTURA && tipo_documento != GUIA)
     money = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
@@ -2356,6 +2357,13 @@ Descuento (GtkWidget *widget, gpointer data)
                         g_strdup_printf ("<span size=\"40000\">%s</span>",
                                          PutPoints (g_strdup_printf ("%u", total - plata))));
   //}
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
+						 "entry_percent_discount"));
+
+  if (aux_widget == widget)
+    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
+						   "sencillo_entry"));
+  gtk_widget_grab_focus(aux_widget);
 }
 
 gboolean
