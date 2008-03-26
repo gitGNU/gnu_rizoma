@@ -2024,6 +2024,10 @@ BuscarProducto (GtkWidget *widget, gpointer data)
       gtk_tree_view_column_set_max_width (column, 70);
       gtk_tree_view_column_set_resizable (column, FALSE);
     }
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_buscar_entry"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), gtk_entry_get_text(GTK_ENTRY(entry)));
+
   window = GTK_WINDOW (gtk_builder_get_object (builder, "ventas_buscar"));
   gtk_widget_show_all (GTK_WIDGET (window));
 
@@ -2223,10 +2227,10 @@ SearchAndFill (void)
   GtkTreeIter iter;
   GtkListStore *store;
 
-  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "ventas_buscar_entry"))));
   store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"))));
 
-  if (strcmp (string, "") != 0)
+  if (!(g_str_equal (string, "")))
     {
       q = g_strdup_printf ("SELECT * FROM buscar_producto ('%s', "
 			   "'{\"barcode\", \"codigo_corto\",\"marca\","
