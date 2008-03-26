@@ -2216,19 +2216,26 @@ BuscarProducto (GtkWidget *widget, gpointer data)
 void
 SearchAndFill (void)
 {
-  PGresult *res;
+  PGresult *res=NULL;
   gint resultados, i;
-  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
-
+  gchar *q;
+  gchar *string;
   GtkTreeIter iter;
-  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"))));
+  GtkListStore *store;
+
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"))));
 
   if (strcmp (string, "") != 0)
-    res = EjecutarSQL
-      (g_strdup_printf
-       ("SELECT * FROM buscar_producto ( '%s', '{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}', true, true )", string));
-
-  resultados = PQntuples (res);
+    {
+      q = g_strdup_printf ("SELECT * FROM buscar_producto ('%s', "
+			   "'{\"barcode\", \"codigo_corto\",\"marca\","
+			   "\"descripcion\"}', true, true )", string);
+      res = EjecutarSQL (q);
+      resultados = PQntuples (res);
+    }
+  else
+    resultados = 0;
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "ventas_label_found")),
                         g_strdup_printf ("<b>%d producto(s)</b>", resultados));
@@ -2241,7 +2248,7 @@ SearchAndFill (void)
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           2, "No se encontró descripción",
-                          8, "White",
+                          8, "Red",
                           9, TRUE,
                           -1);
     }

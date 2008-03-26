@@ -1,5 +1,13 @@
 2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
 
+	* src/ventas.c: fixed the label of the search window when there is
+	no results to show
+
+	* ui/rizoma-ventas.glade: added a stock image to make it look
+	nicer
+
+2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+
 	* db/funciones.sql: applied the round() function to
 	contrib_agregada, because the out parameter was defined like int
 
