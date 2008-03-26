@@ -1,5 +1,13 @@
 2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
 
+	* src/ventas.c: added comments to on_sell_button_clicked and
+	changed the signature
+
+	* src/ventas.h: droped the function Vender and added
+	on_sell_button_clicked
+
+2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
+
 	* .gitignore: changed just to test the prepare changelog script
 
 	* prepareChangelog.py: droped the use of git-status to know the

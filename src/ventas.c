@@ -1355,10 +1355,14 @@ EliminarProducto (GtkButton *button, gpointer data)
     }
 }
 
-/*
- * callback para venta con efectivo, boleta o vale(VENTA)
+/**
+ * Callback connected to the button present in
+ * rizoma-ventas.ui:tipo_venta_win_venta, the button sell_button
+ *
+ * @param button the GtkButton that recieves the signal
+ * @param data the pointer passed to the callback
  */
-gint
+void
 on_sell_button_clicked (GtkButton *button, gpointer data)
 {
   gchar *rut = NULL;

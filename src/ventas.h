@@ -32,7 +32,7 @@ gboolean AgregarProducto (GtkButton *button, gpointer data);
 
 void EliminarProducto (GtkButton *button, gpointer data);
 
-gint Vender (GtkButton *button, gpointer data);
+void on_sell_button_clicked (GtkButton *button, gpointer data);
 
 void AumentarCantidad (GtkEntry *entry, gpointer data);
 
