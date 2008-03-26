@@ -1541,14 +1541,6 @@ CalcularVuelto (void)
                           "<span size=\"30000\"> </span>");
 }
 
-void
-SearchProductByName (void)
-{
-  //  gchar *producto = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_label"))));
-
-  //  if (strcmp (producto, "") == 0)
-  //    WindowProductSelect ();
-}
 
 gint
 AddProduct (void)

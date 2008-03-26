@@ -46,8 +46,6 @@ void CambiarTipoVenta (GtkToggleButton *button, gpointer user_data);
 
 void CalcularVuelto (void);
 
-void SearchProductByName (void);
-
 gint AddProduct (void);
 
 void LooksForClient (void);
