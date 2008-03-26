@@ -1,8 +1,19 @@
-2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
+2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+
+	* db/funciones.sql: applied the round() function to
+	contrib_agregada, because the out parameter was defined like int
+
+	* prepareChangelog.py: given execute permissions
+
+	* src/ventas.c: eliminated the call to PrintDocument function from
+	on_sell_button_clicked, because this functions seem to be called
+	only for facturas
+
+2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
 
 	* autogen.sh: added $@ to pass the parameters to the configure script
 
-2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
+2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
 
 	* src/ventas.c: added comments to on_sell_button_clicked and
 	changed the signature
@@ -10,7 +21,7 @@
 	* src/ventas.h: droped the function Vender and added
 	on_sell_button_clicked
 
-2008-03 25  Felipe Reyes  <felipereyes@gmail.com>
+2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
 
 	* .gitignore: changed just to test the prepare changelog script
 

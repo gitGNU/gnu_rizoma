@@ -1428,7 +1428,6 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
 
-  PrintDocument (tipo_documento, rut, monto, ticket, venta->products);
   ListClean ();
   return 0;
 }
