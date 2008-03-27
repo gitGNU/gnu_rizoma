@@ -1493,7 +1493,10 @@ TipoVenta (GtkWidget *widget, gpointer data)
     {
       tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "tipo_venta_win_venta"));
+
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0");
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "discount_entry")));
+
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), "");
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")), "");
       gtk_widget_show_all (GTK_WIDGET (window));
@@ -2024,6 +2027,10 @@ BuscarProducto (GtkWidget *widget, gpointer data)
       gtk_tree_view_column_set_max_width (column, 70);
       gtk_tree_view_column_set_resizable (column, FALSE);
     }
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_buscar_entry"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), gtk_entry_get_text(GTK_ENTRY(entry)));
+
   window = GTK_WINDOW (gtk_builder_get_object (builder, "ventas_buscar"));
   gtk_widget_show_all (GTK_WIDGET (window));
 
@@ -2223,10 +2230,10 @@ SearchAndFill (void)
   GtkTreeIter iter;
   GtkListStore *store;
 
-  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "ventas_buscar_entry"))));
   store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"))));
 
-  if (strcmp (string, "") != 0)
+  if (!(g_str_equal (string, "")))
     {
       q = g_strdup_printf ("SELECT * FROM buscar_producto ('%s', "
 			   "'{\"barcode\", \"codigo_corto\",\"marca\","
@@ -2268,12 +2275,7 @@ SearchAndFill (void)
                               7, atoi (PQvaluebycol (res, i, "precio")),
                               -1);
         }
-      //gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (venta->buscar_entry)),
-      //GTK_WIDGET (gtk_tree_selection_get_tree_view (venta->search_selection)));
     }
-
-  //gtk_tree_selection_select_path (venta->search_selection, gtk_tree_path_new_from_string ("0"));
-
 }
 
 void
