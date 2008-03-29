@@ -37,6 +37,7 @@
  * almacena el archivo de configuracion de rizoma
  * @param var_name un string con el nombre de la clave que se quiere
  * obtener el valor
+ *
  * @return un string con el valor de la clave solicitada, en caso de
  * que no se haya encontrado la clave retorna NULL
  */
@@ -76,12 +77,57 @@ rizoma_get_value (gchar *var_name)
 }
 
 /**
+ * This function returns the int value associated to a key at the
+ * configuration profile used to start the application.
+ *
+ * @param var_name a key that has a int value associated
+ *
+ * @return the int value, if the function fails will return G_MININT
+ */
+int
+rizoma_get_value_int (gchar *var_name)
+{
+  gint value;
+  GKeyFile *file;
+  gchar *rizoma_path;
+  gboolean res;
+
+  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
+  file = g_key_file_new();
+
+  res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
+
+  if (!res)
+    {
+      g_printerr("\n*** funcion %s: no pudo ser cargado el "
+                 "archivo de configuracion", G_STRFUNC);
+      g_printerr("\npath: %s", rizoma_path);
+
+      return G_MININT;
+    }
+
+  if (!g_key_file_has_key(file, config_profile, var_name, NULL))
+    {
+      g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
+      return G_MININT;
+    }
+
+  value = g_key_file_get_integer(file, config_profile, var_name, NULL);
+  g_key_file_free(file);
+
+  return(value);
+}
+
+
+/**
  * Cambia el valor de una clave existente, si la clave no existe la
  * crea automaticamente, los valores son escritos directamente al
  * archivo de configuracion
  * @param var_name es un string que contiene el nombre de la clave
  * @param new_value es un string que contiene el nuevo valor que debe
  * tener la clave
+ *
+ * @return return 0 when the value was saved with success
  */
 int
 rizoma_set_value (char *var_name, char *new_value)
@@ -115,6 +161,11 @@ rizoma_set_value (char *var_name, char *new_value)
   return (0);
 }
 
+/**
+ * Set the name of the profile that must use the application
+ *
+ * @param group_name the name of the profile that will be used
+ */
 void
 rizoma_set_profile (gchar *group_name)
 {
