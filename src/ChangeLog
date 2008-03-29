@@ -1,3 +1,10 @@
+2008-03-29  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (BuscarProducto): Eliminated an unuseful cast.
+
+	* compras.c (SearchByName): Use the .ui interface.
+	(ClearAllCompraData): Deleted some commented code.
+
 2008-03-23  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (compras_win): Commented all the old code. Added the

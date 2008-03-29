@@ -1929,7 +1929,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   gtk_entry_set_text (GTK_ENTRY (aux_widget),
                       gtk_entry_get_text (GTK_ENTRY (entry)));
 
-  if (gtk_tree_view_get_model (GTK_TREE_VIEW(treeview)) == NULL )
+  if (gtk_tree_view_get_model (treeview) == NULL )
     {
       store = gtk_list_store_new (10,
                                   G_TYPE_STRING,
@@ -2066,8 +2066,8 @@ SearchAndFill (void)
   if (!(g_str_equal (string, "")))
     {
       q = g_strdup_printf ("SELECT * FROM buscar_producto ('%s', "
-			   "'{\"barcode\", \"codigo_corto\",\"marca\","
-			   "\"descripcion\"}', true, true )", string);
+                           "'{\"barcode\", \"codigo_corto\",\"marca\","
+                           "\"descripcion\"}', true, true )", string);
       res = EjecutarSQL (q);
       resultados = PQntuples (res);
     }
@@ -2191,11 +2191,11 @@ Descuento (GtkWidget *widget, gpointer data)
                                          PutPoints (g_strdup_printf ("%u", total - plata))));
   //}
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
-						 "entry_percent_discount"));
+                                                 "entry_percent_discount"));
 
   if (aux_widget == widget)
     aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
-						   "sencillo_entry"));
+                                                   "sencillo_entry"));
   gtk_widget_grab_focus(aux_widget);
 }
 

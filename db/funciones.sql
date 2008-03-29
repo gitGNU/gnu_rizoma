@@ -1553,7 +1553,7 @@ begin
 	IF i > 1 THEN
 	query := query || $S$ or  $S$;
 	END IF;
-	query := query || $S$ upper( $S$ || columnas[i] || $S$ ) $S$ || $S$ like upper( '%$S$ || expresion ||$S$%' ) $S$;
+	query := query || $S$ upper( $S$ || columnas[i] || $S$::varchar ) $S$ || $S$ like upper( '$S$ || expresion ||$S$%' ) $S$;
 	ELSE
 	IF i > 1 THEN
 	query := query || $S$ and $S$;
