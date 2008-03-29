@@ -92,7 +92,7 @@ FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *conten
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
-                      g_strdup_printf ("%s  %s  %s  %s", codigo_corto, marca, contenido, unidad));
+                      g_strdup_printf ("%s  %s  %s", marca, contenido, unidad));
 
   if (atoi (stock) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
@@ -554,9 +554,6 @@ FillDatosVenta (GtkWidget *widget, gpointer data)
 
           break;
         }
-
-      //      gtk_widget_set_sensitive (venta->window, TRUE);
-
       return;
     }
 
@@ -1099,6 +1096,21 @@ SearchProductByCode (void)
 
   if (res != NULL && PQntuples (res) != 0)
     {
+      if (PQntuples(res) > 1)
+	g_printerr("%s: the plpgsql function informacion_producto(0,'%s') returned more than 1 tuple",
+		   G_STRFUNC, codigo);
+
+      if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
+	{
+	  GtkWidget *aux_widget;
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+	  gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
+	  AlertMSG (aux_widget, str);
+	  g_free (str);
+
+	  return FALSE;
+	}
+
       mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
       FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "contenido"),
@@ -1541,14 +1553,6 @@ CalcularVuelto (void)
                           "<span size=\"30000\"> </span>");
 }
 
-void
-SearchProductByName (void)
-{
-  //  gchar *producto = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "product_label"))));
-
-  //  if (strcmp (producto, "") == 0)
-  //    WindowProductSelect ();
-}
 
 gint
 AddProduct (void)
@@ -1823,32 +1827,43 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   if (res == NULL)
     return -1;
 
-  else
-    if (PQntuples (res) == 0)
-      {
-        if (strcmp (barcode, "") != 0)
-          {
-            AlertMSG (widget, g_strdup_printf
-                      ("No existe un producto con el código de barras %s!!", barcode));
+  if (PQntuples (res) == 0)
+    {
+      if (strcmp (barcode, "") != 0)
+	{
+	  AlertMSG (widget, g_strdup_printf
+		    ("No existe un producto con el código de barras %s!!", barcode));
 
-            if (ventas != FALSE)
-              CleanSellLabels ();
-          }
-        else
-          if (GetCurrentStock (barcode) == 0)
-            {
-              AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
+	  if (ventas != FALSE)
+	    CleanSellLabels ();
+	}
+      else
+	if (GetCurrentStock (barcode) == 0)
+	  {
+	    AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
 
-              if (ventas != FALSE)
-                CleanSellLabels ();
-            }
-          else
-            {
-              if (ventas != FALSE)
-                CleanSellLabels ();
-            }
-        return -1;
-      }
+	    if (ventas != FALSE)
+	      CleanSellLabels ();
+	  }
+	else
+	  {
+	    if (ventas != FALSE)
+	      CleanSellLabels ();
+	  }
+      return -1;
+    }
+
+  //check if the product has stock
+  if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
+    {
+      GtkWidget *aux_widget;
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      gchar *str = g_strdup_printf("El producto %s no tiene stock", barcode);
+      AlertMSG (aux_widget, str);
+      g_free (str);
+
+      return -1;
+    }
 
   mayorista = strcmp (PQvaluebycol( res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
@@ -2316,12 +2331,6 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
           SearchBarcodeProduct (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), (gpointer)TRUE);
         }
-      /*   else */
-      /* { */
-      /*   gtk_entry_set_text (GTK_ENTRY (canje_entry), barcode); */
-
-      /*   SearchBarcodeProduct (canje_entry, (gpointer)FALSE); */
-      /* } */
       CloseBuscarWindow (NULL, (gpointer)TRUE);
     }
 }
