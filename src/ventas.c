@@ -92,7 +92,7 @@ FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *conten
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
-                      g_strdup_printf ("%s  %s  %s  %s", codigo_corto, marca, contenido, unidad));
+                      g_strdup_printf ("%s  %s  %s", marca, contenido, unidad));
 
   if (atoi (stock) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
@@ -2309,12 +2309,6 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
           SearchBarcodeProduct (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), (gpointer)TRUE);
         }
-      /*   else */
-      /* { */
-      /*   gtk_entry_set_text (GTK_ENTRY (canje_entry), barcode); */
-
-      /*   SearchBarcodeProduct (canje_entry, (gpointer)FALSE); */
-      /* } */
       CloseBuscarWindow (NULL, (gpointer)TRUE);
     }
 }
