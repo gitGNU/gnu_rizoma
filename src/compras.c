@@ -126,8 +126,6 @@ GtkWidget *pago_otro;
 GtkWidget *frame_cheque;
 GtkWidget *frame_otro;
 
-
-
 void
 toggle_cell (GtkCellRendererToggle *cellrenderertoggle,
              gchar *path_string, gpointer user_data)
@@ -854,7 +852,7 @@ compras_win ()
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-compras.ui", NULL);
   gtk_builder_connect_signals (builder, NULL);
 
-  compras_gui = GTK_WIDGET (gtk_builder_get_object (builder, "compras_gui"));
+  compras_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_compras"));
 
   // check if the window must be set to fullscreen
   fullscreen_opt = rizoma_get_value ("FULLSCREEN");
@@ -4006,206 +4004,104 @@ SearchName (GtkEntry *widget, gpointer data)
 void
 SearchByName(GtkEntry *entry)
 {
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *scroll;
-  GtkAccelGroup *accel_search;
+  GtkWindow *window;
 
-  GtkWidget *button;
-  GtkWidget *search_entry;
-  GtkWidget *label;
+  GtkListStore *store;
+  GtkTreeView *treeview;
 
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-  gchar *string = g_strdup (gtk_entry_get_text (entry));
+  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, ""))));
 
-  gtk_widget_set_sensitive (main_window, FALSE);
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
 
-  compra->find_win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (compra->find_win), GTK_WIN_POS_CENTER_ALWAYS);
-  //  gtk_window_set_transient_for (GTK_WINDOW (compra->find_win), GTK_WINDOW (main_window));
-  gtk_widget_show (compra->find_win);
-  gtk_window_present (GTK_WINDOW (compra->find_win));
+  if (gtk_tree_view_get_model (treeview) == NULL )
+    {
 
-  g_signal_connect (G_OBJECT (compra->find_win), "destroy",
-                    G_CALLBACK (CloseSearchByName), NULL);
+      store = gtk_list_store_new (7,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING,
+                                  G_TYPE_INT);
 
-  accel_search = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (compra->find_win), accel_search);
+      gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (compra->find_win), vbox);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Codigo Simple", renderer,
+                                                         "text", 0,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Codigo de Barras", renderer,
+                                                         "text", 1,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  search_entry = gtk_entry_new ();
-  gtk_widget_show (search_entry);
-  gtk_box_pack_start (GTK_BOX (hbox), search_entry, FALSE, FALSE, 3);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Descripcion del Producto", renderer,
+                                                         "text", 2,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      gtk_tree_view_column_set_min_width (column, 200);
+      gtk_tree_view_column_set_max_width (column, 200);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  if (strcmp (string, "") != 0)
-    gtk_entry_set_text (GTK_ENTRY (search_entry), string);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                         "text", 3,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      gtk_tree_view_column_set_min_width (column, 100);
+      gtk_tree_view_column_set_max_width (column, 100);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  /*g_signal_connect (G_OBJECT (search_entry), "activate",
-    G_CALLBACK (SearchName), (gpointer)search_entry);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
+                                                         "text", 4,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-    gtk_widget_add_accelerator (search_entry, "activate", accel_search,
-    GDK_F5, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE);*/
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                         "text", 5,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  gtk_window_set_focus (GTK_WINDOW (compra->find_win), search_entry);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
+                                                         "text", 6,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
 
-  button = gtk_button_new_from_stock (GTK_STOCK_FIND);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
+  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_buscador"));
+  gtk_widget_show_all (GTK_WIDGET (window));
 
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (SearchName), (gpointer)search_entry);
-
-  scroll = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scroll);
-  if (solo_venta != TRUE)
-    gtk_widget_set_size_request (scroll, 650, 200);
-  else
-    gtk_widget_set_size_request (scroll, 640, 200);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-                                  GTK_POLICY_AUTOMATIC,
-                                  GTK_POLICY_AUTOMATIC);
-  gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 3);
-
-  compra->find_store = gtk_list_store_new (7,
-                                           G_TYPE_STRING,
-                                           G_TYPE_STRING,
-                                           G_TYPE_STRING,
-                                           G_TYPE_STRING,
-                                           G_TYPE_STRING,
-                                           G_TYPE_STRING,
-                                           G_TYPE_INT);
-
-  compra->find_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->find_store));
-  gtk_widget_show (compra->find_tree);
-  gtk_container_add (GTK_CONTAINER (scroll), compra->find_tree);
-
-  //  if (strcmp (string, "") != 0)
-  //SearchName (NULL, (gpointer)entry);
-
-  g_signal_connect (G_OBJECT (search_entry), "activate",
-                    G_CALLBACK (SearchName), (gpointer)search_entry);
-
-  gtk_widget_add_accelerator (search_entry, "activate", accel_search,
-                              GDK_F5, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE);
-
-  g_signal_connect (G_OBJECT (compra->find_tree), "row-activated",
-                    G_CALLBACK (AddFoundProduct), NULL);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Codigo Simple", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Codigo de Barras", renderer,
-                                                     "text", 1,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descripcion del Producto", renderer,
-                                                     "text", 2,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 200);
-  gtk_tree_view_column_set_max_width (column, 200);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
-                                                     "text", 3,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 100);
-  gtk_tree_view_column_set_max_width (column, 100);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
-                                                     "text", 4,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  //  gtk_tree_view_column_set_min_width (column, 200);
-  //  gtk_tree_view_column_set_max_width (column, 200);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
-                                                     "text", 5,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  //  gtk_tree_view_column_set_min_width (column, 200);
-  //  gtk_tree_view_column_set_max_width (column, 200);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
-                                                     "text", 6,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->find_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  //  gtk_tree_view_column_set_min_width (column, 100);
-  //  gtk_tree_view_column_set_max_width (column, 100);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label),
-                        "<b>Se han encontrado:</b> ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  label_found_compras = gtk_label_new ("");
-  gtk_box_pack_start (GTK_BOX (hbox), label_found_compras, FALSE, FALSE, 3);
-  gtk_widget_show (label_found_compras);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseSearchByName), NULL);
-
-  gtk_widget_add_accelerator (button, "clicked", accel_search,
-                              GDK_Escape, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (AddFoundProduct), NULL);
-
-  SearchName (NULL, (gpointer)entry);
+  if (g_str_equal (string, ""))
+    {
+      gtk_entry_set_text (GTK_ENTRY (search_entry), string);
+      //SearchName (NULL, (gpointer)entry) Codigo inutil?
+    }
 }
 
 void
@@ -4292,16 +4188,6 @@ ClearAllCompraData (void)
   gtk_list_store_clear (compra->store_history);
 
   gtk_list_store_clear (compra->store_list);
-
-  /*
-    gtk_entry_set_text (GTK_ENTRY (compra->codigo_entry), "");
-    gtk_entry_set_text (GTK_ENTRY (compra->barcode_entry), "");
-    gtk_entry_set_text (GTK_ENTRY (compra->producto_entry), "");
-    gtk_entry_set_text (GTK_ENTRY (compra->marca_entry), "");
-    gtk_entry_set_text (GTK_ENTRY (compra->contenido_entry), "");
-    gtk_entry_set_text (GTK_ENTRY (compra->unidad_entry), "");
-    gtk_entry_set_text (GTK_ENTRY (compra->precio_unitario_entry), "");
-  */
 
   gtk_entry_set_text (GTK_ENTRY (ingreso_entry), "");
   gtk_entry_set_text (GTK_ENTRY (ganancia_entry), "");
@@ -7437,7 +7323,7 @@ on_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
 }
 
 void
-on_buy_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
+on_entry_buy_barcode_activate (GtkEntry *entry, gpointer user_data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (entry));
 
