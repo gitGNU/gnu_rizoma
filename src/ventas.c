@@ -1827,32 +1827,43 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   if (res == NULL)
     return -1;
 
-  else
-    if (PQntuples (res) == 0)
-      {
-        if (strcmp (barcode, "") != 0)
-          {
-            AlertMSG (widget, g_strdup_printf
-                      ("No existe un producto con el código de barras %s!!", barcode));
+  if (PQntuples (res) == 0)
+    {
+      if (strcmp (barcode, "") != 0)
+	{
+	  AlertMSG (widget, g_strdup_printf
+		    ("No existe un producto con el código de barras %s!!", barcode));
 
-            if (ventas != FALSE)
-              CleanSellLabels ();
-          }
-        else
-          if (GetCurrentStock (barcode) == 0)
-            {
-              AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
+	  if (ventas != FALSE)
+	    CleanSellLabels ();
+	}
+      else
+	if (GetCurrentStock (barcode) == 0)
+	  {
+	    AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
 
-              if (ventas != FALSE)
-                CleanSellLabels ();
-            }
-          else
-            {
-              if (ventas != FALSE)
-                CleanSellLabels ();
-            }
-        return -1;
-      }
+	    if (ventas != FALSE)
+	      CleanSellLabels ();
+	  }
+	else
+	  {
+	    if (ventas != FALSE)
+	      CleanSellLabels ();
+	  }
+      return -1;
+    }
+
+  //check if the product has stock
+  if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
+    {
+      GtkWidget *aux_widget;
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      gchar *str = g_strdup_printf("El producto %s no tiene stock", barcode);
+      AlertMSG (aux_widget, str);
+      g_free (str);
+
+      return -1;
+    }
 
   mayorista = strcmp (PQvaluebycol( res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
