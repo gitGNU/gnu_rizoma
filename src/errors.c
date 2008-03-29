@@ -137,7 +137,7 @@ AlertMSG (GtkWidget *widget, gchar *motivo)
   g_signal_connect (G_OBJECT (error_window), "destroy",
 		    G_CALLBACK (CloseErrorWindow), NULL);
 
-  
+
   vbox = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (vbox);
   gtk_container_add (GTK_CONTAINER (error_window), vbox);

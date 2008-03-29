@@ -1100,6 +1100,17 @@ SearchProductByCode (void)
 	g_printerr("%s: the plpgsql function informacion_producto(0,'%s') returned more than 1 tuple",
 		   G_STRFUNC, codigo);
 
+      if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
+	{
+	  GtkWidget *aux_widget;
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+	  gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
+	  AlertMSG (aux_widget, str);
+	  g_free (str);
+
+	  return FALSE;
+	}
+
       mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
       FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "contenido"),
