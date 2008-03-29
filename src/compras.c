@@ -4099,7 +4099,7 @@ SearchByName(GtkEntry *entry)
 
   if (g_str_equal (string, ""))
     {
-      gtk_entry_set_text (GTK_ENTRY (search_entry), string);
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buscar")), string);
       //SearchName (NULL, (gpointer)entry) Codigo inutil?
     }
 }
