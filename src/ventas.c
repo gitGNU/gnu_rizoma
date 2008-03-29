@@ -82,7 +82,7 @@ gboolean mayorista = FALSE;
 gboolean closing_tipos = FALSE;
 
 void
-FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
+FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *descripcion, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
                  gchar *precio, gchar *precio_mayor, gchar *cantidad_mayor, gchar *codigo_corto)
 {
   GtkWidget *widget;
@@ -92,7 +92,7 @@ FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *conten
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
-                      g_strdup_printf ("%s  %s  %s", marca, contenido, unidad));
+                      g_strdup_printf ("%s  %s  %s %s", marca, descripcion, contenido, unidad));
 
   if (atoi (stock) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
@@ -1113,10 +1113,10 @@ SearchProductByCode (void)
 
       mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
-      FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "contenido"),
-                       PQvaluebycol (res, 0, "unidad"),PQvaluebycol (res, 0, "stock"), PQvaluebycol (res, 0, "stock_day"),
-                       PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"), PQvaluebycol (res, 0, "cantidad_mayor"),
-                       PQvaluebycol (res, 0, "codigo_corto"));
+      FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
+		       PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),PQvaluebycol (res, 0, "stock"),
+		       PQvaluebycol (res, 0, "stock_day"), PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
+		       PQvaluebycol (res, 0, "cantidad_mayor"), PQvaluebycol (res, 0, "codigo_corto"));
 
       if (PQvaluebycol (res, 0, "precio") != 0)
         {
@@ -1867,8 +1867,10 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
   mayorista = strcmp (PQvaluebycol( res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
-  FillProductSell (barcode, mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),
-                   PQvaluebycol (res, 0, "stock"), PQvaluebycol (res, 0, "stock_day"), PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
+  FillProductSell (barcode, mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
+		   PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),
+                   PQvaluebycol (res, 0, "stock"), PQvaluebycol (res, 0, "stock_day"),
+		   PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
                    PQvaluebycol (res, 0, "cantidad_mayor"), PQvaluebycol (res, 0, "codigo_corto"));
 
   if (atoi (PQvaluebycol (res, 0, "precio")) != 0)
