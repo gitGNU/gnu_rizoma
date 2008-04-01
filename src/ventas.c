@@ -1846,6 +1846,8 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   //check if the product has stock
   if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
     {
+      //the product has not stock, so display a message
+      //and abort the operation
       GtkWidget *aux_widget;
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
       gchar *str = g_strdup_printf("El producto %s no tiene stock", barcode);
