@@ -183,44 +183,53 @@ get_datos (void)
   if (PQntuples (res) != 1)
     return -1;
 
-  if (strcmp (PQgetvalue (res, 0, 0), "") != 0)
-    razon_social_value = PQgetvalue (res, 0, 0);
+  if (strcmp (PQvaluebycol (res, 0, "razon_social"), "") != 0)
+    razon_social_value = PQvaluebycol (res, 0, "razon_social");
   else
     razon_social_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 1), "") != 0)
-    rut_value = PQgetvalue (res, 0, 1);
+
+  if (strcmp (PQvaluebycol (res, 0, "rut"), "") != 0)
+    rut_value = PQvaluebycol (res, 0, "rut");
   else
     rut_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 2), "") != 0)
-    nombre_fantasia_value = PQgetvalue (res, 0, 2);
+
+  if (strcmp (PQvaluebycol (res, 0, "nombre"), "") != 0)
+    nombre_fantasia_value = PQvaluebycol (res, 0, "nombre");
   else
     nombre_fantasia_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 3), "") != 0)
-    fono_value = PQgetvalue (res, 0, 3);
+
+  if (strcmp (PQvaluebycol (res, 0, "fono"), "") != 0)
+    fono_value = PQvaluebycol (res, 0, "fono");
   else
     fono_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 4), "") != 0)
-    fax_value = PQgetvalue (res, 0, 4);
+
+  if (strcmp (PQvaluebycol (res, 0, "fax"), "") != 0)
+    fax_value = PQvaluebycol (res, 0, "fax");
   else
     fax_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 5), "") != 0)
-    direccion_value = PQgetvalue (res, 0, 5);
+
+  if (strcmp (PQvaluebycol (res, 0, "direccion"), "") != 0)
+    direccion_value = PQvaluebycol (res, 0, "direccion");
   else
     direccion_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 6), "") != 0)
-    comuna_value = PQgetvalue (res, 0, 6);
+
+  if (strcmp (PQvaluebycol (res, 0, "comuna"), "") != 0)
+    comuna_value = PQvaluebycol (res, 0, "comuna");
   else
     comuna_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 7), "") != 0)
-    ciudad_value = PQgetvalue (res, 0, 7);
+
+  if (strcmp (PQvaluebycol (res, 0, "ciudad"), "") != 0)
+    ciudad_value = PQvaluebycol (res, 0, "ciudad");
   else
     ciudad_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 8), "") != 0)
-    giro_value = PQgetvalue (res, 0, 8);
+
+  if (strcmp (PQvaluebycol (res, 0, "giro"), "") != 0)
+    giro_value = PQvaluebycol (res, 0, "giro");
   else
     giro_value = NULL;
-  if (strcmp (PQgetvalue (res, 0, 9), "") != 0)
-    at_value = PQgetvalue (res, 0, 9);
+
+  if (strcmp (PQvaluebycol (res, 0, "at"), "") != 0)
+    at_value = PQvaluebycol (res, 0, "at");
   else
     at_value = NULL;
 
