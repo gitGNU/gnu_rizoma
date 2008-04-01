@@ -925,7 +925,7 @@ ventas_win ()
   GtkCellRenderer *renderer;
   GtkTreeIter iter;
   GtkWidget *ventas_gui;
-  gchar *fullscreen_opt = NULL;
+  gboolean fullscreen_opt;
 
   venta = (Venta *) g_malloc (sizeof (Venta));
   venta->header = NULL;
@@ -941,8 +941,8 @@ ventas_win ()
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
 
   // check if the window must be set to fullscreen
-  fullscreen_opt = rizoma_get_value("FULLSCREEN");
-  if ((fullscreen_opt != NULL) && (g_str_equal(fullscreen_opt, "YES")))
+  fullscreen_opt = rizoma_get_value_boolean("FULLSCREEN");
+  if (fullscreen_opt)
     gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
 
   gtk_widget_show_all (ventas_gui);

@@ -40,6 +40,8 @@ gchar * rizoma_get_value (gchar *var_name);
 
 int rizoma_get_value_int (gchar *var_name);
 
+gboolean rizoma_get_value_boolean (gchar *var_name);
+
 int rizoma_set_value (char *var_name, char *new_value);
 
 void rizoma_set_profile (gchar *group_name);

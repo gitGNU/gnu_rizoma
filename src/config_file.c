@@ -118,6 +118,52 @@ rizoma_get_value_int (gchar *var_name)
   return(value);
 }
 
+/**
+ * Read a boolean value associated to the given key
+ *
+ * If the value contained in the rizoma configuration file cannot be
+ * interpreted as a boolean value this function will return FALSE
+ *
+ * @param var_name the key
+ *
+ * @return the boolean value associated to the key
+ */
+gboolean
+rizoma_get_value_boolean (gchar *var_name)
+{
+  gboolean value;
+  GKeyFile *file;
+  gchar *rizoma_path;
+  GError *err=NULL;
+  gboolean res;
+
+  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
+  file = g_key_file_new();
+
+  res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
+
+  if (!res)
+    {
+      g_printerr("\n*** funcion %s: no pudo ser cargado el "
+                 "archivo de configuracion", G_STRFUNC);
+      g_printerr("\npath: %s", rizoma_path);
+
+      return G_MININT;
+    }
+
+  if (!g_key_file_has_key(file, config_profile, var_name, NULL))
+    {
+      g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
+      return FALSE;
+    }
+
+  value = g_key_file_get_boolean(file, config_profile, var_name, &err);
+
+  g_key_file_free(file);
+
+  return(value);
+}
+
 
 /**
  * Cambia el valor de una clave existente, si la clave no existe la
