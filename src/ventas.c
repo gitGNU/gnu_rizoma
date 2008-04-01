@@ -1810,18 +1810,8 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
   gtk_entry_set_text (GTK_ENTRY (widget), barcode);
 
-
-
-  //  if (ventas != FALSE)
   q = g_strdup_printf ("SELECT * FROM informacion_producto (%s,'')", barcode);
-  /* else */
-  /*   q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, contenido, unidad, stock, " */
-  /*  "precio, mayorista FROM producto " */
-  /*  "WHERE barcode='%s' AND stock!=0 AND canje='t'", */
-  /*  barcode); */
-
   res = EjecutarSQL(q);
-
   g_free(q);
 
   if (res == NULL)
