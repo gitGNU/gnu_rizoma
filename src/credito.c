@@ -40,19 +40,36 @@ GtkWidget *modificar_window;
 void
 search_client (GtkWidget *widget, gpointer data)
 {
-  GtkListStore *store = (GtkListStore *) data;
+  GtkWidget *aux_widget;
+  GtkListStore *store=NULL;
   GtkTreeIter iter;
-  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->search_entry)));
+  gchar *string;
   PGresult *res;
   gint tuples, i;
   gchar *enable;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf ("SELECT * FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
+  q = g_strdup_printf ("SELECT * FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
 		      "lower(apellido_paterno) LIKE lower('%s%%') OR lower(apellido_materno) LIKE lower('%s%%')",
-		      string, string, string));
+		       string, string, string);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   tuples = PQntuples (res);
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+  if (store == NULL)
+    {
+      store = gtk_list_store_new (4,
+				  G_TYPE_INT,
+				  G_TYPE_STRING,
+				  G_TYPE_INT,
+				  G_TYPE_BOOLEAN);
+      gtk_tree_view_set_model (GTK_TREE_VIEW(aux_widget),
+			       GTK_TREE_MODEL(store));
+    }
 
   gtk_list_store_clear (store);
 
@@ -79,10 +96,11 @@ search_client (GtkWidget *widget, gpointer data)
 			    2, atoi (PQgetvalue (res, i, 7)),
 			    -1);
     }
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
+  gtk_widget_show_all (aux_widget);
 }
 
 void
-//creditos_box (MainBox *module_box)
 creditos_box (GtkWidget *main_box)
 {
   GtkWidget *scroll;
