@@ -48,7 +48,7 @@ void AddToTree (void);
 
 void BuyWindow (void);
 
-void SearchByName (GtkEntry *entry);
+void SearchByName ();
 
 void Comprar (GtkWidget *widget, gpointer data);
 
