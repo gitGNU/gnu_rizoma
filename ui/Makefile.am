@@ -19,4 +19,4 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 rizomaUIdir = $(pkgdatadir)/ui
-rizomaUI_DATA = rizoma-config.ui rizoma-login.ui rizoma.ui rizoma-ventas.ui
+rizomaUI_DATA = rizoma-config.ui rizoma-login.ui rizoma.ui rizoma-ventas.ui rizoma-compras.ui
