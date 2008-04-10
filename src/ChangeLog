@@ -1,4 +1,14 @@
+2008-04-05  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (compras_win): Added GError to gtk_builder_add_from_file
+	to check any wrong object.
+
+	* ventas.c (ventas_win): Added GError to gtk_builder_add_from_file
+	to check any wrong object.
+
 2008-03-29  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (SearchByName): Changed to void the input vars.
 
 	* ventas.c (BuscarProducto): Eliminated an unuseful cast.
 

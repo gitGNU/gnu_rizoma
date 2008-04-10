@@ -839,6 +839,8 @@ compras_win ()
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
 
+  GError *error;
+
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
   compra->products_list = NULL;
@@ -849,8 +851,13 @@ compras_win ()
 
   builder = gtk_builder_new ();
 
-  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-compras.ui", NULL);
+  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-compras.ui", &error);
   gtk_builder_connect_signals (builder, NULL);
+
+
+  if (error != NULL) {
+    g_printerr ("%s\n", error->message);
+  }
 
   compras_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_compras"));
 
@@ -3941,52 +3948,52 @@ CloseSearchByName (void)
 void
 AddFoundProduct (void)
 {
+  GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
   GtkTreeIter iter;
+  GtkTreeModel *model = gtk_tree_view_get_model (treeview);
   gchar *barcode;
 
-  if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->find_tree)), NULL, &iter) == TRUE)
+  if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->find_store), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (model), &iter,
                           1, &barcode,
                           -1);
 
-      gtk_entry_set_text (GTK_ENTRY (compra->barcode_history_entry), barcode);
-
-      //SearchProductHistory ();
-
-      CloseSearchByName ();
-
-      gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
+      gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_buscador")));
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
 }
 
 void
-SearchName (GtkEntry *widget, gpointer data)
+SearchName ()
 {
-  GtkEntry *entry = (GtkEntry *) data;
+  gchar *search_string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buscar"))));
   gchar *q;
   PGresult *res;
   gint i, resultado;
 
+  GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   GtkTreeIter iter;
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, "
                        "contenido, unidad, stock FROM buscar_productos('%s%%')",
-                       g_strdup (gtk_entry_get_text (entry)));
+                       search_string);
   res = EjecutarSQL (q);
   g_free (q);
 
   resultado = PQntuples (res);
 
-  gtk_label_set_markup (GTK_LABEL (label_found_compras),
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_found")),
                         g_strdup_printf ("<b>%d producto(s)</b>", resultado));
 
-  gtk_list_store_clear (compra->find_store);
+  gtk_list_store_clear (store);
 
   for (i = 0; i < resultado; i++)
     {
-      gtk_list_store_append (compra->find_store, &iter);
-      gtk_list_store_set (compra->find_store, &iter,
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "codigo_corto"),
                           1, PQvaluebycol (res, i, "barcode"),
                           2, PQvaluebycol (res, i, "descripcion"),
@@ -3996,13 +4003,12 @@ SearchName (GtkEntry *widget, gpointer data)
                           6, atoi (PQvaluebycol (res, i, "stock")),
                           -1);
     }
-  if (resultado != 0)
-    gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (entry))),
-                          GTK_WIDGET (compra->find_tree));
+
+  if (resultado != 0) gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buscar")));
 }
 
 void
-SearchByName(GtkEntry *entry)
+SearchByName()
 {
   GtkWindow *window;
 
@@ -4012,7 +4018,7 @@ SearchByName(GtkEntry *entry)
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, ""))));
+  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode"))));
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
 
@@ -4097,10 +4103,10 @@ SearchByName(GtkEntry *entry)
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_buscador"));
   gtk_widget_show_all (GTK_WIDGET (window));
 
-  if (g_str_equal (string, ""))
+  if ( ! g_str_equal (string, ""))
     {
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buscar")), string);
-      //SearchName (NULL, (gpointer)entry) Codigo inutil?
+      SearchName();
     }
 }
 
@@ -7329,10 +7335,15 @@ on_entry_buy_barcode_activate (GtkEntry *entry, gpointer user_data)
 
   if (HaveCharacters (barcode) == TRUE || g_str_equal (barcode, ""))
     {
-      SearchByName (entry);
+      SearchByName ();
     }
   else
     {
       SearchProductHistory (entry, barcode);
     }
+}
+
+void
+on_buy_notebook_change_current_page (GtkNotebook *notebook, gint arg1, gpointer user_data) {
+
 }

@@ -898,17 +898,6 @@ TiposVenta (GtkWidget *widget, gpointer data)
       g_signal_connect (G_OBJECT (button), "clicked",
                         G_CALLBACK (FillDatosVenta), (gpointer)"cheque");
 
-      /*      button = gtk_button_new_with_label ("Tarjeta de Crédito");
-              gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 3);
-              gtk_widget_show (button);
-
-              g_signal_connect (G_OBJECT (button), "clicked",
-              G_CALLBACK (FillDatosVenta), (gpointer)("tarjeta"));
-
-              button = gtk_button_new_with_label ("Red Compra");
-              gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 3);
-              gtk_widget_show (button);
-      */
       button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
       gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 3);
       gtk_widget_show (button);
@@ -926,6 +915,7 @@ ventas_win ()
   GtkTreeIter iter;
   GtkWidget *ventas_gui;
   gboolean fullscreen_opt;
+  GError *error;
 
   venta = (Venta *) g_malloc (sizeof (Venta));
   venta->header = NULL;
@@ -935,8 +925,12 @@ ventas_win ()
 
   builder = gtk_builder_new ();
 
-  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", NULL);
+  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", &error);
   gtk_builder_connect_signals (builder, NULL);
+
+  if (error != NULL) {
+    g_printerr ("%s\n", error->message);
+  }
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
 
