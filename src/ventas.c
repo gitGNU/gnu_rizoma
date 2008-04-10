@@ -1374,6 +1374,15 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA && tipo_documento != FACTURA)
     paga_con = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
 
+  if (paga_con <= 0)
+    {
+      GtkWidget *aux;
+      aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_type"));
+      g_assert (aux != NULL);
+      gtk_widget_show_all(aux);
+      return;
+    }
+
   if (tipo_documento != VENTA && paga_con < monto)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "sencillo_entry")), "No esta pagando con el dinero suficiente");
