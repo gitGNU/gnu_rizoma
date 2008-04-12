@@ -64,7 +64,7 @@ gint GetTotalSell (guint from_year, guint from_month, guint from_day,
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
                        gchar *direccion, gchar *fono, gint credito, gchar *giro);
 
-gboolean RutExist (gchar *rut);
+gboolean RutExist (const gchar *rut);
 
 gint InsertDeuda (gint id_venta, gint rut, gint vendedor);
 

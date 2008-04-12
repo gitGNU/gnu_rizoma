@@ -417,11 +417,14 @@ InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar 
 }
 
 gboolean
-RutExist (gchar *rut)
+RutExist (const gchar *rut)
 {
   PGresult *res;
-
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM cliente WHERE rut=%s", strtok (rut, "-")));
+  gchar *q;
+  gchar *rut2 = g_strdup(rut);
+  q = g_strdup_printf ("SELECT * FROM cliente WHERE rut=%s", strtok(rut2,"-"));
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res == NULL)
     return FALSE;
