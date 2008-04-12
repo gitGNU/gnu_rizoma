@@ -296,10 +296,14 @@ IF NOT FOUND THEN
    days := 1;
 END IF;
 
-query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,(SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, (stock / (vendidos / $S$
-|| days
-|| $S$)) AS stock_day, (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido, select_merma( producto.barcode ) as unidades_merma FROM producto WHERE $S$;
+query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,
+      	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada, 
+		    (stock / (vendidos / $S$ || days || $S$)) AS stock_day, 
+		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido, 
+		    select_merma (producto.barcode) as unidades_merma 
+		FROM producto WHERE $S$;
 
+-- check if must use the barcode or the short code
 IF codigo_barras != 0 THEN
    query := query || $S$ barcode=$S$ || codigo_barras;
 ELSE
@@ -307,28 +311,28 @@ ELSE
 END IF;
 
 FOR datos IN EXECUTE query LOOP
-codigo_corto := datos.codigo_corto;
-barcode := datos.barcode;
-descripcion := datos.descripcion;
-marca := datos.marca;
-contenido := datos.contenido;
-unidad := datos.unidad;
-stock := datos.stock;
-precio := datos.precio;
-costo_promedio := datos.costo_promedio;
-stock_min := datos.stock_min;
-stock_day := datos.stock_day;
-margen_promedio := datos.margen_promedio;
-unidades_merma := datos.merma_unid;
-contrib_agregada := round(datos.contrib_agregada);
-unidades_merma := datos.unidades_merma;
-mayorista := datos.mayorista;
-total_vendido := datos.total_vendido;
-RETURN NEXT;
+    codigo_corto := datos.codigo_corto;
+    barcode := datos.barcode;
+    descripcion := datos.descripcion;
+    marca := datos.marca;
+    contenido := datos.contenido;
+    unidad := datos.unidad;
+    stock := datos.stock;
+    precio := datos.precio;
+    costo_promedio := datos.costo_promedio;
+    stock_min := datos.stock_min;
+    stock_day := datos.stock_day;
+    margen_promedio := datos.margen_promedio;
+    unidades_merma := datos.merma_unid;
+    contrib_agregada := round(datos.contrib_agregada);
+    unidades_merma := datos.unidades_merma;
+    mayorista := datos.mayorista;
+    total_vendido := datos.total_vendido;
+    RETURN NEXT;
 END LOOP;
+
 RETURN;
 END;
-
 $$ LANGUAGE plpgsql;
 
 
