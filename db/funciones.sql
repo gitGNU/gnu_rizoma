@@ -317,6 +317,7 @@ stock := datos.stock;
 precio := datos.precio;
 costo_promedio := datos.costo_promedio;
 stock_min := datos.stock_min;
+stock_day := datos.stock_day;
 margen_promedio := datos.margen_promedio;
 unidades_merma := datos.merma_unid;
 contrib_agregada := round(datos.contrib_agregada);
