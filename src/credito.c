@@ -34,6 +34,9 @@
 #include"printing.h"
 #include"dimentions.h"
 #include"utils.h"
+#include"boleta.h"
+#include"config_file.h"
+#include"manejo_productos.h"
 
 GtkWidget *modificar_window;
 
@@ -41,6 +44,8 @@ void
 search_client (GtkWidget *widget, gpointer data)
 {
   GtkWidget *aux_widget;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
   GtkListStore *store=NULL;
   GtkTreeIter iter;
   gchar *string;
@@ -50,25 +55,72 @@ search_client (GtkWidget *widget, gpointer data)
   gchar *q;
 
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
-  q = g_strdup_printf ("SELECT * FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
-		      "lower(apellido_paterno) LIKE lower('%s%%') OR lower(apellido_materno) LIKE lower('%s%%')",
+  q = g_strdup_printf ("SELECT rut::varchar || '-' || dv, nombre || ' ' || apell_p, telefono, credito_enable, direccion "
+		       "FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
+		      "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%')",
 		       string, string, string);
   res = EjecutarSQL (q);
   g_free (q);
 
   tuples = PQntuples (res);
 
+  if (!(g_str_equal(string, "")) && (tuples == 1))
+    {
+      gtk_entry_set_text(GTK_ENTRY(widget), PQgetvalue (res, 0, 0));
+
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_name"));
+      gtk_label_set_text(GTK_LABEL(aux_widget), PQgetvalue (res, 0, 1));
+
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_addr"));
+      gtk_label_set_text(GTK_LABEL(aux_widget), PQvaluebycol (res, 0, "direccion"));
+
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_phone"));
+      gtk_label_set_text(GTK_LABEL(aux_widget), PQvaluebycol (res, 0, "telefono"));
+
+      return;
+    }
+
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+
   if (store == NULL)
     {
       store = gtk_list_store_new (4,
-				  G_TYPE_INT,
 				  G_TYPE_STRING,
-				  G_TYPE_INT,
+				  G_TYPE_STRING,
+				  G_TYPE_STRING,
 				  G_TYPE_BOOLEAN);
+
       gtk_tree_view_set_model (GTK_TREE_VIEW(aux_widget),
 			       GTK_TREE_MODEL(store));
+
+      //Rut
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
+                                                     "text", 0,
+                                                     NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+
+      //nombre
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
+                                                     "text", 1,
+                                                     NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+
+      //telefono
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Telefono", renderer,
+                                                     "text", 2,
+                                                     NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+
+      //credito
+      renderer = gtk_cell_renderer_toggle_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Credito", renderer,
+                                                     "active", 3,
+                                                     NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
     }
 
   gtk_list_store_clear (store);
@@ -79,20 +131,18 @@ search_client (GtkWidget *widget, gpointer data)
 
       if (user_data->user_id == 1)
 	{
-	  enable = PQgetvalue (res, i, 10);
+	  enable = PQvaluebycol (res, i, "credito_enable");
 	  gtk_list_store_set (store, &iter,
-			      0, atoi (PQgetvalue (res, i, 4)),
-			      1, g_strdup_printf ("%s %s %s", PQgetvalue (res, i, 1),
-						  PQgetvalue (res, i, 2), PQgetvalue (res, i, 3)),
-			      2, atoi (PQgetvalue (res, i, 7)),
+			      0, PQgetvalue (res, i, 0),
+			      1, PQgetvalue (res, i, 1),
+			      2, PQvaluebycol (res, i, "telefono"),
 			      3, strcmp (enable, "t") ? FALSE : TRUE,
 			      -1);
 	}
       else
 	gtk_list_store_set (store, &iter,
-			    0, atoi (PQgetvalue (res, i, 4)),
-			    1, g_strdup_printf ("%s %s %s", PQgetvalue (res, i, 1),
-						PQgetvalue (res, i, 2), PQgetvalue (res, i, 3)),
+			    0, PQgetvalue (res, i, 0),
+			    1, PQgetvalue (res, i, 1),
 			    2, atoi (PQgetvalue (res, i, 7)),
 			    -1);
     }
@@ -1580,14 +1630,16 @@ ModificarClienteDB (void)
 }
 
 gint
-LimiteCredito (gchar *rut)
+LimiteCredito (const gchar *rut)
 {
   PGresult *res;
+  gchar *rut2;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente WHERE rut='%s'", rut));
+  rut2 = g_strdup(rut);
+  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente WHERE rut=%s", strtok(rut2,"-")));
 
   if (res != NULL)
-    return atoi (PQgetvalue (res, 0, 0));
+    return atoi(PQgetvalue (res, 0, 0));
   else
     return -1;
 }

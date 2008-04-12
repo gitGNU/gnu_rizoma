@@ -24,6 +24,8 @@
 
 #define CREDITO_H
 
+void search_client (GtkWidget *widget, gpointer data);
+
 //void creditos_box (MainBox *module_box);
 void creditos_box (GtkWidget *main_box);
 
@@ -61,6 +63,6 @@ void EliminarCliente (void);
 
 void ModificarClienteDB (void);
 
-gint LimiteCredito (gchar *rut);
+gint LimiteCredito (const gchar *rut);
 
 #endif
