@@ -24,6 +24,8 @@
 
 #define CREDITO_H
 
+void fill_credit_data (const gchar *rut, const gchar *name, const gchar *address, const gchar *phone);
+
 void search_client (GtkWidget *widget, gpointer data);
 
 //void creditos_box (MainBox *module_box);

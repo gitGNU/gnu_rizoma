@@ -40,6 +40,35 @@
 
 GtkWidget *modificar_window;
 
+/**
+ * Fill the labels and the entry of the credit dialog
+ *
+ * @param rut the rut of the client
+ * @param name the name of the client
+ * @param address the address of the client
+ * @param phone the phone of the client
+ */
+void
+fill_credit_data (const gchar *rut, const gchar *name, const gchar *address, const gchar *phone)
+{
+  GtkLabel *label;
+  GtkEntry *entry;
+
+  entry= GTK_ENTRY(gtk_builder_get_object(builder, "entry_credit_rut"));
+  gtk_entry_set_text(entry, rut);
+
+  label = GTK_LABEL(gtk_builder_get_object(builder, "lbl_client_name"));
+  gtk_label_set_text(label, name);
+
+  label = GTK_LABEL(gtk_builder_get_object(builder, "lbl_client_addr"));
+  gtk_label_set_text(label, address);
+
+  label = GTK_LABEL(gtk_builder_get_object(builder, "lbl_client_phone"));
+  gtk_label_set_text(label, phone);
+
+  return;
+}
+
 void
 search_client (GtkWidget *widget, gpointer data)
 {
@@ -66,17 +95,10 @@ search_client (GtkWidget *widget, gpointer data)
 
   if (!(g_str_equal(string, "")) && (tuples == 1))
     {
-      gtk_entry_set_text(GTK_ENTRY(widget), PQgetvalue (res, 0, 0));
-
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_name"));
-      gtk_label_set_text(GTK_LABEL(aux_widget), PQgetvalue (res, 0, 1));
-
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_addr"));
-      gtk_label_set_text(GTK_LABEL(aux_widget), PQvaluebycol (res, 0, "direccion"));
-
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_phone"));
-      gtk_label_set_text(GTK_LABEL(aux_widget), PQvaluebycol (res, 0, "telefono"));
-
+      fill_credit_data(PQgetvalue (res, 0, 0),
+		       PQgetvalue (res, 0, 1),
+		       PQvaluebycol (res, 0, "direccion"),
+		       PQvaluebycol (res, 0, "telefono"));
       return;
     }
 
