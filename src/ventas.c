@@ -1926,7 +1926,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
                                   G_TYPE_STRING,
                                   G_TYPE_INT,
                                   G_TYPE_STRING,
-                                  G_TYPE_INT,
+                                  G_TYPE_FLOAT,
                                   G_TYPE_INT,
                                   G_TYPE_STRING,
                                   G_TYPE_BOOLEAN);
@@ -2089,7 +2089,7 @@ SearchAndFill (void)
                               3, PQvaluebycol (res, i, "marca"),
                               4, atoi (PQvaluebycol (res, i, "contenido")),
                               5, PQvaluebycol (res, i, "unidad"),
-                              6, atoi (PQvaluebycol (res, i, "stock")),
+                              6, g_ascii_strtod (PQvaluebycol (res, i, "stock"), NULL),
                               7, atoi (PQvaluebycol (res, i, "precio")),
                               -1);
         }
@@ -3245,6 +3245,8 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
                         g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
 
+  clean_credit_data();
+
   ListClean ();
 }
 
@@ -3263,21 +3265,23 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   GtkWidget *aux;
   GtkListStore *store;
   GtkTreeSelection *selection;
-  GtkTreeIter *iter;
+  GtkTreeIter iter;
   gchar *rut;
+  PGresult *res;
+  gchar *q;
 
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
   selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(aux));
 
-  if (!(gtk_tree_selection_get_selected(selection, NULL, iter)))
+  if (!(gtk_tree_selection_get_selected(selection, NULL, &iter)))
     {
       aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
       AlertMSG(aux, "Debe seleccionar un cliente");
       return;
     }
 
-  gtk_tree_model_get(GTK_TREE_MODEL(store), iter,
+  gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
 		     0, &rut,
 		     -1);
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
@@ -3288,4 +3292,43 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
 
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "btn_credit_sale"));
   gtk_widget_grab_focus(aux);
+
+  q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono from cliente where rut = %s",
+		      strtok(rut,"-"));
+  res = EjecutarSQL(q);
+  g_free (q);
+
+  fill_credit_data(rut, PQgetvalue(res, 0, 0),
+		   PQvaluebycol(res, 0, "direccion"),
+		   PQvaluebycol(res, 0, "telefono"));
+}
+
+void
+on_btn_cancel_sale_credit_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *widget;
+
+  clean_credit_data();
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_credit"));
+  gtk_widget_hide(widget);
+}
+
+void
+clean_credit_data ()
+{
+  GtkWidget *widget;
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+  gtk_widget_grab_focus(widget);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_name"));
+  gtk_label_set_text(GTK_LABEL(widget), "");
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_addr"));
+  gtk_label_set_text(GTK_LABEL(widget), "");
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_client_phone"));
+  gtk_label_set_text(GTK_LABEL(widget), "");
+
+  return;
 }
