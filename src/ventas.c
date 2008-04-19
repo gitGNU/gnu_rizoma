@@ -82,8 +82,18 @@ gboolean mayorista = FALSE;
 gboolean closing_tipos = FALSE;
 
 void
-FillProductSell (gchar *barcode, gboolean mayorista, gchar *marca, gchar *descripcion, gchar *contenido, gchar *unidad, gchar *stock, gchar *stock_day,
-                 gchar *precio, gchar *precio_mayor, gchar *cantidad_mayor, gchar *codigo_corto)
+FillProductSell (gchar *barcode,
+		 gboolean mayorista,
+		 gchar *marca,
+		 gchar *descripcion,
+		 gchar *contenido,
+		 gchar *unidad,
+		 gchar *stock,
+		 gchar *stock_day,
+                 gchar *precio,
+		 gchar *precio_mayor,
+		 gchar *cantidad_mayor,
+		 gchar *codigo_corto)
 {
   GtkWidget *widget;
 
@@ -3031,8 +3041,8 @@ main (int argc, char **argv)
   combo = (GtkComboBox *) gtk_builder_get_object (builder, "combo_profile");
 
   cell = gtk_cell_renderer_text_new ();
-  gtk_cell_layout_pack_start ((GtkCellLayout *)combo, cell, TRUE);
-  gtk_cell_layout_set_attributes ((GtkCellLayout *)combo, cell,
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell,
                                   "text", 0,
                                   NULL);
   do
@@ -3126,4 +3136,156 @@ exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
   else
     if (response_id == GTK_RESPONSE_NO)
       gtk_widget_hide (GTK_WIDGET (dialog));
+}
+
+//related with the credit sale
+void
+on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *widget;
+  gint tipo_documento;
+  gint rut;
+  gchar *dv;
+  gchar *str_rut;
+  gchar **str_splited;
+  gint vendedor;
+  gint tipo_vendedor;
+  gint ticket;
+  gint monto;
+  gint maquina;
+  gchar *discount;
+  gboolean canceled;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
+  str_splited = g_strsplit(gtk_entry_get_text(GTK_ENTRY(widget)), "-", 0);
+
+  rut = atoi(str_splited[0]);
+  dv = g_strdup(str_splited[1]);
+  str_rut = g_strdup_printf("%d-%s",rut,dv);
+  g_strfreev(str_splited);
+
+  tipo_vendedor = rizoma_get_value_int ("VENDEDOR");
+
+  //amount
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "label_total"));
+  monto = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget)))));
+
+  //maquina
+  maquina = rizoma_get_value_int ("MAQUINA");
+
+  //salesman
+  vendedor = user_data->user_id;
+
+  if (!(RutExist(str_rut)))
+    {
+      gchar *motivo;
+
+      widget = gtk_widget_get_ancestor(GTK_WIDGET(button),GTK_TYPE_WINDOW);
+
+      motivo = g_strdup_printf("El rut %d no existe", rut);
+      AlertMSG(widget, motivo);
+      g_free (motivo);
+
+      return;
+    }
+
+  if (LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
+    {
+      ErrorMSG (venta->venta_rut, "El cliente sobrepasa su limite de Credito");
+      return;
+    }
+
+  if (tipo_vendedor == 1)
+    tipo_documento = VENTA;
+  else
+    tipo_documento = SIMPLE;
+
+  if (tipo_documento != VENTA)
+    discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
+  else
+    discount = "0";
+
+  switch (tipo_documento)
+    {
+    case SIMPLE:
+      if (monto >= 180)
+	ticket = get_ticket_number (tipo_documento);
+      else
+	ticket = -1;
+      break;
+    case VENTA:
+      ticket = -1;
+      break;
+    default:
+      g_printerr("The document type could not be matched on %s", G_STRFUNC);
+      ticket = -1;
+      break;
+    }
+
+  if (tipo_documento == VENTA)
+    canceled = FALSE;
+  else
+    canceled = TRUE;
+
+  SaveSell (monto, maquina, vendedor, CREDITO, str_rut, discount, ticket, tipo_documento,
+	    NULL, FALSE, canceled);
+
+
+  gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
+  gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_type")));
+  gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "tipo_venta_win_venta")));
+
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+  gtk_list_store_clear (venta->store);
+
+  CleanEntryAndLabelData();
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
+
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+
+  ListClean ();
+}
+
+void
+on_btn_credit_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_credit"));
+  gtk_widget_show_all(widget);
+}
+
+void
+on_btn_client_ok_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *aux;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter *iter;
+  gchar *rut;
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(aux));
+
+  if (!(gtk_tree_selection_get_selected(selection, NULL, iter)))
+    {
+      aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
+      AlertMSG(aux, "Debe seleccionar un cliente");
+      return;
+    }
+
+  gtk_tree_model_get(GTK_TREE_MODEL(store), iter,
+		     0, &rut,
+		     -1);
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
+  gtk_widget_hide(aux);
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
+  gtk_entry_set_text(GTK_ENTRY(aux), rut);
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "btn_credit_sale"));
+  gtk_widget_grab_focus(aux);
 }

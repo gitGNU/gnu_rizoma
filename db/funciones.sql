@@ -284,7 +284,7 @@ RETURNS SETOF record AS $$
 declare
 	days double precision;
 	datos record;
-	query varchar(500);
+	query varchar;
 BEGIN
 
 SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
