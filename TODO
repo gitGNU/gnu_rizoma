@@ -59,7 +59,7 @@ Control - Vendedores Nueva funcionalidad Sistema de login de
 Factura electrónica.
 Conexión a ERP
 
-
+Documentar todas las funciones del codigo fuente usando doxygen.
 
 (1)  El plazo de pago, ingresado en el momento de pactar una compra,
    debe ser usado para establecer la fecha de pago de las mercaderías
