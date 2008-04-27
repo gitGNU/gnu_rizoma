@@ -1,3 +1,11 @@
+2008-04-27  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (SearchProductHistory|AddToProductsList): Use of GtkBuilder.
+	(ShowProductDescription|compras_win): Deleted commented code. We
+	have VC use it if you want to read old code.
+	(FillDataProduct): Deleted function. It was just commented code.
+	(AddToProductsList): Use GtkBuilder. Add some brackets.
+
 2008-04-05  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (compras_win): Added GError to gtk_builder_add_from_file

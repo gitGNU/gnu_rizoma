@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sat Apr  5 17:51:49 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Apr 27 13:28:26 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="wnd_compras">
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
@@ -33,13 +33,14 @@
                           <widget class="GtkHButtonBox" id="hbuttonbox2">
                             <property name="visible">True</property>
                             <child>
-                              <widget class="GtkButton" id="new_product_button">
+                              <widget class="GtkButton" id="button_new_product">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="label" translatable="yes">gtk-add</property>
                                 <property name="use_stock">True</property>
                                 <property name="response_id">0</property>
+                                <signal name="clicked" handler="on_button_new_product_clicked"/>
                               </widget>
                             </child>
                             <child>
@@ -125,7 +126,7 @@
                           <placeholder/>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label62">
+                          <widget class="GtkLabel" id="label_unit">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -134,7 +135,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label61">
+                          <widget class="GtkLabel" id="label_fifo">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -145,7 +146,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label60">
+                          <widget class="GtkLabel" id="label_stock_further">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -156,7 +157,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label59">
+                          <widget class="GtkLabel" id="label_mark">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -165,7 +166,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label58">
+                          <widget class="GtkLabel" id="label_sell_price">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -176,7 +177,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label57">
+                          <widget class="GtkLabel" id="label_stock">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -187,7 +188,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="label18">
+                          <widget class="GtkLabel" id="label_product_desc">
                             <property name="visible">True</property>
                           </widget>
                           <packing>
@@ -323,10 +324,6 @@
                       </widget>
                     </child>
                   </widget>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                  </packing>
                 </child>
                 <child>
                   <widget class="GtkVBox" id="vbox3">
@@ -354,12 +351,13 @@
                                     <property name="visible">True</property>
                                     <property name="layout_style">GTK_BUTTONBOX_END</property>
                                     <child>
-                                      <widget class="GtkButton" id="button5">
+                                      <widget class="GtkButton" id="button_calculate">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="label" translatable="yes">Calcular</property>
                                         <property name="response_id">0</property>
+                                        <signal name="clicked" handler="on_button_calculate_clicked"/>
                                       </widget>
                                       <packing>
                                         <property name="expand">False</property>
@@ -377,7 +375,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkEntry" id="entry4">
+                                  <widget class="GtkEntry" id="entry_sell_price">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </widget>
@@ -391,7 +389,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkEntry" id="entry3">
+                                  <widget class="GtkEntry" id="entry_buy_gain">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </widget>
@@ -405,7 +403,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkEntry" id="entry2">
+                                  <widget class="GtkEntry" id="entry_buy_price">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                   </widget>
@@ -484,7 +482,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkEntry" id="entry13">
+                          <widget class="GtkEntry" id="entry_buy_amount">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
@@ -500,17 +498,18 @@
                             <property name="visible">True</property>
                             <property name="spacing">5</property>
                             <child>
-                              <widget class="GtkButton" id="add_product_list_button">
+                              <widget class="GtkButton" id="button_add_product_list">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="label" translatable="yes">gtk-add</property>
                                 <property name="use_stock">True</property>
                                 <property name="response_id">0</property>
+                                <signal name="clicked" handler="on_button_add_product_list_clicked"/>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkButton" id="clear_button">
+                              <widget class="GtkButton" id="button_clear">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
@@ -560,7 +559,7 @@
                     <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                     <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                     <child>
-                      <widget class="GtkTreeView" id="buying_products_tree_view">
+                      <widget class="GtkTreeView" id="tree_view_products_buy_list">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="headers_clickable">True</property>
@@ -593,7 +592,7 @@
                   <placeholder/>
                 </child>
                 <child>
-                  <widget class="GtkLabel" id="label18w">
+                  <widget class="GtkLabel" id="label_total_buy">
                     <property name="visible">True</property>
                   </widget>
                   <packing>
@@ -3003,6 +3002,11 @@
           </packing>
         </child>
       </widget>
+    </child>
+  </widget>
+  <widget class="GtkWindow" id="wnd_new_product">
+    <child>
+      <placeholder/>
     </child>
   </widget>
 </glade-interface>

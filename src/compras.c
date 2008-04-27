@@ -888,8 +888,6 @@ compras_win ()
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_min_width (column, 70);
-  gtk_tree_view_column_set_max_width (column, 70);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Id", renderer,
@@ -899,8 +897,6 @@ compras_win ()
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_min_width (column, 30);
-  gtk_tree_view_column_set_max_width (column, 30);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
@@ -908,8 +904,6 @@ compras_win ()
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 120);
-  gtk_tree_view_column_set_max_width (column, 120);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -919,8 +913,6 @@ compras_win ()
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_min_width (column, 60);
-  gtk_tree_view_column_set_max_width (column, 60);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   //  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
@@ -932,8 +924,6 @@ compras_win ()
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_min_width (column, 60);
-  gtk_tree_view_column_set_max_width (column, 60);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
 
@@ -964,7 +954,7 @@ compras_win ()
 
     }
 
-  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "buying_products_tree_view"));
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
   renderer = gtk_cell_renderer_text_new ();
@@ -982,8 +972,6 @@ compras_win ()
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 280);
-  gtk_tree_view_column_set_max_width (column, 280);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -991,8 +979,6 @@ compras_win ()
                                                      "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   //gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
@@ -1019,1669 +1005,6 @@ compras_win ()
   /* End Buying Products TreeView*/
 
   gtk_widget_show_all (compras_gui);
-
-  /* g_signal_connect (G_OBJECT (compra->barcode_history_entry), "activate", */
-  /*                   G_CALLBACK (SearchProductHistory), NULL); */
-
-  /* gtk_widget_add_accelerator (compra->barcode_history_entry, "activate", accel, */
-  /*                             GDK_F5, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE); */
-
-  /* g_signal_connect (G_OBJECT (compra->barcode_history_entry), "changed", */
-  /*                   G_CALLBACK (ActiveBuy), NULL); */
-
-  /* gtk_window_set_focus (GTK_WINDOW (main_window), compra->barcode_history_entry); */
-
-  /* see_button = gtk_button_new_with_label ("Ver o Modificar datos"); */
-  /* gtk_widget_show (see_button); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), see_button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (see_button), "clicked", */
-  /*                   G_CALLBACK (ShowProductDescription), NULL); */
-
-  /* gtk_widget_set_sensitive (see_button, FALSE); */
-
-  /* new_button = gtk_button_new_with_label ("Agregar Producto"); */
-  /* gtk_widget_show (new_button); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), new_button, FALSE, FALSE, 0); */
-
-  /* g_signal_connect (G_OBJECT (new_button), "clicked", */
-  /*                   G_CALLBACK (AddNewProduct), NULL); */
-
-  /* gtk_widget_set_sensitive (new_button, FALSE); */
-
-  /* /\* */
-  /*   Start Status Products Frames */
-  /* *\/ */
-
-  /* frame = gtk_frame_new ("Estado Actual del Producto:"); */
-  /* gtk_widget_set_size_request (frame, (MODULE_BOX_WIDTH - 10), 80); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0); */
-  /* gtk_container_set_border_width (GTK_CONTAINER (frame), 5); */
-  /* gtk_widget_show (frame); */
-
-  /* table = gtk_table_new (6, 4, FALSE); */
-  /* gtk_container_add (GTK_CONTAINER (frame), table); */
-  /* gtk_widget_show (table); */
-
-  /* label = gtk_label_new ("Producto: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            0, 1, */
-  /*                            0, 1); */
-  /* gtk_widget_show (label); */
-
-  /* compra->product = gtk_label_new (""); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->product, */
-  /*                            1, 2, */
-  /*                            0, 1); */
-  /* gtk_widget_show (compra->product); */
-
-  /* label = gtk_label_new ("Marca: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            2, 3, */
-  /*                            0, 1); */
-  /* gtk_widget_show (label); */
-
-  /* compra->marca = gtk_label_new (""); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->marca, */
-  /*                            3, 4, */
-  /*                            0, 1); */
-  /* gtk_widget_show (compra->marca); */
-
-  /* label = gtk_label_new ("Unidad: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            4, 5, */
-  /*                            0, 1); */
-  /* gtk_widget_show (label); */
-
-  /* compra->unidad = gtk_label_new (""); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->unidad, */
-  /*                            5, 6, */
-  /*                            0, 1); */
-  /* gtk_widget_show (compra->unidad); */
-
-  /* label = gtk_label_new ("Stock Actual: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            0, 1, */
-  /*                            1, 2); */
-  /* gtk_widget_show (label); */
-
-  /* compra->stock = gtk_label_new (""); */
-  /* gtk_widget_show (compra->stock); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->stock, */
-  /*                            1, 2, */
-  /*                            1, 2); */
-
-  /* label = gtk_label_new ("Alcanza para: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            2, 3, */
-  /*                            1, 2); */
-  /* gtk_widget_show (label); */
-
-  /* compra->stockday = gtk_label_new (""); */
-  /* gtk_widget_show (compra->stockday); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->stockday, */
-  /*                            3, 4, */
-  /*                            1, 2); */
-
-  /* label = gtk_label_new ("Precio Venta Actual: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            0, 1, */
-  /*                            2, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->current_price = gtk_label_new (""); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->current_price, */
-  /*                            1, 2, */
-  /*                            2, 3); */
-  /* gtk_widget_show (compra->current_price); */
-
-  /* label = gtk_label_new ("Precio de Compra: "); */
-  /* gtk_misc_set_alignment (GTK_MISC (label), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label, */
-  /*                            2, 3, */
-  /*                            2, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fifo = gtk_label_new (""); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), compra->fifo, */
-  /*                            3, 4, */
-  /*                            2, 3); */
-  /* gtk_widget_show (compra->fifo); */
-
-  /* label_canje = gtk_label_new (""); */
-  /* gtk_misc_set_alignment (GTK_MISC (label_canje), 0, 0); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label_canje, */
-  /*                            4, 5, */
-  /*                            1, 2); */
-  /* gtk_widget_show (label_canje); */
-
-  /* label_stock_pro = gtk_label_new (""); */
-  /* gtk_table_attach_defaults (GTK_TABLE (table), label_stock_pro, */
-  /*                            5, 6, */
-  /*                            1, 2); */
-  /* gtk_widget_show (label_stock_pro); */
-
-
-  /* /\* */
-  /*   End Status Products Frames */
-  /* *\/ */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /* gtk_widget_set_size_request (hbox, MODULE_BOX_WIDTH - 5, -1); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-
-  /* gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3); */
-  /* gtk_widget_show (scroll); */
-
-
-  /* compra->tree_history = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_history)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->tree_history), TRUE); */
-  /* gtk_widget_set_size_request (compra->tree_history, 360, 180); */
-  /* gtk_widget_show (compra->tree_history); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->tree_history); */
-
-  /* GTK_WIDGET_UNSET_FLAGS (compra->tree_history, GTK_CAN_FOCUS); */
-
-
-  /* /\* */
-  /*   End "Cotizar" Frame */
-  /* *\/ */
-
-  /* box = gtk_vbox_new (FALSE, 3); */
-  /* gtk_widget_show (box); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3); */
-
-  /* /\* */
-  /*   Start "Negociar" Frame */
-  /* *\/ */
-
-  /* frame = gtk_frame_new ("Negociar"); */
-  /* gtk_widget_set_size_request (frame, 210, -1); */
-  /* gtk_widget_show (frame); */
-  /* gtk_box_pack_start (GTK_BOX (box), frame, FALSE, FALSE, 3); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_set_size_request (hbox2, 205, -1); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Precio de Compra: "); */
-  /* gtk_widget_show (label); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-
-  /* ingreso_entry = gtk_entry_new (); */
-  /* gtk_widget_set_size_request (ingreso_entry, 100, -1); */
-  /* gtk_widget_show (ingreso_entry); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), ingreso_entry, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (ingreso_entry), "changed", */
-  /*                   G_CALLBACK (ActiveBuy), NULL); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Ganancia (%): "); */
-  /* gtk_widget_show (label); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-
-  /* ganancia_entry = gtk_entry_new (); */
-  /* gtk_widget_set_size_request (ganancia_entry, 100, -1); */
-  /* gtk_widget_show (ganancia_entry); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), ganancia_entry, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (ingreso_entry), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)ganancia_entry); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Precio Final $: "); */
-  /* gtk_widget_show (label); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-
-  /* precio_final_entry = gtk_entry_new (); */
-  /* gtk_widget_set_size_request (precio_final_entry, 100, -1); */
-  /* gtk_widget_show (precio_final_entry); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), precio_final_entry, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (ganancia_entry), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)precio_final_entry); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_end (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* button = gtk_button_new_with_label ("Calcular"); */
-  /* gtk_widget_show (button); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (CalcularPrecioFinal), NULL); */
-
-  /* g_signal_connect (G_OBJECT (precio_final_entry), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)button); */
-
-
-  /* /\* */
-  /*   End "Negociar" Frame */
-  /* *\/ */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_end (GTK_BOX (box), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Unids."); */
-  /* gtk_widget_show (label); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-
-  /* compra->cantidad_entry = gtk_entry_new (); */
-  /* gtk_entry_set_text (GTK_ENTRY (compra->cantidad_entry), "1"); */
-  /* gtk_widget_set_size_request (compra->cantidad_entry, 45, -1); */
-  /* gtk_widget_show (compra->cantidad_entry); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), compra->cantidad_entry, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)compra->cantidad_entry); */
-
-  /* clean_button = gtk_button_new_from_stock (GTK_STOCK_CLEAR); */
-  /* gtk_widget_show (clean_button); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), clean_button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (clean_button), "clicked", */
-  /*                   G_CALLBACK (CleanStatusProduct), NULL); */
-
-  /* add_button = gtk_button_new_from_stock (GTK_STOCK_ADD); */
-  /* gtk_widget_show (add_button); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), add_button, FALSE, FALSE, 3); */
-
-  /* gtk_widget_set_sensitive (add_button, FALSE); */
-
-  /* g_signal_connect (G_OBJECT (compra->cantidad_entry), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)add_button); */
-
-  /* g_signal_connect (G_OBJECT (add_button), "clicked", */
-  /*                   G_CALLBACK (AddToProductsList), NULL); */
-
-
-  /* /\* */
-  /*   Start Products Frame */
-  /* *\/ */
-
-  /* frame = gtk_frame_new ("Lista de Productos"); */
-  /* gtk_widget_show (frame); */
-  /* //  gtk_widget_set_size_request (frame, (MODULE_BOX_WIDTH - 10), 180); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0); */
-  /* gtk_container_set_border_width (GTK_CONTAINER (frame), 1); */
-
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox); */
-  /* gtk_container_add (GTK_CONTAINER (frame), hbox); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, MODULE_BOX_WIDTH-20, 175); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, MODULE_LITTLE_BOX_WIDTH - 20, 80); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 1); */
-
-  /* compra->tree_list = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_list)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->tree_list), TRUE); */
-  /* gtk_widget_show (compra->tree_list); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->tree_list); */
-
-  /* GTK_WIDGET_UNSET_FLAGS (compra->tree_list, GTK_CAN_FOCUS); */
-
-
-
-
-  /* /\* */
-  /*   End Products Frame */
-  /* *\/ */
-
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox); */
-
-  /* button = gtk_button_new_from_stock (GTK_STOCK_REMOVE); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
-  /* gtk_widget_show (button); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (RemoveBuyProduct), NULL); */
-
-  /* confirm_button = gtk_button_new_with_label ("Confirmar Compra"); */
-  /* gtk_widget_show (confirm_button); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), confirm_button, FALSE, FALSE, 3); */
-
-  /* if (compra->header_compra == NULL) */
-  /*   gtk_widget_set_sensitive (confirm_button, FALSE); */
-
-  /* g_signal_connect (G_OBJECT (confirm_button), "clicked", */
-  /*                   G_CALLBACK (BuyWindow), NULL); */
-
-  /* gtk_widget_add_accelerator (confirm_button, "clicked", accel, */
-  /*                             GDK_F9, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE); */
-
-  /* compra->total_compra = gtk_label_new ("\t\t\t"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), compra->total_compra, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->total_compra); */
-
-  /* label = gtk_label_new ("Total: "); */
-  /* gtk_label_set_markup (GTK_LABEL (label), */
-  /*                       g_strdup_printf ("<span size=\"xx-large\"><b>Total:</b></span>")); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-
-  /* /\* */
-  /*   Ingreso Compras */
-  /* *\/ */
-
-  /* vbox = gtk_vbox_new (FALSE, 0); */
-  /* gtk_widget_show (vbox); */
-  /* gtk_notebook_append_page (GTK_NOTEBOOK (notebook), vbox, */
-  /*                           gtk_label_new_with_mnemonic ("_Ingreso de Compras")); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (notebook, MODULE_BOX_WIDTH - 5, MODULE_BOX_HEIGHT); */
-  /* else */
-  /*   gtk_widget_set_size_request (notebook, MODULE_LITTLE_BOX_WIDTH - 10, MODULE_LITTLE_BOX_HEIGHT); */
-
-  /* g_signal_connect (G_OBJECT (notebook), "switch-page", */
-  /*                   G_CALLBACK (CallBacksTabs), NULL); */
-
-  /* hbox = gtk_hbox_new (FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-
-  /* compra->ingreso_store = gtk_list_store_new (6, */
-  /*                                             G_TYPE_INT, */
-  /*                                             G_TYPE_STRING, */
-  /*                                             G_TYPE_STRING, */
-  /*                                             G_TYPE_STRING, */
-  /*                                             G_TYPE_STRING, */
-  /*                                             G_TYPE_BOOLEAN); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 650, 200); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 630, 150); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3); */
-
-  /* compra->ingreso_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->ingreso_store)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->ingreso_tree), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->ingreso_tree); */
-  /* gtk_widget_show (compra->ingreso_tree); */
-
-  /* /\*  g_signal_connect (G_OBJECT (compra->ingreso_tree), "row-activated", */
-  /*     G_CALLBACK (DocumentoIngreso), NULL);*\/ */
-  /* g_signal_connect (G_OBJECT (compra->ingreso_tree), "row-activated", */
-  /*                   G_CALLBACK (AskIngreso), NULL); */
-
-  /* selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree)); */
-
-  /* gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE); */
-
-  /* g_signal_connect (G_OBJECT (selection), "changed", */
-  /*                   G_CALLBACK (IngresoDetalle), NULL); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("ID", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    "foreground", 4, */
-  /*                                                    "foreground-set", 5, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->ingreso_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 50); */
-  /* gtk_tree_view_column_set_max_width (column, 50); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer, */
-  /*                                                    "text", 1, */
-  /*                                                    "foreground", 4, */
-  /*                                                    "foreground-set", 5, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->ingreso_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 150); */
-  /* gtk_tree_view_column_set_max_width (column, 150); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer, */
-  /*                                                    "text", 2, */
-  /*                                                    "foreground", 4, */
-  /*                                                    "foreground-set", 5, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->ingreso_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* gtk_tree_view_column_set_min_width (column, 250); */
-  /* gtk_tree_view_column_set_max_width (column, 250); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Precio Total", renderer, */
-  /*                                                    "text", 3, */
-  /*                                                    "foreground", 4, */
-  /*                                                    "foreground-set", 5, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->ingreso_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 150); */
-  /* gtk_tree_view_column_set_max_width (column, 150); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* /\* */
-  /*   Lista a Comprar */
-  /* *\/ */
-
-  /* compra->compra_store = gtk_list_store_new (8, */
-  /*                                            G_TYPE_STRING, */
-  /*                                            G_TYPE_STRING, */
-  /*                                            G_TYPE_STRING, */
-  /*                                            G_TYPE_DOUBLE, */
-  /*                                            G_TYPE_DOUBLE, */
-  /*                                            G_TYPE_STRING, */
-  /*                                            G_TYPE_STRING, */
-  /*                                            G_TYPE_BOOLEAN); */
-
-  /* hbox = gtk_hbox_new (FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 650, 200); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 630, 150); */
-
-  /* gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3); */
-
-  /* compra->compra_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->compra_store)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->compra_tree), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->compra_tree); */
-  /* gtk_widget_show (compra->compra_tree); */
-
-
-  /* g_signal_connect (G_OBJECT (compra->compra_tree), "row-activated", */
-  /*                   G_CALLBACK (IngresoParcial), NULL); */
-  /* /\* */
-  /*   renderer = gtk_cell_renderer_toggle_new (); */
-  /*   column = gtk_tree_view_column_new_with_attributes ("Ingreso", renderer, */
-  /*   "active", 0, */
-  /*   NULL); */
-  /*   gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /*   gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /*   g_signal_connect (G_OBJECT (renderer), "toggled", */
-  /*   G_CALLBACK (Ingresar), NULL); */
-  /* *\/ */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    "foreground", 6, */
-  /*                                                    "foreground-set", 7, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 50); */
-  /* gtk_tree_view_column_set_max_width (column, 50); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Producto", renderer, */
-  /*                                                    "text", 1, */
-  /*                                                    "foreground", 6, */
-  /*                                                    "foreground-set", 7, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* gtk_tree_view_column_set_min_width (column, 300); */
-  /* gtk_tree_view_column_set_max_width (column, 300); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer, */
-  /*                                                    "text", 2, */
-  /*                                                    "foreground", 6, */
-  /*                                                    "foreground-set", 7, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* gtk_tree_view_column_set_min_width (column, 60); */
-  /* gtk_tree_view_column_set_max_width (column, 60); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer, */
-  /*                                                    "text", 3, */
-  /*                                                    "foreground", 6, */
-  /*                                                    "foreground-set", 7, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Cant. Ing.", renderer, */
-  /*                                                    "text", 4, */
-  /*                                                    "foreground", 6, */
-  /*                                                    "foreground-set", 7, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer, */
-  /*                                                    "text", 5, */
-  /*                                                    "foreground", 6, */
-  /*                                                    "foreground-set", 7, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->compra_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /* gtk_widget_set_size_request (hbox, 620, -1); */
-  /* gtk_widget_show (hbox); */
-
-
-  /* /\* */
-  /*   Caja Inferior de Ingreso */
-  /* *\/ */
-
-  /* frame = gtk_frame_new ("Ingreso"); */
-  /* gtk_widget_show (frame); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 3); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* recv_button = gtk_button_new_with_label ("Recibir Pedido"); */
-  /* gtk_widget_show (recv_button); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), recv_button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (recv_button), "clicked", */
-  /*                   G_CALLBACK (CheckCanjeables), NULL); */
-
-  /* /\* */
-  /*   Caja Inferior de Anulciones */
-  /* *\/ */
-
-  /* frame = gtk_frame_new ("Anulaciones"); */
-  /* gtk_widget_show (frame); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 3); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* button = gtk_button_new_with_label ("Anular Compra"); */
-  /* gtk_widget_show (button); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (AnularCompra), NULL); */
-
-  /* button = gtk_button_new_with_label ("Anular Producto"); */
-  /* gtk_widget_show (button); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 3); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (AnularProducto), NULL); */
-
-  /* /\* */
-  /*   Caja Inferior para la muestra de */
-  /*   Neto  $ */
-  /*   IVA   $ */
-  /*   Total $ */
-  /* *\/ */
-
-  /* if (solo_venta == TRUE) */
-  /*   { */
-  /*     box = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_widget_set_size_request (box, 6, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), box, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (box); */
-  /*   } */
-
-  /* frame = gtk_frame_new ("Totales"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), frame, FALSE, FALSE, 3); */
-  /* gtk_widget_show (frame); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-  /* gtk_widget_show (vbox2); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-
-  /* label = gtk_label_new ("Total Neto\t\t: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->total_neto = gtk_label_new ("\t\t"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), compra->total_neto, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->total_neto); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-
-  /* label = gtk_label_new ("Total I.V.A\t\t: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->total_iva = gtk_label_new ("\t\t"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), compra->total_iva, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->total_iva); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-
-  /* label = gtk_label_new ("Otros Imp.\t\t: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->total_otros = gtk_label_new ("\t\t"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), compra->total_otros, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->total_otros); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-
-  /* label = gtk_label_new ("Total\t\t\t: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->total = gtk_label_new ("\t\t"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), compra->total, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->total); */
-
-  /* /\* */
-  /*   Fin Compras */
-  /* *\/ */
-
-  /* //  InsertarCompras (); */
-
-  /* /\* */
-  /*   Inicio Ingreso Facturas */
-  /* *\/ */
-
-  /* vbox = gtk_vbox_new (FALSE, 0); */
-  /* gtk_widget_show (vbox); */
-  /* gtk_notebook_append_page (GTK_NOTEBOOK (notebook), vbox, */
-  /*                           gtk_label_new_with_mnemonic ("Ingreso _Facturas")); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (notebook, MODULE_BOX_WIDTH - 5, MODULE_BOX_HEIGHT); */
-  /* else */
-  /*   gtk_widget_set_size_request (notebook, MODULE_LITTLE_BOX_WIDTH - 5, MODULE_LITTLE_BOX_HEIGHT); */
-
-  /* frame = gtk_frame_new ("Datos de la Factura a Ingresar"); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3); */
-  /* gtk_widget_show (frame); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-  /* gtk_widget_show (vbox2); */
-
-  /* hbox = gtk_hbox_new (FALSE, 0); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new ("Proveedor: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_proveedor = gtk_entry_new (); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_proveedor, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_proveedor); */
-
-  /* gtk_entry_set_editable (GTK_ENTRY (compra->fact_proveedor), FALSE); */
-
-  /* //  g_signal_connect (G_OBJECT (compra->fact_proveedor), "changed", */
-  /* //    G_CALLBACK (ClearFactData), NULL); */
-
-  /* g_signal_connect (G_OBJECT (compra->fact_proveedor), "activate", */
-  /*                   G_CALLBACK (SelectProveedor), (gpointer)TRUE); */
-
-
-  /* label = gtk_label_new ("Rut: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_rut = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_rut, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_rut); */
-
-  /* label = gtk_label_new ("\tContacto: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_contacto = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_contacto, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_contacto); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new ("Direccion: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_direccion = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_direccion, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_direccion); */
-
-  /* label = gtk_label_new ("\tComuna: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_comuna = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_comuna, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_comuna); */
-
-  /* label = gtk_label_new ("\tFono: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_fono = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_fono, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_fono); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new ("E-Mail: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_email = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_email, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_email); */
-
-  /* label = gtk_label_new ("\tWeb: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_web = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_web, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fact_web); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new (""); */
-  /* gtk_label_set_markup (GTK_LABEL (label), */
-  /*                       "<b>Numero de Factura: </b>"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->n_factura = gtk_entry_new (); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->n_factura, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->n_factura); */
-
-  /* label = gtk_label_new ("Fecha de Emision: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fecha_d = gtk_entry_new_with_max_length (2); */
-  /* gtk_widget_set_size_request (compra->fecha_d, 25, -1); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fecha_d, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fecha_d); */
-
-  /* g_signal_connect (G_OBJECT (compra->n_factura), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_d); */
-
-  /* compra->fecha_m = gtk_entry_new_with_max_length (2); */
-  /* gtk_widget_set_size_request (compra->fecha_m, 25, -1); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fecha_m, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fecha_m); */
-
-  /* g_signal_connect (G_OBJECT (compra->fecha_d), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_m); */
-
-  /* compra->fecha_y = gtk_entry_new_with_max_length (2); */
-  /* gtk_widget_set_size_request (compra->fecha_y, 25, -1); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fecha_y, FALSE, FALSE, 0); */
-  /* gtk_widget_show (compra->fecha_y); */
-
-  /* g_signal_connect (G_OBJECT (compra->fecha_m), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_y); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new (""); */
-  /* gtk_label_set_markup (GTK_LABEL (label), */
-  /*                       "<b>Monto de la Factura: </b>"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_monto = gtk_entry_new (); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->fact_monto, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->fact_monto); */
-
-  /* g_signal_connect (G_OBJECT (compra->fecha_y), "activate", */
-  /*                   G_CALLBACK (SendCursorTo), (gpointer)compra->fact_monto); */
-
-  /* g_signal_connect (G_OBJECT (compra->fact_monto), "activate", */
-  /*                   G_CALLBACK (CheckMontoGuias), NULL); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* compra->guias_error = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), compra->guias_error, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->guias_error); */
-
-  /* frame = gtk_frame_new ("Seleccione las Guias correspondientes a la Factura"); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3); */
-  /* gtk_widget_show (frame); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_container_add (GTK_CONTAINER (frame), hbox); */
-  /* gtk_widget_show (hbox); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), vbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 480, 140); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 480, 115); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), scroll, FALSE, FALSE, 3); */
-
-  /* compra->store_guias = gtk_tree_store_new (7, */
-  /*                                           G_TYPE_STRING, */
-  /*                                           G_TYPE_STRING, */
-  /*                                           G_TYPE_STRING, */
-  /*                                           G_TYPE_STRING, */
-  /*                                           G_TYPE_STRING, */
-  /*                                           G_TYPE_STRING, */
-  /*                                           G_TYPE_BOOLEAN); */
-
-  /* //FillGuias (NULL); */
-
-  /* compra->tree_guias = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_guias)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->tree_guias), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->tree_guias); */
-  /* gtk_widget_show (compra->tree_guias); */
-
-  /* g_signal_connect (G_OBJECT (compra->tree_guias), "row-activated", */
-  /*                   G_CALLBACK (AddGuia), NULL); */
-
-  /* g_signal_connect (G_OBJECT (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_guias))), */
-  /*                   "changed", G_CALLBACK (FillDetGuias), NULL); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Guias", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 100); */
-  /* gtk_tree_view_column_set_max_width (column, 100); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Compra", renderer, */
-  /*                                                    "text", 1, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 80); */
-  /* gtk_tree_view_column_set_max_width (column, 80); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Forma Pago", renderer, */
-  /*                                                    "text", 2, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 120); */
-  /* gtk_tree_view_column_set_max_width (column, 120); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer, */
-  /*                                                    "text", 3, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Monto", renderer, */
-  /*                                                    "text", 4, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 480, 170); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 480, 115); */
-
-  /* gtk_box_pack_start (GTK_BOX (vbox2), scroll, FALSE, FALSE, 3); */
-
-  /* compra->store_det_guias = gtk_tree_store_new (7, */
-  /*                                               G_TYPE_STRING, */
-  /*                                               G_TYPE_STRING, */
-  /*                                               G_TYPE_STRING, */
-  /*                                               G_TYPE_STRING, */
-  /*                                               G_TYPE_STRING, */
-  /*                                               G_TYPE_STRING, */
-  /*                                               G_TYPE_BOOLEAN); */
-
-  /* compra->tree_det_guias = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_det_guias)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->tree_det_guias), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->tree_det_guias); */
-  /* gtk_widget_show (compra->tree_det_guias); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_det_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Producto", renderer, */
-  /*                                                    "text", 1, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_det_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 250); */
-  /* gtk_tree_view_column_set_max_width (column, 250); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer, */
-  /*                                                    "text", 2, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_det_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer, */
-  /*                                                    "text", 3, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_det_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer, */
-  /*                                                    "text", 4, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_det_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-
-  /* add_guia = gtk_button_new_from_stock (GTK_STOCK_ADD); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), add_guia, FALSE, FALSE, 3); */
-  /* gtk_widget_show (add_guia); */
-
-  /* g_signal_connect (G_OBJECT (add_guia), "clicked", */
-  /*                   G_CALLBACK (AddGuia), NULL); */
-
-  /* gtk_widget_set_sensitive (add_guia, FALSE); */
-
-  /* del_guia = gtk_button_new_from_stock (GTK_STOCK_DELETE); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), del_guia, FALSE, FALSE, 3); */
-  /* gtk_widget_show (del_guia); */
-
-  /* g_signal_connect (G_OBJECT (del_guia), "clicked", */
-  /*                   G_CALLBACK (DelGuia), NULL); */
-
-  /* gtk_widget_set_sensitive (del_guia, FALSE); */
-
-  /* ok_guia = gtk_button_new_from_stock (GTK_STOCK_OK); */
-  /* gtk_box_pack_end (GTK_BOX (hbox2), ok_guia, FALSE, FALSE, 3); */
-  /* gtk_widget_show (ok_guia); */
-
-  /* g_signal_connect (G_OBJECT (ok_guia), "clicked", */
-  /*                   G_CALLBACK (AddFactura), NULL); */
-
-  /* gtk_widget_set_sensitive (ok_guia, FALSE); */
-
-  /* box = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), box, FALSE, FALSE, 3); */
-  /* gtk_widget_show (box); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), vbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 130, 200); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 130, 150); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), scroll, FALSE, FALSE, 3); */
-
-  /* compra->store_new_guias = gtk_tree_store_new (1, */
-  /*                                               G_TYPE_STRING); */
-
-
-  /* compra->tree_new_guias = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_new_guias)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->tree_new_guias), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->tree_new_guias); */
-  /* gtk_widget_show (compra->tree_new_guias); */
-
-  /* g_signal_connect (G_OBJECT (compra->tree_new_guias), "row-activated", */
-  /*                   G_CALLBACK (DelGuia), NULL); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Guia", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_new_guias), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* frame = gtk_frame_new ("Totales Factura"); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 3); */
-  /* gtk_widget_show (frame); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_widget_show (vbox2); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Neto\t:"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_neto = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), compra->fact_neto, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->fact_neto); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("I.V.A\t:"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_iva = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), compra->fact_iva, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->fact_iva); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Imptos.\t:"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_otros = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), compra->fact_otros, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->fact_otros); */
-
-  /* hbox2 = gtk_hbox_new (FALSE, 3); */
-  /* gtk_widget_show (hbox2); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, FALSE, 3); */
-
-  /* label = gtk_label_new ("Total\t:"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3); */
-  /* gtk_widget_show (label); */
-
-  /* compra->fact_total = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox2), compra->fact_total, FALSE, FALSE, 3); */
-  /* gtk_widget_show (compra->fact_total); */
-
-  /* /\* */
-  /*   Fin Ingreso Facturas */
-  /* *\/ */
-
-  /* /\* */
-  /*   Inicio Pagos */
-  /* *\/ */
-
-  /* vbox = gtk_vbox_new (FALSE, 0); */
-  /* gtk_widget_show (vbox); */
-  /* gtk_notebook_append_page (GTK_NOTEBOOK (notebook), vbox, */
-  /*                           gtk_label_new_with_mnemonic ("_Pagos")); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (notebook, MODULE_BOX_WIDTH - 5, MODULE_BOX_HEIGHT); */
-  /* else */
-  /*   gtk_widget_set_size_request (notebook, MODULE_LITTLE_BOX_WIDTH - 5, MODULE_LITTLE_BOX_HEIGHT); */
-
-  /* frame = gtk_frame_new ("Datos de la Factura"); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3); */
-  /* gtk_widget_show (frame); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-  /* gtk_widget_show (vbox2); */
-
-  /* hbox = gtk_hbox_new (FALSE, 0); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new ("Proveedor: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_proveedor = gtk_entry_new (); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_proveedor, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_proveedor); */
-
-  /* gtk_entry_set_editable (GTK_ENTRY (pago_proveedor), FALSE); */
-
-  /* g_signal_connect (G_OBJECT (pago_proveedor), "activate", */
-  /*                   G_CALLBACK (SelectProveedor), (gpointer)FALSE); */
-
-  /* label = gtk_label_new (" Rut: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_rut = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_rut, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_rut); */
-
-  /* label = gtk_label_new ("\tContacto: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_contacto = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_contacto, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_contacto); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new ("Direccion: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_direccion = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_direccion, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_direccion); */
-
-  /* label = gtk_label_new ("\tComuna: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_comuna = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_comuna, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_comuna); */
-
-  /* label = gtk_label_new ("\tFono: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_fono = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox),pago_fono, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_fono); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new ("E-Mail: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_email = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_email, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_email); */
-
-  /* label = gtk_label_new ("\tWeb: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_web = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_web, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_web); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new (""); */
-  /* gtk_label_set_markup (GTK_LABEL (label), */
-  /*                       "<b>Numero de Factura: </b>"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_factura = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_factura, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_factura); */
-
-  /* label = gtk_label_new ("\t\tFecha de Emision: "); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_emision = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_emision, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_emision); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* label = gtk_label_new (""); */
-  /* gtk_label_set_markup (GTK_LABEL (label), */
-  /*                       "<b>Monto de la Factura: </b>"); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0); */
-  /* gtk_widget_show (label); */
-
-  /* pago_monto = gtk_label_new (""); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), pago_monto, FALSE, FALSE, 0); */
-  /* gtk_widget_show (pago_monto); */
-
-  /* frame = gtk_frame_new ("Seleccione la Factura a pagar"); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0); */
-  /* gtk_widget_show (frame); */
-
-  /* vbox2 = gtk_vbox_new (FALSE, 3); */
-  /* gtk_container_add (GTK_CONTAINER (frame), vbox2); */
-  /* gtk_widget_show (vbox2); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0); */
-  /* gtk_widget_show (hbox); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 620, 140); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 620, 120); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 0); */
-
-  /* compra->store_facturas = gtk_tree_store_new (7, */
-  /*                                              G_TYPE_STRING, */
-  /*                                              G_TYPE_STRING, */
-  /*                                              G_TYPE_STRING, */
-  /*                                              G_TYPE_STRING, */
-  /*                                              G_TYPE_STRING, */
-  /*                                              G_TYPE_STRING, */
-  /*                                              G_TYPE_STRING); */
-
-  /* compra->tree_facturas = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_facturas)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (compra->tree_facturas), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), compra->tree_facturas); */
-  /* gtk_widget_show (compra->tree_facturas); */
-
-  /* selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_facturas)); */
-
-  /* g_signal_connect (G_OBJECT (selection), "changed", */
-  /*                   G_CALLBACK (FillDetPagos), NULL); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 30); */
-  /* gtk_tree_view_column_set_max_width (column, 30); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Rut", renderer, */
-  /*                                                    "text", 1, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 75); */
-  /* gtk_tree_view_column_set_max_width (column, 75); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Numero", renderer, */
-  /*                                                    "text", 2, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 160); */
-  /* gtk_tree_view_column_set_max_width (column, 160); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Compra", renderer, */
-  /*                                                    "text", 3, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("F. Emision", renderer, */
-  /*                                                    "text", 4, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Fecha Pagos", renderer, */
-  /*                                                    "text", 5, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 80); */
-  /* gtk_tree_view_column_set_max_width (column, 80); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Monto", renderer, */
-  /*                                                    "text", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_facturas), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* /\*  pagos_calendar = gtk_calendar_new (); */
-  /*     gtk_box_pack_start (GTK_BOX (hbox), pagos_calendar, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (pagos_calendar); */
-  /* *\/ */
-
-  /* /\* */
-  /*   box = gtk_vbox_new (FALSE, 3); */
-  /*   gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3); */
-  /*   gtk_widget_show (box); */
-
-  /*   button = gtk_button_new_with_label ("Mostrar todas"); */
-  /*   gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 3); */
-  /*   gtk_widget_show (button); */
-
-  /*   g_signal_connect (G_OBJECT (button), "clicked", */
-  /*   G_CALLBACK (ShowAllFacturas), NULL); */
-  /* *\/ */
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox); */
-
-  /* scroll = gtk_scrolled_window_new (NULL, NULL); */
-  /* gtk_widget_show (scroll); */
-  /* gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll), */
-  /*                                 GTK_POLICY_AUTOMATIC, */
-  /*                                 GTK_POLICY_AUTOMATIC); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (scroll, 620, 170); */
-  /* else */
-  /*   gtk_widget_set_size_request (scroll, 620, 140); */
-  /* gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3); */
-
-  /* pagos_store = gtk_tree_store_new (7, */
-  /*                                   G_TYPE_STRING, */
-  /*                                   G_TYPE_STRING, */
-  /*                                   G_TYPE_STRING, */
-  /*                                   G_TYPE_STRING, */
-  /*                                   G_TYPE_STRING, */
-  /*                                   G_TYPE_STRING, */
-  /*                                   G_TYPE_BOOLEAN); */
-
-  /* pagos_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (pagos_store)); */
-  /* gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (pagos_tree), TRUE); */
-  /* gtk_container_add (GTK_CONTAINER (scroll), pagos_tree); */
-  /* gtk_widget_show (pagos_tree); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer, */
-  /*                                                    "text", 0, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (pagos_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Producto", renderer, */
-  /*                                                    "text", 1, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (pagos_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL); */
-  /* gtk_tree_view_column_set_min_width (column, 320); */
-  /* gtk_tree_view_column_set_max_width (column, 320); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer, */
-  /*                                                    "text", 2, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (pagos_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer, */
-  /*                                                    "text", 3, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (pagos_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* renderer = gtk_cell_renderer_text_new (); */
-  /* column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer, */
-  /*                                                    "text", 4, */
-  /*                                                    "foreground", 5, */
-  /*                                                    "foreground-set", 6, */
-  /*                                                    NULL); */
-  /* gtk_tree_view_append_column (GTK_TREE_VIEW (pagos_tree), column); */
-  /* gtk_tree_view_column_set_alignment (column, 0.5); */
-  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
-  /* gtk_tree_view_column_set_resizable (column, FALSE); */
-
-  /* hbox = gtk_hbox_new (FALSE, 3); */
-  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
-  /* gtk_widget_show (hbox); */
-
-  /* if (solo_venta == TRUE) */
-  /*   { */
-  /*     box = gtk_hbox_new (FALSE, 3); */
-  /*     gtk_widget_set_size_request (box, 10, -1); */
-  /*     gtk_box_pack_end (GTK_BOX (hbox), box, FALSE, FALSE, 3); */
-  /*     gtk_widget_show (box); */
-  /*   } */
-
-  /* button = gtk_button_new_with_label ("Pagar Factura"); */
-  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
-  /* gtk_widget_show (button); */
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (PagarDocumentoWin), NULL); */
-
-  /* /\* */
-  /*   Fin Pagos */
-  /* *\/ */
-
-  /* /\* */
-  /*   Inicio Mercaderia */
-  /* *\/ */
-
-  /* vbox = gtk_vbox_new (FALSE, 0); */
-  /* gtk_widget_show (vbox); */
-  /* gtk_notebook_append_page (GTK_NOTEBOOK (notebook), vbox, */
-  /*                           gtk_label_new_with_mnemonic ("_Mercadería")); */
-  /* if (solo_venta != TRUE) */
-  /*   gtk_widget_set_size_request (notebook, MODULE_BOX_WIDTH - 5, MODULE_BOX_HEIGHT); */
-  /* else */
-  /*   gtk_widget_set_size_request (notebook, MODULE_LITTLE_BOX_WIDTH - 5, MODULE_LITTLE_BOX_HEIGHT); */
-
-  /* admini_box (vbox); */
-
-  /* /\* */
-  /*   Fin Mercaderia */
-  /* *\/ */
-
-  /* /\* */
-  /*   Inicio Proveedores */
-  /* *\/ */
-
-  /* vbox = gtk_vbox_new (FALSE, 0); */
-  /* gtk_widget_show (vbox); */
-  /* gtk_notebook_append_page (GTK_NOTEBOOK (notebook), vbox, */
-  /*                           gtk_label_new_with_mnemonic ("P_roveedores")); */
-  /* gtk_widget_set_size_request (notebook, MODULE_BOX_WIDTH - 5, MODULE_BOX_HEIGHT); */
-
-  /* proveedores_box (vbox); */
-
-  /* /\* */
-  /*   Fin Proveedores */
-  /* *\/ */
-
-  /* /\* */
-  /*   Fin Cajas */
-  /* *\/ */
-
 }
 
 void
@@ -2702,43 +1025,49 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       PQclear (res);
       gtk_entry_set_text (GTK_ENTRY (entry),barcode);
     }
+
   g_free(q);
 
   q = g_strdup_printf ("SELECT existe_producto(%s)", barcode);
-  if (g_str_equal(GetDataByOne(q), "t"))
+
+  if (g_str_equal( GetDataByOne (q), "t"))
     {
-      gtk_widget_set_sensitive (see_button, TRUE);
+      /* gtk_widget_set_sensitive (see_button, TRUE); */
 
-      ActiveBuy (NULL, NULL);
+      //ActiveBuy (NULL, NULL);
 
-      gtk_widget_set_sensitive (new_button, FALSE);
+      /* gtk_widget_set_sensitive (new_button, FALSE); */
 
-      gtk_widget_set_sensitive (ingreso_entry, TRUE);
-      gtk_widget_set_sensitive (ganancia_entry, TRUE);
-      gtk_widget_set_sensitive (precio_final_entry, TRUE);
-      gtk_widget_set_sensitive (compra->cantidad_entry, TRUE);
+      /* gtk_widget_set_sensitive (ingreso_entry, TRUE); */
+      /* gtk_widget_set_sensitive (ganancia_entry, TRUE); */
+      /* gtk_widget_set_sensitive (precio_final_entry, TRUE); */
+      /* gtk_widget_set_sensitive (compra->cantidad_entry, TRUE); */
 
       ShowProductHistory ();
 
-      gtk_label_set_markup (GTK_LABEL (compra->stock),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
                                              GetCurrentStock (barcode)));
       if ((day_to_sell = GetDayToSell (barcode)) != 0)
-        gtk_label_set_markup (GTK_LABEL (compra->stockday),
-                              g_strdup_printf ("<span weight=\"ultrabold\">%.2f dias"
-                                               "</span>",
-                                               day_to_sell));
+        {
+          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")),
+                                g_strdup_printf ("<span weight=\"ultrabold\">%.2f dias"
+                                                 "</span>",
+                                                 day_to_sell));
+        }
       else
-        gtk_label_set_markup (GTK_LABEL (compra->stockday),
-                              g_strdup_printf ("<span weight=\"ultrabold\">"
-                                               "indefinidos dias</span>"));
+        {
+          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")),
+                                g_strdup_printf ("<span weight=\"ultrabold\">"
+                                                 "indefinidos dias</span>"));
+        }
 
-      gtk_label_set_markup (GTK_LABEL (compra->current_price),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_sell_price")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PutPoints (GetCurrentPrice (barcode))));
       g_free (q);
       q = g_strdup_printf ("SELECT descripcion FROM select_producto(%s)", barcode);
-      gtk_label_set_markup (GTK_LABEL (compra->product),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              GetDataByOne (q)));
       g_free(q);
@@ -2749,40 +1078,38 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       if (g_str_equal (PQvaluebycol(res, 0, "canje"), "t"))
         {
           gtk_label_set_markup (GTK_LABEL (label_canje), "Stock Pro: ");
-          gtk_label_set_markup
-            (GTK_LABEL (label_stock_pro),
-             g_strdup_printf ("<span weight=\"ultrabold\">%.3f</span>",
-                              strtod (PUT (PQvaluebycol(res, 0, "stock_pro")),
-                                      (char **)NULL)));
+          gtk_label_set_markup (GTK_LABEL (label_stock_pro),
+                                g_strdup_printf ("<span weight=\"ultrabold\">%.3f</span>",
+                                                 strtod (PUT (PQvaluebycol(res, 0, "stock_pro")),
+                                                         (char **)NULL)));
         }
 
-      gtk_label_set_markup (GTK_LABEL (compra->marca),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol(res, 0, "marca")));
 
-      gtk_label_set_markup (GTK_LABEL (compra->unidad),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", GetUnit (barcode)));
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")),
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                                             GetUnit (barcode)));
 
-      gtk_label_set_markup
-        (GTK_LABEL (compra->fifo),
-         g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                          PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")),
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                                             PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
 
-      gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
-
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
   else
     {
-      gtk_widget_set_sensitive (see_button, FALSE);
-      gtk_widget_set_sensitive (add_button, FALSE);
+      /* gtk_widget_set_sensitive (see_button, FALSE); */
+      /* gtk_widget_set_sensitive (add_button, FALSE); */
 
-      gtk_widget_set_sensitive (new_button, TRUE);
-      gtk_window_set_focus (GTK_WINDOW (main_window), new_button);
+      /* gtk_widget_set_sensitive (new_button, TRUE); */
+      /* gtk_window_set_focus (GTK_WINDOW (main_window), new_button); */
 
-      gtk_widget_set_sensitive (ingreso_entry, FALSE);
-      gtk_widget_set_sensitive (ganancia_entry, FALSE);
-      gtk_widget_set_sensitive (precio_final_entry, FALSE);
-      gtk_widget_set_sensitive (compra->cantidad_entry, FALSE);
+      /* gtk_widget_set_sensitive (ingreso_entry, FALSE); */
+      /* gtk_widget_set_sensitive (ganancia_entry, FALSE); */
+      /* gtk_widget_set_sensitive (precio_final_entry, FALSE); */
+      /* gtk_widget_set_sensitive (compra->cantidad_entry, FALSE); */
 
       /*
         AlertMSG ("El codigo de barras ingresado no esta registrado.\n"
@@ -3027,35 +1354,6 @@ ShowProductDescription (void)
   g_signal_connect (G_OBJECT (button), "toggled",
                     G_CALLBACK (ChangeSave), NULL);
 
-  /*
-    hbox = gtk_hbox_new (FALSE, 3);
-    gtk_widget_show (hbox);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-    label = gtk_label_new ("Familia del Producto: ");
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-
-    res = EjecutarSQL ("SELECT * FROM familias ORDER BY id DESC");
-
-    tuples = PQntuples (res);
-
-    combo_fami = gtk_combo_box_new_text ();
-    gtk_box_pack_end (GTK_BOX (hbox), combo_fami, FALSE, FALSE, 3);
-    gtk_widget_show (combo_fami);
-
-    for (i = 0; i < tuples; i++)
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_fami),
-    g_strdup_printf ("%s",
-    PQgetvalue (res, i, 1)));
-    active = GetFami (barcode);
-
-    gtk_combo_box_set_active (GTK_COMBO_BOX (combo_fami), active - 1);
-
-    g_signal_connect (G_OBJECT (combo_fami), "changed",
-    G_CALLBACK (ChangeSave), NULL);
-  */
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
@@ -3222,10 +1520,10 @@ Save (GtkWidget *widget, gpointer data)
 void
 CalcularPrecioFinal (void)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
-  gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso_entry)))), (char **)NULL);
-  gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (ganancia_entry))));
-  gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (precio_final_entry))));
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode"))));
+  gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price"))))), (char **)NULL);
+  gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")))));
+  gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")))));
   gdouble precio;
   gdouble porcentaje;
   gdouble iva = GetIVA (barcode);
@@ -3271,7 +1569,7 @@ CalcularPrecioFinal (void)
         {
           precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
         }
-      gtk_entry_set_text (GTK_ENTRY (ingreso_entry),
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")),
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else if (ganancia == 0 && ingresa != 0 && precio_final != 0)
@@ -3292,7 +1590,7 @@ CalcularPrecioFinal (void)
         porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
 
 
-      gtk_entry_set_text (GTK_ENTRY (ganancia_entry),
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")),
                           g_strdup_printf ("%ld", lround (porcentaje)));
     }
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
@@ -3312,9 +1610,9 @@ CalcularPrecioFinal (void)
         precio = (gdouble)(ingresa * (gdouble)(ganancia + 100)) / 100;
 
       if (ganancia == 0)
-        gtk_entry_set_text (GTK_ENTRY (ganancia_entry), "0");
+        gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "0");
 
-      gtk_entry_set_text (GTK_ENTRY (precio_final_entry),
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")),
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else
@@ -3325,14 +1623,18 @@ CalcularPrecioFinal (void)
 void
 AddToProductsList (void)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode"))));
   gdouble cantidad;
-  gdouble precio_compra = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso_entry)))), (char **)NULL);
-  gint margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (ganancia_entry))));
-  gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (precio_final_entry))));
+  gdouble precio_compra = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price"))))), (char **)NULL);
+  gint margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")))));
+  gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")))));
   Producto *check;
 
-  cantidad = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->cantidad_entry)))),
+  GtkListStore *store_history, *store_buy;
+
+  store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
+
+  cantidad = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount"))))),
                      (char **)NULL);
 
   if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
@@ -3353,7 +1655,7 @@ AddToProductsList (void)
         {
           check->cantidad += cantidad;
 
-          gtk_list_store_set (compra->store_list, &check->iter,
+          gtk_list_store_set (store_buy, &check->iter,
                               2, check->cantidad,
                               4, PutPoints (g_strdup_printf ("%.2f", check->cantidad *
                                                              check->precio_compra)),
@@ -3362,28 +1664,24 @@ AddToProductsList (void)
 
         }
 
-      gtk_widget_set_sensitive (confirm_button, TRUE);
 
-      //      SetCurrentProductTo (barcode, FALSE);
-
-      //      FillDataProduct (barcode);
-
-      gtk_label_set_markup (GTK_LABEL (compra->total_compra),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
                             g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
                                              PutPoints (g_strdup_printf
                                                         ("%.2f",
                                                          CalcularTotalCompra
                                                          (compra->header_compra)))));
-      gtk_list_store_clear (compra->store_history);
+      store_history = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
+      gtk_list_store_clear (store_history);
 
       CleanStatusProduct ();
 
-      gtk_widget_set_sensitive (see_button, FALSE);
-
-      gtk_window_set_focus (GTK_WINDOW (main_window), compra->barcode_history_entry);
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
     }
   else if (precio == 0 && strcmp (GetCurrentPrice (barcode), "0") != 0)
-    AskForCurrentPrice (barcode);
+    {
+      AskForCurrentPrice (barcode);
+    }
   else
     {
       CalcularPrecioFinal ();
@@ -3695,29 +1993,13 @@ AddNew (GtkWidget *widget, gpointer data)
 }
 
 void
-FillDataProduct (gchar *barcode)
-{
-
-  /*
-    gtk_entry_set_text (GTK_ENTRY (compra->barcode_entry), compra->current->barcode);
-    gtk_entry_set_text (GTK_ENTRY (compra->codigo_entry), compra->current->codigo);
-    gtk_entry_set_text (GTK_ENTRY (compra->producto_entry), compra->current->producto);
-    gtk_entry_set_text (GTK_ENTRY (compra->marca_entry), compra->current->marca);
-    gtk_entry_set_text (GTK_ENTRY (compra->contenido_entry),
-    g_strdup_printf ("%d", compra->current->contenido));
-    gtk_entry_set_text (GTK_ENTRY (compra->unidad_entry), compra->current->unidad);
-    gtk_entry_set_text (GTK_ENTRY (compra->precio_unitario_entry),
-    g_strdup_printf ("%d", compra->current->precio_compra));
-  */
-}
-
-void
 AddToTree (void)
 {
   GtkTreeIter iter;
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
 
-  gtk_list_store_insert_after (compra->store_list, &iter, NULL);
-  gtk_list_store_set (compra->store_list, &iter,
+  gtk_list_store_insert_after (store, &iter, NULL);
+  gtk_list_store_set (store, &iter,
                       0, compra->current->codigo,
                       1, g_strdup_printf ("%s %s %d %s", compra->current->producto,
                                           compra->current->marca, compra->current->contenido,
@@ -4145,45 +2427,48 @@ ShowProductHistory (void)
   PGresult *res;
   GtkTreeIter iter;
 
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
+  GtkListStore *store;
+
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object( builder, "entry_buy_barcode" ))));
   gint i, tuples, precio = 0;
-  //TODO: arreglar esta fea sentencia y hacerla mucho legible
+
+
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT (SELECT nombre FROM proveedor WHERE rut=t1.rut_proveedor), t2.precio, t2.cantidad,"
-      " date_part('day', t1.fecha), date_part('month', t1.fecha), date_part('year', t1.fecha), "
-      "t1.id, t2.iva, t2.otros FROM compra AS t1, products_buy_history AS t2, productos WHERE "
-      "productos.barcode='%s' AND t2.barcode_product=productos.barcode AND t1.id=t2.id_compra "
-      "AND t2.anulado='f' ORDER BY t1.fecha DESC", barcode));
+     ("SELECT (SELECT nombre FROM proveedor WHERE rut=t1.rut_proveedor) as proveedor, t2.precio, t2.cantidad, date_part('day', t1.fecha) as dia, "
+      "date_part('month', t1.fecha) as mes, date_part('year', t1.fecha) as ano, t1.id, t2.iva, t2.otros_impuestos "
+      "FROM compra AS t1, compra_detalle AS t2, producto "
+      "WHERE producto.barcode='%s' AND t2.barcode_product=producto.barcode AND t1.id=t2.id_compra AND t2.anulado='f' ORDER BY t1.fecha DESC", barcode));
 
   tuples = PQntuples (res);
 
-  gtk_list_store_clear (compra->store_history);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
+
+  gtk_list_store_clear (store);
 
   for (i = 0; i < tuples; i++)
     {
-      if (strcmp (PQgetvalue (res, i, 7), "0") != 0)
+      if (strcmp (PQvaluebycol (res, i, "iva"), "0") != 0)
         {
-          precio = lround ((double) (atoi(PQgetvalue (res, i, 1)) + lround((double)atoi(PQgetvalue (res, i, 7))/
-                                                                           strtod (PUT (PQgetvalue (res, i, 2)), (char **)NULL))));
+          precio = lround ((double) (atoi(PQvaluebycol (res, i, "precio")) + lround((double)atoi(PQvaluebycol (res, i, "iva"))/
+                                                                                    strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL))));
         }
-      if (strcmp (PQgetvalue (res, i, 8), "0") != 0)
+      if (strcmp (PQvaluebycol (res, i, "otros_impuestos"), "0") != 0)
         {
-          precio += lround ((double) lround ((double)atoi(PQgetvalue (res, i, 8)) /
-                                             strtod (PUT (PQgetvalue (res, i, 2)), (char **)NULL)));
+          precio += lround ((double) lround ((double)atoi(PQvaluebycol (res, i, "otros_impuestos")) /
+                                             strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL)));
         }
 
-      gtk_list_store_append (compra->store_history, &iter);
-      gtk_list_store_set (compra->store_history, &iter,
-                          0, g_strdup_printf ("%.2d/%.2d/%s", atoi (PQgetvalue (res, i, 3)),
-                                              atoi (PQgetvalue (res, i, 4)), PQgetvalue (res, i, 5)),
-                          1, PQgetvalue (res, i, 6),
-                          2, PQgetvalue (res, i, 0),
-                          3, strtod (PUT (PQgetvalue (res, i, 2)), (char **)NULL),
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+                          0, g_strdup_printf ("%.2d/%.2d/%s", atoi (PQvaluebycol (res, i, "dia")),
+                                              atoi (PQvaluebycol (res, i, "mes")), PQvaluebycol (res, i, "ano")),
+                          1, PQvaluebycol (res, i, "id"),
+                          2, PQvaluebycol (res, i, "proveedor"),
+                          3, strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
                           4, precio,
                           -1);
     }
-
 }
 
 void
@@ -5016,26 +3301,26 @@ AnularProducto (void)
 void
 CleanStatusProduct (void)
 {
-  gtk_list_store_clear (compra->store_history);
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"))));
 
-  gtk_label_set_text (GTK_LABEL (compra->product), "");
-  gtk_label_set_text (GTK_LABEL (compra->marca), "");
-  gtk_label_set_text (GTK_LABEL (compra->unidad), "");
-  gtk_label_set_text (GTK_LABEL (compra->stock), "");
-  gtk_label_set_text (GTK_LABEL (compra->stockday), "");
-  gtk_label_set_text (GTK_LABEL (compra->current_price), "");
-  gtk_label_set_text (GTK_LABEL (compra->fifo), "");
-  gtk_label_set_text (GTK_LABEL (label_canje), "");
-  gtk_label_set_text (GTK_LABEL (label_stock_pro), "");
+  gtk_list_store_clear (store);
 
-  gtk_entry_set_text (GTK_ENTRY (ingreso_entry), "");
-  gtk_entry_set_text (GTK_ENTRY (ganancia_entry), "");
-  gtk_entry_set_text (GTK_ENTRY (precio_final_entry), "");
-  gtk_entry_set_text (GTK_ENTRY (compra->barcode_history_entry), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_sell_price")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")), "");
 
-  gtk_entry_set_text (GTK_ENTRY (compra->cantidad_entry), "1");
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), "");
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "");
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), "");
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), "1");
 
-  gtk_window_set_focus (GTK_WINDOW (main_window), compra->barcode_history_entry);
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), "");
+
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
 }
 
 void
@@ -7323,12 +5608,6 @@ check_passwd (GtkWidget *widget, gpointer data)
 }
 
 void
-on_barcode_entry_activate (GtkEntry *entry, gpointer user_data)
-{
-
-}
-
-void
 on_entry_buy_barcode_activate (GtkEntry *entry, gpointer user_data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (entry));
@@ -7346,4 +5625,19 @@ on_entry_buy_barcode_activate (GtkEntry *entry, gpointer user_data)
 void
 on_buy_notebook_change_current_page (GtkNotebook *notebook, gint arg1, gpointer user_data) {
 
+}
+
+void
+on_button_calculate_clicked (GtkButton *button, gpointer data) {
+  CalcularPrecioFinal();
+}
+
+void
+on_button_add_product_list_clicked (GtkButton *button, gpointer data) {
+  AddToProductsList ();
+}
+
+void
+on_button_new_product_clicked (GtkButton *button, gpointer data) {
+  AddNewProduct();
 }
