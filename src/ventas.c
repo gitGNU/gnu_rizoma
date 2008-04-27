@@ -3201,7 +3201,14 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
     tipo_documento = SIMPLE;
 
   if (tipo_documento != VENTA)
-    discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
+    {
+      GtkWidget *wid;
+      wid = GTK_WIDGET(gtk_builder_get_object(builder,"entry_percent_discount"));
+      if (g_str_equal(gtk_entry_get_text(GTK_ENTRY(wid)),""))
+	discount = "0";
+      else
+	discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
+    }
   else
     discount = "0";
 
@@ -3294,7 +3301,7 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   gtk_widget_grab_focus(aux);
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono from cliente where rut = %s",
-		      strtok(rut,"-"));
+		      strtok(g_strdup(rut),"-"));
   res = EjecutarSQL(q);
   g_free (q);
 
@@ -3313,6 +3320,10 @@ on_btn_cancel_sale_credit_clicked (GtkButton *button, gpointer data)
   gtk_widget_hide(widget);
 }
 
+/**
+ * Clean the information displayed in the credit client dialog
+ *
+ */
 void
 clean_credit_data ()
 {
