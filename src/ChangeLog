@@ -5,6 +5,12 @@
 	have VC use it if you want to read old code.
 	(FillDataProduct): Deleted function. It was just commented code.
 	(AddToProductsList): Use GtkBuilder. Add some brackets.
+	(on_button_buy_clicked): Added new function to handle button
+	signal clicked.
+	(Comprar): Deleted the use of function InsertarCompras(), this was
+	inserting an creating a treeview everytime that we bought something.
+	(CallBacksTabs): Rename this function for on_buy_notebook_change_current_page().
+	(CalcularTotales): Modified to use GtkBuilder.
 
 2008-04-05  Jonathan Gonzalez V.  <zeus@gnu.org>
 

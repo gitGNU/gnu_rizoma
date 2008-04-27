@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sun Apr 27 13:28:26 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Apr 27 19:35:52 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="wnd_compras">
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
@@ -9,7 +9,7 @@
       <widget class="GtkNotebook" id="buy_notebook">
         <property name="visible">True</property>
         <property name="show_border">False</property>
-        <signal name="change_current_page" handler="on_buy_notebook_change_current_page"/>
+        <signal name="switch_page" handler="on_buy_notebook_switch_page"/>
         <child>
           <widget class="GtkVBox" id="vbox2">
             <property name="visible">True</property>
@@ -631,12 +631,13 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="buy_button">
+                      <widget class="GtkButton" id="button_buy">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Confirmar Compra</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="on_button_buy_clicked"/>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -675,7 +676,7 @@
                 <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <child>
-                  <widget class="GtkTreeView" id="treeview3">
+                  <widget class="GtkTreeView" id="tree_view_pending_requests">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="headers_clickable">True</property>
@@ -694,7 +695,7 @@
                 <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                 <child>
-                  <widget class="GtkTreeView" id="treeview4">
+                  <widget class="GtkTreeView" id="tree_view_pending_request_detail">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="headers_clickable">True</property>
@@ -775,7 +776,7 @@
                             <property name="n_columns">2</property>
                             <property name="column_spacing">5</property>
                             <child>
-                              <widget class="GtkLabel" id="label38">
+                              <widget class="GtkLabel" id="label_pending_total">
                                 <property name="visible">True</property>
                               </widget>
                               <packing>
@@ -788,7 +789,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label37">
+                              <widget class="GtkLabel" id="label_pending_other_task_total">
                                 <property name="visible">True</property>
                               </widget>
                               <packing>
@@ -801,7 +802,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label36">
+                              <widget class="GtkLabel" id="label_pending_task_total">
                                 <property name="visible">True</property>
                               </widget>
                               <packing>
@@ -814,7 +815,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label35">
+                              <widget class="GtkLabel" id="label_pending_net_total">
                                 <property name="visible">True</property>
                               </widget>
                               <packing>
@@ -861,7 +862,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="label31">
+                              <widget class="GtkLabel" id="label">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">Total Neto</property>
                               </widget>
@@ -2408,7 +2409,6 @@
                   <widget class="GtkEntry" id="barcode_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <signal name="activate" handler="on_barcode_entry_activate"/>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
