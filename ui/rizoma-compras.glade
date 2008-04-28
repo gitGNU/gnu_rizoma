@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sun Apr 27 19:35:52 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Apr 27 20:27:26 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="wnd_compras">
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
@@ -680,6 +680,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="headers_clickable">True</property>
+                    <property name="search_column">6</property>
                   </widget>
                 </child>
               </widget>

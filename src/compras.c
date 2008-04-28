@@ -835,7 +835,9 @@ compras_win ()
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
 
-  GError *error;
+  GtkTreeSelection *selection;
+
+  GError *error = NULL;
 
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
@@ -999,6 +1001,164 @@ compras_win ()
 
 
   /* End Buying Products TreeView*/
+
+
+  /* Pending Requests */
+
+  store = gtk_list_store_new (6,
+                              G_TYPE_INT,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_BOOLEAN);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  g_signal_connect (G_OBJECT (treeview), "row-activated",
+                    G_CALLBACK (AskIngreso), NULL);
+
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
+
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (IngresoDetalle), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
+                                                     "text", 0,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer,
+                                                     "text", 1,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+                                                     "text", 2,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Precio Total", renderer,
+                                                     "text", 3,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+
+  /* End Pending Requests */
+
+  /* Pending Request Detail */
+
+  store = gtk_list_store_new (8,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_DOUBLE,
+                              G_TYPE_DOUBLE,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_BOOLEAN);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_request_detail"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  g_signal_connect (G_OBJECT (treeview), "row-activated",
+                    G_CALLBACK (IngresoParcial), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 0,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer,
+                                                     "text", 2,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer,
+                                                     "text", 3,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cant. Ing.", renderer,
+                                                     "text", 4,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer,
+                                                     "text", 5,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  /* End Pending Request Detail */
 
   gtk_widget_show_all (compras_gui);
 }
@@ -2482,7 +2642,7 @@ InsertarCompras (void)
   GtkTreeIter iter;
 
   GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
-  GtkListStore *store_pending_request_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests_detail"))));
+  GtkListStore *store_pending_request_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_request_detail"))));
 
   PGresult *res;
   gint tuples, i, id_compra;
@@ -5586,19 +5746,19 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     case 1:
       InsertarCompras ();
       break;
-    case 2:
-      ClearFactData ();
-      break;
-    case 3:
-      ClearPagosData ();
-      FillPagarFacturas (NULL);
-      break;
-    case 4:
-      ReturnProductsStore (ingreso->store);
-      break;
-    case 5:
-      ListarProveedores ();
-      break;
+    /* case 2: */
+    /*   ClearFactData (); */
+    /*   break; */
+    /* case 3: */
+    /*   ClearPagosData (); */
+    /*   FillPagarFacturas (NULL); */
+    /*   break; */
+    /* case 4: */
+    /*   ReturnProductsStore (ingreso->store); */
+    /*   break; */
+    /* case 5: */
+    /*   ListarProveedores (); */
+    /*   break; */
     default:
       break;
     }
