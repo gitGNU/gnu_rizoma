@@ -2762,13 +2762,14 @@ IngresarCompra (void)
   gint id, doc;
   gchar *rut_proveedor;
   gchar *q;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
 
-  gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter,
+  gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
                       0, &id,
                       -1);
 
@@ -5190,7 +5191,8 @@ void
 AskElabVenc (GtkWidget *widget, gpointer data)
 {
   Productos *products = (Productos *) data;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
   gint id;
   gchar *rut_proveedor;
@@ -5200,7 +5202,7 @@ AskElabVenc (GtkWidget *widget, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
 
-  gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter,
+  gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
                       0, &id,
                       -1);
 
