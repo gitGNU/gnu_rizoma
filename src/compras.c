@@ -59,10 +59,6 @@ GtkWidget *confirm_button;
 
 GtkWidget *recv_button;
 
-GtkWidget *ingreso_entry;
-GtkWidget *ganancia_entry;
-GtkWidget *precio_final_entry;
-
 GtkWidget *entry_stock;
 
 GtkWidget *ok_doc;
@@ -839,7 +835,9 @@ compras_win ()
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
 
-  GError *error;
+  GtkTreeSelection *selection;
+
+  GError *error = NULL;
 
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
@@ -1003,6 +1001,164 @@ compras_win ()
 
 
   /* End Buying Products TreeView*/
+
+
+  /* Pending Requests */
+
+  store = gtk_list_store_new (6,
+                              G_TYPE_INT,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_BOOLEAN);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  g_signal_connect (G_OBJECT (treeview), "row-activated",
+                    G_CALLBACK (AskIngreso), NULL);
+
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
+
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (IngresoDetalle), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
+                                                     "text", 0,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer,
+                                                     "text", 1,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+                                                     "text", 2,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Precio Total", renderer,
+                                                     "text", 3,
+                                                     "foreground", 4,
+                                                     "foreground-set", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+
+  /* End Pending Requests */
+
+  /* Pending Request Detail */
+
+  store = gtk_list_store_new (8,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_DOUBLE,
+                              G_TYPE_DOUBLE,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_BOOLEAN);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_request_detail"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  g_signal_connect (G_OBJECT (treeview), "row-activated",
+                    G_CALLBACK (IngresoParcial), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 0,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer,
+                                                     "text", 2,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer,
+                                                     "text", 3,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cant. Ing.", renderer,
+                                                     "text", 4,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer,
+                                                     "text", 5,
+                                                     "foreground", 6,
+                                                     "foreground-set", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  /* End Pending Request Detail */
 
   gtk_widget_show_all (compras_gui);
 }
@@ -1616,7 +1772,7 @@ CalcularPrecioFinal (void)
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else
-    ErrorMSG (ingreso_entry, "Solamente 2 campos deben ser llenados");
+    ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), "Solamente 2 campos deben ser llenados");
 
 }
 
@@ -1986,7 +2142,7 @@ AddNew (GtkWidget *widget, gpointer data)
 
       CloseAddWindow (NULL, NULL);
 
-      gtk_window_set_focus (GTK_WINDOW (main_window), ingreso_entry);
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
 
   return;
@@ -2027,8 +2183,6 @@ CloseBuyWindow (void)
 {
   gtk_widget_destroy (compra->buy_window);
   compra->buy_window = NULL;
-
-  gtk_widget_set_sensitive (main_window, TRUE);
 }
 
 void
@@ -2412,8 +2566,6 @@ Comprar (GtkWidget *widget, gpointer data)
 
       ClearAllCompraData ();
 
-      InsertarCompras ();
-
       CleanStatusProduct ();
 
       compra->header_compra = NULL;
@@ -2474,19 +2626,13 @@ ShowProductHistory (void)
 void
 ClearAllCompraData (void)
 {
-  gtk_entry_set_text (GTK_ENTRY (compra->barcode_history_entry), "");
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"))));
 
-  gtk_list_store_clear (compra->store_history);
+  gtk_list_store_clear (store);
 
-  gtk_list_store_clear (compra->store_list);
+  CleanStatusProduct ();
 
-  gtk_entry_set_text (GTK_ENTRY (ingreso_entry), "");
-  gtk_entry_set_text (GTK_ENTRY (ganancia_entry), "");
-  gtk_entry_set_text (GTK_ENTRY (precio_final_entry), "");
-
-  gtk_entry_set_text (GTK_ENTRY (compra->cantidad_entry), "");
-
-  gtk_label_set_text (GTK_LABEL (compra->total_compra), "\t\t\t");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "\t\t\t");
 
 }
 
@@ -2495,19 +2641,22 @@ InsertarCompras (void)
 {
   GtkTreeIter iter;
 
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
+  GtkListStore *store_pending_request_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_request_detail"))));
+
   PGresult *res;
   gint tuples, i, id_compra;
 
   res = EjecutarSQL( "SELECT * FROM get_compras()" );
 
-  gtk_list_store_clear (compra->ingreso_store);
-  gtk_list_store_clear (compra->compra_store);
 
-  gtk_label_set_text (GTK_LABEL (compra->total_neto), "");
-  gtk_label_set_text (GTK_LABEL (compra->total_iva), "");
-  gtk_label_set_text (GTK_LABEL (compra->total_otros), "");
-  gtk_label_set_text (GTK_LABEL (compra->total), "");
+  gtk_list_store_clear (store_pending_request);
+  gtk_list_store_clear (store_pending_request_detail);
 
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_net_total")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_task_total")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_other_task_total")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total")), "");
 
   tuples = PQntuples (res);
 
@@ -2515,8 +2664,8 @@ InsertarCompras (void)
     {
       id_compra = atoi (PQvaluebycol(res, i, "id_compra"));
 
-      gtk_list_store_append (compra->ingreso_store, &iter);
-      gtk_list_store_set (compra->ingreso_store, &iter,
+      gtk_list_store_append (store_pending_request, &iter);
+      gtk_list_store_set (store_pending_request, &iter,
                           0, id_compra,
                           1, g_strdup_printf ("%.2d/%.2d/%s", atoi (PQvaluebycol (res, i, "dia")),
                                               atoi (PQvaluebycol (res, i, "mes")), PQvaluebycol (res, i, "ano")),
@@ -2526,8 +2675,6 @@ InsertarCompras (void)
                           5, TRUE,
                           -1);
     }
-
-  IngresoDetalle (NULL, NULL);
 }
 
 void
@@ -2535,9 +2682,14 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
 {
   gint i, id, tuples;
   gboolean color;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
   GtkTreeIter iter;
+
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
+  GtkListStore *store_pending_request_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_request_detail"))));
+
   PGresult *res;
+
   gdouble sol, ing;
   gdouble cantidad;
 
@@ -2546,12 +2698,12 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
                           0, &id,
                           -1);
 
 
-      gtk_list_store_clear (compra->compra_store);
+      gtk_list_store_clear (store_pending_request_detail);
 
       res = EjecutarSQL ( g_strdup_printf( "SELECT * FROM get_detalle_compra( %d ) ", id ) );
 
@@ -2574,8 +2726,8 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
           else
             color = FALSE;
 
-          gtk_list_store_append (compra->compra_store, &iter);
-          gtk_list_store_set (compra->compra_store, &iter,
+          gtk_list_store_append (store_pending_request_detail, &iter);
+          gtk_list_store_set (store_pending_request_detail, &iter,
                               0, PQvaluebycol(res, i, "codigo_corto"),
                               1, g_strdup_printf ("%s %s %s %s", PQvaluebycol(res, i, "descripcion"),
                                                   PQvaluebycol(res, i, "marca"), PQvaluebycol(res, i, "contenido"),
@@ -2610,13 +2762,14 @@ IngresarCompra (void)
   gint id, doc;
   gchar *rut_proveedor;
   gchar *q;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
 
-  gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter,
+  gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
                       0, &id,
                       -1);
 
@@ -3060,13 +3213,13 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
 void
 ActiveBuy (GtkWidget *widget, gpointer data)
 {
-  gchar *precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso_entry)));
-  gchar *barcode_history = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
+  /* gchar *precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso_entry))); */
+  /* gchar *barcode_history = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry))); */
 
-  if (strcmp (precio, "") != 0 && strcmp (barcode_history, "") != 0)
-    gtk_widget_set_sensitive (add_button, TRUE);
-  else
-    gtk_widget_set_sensitive (add_button, FALSE);
+  /* if (strcmp (precio, "") != 0 && strcmp (barcode_history, "") != 0) */
+  /*   gtk_widget_set_sensitive (add_button, TRUE); */
+  /* else */
+  /*   gtk_widget_set_sensitive (add_button, FALSE); */
 
 }
 
@@ -3336,13 +3489,13 @@ CloseAskForCurrentPrice (GtkWidget *widget, gpointer data)
 void
 AcceptCurrentPrice (GtkWidget *widget, gpointer data)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry)));
+  /* gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry))); */
 
-  gtk_entry_set_text (GTK_ENTRY (precio_final_entry), GetCurrentPrice (barcode));
+  /* gtk_entry_set_text (GTK_ENTRY (precio_final_entry), GetCurrentPrice (barcode)); */
 
-  AddToProductsList ();
+  /* AddToProductsList (); */
 
-  CloseAskForCurrentPrice (NULL, data);
+  /* CloseAskForCurrentPrice (NULL, data); */
 }
 
 void
@@ -4490,44 +4643,6 @@ ClearFactData (void)
   //  gtk_window_set_focus (GTK_WINDOW (main_window), compra->fact_proveedor);
 }
 
-/*
-  Las siguiente funcion se atiene a reducir el tiempo de cambio de los modulos
-*/
-
-void
-CallBacksTabs (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
-{
-  switch (page_num)
-    {
-    case 0:
-      gtk_widget_add_accelerator (confirm_button, "clicked", accel,
-                                  GDK_F9, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE);
-      break;
-    case 1:
-      InsertarCompras ();
-      gtk_widget_add_accelerator (recv_button, "clicked", accel,
-                                  GDK_F9, GDK_LOCK_MASK, GTK_ACCEL_VISIBLE);
-      break;
-    case 2:
-      ClearFactData ();
-      break;
-    case 3:
-      ClearPagosData ();
-      FillPagarFacturas (NULL);
-      break;
-    case 4:
-      ReturnProductsStore (ingreso->store);
-      //gtk_tree_selection_select_path (ingreso->selection, gtk_tree_path_new_from_string ("0"));
-      break;
-    case 5:
-      ListarProveedores ();
-      break;
-    default:
-      break;
-    }
-}
-
-
 void
 RemoveBuyProduct (void)
 {
@@ -4595,13 +4710,13 @@ CalcularTotales (void)
 
   total = total_neto + total_otros + total_iva;
 
-  gtk_label_set_text (GTK_LABEL (compra->total_neto),
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_net_total")),
                       PutPoints (g_strdup_printf ("%li", lround (total_neto))));
-  gtk_label_set_text (GTK_LABEL (compra->total_iva),
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_task_total")),
                       PutPoints (g_strdup_printf ("%li", lround (total_iva))));
-  gtk_label_set_text (GTK_LABEL (compra->total_otros),
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_other_task_total")),
                       PutPoints (g_strdup_printf ("%lu", lround (total_otros))));
-  gtk_label_set_text (GTK_LABEL (compra->total),
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total")),
                       PutPoints (g_strdup_printf ("%li", lround (total))));
 
 }
@@ -5076,7 +5191,8 @@ void
 AskElabVenc (GtkWidget *widget, gpointer data)
 {
   Productos *products = (Productos *) data;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
   gint id;
   gchar *rut_proveedor;
@@ -5086,7 +5202,7 @@ AskElabVenc (GtkWidget *widget, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
 
-  gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter,
+  gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
                       0, &id,
                       -1);
 
@@ -5623,8 +5739,31 @@ on_entry_buy_barcode_activate (GtkEntry *entry, gpointer user_data)
 }
 
 void
-on_buy_notebook_change_current_page (GtkNotebook *notebook, gint arg1, gpointer user_data) {
+on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data) {
 
+  switch (page_num)
+    {
+    case 0:
+      break;
+    case 1:
+      InsertarCompras ();
+      break;
+    /* case 2: */
+    /*   ClearFactData (); */
+    /*   break; */
+    /* case 3: */
+    /*   ClearPagosData (); */
+    /*   FillPagarFacturas (NULL); */
+    /*   break; */
+    /* case 4: */
+    /*   ReturnProductsStore (ingreso->store); */
+    /*   break; */
+    /* case 5: */
+    /*   ListarProveedores (); */
+    /*   break; */
+    default:
+      break;
+    }
 }
 
 void
@@ -5639,5 +5778,10 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data) {
 
 void
 on_button_new_product_clicked (GtkButton *button, gpointer data) {
-  AddNewProduct();
+  AddNewProduct ();
+}
+
+void
+on_button_buy_clicked (GtkButton *button, gpointer data) {
+  BuyWindow ();
 }
