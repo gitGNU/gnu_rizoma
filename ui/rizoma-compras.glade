@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sun Apr 27 20:27:26 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Apr 27 20:57:07 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="wnd_compras">
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
@@ -684,10 +684,6 @@
                   </widget>
                 </child>
               </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-              </packing>
             </child>
             <child>
               <widget class="GtkScrolledWindow" id="scrolledwindow4">
@@ -704,8 +700,6 @@
                 </child>
               </widget>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
