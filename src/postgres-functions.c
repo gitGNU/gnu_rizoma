@@ -1356,9 +1356,12 @@ ReturnProveedor (gint id_compra)
 {
   Proveedor *proveedor = (Proveedor *) g_malloc (sizeof (Proveedor));
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM proveedor WHERE rut=(SELECT rut_proveedor FROM compra"
-                                      " WHERE id=%d", id_compra));
+  q = g_strdup_printf ("SELECT * FROM proveedor WHERE rut=(SELECT rut_proveedor FROM compra"
+		       " WHERE id=%d", id_compra);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res == NULL)
     return NULL;
