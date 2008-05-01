@@ -1067,7 +1067,7 @@ GetCurrentStock (gchar *barcode)
 
   res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM select_producto(%s)", barcode));
 
-  stock = strtod (PUT (PQgetvalue (res, 0, 0)), (char **)NULL);
+  stock = g_ascii_strtod(PQgetvalue (res, 0, 0), NULL);
 
   return stock;
 }

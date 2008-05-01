@@ -96,6 +96,7 @@ FillProductSell (gchar *barcode,
 		 gchar *codigo_corto)
 {
   GtkWidget *widget;
+  gchar *str_aux;
 
   //caja de producto
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
@@ -104,13 +105,13 @@ FillProductSell (gchar *barcode,
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
                       g_strdup_printf ("%s  %s  %s %s", marca, descripcion, contenido, unidad));
 
-  if (atoi (stock) <= GetMinStock (barcode))
+  if (g_ascii_strtod (stock, NULL) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
                           g_strdup_printf("<span foreground=\"red\"><b>%.2f dia(s)</b></span>",
-                                          strtod (PUT (stock_day), (char **)NULL)));
+                                          g_ascii_strtod (stock_day, NULL)));
   else
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
-                          g_strdup_printf ("<b>%.2f dia(s)</b>", strtod (PUT (stock_day), (char **)NULL)));
+                          g_strdup_printf ("<b>%.2f dia(s)</b>", g_ascii_strtod (stock_day, NULL)));
 
   //precio
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
@@ -127,14 +128,12 @@ FillProductSell (gchar *barcode,
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
                         g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
-                                         strtod (stock, (char **)NULL)));
+                                         g_ascii_strtod (stock, NULL)));
 
+  str_aux = g_strdup(gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))));
+  str_aux = g_strdup_printf ("%.0f", g_strtod (str_aux, NULL) * atoi (precio));
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
-                        g_strdup_printf
-                        ("<span weight=\"ultrabold\">%s</span>",
-                         g_strdup_printf ("%.0f",
-                                          strtod (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))), (char **)NULL) *
-                                          atoi (precio))));
+                        g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", str_aux));
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), codigo_corto);
 }
@@ -1840,7 +1839,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
     }
 
   //check if the product has stock
-  if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
+  if (g_ascii_strtod(PQvaluebycol(res, 0, "stock"), NULL) <= 0)
     {
       //the product has not stock, so display a message
       //and abort the operation
