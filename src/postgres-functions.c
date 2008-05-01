@@ -1337,9 +1337,13 @@ gint
 ReturnIncompletProducts (gint id_venta)
 {
   PGresult *res;
+  gchar *q;
 
-
-  res = EjecutarSQL (g_strdup_printf ("SELECT count(*) FROM compra_detalle WHERE id_compra=%d AND cantidad_ingresada>0 AND cantidad_ingresada<cantidad", id_venta));
+  q = g_strdup_printf ("SELECT count(*) FROM compra_detalle WHERE id_compra=%d "
+		       "AND cantidad_ingresada>0 AND cantidad_ingresada<cantidad",
+		       id_venta);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return atoi (PQgetvalue (res, 0, 0));
