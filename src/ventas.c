@@ -118,6 +118,7 @@ FillProductSell (gchar *barcode,
                         g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                          PutPoints (precio)));
 
+  //precio de mayorista
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor")),
                         g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                          PutPoints (precio_mayor)));
@@ -1925,7 +1926,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
                                   G_TYPE_STRING,
                                   G_TYPE_INT,
                                   G_TYPE_STRING,
-                                  G_TYPE_FLOAT,
+                                  G_TYPE_STRING,
                                   G_TYPE_INT,
                                   G_TYPE_STRING,
                                   G_TYPE_BOOLEAN);
@@ -2009,7 +2010,7 @@ BuscarProducto (GtkWidget *widget, gpointer data)
                                                          NULL);
       gtk_tree_view_append_column (treeview, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_min_width (column, 60);
       gtk_tree_view_column_set_max_width (column, 60);
       gtk_tree_view_column_set_resizable (column, FALSE);
@@ -2037,6 +2038,12 @@ BuscarProducto (GtkWidget *widget, gpointer data)
   return;
 }
 
+/**
+ * Populate the search products window, takes as argument the content of
+ * the 'ventas_buscar_entry' for the buscar_producto plpgsql function, and
+ * the rows returned by the function are inserted into the TreeView model
+ *
+ */
 void
 SearchAndFill (void)
 {
@@ -2088,7 +2095,7 @@ SearchAndFill (void)
                               3, PQvaluebycol (res, i, "marca"),
                               4, atoi (PQvaluebycol (res, i, "contenido")),
                               5, PQvaluebycol (res, i, "unidad"),
-                              6, g_ascii_strtod (PQvaluebycol (res, i, "stock"), NULL),
+                              6, g_strdup_printf("%.3f", g_ascii_strtod (PQvaluebycol (res, i, "stock"), NULL)),
                               7, atoi (PQvaluebycol (res, i, "precio")),
                               -1);
         }
