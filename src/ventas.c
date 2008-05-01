@@ -2207,9 +2207,7 @@ CalcularVentas (Productos *header)
 void
 CloseChequeWindow (void)
 {
-
   gtk_widget_destroy (venta->cheque_window);
-
 }
 
 void
