@@ -1301,9 +1301,12 @@ gint
 GetMinStock (gchar *barcode)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-                     ("SELECT stock_min FROM producto WHERE barcode='%s'", barcode));
+  q = g_strdup_printf ("SELECT stock_min FROM producto WHERE barcode='%s'",
+		       barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL && PQntuples (res) != 0)
     return atoi (PQgetvalue (res, 0, 0));
