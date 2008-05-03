@@ -3257,7 +3257,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   SaveSell (monto, maquina, vendedor, CREDITO, str_rut, discount, ticket, tipo_documento,
 	    NULL, FALSE, canceled);
 
-
+  //clean the interface
   gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
   gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_type")));
   gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "tipo_venta_win_venta")));

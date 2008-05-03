@@ -30,13 +30,8 @@
 
 #include<math.h>
 
-//#include<libgnomeprint/gnome-print.h>
-//#include<libgnomeprint/gnome-print-job.h>
-
 #include"tipos.h"
-
 #include"config_file.h"
-
 #include"factura_more.h"
 #include"postgres-functions.h"
 
