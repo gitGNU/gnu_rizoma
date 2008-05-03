@@ -208,7 +208,7 @@ rizoma_set_value (char *var_name, char *new_value)
 }
 
 gdouble*
-rizoma_get_double_list (gchar *var_name)
+rizoma_get_double_list (gchar *var_name, gsize length)
 {
   gdouble *value;
   GKeyFile *file;
@@ -236,7 +236,7 @@ rizoma_get_double_list (gchar *var_name)
       return FALSE;
     }
 
-  value = g_key_file_get_double_list(file, config_profile, var_name, &err);
+  value = g_key_file_get_double_list(file, config_profile, var_name, &length, &err);
 
   g_key_file_free(file);
 
