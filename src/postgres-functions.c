@@ -273,8 +273,9 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if ((vale_dir == NULL) || g_str_equal(vale_dir, ""))
     PrintVale (venta->header, venta_id, total);
 
-  if (tipo_venta == CHEQUE)
+  switch (tipo_venta)
     {
+    case CHEQUE:
       serie = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_serie)));
       numero = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_numero)));
       banco = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_banco)));
@@ -287,23 +288,26 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
                                     cheque_date[9]));
 
       SaveDataCheque (venta_id, serie, atoi (numero), banco, plaza, monto, day, month, year);
-    }
-  if (tipo_venta == TARJETA)
-    {
+      break;
+
+    case TARJETA:
       inst = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_inst)));
       numero = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_numero)));
       fecha = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_fecha)));
 
       SaveVentaTarjeta (venta_id, inst, numero, fecha);
-    }
-  if (tipo_venta == CREDITO)
-    {
+      break;
+
+    case CREDITO:
       InsertDeuda (venta_id, atoi (rut), seller);
 
       if (GetResto (atoi (rut)) != 0)
         CancelarDeudas (0, atoi (rut));
+      break;
+    default:
+      g_printerr("%s: Trying to sale without a proper sell type", G_STRFUNC);
+      return FALSE;
     }
-
   return TRUE;
 }
 
