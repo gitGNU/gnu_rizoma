@@ -81,6 +81,22 @@ gboolean mayorista = FALSE;
 
 gboolean closing_tipos = FALSE;
 
+/**
+ * Display the information of a product on the main sales window
+ *
+ * @param barcode the barcode of the product
+ * @param mayorista TRUE if the product has a especial value for mayorist sales
+ * @param marca the brand of the product
+ * @param descripcion the description of the product
+ * @param contenido the contents (amount) of the product
+ * @param unidad the unit of the product (i.e. kg)
+ * @param stock the current stock of the product
+ * @param stock_day for how many days the current stock will be enough
+ * @param precio the price of the product
+ * @param precio_mayor the price of the producto for mayorist values
+ * @param cantidad_mayor how many products must be saled to be considered as mayorist
+ * @param codigo_corto the short code associated to the product
+ */
 void
 FillProductSell (gchar *barcode,
 		 gboolean mayorista,
