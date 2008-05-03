@@ -44,6 +44,8 @@ gboolean rizoma_get_value_boolean (gchar *var_name);
 
 int rizoma_set_value (char *var_name, char *new_value);
 
+gdouble* rizoma_get_double_list (gchar *var_name);
+
 void rizoma_set_profile (gchar *group_name);
 
 int rizoma_extract_xy (char *value, float *x, float *y);
