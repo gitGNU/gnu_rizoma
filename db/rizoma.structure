@@ -262,6 +262,7 @@ create table Cliente (
   apell_m                   varchar(60),
   giro                      varchar(255),
   direccion                 varchar(150),
+  comuna		    varchar(25),
   telefono                  varchar(15),
   telefono_movil            varchar(15),
   mail                      varchar(30),
