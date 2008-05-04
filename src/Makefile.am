@@ -71,7 +71,8 @@ printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
 tiempo.c tiempo.h \
-utils.c utils.h
+utils.c utils.h \
+factura_more.c factura_more.h
 
 rizoma_config_SOURCES = rizoma-config.c
 
