@@ -5806,3 +5806,24 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
     }
   }
 }
+
+void
+on_quit_message_response (GtkDialog *dialog, gint response_id, gpointer user_data)
+{
+  if (response_id == GTK_RESPONSE_YES)
+    {
+      gtk_main_quit();
+    }
+  else
+    if (response_id == GTK_RESPONSE_NO)
+      gtk_widget_hide (GTK_WIDGET (dialog));
+}
+
+gboolean
+on_wnd_compras_delete_event (GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+  GtkWidget *window;
+  window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+  gtk_widget_show_all (window);
+  return TRUE;
+}
