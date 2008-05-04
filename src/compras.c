@@ -846,6 +846,7 @@ compras_win ()
   compra->products_compra = NULL;
   compra->current = NULL;
 
+  compra->documentos = NULL;
 
   builder = gtk_builder_new ();
 
@@ -1015,9 +1016,6 @@ compras_win ()
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
-
-  g_signal_connect (G_OBJECT (treeview), "row-activated",
-                    G_CALLBACK (AskIngreso), NULL);
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 
@@ -3587,7 +3585,7 @@ DocumentoIngreso (void)
 
   if (compra->documentos != NULL)
     return;
-
+  g_print ("test\n");
   gtk_widget_set_sensitive (main_window, FALSE);
 
   compra->documentos = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -4900,87 +4898,91 @@ CloseAskIngreso (GtkWidget *widget, gpointer data)
 void
 AskIngreso (GtkWindow *win_mother)
 {
-  GtkWidget *label = NULL;
-  GtkWidget *image;
-  GtkWidget *button;
+  GtkWindow *wnd_ingress = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_buy"));
 
-  GtkWidget *vbox;
-  GtkWidget *hbox;
+  gtk_widget_show_all (GTK_WIDGET (wnd_ingress));
 
-  gtk_widget_set_sensitive (main_window, FALSE);
+  /* GtkWidget *label = NULL; */
+  /* GtkWidget *image; */
+  /* GtkWidget *button; */
 
-  ask_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (ask_window), "Ingresar");
-  gtk_window_set_position (GTK_WINDOW (ask_window), GTK_WIN_POS_CENTER_ALWAYS);
-  //  gtk_window_set_transient_for (GTK_WINDOW (ask_window), win_mother);
-  gtk_window_present (GTK_WINDOW (ask_window));
-  gtk_widget_set_size_request (ask_window, -1, -1);
-  gtk_widget_show (ask_window);
+  /* GtkWidget *vbox; */
+  /* GtkWidget *hbox; */
 
-  g_signal_connect (G_OBJECT (ask_window), "destroy",
-                    G_CALLBACK (CloseAskIngreso), NULL);
+  /* gtk_widget_set_sensitive (main_window, FALSE); */
 
-  //  gtk_widget_set_sensitive (GTK_WIDGET (win_mother), FALSE);
+  /* ask_window = gtk_window_new (GTK_WINDOW_TOPLEVEL); */
+  /* gtk_window_set_title (GTK_WINDOW (ask_window), "Ingresar"); */
+  /* gtk_window_set_position (GTK_WINDOW (ask_window), GTK_WIN_POS_CENTER_ALWAYS); */
+  /* //  gtk_window_set_transient_for (GTK_WINDOW (ask_window), win_mother); */
+  /* gtk_window_present (GTK_WINDOW (ask_window)); */
+  /* gtk_widget_set_size_request (ask_window, -1, -1); */
+  /* gtk_widget_show (ask_window); */
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (ask_window), vbox);
-  gtk_widget_show (vbox);
+  /* g_signal_connect (G_OBJECT (ask_window), "destroy", */
+  /*                   G_CALLBACK (CloseAskIngreso), NULL); */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
+  /* //  gtk_widget_set_sensitive (GTK_WIDGET (win_mother), FALSE); */
 
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_DIALOG);
-  gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
-  gtk_widget_show (image);
+  /* vbox = gtk_vbox_new (FALSE, 3); */
+  /* gtk_container_add (GTK_CONTAINER (ask_window), vbox); */
+  /* gtk_widget_show (vbox); */
 
-  if (ingreso_total == TRUE)
-    label = gtk_label_new ("¿Desea ingresar totalidad de la compra?");
-  else if (ingreso_total == FALSE)
-    label = gtk_label_new ("¿Desea ingresar parcialmente otra mercadería?");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
+  /* gtk_widget_show (hbox); */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
+  /* image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_DIALOG); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3); */
+  /* gtk_widget_show (image); */
+  /* g_print( "%d\n", ingreso_total ); */
+  /* if (ingreso_total == TRUE) */
+  /*   label = gtk_label_new ("¿Desea ingresar totalidad de la compra?"); */
+  /* else if (ingreso_total == FALSE) */
+  /*   label = gtk_label_new ("¿Desea ingresar parcialmente otra mercadería?"); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
+  /* gtk_widget_show (label); */
 
-  if (ingreso_total == TRUE)
-    {
-      button = gtk_button_new_from_stock (GTK_STOCK_NO);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
+  /* gtk_widget_show (hbox); */
 
-      g_signal_connect (G_OBJECT (button), "clicked",
-                        G_CALLBACK (CloseAskIngreso), ((gpointer)FALSE));
+  /* if (ingreso_total == TRUE) */
+  /*   { */
+  /*     button = gtk_button_new_from_stock (GTK_STOCK_NO); */
+  /*     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
+  /*     gtk_widget_show (button); */
 
-      button = gtk_button_new_from_stock (GTK_STOCK_YES);
-      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
+  /*     g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                       G_CALLBACK (CloseAskIngreso), ((gpointer)FALSE)); */
 
-      g_signal_connect (G_OBJECT (button), "clicked",
-                        G_CALLBACK (CloseAskIngreso), (gpointer)TRUE);
+  /*     button = gtk_button_new_from_stock (GTK_STOCK_YES); */
+  /*     gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
+  /*     gtk_widget_show (button); */
 
-      gtk_window_set_focus (GTK_WINDOW (ask_window), button);
-    }
-  else if (ingreso_total == FALSE)
-    {
-      button = gtk_button_new_from_stock (GTK_STOCK_YES);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
+  /*     g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                       G_CALLBACK (CloseAskIngreso), (gpointer)TRUE); */
 
-      g_signal_connect (G_OBJECT (button), "clicked",
-                        G_CALLBACK (CloseAskIngreso), ((gpointer)FALSE));
+  /*     gtk_window_set_focus (GTK_WINDOW (ask_window), button); */
+  /*   } */
+  /* else if (ingreso_total == FALSE) */
+  /*   { */
+  /*     button = gtk_button_new_from_stock (GTK_STOCK_YES); */
+  /*     gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
+  /*     gtk_widget_show (button); */
 
-      button = gtk_button_new_from_stock (GTK_STOCK_NO);
-      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
+  /*     g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                       G_CALLBACK (CloseAskIngreso), ((gpointer)FALSE)); */
 
-      g_signal_connect (G_OBJECT (button), "clicked",
-                        G_CALLBACK (CloseAskIngreso), (gpointer)TRUE);
+  /*     button = gtk_button_new_from_stock (GTK_STOCK_NO); */
+  /*     gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
+  /*     gtk_widget_show (button); */
 
-      gtk_window_set_focus (GTK_WINDOW (ask_window), button);
-    }
+  /*     g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                       G_CALLBACK (CloseAskIngreso), (gpointer)TRUE); */
+
+  /*     gtk_window_set_focus (GTK_WINDOW (ask_window), button); */
+  /*   } */
 
 }
 
@@ -5784,4 +5786,23 @@ on_button_new_product_clicked (GtkButton *button, gpointer data) {
 void
 on_button_buy_clicked (GtkButton *button, gpointer data) {
   BuyWindow ();
+}
+
+void
+on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
+  GtkWindow *wnd_ingress = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_buy"));
+  gboolean complete = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radiobutton_ingress_complete")));
+  gboolean factura = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radiobutton_ingress_document")));
+
+  gtk_widget_hide_all (GTK_WIDGET (wnd_ingress));
+
+  if (complete) {
+    if (factura) {
+      GtkWindow *wnd_factura = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_factura"));
+      gtk_widget_show_all (GTK_WIDGET (wnd_factura));
+    } else {
+      GtkWindow *wnd_guia = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guia"));
+      gtk_widget_show_all (GTK_WIDGET (wnd_guia));
+    }
+  }
 }
