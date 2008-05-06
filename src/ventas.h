@@ -92,4 +92,5 @@ gboolean on_delete_ventas_gui (GtkWidget *widget, GdkEvent  *event, gpointer   u
 void exit_response (GtkDialog *dialog, gint response_id, gpointer user_data);
 
 void clean_credit_data ();
+
 #endif

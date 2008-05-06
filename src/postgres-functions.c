@@ -37,6 +37,7 @@
 #include"vale.h"
 #include"rizoma_errors.h"
 #include"utils.h"
+#include"factura_more.h"
 
 PGconn *connection;
 

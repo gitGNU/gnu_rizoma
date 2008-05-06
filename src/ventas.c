@@ -3363,3 +3363,101 @@ clean_credit_data ()
 
   return;
 }
+
+/**
+ * Callback conected to the btn_sale_invoice button.
+ *
+ * This function setup the window and the show it
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+  GtkEntryCompletion *completion;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+  PGresult *res;
+  gint i;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_invoice_rut"));
+
+  //only setup the completion if it wasn't configured previously
+  if (gtk_entry_get_completion(GTK_ENTRY(widget))== NULL)
+    {
+      completion = gtk_entry_completion_new();
+      gtk_entry_set_completion(GTK_ENTRY(widget), completion);
+
+      model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
+
+      res = EjecutarSQL("select rut || '-' || dv from cliente order by rut asc");
+
+      gtk_list_store_clear (GTK_LIST_STORE(model));
+
+      for (i=0 ; i < PQntuples(res) ; i++)
+	{
+	  gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+	  gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+			     0, PQgetvalue(res, i, 0),
+			     -1);
+	}
+
+
+      gtk_entry_completion_set_model(completion, model);
+      gtk_entry_completion_set_text_column(completion, 0);
+      gtk_entry_completion_set_minimum_key_length(completion, 3);
+    }
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
+
+  gtk_widget_show_all(widget);
+}
+
+/**
+ * Conected to the internal entry of the GtkComboBoxEntry that displays the rut
+ * of the clients when is being sold with invoice
+ *
+ * @param editable The entry
+ * @param user_data
+ */
+void
+on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
+{
+  GtkWidget *widget;
+  PGresult *res;
+  gchar *rut;
+  gchar *q;
+  gchar **rut_split;
+  rut = g_strdup(gtk_entry_get_text(entry));
+
+  rut_split = g_strsplit(rut, "-", 2);
+
+  q = g_strdup_printf("select count(*) from cliente where rut=%s and dv='%s'",
+		      rut_split[0], rut_split[1]);
+
+  res = EjecutarSQL(q);
+  g_free (q);
+
+  if (PQgetvalue(res, 0, 0) == 0)
+    {
+      //the user with that rut does not exist so it is neccesary create a new client
+    }
+
+  q = g_strdup_printf("select nombre, giro from cliente where rut=%s and dv='%s'",
+		      rut_split[0], rut_split[1]);
+
+  res = EjecutarSQL(q);
+  g_free (q);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_name"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "nombre"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_giro"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_invoice"));
+  gtk_widget_set_sensitive(widget, TRUE);
+  gtk_widget_grab_focus(widget);
+}
