@@ -183,7 +183,7 @@
             <property name="column_spacing">4</property>
             <property name="row_spacing">4</property>
             <child>
-              <object class="GtkEntry" id="entry25">
+              <object class="GtkEntry" id="entry_ingress_factura_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -195,7 +195,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry24">
+              <object class="GtkEntry" id="entry_ingress_factura_n">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -208,33 +208,30 @@
               <object class="GtkHBox" id="hbox10">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkEntry" id="entry10">
+                  <object class="GtkEntry" id="entry_ingress_factura_date">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="max_length">2</property>
-                    <property name="width_chars">2</property>
+                    <property name="editable">False</property>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry12">
+                  <object class="GtkButton" id="button28">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="max_length">2</property>
-                    <property name="width_chars">2</property>
+                    <property name="receives_default">True</property>
+                    <property name="response_id">0</property>
+                    <signal name="clicked" handler="display_calendar" object="entry_ingress_factura_date"/>
+                    <child>
+                      <object class="GtkArrow" id="arrow1">
+                        <property name="visible">True</property>
+                        <property name="arrow_type">GTK_ARROW_DOWN</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry13">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">2</property>
-                    <property name="width_chars">2</property>
-                  </object>
-                  <packing>
-                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -748,6 +745,7 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_compras">
+    <property name="events">GDK_POINTER_MOTION_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
     <property name="window_position">GTK_WIN_POS_CENTER</property>
     <signal name="delete_event" handler="on_wnd_compras_delete_event"/>

@@ -27,6 +27,8 @@
 
 #define PUT(num) PutComa (num)
 
+#define builder_get(builder,object) gtk_builder_get_object(builder,object)
+
 void SetToggleMode (GtkToggleButton *widget, gpointer data);
 
 gboolean HaveCharacters (gchar *string);
@@ -38,5 +40,7 @@ gchar * PutPoints (gchar *number);
 gchar * CutPoints (gchar *number_points);
 
 void control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer user_data);
+
+void display_calendar (GtkEntry *entry);
 
 #endif

@@ -150,3 +150,105 @@ control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel
     }
 
 }
+
+/*
+ * This callbacks handle the double-click event for the
+ * display_calendar function
+ *
+ * @param calendar
+ * @param user_data
+ */
+void
+on_calendar_day_selected_double_click (GtkCalendar *calendar, gpointer user_data)
+{
+  GtkEntry *entry = (GtkEntry *)user_data;
+  gchar *str_date;
+  guint year;
+  guint month;
+  guint day;
+
+  gtk_calendar_get_date (calendar, &year, &month, &day);
+
+  str_date = g_strdup_printf ("%d/%d/%d", day, month, year);
+  gtk_entry_set_text (entry, str_date);
+
+  gtk_widget_destroy (GTK_WIDGET (gtk_widget_get_parent_window (GTK_WIDGET (calendar))));
+}
+
+/*
+ * display_calendar must be attached to a button, and the with clicked
+ * event this will display a GtkCalender just under the GtkEntry
+ * passed as the argument. When a double-click event occur on the
+ * GtkCalendar the selected date will be saved on the GtkEntry and the
+ * GtkCalendar will die.
+ *
+ * @param entry The Gtk entry which will contain the date
+ */
+void
+display_calendar (GtkEntry *entry)
+{
+  GtkWidget *window;
+  GtkCalendar *calendar;
+  GtkRequisition req;
+  gint x, y;
+  gint entry_y, entry_x;
+
+  GDate *date;
+
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window), 0);
+  gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
+  gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
+  gtk_window_stick (GTK_WINDOW (window));
+
+  gtk_widget_set_parent_window (window, GTK_WIDGET (entry)->window);
+  gtk_window_set_modal (GTK_WINDOW (window), TRUE);
+
+  calendar = GTK_CALENDAR (gtk_calendar_new ());
+  gtk_container_add (GTK_CONTAINER (window), GTK_WIDGET (calendar));
+  gtk_widget_show (GTK_WIDGET (calendar));
+
+  gtk_widget_set_parent_window (GTK_WIDGET (calendar), (GdkWindow *)window);
+
+  date = g_date_new ();
+  g_date_set_time_t (date, time (NULL));
+
+  gtk_calendar_select_day (calendar, g_date_get_day (date));
+  gtk_calendar_select_month (calendar, g_date_get_month (date), g_date_get_year (date));
+
+  g_signal_connect (G_OBJECT (calendar), "day-selected-double-click",
+                    G_CALLBACK (on_calendar_day_selected_double_click), (gpointer) entry);
+
+  gdk_window_get_origin (GTK_WIDGET (entry)->window, &x, &y);
+
+  gtk_widget_size_request (GTK_WIDGET (entry), &req);
+
+  entry_y = GTK_WIDGET (entry)->allocation.y;
+  entry_x = GTK_WIDGET (entry)->allocation.x;
+
+  x += entry_x - (req.width/2);
+  y += entry_y;
+
+  gtk_window_move (GTK_WINDOW (window), x, y);
+  gtk_window_present (GTK_WINDOW (window));
+
+  gtk_widget_show (window);
+}
+
+
+/*
+ * Validate a string using a regular expression
+ *
+ * @param pattern regexp string to run
+ * @param subject string to check using pattern
+ *
+ * @return TRUE if the pattern it's found on subject
+ */
+gboolean
+validate_string (gchar *pattern, gchar *subject)
+{
+  GRegex *regex = g_regex_new (pattern, 0, 0, NULL);
+  gboolean valid = g_regex_match (regex, subject, 0, NULL);
+
+  return valid;
+}
