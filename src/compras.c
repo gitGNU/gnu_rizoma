@@ -3845,11 +3845,11 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
 {
   PGresult *res;
 
-  gchar *n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_documento)));
-  gchar *fecha_y = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_y)));
-  gchar *fecha_m = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_m)));
-  gchar *fecha_d = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_d)));
-  gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->monto_documento)));
+  gchar *n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
+  gchar *fecha_y = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_y"))));
+  gchar *fecha_m = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_m"))));
+  gchar *fecha_d = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_d"))));
+  gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
 
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), "
@@ -5199,7 +5199,6 @@ AskElabVenc (GtkWidget *widget, gpointer data)
   gint id;
   gchar *rut_proveedor;
 
-  gtk_widget_set_sensitive (main_window, FALSE);
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
@@ -5750,19 +5749,19 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     case 1:
       InsertarCompras ();
       break;
-    /* case 2: */
-    /*   ClearFactData (); */
-    /*   break; */
-    /* case 3: */
-    /*   ClearPagosData (); */
-    /*   FillPagarFacturas (NULL); */
-    /*   break; */
-    /* case 4: */
-    /*   ReturnProductsStore (ingreso->store); */
-    /*   break; */
-    /* case 5: */
-    /*   ListarProveedores (); */
-    /*   break; */
+      /* case 2: */
+      /*   ClearFactData (); */
+      /*   break; */
+      /* case 3: */
+      /*   ClearPagosData (); */
+      /*   FillPagarFacturas (NULL); */
+      /*   break; */
+      /* case 4: */
+      /*   ReturnProductsStore (ingreso->store); */
+      /*   break; */
+      /* case 5: */
+      /*   ListarProveedores (); */
+      /*   break; */
     default:
       break;
     }
@@ -5826,4 +5825,13 @@ on_wnd_compras_delete_event (GtkWidget *widget, GdkEvent *event, gpointer user_d
   window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
   gtk_widget_show_all (window);
   return TRUE;
+}
+
+gboolean
+check_regexp (GtkWidget *widget, GdkEventKey *event, gpointer data) {
+  GRegex *regex = g_regex_new ("[^0-9]+", 0, 0, NULL);
+  gboolean found = g_regex_match (regex, event->string, 0, NULL);
+
+
+  return found;
 }

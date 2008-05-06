@@ -1,3 +1,9 @@
+2008-05-04  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* utils.c: Added this function to display a calendar ander a
+	button and put the selected date into a GtkEntry. This is to
+	replace the GnomeDateEdit widget that isn't supported yet with GtkBuilder.
+
 2008-04-27  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (SearchProductHistory|AddToProductsList): Use of GtkBuilder.
