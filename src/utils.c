@@ -234,3 +234,21 @@ display_calendar (GtkEntry *entry)
 
   gtk_widget_show (window);
 }
+
+
+/*
+ * Validate a string using a regular expression
+ *
+ * @param pattern regexp string to run
+ * @param subject string to check using pattern
+ *
+ * @return TRUE if the pattern it's found on subject
+ */
+gboolean
+validate_string (gchar *pattern, gchar *subject)
+{
+  GRegex *regex = g_regex_new (pattern, 0, 0, NULL);
+  gboolean valid = g_regex_match (regex, subject, 0, NULL);
+
+  return valid;
+}

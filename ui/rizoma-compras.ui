@@ -784,7 +784,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="activates_default">True</property>
-                            <signal name="key_press_event" handler="check_regexp"/>
                             <signal name="activate" handler="on_entry_buy_barcode_activate"/>
                           </object>
                           <packing>
