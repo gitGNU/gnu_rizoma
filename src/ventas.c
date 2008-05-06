@@ -3461,3 +3461,18 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
   gtk_widget_set_sensitive(widget, TRUE);
   gtk_widget_grab_focus(widget);
 }
+
+
+/**
+ * This callback is connected to the btn_make_invoice button.
+ *
+ * This function must take care of make the sale process using a invoice
+ *
+ * @param button the button
+ * @param user_data the user dats
+ */
+void
+on_btn_make_invoice_clicked (GtkButton *button, gpointer user_data)
+{
+
+}
