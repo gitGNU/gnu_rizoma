@@ -41,6 +41,6 @@ gchar * CutPoints (gchar *number_points);
 
 void control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model, GtkTreeIter *iter, gpointer user_data);
 
-void DisplayCal (GtkButton *button, gpointer user_data);
+void display_calendar (GtkEntry *entry);
 
 #endif

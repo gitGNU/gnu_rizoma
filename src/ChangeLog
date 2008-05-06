@@ -1,3 +1,9 @@
+2008-05-06  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* utils.c (display_calendar): Fixed the position of the
+	GtkCalendar and drop the use of the vbox to put the calendar
+	inside the GtkWindow. Some order and drop the use of unnecessary functions.
+
 2008-05-04  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* utils.c: Added this function to display a calendar ander a

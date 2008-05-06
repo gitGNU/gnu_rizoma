@@ -188,28 +188,15 @@ void
 display_calendar (GtkEntry *entry)
 {
   GtkWidget *window;
-  GtkWidget *vbox;
   GtkCalendar *calendar;
   GtkRequisition req;
-  gint h, w;
   gint x, y;
-  gint button_y, button_x;
+  gint entry_y, entry_x;
 
   GDate *date;
 
-  gdk_window_get_origin (GTK_WIDGET (entry)->window, &x, &y);
-
-  gtk_widget_size_request (GTK_WIDGET (entry), &req);
-  h = req.height;
-  w = req.width;
-
-  button_y = GTK_WIDGET (entry)->allocation.y;
-  button_x = GTK_WIDGET (entry)->allocation.x;
-
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_screen (GTK_WINDOW (window), gtk_widget_get_screen (GTK_WIDGET (entry)));
-
-  gtk_container_set_border_width (GTK_CONTAINER (window), 5);
+  gtk_container_set_border_width (GTK_CONTAINER (window), 0);
   gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
   gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
   gtk_window_stick (GTK_WINDOW (window));
@@ -217,12 +204,8 @@ display_calendar (GtkEntry *entry)
   gtk_widget_set_parent_window (window, GTK_WIDGET (entry)->window);
   gtk_window_set_modal (GTK_WINDOW (window), TRUE);
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
   calendar = GTK_CALENDAR (gtk_calendar_new ());
-  gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (calendar), FALSE, FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (window), GTK_WIDGET (calendar));
   gtk_widget_show (GTK_WIDGET (calendar));
 
   gtk_widget_set_parent_window (GTK_WIDGET (calendar), (GdkWindow *)window);
@@ -236,8 +219,15 @@ display_calendar (GtkEntry *entry)
   g_signal_connect (G_OBJECT (calendar), "day-selected-double-click",
                     G_CALLBACK (on_calendar_day_selected_double_click), (gpointer) entry);
 
-  x = (x + button_x);
-  y = (y + button_y) + h;
+  gdk_window_get_origin (GTK_WIDGET (entry)->window, &x, &y);
+
+  gtk_widget_size_request (GTK_WIDGET (entry), &req);
+
+  entry_y = GTK_WIDGET (entry)->allocation.y;
+  entry_x = GTK_WIDGET (entry)->allocation.x;
+
+  x += entry_x - (req.width/2);
+  y += entry_y;
 
   gtk_window_move (GTK_WINDOW (window), x, y);
   gtk_window_present (GTK_WINDOW (window));
