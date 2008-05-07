@@ -46,7 +46,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   gchar *q;
   aux_rut = g_strdup(rut);
 
-  q = g_strdup_printf("SELECT nombre || ' ' || apellido_paterno || ' ' || apellido_materno AS name, "
+  q = g_strdup_printf("SELECT nombre || ' ' || apell_p || ' ' || apell_m AS name, "
 		      "direccion, giro, comuna, telefono FROM cliente where rut=%s",
 		      strtok(aux_rut,"-"));
   res = EjecutarSQL(q);
@@ -100,6 +100,7 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
   gchar *factura_prefix = rizoma_get_value ("FACTURA_FILE_PREFIX");
   gchar *str_aux;
+  gchar *font;
   gdouble *fact_address = NULL;
   gdouble *fact_giro = NULL;
   gdouble *fact_comuna = NULL;
@@ -121,7 +122,7 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
 
   current_iva = g_ascii_strtod(GetDataByOne("select monto from impuesto where id = 0"), NULL)/100 + 1.0;
 
-  //Productos *header = products;
+  Productos *header = products;
 
   filename = g_strdup_printf ("%s/%s%d.ps", temp_directory, factura_prefix, num);
 
@@ -141,7 +142,14 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   PS_set_info (psdoc, "BoundingBox", str_aux);
   g_free(str_aux);
 
-  psfont = PS_findfont (psdoc, "Helvetica", "builtin", 0);
+  font = g_strconcat(rizoma_get_value("FONT_METRICS"), rizoma_get_value("FONT"), NULL);
+  psfont = PS_findfont (psdoc, font, "", 0);
+
+  if (psfont == 0)
+    {
+      g_printerr("%s: the font could not be found", G_STRFUNC);
+      return NULL;
+    }
 
   PS_begin_page (psdoc, fact_size[0], fact_size[1]);
   PS_setfont (psdoc, psfont, 10);
@@ -181,7 +189,7 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   fact_uni = rizoma_get_double_list ("FACTURA_UNI", 2);
   fact_total = rizoma_get_double_list ("FACTURA_TOTAL", 2);
 
-  while (products != NULL)
+  do
     {
       PS_show_xy (psdoc, products->product->codigo, fact_code[0], initial);
 
@@ -217,11 +225,11 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
 
       products = products->next;
 
-    };
+    } while (products != header);
 
   /* Finished the products detail*/
 
-  fact_subtotal = rizoma_get_double_list ("FACTURA_SUTOTAL", 2);
+  fact_subtotal = rizoma_get_double_list ("FACTURA_SUBTOTAL", 2);
   g_assert (fact_subtotal != NULL);
   str_aux = g_strdup_printf ("%.0f", subtotal);
   PS_show_xy (psdoc, str_aux, fact_subtotal[0], fact_subtotal[1]);
