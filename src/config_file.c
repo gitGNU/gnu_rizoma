@@ -152,6 +152,25 @@ rizoma_get_value_boolean (gchar *var_name)
   return(value);
 }
 
+/**
+ * Write the contents of the key into the rizoma configuration file
+ *
+ * @param file the key file to write
+ */
+void
+rizoma_write_config (GKeyFile *file)
+{
+  FILE *fp;
+
+  //TODO: usar glib para manipular el archivo, si bien esto funciona
+  //la idea es dejarlo consistente para que todo use glib
+  fp = fopen (g_strdup_printf ("%s/.rizoma", g_getenv ("HOME")), "w");
+
+  fprintf(fp, "%s", g_key_file_to_data(file, NULL, NULL));
+
+  fflush(fp);
+  fclose(fp);
+}
 
 /**
  * Cambia el valor de una clave existente, si la clave no existe la
@@ -172,17 +191,39 @@ rizoma_set_value (char *var_name, char *new_value)
   file = rizoma_open_config();
 
   g_key_file_set_string(file, config_profile, var_name, new_value);
-  //TODO: usar glib para manipular el archivo, si bien esto funciona
-  //la idea es dejarlo consistente para que todo use glib
-  fp = fopen (g_strdup_printf ("%s/.rizoma", g_getenv ("HOME")), "w");
 
-  fprintf(fp, "%s", g_key_file_to_data(file, NULL, NULL));
+  rizoma_write_config(file);
 
-  fflush(fp);
-  fclose(fp);
   return (0);
 }
 
+/**
+ * Set the key var_name to a list of double values
+ *
+ * @param var_name the name of the key
+ * @param list the list of double values
+ * @param length the length of the list
+ */
+void
+rizoma_set_double_list (gchar *var_name, gdouble list[], gsize length)
+{
+  GKeyFile *file;
+
+  file = rizoma_open_config();
+
+  g_key_file_set_double_list (file, config_profile, var_name, list, length);
+
+  rizoma_write_config (file);
+}
+
+/**
+ * Returns a list of double values
+ *
+ * @param var_name the key name to retrieve
+ * @param length the amount of double values that must contain the list
+ *
+ * @return the list of double values of length
+ */
 gdouble*
 rizoma_get_double_list (gchar *var_name, gsize length)
 {
