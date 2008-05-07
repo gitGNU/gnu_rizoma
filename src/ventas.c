@@ -3392,22 +3392,23 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
 
       model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
 
-      res = EjecutarSQL("select rut || '-' || dv from cliente order by rut asc");
-
-      gtk_list_store_clear (GTK_LIST_STORE(model));
-
-      for (i=0 ; i < PQntuples(res) ; i++)
-	{
-	  gtk_list_store_append(GTK_LIST_STORE(model), &iter);
-	  gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-			     0, PQgetvalue(res, i, 0),
-			     -1);
-	}
-
-
       gtk_entry_completion_set_model(completion, model);
       gtk_entry_completion_set_text_column(completion, 0);
       gtk_entry_completion_set_minimum_key_length(completion, 3);
+    }
+  else
+    model = gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)));
+
+  res = EjecutarSQL("select rut || '-' || dv from cliente order by rut asc");
+
+  gtk_list_store_clear (GTK_LIST_STORE(model));
+
+  for (i=0 ; i < PQntuples(res) ; i++)
+    {
+      gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+      gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+			 0, PQgetvalue(res, i, 0),
+			 -1);
     }
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
@@ -3443,6 +3444,7 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
   if (PQgetvalue(res, 0, 0) == 0)
     {
       //the user with that rut does not exist so it is neccesary create a new client
+      return;
     }
 
   q = g_strdup_printf("select nombre, giro from cliente where rut=%s and dv='%s'",
@@ -3469,10 +3471,91 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
  * This function must take care of make the sale process using a invoice
  *
  * @param button the button
- * @param user_data the user dats
+ * @param data the user data
  */
 void
-on_btn_make_invoice_clicked (GtkButton *button, gpointer user_data)
+on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 {
+  GtkWidget *widget;
+  gchar *str_rut;
+  gint rut;
+  gint vendedor;
+  gint tipo_vendedor;
+  gint ticket;
+  gint monto;
+  gint maquina;
+
+  tipo_vendedor = rizoma_get_value_int ("VENDEDOR");
+
+  //amount
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "label_total"));
+  monto = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget)))));
+
+  //maquina
+  maquina = rizoma_get_value_int ("MAQUINA");
+
+  //salesman
+  vendedor = user_data->user_id;
+
+  //rut
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_invoice_rut"));
+  str_rut = g_strdup(gtk_entry_get_text(GTK_ENTRY(widget)));
+
+  rut = atoi(strtok(g_strdup(str_rut),"-"));
+
+  if (!(RutExist(str_rut)))
+    {
+      gchar *motivo;
+
+      widget = gtk_widget_get_ancestor(GTK_WIDGET(button),GTK_TYPE_WINDOW);
+
+      motivo = g_strdup_printf("El rut %s no existe", str_rut);
+      AlertMSG(widget, motivo);
+      g_free (motivo);
+
+      return;
+    }
+
+  if (LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
+    {
+      widget = gtk_widget_get_ancestor(GTK_WIDGET(button),GTK_TYPE_WINDOW);
+      ErrorMSG (widget, "El cliente sobrepasa su limite de Credito");
+      return;
+    }
+
+  ticket = get_ticket_number (FACTURA);
+
+  SaveSell (monto, maquina, vendedor, CREDITO, str_rut, "0", ticket, FACTURA,
+	    NULL, FALSE, FALSE);
+
+  //clean the interface
+  //restart the invoice dialog
+  widget = GTK_WIDGET(gtk_builder_get_object (builder, "entry_invoice_rut"));
+  gtk_entry_set_text (GTK_ENTRY(widget), "");
+  gtk_widget_grab_focus (widget);
+
+  gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
+
+  widget = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_entry_name"));
+  gtk_label_set_text(GTK_LABEL(widget), "");
+
+  widget = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_entry_giro"));
+  gtk_label_set_text(GTK_LABEL(widget), "");
+
+  widget = GTK_WIDGET(gtk_builder_get_object (builder, "wnd_sale_invoice"));
+  gtk_widget_hide (widget);
+
+  //clean the main window
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"));
+  gtk_widget_grab_focus (widget);
+
+  gtk_list_store_clear (venta->store);
+
+  CleanEntryAndLabelData();
+
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "label_total"));
+  gtk_label_set_text (GTK_LABEL(widget), "");
+
+  ListClean ();
 
 }

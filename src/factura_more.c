@@ -141,7 +141,7 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   PS_set_info (psdoc, "BoundingBox", str_aux);
   g_free(str_aux);
 
-  psfont = PS_findfont (psdoc, "Courier", "", 0);
+  psfont = PS_findfont (psdoc, "Helvetica", "builtin", 0);
 
   PS_begin_page (psdoc, fact_size[0], fact_size[1]);
   PS_setfont (psdoc, psfont, 10);

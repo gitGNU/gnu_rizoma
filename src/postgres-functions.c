@@ -309,6 +309,26 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
       g_printerr("%s: Trying to sale without a proper sell type", G_STRFUNC);
       return FALSE;
     }
+
+  switch (tipo_documento)
+    {
+    case FACTURA: //specific operations for invoice
+      if (rizoma_get_value_boolean ("PRINT_FACTURA")) //print the invoice
+	  PrintDocument(tipo_documento, rut, total, id_documento,venta->header);
+      break;
+
+    case SIMPLE: //specific operations for cash
+      break;
+
+    case GUIA: //specific operations for guide
+      break;
+
+    case VENTA:
+      break;
+    default:
+      g_printerr("%s: Trying to sale without the proper document type", G_STRFUNC);
+      return FALSE;
+    }
   return TRUE;
 }
 
