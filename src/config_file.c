@@ -33,20 +33,17 @@
 #include"config_file.h"
 
 /**
- * Esta funcion se utiliza para obtener el valor de una clave que se
- * almacena el archivo de configuracion de rizoma
- * @param var_name un string con el nombre de la clave que se quiere
- * obtener el valor
+ * Open the rizoma configuration file
  *
- * @return un string con el valor de la clave solicitada, en caso de
- * que no se haya encontrado la clave retorna NULL
+ * The returned value must be freed when no longer needed.
+ *
+ * @return the pointer that contains the rizoma configuration,
  */
-gchar *
-rizoma_get_value (gchar *var_name)
+GKeyFile*
+rizoma_open_config()
 {
-  gchar *value = NULL;
-  GKeyFile *file;
   gchar *rizoma_path;
+  GKeyFile *file;
   gboolean res;
 
   rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
@@ -62,6 +59,25 @@ rizoma_get_value (gchar *var_name)
 
       return NULL;
     }
+  return file;
+}
+
+/**
+ * Esta funcion se utiliza para obtener el valor de una clave que se
+ * almacena el archivo de configuracion de rizoma
+ * @param var_name un string con el nombre de la clave que se quiere
+ * obtener el valor
+ *
+ * @return un string con el valor de la clave solicitada, en caso de
+ * que no se haya encontrado la clave retorna NULL
+ */
+gchar *
+rizoma_get_value (gchar *var_name)
+{
+  gchar *value = NULL;
+  GKeyFile *file;
+
+  file = rizoma_open_config();
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
@@ -89,22 +105,8 @@ rizoma_get_value_int (gchar *var_name)
 {
   gint value;
   GKeyFile *file;
-  gchar *rizoma_path;
-  gboolean res;
 
-  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
-  file = g_key_file_new();
-
-  res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
-
-  if (!res)
-    {
-      g_printerr("\n*** funcion %s: no pudo ser cargado el "
-                 "archivo de configuracion", G_STRFUNC);
-      g_printerr("\npath: %s", rizoma_path);
-
-      return G_MININT;
-    }
+  file = rizoma_open_config();
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
@@ -133,23 +135,9 @@ rizoma_get_value_boolean (gchar *var_name)
 {
   gboolean value;
   GKeyFile *file;
-  gchar *rizoma_path;
   GError *err=NULL;
-  gboolean res;
 
-  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
-  file = g_key_file_new();
-
-  res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
-
-  if (!res)
-    {
-      g_printerr("\n*** funcion %s: no pudo ser cargado el "
-                 "archivo de configuracion", G_STRFUNC);
-      g_printerr("\npath: %s", rizoma_path);
-
-      return G_MININT;
-    }
+  file = rizoma_open_config();
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
@@ -179,21 +167,9 @@ int
 rizoma_set_value (char *var_name, char *new_value)
 {
   GKeyFile *file;
-  gchar *rizoma_path;
-  gboolean res;
   FILE *fp;
 
-  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
-  file = g_key_file_new();
-
-  res = g_key_file_load_from_file(file, rizoma_path,
-                                  G_KEY_FILE_KEEP_COMMENTS, NULL);
-
-  if (!res)
-    {
-      g_printerr("\n*** funcion %s: no pudo ser cargado el archivo de configuracion", G_STRFUNC);
-      return -1;
-    }
+  file = rizoma_open_config();
 
   g_key_file_set_string(file, config_profile, var_name, new_value);
   //TODO: usar glib para manipular el archivo, si bien esto funciona
@@ -212,23 +188,9 @@ rizoma_get_double_list (gchar *var_name, gsize length)
 {
   gdouble *value;
   GKeyFile *file;
-  gchar *rizoma_path;
   GError *err=NULL;
-  gboolean res;
 
-  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
-  file = g_key_file_new();
-
-  res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
-
-  if (!res)
-    {
-      g_printerr("\n*** funcion %s: no pudo ser cargado el "
-                 "archivo de configuracion", G_STRFUNC);
-      g_printerr("\npath: %s", rizoma_path);
-
-      return NULL;
-    }
+  file = rizoma_open_config();
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
