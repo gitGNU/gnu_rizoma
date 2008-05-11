@@ -185,64 +185,101 @@ CloseAgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 void
 AgregarProveedor (GtkWidget *widget, gpointer user_data)
 {
-  gchar *rut_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->rut_add)));
-  gchar *rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->rut_ver)));
-  gchar *nombre_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->nombre_add)));
-  gchar *direccion_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->direccion_add)));
-  gchar *ciudad_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->ciudad_add)));
-  gchar *comuna_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->comuna_add)));
-  gchar *telefono_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->telefono_add)));
-  gchar *email_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->email_add)));
-  gchar *web_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->web_add)));
-  gchar *contacto_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
-  gchar *giro_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
+  GtkWidget *aux_widget;
+  GtkWidget *wnd;
+  gchar *rut_c;
+  gchar *rut_ver;
+  gchar *nombre_c;
+  gchar *direccion_c;
+  gchar *ciudad_c;
+  gchar *comuna_c;
+  gchar *telefono_c;
+  gchar *email_c;
+  gchar *web_c;
+  gchar *contacto_c;
+  gchar *giro_c;
+
+  wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addprovider"));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_rut"));
+  rut_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_dv"));
+  rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
+  nombre_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
+  direccion_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_city"));
+  ciudad_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_comuna"));
+  comuna_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
+  telefono_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_email"));
+  email_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_web"));
+  web_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_contact"));
+  contacto_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
+  giro_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
 
   if (g_strcmp0 (rut_c, "") == 0)
     {
-      ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
-      return;
-    }
-  else if ((GetDataByOne
-	    (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s-%s'", rut_c, rut_ver))) != NULL)
-    {
-      ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
+      ErrorMSG (wnd, "Debe Escribir el rut completo");
       return;
     }
   else if (g_strcmp0 (rut_ver, "") == 0)
     {
-      ErrorMSG (compra->rut_ver, "Debe ingresar el digito verificador del rut");
+      ErrorMSG (wnd, "Debe ingresar el digito verificador del rut");
+      return;
+    }
+  else if ((GetDataByOne
+	    (g_strdup_printf ("SELECT * FROM proveedor WHERE rut=%s", rut_c))) != NULL)
+    {
+      ErrorMSG (wnd, "Ya existe un proveedor con el mismo rut");
       return;
     }
   else if (g_strcmp0 (nombre_c, "") == 0)
     {
-      ErrorMSG (compra->nombre_add, "Debe escribir el nombre del proveedor");
+      ErrorMSG (wnd, "Debe escribir el nombre del proveedor");
       return;
     }
   else if (g_strcmp0 (direccion_c, "") == 0)
     {
-      ErrorMSG (compra->direccion_add, "Debe escribir la direccion");
+      ErrorMSG (wnd, "Debe escribir la direccion");
       return;
     }
   else if (g_strcmp0 (comuna_c, "") == 0)
     {
-      ErrorMSG (compra->comuna_add, "Debe escribir la comuna");
+      ErrorMSG (wnd, "Debe escribir la comuna");
       return;
     }
   else if (g_strcmp0 (telefono_c, "") == 0)
     {
-      ErrorMSG (compra->telefono_add, "Debe escribir el telefono");
+      ErrorMSG (wnd, "Debe escribir el telefono");
       return;
     }
   else if (g_strcmp0 (giro_c, "") == 0)
     {
-      ErrorMSG (compra->giro_add, "Debe escribir el giro");
+      ErrorMSG (wnd, "Debe escribir el giro");
       return;
     }
 
   if (VerificarRut (rut_c, rut_ver) != TRUE)
     {
-      ErrorMSG (compra->rut_ver, "El rut no es valido!");
+      ErrorMSG (wnd, "El rut no es valido!");
       return;
     }
 
