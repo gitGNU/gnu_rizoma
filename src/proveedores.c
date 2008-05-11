@@ -198,7 +198,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
   gchar *giro_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
 
 
-if (g_strcmp0 (rut_c, "") == 0)
+  if (g_strcmp0 (rut_c, "") == 0)
     {
       ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
       return;

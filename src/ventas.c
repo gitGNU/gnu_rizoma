@@ -3444,6 +3444,7 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
   if (PQgetvalue(res, 0, 0) == 0)
     {
       //the user with that rut does not exist so it is neccesary create a new client
+      AgregarProveedorWindow(NULL, NULL); //raise the window to add a proveedor
       return;
     }
 
