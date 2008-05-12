@@ -3845,43 +3845,39 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
 {
   PGresult *res;
 
+  GDate *date = g_date_new ();
+  Gdate *date_buy = g_date_new ();
   gchar *n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
-  gchar *fecha_y = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_y"))));
-  gchar *fecha_m = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_m"))));
-  gchar *fecha_d = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_d"))));
   gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
+  GDateDay day;
+  GDateMonth month;
+  GDateYear year;
 
+  g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
+
+  if (!g_date_valid (date)) 
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
+                "Debe ingresar una fecha de emision para el documento");
+      return FALSE;
+    }
+
+  day = g_date_get_day (date);
+  month = g_date_get_month (date);
+  year = g_date_get_year (year);
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), "
                                       "date_part('month', fecha), "
                                       "date_part('year', fecha) "
                                       "FROM compra WHERE id=%d", id));
 
-  if (atoi (fecha_y) < (atoi (PQgetvalue (res, 0, 2)) - 2000))
-    {
-      ErrorMSG (compra->fecha_emision_y,
-                "La fecha de emision del documento no puede ser menor a\nla fecha de compra");
-      return FALSE;
-    }
-  else
-    {
-      if (atoi (fecha_m) < atoi (PQgetvalue (res, 0, 1)))
-        {
-          ErrorMSG (compra->fecha_emision_m,
-                    "La fecha de emision del documento no puede ser menor a\nla fecha de compra");
-          return FALSE;
-        }
-      else if (atoi (fecha_m) == atoi (PQgetvalue (res, 0, 1)))
-        {
-          if (atoi (fecha_d) < atoi (PQgetvalue (res, 0, 0)))
-            {
-              ErrorMSG (compra->fecha_emision_d,
-                        "La fecha de emision del documento no puede ser menor a\nla fecha de compra");
-              return FALSE;
-            }
-        }
-    }
+  g_date_set_dmy (date, atoi (PQgetvalue( res, 0, 0)), atoi (PQgetvalue( res, 0, 1)), atoi (PQgetvalue( res, 0, 2)));
 
+  if (g_date_compare (date_buy, date) > 0 )
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
+                "La fecha de emision del documento no puede ser menor a la fecha de compra");
+    }
 
   /*
     Un switch es mucho mas elegante para el caso, sin embargo debe buscarse
@@ -3895,24 +3891,6 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
         {
           ErrorMSG (compra->n_documento,
                     "Debe Obligatoriamente ingresar el numero del documento");
-          return FALSE;
-        }
-      else if (strcmp (fecha_y, "") == 0)
-        {
-          ErrorMSG (compra->fecha_emision_y,
-                    "Debe Obligatoriamente ingresar el aÃï¿½Â±o de emision");
-          return FALSE;
-        }
-      else if (strcmp (fecha_m, "") == 0)
-        {
-          ErrorMSG (compra->fecha_emision_m,
-                    "Debe Obligatoriamente ingresar el mes de emision");
-          return FALSE;
-        }
-      else if (strcmp (fecha_d, "") == 0)
-        {
-          ErrorMSG (compra->fecha_emision_d,
-                    "Debe Obligatoriamente ingresar el dia de la emision");
           return FALSE;
         }
       else if (strcmp (monto, "") == 0)
@@ -3934,21 +3912,6 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
       if (strcmp (n_documento, "") == 0)
         {
           ErrorMSG (compra->n_documento, "Debe Obligatoriamente ingresar el numero del documento");
-          return FALSE;
-        }
-      else if (strcmp (fecha_y, "") == 0)
-        {
-          ErrorMSG (compra->fecha_emision_y, "Debe Obligatoriamente ingresar el aÃï¿½Â±o de emision");
-          return FALSE;
-        }
-      else if (strcmp (fecha_m, "") == 0)
-        {
-          ErrorMSG (compra->fecha_emision_m, "Debe Obligatoriamente ingresar el mes de emision");
-          return FALSE;
-        }
-      else if (strcmp (fecha_d, "") == 0)
-        {
-          ErrorMSG (compra->fecha_emision_d, "Debe Obligatoriamente ingresar el dia de la emision");
           return FALSE;
         }
       else if (strcmp (monto, "") == 0)
@@ -5825,13 +5788,4 @@ on_wnd_compras_delete_event (GtkWidget *widget, GdkEvent *event, gpointer user_d
   window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
   gtk_widget_show_all (window);
   return TRUE;
-}
-
-gboolean
-check_regexp (GtkWidget *widget, GdkEventKey *event, gpointer data) {
-  GRegex *regex = g_regex_new ("[^0-9]+", 0, 0, NULL);
-  gboolean found = g_regex_match (regex, event->string, 0, NULL);
-
-
-  return found;
 }
