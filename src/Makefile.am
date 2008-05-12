@@ -53,7 +53,8 @@ factura_more.c factura_more.h \
 caja.c caja.h \
 vale.c vale.h \
 tiempo.c tiempo.h \
-encriptar.c encriptar.h
+encriptar.c encriptar.h \
+proveedores.c proveedores.h
 
 rizoma_compras_SOURCES = compras.c compras.h \
 administracion_productos.c administracion_productos.h \
