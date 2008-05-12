@@ -192,6 +192,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
 {
   GtkWidget *aux_widget;
   GtkWidget *wnd;
+  gchar *str_rut;
   gchar *rut_c;
   gchar *rut_ver;
   gchar *nombre_c;
@@ -290,8 +291,9 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
 
   CloseAgregarProveedorWindow (NULL, user_data);
 
-  AddProveedorToDB (g_strdup_printf ("%s-%s", rut_c, rut_ver), nombre_c, direccion_c, ciudad_c, comuna_c, telefono_c, email_c, web_c, contacto_c, giro_c);
-
+  str_rut = g_strdup_printf ("%s-%s", rut_c, rut_ver);
+  AddProveedorToDB (str_rut, nombre_c, direccion_c, ciudad_c, comuna_c, telefono_c, email_c, web_c, contacto_c, giro_c);
+  g_free (str_rut);
   ListarProveedores ();
 
 }
