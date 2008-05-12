@@ -3408,7 +3408,7 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
   else
     model = gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)));
 
-  res = EjecutarSQL("select rut || '-' || dv from cliente order by rut asc");
+  res = EjecutarSQL("select rut || '-' || dv from proveedor order by rut asc");
 
   gtk_list_store_clear (GTK_LIST_STORE(model));
 
@@ -3568,5 +3568,16 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL(widget), "");
 
   ListClean ();
+
+}
+
+void
+on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_invoice_rut"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+  gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
 
 }
