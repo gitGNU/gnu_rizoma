@@ -46,6 +46,7 @@
 #include"encriptar.h"
 #include"factura_more.h"
 #include"rizoma_errors.h"
+#include"proveedores.h"
 
 GtkBuilder *builder;
 
@@ -952,11 +953,18 @@ ventas_win ()
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", &error);
-  gtk_builder_connect_signals (builder, NULL);
 
   if (error != NULL) {
-    g_printerr ("%s\n", error->message);
+    g_printerr ("%s: %s\n", G_STRFUNC, error->message);
   }
+
+  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
+
+  if (error != NULL) {
+    g_printerr ("%s: %s\n", G_STRFUNC, error->message);
+  }
+
+  gtk_builder_connect_signals (builder, NULL);
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
 
@@ -3048,6 +3056,7 @@ main (int argc, char **argv)
     g_error ("ERROR: %s\n", err->message);
     return -1;
   }
+
   gtk_builder_connect_signals (builder, NULL);
 
   login_window = GTK_WINDOW(gtk_builder_get_object (builder, "login_window"));
@@ -3441,10 +3450,11 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
   res = EjecutarSQL(q);
   g_free (q);
 
-  if (PQgetvalue(res, 0, 0) == 0)
+  if (g_str_equal(PQgetvalue(res, 0, 0), "0"))
     {
       //the user with that rut does not exist so it is neccesary create a new client
-      AgregarProveedorWindow(NULL, NULL); //raise the window to add a proveedor
+      gtk_window_set_modal(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(entry))), FALSE);
+      AgregarProveedorWindow(GTK_WIDGET(entry), NULL); //raise the window to add a proveedor
       return;
     }
 

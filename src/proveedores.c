@@ -179,7 +179,10 @@ CloseAgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 {
   GtkWidget *window;
 
-  window = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addproveedor"));
+  window = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addprovider"));
+
+  gtk_window_set_transient_for(GTK_WINDOW(window), NULL);
+
   gtk_widget_hide(window);
 
 }
@@ -222,7 +225,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
   comuna_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
-  telefono_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget));
+  telefono_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_email"));
   email_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
@@ -331,7 +334,10 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addproveedor"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addprovider"));
+  gtk_window_set_transient_for(GTK_WINDOW(aux_widget),
+  			       GTK_WINDOW(gtk_widget_get_toplevel(widget)));
+  gtk_window_set_modal (GTK_WINDOW(aux_widget), TRUE);
   gtk_widget_show (aux_widget);
 
   /* GtkWidget *window; */

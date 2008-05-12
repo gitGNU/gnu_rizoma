@@ -27,4 +27,6 @@ void proveedores_box (GtkWidget *main_box);
 
 void ListarProveedores (void);
 
+void AgregarProveedorWindow (GtkWidget *widget, gpointer user_data);
+
 #endif
