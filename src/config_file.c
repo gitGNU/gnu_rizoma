@@ -186,7 +186,6 @@ int
 rizoma_set_value (char *var_name, char *new_value)
 {
   GKeyFile *file;
-  FILE *fp;
 
   file = rizoma_open_config();
 
