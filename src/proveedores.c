@@ -177,9 +177,11 @@ LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
 void
 CloseAgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 {
-  GtkWidget *window = (GtkWidget *) user_data;
+  GtkWidget *window;
 
-  gtk_widget_destroy (window);
+  window = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addproveedor"));
+  gtk_widget_hide(window);
+
 }
 
 void
@@ -294,232 +296,270 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
 void
 AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 {
-  GtkWidget *window;
+  GtkWidget *aux_widget;
 
-  GtkWidget *hbox;
-  GtkWidget *vbox;
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_rut"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  GtkWidget *button;
-  GtkWidget *label;
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_dv"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_widget_show (window);
-  gtk_window_present (GTK_WINDOW (window));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  /*
-    Cajas
-  */
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_comuna"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  /*
-    Rut Proveedor
-  */
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_city"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  label = gtk_label_new ("Rut: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_email"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  compra->rut_ver = gtk_entry_new_with_max_length (1);
-  gtk_widget_set_size_request (compra->rut_ver, 20, -1);
-  gtk_widget_show (compra->rut_ver);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->rut_ver, FALSE, FALSE, 3);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_web"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  label = gtk_label_new ("-");
-  gtk_widget_show (label);
-  gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_contact"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  compra->rut_add = gtk_entry_new_with_max_length (10);
-  gtk_widget_set_size_request (compra->rut_add, 75, -1);
-  gtk_widget_show (compra->rut_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->rut_add, FALSE, FALSE, 3);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  gtk_window_set_focus (GTK_WINDOW (window), compra->rut_add);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addproveedor"));
+  gtk_widget_show (aux_widget);
 
-  /*
-    Nombre
-  */
+  /* GtkWidget *window; */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* GtkWidget *hbox; */
+  /* GtkWidget *vbox; */
 
-  label = gtk_label_new ("*Nombre: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* GtkWidget *button; */
+  /* GtkWidget *label; */
 
-  compra->nombre_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->nombre_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->nombre_add, FALSE, FALSE, 3);
+  /* window = gtk_window_new (GTK_WINDOW_TOPLEVEL); */
+  /* gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS); */
+  /* gtk_widget_show (window); */
+  /* gtk_window_present (GTK_WINDOW (window)); */
 
-  /*
-    Direccion
-  */
+  /* vbox = gtk_vbox_new (FALSE, 3); */
+  /* gtk_widget_show (vbox); */
+  /* gtk_container_add (GTK_CONTAINER (window), vbox); */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* /\* */
+  /*   Cajas */
+  /* *\/ */
 
-  label = gtk_label_new ("*Direccion: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* /\* */
+  /*   Rut Proveedor */
+  /* *\/ */
 
-  compra->direccion_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->direccion_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->direccion_add, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  /*
-    Ciudad
-  */
+  /* label = gtk_label_new ("Rut: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* compra->rut_ver = gtk_entry_new_with_max_length (1); */
+  /* gtk_widget_set_size_request (compra->rut_ver, 20, -1); */
+  /* gtk_widget_show (compra->rut_ver); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->rut_ver, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("*Ciudad: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("-"); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->ciudad_add = gtk_entry_new_with_max_length (100);
-  gtk_widget_show (compra->ciudad_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->ciudad_add, FALSE, FALSE, 3);
+  /* compra->rut_add = gtk_entry_new_with_max_length (10); */
+  /* gtk_widget_set_size_request (compra->rut_add, 75, -1); */
+  /* gtk_widget_show (compra->rut_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->rut_add, FALSE, FALSE, 3); */
+
+  /* gtk_window_set_focus (GTK_WINDOW (window), compra->rut_add); */
+
+  /* /\* */
+  /*   Nombre */
+  /* *\/ */
+
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
+
+  /* label = gtk_label_new ("*Nombre: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
+
+  /* compra->nombre_add = gtk_entry_new_with_max_length (200); */
+  /* gtk_widget_show (compra->nombre_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->nombre_add, FALSE, FALSE, 3); */
+
+  /* /\* */
+  /*   Direccion */
+  /* *\/ */
+
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
+
+  /* label = gtk_label_new ("*Direccion: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
+
+  /* compra->direccion_add = gtk_entry_new_with_max_length (200); */
+  /* gtk_widget_show (compra->direccion_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->direccion_add, FALSE, FALSE, 3); */
+
+  /* /\* */
+  /*   Ciudad */
+  /* *\/ */
+
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
+
+  /* label = gtk_label_new ("*Ciudad: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
+
+  /* compra->ciudad_add = gtk_entry_new_with_max_length (100); */
+  /* gtk_widget_show (compra->ciudad_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->ciudad_add, FALSE, FALSE, 3); */
 
 
-  /*
-    Comuna
-  */
+  /* /\* */
+  /*   Comuna */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("*Comuna: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("*Comuna: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->comuna_add = gtk_entry_new_with_max_length (20);
-  gtk_widget_show (compra->comuna_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->comuna_add, FALSE, FALSE, 3);
+  /* compra->comuna_add = gtk_entry_new_with_max_length (20); */
+  /* gtk_widget_show (compra->comuna_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->comuna_add, FALSE, FALSE, 3); */
 
-  /*
-    Telefono
-  */
+  /* /\* */
+  /*   Telefono */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("*Telefono: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("*Telefono: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->telefono_add = gtk_entry_new_with_max_length (20);
-  gtk_widget_show (compra->telefono_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->telefono_add, FALSE, FALSE, 3);
+  /* compra->telefono_add = gtk_entry_new_with_max_length (20); */
+  /* gtk_widget_show (compra->telefono_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->telefono_add, FALSE, FALSE, 3); */
 
-  /*
-    E-Mail
-  */
+  /* /\* */
+  /*   E-Mail */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("E-Mail: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("E-Mail: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->email_add = gtk_entry_new_with_max_length (300);
-  gtk_widget_show (compra->email_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->email_add, FALSE, FALSE, 3);
+  /* compra->email_add = gtk_entry_new_with_max_length (300); */
+  /* gtk_widget_show (compra->email_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->email_add, FALSE, FALSE, 3); */
 
-  /*
-    Web
-  */
+  /* /\* */
+  /*   Web */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("Web: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("Web: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->web_add = gtk_entry_new_with_max_length (300);
-  gtk_widget_show (compra->web_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->web_add, FALSE, FALSE, 3);
+  /* compra->web_add = gtk_entry_new_with_max_length (300); */
+  /* gtk_widget_show (compra->web_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->web_add, FALSE, FALSE, 3); */
 
-  /*
-    Contacto
-  */
+  /* /\* */
+  /*   Contacto */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("Contacto: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("Contacto: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->contacto_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->contacto_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->contacto_add, FALSE, FALSE, 3);
+  /* compra->contacto_add = gtk_entry_new_with_max_length (200); */
+  /* gtk_widget_show (compra->contacto_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->contacto_add, FALSE, FALSE, 3); */
 
-  /*
-    Giro
-  */
+  /* /\* */
+  /*   Giro */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  label = gtk_label_new ("*Giro: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  /* label = gtk_label_new ("*Giro: "); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3); */
 
-  compra->giro_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->giro_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->giro_add, FALSE, FALSE, 3);
+  /* compra->giro_add = gtk_entry_new_with_max_length (200); */
+  /* gtk_widget_show (compra->giro_add); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), compra->giro_add, FALSE, FALSE, 3); */
 
-  /*
-    Fin Cajas
-  */
+  /* /\* */
+  /*   Fin Cajas */
+  /* *\/ */
 
-  /*
-    Mensaje Inferior
-  */
-  label = gtk_label_new ("Los datos con * son obligatorios");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
+  /* /\* */
+  /*   Mensaje Inferior */
+  /* *\/ */
+  /* label = gtk_label_new ("Los datos con * son obligatorios"); */
+  /* gtk_widget_show (label); */
+  /* gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3); */
 
-  /*
-    Fin
-  */
+  /* /\* */
+  /*   Fin */
+  /* *\/ */
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  /* hbox = gtk_hbox_new (FALSE, 3); */
+  /* gtk_widget_show (hbox); */
+  /* gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3); */
 
-  button = gtk_button_new_from_stock (GTK_STOCK_ADD);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
+  /* button = gtk_button_new_from_stock (GTK_STOCK_ADD); */
+  /* gtk_widget_show (button); */
+  /* gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (AgregarProveedor), (gpointer)window);
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /* 		    G_CALLBACK (AgregarProveedor), (gpointer)window); */
 
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
+  /* button = gtk_button_new_from_stock (GTK_STOCK_CANCEL); */
+  /* gtk_widget_show (button); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3); */
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseAgregarProveedorWindow), (gpointer)window);
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                   G_CALLBACK (CloseAgregarProveedorWindow), (gpointer)window); */
 
 }
 

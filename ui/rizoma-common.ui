@@ -2,6 +2,7 @@
 <interface>
   <object class="GtkWindow" id="wnd_addprovider">
     <property name="border_width">10</property>
+    <signal name="delete_event" handler="CloseAgregarProveedorWindow"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -194,7 +195,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_prov_ciudad">
+              <object class="GtkEntry" id="entry_prov_city">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -299,6 +300,7 @@
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="CloseAgregarProveedorWindow"/>
               </object>
               <packing>
                 <property name="expand">False</property>
