@@ -60,7 +60,7 @@ void InsertarCompras (void);
 
 void IngresoDetalle (GtkTreeSelection *selection, gpointer data);
 
-void IngresarCompra (void);
+void IngresarCompra (gboolean invoice);
 
 void SelectProveedores (GtkWidget *widget, gpointer data);
 
@@ -133,15 +133,15 @@ void CalcularTotalesGuias (void);
 
 void ToggleSelect (GtkRadioButton *button, gpointer data);
 
-void CheckMontoGuias (void);
+void CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc);
 
-void CheckMontoIngreso (void);
+void CheckMontoGuias (void);
 
 void AskIngreso (GtkWindow *win_mother);
 
 void SetElabVenc (GtkWidget *widget, gpointer data);
 
-void AskElabVenc (GtkWidget *widget, gpointer data);
+void AskElabVenc (GtkWidget *wnd, gboolean invoice);
 
 void InformeComprasShow (void);
 

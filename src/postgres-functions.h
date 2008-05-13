@@ -165,8 +165,7 @@ gint ReturnIncompletProducts (gint id_venta);
 
 Proveedor * ReturnProveedor (gint id_compra);
 
-gint IngresarFactura (gchar *n_doc, gint id_compra, gchar *rut_proveedor, gint total,
-                      gchar *d_emision, gchar *m_emision, gchar *y_emision, gint guia);
+gint IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, gint d_emision, gint m_emision, gint y_emision, gint guia);
 
 gint IngresarGuia (gchar *n_doc, gint id_compra, gint total,
                    gchar *d_emision, gchar *m_emision, gchar *y_emision);

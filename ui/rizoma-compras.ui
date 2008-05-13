@@ -3,7 +3,6 @@
   <object class="GtkMessageDialog" id="quit_message">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
-    <property name="type">GTK_WINDOW_POPUP</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
@@ -40,6 +39,7 @@
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="destroy_with_parent">True</property>
     <property name="transient_for">wnd_compras</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
     <child>
       <object class="GtkVBox" id="vbox17">
         <property name="visible">True</property>
@@ -167,11 +167,12 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="wnd_ingress_factura">
+  <object class="GtkWindow" id="wnd_ingress_invoice">
     <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Factura</property>
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
     <property name="transient_for">wnd_compras</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
     <child>
       <object class="GtkVBox" id="vbox16">
         <property name="visible">True</property>
@@ -186,6 +187,7 @@
               <object class="GtkEntry" id="entry_ingress_factura_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="activate" handler="on_entry_ingress_factura_amount_activate" object="btn_ok_ingress_invoice"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -282,18 +284,19 @@
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_factura"/>
+                <signal name="clicked" handler="gtk_widget_hide"/>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="button26">
+              <object class="GtkButton" id="btn_ok_ingress_invoice">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="AskElabVenc"/>
+                <signal name="clicked" handler="on_btn_ok_ingress_invoice_clicked"/>
               </object>
               <packing>
                 <property name="position">1</property>

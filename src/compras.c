@@ -244,8 +244,6 @@ Canjeables (GtkWidget *widget, gpointer data)
       gtk_widget_destroy (gtk_widget_get_toplevel (widget));
 
       CalcularTotales ();
-
-      DocumentoIngreso ();
     }
 }
 
@@ -453,9 +451,6 @@ CheckCanjeables (void)
     {
       if (LookCanjeable (compra->header) == TRUE)
         CanjeablesWindow ();
-      else
-        DocumentoIngreso ();
-      //CanjeablesWindow ();
     }
 }
 
@@ -2754,10 +2749,11 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
 }
 
 void
-IngresarCompra (void)
+IngresarCompra (gboolean invoice)
 {
   Productos *products = compra->header;
   gint id, doc;
+  gint n_document = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
   gchar *rut_proveedor;
   gchar *q;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
@@ -2777,9 +2773,7 @@ IngresarCompra (void)
 
         IngresarProducto (products->product, id);
 
-        IngresarDetalleDocumento (products->product, id,
-                                  atoi (gtk_entry_get_text (GTK_ENTRY (compra->n_documento))),
-                                  compra->factura);
+        IngresarDetalleDocumento (products->product, id, n_document, invoice);
 
         products = products->next;
       }
@@ -2793,32 +2787,29 @@ IngresarCompra (void)
   rut_proveedor = GetDataByOne (q);
   g_free (q);
 
-  if (compra->factura == TRUE)
-    doc = IngresarFactura
-      (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_documento))),
-       id, rut_proveedor,
-       atoi (CutPoints (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->monto_documento))))),
-       g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_d))),
-       g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_m))),
-       g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_y))), 0);
+  if (invoice == TRUE)
+    {
+      gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_factura_amount")))));
+      GDate *date = g_date_new ();
+
+      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
+
+      doc = IngresarFactura (n_document, id, rut_proveedor, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), 0);
+    }
   else
-    doc = IngresarGuia
-      (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_documento))),
-       id, atoi (CutPoints (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fact_monto))))),
-       g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_d))),
-       g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_m))),
-       g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_y))));
+    {
+      doc = IngresarGuia
+        (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_documento))),
+         id, atoi (CutPoints (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fact_monto))))),
+         g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_d))),
+         g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_m))),
+         g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_y))));
+    }
 
-
-
-  CloseDocumentoIngreso ();
 
   CompraIngresada ();
 
   InsertarCompras ();
-
-  gtk_window_set_focus (GTK_WINDOW (main_window), compra->ingreso_tree);
-
 }
 
 void
@@ -3556,297 +3547,13 @@ AskForCurrentPrice (gchar *barcode)
 
 }
 
-void
-CloseDocumentoIngreso (void)
-{
-  gtk_widget_destroy (compra->documentos);
-  compra->documentos = NULL;
-
-  gtk_widget_set_sensitive (main_window, TRUE);
-
-  gtk_window_set_focus (GTK_WINDOW (main_window), compra->ingreso_tree);
-}
-
-void
-DocumentoIngreso (void)
-{
-  //  Productos *products = compra->header;
-
-  GtkWidget *label;
-
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  //  GtkWidget *scroll;
-  GtkWidget *button;
-
-  /*GtkTreeIter iter;
-    GtkCellRenderer *renderer;
-    GtkTreeViewColumn *column;*/
-
-  if (compra->documentos != NULL)
-    return;
-  g_print ("test\n");
-  gtk_widget_set_sensitive (main_window, FALSE);
-
-  compra->documentos = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (compra->documentos), "Documento de Ingreso");
-  gtk_window_set_position (GTK_WINDOW (compra->documentos), GTK_WIN_POS_CENTER_ALWAYS);
-  //  gtk_window_set_transient_for (GTK_WINDOW (compra->documentos), GTK_WINDOW (main_window));
-  gtk_window_present (GTK_WINDOW (compra->documentos));
-  gtk_widget_show (compra->documentos);
-
-  g_signal_connect (G_OBJECT (compra->documentos), "destroy",
-                    G_CALLBACK (CloseDocumentoIngreso), NULL);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (compra->documentos), vbox);
-  gtk_widget_show (vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("La mercadería ingresa con: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  /*
-    Necesitamos saber si tenemos puesta la pregunta del numero de documento
-  */
-  compra->n_doc = FALSE;
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_with_label ("Factura");
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  gtk_window_set_focus (GTK_WINDOW (compra->documentos), button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (DocumentoFactura), (gpointer)vbox);
-
-  button = gtk_button_new_with_label ("Guia de Despacho");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (DocumentoGuia), (gpointer)vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  compra->error_documento = gtk_label_new ("");
-  gtk_box_pack_start (GTK_BOX (hbox), compra->error_documento, FALSE, FALSE, 3);
-  gtk_widget_show (compra->error_documento);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseDocumentoIngreso), NULL);
-
-  ok_doc = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), ok_doc, FALSE, FALSE, 3);
-  gtk_widget_show (ok_doc);
-
-  g_signal_connect (G_OBJECT (ok_doc), "clicked",
-                    G_CALLBACK (AskElabVenc), (gpointer)compra->header);
-
-  gtk_widget_set_sensitive (ok_doc, FALSE);
-
-  //  AskIngreso (GTK_WINDOW (compra->documentos));
-}
-
-void
-DocumentoFactura (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *vbox = (GtkWidget *)data;
-
-  GtkWidget *hbox;
-  GtkWidget *label;
-  //  GtkWidget *button;
-
-  //  Productos *products = compra->header;
-
-  if (compra->n_doc == FALSE)
-    compra->n_doc = TRUE;
-  else
-    return;
-
-  compra->factura = TRUE;
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Numero de la Factura: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  compra->n_documento = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), compra->n_documento, FALSE, FALSE, 3);
-  gtk_widget_show (compra->n_documento);
-
-  gtk_window_set_focus (GTK_WINDOW (compra->documentos), compra->n_documento);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Fecha de Emision: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  compra->fecha_emision_y = gtk_entry_new_with_max_length (2);
-  gtk_widget_set_size_request (compra->fecha_emision_y, 25, -1);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->fecha_emision_y, FALSE, FALSE, 3);
-  gtk_widget_show (compra->fecha_emision_y);
-
-  compra->fecha_emision_m = gtk_entry_new_with_max_length (2);
-  gtk_widget_set_size_request (compra->fecha_emision_m, 25, -1);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->fecha_emision_m, FALSE, FALSE, 3);
-  gtk_widget_show (compra->fecha_emision_m);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_m), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_emision_y);
-
-  compra->fecha_emision_d = gtk_entry_new_with_max_length (2);
-  gtk_widget_set_size_request (compra->fecha_emision_d, 25, -1);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->fecha_emision_d, FALSE, FALSE, 3);
-  gtk_widget_show (compra->fecha_emision_d);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_d), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_emision_m);
-
-  g_signal_connect (G_OBJECT (compra->n_documento), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_emision_d);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Monto de la Factura: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  compra->monto_documento = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), compra->monto_documento, FALSE, FALSE, 3);
-  gtk_widget_show (compra->monto_documento);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_y), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->monto_documento);
-
-  g_signal_connect (G_OBJECT (compra->monto_documento), "activate",
-                    G_CALLBACK (CheckMontoIngreso), NULL);
-
-  gtk_entry_set_text (GTK_ENTRY (compra->monto_documento),
-                      gtk_label_get_text (GTK_LABEL (compra->total)));
-}
-
-void
-DocumentoGuia (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *vbox = (GtkWidget *)data;
-
-  GtkWidget *hbox;
-  GtkWidget *label;
-
-  //  Productos *products = compra->header;
-
-  if (compra->n_doc == FALSE)
-    compra->n_doc = TRUE;
-  else
-    return;
-
-  compra->factura = FALSE;
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Numero de la Guia: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  compra->n_documento = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), compra->n_documento, FALSE, FALSE, 3);
-  gtk_widget_show (compra->n_documento);
-
-  gtk_window_set_focus (GTK_WINDOW (compra->documentos), compra->n_documento);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Fecha de Emision: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  compra->fecha_emision_y = gtk_entry_new_with_max_length (2);
-  gtk_widget_set_size_request (compra->fecha_emision_y, 25, -1);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->fecha_emision_y, FALSE, FALSE, 3);
-  gtk_widget_show (compra->fecha_emision_y);
-
-  compra->fecha_emision_m = gtk_entry_new_with_max_length (2);
-  gtk_widget_set_size_request (compra->fecha_emision_m, 25, -1);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->fecha_emision_m, FALSE, FALSE, 3);
-  gtk_widget_show (compra->fecha_emision_m);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_m), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_emision_y);
-
-  compra->fecha_emision_d = gtk_entry_new_with_max_length (2);
-  gtk_widget_set_size_request (compra->fecha_emision_d, 25, -1);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->fecha_emision_d, FALSE, FALSE, 3);
-  gtk_widget_show (compra->fecha_emision_d);
-
-  g_signal_connect (G_OBJECT (compra->n_documento), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_emision_d);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_d), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->fecha_emision_m);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_y), "toggle-overwrite",
-                    G_CALLBACK (SendCursorTo), (gpointer) compra->fecha_emision_m);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Monto de la Guia: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  compra->monto_documento = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), compra->monto_documento, FALSE, FALSE, 3);
-  gtk_widget_show (compra->monto_documento);
-
-  g_signal_connect (G_OBJECT (compra->fecha_emision_y), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)compra->monto_documento);
-
-  g_signal_connect (G_OBJECT (compra->monto_documento), "activate",
-                    G_CALLBACK (CheckMontoIngreso), NULL);
-
-  gtk_entry_set_text (GTK_ENTRY (compra->monto_documento),
-                      gtk_label_get_text (GTK_LABEL (compra->total)));
-}
-
 gboolean
 CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
 {
   PGresult *res;
 
   GDate *date = g_date_new ();
-  Gdate *date_buy = g_date_new ();
+  GDate *date_buy = g_date_new ();
   gchar *n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
   gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
   GDateDay day;
@@ -3855,7 +3562,7 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
 
   g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
 
-  if (!g_date_valid (date)) 
+  if (!g_date_valid (date))
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
                 "Debe ingresar una fecha de emision para el documento");
@@ -3864,14 +3571,14 @@ CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
 
   day = g_date_get_day (date);
   month = g_date_get_month (date);
-  year = g_date_get_year (year);
+  year = g_date_get_year (date);
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), "
                                       "date_part('month', fecha), "
                                       "date_part('year', fecha) "
                                       "FROM compra WHERE id=%d", id));
 
-  g_date_set_dmy (date, atoi (PQgetvalue( res, 0, 0)), atoi (PQgetvalue( res, 0, 1)), atoi (PQgetvalue( res, 0, 2)));
+  g_date_set_dmy (date_buy, atoi (PQgetvalue( res, 0, 0)), atoi (PQgetvalue( res, 0, 1)), atoi (PQgetvalue( res, 0, 2)));
 
   if (g_date_compare (date_buy, date) > 0 )
     {
@@ -4475,10 +4182,10 @@ AddFactura (void)
   gchar *guia;
   gint factura;
   gchar *rut = g_strdup (gtk_label_get_text (GTK_LABEL (compra->fact_rut)));
-  gchar *n_fact = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_factura)));
-  gchar *fecha_y = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_y)));
-  gchar *fecha_m = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_m)));
-  gchar *fecha_d = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_d)));
+  gint n_fact = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_factura))));
+  gint fecha_y = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_y))));
+  gint fecha_m = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_m))));
+  gint fecha_d = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_d))));
   gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fact_monto)));
 
   gtk_tree_model_get_iter_first (GTK_TREE_MODEL (compra->store_new_guias), &iter);
@@ -4495,21 +4202,21 @@ AddFactura (void)
   if (res == NULL || PQntuples (res) == 0)
     return;
 
-  if (atoi (fecha_y) < (atoi (PQgetvalue (res, 0, 2)) - 2000))
+  if (fecha_y < (atoi (PQgetvalue (res, 0, 2)) - 2000))
     {
       ErrorMSG (compra->fecha_y, "La fecha de emision del documento no puede ser menor a\nla fecha de compra");
       return;
     }
   else
     {
-      if (atoi (fecha_m) < atoi (PQgetvalue (res, 0, 1)))
+      if (fecha_m < atoi (PQgetvalue (res, 0, 1)))
         {
           ErrorMSG (compra->fecha_m, "La fecha de emision del documento no puede ser menor a\nla fecha de compra");
           return;
         }
-      else if (atoi (fecha_m) == atoi (PQgetvalue (res, 0, 1)))
+      else if (fecha_m == atoi (PQgetvalue (res, 0, 1)))
         {
-          if (atoi (fecha_d) < atoi (PQgetvalue (res, 0, 0)))
+          if (fecha_d < atoi (PQgetvalue (res, 0, 0)))
             {
               ErrorMSG (compra->fecha_d, "La fecha de emision del documento no puede ser menor a\nla fecha de compra");
               return;
@@ -4523,22 +4230,22 @@ AddFactura (void)
       ErrorMSG (compra->tree_prov, "Debe Seleccionar un proveedor");
       return;
     }
-  else if (strcmp (n_fact, "") == 0)
+  else if (n_fact == 0)
     {
       ErrorMSG (compra->n_factura, "Debe Ingresar el numero de la factura");
       return;
     }
-  else if (strcmp (fecha_y, "") == 0)
+  else if (fecha_y == 0)
     {
       ErrorMSG (compra->fecha_y, "Debe Obligatoriamente ingresar el a��±o de emision");
       return;
     }
-  else if (strcmp (fecha_m, "") == 0)
+  else if (fecha_m == 0)
     {
       ErrorMSG (compra->fecha_m, "Debe Obligatoriamente ingresar el mes de emision");
       return;
     }
-  else if (strcmp (fecha_d, "") == 0)
+  else if (fecha_d == 0)
     {
       ErrorMSG (compra->fecha_d, "Debe Obligatoriamente ingresar el dia de la emision");
       return;
@@ -4809,33 +4516,22 @@ CheckMontoGuias (void)
 }
 
 void
-CheckMontoIngreso (void)
+CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc)
 {
-  gint total = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (compra->total))));
-  gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->monto_documento))));
-
   if (total < total_doc)
     {
-      gtk_label_set_markup
-        (GTK_LABEL (compra->error_documento),
-         "<span foreground=\"red\">El monto total de la(s) guia(s) es insuficiente</span>");
-      gtk_widget_set_sensitive (ok_doc, FALSE);
+      gtk_widget_set_sensitive (btn_ok, FALSE);
     }
   else if (total > total_doc)
     {
-      gtk_label_set_markup (GTK_LABEL (compra->error_documento),
-                            "<span foreground=\"red\">El Monto de la(s) guia(s) es mayor alde la factura</span>");
-      gtk_widget_set_sensitive (ok_doc, FALSE);
+      gtk_widget_set_sensitive (btn_ok, FALSE);
     }
   else if (total == total_doc)
     {
-      gtk_label_set_markup (GTK_LABEL (compra->error_documento),
-                            "");
-      gtk_widget_set_sensitive (ok_doc, TRUE);
+      gtk_widget_set_sensitive (btn_ok, TRUE);
 
-      SendCursorTo (ok_doc, (gpointer)ok_doc);
+      gtk_widget_grab_focus (btn_ok);
     }
-
 }
 
 void
@@ -5147,15 +4843,15 @@ SetElabVenc (GtkWidget *widget, gpointer data)
 
           DrawAsk (products);
         }
-      else
-        IngresarCompra ();
+      /* else */
+      /*   IngresarCompra (); */
+
     }
 }
 
 void
-AskElabVenc (GtkWidget *widget, gpointer data)
+AskElabVenc (GtkWidget *wnd, gboolean invoice)
 {
-  Productos *products = (Productos *) data;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
   GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
@@ -5172,29 +4868,11 @@ AskElabVenc (GtkWidget *widget, gpointer data)
 
   rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id));
 
-  /*
-    Las facturas y las guias ingresan en tablas distintas pero con estructura similar,
-    sin embargo es mejor separar para posteriores cambios.
-    CheckDocumentData recive un argumento como factura si es TRUE checkea datos en modo factura
-    si es FALSE checkea datos en modo guia de despacho
-  */
   if (CheckDocumentData (compra->factura, rut_proveedor, id) == FALSE) return;
 
-  //  CloseDocumentoIngreso ();
+  IngresarCompra (invoice);
 
-  while (products->product->perecible == FALSE)
-    {
-      products = products->next;
-      if (products == compra->header)
-        break;
-    }
-
-  if (products->product->perecible == TRUE)
-    DrawAsk (products);
-  else
-    IngresarCompra ();
-
-  gtk_widget_set_sensitive (main_window, TRUE);
+  gtk_widget_hide (wnd);
 }
 
 void
@@ -5760,7 +5438,7 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
 
   if (complete) {
     if (factura) {
-      GtkWindow *wnd_factura = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_factura"));
+      GtkWindow *wnd_factura = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
       gtk_widget_show_all (GTK_WIDGET (wnd_factura));
     } else {
       GtkWindow *wnd_guia = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guia"));
@@ -5788,4 +5466,21 @@ on_wnd_compras_delete_event (GtkWidget *widget, GdkEvent *event, gpointer user_d
   window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
   gtk_widget_show_all (window);
   return TRUE;
+}
+
+void
+on_entry_ingress_factura_amount_activate (GtkWidget *btn_ok)
+{
+  gint total = atoi (CutPoints(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
+  gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_factura_amount")))));
+
+  CheckMontoIngreso (btn_ok, total, total_doc);
+}
+
+void
+on_btn_ok_ingress_invoice_clicked (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
+
+  AskElabVenc (wnd, TRUE);
 }

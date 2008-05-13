@@ -1,5 +1,11 @@
 2008-05-12  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* postgres-functions.c (IngresarFactura): The n_doc argument and
+	the arguments related to date all moved to gint.
+
+	* compras.c (IngresarCompra): Added the invoice argument to know
+	when we will ingress an invoice or not.
+
 	* utils.c (display_calendar): Added a -1 when set the month on the
 	GtkCalendar, this sinces GtkCalendar set the months from 0 to 11
 	and GDate set them from 1 to 12 and left 0 for a bad month. Also
