@@ -213,8 +213,14 @@ display_calendar (GtkEntry *entry)
   date = g_date_new ();
   g_date_set_time_t (date, time (NULL));
 
+  if ( ! g_date_valid (date))
+    {
+      gtk_widget_destroy (window);
+      return;
+    }
+
   gtk_calendar_select_day (calendar, g_date_get_day (date));
-  gtk_calendar_select_month (calendar, g_date_get_month (date), g_date_get_year (date));
+  gtk_calendar_select_month (calendar, g_date_get_month (date) - 1, g_date_get_year (date));
 
   g_signal_connect (G_OBJECT (calendar), "day-selected-double-click",
                     G_CALLBACK (on_calendar_day_selected_double_click), (gpointer) entry);
