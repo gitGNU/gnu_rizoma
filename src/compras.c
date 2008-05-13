@@ -5438,11 +5438,11 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
 
   if (complete) {
     if (factura) {
-      GtkWindow *wnd_factura = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
-      gtk_widget_show_all (GTK_WIDGET (wnd_factura));
+      GtkWindow *wnd_invoice = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
+      gtk_widget_show_all (GTK_WIDGET (wnd_invoice));
     } else {
-      GtkWindow *wnd_guia = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guia"));
-      gtk_widget_show_all (GTK_WIDGET (wnd_guia));
+      GtkWindow *wnd_guide = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guide"));
+      gtk_widget_show_all (GTK_WIDGET (wnd_guide));
     }
   }
 }
@@ -5483,4 +5483,21 @@ on_btn_ok_ingress_invoice_clicked (GtkWidget *widget, gpointer data)
   GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
 
   AskElabVenc (wnd, TRUE);
+}
+
+void
+on_entry_ingress_guide_amount_activate (GtkWidget *btn_ok)
+{
+  gint total = atoi (CutPoints(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
+  gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_guide_amount")))));
+
+  CheckMontoIngreso (btn_ok, total, total_doc);
+}
+
+void
+on_btn_ok_ingress_guide_clicked (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_guide"));
+
+  AskElabVenc (wnd, FALSE);
 }

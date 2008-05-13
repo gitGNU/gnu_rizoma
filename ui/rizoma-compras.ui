@@ -3493,7 +3493,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="wnd_ingress_guia">
+  <object class="GtkWindow" id="wnd_ingress_guide">
     <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Factura</property>
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
@@ -3509,9 +3509,10 @@
             <property name="column_spacing">4</property>
             <property name="row_spacing">4</property>
             <child>
-              <object class="GtkEntry" id="entry30">
+              <object class="GtkEntry" id="entry_ingress_guide_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="activate" handler="on_entry_ingress_guide_amount_activate" object="btn_ok_ingress_guide"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -3534,33 +3535,29 @@
               <object class="GtkHBox" id="hbox11">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkEntry" id="entry26">
+                  <object class="GtkEntry" id="entry_ingress_guide_date">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="max_length">2</property>
-                    <property name="width_chars">2</property>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="entry27">
+                  <object class="GtkButton" id="button26">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="max_length">2</property>
-                    <property name="width_chars">2</property>
+                    <property name="receives_default">True</property>
+                    <property name="response_id">0</property>
+                    <signal name="clicked" handler="display_calendar" object="entry_ingress_guide_date"/>
+                    <child>
+                      <object class="GtkArrow" id="arrow2">
+                        <property name="visible">True</property>
+                        <property name="arrow_type">GTK_ARROW_DOWN</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry28">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">2</property>
-                    <property name="width_chars">2</property>
-                  </object>
-                  <packing>
-                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -3614,13 +3611,15 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="button24">
+              <object class="GtkButton" id="btn_ok_ingress_guide">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_ok_ingress_guide_clicked"/>
               </object>
               <packing>
                 <property name="position">1</property>
