@@ -3444,7 +3444,7 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
 
   rut_split = g_strsplit(rut, "-", 2);
 
-  q = g_strdup_printf("select count(*) from cliente where rut=%s and dv='%s'",
+  q = g_strdup_printf("select count(*) from proveedor where rut=%s and dv='%s'",
 		      rut_split[0], rut_split[1]);
 
   res = EjecutarSQL(q);
@@ -3458,11 +3458,11 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
       return;
     }
 
-  q = g_strdup_printf("select nombre, giro from cliente where rut=%s and dv='%s'",
-		      rut_split[0], rut_split[1]);
+  q = g_strdup_printf("select nombre, giro from select_proveedor(%s)", rut_split[0]);
 
   res = EjecutarSQL(q);
   g_free (q);
+  g_strfreev (rut_split);
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_name"));
   gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "nombre"));
@@ -3472,7 +3472,6 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_invoice"));
   gtk_widget_set_sensitive(widget, TRUE);
-  gtk_widget_grab_focus(widget);
 }
 
 
@@ -3580,4 +3579,6 @@ on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
   gtk_entry_set_text(GTK_ENTRY(widget), "");
   gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
 
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
+  gtk_widget_hide(widget);
 }
