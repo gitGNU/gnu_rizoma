@@ -284,7 +284,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="gtk_widget_hide"/>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_invoice"/>
               </object>
             </child>
             <child>
@@ -3522,7 +3522,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry29">
+              <object class="GtkEntry" id="entry_ingress_guide_n">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -3608,6 +3608,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_guide"/>
               </object>
             </child>
             <child>

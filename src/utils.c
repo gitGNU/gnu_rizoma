@@ -25,6 +25,7 @@
 #include<gtk/gtk.h>
 
 #include<string.h>
+#include<stdlib.h>
 
 void
 SetToggleMode (GtkToggleButton *widget, gpointer data)
@@ -239,6 +240,58 @@ display_calendar (GtkEntry *entry)
   gtk_window_present (GTK_WINDOW (window));
 
   gtk_widget_show (window);
+}
+
+/*
+ * Parse a date with the format DD/MM/YY or DD/MM/YYYY.
+ *
+ * @param string date.
+ *
+ * return GDate with a valid date or NULL on fail.
+ */
+#define NUM_LEN 10
+GDate *
+parse_date (const gchar *str_date)
+{
+  gchar num[4][NUM_LEN];
+  gint i;
+  gint nums = 0;
+
+  GDate *date;
+  GDateDay day;
+  GDateMonth month;
+  GDateYear year;
+
+  num[0][0] = num[1][0] = num[2][0] = num[3][0] = '\0';
+
+  while (*str_date)
+    {
+      i = 0;
+      while (*str_date && g_ascii_isdigit (*str_date))
+        {
+          num[nums][i] = *str_date;
+          ++str_date;
+          ++i;
+        }
+
+      if (i > 0)
+        {
+          num[nums][i] = '\0';
+          nums++;
+        }
+
+      if (*str_date == '\0') break;
+
+      ++str_date;
+    }
+
+  day = nums > 0 ? atoi (num[0]) : 0;
+  month = nums > 1 ? atoi (num[1]) : 0;
+  year = nums > 2 ? atoi (num[2]) : 0;
+
+  date = g_date_new_dmy (day, month, year);
+
+  return g_date_valid (date) ? date : NULL;
 }
 
 

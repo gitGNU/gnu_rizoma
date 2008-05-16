@@ -43,4 +43,6 @@ void control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTree
 
 void display_calendar (GtkEntry *entry);
 
+GDate * parse_date (const gchar *str_date);
+
 #endif
