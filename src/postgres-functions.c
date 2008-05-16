@@ -1452,14 +1452,13 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, g
 }
 
 gint
-IngresarGuia (gchar *n_doc, gint id_compra, gint total,
-              gchar *d_emision, gchar *m_emision, gchar *y_emision)
+IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emision, gint y_emision)
 {
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO guias_compra VALUES (DEFAULT, %s, %d, 0, (SELECT rut_proveedor FROM compra WHERE id=%d), "
+  res = EjecutarSQL (g_strdup_printf ("INSERT INTO guias_compra VALUES (DEFAULT, %d, %d, 0, (SELECT rut_proveedor FROM compra WHERE id=%d), "
                                       "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'))",
-                                      n_doc, id_compra, id_compra, atoi (d_emision), atoi (m_emision), atoi (y_emision)));
+                                      n_doc, id_compra, id_compra, d_emision, m_emision, y_emision));
 
   res = EjecutarSQL ("SELECT last_value FROM guias_compra_id_seq");
 

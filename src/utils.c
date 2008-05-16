@@ -163,15 +163,22 @@ void
 on_calendar_day_selected_double_click (GtkCalendar *calendar, gpointer user_data)
 {
   GtkEntry *entry = (GtkEntry *)user_data;
-  gchar *str_date;
+  gchar str_date[256];
   guint year;
   guint month;
   guint day;
+  GDate *date;
 
   gtk_calendar_get_date (calendar, &year, &month, &day);
 
-  str_date = g_strdup_printf ("%d/%d/%d", day, month, year);
-  gtk_entry_set_text (entry, str_date);
+  date = g_date_new_dmy (day, month, year);
+
+  if (g_date_valid (date))
+    {
+      if (g_date_strftime (str_date, sizeof (str_date), "%x", date) == 0) strcpy (str_date, "---");
+
+      gtk_entry_set_text (entry, str_date);
+    }
 
   gtk_widget_destroy (GTK_WIDGET (gtk_widget_get_parent_window (GTK_WIDGET (calendar))));
 }
@@ -241,59 +248,6 @@ display_calendar (GtkEntry *entry)
 
   gtk_widget_show (window);
 }
-
-/*
- * Parse a date with the format DD/MM/YY or DD/MM/YYYY.
- *
- * @param string date.
- *
- * return GDate with a valid date or NULL on fail.
- */
-#define NUM_LEN 10
-GDate *
-parse_date (const gchar *str_date)
-{
-  gchar num[4][NUM_LEN];
-  gint i;
-  gint nums = 0;
-
-  GDate *date;
-  GDateDay day;
-  GDateMonth month;
-  GDateYear year;
-
-  num[0][0] = num[1][0] = num[2][0] = num[3][0] = '\0';
-
-  while (*str_date)
-    {
-      i = 0;
-      while (*str_date && g_ascii_isdigit (*str_date))
-        {
-          num[nums][i] = *str_date;
-          ++str_date;
-          ++i;
-        }
-
-      if (i > 0)
-        {
-          num[nums][i] = '\0';
-          nums++;
-        }
-
-      if (*str_date == '\0') break;
-
-      ++str_date;
-    }
-
-  day = nums > 0 ? atoi (num[0]) : 0;
-  month = nums > 1 ? atoi (num[1]) : 0;
-  year = nums > 2 ? atoi (num[2]) : 0;
-
-  date = g_date_new_dmy (day, month, year);
-
-  return g_date_valid (date) ? date : NULL;
-}
-
 
 /*
  * Validate a string using a regular expression
