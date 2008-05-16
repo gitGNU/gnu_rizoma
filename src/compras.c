@@ -3548,96 +3548,114 @@ AskForCurrentPrice (gchar *barcode)
 }
 
 gboolean
-CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint id)
+CheckDocumentData (gboolean invoice, gchar *rut_proveedor, gint id)
 {
   PGresult *res;
 
-  GDate *date = g_date_new ();
-  GDate *date_buy = g_date_new ();
-  gchar *n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
-  gchar *monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
-  GDateDay day;
-  GDateMonth month;
-  GDateYear year;
+  GDate *date = NULL;
+  GDate *date_buy = NULL;
+  gchar *n_documento = NULL;
+  gchar *monto = NULL;
 
-  g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
-
-  if (!g_date_valid (date))
+  if (invoice)
     {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
-                "Debe ingresar una fecha de emision para el documento");
-      return FALSE;
-    }
+      n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
+      monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
 
-  day = g_date_get_day (date);
-  month = g_date_get_month (date);
-  year = g_date_get_year (date);
+      date = parse_date (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
+
+      if (date == NULL || !g_date_valid (date))
+        {
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
+                    "Debe ingresar una fecha de emision para el documento");
+          return FALSE;
+        }
+    }
+  else
+    {
+      n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_n"))));
+      monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_amount"))));
+
+      date = parse_date (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_date"))));
+
+      if (date == NULL || !g_date_valid (date))
+        {
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_date")),
+                    "Debe ingresar una fecha de emision para el documento");
+          return FALSE;
+        }
+    }
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), "
                                       "date_part('month', fecha), "
                                       "date_part('year', fecha) "
                                       "FROM compra WHERE id=%d", id));
 
+  date_buy = g_date_new ();
   g_date_set_dmy (date_buy, atoi (PQgetvalue( res, 0, 0)), atoi (PQgetvalue( res, 0, 1)), atoi (PQgetvalue( res, 0, 2)));
 
-  if (g_date_compare (date_buy, date) > 0 )
+  if (invoice)
     {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
-                "La fecha de emision del documento no puede ser menor a la fecha de compra");
+      if (g_date_compare (date_buy, date) > 0 )
+        {
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
+                    "La fecha de emision del documento no puede ser menor a la fecha de compra");
+        }
+    }
+  else
+    {
+      if (g_date_compare (date_buy, date) > 0 )
+        {
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_date")),
+                    "La fecha de emision del documento no puede ser menor a la fecha de compra");
+        }
     }
 
-  /*
-    Un switch es mucho mas elegante para el caso, sin embargo debe buscarse
-    una manera mas limpia de ejecutar el chequeo de datos.
-  */
-
-  switch (factura)
+  if (invoice)
     {
-    case TRUE:
       if (strcmp (n_documento, "") == 0)
         {
-          ErrorMSG (compra->n_documento,
-                    "Debe Obligatoriamente ingresar el numero del documento");
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_n")), "Debe Obligatoriamente ingresar el numero del documento");
           return FALSE;
         }
       else if (strcmp (monto, "") == 0)
         {
-          ErrorMSG (compra->monto_documento, "El Monto del documento debe ser ingresado");
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_amount")), "El Monto del documento debe ser ingresado");
           return FALSE;
         }
       else
         {
           if (DataExist (g_strdup_printf ("SELECT num_factura FROM factura_compra WHERE rut_proveedor='%s' AND num_factura=%s", rut_proveedor, n_documento)) == TRUE)
             {
-              ErrorMSG (compra->n_documento, g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
+              ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_n")),
+                        g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
               return FALSE;
             }
           return TRUE;
         }
-      break;
-    case FALSE:
+    }
+  else
+    {
       if (strcmp (n_documento, "") == 0)
         {
-          ErrorMSG (compra->n_documento, "Debe Obligatoriamente ingresar el numero del documento");
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_n")), "Debe Obligatoriamente ingresar el numero del documento");
           return FALSE;
         }
       else if (strcmp (monto, "") == 0)
         {
-          ErrorMSG (compra->monto_documento, "El Monto del documento debe ser ingresado");
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_amount")), "El Monto del documento debe ser ingresado");
           return FALSE;
         }
       else
         {
           if (DataExist (g_strdup_printf ("SELECT numero FROM guias_compra WHERE rut_proveedor='%s' AND numero=%s", rut_proveedor, n_documento)) == TRUE)
             {
-              ErrorMSG (compra->n_documento, g_strdup_printf ("Ya existe la guia %s ingresada de este proveedor", n_documento));
+              ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_n")),
+                        g_strdup_printf ("Ya existe la guia %s ingresada de este proveedor", n_documento));
               return FALSE;
             }
           return TRUE;
         }
-      break;
-    default:
-      return FALSE;
     }
 }
 
@@ -4868,7 +4886,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
 
   rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id));
 
-  if (CheckDocumentData (compra->factura, rut_proveedor, id) == FALSE) return;
+  if (CheckDocumentData (invoice, rut_proveedor, id) == FALSE) return;
 
   IngresarCompra (invoice);
 
@@ -5438,11 +5456,11 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
 
   if (complete) {
     if (factura) {
-      GtkWindow *wnd_factura = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
-      gtk_widget_show_all (GTK_WIDGET (wnd_factura));
+      GtkWindow *wnd_invoice = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
+      gtk_widget_show_all (GTK_WIDGET (wnd_invoice));
     } else {
-      GtkWindow *wnd_guia = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guia"));
-      gtk_widget_show_all (GTK_WIDGET (wnd_guia));
+      GtkWindow *wnd_guide = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guide"));
+      gtk_widget_show_all (GTK_WIDGET (wnd_guide));
     }
   }
 }
@@ -5483,4 +5501,21 @@ on_btn_ok_ingress_invoice_clicked (GtkWidget *widget, gpointer data)
   GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
 
   AskElabVenc (wnd, TRUE);
+}
+
+void
+on_entry_ingress_guide_amount_activate (GtkWidget *btn_ok)
+{
+  gint total = atoi (CutPoints(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
+  gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_guide_amount")))));
+
+  CheckMontoIngreso (btn_ok, total, total_doc);
+}
+
+void
+on_btn_ok_ingress_guide_clicked (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_guide"));
+
+  AskElabVenc (wnd, FALSE);
 }

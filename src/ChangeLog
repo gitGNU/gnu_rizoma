@@ -1,3 +1,15 @@
+2008-05-15  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (CheckDocumentData): Fixed to use parse_date to get
+	the GDate from the date string set by calendar_display.
+
+	* utils.c (parse_date): Created this function to deal with a parse
+	of date and return a GDate, this should not be useful when
+	g_date_set_parse deal with DDMMYY date format.
+
+	* compras.c (CheckDocumentData): Changed to deal with invoice and
+	guide at the same time. We really need a better way to check data.
+
 2008-05-12  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* postgres-functions.c (IngresarFactura): The n_doc argument and
