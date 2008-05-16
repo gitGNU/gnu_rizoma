@@ -171,7 +171,7 @@ on_calendar_day_selected_double_click (GtkCalendar *calendar, gpointer user_data
 
   gtk_calendar_get_date (calendar, &year, &month, &day);
 
-  date = g_date_new_dmy (day, month, year);
+  date = g_date_new_dmy (day, month + 1, year);
 
   if (g_date_valid (date))
     {
