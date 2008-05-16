@@ -27,5 +27,5 @@
 gint PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *productos);
 
 gchar * PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *comuna, gchar *fono,
-		   Productos *productos, gint num);
+		   GList *products, gint num);
 #endif

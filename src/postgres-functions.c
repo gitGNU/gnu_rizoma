@@ -2154,3 +2154,23 @@ SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *c
 
   return 0;
 }
+
+gboolean
+provider_exist (const gchar *rut)
+{
+  PGresult *res;
+  gchar *q;
+  gchar *rut2 = g_strdup(rut);
+  q = g_strdup_printf ("SELECT count(*) FROM proveedor WHERE rut=%s", strtok(rut2,"-"));
+  res = EjecutarSQL (q);
+  g_free (q);
+  g_free (rut2);
+
+  if (res == NULL)
+    return FALSE;
+  else
+    if (g_str_equal(PQgetvalue(res, 0, 0), "0"))
+      return FALSE;
+    else
+      return TRUE;
+}

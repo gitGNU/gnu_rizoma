@@ -34,6 +34,7 @@
 #include"config_file.h"
 #include"factura_more.h"
 #include"postgres-functions.h"
+#include"boleta.h"
 
 gint
 PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *products)
@@ -44,10 +45,17 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   gchar *aux_rut;
   PGresult *res;
   gchar *q;
+  Productos *header;
+  GList *aux_list;
+  gint max_lines = rizoma_get_value_int ("FACTURA_LINEAS");
+  gint fact_num = num;
+  gboolean usado = FALSE;
+  gint i;
+
   aux_rut = g_strdup(rut);
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p || ' ' || apell_m AS name, "
-		      "direccion, giro, comuna, telefono FROM cliente where rut=%s",
+		      "direccion, giro, comuna, telefono FROM proveedor where rut=%s",
 		      strtok(aux_rut,"-"));
   res = EjecutarSQL(q);
   g_free (q);
@@ -57,19 +65,28 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   comuna = PQvaluebycol(res, 0, "comuna");
   fono = PQvaluebycol(res, 0, "telefono");
 
-
-  if (sell_type == FACTURA)
-      file_to_print = PrintFactura(client, rut, address, giro, comuna, fono, products, num);
-  /*
-  if (file_to_print != NULL)
+  header = products;
+  do
     {
-      job = gnome_print_job_new (NULL);
+      aux_list = NULL;
+      for (i = 0; (i < max_lines) || (products != header) ; i++)
+	{
+	  aux_list = g_list_append(aux_list, products->product);
+	  products = products->next;
+	}
 
-      gnome_print_job_set_file (job, file_to_print);
+      if (sell_type == FACTURA)
+	{
+	  if (usado)
+	    fact_num = get_ticket_number (FACTURA);
 
-      gnome_print_job_print (job);
-    }
-  */
+	  file_to_print = PrintFactura(client, rut, address, giro, comuna, fono, aux_list, fact_num);
+	  usado = TRUE;
+	}
+      else
+	g_printerr ("%s: calling without the proper sell_type\n", G_STRFUNC);
+
+    } while (products != header);
   return 0;
 }
 
@@ -89,7 +106,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
  */
 gchar *
 PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *comuna, gchar *fono,
-	      Productos *products, gint num)
+	      GList *products, gint num)
 {
   gchar *filename;
   PSDoc *psdoc;
@@ -118,11 +135,12 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   gdouble *fact_rut = NULL;
   gdouble *fact_subtotal = NULL;
   gdouble current_iva;
-
+  Producto *product;
+  gint i;
 
   current_iva = g_ascii_strtod(GetDataByOne("select monto from impuesto where id = 0"), NULL)/100 + 1.0;
 
-  Productos *header = products;
+  //Productos *header = products;
 
   filename = g_strdup_printf ("%s/%s%d.ps", temp_directory, factura_prefix, num);
 
@@ -189,43 +207,41 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   fact_uni = rizoma_get_double_list ("FACTURA_UNI", 2);
   fact_total = rizoma_get_double_list ("FACTURA_TOTAL", 2);
 
-  do
+  for (i = 0 ; i < g_list_length(products) ; i++)
     {
-      PS_show_xy (psdoc, products->product->codigo, fact_code[0], initial);
+      product = g_list_nth_data (products, i);
 
-      PS_show_xy (psdoc, products->product->producto, fact_desc[0], initial);
+      PS_show_xy (psdoc, product->codigo, fact_code[0], initial);
 
-      str_aux = g_strdup_printf ("%.3f", products->product->cantidad);
+      PS_show_xy (psdoc, product->producto, fact_desc[0], initial);
+
+      str_aux = g_strdup_printf ("%.3f", product->cantidad);
       PS_show_xy (psdoc, str_aux, fact_cant[0], initial);
       g_free (str_aux);
 
       //check if must be used the mayorist price or not
-      if (products->product->cantidad < products->product->cantidad_mayorista ||
-	  products->product->mayorista == FALSE)
-	precio = products->product->precio;///(((gdouble)products->product->iva/100)+1);
+      if ((product->cantidad < product->cantidad_mayorista) || (product->mayorista == FALSE))
+	precio = product->precio;              ///(((gdouble)products->product->iva/100)+1);
       else
-	precio = products->product->precio_mayor;///(((gdouble)products->product->iva/100)+1);
+	precio = product->precio_mayor;        ///(((gdouble)products->product->iva/100)+1);
 
       str_aux = g_strdup_printf ("%.0f", precio);
       PS_show_xy (psdoc, str_aux, fact_uni[0], initial);
       g_free (str_aux);
 
-      str_aux = g_strdup_printf ("%.0f", products->product->cantidad * precio);
+      str_aux = g_strdup_printf ("%.0f", product->cantidad * precio);
       PS_show_xy (psdoc, str_aux, fact_total[0], initial);
       g_free (str_aux);
 
       pepe = lround ((gdouble)precio/current_iva);
 
 
-      subtotal += pepe * products->product->cantidad;
+      subtotal += pepe * product->cantidad;
 
-      iva += (precio - pepe) * products->product->cantidad;
+      iva += (precio - pepe) * product->cantidad;
 
       initial -= 10;
-
-      products = products->next;
-
-    } while (products != header);
+    }
 
   /* Finished the products detail*/
 

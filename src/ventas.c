@@ -3373,6 +3373,19 @@ clean_credit_data ()
   return;
 }
 
+void
+on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_invoice_rut"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+  gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
+  gtk_widget_hide(widget);
+}
+
 /**
  * Callback conected to the btn_sale_invoice button.
  *
@@ -3397,6 +3410,7 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
   if (gtk_entry_get_completion(GTK_ENTRY(widget))== NULL)
     {
       completion = gtk_entry_completion_new();
+
       gtk_entry_set_completion(GTK_ENTRY(widget), completion);
 
       model = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
@@ -3444,13 +3458,7 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
 
   rut_split = g_strsplit(rut, "-", 2);
 
-  q = g_strdup_printf("select count(*) from proveedor where rut=%s and dv='%s'",
-		      rut_split[0], rut_split[1]);
-
-  res = EjecutarSQL(q);
-  g_free (q);
-
-  if (g_str_equal(PQgetvalue(res, 0, 0), "0"))
+  if (!(RutExist(rut))
     {
       //the user with that rut does not exist so it is neccesary create a new client
       gtk_window_set_modal(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(entry))), FALSE);
@@ -3458,7 +3466,7 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
       return;
     }
 
-  q = g_strdup_printf("select nombre, giro from select_proveedor(%s)", rut_split[0]);
+  q = g_strdup_printf("select nombre, giro from cliente where rut = %s", rut_split[0]);
 
   res = EjecutarSQL(q);
   g_free (q);
@@ -3536,7 +3544,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   ticket = get_ticket_number (FACTURA);
 
   SaveSell (monto, maquina, vendedor, CREDITO, str_rut, "0", ticket, FACTURA,
-	    NULL, FALSE, FALSE);
+	    NULL, FALSE, TRUE);
 
   //clean the interface
   //restart the invoice dialog
@@ -3568,17 +3576,4 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 
   ListClean ();
 
-}
-
-void
-on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
-{
-  GtkWidget *widget;
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_invoice_rut"));
-  gtk_entry_set_text(GTK_ENTRY(widget), "");
-  gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
-  gtk_widget_hide(widget);
 }

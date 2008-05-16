@@ -294,7 +294,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
   str_rut = g_strdup_printf ("%s-%s", rut_c, rut_ver);
   AddProveedorToDB (str_rut, nombre_c, direccion_c, ciudad_c, comuna_c, telefono_c, email_c, web_c, contacto_c, giro_c);
   g_free (str_rut);
-  ListarProveedores ();
+  //ListarProveedores (); <- this does not correspond
 
 }
 
