@@ -429,11 +429,13 @@ InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar 
               gchar *direccion, gchar *fono, gint credito, gchar *giro)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf ("INSERT INTO cliente VALUES(DEFAULT, '%s', '%s', '%s', '%s', '%s', '%s', "
-                      "'%s', 0, %d, DEFAULT, '%s')", nombres, paterno, materno, rut, ver,
-                      direccion, fono, credito, giro));
+  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito) "
+		       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d)",
+		       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
