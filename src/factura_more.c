@@ -55,7 +55,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   aux_rut = g_strdup(rut);
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p || ' ' || apell_m AS name, "
-		      "direccion, giro, comuna, telefono FROM proveedor where rut=%s",
+		      "direccion, giro, comuna, telefono FROM cliente where rut=%s",
 		      strtok(aux_rut,"-"));
   res = EjecutarSQL(q);
   g_free (q);
@@ -69,11 +69,12 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   do
     {
       aux_list = NULL;
-      for (i = 0; (i < max_lines) || (products != header) ; i++)
-	{
-	  aux_list = g_list_append(aux_list, products->product);
-	  products = products->next;
-	}
+      i = 0;
+      do {
+	aux_list = g_list_append(aux_list, products->product);
+	products = products->next;
+	i++;
+      } while ((i < max_lines) && (products != header));
 
       if (sell_type == FACTURA)
 	{
