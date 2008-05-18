@@ -2740,7 +2740,6 @@ IngresoDetalle (GtkTreeSelection *selection1, gpointer data)
 
           CompraAgregarALista (PQvaluebycol(res, i, "barcode"), cantidad, atoi (PQvaluebycol(res, i, "precio_venta")),
                                strtod (PUT((PQvaluebycol(res, i, "precio"))), (char **)NULL), atoi (PQvaluebycol(res, i, "margen")), TRUE);
-
         }
 
       CalcularTotales ();
@@ -2753,12 +2752,23 @@ IngresarCompra (gboolean invoice)
 {
   Productos *products = compra->header;
   gint id, doc;
-  gint n_document = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
+  gint n_document;
   gchar *rut_proveedor;
   gchar *q;
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
   GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
+  GDate *date = g_date_new ();
+
+  if (invoice)
+    {
+      n_document = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
+    }
+  else
+    {
+      n_document = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_n"))));
+    }
+
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
@@ -2790,20 +2800,16 @@ IngresarCompra (gboolean invoice)
   if (invoice == TRUE)
     {
       gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_factura_amount")))));
-      GDate *date = g_date_new ();
-
       g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
 
       doc = IngresarFactura (n_document, id, rut_proveedor, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), 0);
     }
   else
     {
-      doc = IngresarGuia
-        (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_documento))),
-         id, atoi (CutPoints (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fact_monto))))),
-         g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_d))),
-         g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_m))),
-         g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fecha_emision_y))));
+      gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_guide_amount")))));
+      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_date"))));
+
+      doc = IngresarGuia (n_document, id, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date));
     }
 
 
@@ -3552,8 +3558,8 @@ CheckDocumentData (gboolean invoice, gchar *rut_proveedor, gint id)
 {
   PGresult *res;
 
-  GDate *date = NULL;
-  GDate *date_buy = NULL;
+  GDate *date = g_date_new ();
+  GDate *date_buy = g_date_new ();
   gchar *n_documento = NULL;
   gchar *monto = NULL;
 
@@ -3562,9 +3568,9 @@ CheckDocumentData (gboolean invoice, gchar *rut_proveedor, gint id)
       n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
       monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
 
-      date = parse_date (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
+      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
 
-      if (date == NULL || !g_date_valid (date))
+      if (!g_date_valid (date))
         {
           ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
                     "Debe ingresar una fecha de emision para el documento");
@@ -3576,9 +3582,9 @@ CheckDocumentData (gboolean invoice, gchar *rut_proveedor, gint id)
       n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_n"))));
       monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_amount"))));
 
-      date = parse_date (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_date"))));
+      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_date"))));
 
-      if (date == NULL || !g_date_valid (date))
+      if (!g_date_valid (date))
         {
           ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_date")),
                     "Debe ingresar una fecha de emision para el documento");
@@ -3591,7 +3597,6 @@ CheckDocumentData (gboolean invoice, gchar *rut_proveedor, gint id)
                                       "date_part('year', fecha) "
                                       "FROM compra WHERE id=%d", id));
 
-  date_buy = g_date_new ();
   g_date_set_dmy (date_buy, atoi (PQgetvalue( res, 0, 0)), atoi (PQgetvalue( res, 0, 1)), atoi (PQgetvalue( res, 0, 2)));
 
   if (invoice)

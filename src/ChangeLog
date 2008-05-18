@@ -1,3 +1,12 @@
+2008-05-16  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* utils.c (parse_date): Dropped, not need it anymore.
+
+	* compras.c (IngresarCompra): Last part to deal with an ingress guide.
+
+	* postgres-functions.c (IngresarGuia): Changed the type of input
+	values related to date from gchar * to gint.
+
 2008-05-15  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (CheckDocumentData): Fixed to use parse_date to get
