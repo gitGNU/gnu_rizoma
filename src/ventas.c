@@ -3422,7 +3422,7 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
   else
     model = gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)));
 
-  res = EjecutarSQL("select rut || '-' || dv from proveedor order by rut asc");
+  res = EjecutarSQL("select rut || '-' || dv from cliente order by rut asc");
 
   gtk_list_store_clear (GTK_LIST_STORE(model));
 
@@ -3458,11 +3458,11 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
 
   rut_split = g_strsplit(rut, "-", 2);
 
-  if (!(RutExist(rut))
+  if (!(RutExist(rut)))
     {
       //the user with that rut does not exist so it is neccesary create a new client
       gtk_window_set_modal(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(entry))), FALSE);
-      AgregarProveedorWindow(GTK_WIDGET(entry), NULL); //raise the window to add a proveedor
+      AddClient(NULL, NULL); //raise the window to add a proveedor
       return;
     }
 
