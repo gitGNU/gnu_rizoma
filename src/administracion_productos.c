@@ -552,9 +552,18 @@ ModificarMargenVenta (GtkEditable *editable, gpointer data)
                         g_strdup_printf ("<b>$%d</b>", stock * new_venta));
 }
 
+/**
+ * This function initialize the 'Mercaderia' tab
+ *
+ */
 void
-admini_box (GtkWidget *main_box)
+admini_box ()
 {
+  GtkListStore *store;
+  GtkWidget *widget;
+  GtkWidget *treeview;
+  GtkTreeSelection *selection;
+
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *box;
@@ -575,114 +584,42 @@ admini_box (GtkWidget *main_box)
 
   Print *print = (Print *) malloc (sizeof (Print));
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  if (solo_venta != TRUE)
-    gtk_widget_set_size_request (vbox, MODULE_BOX_WIDTH - 5, -1);
-  else
-    gtk_widget_set_size_request (vbox, MODULE_LITTLE_BOX_WIDTH - 5, -1);
-  gtk_box_pack_start (GTK_BOX (main_box), vbox, FALSE, FALSE, 0);
-
-  /*
-    Buscador
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  ingreso->buscar_entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), ingreso->buscar_entry, FALSE, FALSE, 3);
-  gtk_widget_show (ingreso->buscar_entry);
-
-  g_signal_connect (G_OBJECT (ingreso->buscar_entry), "activate",
-                    G_CALLBACK (BuscarProductosParaListar), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_FIND);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (BuscarProductosParaListar), NULL);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Stock Valorizado");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  inv_total_stock = gtk_label_new ("");
+  //stock valorizado
+  inv_total_stock = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_merca_stock_valorizado"));
   gtk_label_set_markup (GTK_LABEL (inv_total_stock),
-                        g_strdup_printf ("<span foreground=\"blue\"><b>$%s</b></span>",
+                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (InversionTotalStock ())));
-  gtk_box_pack_start (GTK_BOX (box), inv_total_stock, FALSE, FALSE, 0);
-  gtk_widget_show (inv_total_stock);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Valorizado de Venta");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  valor_total_stock = gtk_label_new ("");
+  //valorizado de venta
+  valor_total_stock = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_merca_valorizado_venta"));
   gtk_label_set_markup (GTK_LABEL (valor_total_stock),
-                        g_strdup_printf ("<span foreground=\"blue\"><b>$%s</b></span>",
+                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (ValorTotalStock ())));
-  gtk_box_pack_start (GTK_BOX (box), valor_total_stock, FALSE, FALSE, 0);
-  gtk_widget_show (valor_total_stock);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contribución Proyectada");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  contri_total_stock = gtk_label_new ("");
+  //contribucion proyectada
+  contri_total_stock = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_merca_contrib_proyectada"));
   gtk_label_set_markup (GTK_LABEL (contri_total_stock),
-                        g_strdup_printf ("<span foreground=\"blue\"><b>$%s</b></span>",
+                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (ContriTotalStock ())));
-  gtk_box_pack_start (GTK_BOX (box), contri_total_stock, FALSE, FALSE, 0);
-  gtk_widget_show (contri_total_stock);
+  //products list
+  store = gtk_list_store_new (10,
+			      G_TYPE_STRING, //shortcode
+			      G_TYPE_STRING, //barcode
+			      G_TYPE_STRING, //description
+			      G_TYPE_STRING, //brand
+			      G_TYPE_INT,    //cantidad
+			      G_TYPE_STRING, //unit
+			      G_TYPE_INT,    //stock
+			      G_TYPE_INT,    //price
+			      G_TYPE_STRING,
+			      G_TYPE_BOOLEAN);
 
-  /*
-    Caja Inferior con Lista de Productos
-  */
+  treeview = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store));
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  scroll = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scroll);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-                                  GTK_POLICY_AUTOMATIC,
-                                  GTK_POLICY_AUTOMATIC);
-  gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 0);
-
-  ingreso->store = gtk_list_store_new (10,
-                                       G_TYPE_STRING,
-                                       G_TYPE_STRING,
-                                       G_TYPE_STRING,
-                                       G_TYPE_STRING,
-                                       G_TYPE_INT,
-                                       G_TYPE_STRING,
-                                       G_TYPE_INT,
-                                       G_TYPE_INT,
-                                       G_TYPE_STRING,
-                                       G_TYPE_BOOLEAN);
-
-  //  ReturnProductsStore (ingreso->store);
-
-  ingreso->treeview_products = gtk_tree_view_new_with_model (GTK_TREE_MODEL (ingreso->store));
-  if (solo_venta != TRUE)
-    gtk_widget_set_size_request (ingreso->treeview_products, MODULE_BOX_WIDTH - 10, 200);
-  else
-    gtk_widget_set_size_request (ingreso->treeview_products, MODULE_LITTLE_BOX_WIDTH - 5, 110);
-  gtk_widget_show (ingreso->treeview_products);
-  gtk_container_add (GTK_CONTAINER (scroll), ingreso->treeview_products);
 
   /* Ahora llenamos la struct con los datos necesarios para poder imprimir el treeview */
-  print->tree = GTK_TREE_VIEW (ingreso->treeview_products);
+  print->tree = GTK_TREE_VIEW (treeview);
   print->title = "Listado de Productos";
   print->date_string = NULL;
   print->cols[0].name = "Codigo";
@@ -695,11 +632,11 @@ admini_box (GtkWidget *main_box)
   print->cols[7].name = "Precio";
   print->cols[8].name = NULL;
 
-  ingreso->selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (ingreso->treeview_products));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 
-  gtk_tree_selection_set_mode (ingreso->selection, GTK_SELECTION_SINGLE);
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
-  g_signal_connect (G_OBJECT (ingreso->selection), "changed",
+  g_signal_connect (G_OBJECT (selection), "changed",
                     G_CALLBACK (FillFields), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -708,7 +645,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 0);
@@ -720,7 +657,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -731,7 +668,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_min_width (column, 150);
   gtk_tree_view_column_set_max_width (column, 150);
@@ -743,7 +680,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_min_width (column, 96);
   gtk_tree_view_column_set_max_width (column, 96);
@@ -755,7 +692,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 4);
@@ -769,7 +706,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_min_width (column, 38);
@@ -782,7 +719,7 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 6);
@@ -794,566 +731,45 @@ admini_box (GtkWidget *main_box)
                                                      "foreground", 8,
                                                      "foreground-set", 9,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (ingreso->treeview_products), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW(treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 7);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label),
-                        "<b>Se han encontrado:</b> ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  label_found = gtk_label_new ("");
-  gtk_box_pack_start (GTK_BOX (hbox), label_found, FALSE, FALSE, 3);
-  gtk_widget_show (label_found);
-
-  /* Descripcion Mercaderia */
-
-  frame = gtk_frame_new ("Ingresar de Productos");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 0);
-
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Código de Barras");
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  barcode_entry = gtk_label_new ("");
-  gtk_widget_set_size_request (GTK_WIDGET (barcode_entry), 110, -1);
-  gtk_box_pack_start (GTK_BOX (box), barcode_entry, FALSE, FALSE, 0);
-  gtk_widget_show (barcode_entry);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Código Simple");
-  gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_LEFT);
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ingreso->codigo_entry = gtk_label_new ("");
-  gtk_box_pack_start (GTK_BOX (box), ingreso->codigo_entry, FALSE, FALSE, 0);
-  gtk_widget_show (ingreso->codigo_entry);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Descripción");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ingreso->product_entry = gtk_label_new ("");
-  gtk_widget_set_size_request (GTK_WIDGET (ingreso->product_entry), 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), ingreso->product_entry, FALSE, FALSE, 0);
-  gtk_widget_show (ingreso->product_entry);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Marca");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ingreso->marca_entry = gtk_label_new("");
-  gtk_widget_set_size_request (GTK_WIDGET (ingreso->marca_entry), 120, -1);
-  gtk_box_pack_start (GTK_BOX (box), ingreso->marca_entry, FALSE, FALSE, 0);
-  gtk_widget_show (ingreso->marca_entry);
-
-  /*  hbox = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (hbox);
-      gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  */
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contenido: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ingreso->cantidad_entry = gtk_label_new ("");
-  gtk_widget_set_size_request (GTK_WIDGET (ingreso->cantidad_entry), 70, -1);
-  gtk_box_pack_start (GTK_BOX (box), ingreso->cantidad_entry, FALSE, FALSE, 0);
-  gtk_widget_show (ingreso->cantidad_entry);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Unidad");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ingreso->unidad_entry = gtk_label_new ("");
-  gtk_widget_set_size_request (GTK_WIDGET (ingreso->unidad_entry), 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), ingreso->unidad_entry, FALSE, FALSE, 0);
-  gtk_widget_show (ingreso->unidad_entry);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Impuesto Adicional");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  impuesto_adic = gtk_label_new ("");
-  gtk_misc_set_alignment (GTK_MISC (impuesto_adic), 0.5, 0.5);
-  gtk_widget_set_size_request (impuesto_adic, 130, -1);
-  gtk_box_pack_start (GTK_BOX (box), impuesto_adic, FALSE, FALSE, 0);
-  gtk_widget_show (impuesto_adic);
-
-  /*
-    box = gtk_vbox_new (FALSE, 3);
-    gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-    label = gtk_label_new ("Familia");
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-    gtk_widget_show (box);
-    familia = gtk_label_new ("");
-    gtk_widget_set_size_request (familia, 110, -1);
-    gtk_box_pack_start (GTK_BOX (box), familia, FALSE, FALSE, 0);
-    gtk_widget_show (familia);
-  */
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Tipo");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  perecible = gtk_label_new ("");
-  gtk_widget_set_size_request (perecible, 80, -1);
-  gtk_box_pack_start (GTK_BOX (box), perecible, FALSE, FALSE, 0);
-  gtk_widget_show (perecible);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("T. Vendido");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  total_unidades_vendidas = gtk_label_new ("");
-  gtk_widget_show (total_unidades_vendidas);
-  gtk_widget_set_size_request (GTK_WIDGET (total_unidades_vendidas), 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), total_unidades_vendidas, FALSE, FALSE, 0);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 0);
-  label = gtk_label_new ("Stock");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ingreso->stock_entry = gtk_label_new ("");
-  gtk_widget_show (ingreso->stock_entry);
-  gtk_widget_set_size_request (GTK_WIDGET (ingreso->stock_entry), 40, -1);
-  gtk_box_pack_start (GTK_BOX (box), ingreso->stock_entry, FALSE, FALSE, 0);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Ventas/Día ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  ventas_dias = gtk_label_new ("");
-  gtk_widget_show (ventas_dias);
-  gtk_widget_set_size_request (GTK_WIDGET (ventas_dias), 40, -1);
-  gtk_box_pack_start (GTK_BOX (box), ventas_dias, FALSE, FALSE, 0);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 0);
-  label = gtk_label_new ("Stock Dias");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  stock_dias = gtk_label_new ("");
-  gtk_widget_show (stock_dias);
-  gtk_widget_set_size_request (GTK_WIDGET (stock_dias), 40, -1);
-  gtk_box_pack_start (GTK_BOX (box), stock_dias, FALSE, FALSE, 0);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Stock M.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  stock_min = gtk_entry_new_with_max_length (10);
-  gtk_widget_show (stock_min);
-  gtk_widget_set_size_request (GTK_WIDGET (stock_min), 40, -1);
-  gtk_box_pack_start (GTK_BOX (box), stock_min, FALSE, FALSE, 0);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Costo Promedio");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  costo_promedio = gtk_label_new ("");
-  gtk_widget_set_size_request (costo_promedio, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), costo_promedio, FALSE, FALSE, 0);
-  gtk_widget_show (costo_promedio);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (box);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Margen %");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  margen_entry = gtk_entry_new_with_max_length (10);
-  gtk_entry_set_alignment (GTK_ENTRY (margen_entry), 1);
-  gtk_widget_set_size_request (GTK_WIDGET (margen_entry), 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), margen_entry, FALSE, FALSE, 0);
-  gtk_widget_show (margen_entry);
-
+  //this signal is connected in this way because glade/gtkbuilde does
+  //not respect the signature of the user_data when is seted with the glade
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_infomerca_percentmargin"));
   g_signal_connect (G_OBJECT (margen_entry), "activate",
                     G_CALLBACK (ModificarMargenVenta), (gpointer)TRUE);
+  ///////////
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contrib Unit.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  contrib_unit = gtk_label_new ("");
-  gtk_widget_set_size_request (contrib_unit, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), contrib_unit, FALSE, FALSE, 0);
-  gtk_widget_show (contrib_unit);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Precio Venta");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  precio_venta = gtk_entry_new_with_max_length (10);
-  gtk_entry_set_alignment (GTK_ENTRY (precio_venta), 1);
-  gtk_widget_set_size_request (precio_venta, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), precio_venta, FALSE, FALSE, 0);
-  gtk_widget_show (precio_venta);
-
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_informerca_price"));
   g_signal_connect (G_OBJECT (precio_venta), "activate",
                     G_CALLBACK (ModificarMargenVenta), (gpointer)FALSE);
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Inversión Stock");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  stock_valor = gtk_label_new ("");
-  gtk_widget_set_size_request (stock_valor, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), stock_valor, FALSE, FALSE, 0);
-  gtk_widget_show (stock_valor);
+  //////////
 
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Merma Unid.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  mermita = gtk_label_new ("");
-  gtk_widget_set_size_request (mermita, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), mermita, FALSE, FALSE, 0);
-  gtk_widget_show (mermita);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  label = gtk_label_new ("Merma %");
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (label);
-  mermata = gtk_label_new ("");
-  gtk_widget_set_size_request (mermata, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), mermata, FALSE, FALSE, 0);
-  gtk_widget_show (mermata);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("ICI");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  ici = gtk_label_new ("");
-  gtk_widget_set_size_request (ici, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), ici, FALSE, FALSE, 0);
-  gtk_widget_show (ici);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Compras Totales");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  comp_totales = gtk_label_new ("");
-  gtk_widget_set_size_request (comp_totales, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), comp_totales, FALSE, FALSE, 0);
-  gtk_widget_show (comp_totales);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Total Vendido $");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  total_vendido = gtk_label_new ("");
-  gtk_widget_set_size_request (total_vendido, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), total_vendido, FALSE, FALSE, 0);
-  gtk_widget_show (total_vendido);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Indice T");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  indice_t = gtk_label_new ("");
-  gtk_widget_set_size_request (indice_t, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), indice_t, FALSE, FALSE, 0);
-  gtk_widget_show (indice_t);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contrib Agreg.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  contri_agr = gtk_label_new ("");
-  gtk_widget_set_size_request (contri_agr, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), contri_agr, FALSE, FALSE, 0);
-  gtk_widget_show (contri_agr);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Contrib. Proyect.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  contri_proy = gtk_label_new ("");
-  gtk_widget_set_size_request (contri_proy, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), contri_proy, FALSE, FALSE, 0);
-  gtk_widget_show (contri_proy);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Fecha Elab.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  elab_date = gtk_label_new ("");
-  gtk_widget_set_size_request (elab_date, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), elab_date, FALSE, FALSE, 0);
-  gtk_widget_show (elab_date);
-
-  box = gtk_vbox_new (FALSE, 6);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  label = gtk_label_new ("Fecha Venc.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  venc_date = gtk_label_new ("");
-  gtk_widget_set_size_request (venc_date, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), venc_date, FALSE, FALSE, 0);
-  gtk_widget_show (venc_date);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Canjeable");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-
-  vbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (box), vbox, FALSE, FALSE, 0);
-  gtk_widget_show (vbox);
-
-  canje_buttons_f = gtk_radio_button_new_with_label (NULL, "No");
-  gtk_box_pack_end (GTK_BOX (vbox), canje_buttons_f, FALSE, FALSE, 2);
-  gtk_widget_show (canje_buttons_f);
-
-  //  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (canje_buttons), FALSE);
-
-  group_canj = gtk_radio_button_get_group (GTK_RADIO_BUTTON (canje_buttons_f));
-  canje_buttons_t = gtk_radio_button_new_with_label (group_canj, "Sí");
-  gtk_box_pack_end (GTK_BOX (vbox), canje_buttons_t, FALSE, FALSE, 2);
-  gtk_widget_show (canje_buttons_t);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Stock Pro.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  stock_pro = gtk_label_new ("");
-  gtk_widget_set_size_request (stock_pro, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), stock_pro, FALSE, FALSE, 0);
-  gtk_widget_show (stock_pro);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Tasa de canje");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  tasa_canje = gtk_entry_new ();
-  gtk_widget_set_size_request (tasa_canje, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), tasa_canje, FALSE, FALSE, 0);
-  gtk_widget_show (tasa_canje);
-
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Mayorista");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-
-  vbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (box), vbox, FALSE, FALSE, 0);
-  gtk_widget_show (vbox);
-
-  mayor_buttons_f = gtk_radio_button_new_with_label (NULL, "No");
-  gtk_box_pack_end (GTK_BOX (vbox), mayor_buttons_f, FALSE, FALSE, 2);
-  gtk_widget_show (mayor_buttons_f);
-
-  group_mayor = gtk_radio_button_get_group (GTK_RADIO_BUTTON (mayor_buttons_f));
-  mayor_buttons_t = gtk_radio_button_new_with_label (group_mayor, "Sí");
-  gtk_box_pack_end (GTK_BOX (vbox), mayor_buttons_t, FALSE, FALSE, 2);
-  gtk_widget_show (mayor_buttons_t);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Cant. Mayor.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  mayor_cantidad = gtk_entry_new ();
-  gtk_widget_set_size_request (mayor_cantidad, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), mayor_cantidad, FALSE, FALSE, 0);
-  gtk_widget_show (mayor_cantidad);
-
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Precio Mayor.");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  mayor_precio = gtk_entry_new ();
-  gtk_widget_set_size_request (mayor_precio, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), mayor_precio, FALSE, FALSE, 0);
-  gtk_widget_show (mayor_precio);
-
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (FALSE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 2);
-  label = gtk_label_new ("Proveedores");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (box);
-  combo_proveedores = gtk_combo_box_new_text ();
-  gtk_widget_set_size_request (combo_proveedores, 50, -1);
-  gtk_box_pack_start (GTK_BOX (box), combo_proveedores, FALSE, FALSE, 0);
-  gtk_widget_show (combo_proveedores);
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_with_label ("Devolución");
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (DevolucionWindow), NULL);
-
-  button = gtk_button_new_with_label ("Recibir");
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (RecivirWindow), NULL);
-
-  /*
-    Bottom buttons
-  */
-
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  /* Separamos el boton de guardar con 8 pixeles de la orilla*/
-  /* es una gtk_box vacia*/
-  /*  if (solo_venta == TRUE)
-      {
-      box = gtk_vbox_new (FALSE, 6);
-      gtk_box_pack_end (GTK_BOX (hbox), box, FALSE, FALSE, 8);
-      gtk_widget_show (box);
-      }
-  */
-
-  button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (GuardarModificacionesProducto), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_DELETE);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (EliminarProductoDB), NULL);
-
-  button = gtk_button_new_with_label ("Ajuste");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (AjusteWin), NULL);
-
-  print_button = gtk_button_new_from_stock (GTK_STOCK_PRINT);
-  gtk_box_pack_end (GTK_BOX (hbox), print_button, FALSE, FALSE, 3);
-  gtk_widget_show (print_button);
-
-  g_signal_connect (G_OBJECT (print_button), "clicked",
+  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "btn_infomerca_print"));
+  g_signal_connect (G_OBJECT (aux_widget), "clicked",
                     G_CALLBACK (PrintTree), (gpointer)print);
 
-  button = gtk_button_new_with_label ("Modificar");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
+  ////////////////////////////////////////////////////////
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (ModificarProducto), NULL);
+
+  /* button = gtk_button_new_with_label ("Devolución"); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
+  /* gtk_widget_show (button); */
+
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                   G_CALLBACK (DevolucionWindow), NULL); */
+
+  /* button = gtk_button_new_with_label ("Recibir"); */
+  /* gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 0); */
+  /* gtk_widget_show (button); */
+
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*                   G_CALLBACK (RecivirWindow), NULL); */
 }
 
 void

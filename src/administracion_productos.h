@@ -24,7 +24,7 @@
 
 #define INGRESO_PRODUCTOS_H
 
-void admini_box (GtkWidget *main_box);
+void admini_box ();
 
 void Ingresar_Producto (gpointer data);
 
