@@ -564,25 +564,12 @@ admini_box ()
   GtkWidget *treeview;
   GtkTreeSelection *selection;
 
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *box;
-  GtkWidget *vbox2;
-  GtkWidget *frame;
-
-  GtkWidget *label;
-  GtkWidget *button;
-  GtkWidget *print_button;
-
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-  GSList *group_canj;
-  GSList *group_mayor;
+  Print *print;
 
-  GtkWidget *scroll;
-
-  Print *print = (Print *) malloc (sizeof (Print));
+  print = (Print *) malloc (sizeof (Print));
 
   //stock valorizado
   inv_total_stock = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_merca_stock_valorizado"));
@@ -739,19 +726,19 @@ admini_box ()
 
   //this signal is connected in this way because glade/gtkbuilde does
   //not respect the signature of the user_data when is seted with the glade
-  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_infomerca_percentmargin"));
-  g_signal_connect (G_OBJECT (margen_entry), "activate",
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_infomerca_percentmargin"));
+  g_signal_connect (G_OBJECT (widget), "activate",
                     G_CALLBACK (ModificarMargenVenta), (gpointer)TRUE);
   ///////////
 
-  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_informerca_price"));
-  g_signal_connect (G_OBJECT (precio_venta), "activate",
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_informerca_price"));
+  g_signal_connect (G_OBJECT (widget), "activate",
                     G_CALLBACK (ModificarMargenVenta), (gpointer)FALSE);
 
   //////////
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "btn_infomerca_print"));
-  g_signal_connect (G_OBJECT (aux_widget), "clicked",
+  widget = GTK_WIDGET(gtk_builder_get_object (builder, "btn_infomerca_print"));
+  g_signal_connect (G_OBJECT (widget), "clicked",
                     G_CALLBACK (PrintTree), (gpointer)print);
 
   ////////////////////////////////////////////////////////
