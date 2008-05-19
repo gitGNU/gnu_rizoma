@@ -628,8 +628,8 @@ admini_box ()
 
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
-  g_signal_connect (G_OBJECT (selection), "changed",
-                    G_CALLBACK (FillFields), NULL);
+  /* g_signal_connect (G_OBJECT (selection), "changed", */
+  /*                   G_CALLBACK (FillFields), NULL); */
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Código", renderer,

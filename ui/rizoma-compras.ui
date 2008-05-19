@@ -1829,6 +1829,7 @@
                       <object class="GtkEntry" id="find_product_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <signal name="activate" handler="BuscarProductosParaListar"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1843,6 +1844,7 @@
                         <property name="label" translatable="yes">gtk-find</property>
                         <property name="use_stock">True</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="BuscarProductosParaListar"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1960,6 +1962,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="headers_clickable">True</property>
+                        <signal name="row_activated" handler="FillFields"/>
                       </object>
                     </child>
                   </object>
@@ -2582,6 +2585,7 @@
                     <property name="receives_default">True</property>
                     <property name="label" translatable="yes">Modificar</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="ModificarProducto"/>
                   </object>
                 </child>
                 <child>
@@ -2604,6 +2608,7 @@
                     <property name="receives_default">True</property>
                     <property name="label" translatable="yes">Ajuste</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="AjusteWin"/>
                   </object>
                   <packing>
                     <property name="position">2</property>
@@ -2617,6 +2622,7 @@
                     <property name="label" translatable="yes">gtk-delete</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="EliminarProductoDB"/>
                   </object>
                   <packing>
                     <property name="position">3</property>
@@ -2630,6 +2636,7 @@
                     <property name="label" translatable="yes">gtk-save</property>
                     <property name="use_stock">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="GuardarModificacionesProducto"/>
                   </object>
                   <packing>
                     <property name="position">4</property>
