@@ -357,18 +357,23 @@ AjusteWin (GtkWidget *widget, gpointer data)
   GtkWidget *entry;
   GtkWidget *label;
   GtkWidget *button;
+  GtkWidget *aux_widget;
+  GtkListStore *store;
 
   PGresult *res;
   gint tuples, i;
   gchar *barcode;
   GtkTreeIter iter;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection
-    (GTK_TREE_VIEW (ingreso->treeview_products));
+  GtkTreeSelection *selection;
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (aux_widget));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW (aux_widget)));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
 
-      gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           1, &barcode,
                           -1);
 
@@ -602,7 +607,7 @@ admini_box ()
 			      G_TYPE_BOOLEAN);
 
   treeview = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
-  gtk_tree_view_set_model (GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store));
+  gtk_tree_view_set_model (GTK_TREE_VIEW(treeview), GTK_TREE_MODEL(store));
 
 
   /* Ahora llenamos la struct con los datos necesarios para poder imprimir el treeview */
@@ -848,17 +853,26 @@ FillEditFields (GtkTreeSelection *selection, gpointer data)
   GtkTreeIter iter;
   gchar *product, *codigo;
   gint precio;
+  GtkTreeSelection *selec;
+  GtkWidget *treeview;
+  GtkWidget *entry;
+  GtkListStore *store;
 
   if (Deleting != TRUE)
     {
-      gtk_tree_selection_get_selected (ingreso->selection, NULL, &iter);
+      treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_find_products"));
+      selec = gtk_tree_view_get_selection (GTK_TREE_VIEW(treeview));
+      store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(treeview)));
 
-      gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
+      gtk_tree_selection_get_selected (selec, NULL, &iter);
+
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           0, &codigo,
                           2, &product,
                           7, &precio,
                           -1);
 
+      entry = GTK_WIDGET(gtk_builder_get_object(builder, "entry_"));
       gtk_entry_set_text (GTK_ENTRY (ingreso->codigo_entry_edit), g_strdup (codigo));
       gtk_entry_set_text (GTK_ENTRY (ingreso->product_entry_edit), g_strdup (product));
       gtk_entry_set_text (GTK_ENTRY (ingreso->precio_entry_edit), g_strdup_printf ("%d", precio));
@@ -1150,10 +1164,14 @@ BuscarProductosParaListar (void)
   gchar *string;
   gint i, resultados;
   GtkTreeIter iter;
+  GtkWidget *widget;
+  GtkListStore *store;
 
-  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso->buscar_entry)));
-  q = g_strdup_printf( "SELECT * FROM buscar_producto( '%s', '{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}', true )", string);
-
+  widget = GTK_WIDGET(gtk_builder_get_object (builder,"find_product_entry"));
+  string = g_strdup (gtk_entry_get_text(GTK_ENTRY(widget)));
+  q = g_strdup_printf ( "SELECT * FROM buscar_producto( '%s', "
+			"'{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}',"
+			"TRUE, FALSE )", string);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1162,12 +1180,14 @@ BuscarProductosParaListar (void)
   gtk_label_set_markup (GTK_LABEL (label_found),
                         g_strdup_printf ("<b>%d producto(s)</b>", resultados));
 
-  gtk_list_store_clear (ingreso->store);
+  widget = GTK_WIDGET(gtk_builder_get_object (builder,"treeview_find_products"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(widget)));
+  gtk_list_store_clear (store);
 
   for (i = 0; i < resultados; i++)
     {
-      gtk_list_store_append (ingreso->store, &iter);
-      gtk_list_store_set (ingreso->store, &iter,
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "barcode"),
                           1, PQvaluebycol (res, i, "codigo_corto"),
                           2, PQvaluebycol (res, i, "marca"),
