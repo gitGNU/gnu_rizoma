@@ -209,16 +209,22 @@ GetDataByOne (gchar *setencia)
     return NULL;
 }
 
-/*
+/**
  * Borrar un producto de la tabla 'producto' en base a su barcode
- * @oaram codigo de barras del producto que quiere ser borrado
+ *
+ * @param codigo codigo de barras del producto que quiere ser borrado
+ *
+ * @return TRUE on succesfull deletetion
  */
 gboolean
 DeleteProduct (gchar *codigo)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("DELETE FROM producto WHERE codigo='%s'", codigo));
+  q = g_strdup_printf ("DELETE FROM producto WHERE barcode=%s", codigo);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
