@@ -1018,18 +1018,18 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
                           g_strdup_printf ("%d", margen));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_infomerca_contrib_unit"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_contrib_unit"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>$%d</b>", contri_unit));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_price"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_price"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget), PQvaluebycol (res, 0, "precio"));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_infomerca_invstock"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_invstock"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>$%d</b>", valor_stock));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_infomerca_mermauni"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_mermauni"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%.2f</b>", merma));
 
@@ -1041,18 +1041,18 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       /* gtk_label_set_markup (GTK_LABEL (ici), */
       /*                       g_strdup_printf ("<b>%.2f%%</b>", ici_total)); */
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_infomerca_totalbuy"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_totalbuy"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>$%d</b>", compras_totales));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_infomerca_sold"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sold"));
       if(g_str_equal (PQvaluebycol (res, 0, "contrib_agregada"), ""))
         gtk_label_set_markup (GTK_LABEL (aux_widget), "");
       else
         gtk_label_set_markup (GTK_LABEL (aux_widget),
                               g_strdup_printf ("<b>$ %s</b>", PQvaluebycol (res, 0, "total_vendido")));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_infomerca_contribadded"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_contribadded"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>$%d</b>", contrib_agreg));
 
@@ -1072,16 +1072,16 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       if (strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0)
         {
 	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
-          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mayor_buttons_t), TRUE);
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (aux_widget), TRUE);
 	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_no"));
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mayor_buttons_f), FALSE);
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (aux_widget), FALSE);
         }
       else
         {
-	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_no"));
-          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mayor_buttons_t), FALSE);
 	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mayor_buttons_f), TRUE);
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (aux_widget), FALSE);
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_no"));
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (aux_widget), TRUE);
         }
 
       /* q = g_strdup_printf("SELECT nombre FROM select_proveedor_for_product(%s)", */
