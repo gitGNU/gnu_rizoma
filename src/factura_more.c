@@ -26,6 +26,7 @@
 #include<gtk/gtk.h>
 #include<libps/pslib.h>
 
+#include<stdlib.h>
 #include<locale.h>
 #include<string.h>
 #include<math.h>
@@ -61,7 +62,6 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   GList *aux_list;
   gint max_lines = rizoma_get_value_int ("FACTURA_LINEAS");
   gint fact_num = num;
-  gboolean usado = FALSE;
   gint i;
   gchar *print_command;
 
