@@ -78,11 +78,9 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
 
       if (sell_type == FACTURA)
 	{
-	  if (usado)
-	    fact_num = get_ticket_number (FACTURA);
-
+	  fact_num = get_ticket_number (FACTURA);
 	  file_to_print = PrintFactura(client, rut, address, giro, comuna, fono, aux_list, fact_num);
-	  usado = TRUE;
+	  set_ticket_number (fact_num, FACTURA);
 	}
       else
 	g_printerr ("%s: calling without the proper sell_type\n", G_STRFUNC);
