@@ -941,7 +941,6 @@ ventas_win ()
   GtkCellRenderer *renderer;
   GtkTreeIter iter;
   GtkWidget *ventas_gui;
-  gboolean fullscreen_opt;
   GError *error;
 
   venta = (Venta *) g_malloc (sizeof (Venta));
@@ -966,11 +965,19 @@ ventas_win ()
 
   gtk_builder_connect_signals (builder, NULL);
 
+  // check if is enabled the print of invoices to show or not show the
+  // make invoice button
+  if (!(rizoma_get_value_boolean ("PRINT_FACTURA")))
+    {
+      GtkWidget *aux_widget;
+      aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "btn_invoice"));
+      gtk_widget_hide (aux_widget);
+    }
+
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
 
   // check if the window must be set to fullscreen
-  fullscreen_opt = rizoma_get_value_boolean("FULLSCREEN");
-  if (fullscreen_opt)
+  if (rizoma_get_value_boolean("FULLSCREEN"))
     gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
 
   gtk_widget_show_all (ventas_gui);
