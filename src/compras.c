@@ -1153,6 +1153,9 @@ compras_win ()
 
   /* End Pending Request Detail */
 
+  //mercaderia
+  admini_box();
+
   gtk_widget_show_all (compras_gui);
 }
 
