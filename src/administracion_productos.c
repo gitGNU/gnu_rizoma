@@ -1136,8 +1136,11 @@ EliminarProductoDB (GtkButton *button, gpointer data)
 
       if (stock == 0)
         {
-          DeleteProduct (codigo);
-          gtk_list_store_remove (GTK_LIST_STORE (store), &iter);
+          if (DeleteProduct (codigo))
+	    gtk_list_store_remove (GTK_LIST_STORE (store), &iter);
+	  else
+	    ErrorMSG (GTK_WIDGET (treeview), "No pudo ser borrado el producto \n"
+		      "aun debe encontrarse en uso por alguna parte del sistema");
         }
       else
         ErrorMSG (GTK_WIDGET (treeview), "Solo se puede eliminar productos \n con stock mayor a 0");
