@@ -1114,28 +1114,33 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 void
 EliminarProductoDB (GtkButton *button, gpointer data)
 {
+  GtkWidget *treeview;
+  GtkListStore *store;
   GtkTreeIter iter;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (ingreso->treeview_products));
+  GtkTreeSelection *selection;
   gchar *codigo;
   gint stock;
+
+  treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_find_products"));
+  selection  = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (treeview)));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       Deleting = TRUE;
 
-      gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
-                          0, &codigo,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          1, &codigo,
                           6, &stock,
                           -1);
 
       if (stock == 0)
         {
-          gtk_list_store_remove (GTK_LIST_STORE (ingreso->store), &iter);
-
           DeleteProduct (codigo);
+          gtk_list_store_remove (GTK_LIST_STORE (store), &iter);
         }
       else
-        ErrorMSG (GTK_WIDGET (selection), "Solo se puede eliminar productos \n con stock mayor a 0");
+        ErrorMSG (GTK_WIDGET (treeview), "Solo se puede eliminar productos \n con stock mayor a 0");
       Deleting = FALSE;
     }
 }
