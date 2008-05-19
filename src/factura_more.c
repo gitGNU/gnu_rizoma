@@ -36,6 +36,18 @@
 #include"postgres-functions.h"
 #include"boleta.h"
 
+/**
+ * Generate the neccesary invoice postscript files to be printed.
+ *
+ * @param sell_type the type of sell, at the momment must be always FACTURA
+ * @param rut the rut of the client
+ * @param total the total amount of the sale (not neccesary the total
+ * amount of the invoice
+ * @param num the num of the invoice (currently not being used)
+ * @param products the list of products
+ *
+ * @return 0 if the invoices could be generated and printed
+ */
 gint
 PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *products)
 {
@@ -51,8 +63,10 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   gint fact_num = num;
   gboolean usado = FALSE;
   gint i;
+  gchar *print_command;
 
   aux_rut = g_strdup(rut);
+  print_command = rizoma_get_value ("PRINT_COMMAND");
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p || ' ' || apell_m AS name, "
 		      "direccion, giro, comuna, telefono FROM cliente where rut=%s",
@@ -81,6 +95,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
 	  fact_num = get_ticket_number (FACTURA);
 	  file_to_print = PrintFactura(client, rut, address, giro, comuna, fono, aux_list, fact_num);
 	  set_ticket_number (fact_num, FACTURA);
+	  system (g_strdup_printf ("%s %s", print_command, file_to_print));
 	}
       else
 	g_printerr ("%s: calling without the proper sell_type\n", G_STRFUNC);
@@ -96,7 +111,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
  * @param rut the rut of the client
  * @param address the address of the client
  * @param giro the 'giro' of the client
- * @param comuna 
+ * @param comuna the comuna of the client
  * @param fono the contact phone of the client
  * @param products the list of products sold
  * @param num the number of the factura
@@ -264,6 +279,6 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   PS_delete (psdoc);
   PS_shutdown ();
 
-  g_print("factura: %s", filename);
+  g_printerr("factura: %s\n", filename);
   return filename;
 }
