@@ -495,6 +495,7 @@ GuardarModificacionesProducto (void)
     {
       SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
                                  cantidad_mayorista);
+
       GtkWidget *treeview;
       GtkTreeSelection *selec;
       GtkListStore *store;
@@ -520,6 +521,8 @@ GuardarModificacionesProducto (void)
 	  gtk_list_store_set (GTK_LIST_STORE (store), &iter,
 			      7, atoi(new_venta),
                           -1);
+	  statusbar_push (GTK_STATUSBAR(gtk_builder_get_object(builder, "statusbar")),
+			  "Ha sido editado el producto existosamente", 5000);
 	}
       //FillFields (NULL, NULL);
     }
