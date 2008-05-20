@@ -455,27 +455,73 @@ AjusteWin (GtkWidget *widget, gpointer data)
 void
 GuardarModificacionesProducto (void)
 {
-  gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (barcode_entry)));
-  gchar *stock_minimo = g_strdup (gtk_entry_get_text (GTK_ENTRY (stock_min)));
-  gchar *margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (margen_entry)));
-  gchar *new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (precio_venta)));
-  gboolean canjeable = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (canje_buttons_t));
-  gint tasa = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (tasa_canje))));
-  gboolean mayorista = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (mayor_buttons_t));
-  gint precio_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (mayor_precio))));
-  gint cantidad_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (mayor_cantidad))));
+  GtkWidget *widget;
+  gchar *barcode;
+  gchar *stock_minimo;
+  gchar *margen;
+  gchar *new_venta;
+  gboolean mayorista;
+  gint precio_mayorista;
+  gint cantidad_mayorista;
 
-  if (strcmp (stock_minimo, "") == 0)
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
+  barcode = g_strdup (gtk_label_get_text (GTK_LABEL (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
+  stock_minimo = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
+  margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_price"));
+  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
+  mayorista = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_pricemayorist"));
+  precio_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_cantmayorist"));
+  cantidad_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
+
+  if (g_str_equal (stock_minimo, ""))
     ErrorMSG (stock_min, "Debe setear stock minimo");
-  else if (strcmp (margen, "") == 0)
+  else if (g_str_equal (margen, ""))
     ErrorMSG (margen_entry, "Debe poner un valor de margen para el producto");
-  else if (strcmp (new_venta, "") == 0)
+  else if (g_str_equal (new_venta, ""))
     ErrorMSG (precio_venta, "Debe insertar un precio de venta");
   else
     {
-      SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, canjeable, tasa, mayorista, precio_mayorista,
+      SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
                                  cantidad_mayorista);
-      FillFields (ingreso->selection, NULL);
+      GtkWidget *treeview;
+      GtkTreeSelection *selec;
+      GtkListStore *store;
+      GtkTreeIter iter;
+      gchar *selec_barcode;
+
+      treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_find_products"));
+      selec = gtk_tree_view_get_selection (GTK_TREE_VIEW(treeview));
+      store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW(treeview)));
+      if (gtk_tree_selection_get_selected (selec, NULL, &iter) == TRUE)
+	{
+
+	  gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+			      1, &selec_barcode,
+			      -1);
+
+	  if (!(g_str_equal(barcode, selec_barcode)))
+	    {
+	      g_printerr("\nThe barcode selected in the treeview is diferent from the one that is being modified\n");
+	      return;
+	    }
+
+	  gtk_list_store_set (GTK_LIST_STORE (store), &iter,
+			      7, atoi(new_venta),
+                          -1);
+	}
+      //FillFields (NULL, NULL);
     }
 }
 
@@ -595,16 +641,16 @@ admini_box ()
                                          PutPoints (ContriTotalStock ())));
   //products list
   store = gtk_list_store_new (10,
-			      G_TYPE_STRING, //shortcode
-			      G_TYPE_STRING, //barcode
-			      G_TYPE_STRING, //description
-			      G_TYPE_STRING, //brand
-			      G_TYPE_INT,    //cantidad
-			      G_TYPE_STRING, //unit
-			      G_TYPE_INT,    //stock
-			      G_TYPE_INT,    //price
-			      G_TYPE_STRING,
-			      G_TYPE_BOOLEAN);
+			      G_TYPE_STRING,  //0 shortcode
+			      G_TYPE_STRING,  //1 barcode
+			      G_TYPE_STRING,  //2 description
+			      G_TYPE_STRING,  //3 brand
+			      G_TYPE_INT,     //4 cantidad
+			      G_TYPE_STRING,  //5 unit
+			      G_TYPE_INT,     //6 stock
+			      G_TYPE_INT,     //7 price
+			      G_TYPE_STRING,  //8
+			      G_TYPE_BOOLEAN);//9
 
   treeview = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
   gtk_tree_view_set_model (GTK_TREE_VIEW(treeview), GTK_TREE_MODEL(store));
@@ -950,13 +996,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       precio_mayorista = atoi (PQvaluebycol (res, 0, "precio_mayor"));
 
       cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));
-
-      gtk_list_store_set (GTK_LIST_STORE (store), &iter,
-                          6, atoi (PQvaluebycol (res, 0, "stock")),
-                          7, atoi (PQvaluebycol (res, 0, "margen_promedio")),
-                          8, (stock <= atoi (PQvaluebycol (res, 0, "stock_min")) &&
-                              atoi (PQvaluebycol (res, 0, "stock_min")) != 0) ? "Red" : "Black",
-                          -1);
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
