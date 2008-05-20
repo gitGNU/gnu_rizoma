@@ -249,7 +249,7 @@ display_calendar (GtkEntry *entry)
   gtk_widget_show (window);
 }
 
-/*
+/**
  * Validate a string using a regular expression
  *
  * @param pattern regexp string to run
@@ -264,4 +264,43 @@ validate_string (gchar *pattern, gchar *subject)
   gboolean valid = g_regex_match (regex, subject, 0, NULL);
 
   return valid;
+}
+
+gboolean
+statusbar_pop (GtkStatusbar *statusbar)
+{
+
+  guint *context_id;
+
+  context_id = g_object_get_data (G_OBJECT(statusbar), "context_id");
+
+  gtk_statusbar_pop (GTK_STATUSBAR(statusbar), *context_id);
+
+  g_free (context_id);
+
+  return FALSE;
+}
+
+/**
+ * This is a helper function to show a message in the status bar in a
+ * simple way.
+ *
+ * @param statusbar The statusbar that will be used to display the text
+ * @param text The message that will be displayed in the statusbar
+ * @param duration The duration of the message
+ */
+void
+statusbar_push (GtkStatusbar *statusbar, const gchar *text, guint duration)
+{
+  guint *context_id;
+  guint message_id;
+
+  context_id = g_malloc(sizeof(guint));
+
+  *context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(statusbar), "rizoma-compras");
+  message_id = gtk_statusbar_push (statusbar, *context_id, text);
+
+  g_object_set_data (G_OBJECT(statusbar), "context_id", context_id);
+
+  g_timeout_add (duration, (GSourceFunc) statusbar_pop, (gpointer) statusbar);
 }
