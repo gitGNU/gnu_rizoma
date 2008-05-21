@@ -1282,43 +1282,27 @@ BuscarProductosParaListar (void)
 void
 ModificarProducto (void)
 {
+  GtkWidget *widget;
+  GtkWidget *combo_imp;
+  GtkTreeIter iter;
+  GtkListStore *combo_store;
+
   gchar *q;
   gchar *barcode;
-  gchar *codigo;
-  gchar *description;
-  gchar *marca;
-  gchar *unidad;
-  gchar *contenido;
-  gchar *precio;
-  gchar *active_char;
-
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *label;
-  GtkWidget *button;
-  GtkTreeIter iter;
   gint active;
+  gint otros_index;
 
   PGresult *res;
   gint tuples, i;
-  GSList *group;
 
-  gtk_widget_set_sensitive (main_window, FALSE);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
+  barcode = g_strdup(gtk_label_get_text(GTK_LABEL(widget)));
 
-  if (gtk_tree_selection_get_selected (ingreso->selection, NULL, &iter) == TRUE)
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
-                          1, &barcode,
-                          -1);
-    }
-  else
-    {
-      return;
-    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
+  gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, unidad, "
                        "contenido, precio FROM select_producto(%s)", barcode);
-
   res = EjecutarSQL(q);
   g_free(q);
 
@@ -1328,338 +1312,99 @@ ModificarProducto (void)
       return;
     }
 
-  codigo = PQgetvalue (res, 0, 0);
-  description = PQgetvalue(res, 0, 1);
-  marca = PQgetvalue(res, 0, 2);
-  unidad = PQgetvalue( res, 0, 3);
-  contenido = PQgetvalue (res, 0, 4);
-  precio = PQgetvalue (res, 0, 5);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_shortcode"));
+  gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "codigo_corto"));
 
-  compra->see_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (compra->see_window),
-                           GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_title (GTK_WINDOW (compra->see_window),
-                        "Descripcion Producto");
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_desc"));
+  gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "descripcion"));
 
-  gtk_widget_show (compra->see_window);
-  gtk_window_present (GTK_WINDOW (compra->see_window));
-  //#  gtk_window_set_transient_for (GTK_WINDOW (compra->see_window), GTK_WINDOW (main_window));
-  g_signal_connect (G_OBJECT (compra->see_window), "destroy",
-                    G_CALLBACK (CloseProductDescription), NULL);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_brand"));
+  gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "marca"));
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (compra->see_window), vbox);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_unit"));
+  gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol ( res, 0, "unidad"));
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_content"));
+  gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "contenido"));
 
-  button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_price"));
+  gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "precio"));
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseProductDescription), NULL);
-
-  compra->see_button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
-  gtk_widget_show (compra->see_button);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_button), "clicked",
-                    G_CALLBACK (Save), NULL);
-
-  gtk_widget_set_sensitive (compra->see_button, FALSE);
-
-  label = gtk_label_new ("Detalle del Producto");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Codigo: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_codigo = gtk_entry_new_with_max_length (10);
-  gtk_entry_set_text (GTK_ENTRY (compra->see_codigo), codigo);
-  gtk_widget_show (compra->see_codigo);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_codigo, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_codigo), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Codigo de Barras: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_barcode = gtk_entry_new_with_max_length (14);
-  gtk_entry_set_text (GTK_ENTRY (compra->see_barcode), barcode);
-  gtk_widget_show (compra->see_barcode);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_barcode, FALSE, FALSE, 3);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Descripcion: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_description = gtk_entry_new_with_max_length (35);
-  gtk_entry_set_text (GTK_ENTRY (compra->see_description), description);
-  gtk_widget_show (compra->see_description);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_description, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_description), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Marca: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_marca = gtk_entry_new_with_max_length (35);
-  gtk_entry_set_text (GTK_ENTRY (compra->see_marca), marca);
-  gtk_widget_show (compra->see_marca);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_marca, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_marca), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Unidad: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_unidad = gtk_entry_new_with_max_length (10);
-  gtk_entry_set_text (GTK_ENTRY (compra->see_unidad), unidad);
-  gtk_widget_show (compra->see_unidad);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_unidad, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_unidad), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Contenido: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_contenido = gtk_entry_new_with_max_length (10);
-  gtk_entry_set_text (GTK_ENTRY (compra->see_contenido), contenido);
-  gtk_widget_show (compra->see_contenido);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_contenido, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_contenido), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Precio: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->see_precio = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (compra->see_precio), precio);
-  gtk_widget_show (compra->see_precio);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->see_precio, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (compra->see_precio), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Venta Fraccionaria: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  button = gtk_radio_button_new_with_label (NULL, "No");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
-
-  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-  button = gtk_radio_button_new_with_label (group, "Si");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  fraccionm = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button));
-
-  if (VentaFraccion (barcode) == TRUE)
-    {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-      fraccionm = TRUE;
-    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_fraccionaria"));
+  if (VentaFraccion (barcode))
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
   else
-    {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
-      fraccionm = FALSE;
-    }
-
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (ToggleSelect), (gpointer)"3");
-
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  /*
-    hbox = gtk_hbox_new (FALSE, 3);
-    gtk_widget_show (hbox);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-    label = gtk_label_new ("Familia del Producto: ");
-    gtk_widget_show (label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
 
-    res = EjecutarSQL ("SELECT * FROM familias ORDER BY id DESC");
-
-    tuples = PQntuples (res);
-
-    combo_fami = gtk_combo_box_new_text ();
-    gtk_box_pack_end (GTK_BOX (hbox), combo_fami, FALSE, FALSE, 3);
-    gtk_widget_show (combo_fami);
-
-    for (i = 0; i < tuples; i++)
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_fami),
-    g_strdup_printf ("%s",
-    PQgetvalue (res, i, 1)));
-    active = GetFami (barcode);
-
-    gtk_combo_box_set_active (GTK_COMBO_BOX (combo_fami), active - 1);
-
-    g_signal_connect (G_OBJECT (combo_fami), "changed",
-    G_CALLBACK (ChangeSave), NULL);
-  */
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Producto Perecible: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  button = gtk_radio_button_new_with_label (NULL, "No");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-
-  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-  button = gtk_radio_button_new_with_label (group, "Si");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (ToggleSelect), (gpointer)"2");
-
-  if (strcmp (GetPerecible (barcode), "Perecible") == 0)
-    {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_perecible"));
+  if (g_str_equal (GetPerecible (barcode), "Perecible"))
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
   else
-    {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
-    }
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (ChangeSave), NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Incluye IVA: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  button = gtk_radio_button_new_with_label (NULL, "No");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
 
-  group = gtk_radio_button_get_group (GTK_RADIO_BUTTON (button));
-  button = gtk_radio_button_new_with_label (group, "Si");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (ToggleSelect), (gpointer)"1");
-
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
   if (GetIVA (barcode) != -1)
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
   else
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (ChangeSave), NULL);
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  combo_imp = GTK_WIDGET(gtk_builder_get_object(builder, "cmbbox_edit_prod_extratax"));
+  combo_store = GTK_LIST_STORE(gtk_combo_box_get_model (GTK_COMBO_BOX(combo_imp)));
 
-  label = gtk_label_new ("Impuestos Adicionales: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
+  if (combo_store == NULL)
+    {
+      GtkCellRenderer *cell;
 
+      combo_store = gtk_list_store_new (2,
+					G_TYPE_INT,    //0 id
+					G_TYPE_STRING, //1 descripcion
+					G_TYPE_FLOAT);//2 monto
+
+      gtk_combo_box_set_model (GTK_COMBO_BOX(combo_imp), GTK_TREE_MODEL(combo_store));
+
+      cell = gtk_cell_renderer_text_new ();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo_imp), cell, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo_imp), cell,
+				      "text", 1,
+				      NULL);
+    }
+
+  gtk_list_store_clear (combo_store);
+
+  gtk_list_store_append (combo_store, &iter);
+
+  gtk_list_store_set (combo_store, &iter,
+		      0, -1,
+		      1, "Ninguno",
+		      2, 0.0,
+		      -1);
+
+
+  otros_index = GetOtrosIndex(barcode);
+  active = -1;
 
   res = EjecutarSQL ("SELECT id, descripcion, monto "
-                     "FROM impuestos WHERE id!=0");
-
+                     "FROM impuesto WHERE id!=0");
   tuples = PQntuples (res);
-
-  combo_imp = gtk_combo_box_new_text ();
-  gtk_box_pack_end (GTK_BOX (hbox), combo_imp, FALSE, FALSE, 3);
-  gtk_widget_show (combo_imp);
-
-  gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp), "Ninguno");
-
-  active_char = GetOtrosName (barcode);
 
   for (i = 0; i < tuples; i++)
     {
-      gtk_combo_box_append_text (GTK_COMBO_BOX (combo_imp),
-                                 g_strdup_printf ("%s",
-                                                  PQgetvalue (res, i, 1)));
+      gtk_list_store_append (combo_store, &iter);
 
-      if (active_char != NULL)
-        {
-          if (strcmp (PQgetvalue (res, i, 1), active_char) == 0 &&
-              strcmp (PQgetvalue (res, i, 1), ""))
-            active = i;
-        }
-      else
-        active = -1;
-
+      gtk_list_store_set (combo_store, &iter,
+			  0, atoi (PQvaluebycol(res, i, "id")),
+			  1, PQvaluebycol (res, i, "descripcion"),
+			  2, g_ascii_strtod (PQvaluebycol(res, i, "monto"), NULL),
+			  -1);
+      if (atoi (PQvaluebycol(res, i, "id")) == otros_index)
+	active = i+1;
     }
 
-  //active = GetOtrosIndex (barcode);
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo_imp), active != -1 ? active : 0);
 
-
-  gtk_combo_box_set_active (GTK_COMBO_BOX (combo_imp), active != -1 ? active+1 : 0);
-
-  g_signal_connect (G_OBJECT (combo_imp), "changed",
-                    G_CALLBACK (ChangeSave), NULL);
-
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_product"));
+  gtk_widget_show_all(widget);
 }
