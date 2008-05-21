@@ -55,27 +55,37 @@ LaunchApp (gchar *file)
 void
 PrintTree (GtkWidget *widget, gpointer data)
 {
-  Print *print = (Print *) data;
-  GtkTreeModel *model = gtk_tree_view_get_model (print->tree);
+  Print *print;
+  GtkTreeModel *model;
   GtkTreeIter iter;
   GtkTreeIter son;
   GType column_type;
-  gint columns = gtk_tree_model_get_n_columns (model);
+  gint columns;
   gint i;
   gint cols = 0;
-  gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
+  gchar *temp_directory;
   gchar *file;
   FILE *fp;
 
-  if (gtk_tree_model_get_iter_first (model, &iter) == FALSE)
-    return;
+  print = (Print *) data;
+  model = gtk_tree_view_get_model (print->tree);
+  columns = gtk_tree_model_get_n_columns (model);
+  temp_directory = rizoma_get_value ("TEMP_FILES");
 
+
+  if (!(gtk_tree_model_get_iter_first (model, &iter)))
+    {
+      g_printerr("%s: could not be obtained the iter for the first element", G_STRFUNC);
+      return;
+    }
+
+  //what for is this?
   while (print->cols[cols].name != NULL)
     cols++;
 
   /* Si es NULL */
   if (print->date_string == NULL)
-    print->date_string = CurrentDate (); /* Asumismo la fecha actual */
+    print->date_string = CurrentDate (); /* Asumimos la fecha actual */
 
   file = g_strdup_printf ("%s/informe-%s.csv", temp_directory, print->date_string);
 
@@ -87,7 +97,7 @@ PrintTree (GtkWidget *widget, gpointer data)
       return;
     }
   else
-    printf ("Working on %s\n", file);
+    g_printerr ("Working on %s\n", file);
 
   fprintf (fp, "%s,,,,\n%s\n", print->title, print->date_string);
 
