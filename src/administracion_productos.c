@@ -351,104 +351,76 @@ AjustarMercaderia (GtkWidget *widget, gpointer data)
 void
 AjusteWin (GtkWidget *widget, gpointer data)
 {
-  GtkWidget *window;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *entry;
-  GtkWidget *label;
-  GtkWidget *button;
   GtkWidget *aux_widget;
-  GtkListStore *store;
+  GtkWidget *combo_merma;
+  GtkListStore *combo_store;
 
   PGresult *res;
   gint tuples, i;
   gchar *barcode;
   GtkTreeIter iter;
-  GtkTreeSelection *selection;
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
+  barcode = g_strdup(gtk_label_get_text(GTK_LABEL(aux_widget)));
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (aux_widget));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model (GTK_TREE_VIEW (aux_widget)));
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+  if (!(g_str_equal(barcode, "")))
     {
 
-      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-                          1, &barcode,
-                          -1);
-
-      window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gtk_window_set_title (GTK_WINDOW (window), "Ajuste de Mercadería");
-      gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-      gtk_widget_show (window);
-      gtk_window_present (GTK_WINDOW (window));
-      //      gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-      gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-      gtk_widget_set_size_request (window, 220, -1);
-
-      g_signal_connect (G_OBJECT (window), "destroy",
-                        G_CALLBACK (AjustarMercaderia), NULL);
-
-      vbox = gtk_vbox_new (FALSE, 3);
-      gtk_container_add (GTK_CONTAINER (window), vbox);
-      gtk_widget_show (vbox);
-
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-      gtk_widget_show (hbox);
-
-      label = gtk_label_new ("");
-      gtk_label_set_markup (GTK_LABEL (label),
-                            g_strdup_printf ("Stock: %.2f", GetCurrentStock (barcode)));
-      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-      gtk_widget_show (label);
-
-      label = gtk_label_new ("Inventario:");
-      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-      gtk_widget_show (label);
-
-      entry = gtk_entry_new ();
-      gtk_box_pack_start (GTK_BOX (hbox), entry, FALSE, FALSE, 3);
-      gtk_widget_show (entry);
-
-      gtk_window_set_focus (GTK_WINDOW (window), entry);
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_adjust_current_stock"));
+      gtk_label_set_markup (GTK_LABEL (aux_widget),
+                            g_strdup_printf ("%.3f", GetCurrentStock (barcode)));
 
       res = EjecutarSQL ("SELECT id, nombre FROM select_tipo_merma() "
                          "AS (id int4, nombre varchar(20))");
 
       tuples = PQntuples (res);
 
-      combo_merma = gtk_combo_box_new_text ();
-      gtk_box_pack_start (GTK_BOX (vbox), combo_merma, FALSE, FALSE, 3);
-      gtk_widget_show (combo_merma);
+      combo_merma = GTK_WIDGET(gtk_builder_get_object(builder, "cmbbox_adjust_motive"));
+      combo_store = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo_merma)));
+
+      if (combo_store == NULL)
+	{
+	  GtkCellRenderer *cell;
+	  //merma
+	  combo_store = gtk_list_store_new (2,
+					    G_TYPE_INT,    //0 id
+					    G_TYPE_STRING);//1 nombre
+
+	  gtk_combo_box_set_model (GTK_COMBO_BOX(combo_merma), GTK_TREE_MODEL(combo_store));
+
+	  cell = gtk_cell_renderer_text_new ();
+	  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo_merma), cell, TRUE);
+	  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo_merma), cell,
+					  "text", 1,
+					  NULL);
+	}
+
+      gtk_list_store_clear (combo_store);
 
       for (i = 0; i < tuples; i++)
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combo_merma),
-                                   g_strdup_printf ("%s", PQgetvalue (res, i, 1)));
+	{
+	  gtk_list_store_append (combo_store, &iter);
 
-      g_signal_connect (G_OBJECT (entry), "activate",
-                        G_CALLBACK (SendCursorTo), combo_merma);
+	  gtk_list_store_set (combo_store, &iter,
+			      0, atoi (PQvaluebycol(res, i, "id")),
+			      1, PQvaluebycol(res, i, "nombre"),
+			      -1);
+	}
 
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-      gtk_widget_show (hbox);
+      //signal connected here to pass athe user data
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_adjust_ok"));
+      g_signal_connect (G_OBJECT (widget), "clicked",
+                        G_CALLBACK (AjustarMercaderia),
+			(gpointer)gtk_builder_get_object(builder, "entry_adjust_new_stock"));
 
-      button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
+      gtk_widget_grab_focus(aux_widget);
 
-      g_signal_connect (G_OBJECT (button), "clicked",
-                        G_CALLBACK (AjustarMercaderia), NULL);
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_adjust_product"));
+      gtk_widget_show_all(aux_widget);
 
-      button = gtk_button_new_from_stock (GTK_STOCK_OK);
-      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-                        G_CALLBACK (AjustarMercaderia), (gpointer)entry);
-
-      g_signal_connect (G_OBJECT (combo_merma), "changed",
-                        G_CALLBACK (SendCursorTo), button);
     }
 }
 
