@@ -26,8 +26,6 @@
 
 void SearchProductHistory (GtkEntry *entry, gchar *barcode);
 
-void CloseProductDescription (void);
-
 void ShowProductDescription (void);
 
 void ChangeSave (void);

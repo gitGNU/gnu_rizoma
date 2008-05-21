@@ -1271,15 +1271,6 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 }
 
 void
-CloseProductDescription (void)
-{
-  gtk_widget_destroy (compra->see_window);
-
-  compra->see_window = NULL;
-  gtk_widget_set_sensitive (main_window, TRUE);
-}
-
-void
 ShowProductDescription (void)
 {
   gchar *q;
@@ -1625,6 +1616,13 @@ ChangeSave (void)
   gtk_widget_set_sensitive (compra->see_button, TRUE);
 }
 
+/**
+ * Callback connected to the button of the dialog used to modificate a
+ * product in the 'Mercaderia' tab
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ */
 void
 Save (GtkWidget *widget, gpointer data)
 {
@@ -1652,17 +1650,7 @@ Save (GtkWidget *widget, gpointer data)
     }
   else
     otros = "";
-  /*
-    if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_fami)) != -1)
-    {
-    model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_fami));
-    gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_fami), &iter);
 
-    gtk_tree_model_get (model, &iter,
-    0, &familia,
-    -1);
-    }
-  */
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
                      iva, otros, barcode, familia, perecible, fraccion);
 

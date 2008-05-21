@@ -1253,7 +1253,8 @@ BuscarProductosParaListar (void)
 
   resultados = PQntuples (res);
 
-  gtk_label_set_markup (GTK_LABEL (label_found),
+  widget = GTK_WIDGET(gtk_builder_get_object (builder,"lbl_find_num_products"));
+  gtk_label_set_markup (GTK_LABEL (widget),
                         g_strdup_printf ("<b>%d producto(s)</b>", resultados));
 
   widget = GTK_WIDGET(gtk_builder_get_object (builder,"treeview_find_products"));
@@ -1358,10 +1359,10 @@ ModificarProducto (void)
     {
       GtkCellRenderer *cell;
 
-      combo_store = gtk_list_store_new (2,
+      combo_store = gtk_list_store_new (3,
 					G_TYPE_INT,    //0 id
 					G_TYPE_STRING, //1 descripcion
-					G_TYPE_FLOAT);//2 monto
+					G_TYPE_DOUBLE);//2 monto
 
       gtk_combo_box_set_model (GTK_COMBO_BOX(combo_imp), GTK_TREE_MODEL(combo_store));
 
@@ -1407,4 +1408,14 @@ ModificarProducto (void)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_product"));
   gtk_widget_show_all(widget);
+}
+
+void
+CloseProductDescription (void)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_product"));
+
+  gtk_widget_hide (widget);
 }

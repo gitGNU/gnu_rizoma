@@ -46,4 +46,6 @@ void BuscarProductosParaListar (void);
 
 void ModificarProducto (void);
 
+void CloseProductDescription (void);
+
 #endif
