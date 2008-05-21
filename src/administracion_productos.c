@@ -314,38 +314,64 @@ DevolucionWindow (GtkWidget *widget, gpointer data)
 void
 AjustarMercaderia (GtkWidget *widget, gpointer data)
 {
+  gint merma_id;
   gint active;
   gdouble cantidad;
   //  gdouble stock;
   gchar *barcode;
   GtkTreeIter iter;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection
-    (GTK_TREE_VIEW (ingreso->treeview_products));
+  GtkListStore *store;
+  GtkWidget *aux_widget;
+  gchar *endptr=NULL;
 
-  if (data == NULL)
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
+  barcode = g_strdup(gtk_label_get_text(GTK_LABEL(aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
+  cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)))), &endptr);
+
+  if ((cantidad == 0) && g_str_equal(endptr, ""))
     {
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
+      ErrorMSG(aux_widget, "Debe ingresar un número mayor que cero");
       return;
     }
 
-  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_merma));
-  // cantidad = (gdouble)atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (data))));
-  cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (data)))), (char **)NULL);
-
-  gtk_tree_selection_get_selected (selection, NULL, &iter);
-  gtk_tree_model_get (GTK_TREE_MODEL (ingreso->store), &iter,
-                      1, &barcode,
-                      -1);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "cmbbox_adjust_motive"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (aux_widget));
 
   if (active == -1)
-    ErrorMSG (GTK_WIDGET (active), "Debe Seleccionar un motivo de la merma");
-  else
     {
-      AjusteStock (cantidad, active+1, barcode);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-
-      FillFields (ingreso->selection, NULL);
+      ErrorMSG (GTK_WIDGET (aux_widget), "Debe Seleccionar un motivo de la merma");
+      return;
     }
+
+  store = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(aux_widget)));
+  if (!(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, g_strdup_printf("%d",active))))
+    {
+      g_printerr("%s: Troubles with the path", G_STRFUNC);
+      return;
+    }
+
+  gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+		      0, &merma_id,
+		      -1);
+
+  AjusteStock (cantidad, merma_id, barcode);
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_adjust_product"));
+  gtk_widget_hide (aux_widget);
+
+  FillFields (NULL, NULL);
+}
+
+void
+CloseAjusteWin (GtkButton *button, gpointer data)
+{
+  GtkWidget *aux_widget;
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_adjust_product"));
+  gtk_widget_hide (aux_widget);
+  return;
 }
 
 void
@@ -359,6 +385,10 @@ AjusteWin (GtkWidget *widget, gpointer data)
   gint tuples, i;
   gchar *barcode;
   GtkTreeIter iter;
+
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
   barcode = g_strdup(gtk_label_get_text(GTK_LABEL(aux_widget)));
@@ -408,12 +438,6 @@ AjusteWin (GtkWidget *widget, gpointer data)
 			      1, PQvaluebycol(res, i, "nombre"),
 			      -1);
 	}
-
-      //signal connected here to pass athe user data
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_adjust_ok"));
-      g_signal_connect (G_OBJECT (widget), "clicked",
-                        G_CALLBACK (AjustarMercaderia),
-			(gpointer)gtk_builder_get_object(builder, "entry_adjust_new_stock"));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
       gtk_widget_grab_focus(aux_widget);

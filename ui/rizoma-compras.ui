@@ -6,7 +6,7 @@
     <property name="title" translatable="yes">Ajuste de Mercader&#xED;a</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="transient_for">wnd_compras</property>
-    <signal name="delete_event" handler="AjustarMercaderia"/>
+    <signal name="delete_event" handler="CloseAjusteWin"/>
     <child>
       <object class="GtkVBox" id="vbox20">
         <property name="visible">True</property>
@@ -103,7 +103,7 @@
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="AjustarMercaderia"/>
+                <signal name="clicked" handler="CloseAjusteWin"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -118,6 +118,7 @@
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="AjustarMercaderia"/>
               </object>
               <packing>
                 <property name="expand">False</property>

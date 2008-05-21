@@ -48,4 +48,5 @@ void ModificarProducto (void);
 
 void CloseProductDescription (void);
 
+void CloseAjusteWin (GtkButton *button, gpointer data);
 #endif
