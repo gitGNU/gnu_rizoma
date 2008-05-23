@@ -110,6 +110,8 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
 void
 ListarProveedores (void)
 {
+  GtkWidget *treeview;
+  GtkListStore *store;
   PGresult *res;
   gint tuples, i;
   GtkTreeIter iter;
@@ -118,14 +120,16 @@ ListarProveedores (void)
   res = EjecutarSQL ("SELECT rut, dv, nombre, giro, contacto FROM buscar_proveedor('%') ORDER BY nombre ASC");
 
   tuples = PQntuples (res);
+  treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_prov_search"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
 
-  gtk_tree_store_clear (GTK_TREE_STORE (proveedores_store));
+  gtk_list_store_clear (GTK_TREE_STORE (store));
 
   for (i = 0; i < tuples; i++)
     {
       str_axu = g_strconcat(PQvaluebycol(res, i, "rut"), "-", PQvaluebycol(res, i, "dv"), NULL);
-      gtk_tree_store_append (GTK_TREE_STORE (proveedores_store), &iter, NULL);
-      gtk_tree_store_set (GTK_TREE_STORE (proveedores_store), &iter,
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
 			  0, str_axu,
 			  1, PQvaluebycol (res, i, "nombre"),
 			  2, PQvaluebycol (res, i, "giro"),
