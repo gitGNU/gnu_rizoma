@@ -1156,6 +1156,9 @@ compras_win ()
   //mercaderia
   admini_box();
 
+  //setup the providers tab
+  proveedores_box();
+
   gtk_widget_show_all (compras_gui);
 }
 
