@@ -31,6 +31,7 @@
 #include"compras.h"
 #include"credito.h"
 #include"errors.h"
+#include"utils.h"
 
 GtkWidget *rut;
 GtkWidget *razon;
@@ -238,37 +239,37 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
 
   wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addprovider"));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_rut"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_rut"));
   rut_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_dv"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_dv"));
   rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_name"));
   nombre_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_addr"));
   direccion_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_city"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_city"));
   ciudad_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_comuna"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_comuna"));
   comuna_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_phone"));
   telefono_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_email"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_email"));
   email_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_web"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_web"));
   web_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_contact"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_contact"));
   contacto_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_giro"));
   giro_c = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
 
@@ -334,37 +335,37 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 {
   GtkWidget *aux_widget;
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_rut"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_rut"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_dv"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_dv"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_name"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_addr"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_comuna"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_comuna"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_city"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_city"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_phone"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_email"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_email"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_web"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_web"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_contact"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_contact"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_addprov_giro"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addprovider"));
@@ -377,19 +378,52 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 void
 ModificarProveedor (void)
 {
-  gchar *rut_c = (gchar *) gtk_label_get_text (GTK_LABEL (rut));
-  gchar *razon_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (razon));
-  gchar *direccion_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (direccion));
-  gchar *comuna_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (comuna));
-  gchar *ciudad_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (ciudad));
-  gchar *fono_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (fono));
-  gchar *web_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (web));
-  gchar *contacto_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (contacto));
-  gchar *email_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (email));
-  gchar *giro_c = (gchar *) gtk_entry_get_text (GTK_ENTRY (giro));
+  GtkWidget *widget;
+  gchar *rut_c;
+  gchar *razon_c;
+  gchar *direccion_c;
+  gchar *comuna_c;
+  gchar *ciudad_c;
+  gchar *fono_c;
+  gchar *web_c;
+  gchar *contacto_c;
+  gchar *email_c;
+  gchar *giro_c;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
+  rut_c = g_strdup(gtk_label_get_text (GTK_LABEL (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_razon"));
+  razon_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
+  direccion_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_comuna"));
+  comuna_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_city"));
+  ciudad_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
+  fono_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_web"));
+  web_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_contact"));
+  contacto_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_mail"));
+  email_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
+  giro_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
 
   SetModificacionesProveedor (rut_c, razon_c, direccion_c, comuna_c, ciudad_c, fono_c,
                               web_c, contacto_c, email_c, giro_c);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+  statusbar_push (GTK_STATUSBAR(widget), "El proveedor ha sido actualizado exitosamente", 3000);
 }
 
 void
