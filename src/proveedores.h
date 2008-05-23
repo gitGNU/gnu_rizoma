@@ -23,7 +23,7 @@
 
 #define PROVEEDORES_FUNCTIONS_H
 
-void proveedores_box (GtkWidget *main_box);
+void proveedores_box ();
 
 void ListarProveedores (void);
 

@@ -67,12 +67,17 @@ GtkWidget *proveedores_tree;
 void
 BuscarProveedor (GtkWidget *widget, gpointer data)
 {
+  GtkWidget *aux_widget;
   GtkTreeIter iter;
+  GtkListStore *store;
   PGresult *res;
   gint tuples, i;
   gchar *str_axu;
   gchar *q;
-  gchar *string = g_strdup (gtk_entry_get_text (GTK_ENTRY (search_entry)));
+  gchar *string;
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_search"));
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
   q = g_strdup_printf ("SELECT rut, dv, nombre, giro, contacto "
 		       "FROM buscar_proveedor('%%%s%%')",
@@ -82,14 +87,17 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
 
   tuples = PQntuples (res);
 
-  gtk_tree_store_clear (proveedores_store);
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_prov_search"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+  gtk_list_store_clear (store);
 
   for (i = 0; i < tuples; i++)
     {
       str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
 			    PQvaluebycol (res, i, "dv"), NULL);
-      gtk_tree_store_append (GTK_TREE_STORE (proveedores_store), &iter, NULL);
-      gtk_tree_store_set (GTK_TREE_STORE (proveedores_store), &iter,
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
 			  0, str_axu,
 			  1, PQvaluebycol (res, i, "nombre"),
 			  2, PQvaluebycol (res, i, "giro"),
@@ -362,8 +370,9 @@ ModificarProveedor (void)
 }
 
 void
-proveedores_box (GtkWidget *main_box)
+proveedores_box ()
 {
+  GtkListStore *store;
   GtkWidget *button;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
@@ -372,14 +381,14 @@ proveedores_box (GtkWidget *main_box)
   proveedores_print = (Print *) g_malloc0 (sizeof (Print));
 
   //setup the gtktreeview and all the necesary objects
-  proveedores_store = gtk_tree_store_new (4,
-                                          G_TYPE_STRING,
-                                          G_TYPE_STRING,
-                                          G_TYPE_STRING,
-                                          G_TYPE_STRING);
+  store = gtk_list_store_new (4,
+			      G_TYPE_STRING,
+			      G_TYPE_STRING,
+			      G_TYPE_STRING,
+			      G_TYPE_STRING);
 
   proveedores_tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_prov_search"));
-  gtk_tree_view_set_model(GTK_TREE_VIEW(proveedores_tree), GTK_TREE_MODEL(proveedores_tree));
+  gtk_tree_view_set_model(GTK_TREE_VIEW(proveedores_tree), GTK_TREE_MODEL(store));
 
   /* g_signal_connect (G_OBJECT (gtk_tree_view_get_selection */
   /*                             (GTK_TREE_VIEW (proveedores_tree))), "changed", */
