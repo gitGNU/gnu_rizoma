@@ -311,7 +311,12 @@ DevolucionWindow (GtkWidget *widget, gpointer data)
                     G_CALLBACK (Devolucion), (gpointer)TRUE);
 }
 
-void
+/**
+ * This function is connected the accept button of the adjust stock window.
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ */void
 AjustarMercaderia (GtkWidget *widget, gpointer data)
 {
   gint merma_id;
@@ -364,7 +369,13 @@ AjustarMercaderia (GtkWidget *widget, gpointer data)
   FillFields (NULL, NULL);
 }
 
-void
+
+/**
+ * This function close the adjust stock window.
+ *
+ * @param button the button that emited the signal
+ * @param data the user data
+ */void
 CloseAjusteWin (GtkButton *button, gpointer data)
 {
   GtkWidget *aux_widget;
@@ -374,7 +385,13 @@ CloseAjusteWin (GtkButton *button, gpointer data)
   return;
 }
 
-void
+
+/**
+ * This function raise and setup the adjust stock window.
+ *
+ * @param widget The widget that emited the signal
+ * @param data The user data
+ */void
 AjusteWin (GtkWidget *widget, gpointer data)
 {
   GtkWidget *aux_widget;
@@ -448,6 +465,12 @@ AjusteWin (GtkWidget *widget, gpointer data)
     }
 }
 
+/**
+ * This callback is connected to the save button of the modificate
+ * product window.
+ *
+ * Saves the new properties of the product into the database.
+ */
 void
 GuardarModificacionesProducto (void)
 {
@@ -524,7 +547,15 @@ GuardarModificacionesProducto (void)
     }
 }
 
-void
+
+/**
+ * This callback is associated with the accept button of the adjust
+ * margin window.
+ *
+ * Saves the new stock of the product.
+ * @param editable
+ * @param data
+ */void
 ModificarMargenVenta (GtkEditable *editable, gpointer data)
 {
   gboolean margen = (gboolean) data;
@@ -603,8 +634,10 @@ ModificarMargenVenta (GtkEditable *editable, gpointer data)
 }
 
 /**
- * This function initialize the 'Mercaderia' tab
+ * This function initialize the 'Mercaderia' tab.
  *
+ * It must be called from the startup of the application, because this
+ * function setup the UI
  */
 void
 admini_box ()
@@ -924,7 +957,21 @@ FillEditFields (GtkTreeSelection *selection, gpointer data)
     }
 }
 
-void
+
+/**
+ * This function is the callback connected to the 'row-activated'
+ * signal of the GtkTreeView.
+ *
+ * It populates the labels and the entries with information associated
+ * with the product that user selected.
+ *
+ * Note: just pass NULL parameters and the function will work, the
+ * paremeter were not eliminated just for backward compatibility with
+ * old code.
+ *
+ * @param selection unused parameter
+ * @param data unused paramter
+ */void
 FillFields(GtkTreeSelection *selection, gpointer data)
 {
   GtkTreeIter iter;
@@ -1149,6 +1196,13 @@ FillFields(GtkTreeSelection *selection, gpointer data)
     }
 }
 
+/**
+ * This function is a callback connected to the delete product button
+ * present in the 'mercaderia' tab.
+ *
+ * @param button The button that emited the signal
+ * @param data the user data
+ */
 void
 EliminarProductoDB (GtkButton *button, gpointer data)
 {
@@ -1228,6 +1282,14 @@ SaveChanges (void)
     }
 }
 
+/**
+ * This function is the callback connected to the search button
+ * present in the 'mercaderia' tab.
+ *
+ * This populates the model with the result returned by the search
+ * function of the database
+ *
+ */
 void
 BuscarProductosParaListar (void)
 {
@@ -1276,6 +1338,11 @@ BuscarProductosParaListar (void)
     }
 }
 
+/**
+ * This function saves the modifications that the user entedered in
+ * the modification product window
+ *
+ */
 void
 ModificarProducto (void)
 {
@@ -1406,6 +1473,10 @@ ModificarProducto (void)
   gtk_widget_show_all(widget);
 }
 
+/**
+ * This function closes the modification product window
+ *
+ */
 void
 CloseProductDescription (void)
 {
