@@ -123,7 +123,7 @@ ListarProveedores (void)
   treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_prov_search"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)));
 
-  gtk_list_store_clear (GTK_TREE_STORE (store));
+  gtk_list_store_clear (store);
 
   for (i = 0; i < tuples; i++)
     {
@@ -140,17 +140,26 @@ ListarProveedores (void)
 }
 
 void
-LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
+LlenarDatosProveedor (GtkTreeView       *tree_view,
+		      GtkTreePath       *path,
+		      GtkTreeViewColumn *column,
+		      gpointer           user_data)
 {
+  GtkWidget *widget;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
   PGresult *res;
   GtkTreeIter iter;
   gchar *rut_proveedor;
   gchar **aux, *q;
 
+  selection = gtk_tree_view_get_selection(tree_view);
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(tree_view));
+
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     return;
 
-  gtk_tree_model_get (GTK_TREE_MODEL (proveedores_store), &iter,
+  gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 		      0, &rut_proveedor,
 		      -1);
 
@@ -160,30 +169,40 @@ LlenarDatosProveedor (GtkTreeSelection *selection, gpointer data)
   g_free (q);
   g_strfreev(aux);
 
-  if (res == NULL || PQntuples (res) == 0)
+  if ((res == NULL) || (PQntuples (res) == 0))
     return;
 
-  gtk_entry_set_text (GTK_ENTRY (razon), PQvaluebycol (res, 0, "nombre"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_razon"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "nombre"));
 
   q = g_strconcat(PQvaluebycol (res, 0, "rut"), "-", PQvaluebycol(res, 0, "dv"), NULL);
-  gtk_label_set_text (GTK_LABEL (rut), q);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
+  gtk_label_set_text (GTK_LABEL (widget), q);
   g_free (q);
 
-  gtk_entry_set_text (GTK_ENTRY (direccion), PQvaluebycol (res, 0, "direccion"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "direccion"));
 
-  gtk_entry_set_text (GTK_ENTRY (ciudad), PQvaluebycol (res, 0, "ciudad"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_city"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "ciudad"));
 
-  gtk_entry_set_text (GTK_ENTRY (comuna), PQvaluebycol (res, 0, "comuna"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_comuna"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "comuna"));
 
-  gtk_entry_set_text (GTK_ENTRY (fono), PQvaluebycol (res, 0, "telefono"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_phone"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "telefono"));
 
-  gtk_entry_set_text (GTK_ENTRY (web), PQvaluebycol (res, 0, "web"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_web"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "web"));
 
-  gtk_entry_set_text (GTK_ENTRY (contacto), PQvaluebycol (res, 0, "contacto"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_contact"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "contacto"));
 
-  gtk_entry_set_text (GTK_ENTRY (email), PQvaluebycol (res, 0, "email"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_mail"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "email"));
 
-  gtk_entry_set_text (GTK_ENTRY (giro), PQvaluebycol (res, 0, "giro"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "giro"));
 }
 
 void
