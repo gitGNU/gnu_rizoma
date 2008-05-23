@@ -846,12 +846,17 @@ compras_win ()
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-compras.ui", &error);
-  gtk_builder_connect_signals (builder, NULL);
-
 
   if (error != NULL) {
     g_printerr ("%s\n", error->message);
   }
+
+  gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
+
+  if (error != NULL) {
+    g_printerr ("%s\n", error->message);
+  }
+  gtk_builder_connect_signals (builder, NULL);
 
   compras_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_compras"));
 
