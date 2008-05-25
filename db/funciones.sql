@@ -322,7 +322,7 @@ IF NOT FOUND THEN
 END IF;
 
 
-query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,
+query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
 		    (stock::float / ($S$ || prod_vendidos || $S$::float / $S$ || days || $S$::float)::float) AS stock_day,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
@@ -349,7 +349,6 @@ FOR datos IN EXECUTE query LOOP
     stock_min := datos.stock_min;
     stock_day := datos.stock_day;
     margen_promedio := datos.margen_promedio;
-    unidades_merma := datos.merma_unid;
     contrib_agregada := round(datos.contrib_agregada);
     unidades_merma := datos.unidades_merma;
     mayorista := datos.mayorista;
