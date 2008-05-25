@@ -306,7 +306,7 @@ declare
 	prod_vendidos double precision;
 BEGIN
 
-select select_vendidos(codigo_barras, codigo_corto) into prod_vendidos;
+select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
 
 if prod_vendidos = 0 or prod_vendidos = NULL then
    prod_vendidos := 1; -- to avoid division by zero
@@ -314,13 +314,12 @@ end if;
 
 SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
        FROM compra_detalle, producto, compra
-       WHERE producto.barcode= codigo_barras AND compra_detalle.barcode_product=producto.barcode
+       WHERE (producto.barcode= codigo_barras or producto.codigo_corto = in_codigo_corto) AND compra_detalle.barcode_product=producto.barcode
        AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
 
 IF NOT FOUND THEN
    days := 1;
 END IF;
-
 
 query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
