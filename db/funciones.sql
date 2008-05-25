@@ -309,10 +309,8 @@ BEGIN
 select select_vendidos(codigo_barras, codigo_corto) into prod_vendidos;
 
 if prod_vendidos = 0 or prod_vendidos = NULL then
-   raise notice '%', prod_vendidos;
    prod_vendidos := 1; -- to avoid division by zero
 end if;
-raise notice '%', prod_vendidos;
 
 SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
        FROM compra_detalle, producto, compra
@@ -322,7 +320,6 @@ SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detal
 IF NOT FOUND THEN
    days := 1;
 END IF;
-raise notice 'days: %', days;
 
 
 query := $S$ SELECT *, (SELECT SUM(unidades) FROM merma WHERE barcode=producto.barcode) as merma_unid,
@@ -338,8 +335,6 @@ IF codigo_barras != 0 THEN
 ELSE
    query := query || $S$ codigo_corto=$S$ || quote_literal(in_codigo_corto);
 END IF;
-
-raise notice '%',query;
 
 FOR datos IN EXECUTE query LOOP
     codigo_corto := datos.codigo_corto;
