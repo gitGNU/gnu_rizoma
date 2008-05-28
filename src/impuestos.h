@@ -24,6 +24,6 @@
 
 #define IMPUESTOS_H
 
-void Impuestos (GtkWidget *main_box);
+void taxes_box ();
 
 #endif

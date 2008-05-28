@@ -46,17 +46,17 @@ FillImpuestos (void)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
-  gtk_list_store_clear (store_tasks); 
-      
+  gtk_list_store_clear (store_tasks);
+
   res = EjecutarSQL ("SELECT id, descripcion, monto FROM select_impuesto()");
 
   if (res != NULL)
     tuples = PQntuples (res);
-  
+
   if (res != NULL && tuples != 0)
     {
-      //      gtk_list_store_clear (store_tasks); 
-      
+      //      gtk_list_store_clear (store_tasks);
+
       for (i = 0; i < tuples; i++)
 	{
 	  gtk_list_store_append (store_tasks, &iter);
@@ -66,7 +66,7 @@ FillImpuestos (void)
 			      2, PQgetvalue (res, i, 2),
 			      -1);
 	}
-    }  
+    }
 }
 
 void
@@ -125,7 +125,7 @@ DelTask (void)
 	}
       else
 	ErrorMSG (impuesto_name, "No se puede eliminar el imipuesto IVA");
-    }   
+    }
 }
 
 void
@@ -162,10 +162,10 @@ EditTask (GtkWidget *widget, gpointer data)
       else
 	ErrorMSG (GTK_WIDGET (selection), "No se pudo editar el impuesto");
     }
-  
+
   gtk_widget_destroy (gtk_widget_get_toplevel (widget));
   gtk_widget_set_sensitive (main_window, TRUE);
-  
+
 }
 
 void
@@ -192,25 +192,25 @@ EditTaskWin (void)
 			  -1);
 
       gtk_widget_set_sensitive (main_window, FALSE);
-      
+
       window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
       gtk_window_set_title (GTK_WINDOW (window), "Editar Impuesto");
       gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
       //      gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
       gtk_widget_set_size_request (window, -1, 100);
       gtk_widget_show (window);
-      
+
       g_signal_connect (G_OBJECT (window), "destroy",
 			G_CALLBACK (EditTask), (gpointer)FALSE);
-      
+
       vbox = gtk_vbox_new (FALSE, 3);
       gtk_container_add (GTK_CONTAINER (window), vbox);
       gtk_widget_show (vbox);
-      
+
       hbox = gtk_hbox_new (FALSE, 3);
       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
       gtk_widget_show (hbox);
-      
+
       hbox2 = gtk_vbox_new (TRUE, 2);
       gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
       gtk_widget_show (hbox2);
@@ -222,7 +222,7 @@ EditTaskWin (void)
       gtk_widget_set_size_request (edit_tasa, 30, -1);
       gtk_box_pack_start (GTK_BOX (hbox2), edit_tasa, FALSE, FALSE, 0);
       gtk_widget_show (edit_tasa);
-      
+
       hbox2 = gtk_vbox_new (TRUE, 2);
       gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
       gtk_widget_show (hbox2);
@@ -234,29 +234,29 @@ EditTaskWin (void)
       gtk_widget_set_size_request (edit_name, 150, -1);
       gtk_box_pack_start (GTK_BOX (hbox2), edit_name, FALSE, FALSE, 0);
       gtk_widget_show (edit_name);
-      
+
       hbox = gtk_hbox_new (FALSE, 3);
       gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
       gtk_widget_show (hbox);
-      
+
       button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
       gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
       gtk_widget_show (button);
-      
+
       g_signal_connect (G_OBJECT (button), "clicked",
 			G_CALLBACK (EditTask), (gpointer)FALSE);
-      
+
       button = gtk_button_new_from_stock (GTK_STOCK_OK);
       gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
       gtk_widget_show (button);
-      
+
       g_signal_connect (G_OBJECT (button), "clicked",
 			G_CALLBACK (EditTask), (gpointer)TRUE);
-    }      
+    }
 }
 
 void
-Impuestos (GtkWidget *main_box)
+taxes_box ()
 {
   GtkWidget *frame;
   GtkWidget *vbox;
@@ -281,7 +281,7 @@ Impuestos (GtkWidget *main_box)
   vbox2 = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (vbox2);
   gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  
+
   hbox = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
@@ -297,7 +297,7 @@ Impuestos (GtkWidget *main_box)
   gtk_widget_show (impuesto_tasa);
 
   gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  
+
   hbox2 = gtk_vbox_new (TRUE, 2);
   gtk_widget_show (hbox2);
   label = gtk_label_new ("Nombre");
@@ -328,7 +328,7 @@ Impuestos (GtkWidget *main_box)
   hbox2 = gtk_hbox_new (FALSE, 3);
   gtk_widget_show (hbox2);
   gtk_container_add (GTK_CONTAINER (frame), hbox2);
-    
+
   scroll = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scroll);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
@@ -385,19 +385,19 @@ Impuestos (GtkWidget *main_box)
   vbox2 = gtk_vbox_new (FALSE, 3);
   gtk_box_pack_end (GTK_BOX (hbox2), vbox2, FALSE, FALSE, 3);
   gtk_widget_show (vbox2);
-  
+
   button = gtk_button_new_from_stock (GTK_STOCK_DELETE);
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (DelTask), NULL);
 
   button = gtk_button_new_with_label ("Editar");
   gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 3);
   gtk_widget_show (button);
-  
+
   g_signal_connect (G_OBJECT (button), "clicked",
 		    G_CALLBACK (EditTaskWin), NULL);
-  
+
 }
