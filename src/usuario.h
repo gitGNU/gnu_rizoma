@@ -24,7 +24,7 @@
 
 #define USUARIO_H
 
-void user_box (GtkWidget *main_box);
+void user_box ();
 
 gint ChangePasswd (GtkWidget *widget, gpointer data);
 

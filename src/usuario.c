@@ -56,6 +56,8 @@ GtkListStore *store_users;
 void
 FillUsers (void)
 {
+  GtkWidget *widget;
+  GtkListStore *store;
   GtkTreeIter iter;
   PGresult *res;
   PGresult *res2;
@@ -70,16 +72,19 @@ FillUsers (void)
 		     "apell_p varchar(75),apell_m varchar(75),"
 		     "fecha_ingreso timestamp,\"level\" int2);");
 
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+
   tuples = PQntuples (res);
 
   if (res != NULL && tuples != 0)
     {
-      gtk_list_store_clear (store_users);
+      gtk_list_store_clear (store);
 
       for (i = 0; i < tuples; i++)
 	{
 	  q = g_strdup_printf ("select * from select_asistencia(%s)",
-			       PQgetvalue (res, i, 0));
+			       PQvaluebycol (res, i, "id"));
 	  res2 = EjecutarSQL (q);
 	  g_free (q);
 
@@ -108,13 +113,13 @@ FillUsers (void)
 	      salida = "No ha Ingresado";
 	    }
 
-	  gtk_list_store_append (store_users, &iter);
-	  gtk_list_store_set (store_users, &iter,
-			      0, PQgetvalue (res, i, 0),
-			      1, PQgetvalue (res, i, 1),
-			      2, PQgetvalue (res, i, 2),
-			      3, PQgetvalue (res, i, 3),
-			      4, PQgetvalue (res, i, 4),
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, PQvaluebycol (res, i, "id"),
+			      1, PQgetvalue (res, i, 1), //rut
+			      2, PQvaluebycol (res, i, "nombre"),
+			      3, PQvaluebycol (res, i, "apell_p"),
+			      4, PQvaluebycol (res, i, "apell_m"),
 			      5, entrada,
 			      6, salida,
 			      -1);
@@ -210,209 +215,30 @@ AskDelete (void)
 }
 
 void
-user_box (GtkWidget *main_box)
+user_box ()
 {
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-
-  GtkWidget *vbox2;
-  GtkWidget *hbox2;
-
-  GtkWidget *frame;
-  GtkWidget *label;
-  GtkWidget *button;
-
-  GtkWidget *scroll;
+  GtkWidget *widget;
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
-
-  GtkWidget *combo;
-  PGresult *res;
-  gint i, tuples;
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_box_pack_start (GTK_BOX (main_box), vbox, FALSE, FALSE, 3);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  frame = gtk_frame_new ("Agregar Vendedor");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Rut");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  rut_1 = gtk_entry_new_with_max_length (8);
-  gtk_widget_set_size_request (rut_1, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), rut_1, FALSE, FALSE, 0);
-  gtk_widget_show (rut_1);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  rut_check = gtk_entry_new_with_max_length (1);
-  gtk_widget_set_size_request (rut_check, 15, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), rut_check, FALSE, FALSE, 0);
-  gtk_widget_show (rut_check);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Nombre de Usuario: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  username = gtk_entry_new_with_max_length (30);
-  gtk_widget_set_size_request (username, 30, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), username, FALSE, FALSE, 0);
-  gtk_widget_show (username);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Nombre: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  nombre = gtk_entry_new_with_max_length (75);
-  gtk_widget_set_size_request (nombre, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), nombre, FALSE, FALSE, 0);
-  gtk_widget_show (nombre);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Apellido P.: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  apell_p = gtk_entry_new_with_max_length (75);
-  gtk_widget_set_size_request (apell_p, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), apell_p, FALSE, FALSE, 0);
-  gtk_widget_show (apell_p);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Apellido M.: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  apell_m = gtk_entry_new_with_max_length (75);
-  gtk_widget_set_size_request (apell_m, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), apell_m, FALSE, FALSE, 0);
-  gtk_widget_show (apell_m);
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Password: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  new_pass1 = gtk_entry_new_with_max_length (100);
-  gtk_entry_set_visibility (GTK_ENTRY (new_pass1), FALSE);
-  gtk_widget_set_size_request (new_pass1, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), new_pass1, FALSE, FALSE, 0);
-  gtk_widget_show (new_pass1);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Repetir Password: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  new_pass2 = gtk_entry_new_with_max_length (100);
-  gtk_entry_set_visibility (GTK_ENTRY (new_pass2), FALSE);
-  gtk_widget_set_size_request (new_pass2, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), new_pass2, FALSE, FALSE, 0);
-  gtk_widget_show (new_pass2);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Identificador: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  id_box = gtk_entry_new_with_max_length (1);
-  gtk_widget_set_size_request (id_box, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), id_box, FALSE, FALSE, 0);
-  gtk_widget_show (id_box);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  /*hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  */
-  button = gtk_button_new_from_stock (GTK_STOCK_ADD);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (AddSeller), NULL);
-
-  frame = gtk_frame_new ("Listado de Usuarios");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  scroll = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scroll);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-				  GTK_POLICY_AUTOMATIC,
-				  GTK_POLICY_AUTOMATIC);
-  gtk_widget_set_size_request (scroll, MODULE_BOX_WIDTH - 20, 150);
-  gtk_box_pack_start (GTK_BOX (hbox), scroll, FALSE, FALSE, 3);
+  GtkListStore *store_users;
 
   store_users = gtk_list_store_new (7,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING,
+				    G_TYPE_STRING, //ID
+				    G_TYPE_STRING, //RUT
+				    G_TYPE_STRING, //nombre
 				    G_TYPE_STRING,
 				    G_TYPE_STRING,
 				    G_TYPE_STRING,
 				    G_TYPE_STRING);
 
-  tree_users = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store_users));
-  gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (tree_users), TRUE);
-  gtk_container_add (GTK_CONTAINER (scroll), tree_users);
-  gtk_widget_show (tree_users);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
+  gtk_tree_view_set_model(GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store_users));
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
 						     "text", 0,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -423,7 +249,7 @@ user_box (GtkWidget *main_box)
   column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
 						     "text", 1,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -434,7 +260,7 @@ user_box (GtkWidget *main_box)
   column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
 						     "text", 2,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -445,7 +271,7 @@ user_box (GtkWidget *main_box)
   column = gtk_tree_view_column_new_with_attributes ("Apellido P.", renderer,
 						     "text", 3,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -456,7 +282,7 @@ user_box (GtkWidget *main_box)
   column = gtk_tree_view_column_new_with_attributes ("Apellido M.", renderer,
 						     "text", 4,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -467,7 +293,7 @@ user_box (GtkWidget *main_box)
   column = gtk_tree_view_column_new_with_attributes ("Ingreso", renderer,
 						     "text", 5,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -478,7 +304,7 @@ user_box (GtkWidget *main_box)
   column = gtk_tree_view_column_new_with_attributes ("Salida", renderer,
 						     "text", 6,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_users), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -486,86 +312,6 @@ user_box (GtkWidget *main_box)
   gtk_tree_view_column_set_max_width (column, 100);
 
   FillUsers ();
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_DELETE);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (AskDelete), NULL);
-
-
-  frame = gtk_frame_new ("Cambia contraseña de usuario");
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-  gtk_widget_show (frame);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-  gtk_widget_show (vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  hbox2 = gtk_vbox_new (FALSE,  2);
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  gtk_widget_show (hbox2);
-
-  label = gtk_label_new ("Usuario");
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  combo = gtk_combo_box_new_text ();
-  gtk_box_pack_start (GTK_BOX (hbox2), combo, FALSE, FALSE, 3);
-  gtk_widget_show (combo);
-
-  res = EjecutarSQL ("SELECT usuario FROM users");
-
-  tuples = PQntuples (res);
-
-  for (i = 0; i < tuples; i++)
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo),
-			       PQgetvalue (res, i, 0));
-
-  hbox2 = gtk_vbox_new (FALSE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  gtk_widget_show (hbox2);
-
-  label = gtk_label_new ("Nueva Contraseña");
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  new_pass_1 = gtk_entry_new_with_max_length (20);
-  gtk_entry_set_visibility (GTK_ENTRY (new_pass_1), FALSE);
-  gtk_widget_set_size_request (new_pass_1, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), new_pass_1, FALSE, FALSE, 3);
-  gtk_widget_show (new_pass_1);
-
-  hbox2 = gtk_vbox_new (FALSE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-  gtk_widget_show (hbox2);
-
-  label = gtk_label_new ("Repetir Contraseña");
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  new_pass_2 = gtk_entry_new_with_max_length (20);
-  gtk_entry_set_visibility (GTK_ENTRY (new_pass_2), FALSE);
-  gtk_widget_set_size_request (new_pass_2, 100, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), new_pass_2, FALSE, FALSE, 3);
-  gtk_widget_show (new_pass_2);
-
-
-  button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (ChangePasswd), (gpointer)combo);
 }
 
 gint
