@@ -151,6 +151,7 @@
                         <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
                         <property name="response_id">0</property>
+                        <signal name="clicked" handler="AddImpuesto"/>
                       </object>
                       <packing>
                         <property name="position">4</property>
@@ -168,7 +169,7 @@
                         <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                         <child>
-                          <object class="GtkTreeView" id="treeview2">
+                          <object class="GtkTreeView" id="treeview_taxes">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="headers_clickable">True</property>
@@ -188,6 +189,7 @@
                             <property name="label" translatable="yes">gtk-edit</property>
                             <property name="use_stock">True</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="EditTaskWin"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -204,6 +206,7 @@
                             <property name="label" translatable="yes">gtk-delete</property>
                             <property name="use_stock">True</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="DelTask"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>

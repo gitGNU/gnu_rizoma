@@ -72,7 +72,7 @@ MainControl (MainBox *module_box)
   gtk_widget_set_size_request (notebook, MODULE_BOX_WIDTH - 10, MODULE_BOX_HEIGHT - 10);
 
   /* Impuestos */
-  Impuestos (vbox);
+  //Impuestos (vbox);
 
   /* Familia de productos */
 

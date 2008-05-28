@@ -43,27 +43,31 @@ GtkListStore *store_tasks;
 void
 FillImpuestos (void)
 {
+  GtkWidget *widget;
+  GtkListStore *store;
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
-  gtk_list_store_clear (store_tasks);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_taxes"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+
+  gtk_list_store_clear (store);
 
   res = EjecutarSQL ("SELECT id, descripcion, monto FROM select_impuesto()");
 
   if (res != NULL)
     tuples = PQntuples (res);
 
-  if (res != NULL && tuples != 0)
+  if (tuples != 0)
     {
-      //      gtk_list_store_clear (store_tasks);
-
       for (i = 0; i < tuples; i++)
 	{
-	  gtk_list_store_append (store_tasks, &iter);
-	  gtk_list_store_set (store_tasks, &iter,
-			      0, PQgetvalue (res, i, 0),
-			      1, PQgetvalue (res, i, 1),
-			      2, PQgetvalue (res, i, 2),
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, PQvaluebycol (res, i, "id"),
+			      1, PQvaluebycol (res, i, "descripcion"),
+			      2, PQvaluebycol (res, i, "monto"),
 			      -1);
 	}
     }
@@ -258,100 +262,25 @@ EditTaskWin (void)
 void
 taxes_box ()
 {
-  GtkWidget *frame;
-  GtkWidget *vbox;
-  GtkWidget *vbox2;
-  GtkWidget *hbox;
-  GtkWidget *hbox2;
-  GtkWidget *label;
-  GtkWidget *button;
+  GtkListStore *store;
+  GtkWidget *widget;
 
-  GtkWidget *scroll;
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
 
-  vbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_box_pack_start (GTK_BOX (main_box), vbox, FALSE, FALSE, 3);
+  store = gtk_list_store_new (3,
+			      G_TYPE_STRING, //ID
+			      G_TYPE_STRING,
+			      G_TYPE_STRING);
 
-  frame = gtk_frame_new ("Agregar Impuestos");
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-  gtk_widget_show (frame);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox2);
-  gtk_container_add (GTK_CONTAINER (frame), vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Tasa %");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  impuesto_tasa = gtk_entry_new_with_max_length (5);
-  gtk_widget_set_size_request (impuesto_tasa, 30, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), impuesto_tasa, FALSE, FALSE, 0);
-  gtk_widget_show (impuesto_tasa);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox2 = gtk_vbox_new (TRUE, 2);
-  gtk_widget_show (hbox2);
-  label = gtk_label_new ("Nombre");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-  impuesto_name = gtk_entry_new_with_max_length (60);
-  gtk_widget_set_size_request (impuesto_name, 150, -1);
-  gtk_box_pack_start (GTK_BOX (hbox2), impuesto_name, FALSE, FALSE, 0);
-  gtk_widget_show (impuesto_name);
-
-  gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_ADD);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (AddImpuesto), NULL);
-
-  frame = gtk_frame_new ("Agregar Impuestos");
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-  gtk_widget_show (frame);
-
-  hbox2 = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox2);
-  gtk_container_add (GTK_CONTAINER (frame), hbox2);
-
-  scroll = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scroll);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-				  GTK_POLICY_AUTOMATIC,
-				  GTK_POLICY_AUTOMATIC);
-  gtk_widget_set_size_request (scroll, 300, 120);
-  gtk_box_pack_start (GTK_BOX (hbox2), scroll, FALSE, FALSE, 3);
-
-  store_tasks = gtk_list_store_new (3,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING);
-
-  tree_tasks = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store_tasks));
-  gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (tree_tasks), TRUE);
-  gtk_container_add (GTK_CONTAINER (scroll), tree_tasks);
-  gtk_widget_show (tree_tasks);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_taxes"));
+  gtk_tree_view_set_model(GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store));
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
 						     "text", 0,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_tasks), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -362,7 +291,7 @@ taxes_box ()
   column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
 						     "text", 1,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_tasks), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -373,7 +302,7 @@ taxes_box ()
   column = gtk_tree_view_column_new_with_attributes ("Tasa %", renderer,
 						     "text", 2,
 						     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree_tasks), column);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -381,23 +310,4 @@ taxes_box ()
   gtk_tree_view_column_set_max_width (column, 30);
 
   FillImpuestos ();
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (hbox2), vbox2, FALSE, FALSE, 3);
-  gtk_widget_show (vbox2);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_DELETE);
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (DelTask), NULL);
-
-  button = gtk_button_new_with_label ("Editar");
-  gtk_box_pack_start (GTK_BOX (vbox2), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (EditTaskWin), NULL);
-
 }

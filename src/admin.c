@@ -33,6 +33,7 @@
 #include"postgres-functions.h"
 #include"encriptar.h"
 #include"rizoma_errors.h"
+#include"impuestos.h"
 
 //the builder that contains all the UI
 GtkBuilder *builder;
