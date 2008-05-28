@@ -18,9 +18,9 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-bin_PROGRAMS = rizoma-config rizoma-ventas rizoma-compras
+bin_PROGRAMS = rizoma-admin rizoma-config rizoma-ventas rizoma-compras
 
-rizoma_admin_SOURCES = main.c tipos.h main.h \
+rizoma_admin_SOURCES = admin.c tipos.h admin.h \
 datos.h dimentions.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
@@ -35,8 +35,11 @@ datos_negocio.c datos_negocio.h \
 config_file.c config_file.h \
 parametros.c parametros.h \
 rizoma_errors.c rizoma_errors.h \
-utils.c utils.h
-
+utils.c utils.h \
+vale.c vale.h \
+factura_more.c factura_more.h \
+printing.c printing.h \
+tiempo.c tiempo.h
 rizoma_ventas_SOURCES = ventas.c ventas.h  dimentions.h tipos.h \
 credito.c credito.h \
 postgres-functions.c postgres-functions.h \
