@@ -34,6 +34,7 @@
 #include"encriptar.h"
 #include"rizoma_errors.h"
 #include"impuestos.h"
+#include"datos_negocio.h"
 
 //the builder that contains all the UI
 GtkBuilder *builder;
@@ -191,7 +192,7 @@ admin_win()
   //setup the different tabs
   user_box(); //users tab
   taxes_box(); //taxes tab
-  //business_box();
+  datos_box(); //business info
   //preferences_box();
   gtk_widget_show_all (admin_gui);
 }

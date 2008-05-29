@@ -237,256 +237,129 @@ get_datos (void)
 }
 
 void
-datos_box (GtkWidget *main_box)
+datos_box ()
 {
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *box;
-  GtkWidget *frame;
-  GtkWidget *button;
+  GtkWidget *widget;
 
   get_datos ();
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (main_box), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  frame = gtk_frame_new ("Datos del Negocio");
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-  gtk_widget_show (frame);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_widget_show (vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  razon_red = gtk_label_new ("*Razón Social");
-  gtk_widget_show (razon_red);
-  gtk_box_pack_start (GTK_BOX (box), razon_red, FALSE, FALSE, 0);
-  razon_social = gtk_entry_new_with_max_length (200);
-
   if (razon_social_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (razon_social), razon_social_value);
-      //      g_free (razon_social_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_razon"));
+      gtk_entry_set_text (GTK_ENTRY (widget), razon_social_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (razon_red),
-			  "<span color=\"red\">*Razón Social</span>");
-
-  gtk_widget_set_size_request (razon_social, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), razon_social, FALSE, FALSE, 0);
-  gtk_widget_show (razon_social);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  rut_red = gtk_label_new ("*Rut");
-  gtk_widget_show (rut_red);
-  gtk_box_pack_start (GTK_BOX (box), rut_red, FALSE, FALSE, 0);
-  rut = gtk_entry_new_with_max_length (8);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_razon"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Razón Social:</span>");
+    }
 
   if (rut_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (rut), rut_value);
-      //      g_free (rut_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_rut"));
+      gtk_entry_set_text (GTK_ENTRY (widget), rut_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (rut_red),
-			  "<span color=\"red\">*Rut</span>");
-
-  gtk_widget_set_size_request (rut, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), rut, FALSE, FALSE, 0);
-  gtk_widget_show (rut);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  nombre_red = gtk_label_new ("Nombre de Fantasia");
-  gtk_widget_show (nombre_red);
-  gtk_box_pack_start (GTK_BOX (box), nombre_red, FALSE, FALSE, 0);
-  nombre_fantasia = gtk_entry_new_with_max_length (200);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_rut"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Rut</span>");
+    }
 
   if (nombre_fantasia_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (nombre_fantasia), nombre_fantasia_value);
-      //g_free (nombre_fantasia_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_fantasy"));
+      gtk_entry_set_text (GTK_ENTRY (widget), nombre_fantasia_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (nombre_red),
-			  "<span color=\"red\">Nombre de Fantasia</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fantasy"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">Nombre de Fantasia</span>");
+    }
 
-  gtk_widget_set_size_request (nombre_fantasia, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), nombre_fantasia, FALSE, FALSE, 0);
-  gtk_widget_show (nombre_fantasia);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  direccion_red = gtk_label_new ("*Dirección");
-  gtk_widget_show (direccion_red);
-  gtk_box_pack_start (GTK_BOX (box), direccion_red, FALSE, FALSE, 0);
-  direccion = gtk_entry_new_with_max_length (200);
   if (direccion_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (direccion), direccion_value);
-      //      g_free (direccion_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addr"));
+      gtk_entry_set_text (GTK_ENTRY (widget), direccion_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (direccion_red),
-			  "<span color=\"red\">*Dirección</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_addr"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Dirección</span>");
+    }
 
-  gtk_widget_set_size_request (direccion, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), direccion, FALSE, FALSE, 0);
-  gtk_widget_show (direccion);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  comuna_red = gtk_label_new ("*Comuna");
-  gtk_widget_show (comuna_red);
-  gtk_box_pack_start (GTK_BOX (box), comuna_red, FALSE, FALSE, 0);
-  comuna = gtk_entry_new_with_max_length (50);
   if (comuna_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (comuna), comuna_value);
-      //g_free (comuna_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_comuna"));
+      gtk_entry_set_text (GTK_ENTRY (widget), comuna_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (comuna_red),
-			  "<span color=\"red\">*Comuna</span>");
-
-  gtk_widget_set_size_request (comuna, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), comuna, FALSE, FALSE, 0);
-  gtk_widget_show (comuna);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  ciudad_red = gtk_label_new ("*Ciudad");
-  gtk_widget_show (ciudad_red);
-  gtk_box_pack_start (GTK_BOX (box), ciudad_red, FALSE, FALSE, 0);
-  ciudad = gtk_entry_new_with_max_length (50);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_comuna"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Comuna</span>");
+    }
 
   if (ciudad_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (ciudad), ciudad_value);
-      //      g_free (ciudad_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_city"));
+      gtk_entry_set_text (GTK_ENTRY (widget), ciudad_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (ciudad_red),
-			  "<span color=\"red\">*Ciudad</span>");
-
-  gtk_widget_set_size_request (ciudad, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), ciudad, FALSE, FALSE, 0);
-  gtk_widget_show (ciudad);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  fono_red = gtk_label_new ("*Fono");
-  gtk_widget_show (fono_red);
-  gtk_box_pack_start (GTK_BOX (box), fono_red, FALSE, FALSE, 0);
-  fono = gtk_entry_new_with_max_length (15);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_city"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Ciudad</span>");
+    }
 
   if (fono_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (fono), fono_value);
-      //g_free (fono_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_phone"));
+      gtk_entry_set_text (GTK_ENTRY (widget), fono_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (fono_red),
-			  "<span color=\"red\">*Fono</span>");
-
-  gtk_widget_set_size_request (fono, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), fono, FALSE, FALSE, 0);
-  gtk_widget_show (fono);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  fax_red = gtk_label_new ("Fax");
-  gtk_widget_show (fax_red);
-  gtk_box_pack_start (GTK_BOX (box), fax_red, FALSE, FALSE, 0);
-  fax = gtk_entry_new_with_max_length (15);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_phone"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Fono</span>");
+    }
 
   if (fax_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (fax), fax_value);
-      //g_free (fax_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_fax"));
+      gtk_entry_set_text (GTK_ENTRY (widget), fax_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (fax_red),
-			  "<span color=\"red\">Fax</span>");
-
-  gtk_widget_set_size_request (fax, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), fax, FALSE, FALSE, 0);
-  gtk_widget_show (fax);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  giro_red = gtk_label_new ("*Giro");
-  gtk_widget_show (giro_red);
-  gtk_box_pack_start (GTK_BOX (box), giro_red, FALSE, FALSE, 0);
-  giro = gtk_entry_new_with_max_length (100);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fax"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">Fax</span>");
+    }
 
   if (giro_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (giro), giro_value);
-      //      g_free (giro_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_giro"));
+      gtk_entry_set_text (GTK_ENTRY (widget), giro_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (giro_red),
-			  "<span color=\"red\">*Giro</span>");
-
-  gtk_widget_set_size_request (giro, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), giro, FALSE, FALSE, 0);
-  gtk_widget_show (giro);
-
-  box = gtk_vbox_new (TRUE, 2);
-  gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-  gtk_widget_show (box);
-  at_red = gtk_label_new ("A.T.");
-  gtk_widget_show (at_red);
-  gtk_box_pack_start (GTK_BOX (box), at_red, FALSE, FALSE, 0);
-  at = gtk_entry_new_with_max_length (100);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_giro"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">*Giro</span>");
+    }
 
   if (at_value != NULL)
     {
-      gtk_entry_set_text (GTK_ENTRY (at), at_value);
-      //      g_free (at_value);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_at"));
+      gtk_entry_set_text (GTK_ENTRY (widget), at_value);
     }
   else
-    gtk_label_set_markup (GTK_LABEL (at_red),
-			  "<span color=\"red\">A.T.</span>");
-
-  gtk_widget_set_size_request (at, 150, -1);
-  gtk_box_pack_start (GTK_BOX (box), at, FALSE, FALSE, 0);
-  gtk_widget_show (at);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (SaveDatosNegocio), NULL);
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_at"));
+      gtk_label_set_markup (GTK_LABEL (widget),
+			    "<span color=\"red\">A.T.</span>");
+    }
 }

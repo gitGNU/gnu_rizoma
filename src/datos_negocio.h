@@ -24,7 +24,7 @@
 
 #define _DATOS_NEGOCIO_H
 
-void datos_box (GtkWidget *main_box);
+void datos_box ();
 
 int get_datos (void);
 
