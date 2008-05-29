@@ -90,6 +90,6 @@ MainControl (MainBox *module_box)
   gtk_widget_show (vbox);
 
   /* Parametrizacion */
-  Parametros (vbox);
+  //Parametros (vbox);
 
 }

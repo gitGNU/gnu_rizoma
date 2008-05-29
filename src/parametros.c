@@ -109,246 +109,45 @@ guardar_parametros (GtkWidget *widget, gpointer user_data)
 }
 
 void
-modificar_config (GtkWidget *box)
+preferences_box ()
 {
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *label;
-  GtkWidget *button;
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Nombre base de datos");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  db_name_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_name_entry), rizoma_get_value ("DB_NAME"));
-  gtk_widget_set_size_request (db_name_entry, 50, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), db_name_entry, FALSE, FALSE, 3);
-  gtk_widget_show (db_name_entry);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Usuario BD");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  db_user_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_user_entry), rizoma_get_value ("USER"));
-  gtk_widget_set_size_request (db_user_entry, 50, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), db_user_entry, FALSE, FALSE, 3);
-  gtk_widget_show (db_user_entry);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Contraseña BD");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  db_pass_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_pass_entry), rizoma_get_value ("PASSWORD"));
-  gtk_widget_set_size_request (db_pass_entry, 50, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), db_pass_entry, FALSE, FALSE, 3);
-  gtk_widget_show (db_pass_entry);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Host BD");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  db_host_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (db_host_entry), rizoma_get_value ("SERVER_HOST"));
-  gtk_widget_set_size_request (db_host_entry, 80, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), db_host_entry, FALSE, FALSE, 3);
-  gtk_widget_show (db_host_entry);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Archivos temporales");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  temp_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (temp_entry), rizoma_get_value ("TEMP_FILES"));
-  gtk_widget_set_size_request (temp_entry, 80, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), temp_entry, FALSE, FALSE, 3);
-  gtk_widget_show (temp_entry);
+  GtkWidget *widget;
+  gint current_number;
 
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
+  // Boleta/ticket
+  current_number = get_ticket_number (SIMPLE);
 
-  label = gtk_label_new ("Copias por vale");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  copy_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (copy_entry), rizoma_get_value ("VALE_COPY"));
-  gtk_widget_set_size_request (copy_entry, 80, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), copy_entry, FALSE, FALSE, 3);
-  gtk_widget_show (copy_entry);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Comando de impresion");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  print_entry = gtk_entry_new ();
-  gtk_entry_set_text (GTK_ENTRY (print_entry),
-		      rizoma_get_value ("PRINT_COMMAND"));
-  gtk_widget_set_size_request (print_entry, 80, -1);
-  gtk_box_pack_start (GTK_BOX (vbox), print_entry, FALSE, FALSE, 3);
-  gtk_widget_show (print_entry);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (guardar_parametros), NULL);
-
-}
-
-void
-Parametros (GtkWidget *main_box)
-{
-  GtkWidget *frame;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *hbox2;
-  GtkWidget *label;
-  GtkWidget *button;
-
-  gint current_number = get_ticket_number (SIMPLE);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (main_box), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  /*
-    Ticket
-  */
-
-  frame = gtk_frame_new ("Ajustar número boleta");
-  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 3);;
-  gtk_widget_show (frame);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Ingrese el ultimo número de boleta emitido");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox2 = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox2, FALSE, FALSE, 3);
-  gtk_widget_show (hbox2);
-
-  boleta_entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox2), boleta_entry, FALSE, FALSE, 3);
-  gtk_widget_show (boleta_entry);
-
-  gtk_entry_set_text (GTK_ENTRY (boleta_entry),
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_ticketnum"));
+  gtk_entry_set_text (GTK_ENTRY (widget),
 		      g_strdup_printf ("%d", current_number));
 
-  g_signal_connect (G_OBJECT (boleta_entry), "activate",
-		    G_CALLBACK (ModificarNumber), (gpointer)SIMPLE);
-
-  button = gtk_button_new_with_label ("Modificar");
-  gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (ModificarNumber), NULL);
-
-
-  /*
-    Factura
-  */
-
+  //Factura
   current_number = get_ticket_number (FACTURA);
 
-  frame = gtk_frame_new ("Ajustar número de Factura");
-  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 3);;
-  gtk_widget_show (frame);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Ingrese el ultimo número de factura emitido");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox2 = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox2, FALSE, FALSE, 3);
-  gtk_widget_show (hbox2);
-
-  factura_entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox2), factura_entry, FALSE, FALSE, 3);
-  gtk_widget_show (factura_entry);
-
-  gtk_entry_set_text (GTK_ENTRY (factura_entry),
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_invoicenum"));
+  gtk_entry_set_text (GTK_ENTRY (widget),
 		      g_strdup_printf ("%d", current_number));
 
-  g_signal_connect (G_OBJECT (factura_entry), "activate",
-		    G_CALLBACK (ModificarNumberF), (gpointer)FACTURA);
 
-  button = gtk_button_new_with_label ("Modificar");
-  gtk_box_pack_start (GTK_BOX (hbox2), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_dbname"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("DB_NAME"));
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (ModificarNumberF), NULL);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_dbuser"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("USER"));
 
-  /*
-    Una nueva linea
-  */
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_dbpasswd"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("PASSWORD"));
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (main_box), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_dbhost"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("SERVER_HOST"));
 
-  /*
-    Configuracion
-  */
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_tmpfiles"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("TEMP_FILES"));
 
-  frame = gtk_frame_new ("Modificar configuracion");
-  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 3);;
-  gtk_widget_show (frame);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_copynum"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("VALE_COPY"));
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_widget_show (vbox);
-
-  modificar_config (vbox);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_printcmd"));
+  gtk_entry_set_text (GTK_ENTRY (widget), rizoma_get_value ("PRINT_COMMAND"));
 }

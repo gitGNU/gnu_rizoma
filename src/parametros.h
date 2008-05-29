@@ -24,6 +24,6 @@
 
 #define PARAMETROS_H
 
-void Parametros (GtkWidget *main_box);
+void preferences_box ();
 
 #endif
