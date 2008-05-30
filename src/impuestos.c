@@ -233,88 +233,48 @@ EditTask (GtkWidget *widget, gpointer data)
 void
 EditTaskWin (void)
 {
-  GtkWidget *window;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *hbox2;
-  GtkWidget *label;
-  GtkWidget *button;
-
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_tasks));
+  GtkWidget *widget;
+  GtkWidget *tree;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
   GtkTreeIter iter;
   gchar *name;
   gchar *tasa;
 
+  tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_taxes"));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (store_tasks), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  1, &name,
 			  2, &tasa,
 			  -1);
 
-      gtk_widget_set_sensitive (main_window, FALSE);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_tax_value"));
+      gtk_entry_set_text (GTK_ENTRY (widget), tasa);
 
-      window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gtk_window_set_title (GTK_WINDOW (window), "Editar Impuesto");
-      gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-      //      gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-      gtk_widget_set_size_request (window, -1, 100);
-      gtk_widget_show (window);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_tax_name"));
+      gtk_entry_set_text (GTK_ENTRY (widget), name);
 
-      g_signal_connect (G_OBJECT (window), "destroy",
-			G_CALLBACK (EditTask), (gpointer)FALSE);
-
-      vbox = gtk_vbox_new (FALSE, 3);
-      gtk_container_add (GTK_CONTAINER (window), vbox);
-      gtk_widget_show (vbox);
-
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-      gtk_widget_show (hbox);
-
-      hbox2 = gtk_vbox_new (TRUE, 2);
-      gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-      gtk_widget_show (hbox2);
-      label = gtk_label_new ("Tasa %s");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-      edit_tasa = gtk_entry_new_with_max_length (5);
-      gtk_entry_set_text (GTK_ENTRY (edit_tasa), tasa);
-      gtk_widget_set_size_request (edit_tasa, 30, -1);
-      gtk_box_pack_start (GTK_BOX (hbox2), edit_tasa, FALSE, FALSE, 0);
-      gtk_widget_show (edit_tasa);
-
-      hbox2 = gtk_vbox_new (TRUE, 2);
-      gtk_box_pack_start (GTK_BOX (hbox), hbox2, FALSE, FALSE, 3);
-      gtk_widget_show (hbox2);
-      label = gtk_label_new ("Nombre");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (hbox2), label, FALSE, FALSE, 0);
-      edit_name = gtk_entry_new_with_max_length (60);
-      gtk_entry_set_text (GTK_ENTRY (edit_name), name);
-      gtk_widget_set_size_request (edit_name, 150, -1);
-      gtk_box_pack_start (GTK_BOX (hbox2), edit_name, FALSE, FALSE, 0);
-      gtk_widget_show (edit_name);
-
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-      gtk_widget_show (hbox);
-
-      button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-			G_CALLBACK (EditTask), (gpointer)FALSE);
-
-      button = gtk_button_new_from_stock (GTK_STOCK_OK);
-      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-			G_CALLBACK (EditTask), (gpointer)TRUE);
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_edit_tax"));
+      gtk_widget_show_all(widget);
     }
+  else
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push (GTK_STATUSBAR(widget), "Debe seleccionar un impuesto de la lista", 3000);
+    }
+}
+
+void
+CloseEditTaxWin (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_edit_tax"));
+  gtk_widget_hide(widget);
 }
 
 void
