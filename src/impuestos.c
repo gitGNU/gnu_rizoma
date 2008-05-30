@@ -76,26 +76,36 @@ FillImpuestos (void)
 void
 AddImpuesto (void)
 {
-  gchar *task_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (impuesto_name)));
-  gchar *task_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (impuesto_tasa)));
+  GtkWidget *widget;
+  gchar *task_name;
+  gchar *task_tasa;
   PGresult *res;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addtax_name"));
+  task_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addtax_value"));
+  task_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   res = EjecutarSQL (g_strdup_printf ("SELECT insert_impuesto('%s', %s)",
 				      task_name, task_tasa));
 
   if (res != NULL)
     {
-      ExitoMSG (impuesto_name, "Se agrego el impuesto con exito");
-      gtk_entry_set_text (GTK_ENTRY (impuesto_name), "");
-      gtk_entry_set_text (GTK_ENTRY (impuesto_tasa), "");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push (GTK_STATUSBAR(widget), "Se agrego el impuesto con exito", 3000);
       FillImpuestos ();
     }
   else
     {
       ErrorMSG (impuesto_name, "No se pudo agregar el impuesto");
-      gtk_entry_set_text (GTK_ENTRY (impuesto_name), "");
-      gtk_entry_set_text (GTK_ENTRY (impuesto_tasa), "");
     }
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addtax_name"));
+  gtk_entry_set_text (GTK_ENTRY (widget), "");
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addtax_value"));
+  gtk_entry_set_text (GTK_ENTRY (widget), "");
 }
 
 void
