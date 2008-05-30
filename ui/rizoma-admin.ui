@@ -483,7 +483,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="entry1">
+                      <object class="GtkEntry" id="entry_admin_addtax_name">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -501,7 +501,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="entry2">
+                      <object class="GtkEntry" id="entry_admin_addtax_value">
                         <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -525,6 +525,10 @@
                       </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkVBox" id="vbox6">
