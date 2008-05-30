@@ -155,7 +155,7 @@ void
 admin_win()
 {
   GtkWidget *admin_gui;
-  GError *error;
+  GError *error=NULL;
 
   builder = gtk_builder_new ();
 
@@ -164,6 +164,8 @@ admin_win()
   if (error != NULL) {
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
   }
+
+  error = NULL;
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
 
