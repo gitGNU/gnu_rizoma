@@ -1,25 +1,25 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*datos_negocio.c
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<gtk/gtk.h>
 
@@ -29,125 +29,192 @@
 #include"postgres-functions.h"
 #include"errors.h"
 #include"datos_negocio.h"
+#include"utils.h"
 
-GtkWidget *razon_red;
-GtkWidget *razon_social;
-char *razon_social_value = NULL;
-GtkWidget *rut_red;
-GtkWidget *rut;
-char *rut_value = NULL;
-GtkWidget *nombre_red;
-GtkWidget *nombre_fantasia;
-char *nombre_fantasia_value = NULL;
-GtkWidget *fono_red;
-GtkWidget *fono;
-char *fono_value = NULL;
-GtkWidget *direccion_red;
-GtkWidget *direccion;
-char *direccion_value = NULL;
-GtkWidget *comuna_red;
-GtkWidget *comuna;
-char *comuna_value = NULL;
-GtkWidget *ciudad_red;
-GtkWidget *ciudad;
-char *ciudad_value = NULL;
-GtkWidget *fax_red;
-GtkWidget *fax;
-char *fax_value = NULL;
-GtkWidget *giro_red;
-GtkWidget *giro;
-char *giro_value = NULL;
-GtkWidget *at_red;
-GtkWidget *at;
-char *at_value = NULL;
+gchar *razon_social_value = NULL;
+gchar *rut_value = NULL;
+gchar *nombre_fantasia_value = NULL;
+gchar *fono_value = NULL;
+gchar *direccion_value = NULL;
+gchar *comuna_value = NULL;
+gchar *ciudad_value = NULL;
+gchar *fax_value = NULL;
+gchar *giro_value = NULL;
+gchar *at_value = NULL;
 
 void
 refresh_labels (void)
 {
+  GtkWidget *widget;
   /* We get all the new data */
 
   get_datos ();
 
   /* We refresh all labesl */
 
+  //Razon
   if (razon_social_value != NULL)
-    gtk_label_set (GTK_LABEL (razon_red), "*Razón Social");
-  else
-    gtk_label_set_markup (GTK_LABEL (razon_red),
-			  "<span color=\"red\">*Razón Social</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_razon"));
+      gtk_entry_set_text (GTK_ENTRY (widget), razon_social_value);
+    }
 
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_razon"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			razon_social_value !=NULL ?
+			"*Razón Social:":
+			"<span color=\"red\">*Razón Social:</span>");
+
+  //rut
   if (rut_value != NULL)
-    gtk_label_set (GTK_LABEL (rut_red), "*Rut");
-  else
-    gtk_label_set_markup (GTK_LABEL (rut_red),
-			  "<span color=\"red\">*Rut</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_rut"));
+      gtk_entry_set_text (GTK_ENTRY (widget), rut_value);
+    }
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_rut"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			rut_value != NULL ?
+			"*Rut:":
+			"<span color=\"red\">*Rut:</span>");
+
+  //nombre de fantasia
   if (nombre_fantasia_value != NULL)
-    gtk_label_set (GTK_LABEL (nombre_red), "Nombre de Fantasia");
-  else
-    gtk_label_set_markup (GTK_LABEL (nombre_red),
-			  "<span color=\"red\">Nombre de Fantasia</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_fantasy"));
+      gtk_entry_set_text (GTK_ENTRY (widget), nombre_fantasia_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fantasy"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			nombre_fantasia_value != NULL ?
+			"Nombre de Fantasia:":
+			"<span color=\"red\">Nombre de Fantasia</span>");
 
+  //direccion
   if (direccion_value != NULL)
-    gtk_label_set (GTK_LABEL (direccion_red), "*Dirección");
-  else
-    gtk_label_set_markup (GTK_LABEL (direccion_red),
-			  "<span color=\"red\">*Dirección</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addr"));
+      gtk_entry_set_text (GTK_ENTRY (widget), direccion_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_addr"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			direccion_value != NULL ?
+			"*Direccion:":
+			"<span color=\"red\">*Dirección</span>");
+
+  //comuna
   if (comuna_value != NULL)
-    gtk_label_set (GTK_LABEL (comuna_red), "*Comuna");
-  else
-    gtk_label_set_markup (GTK_LABEL (comuna_red),
-			  "<span color=\"red\">*Comuna</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_comuna"));
+      gtk_entry_set_text (GTK_ENTRY (widget), comuna_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_comuna"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			comuna_value != NULL ?
+			"*Comuna:":
+			"<span color=\"red\">*Comuna</span>");
 
+  //ciudad
   if (ciudad_value != NULL)
-    gtk_label_set (GTK_LABEL (ciudad_red), "*Ciudad");
-  else
-    gtk_label_set_markup (GTK_LABEL (ciudad_red),
-			  "<span color=\"red\">*Ciudad</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_city"));
+      gtk_entry_set_text (GTK_ENTRY (widget), ciudad_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_city"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			ciudad_value != NULL ?
+			"*Ciudad:":
+			"<span color=\"red\">*Ciudad</span>");
 
+
+  //fono
   if (fono_value != NULL)
-    gtk_label_set (GTK_LABEL (fono_red), "*Fono");
-  else
-    gtk_label_set_markup (GTK_LABEL (fono_red),
-			  "<span color=\"red\">*Fono</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_phone"));
+      gtk_entry_set_text (GTK_ENTRY (widget), fono_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_phone"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			fono_value != NULL ?
+			"*Fono":
+			"<span color=\"red\">*Fono</span>");
 
+  //fax
   if (fax_value != NULL)
-    gtk_label_set (GTK_LABEL (fax_red), "Fax");
-  else
-    gtk_label_set_markup (GTK_LABEL (fax_red),
-			  "<span color=\"red\">Fax</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_fax"));
+      gtk_entry_set_text (GTK_ENTRY (widget), fax_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fax"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			fax_value != NULL ?
+			"Fax:":
+			"<span color=\"red\">Fax</span>");
 
+  //Giro
   if (giro_value != NULL)
-    gtk_label_set (GTK_LABEL (giro_red), "*Giro");
-  else
-    gtk_label_set_markup (GTK_LABEL (giro_red),
-			  "<span color=\"red\">*Giro</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_giro"));
+      gtk_entry_set_text (GTK_ENTRY (widget), giro_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_giro"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			giro_value != NULL ?
+			"*Giro:":
+			"<span color=\"red\">*Giro</span>");
 
+  //AT
   if (at_value != NULL)
-    gtk_label_set (GTK_LABEL (at_red), "A.T.");
-  else
-    gtk_label_set_markup (GTK_LABEL (at_red),
-			  "<span color=\"red\">A.T.</span>");
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_at"));
+      gtk_entry_set_text (GTK_ENTRY (widget), at_value);
+    }
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_at"));
+  gtk_label_set_markup (GTK_LABEL (widget),
+			at_value != NULL ?
+			"A.T.:":
+			"<span color=\"red\">A.T.</span>");
 }
 
 void
 SaveDatosNegocio (GtkWidget *widget, gpointer data)
 {
   PGresult *res;
+  GtkWidget *aux_widget;
 
-  razon_social_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (razon_social)));
-  rut_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (rut)));
-  nombre_fantasia_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (nombre_fantasia)));
-  fono_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (fono)));
-  direccion_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (direccion)));
-  comuna_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (comuna)));
-  ciudad_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (ciudad)));
-  fax_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (fax)));
-  giro_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (giro)));
-  at_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (at)));
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_razon"));
+  razon_social_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  res = EjecutarSQL ("SELECT * FROM negocio");
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_rut"));
+  rut_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  if (PQntuples (res) == 0)
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_fantasy"));
+  nombre_fantasia_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_phone"));
+  fono_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_addr"));
+  direccion_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_comuna"));
+  comuna_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_city"));
+  ciudad_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_fax"));
+  fax_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_giro"));
+  giro_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_at"));
+  at_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  res = EjecutarSQL ("SELECT count(*) FROM negocio");
+
+  if (g_str_equal(PQgetvalue (res, 0, 0), "0"))
     {
       res = EjecutarSQL
 	(g_strdup_printf
@@ -165,9 +232,12 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
     }
 
   if (res != NULL)
-    ExitoMSG (razon_social, "Los datos se actualizaron exitosamente");
+    {
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push (GTK_STATUSBAR(aux_widget), "Los datos del negocio se actualizaron exitosamente", 3000);
+    }
   else
-    AlertMSG (razon_social, "Se produjo un error al intentar actualizar los datos!");
+    AlertMSG (aux_widget, "Se produjo un error al intentar actualizar los datos!");
 
   refresh_labels ();
 }
@@ -239,127 +309,5 @@ get_datos (void)
 void
 datos_box ()
 {
-  GtkWidget *widget;
-
-  get_datos ();
-
-  if (razon_social_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_razon"));
-      gtk_entry_set_text (GTK_ENTRY (widget), razon_social_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_razon"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Razón Social:</span>");
-    }
-
-  if (rut_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_rut"));
-      gtk_entry_set_text (GTK_ENTRY (widget), rut_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_rut"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Rut</span>");
-    }
-
-  if (nombre_fantasia_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_fantasy"));
-      gtk_entry_set_text (GTK_ENTRY (widget), nombre_fantasia_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fantasy"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">Nombre de Fantasia</span>");
-    }
-
-  if (direccion_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addr"));
-      gtk_entry_set_text (GTK_ENTRY (widget), direccion_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_addr"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Dirección</span>");
-    }
-
-  if (comuna_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_comuna"));
-      gtk_entry_set_text (GTK_ENTRY (widget), comuna_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_comuna"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Comuna</span>");
-    }
-
-  if (ciudad_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_city"));
-      gtk_entry_set_text (GTK_ENTRY (widget), ciudad_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_city"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Ciudad</span>");
-    }
-
-  if (fono_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_phone"));
-      gtk_entry_set_text (GTK_ENTRY (widget), fono_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_phone"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Fono</span>");
-    }
-
-  if (fax_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_fax"));
-      gtk_entry_set_text (GTK_ENTRY (widget), fax_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fax"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">Fax</span>");
-    }
-
-  if (giro_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_giro"));
-      gtk_entry_set_text (GTK_ENTRY (widget), giro_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_giro"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">*Giro</span>");
-    }
-
-  if (at_value != NULL)
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_at"));
-      gtk_entry_set_text (GTK_ENTRY (widget), at_value);
-    }
-  else
-    {
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_at"));
-      gtk_label_set_markup (GTK_LABEL (widget),
-			    "<span color=\"red\">A.T.</span>");
-    }
+  refresh_labels();
 }
