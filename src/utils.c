@@ -304,3 +304,12 @@ statusbar_push (GtkStatusbar *statusbar, const gchar *text, guint duration)
 
   g_timeout_add (duration, (GSourceFunc) statusbar_pop, (gpointer) statusbar);
 }
+
+void
+gtk_entry_set_alert(GtkEntry *entry)
+{
+  /*
+   * TODO: is neccesary get the gtk widget colors to setup the alert
+   */
+  return;
+}
