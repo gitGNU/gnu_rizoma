@@ -183,7 +183,7 @@ rizoma_write_config (GKeyFile *file)
  * @return return 0 when the value was saved with success
  */
 int
-rizoma_set_value (char *var_name, char *new_value)
+rizoma_set_value (const gchar *var_name, const gchar *new_value)
 {
   GKeyFile *file;
 
