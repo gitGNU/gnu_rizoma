@@ -25,20 +25,12 @@
 
 #include<string.h>
 
+#include"impuestos.h"
 #include"tipos.h"
 #include"postgres-functions.h"
 #include"errors.h"
 #include"dimentions.h"
 #include"utils.h"
-
-GtkWidget *impuesto_tasa;
-GtkWidget *impuesto_name;
-
-GtkWidget *edit_tasa;
-GtkWidget *edit_name;
-
-GtkWidget *tree_tasks;
-GtkListStore *store_tasks;
 
 void
 FillImpuestos (void)
@@ -98,7 +90,7 @@ AddImpuesto (void)
     }
   else
     {
-      ErrorMSG (impuesto_name, "No se pudo agregar el impuesto");
+      ErrorMSG (widget, "No se pudo agregar el impuesto");
     }
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_addtax_name"));
@@ -180,11 +172,11 @@ DelTask (void)
 		  FillImpuestos ();
 		}
 	      else
-		ErrorMSG (impuesto_name, "No se pudo eliminar el impuesto");
+		ErrorMSG (widget, "No se pudo eliminar el impuesto");
 	    }
 	}
       else
-	ErrorMSG (impuesto_name, "No se puede eliminar el imipuesto IVA");
+	ErrorMSG (widget, "No se puede eliminar el imipuesto IVA");
     }
   else
     AlertMSG(widget, "Debe seleccionar un impuesto de la lista");
