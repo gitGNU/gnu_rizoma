@@ -176,7 +176,7 @@ DelTask (void)
 	      if (res != NULL)
 		{
 		  widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-		  statusbar_push (widget, "El impuesto se elimino con exito", 3000);
+		  statusbar_push (GTK_STATUSBAR(widget), "El impuesto se elimino con exito", 3000);
 		  FillImpuestos ();
 		}
 	      else
