@@ -965,7 +965,7 @@ declare
 	query text;
 begin
 	INSERT INTO impuesto VALUES (DEFAULT,
-	       	    	      	     quote_literal(imp_descripcion),
+	       	    	      	     imp_descripcion,
 				     imp_monto);
 return;
 end; $$ language plpgsql;
