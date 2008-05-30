@@ -24,6 +24,8 @@
 
 #define IMPUESTOS_H
 
+void CloseEditTaxWin (GtkButton *button, gpointer user_data);
+
 void taxes_box ();
 
 #endif

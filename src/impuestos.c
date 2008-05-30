@@ -1,25 +1,25 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*impuestos.c
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<gtk/gtk.h>
 
@@ -193,41 +193,49 @@ DelTask (void)
 void
 EditTask (GtkWidget *widget, gpointer data)
 {
-  gchar *new_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (edit_name)));
-  gchar *new_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (edit_tasa)));
+  gchar *new_name;
+  gchar *new_tasa;
   PGresult *res;
   gchar *q;
-  gboolean edit = (gboolean) data;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_tasks));
+  GtkWidget *aux_widget;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
   GtkTreeIter iter;
   gchar *id;
 
-  if (edit == TRUE)
-    {
-      if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
-	{
-	  gtk_tree_model_get (GTK_TREE_MODEL (store_tasks), &iter,
-			      0, &id,
-			      -1);
-	  q = g_strdup_printf ("UPDATE impuestos SET descripcion='%s', "
-			       "monto=%s WHERE id=%s", new_name, CUT(new_tasa), id);
-	  res = EjecutarSQL (q);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_taxes"));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (aux_widget));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
 
-	  if (res != NULL)
-	    {
-	      ExitoMSG (main_window, "Su Impuesto se edito con exito");
-	      FillImpuestos ();
-	    }
-	  else
-	    ErrorMSG (GTK_WIDGET (selection), "No se pudo editar su impuesto");
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_tax_name"));
+  new_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_tax_value"));
+  new_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  CloseEditTaxWin(NULL, NULL);
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+			  0, &id,
+			  -1);
+      q = g_strdup_printf ("UPDATE impuestos SET descripcion='%s', "
+			   "monto=%s WHERE id=%s", new_name, CUT(new_tasa), id);
+      res = EjecutarSQL (q);
+      g_free(q);
+
+      if (res != NULL)
+	{
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+	  statusbar_push (GTK_STATUSBAR(aux_widget), "Su Impuesto se edito con exito", 3000);
+	  FillImpuestos ();
 	}
       else
-	ErrorMSG (GTK_WIDGET (selection), "No se pudo editar el impuesto");
+	ErrorMSG (GTK_WIDGET (selection), "No se pudo editar su impuesto");
     }
-
-  gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-  gtk_widget_set_sensitive (main_window, TRUE);
-
+  else
+    ErrorMSG (GTK_WIDGET (selection), "No se pudo editar el impuesto");
 }
 
 void
