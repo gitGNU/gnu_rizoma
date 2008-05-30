@@ -56,19 +56,26 @@ ModificarNumber (GtkWidget *widget, gpointer data)
   else
     {
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio con exito.", 3000);
+      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio de la boleta con exito.", 3000);
     }
 }
 
 void
 ModificarNumberF (GtkWidget *widget, gpointer data)
 {
-  gint new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (factura_entry))));
+  GtkWidget *aux_widget;
+  gint new_number;
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_invoicenum"));
+  new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))));
 
   if ((set_ticket_number (new_number, FACTURA)) == FALSE)
     ErrorMSG (factura_entry, "Ocurrió un error mientras se intento modificar el número.");
   else
-    ExitoMSG (factura_entry, "Se modifico el folio con exito.");
+    {
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push (GTK_STATUSBAR(aux_widget), "Se modifico el folio de la factura con exito.", 3000);
+    }
 }
 
 void
