@@ -31,17 +31,6 @@
 #include"config_file.h"
 #include"utils.h"
 
-GtkWidget *boleta_entry;
-GtkWidget *factura_entry;
-
-GtkWidget *db_name_entry;
-GtkWidget *db_user_entry;
-GtkWidget *db_pass_entry;
-GtkWidget *db_host_entry;
-GtkWidget *temp_entry;
-GtkWidget *copy_entry;
-GtkWidget *print_entry;
-
 void
 ModificarNumber (GtkWidget *widget, gpointer data)
 {
@@ -70,7 +59,7 @@ ModificarNumberF (GtkWidget *widget, gpointer data)
   new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))));
 
   if ((set_ticket_number (new_number, FACTURA)) == FALSE)
-    ErrorMSG (factura_entry, "Ocurrió un error mientras se intento modificar el número.");
+    ErrorMSG (aux_widget, "Ocurrió un error mientras se intento modificar el número.");
   else
     {
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
@@ -86,49 +75,49 @@ guardar_parametros (GtkWidget *widget, gpointer user_data)
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_dbname"));
   if ((rizoma_set_value ("DB_NAME", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (db_name_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_dbuser"));
   if ((rizoma_set_value ("USER", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (db_user_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_dbpass"));
   if ((rizoma_set_value ("PASSWORD", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (db_pass_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_dbhost"));
   if ((rizoma_set_value ("SERVER_HOST", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (db_host_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_tmpfiles"));
   if ((rizoma_set_value ("TEMP_FILES", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (temp_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_copynum"));
   if ((rizoma_set_value ("VALE_COPY", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (copy_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_printcmd"));
   if ((rizoma_set_value ("PRINT_COMMAND", gtk_entry_get_text (GTK_ENTRY (aux_widget)))) != 0)
     {
-      ErrorMSG (print_entry, "Ocurrió un error mientras se modificaban los parametros");
+      ErrorMSG (aux_widget, "Ocurrió un error mientras se modificaban los parametros");
       return;
     }
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
