@@ -36,6 +36,8 @@ typedef struct __parms_dimensions {
 
 int read_dimensions (char *file, ParmsDimensions parms[], int total);
 
+GKeyFile* rizoma_open_config();
+
 gchar * rizoma_get_value (gchar *var_name);
 
 int rizoma_get_value_int (gchar *var_name);

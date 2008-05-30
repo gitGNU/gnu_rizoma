@@ -46,7 +46,11 @@ rizoma_open_config()
   GKeyFile *file;
   gboolean res;
 
-  rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
+  if (g_getenv("RIZOMA_CONF") != NULL)
+      rizoma_path = g_strdup(g_getenv("RIZOMA_CONF"));
+  else
+      rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
+
   file = g_key_file_new();
 
   res = g_key_file_load_from_file(file, rizoma_path, G_KEY_FILE_NONE, NULL);
