@@ -111,35 +111,82 @@ AddImpuesto (void)
 void
 DelTask (void)
 {
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_tasks));
+  GtkWidget *widget;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
   GtkTreeIter iter;
   PGresult *res;
   gchar *id;
   gchar *q;
+  gboolean borrar = FALSE;
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_taxes"));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (widget));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (store_tasks), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  0, &id,
 			  -1);
 
-      if (strcmp (id, "0") != 0)
+      if (!(g_str_equal (id, "0")))
 	{
-	  res = EjecutarSQL (g_strdup_printf ("DELETE FROM impuesto WHERE id=%s", id));
+	  q = g_strdup_printf("select count(*) from producto where otros = %s", id);
+	  res = EjecutarSQL(q);
+	  g_free (q);
 
-	  if (res != NULL)
+	  if ((res != NULL) && (g_str_equal(PQgetvalue(res, 0, 0), "0")))
+	    borrar = TRUE;
+	  else
 	    {
-	      ExitoMSG (impuesto_name, "El impuesto se elimino con exito");
+	      GtkWidget *dialog;
+	      gint result;
+	      GtkWidget *label;
+	      dialog = gtk_dialog_new_with_buttons ("Impuestos",
+						    GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+						    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+						    GTK_STOCK_CANCEL,
+						    GTK_RESPONSE_REJECT,
+						    GTK_STOCK_OK,
+						    GTK_RESPONSE_ACCEPT,
+						    NULL);
+	      label = gtk_label_new(g_strdup_printf("Actualmente hay <b>%s</b> productos utilizando el impuesto que ud desea borrar.\n"
+						    "¿Desea realmente eliminar el impuesto?", PQgetvalue(res, 0, 0)));
+	      gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+
+	      gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+				 label);
+	      gtk_widget_show_all (dialog);
+	      result = gtk_dialog_run (GTK_DIALOG (dialog));
+	      if (result == GTK_RESPONSE_ACCEPT)
+		borrar = TRUE;
+
+	      gtk_widget_destroy (dialog);
+
+	    }
+	  if (borrar)
+	    {
 	      q = g_strdup_printf ("UPDATE producto SET otros=-1 WHERE otros=%s", id);
 	      res = EjecutarSQL (q);
-	      FillImpuestos ();
+	      g_free(q);
+
+	      res = EjecutarSQL (g_strdup_printf ("DELETE FROM impuesto WHERE id=%s", id));
+
+	      if (res != NULL)
+		{
+		  ExitoMSG (widget, "El impuesto se elimino con exito");
+		  FillImpuestos ();
+		}
+	      else
+		ErrorMSG (impuesto_name, "No se pudo eliminar el impuesto");
 	    }
-	  else
-	    ErrorMSG (impuesto_name, "No se pudo eliminar el impuesto");
 	}
       else
 	ErrorMSG (impuesto_name, "No se puede eliminar el imipuesto IVA");
     }
+  else
+    AlertMSG(widget, "Debe seleccionar un impuesto de la lista");
 }
 
 void
