@@ -29,6 +29,7 @@
 #include"boleta.h"
 #include"errors.h"
 #include"config_file.h"
+#include"utils.h"
 
 GtkWidget *boleta_entry;
 GtkWidget *factura_entry;
@@ -44,12 +45,19 @@ GtkWidget *print_entry;
 void
 ModificarNumber (GtkWidget *widget, gpointer data)
 {
-  gint new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (boleta_entry))));
+  GtkWidget *aux_widget;
+  gint new_number;
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_ticketnum"));
+  new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))));
 
   if ((set_ticket_number (new_number, SIMPLE)) == FALSE)
-    ErrorMSG (boleta_entry, "Ocurrió un error mientras se intento modificar el número.");
+    ErrorMSG (widget, "Ocurrió un error mientras se intento modificar el número.");
   else
-    ExitoMSG (boleta_entry, "Se modifico el folio con exito.");
+    {
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio con exito.", 3000);
+    }
 }
 
 void
@@ -116,14 +124,14 @@ preferences_box ()
 
 
   // Boleta/ticket
-  current_number = get_ticket_number (SIMPLE);
+  current_number = get_ticket_number (SIMPLE) - 1;
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_ticketnum"));
   gtk_entry_set_text (GTK_ENTRY (widget),
 		      g_strdup_printf ("%d", current_number));
 
   //Factura
-  current_number = get_ticket_number (FACTURA);
+  current_number = get_ticket_number (FACTURA) - 1;
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_invoicenum"));
   gtk_entry_set_text (GTK_ENTRY (widget),
