@@ -5,6 +5,7 @@
     <property name="title" translatable="yes">Editar Impuesto</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="transient_for">wnd_admin</property>
+    <signal name="delete_event" handler="CloseEditTaxWin"/>
     <child>
       <object class="GtkVBox" id="vbox12">
         <property name="visible">True</property>
@@ -65,6 +66,7 @@
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseEditTaxWin"/>
+                <accelerator key="Escape" signal="clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
