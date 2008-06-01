@@ -41,6 +41,14 @@
 GtkBuilder *builder;
 
 
+/**
+ * The main function of the rizoma-admin application
+ *
+ * @param argc the number of arguments passed
+ * @param argv an array of arguments
+ *
+ * @return the exit code
+ */
 int
 main (int argc, char **argv)
 {
@@ -106,6 +114,15 @@ main (int argc, char **argv)
   return 0;
 }
 
+/**
+ * Callback connected to the login button.
+ *
+ *Check the username and password, and if the pair is correct raise
+ * the main window, otherwise raise an alert
+ *
+ * @param widget the widget that emits the signal
+ * @param data the user data
+ */
 void
 check_passwd (GtkWidget *widget, gpointer data)
 {
@@ -151,6 +168,10 @@ check_passwd (GtkWidget *widget, gpointer data)
     }
 }
 
+/**
+ * Setup the main window of the administration application (rizoma-admin).
+ *
+ */
 void
 admin_win()
 {
@@ -188,4 +209,32 @@ admin_win()
   preferences_box(); //preferences tab
 
   gtk_widget_show_all (admin_gui);
+}
+
+/**
+ * Callback connected to the quit button and delete-event of the main window.
+ *
+ * @param button the button that emits the signal
+ * @param user_data the user data
+ */
+void
+on_btn_quit_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "quit_message"));
+
+  gtk_widget_show_all(widget);
+}
+
+/**
+ * Quits the application
+ *
+ * @param button the button that emits the signal
+ * @param user_data the user data
+ */
+void
+on_quit_application (GtkButton *button, gpointer user_data)
+{
+  gtk_main_quit ();
 }
