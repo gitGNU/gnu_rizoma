@@ -212,7 +212,7 @@ EditTask (GtkWidget *widget, gpointer data)
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  0, &id,
 			  -1);
-      q = g_strdup_printf ("UPDATE impuestos SET descripcion='%s', "
+      q = g_strdup_printf ("UPDATE impuesto SET descripcion='%s', "
 			   "monto=%s WHERE id=%s", new_name, CUT(new_tasa), id);
       res = EjecutarSQL (q);
       g_free(q);
