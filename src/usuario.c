@@ -139,7 +139,7 @@ DeleteUser (GtkWidget *widget, gpointer data)
 
   tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_users));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
@@ -349,48 +349,94 @@ ChangePasswd (GtkWidget *widget, gpointer data)
 gint
 AddSeller (void)
 {
-  gchar *rut_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (rut_1)));
-  gchar *check_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (rut_check)));
-  gchar *nombre_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (nombre)));
-  gchar *p_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (apell_p)));
-  gchar *m_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (apell_m)));
-  gchar *user_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (username)));
-  gchar *passwd_new1 = g_strdup (gtk_entry_get_text (GTK_ENTRY (new_pass1)));
-  gchar *passwd_new2 = g_strdup (gtk_entry_get_text (GTK_ENTRY (new_pass2)));
-  gchar *id = g_strdup (gtk_entry_get_text (GTK_ENTRY (id_box)));
+  GtkWidget *widget;
+  gchar *rut_seller;
+  gchar *check_seller;
+  gchar *nombre_seller;
+  gchar *p_seller;
+  gchar *m_seller;
+  gchar *user_name;
+  gchar *passwd_new1;
+  gchar *passwd_new2;
+  gchar *id;
+  gchar *rut_full;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_rut"));
+  rut_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_dv"));
+  check_seller  = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_name"));
+  nombre_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_apell_p"));
+  p_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_apell_m"));
+  m_seller = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_username"));
+  user_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_passwd"));
+  passwd_new1 = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_passwd2"));
+  passwd_new2 = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  id = ""; //use the default id, assigned by the Database
 
   if (VerificarRut (rut_seller, check_seller) == FALSE)
     {
-      AlertMSG (rut_1, "El Rut no es valido");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_rut"));
+      gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+      AlertMSG (widget, "El Rut no es valido");
+
       return -1;
     }
+
   if (strcmp (nombre_seller, "") == 0)
     {
-      AlertMSG (nombre, "Debe Ingresar un nombre al vendedor");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_name"));
+      gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+      AlertMSG (widget, "Debe Ingresar un nombre al vendedor");
       return -1;
     }
   else if (strcmp (user_name, "") == 0)
     {
-      AlertMSG (username, "Debe Ingresar un nombre de usuario");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_username"));
+      gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+      AlertMSG (widget, "Debe Ingresar un nombre de usuario");
       return -1;
     }
   else if (strcmp (passwd_new1, "") == 0 || strcmp (passwd_new2, "") == 0)
     {
-      AlertMSG (new_pass1, "El vendedor debe tener password");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_passwd"));
+      gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+      AlertMSG (widget, "El vendedor debe tener password");
       return -1;
     }
 
   if (strcmp (passwd_new1, passwd_new2) != 0)
     {
-      AlertMSG (new_pass1, "La Password nueva no coincide");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_passwd"));
+      gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+
+      AlertMSG (widget, "La Password nueva no coincide");
       return -1;
     }
 
   if (ReturnUserExist (user_name) == TRUE)
     {
-      AlertMSG (username, "Ya existe el nombre de usuario");
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adduser_username"));
+      gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
 
-      gtk_entry_set_text (GTK_ENTRY (username), "");
+      AlertMSG (widget, "Ya existe el nombre de usuario");
 
       return -1;
     }
@@ -403,38 +449,53 @@ AddSeller (void)
       return -1;
     }
 
- if (AddNewSeller (rut_seller, nombre_seller, p_seller, m_seller, user_name, passwd_new1, id) == TRUE)
-   {
-     //ExitoMSG (rut_1, "Usuario agregado con exito");
-     rizoma_error_window (rut_1);
-
-     gtk_entry_set_text (GTK_ENTRY (rut_1), "");
-     gtk_entry_set_text (GTK_ENTRY (rut_check), "");
-     gtk_entry_set_text (GTK_ENTRY (nombre), "");
-     gtk_entry_set_text (GTK_ENTRY (apell_p), "");
-     gtk_entry_set_text (GTK_ENTRY (apell_m), "");
-     gtk_entry_set_text (GTK_ENTRY (username), "");
-     gtk_entry_set_text (GTK_ENTRY (new_pass1), "");
-     gtk_entry_set_text (GTK_ENTRY (new_pass2), "");
-     gtk_entry_set_text (GTK_ENTRY (id_box), "");
-
-     FillUsers ();
-   }
- else
-   {
-     // ErrorMSG (rut_1, "El Usuario no pudo ser agregado");
-     rizoma_error_window (rut_1);
-
-     gtk_entry_set_text (GTK_ENTRY (rut_1), "");
-     gtk_entry_set_text (GTK_ENTRY (rut_check), "");
-     gtk_entry_set_text (GTK_ENTRY (nombre), "");
-     gtk_entry_set_text (GTK_ENTRY (apell_p), "");
-     gtk_entry_set_text (GTK_ENTRY (apell_m), "");
-     gtk_entry_set_text (GTK_ENTRY (username), "");
-     gtk_entry_set_text (GTK_ENTRY (new_pass1), "");
-     gtk_entry_set_text (GTK_ENTRY (new_pass2), "");
-     gtk_entry_set_text (GTK_ENTRY (id_box), "");
-   }
+  rut_full = g_strdup_printf("%s-%s", rut_seller, check_seller);
+  if (AddNewSeller (rut_full, nombre_seller, p_seller, m_seller, user_name, passwd_new1, id))
+    {
+      CloseAddSellerWin(NULL, NULL);
+      FillUsers ();
+    }
+  else
+    {
+      ErrorMSG (rut_1, "El Usuario no pudo ser agregado");
+      rizoma_error_window (widget);
+    }
+  g_free (rut_full);
 
   return 0;
+}
+
+void
+CloseAddSellerWin (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+  int i;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_adduser"));
+  gtk_widget_hide (widget);
+
+  gchar *entries[8] = {"entry_adduser_rut",
+		       "entry_adduser_dv",
+		       "entry_adduser_username",
+		       "entry_adduser_name",
+		       "entry_adduser_apell_p",
+		       "entry_adduser_apell_m",
+		       "entry_adduser_passwd",
+		       "entry_adduser_passwd2"};
+
+  for (i=0 ; i < 8 ; i++)
+    {
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, entries[i]));
+      g_assert(widget != NULL);
+      gtk_entry_set_text(GTK_ENTRY(widget), "");
+    }
+}
+
+void
+AddSellerWin (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_adduser"));
+  gtk_widget_show_all(widget);
 }

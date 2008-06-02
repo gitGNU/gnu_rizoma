@@ -30,4 +30,6 @@ gint ChangePasswd (GtkWidget *widget, gpointer data);
 
 gint AddSeller (void);
 
+void CloseAddSellerWin (GtkButton *button, gpointer user_data);
+
 #endif
