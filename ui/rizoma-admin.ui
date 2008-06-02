@@ -1425,4 +1425,40 @@
       </object>
     </child>
   </object>
+  <object class="GtkMessageDialog" id="ask_delete_user">
+    <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_admin</property>
+    <property name="has_separator">False</property>
+    <property name="message_type">GTK_MESSAGE_QUESTION</property>
+    <property name="buttons">GTK_BUTTONS_YES_NO</property>
+    <property name="text">&#xBF;Desea eliminar al usuario?</property>
+    <signal name="close" handler="gtk_widget_hide_on_delete" object="ask_delete_user"/>
+    <signal name="response" handler="on_ask_delete_user_response"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox3">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area3">
+            <property name="visible">True</property>
+            <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

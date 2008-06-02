@@ -159,58 +159,39 @@ DeleteUser (GtkWidget *widget, gpointer data)
 }
 
 void
+on_ask_delete_user_response (GtkDialog *dialog,
+			     gint       response_id,
+			     gpointer   user_data)
+{
+  if (response_id == GTK_RESPONSE_YES)
+    DeleteUser (NULL, (gpointer)TRUE);
+
+  gtk_widget_hide(GTK_WIDGET(dialog));
+}
+
+/**
+ * Callback connected to the delete user button in rizoma-admin
+ *
+ */
+void
 AskDelete (void)
 {
   GtkWidget *window;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *image;
-  GtkWidget *label;
-  GtkWidget *button;
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_users));
+  GtkWidget *tree;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
   GtkTreeIter iter;
+
+  tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
-      window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gtk_window_set_title (GTK_WINDOW (window), "Borrar Usuario");
-      gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-      //      gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-      gtk_widget_show (window);
+      window = GTK_WIDGET(gtk_builder_get_object(builder, "ask_delete_user"));
 
-      vbox = gtk_vbox_new (FALSE, 3);
-      gtk_container_add (GTK_CONTAINER (window), vbox);
-      gtk_widget_show (vbox);
+      gtk_widget_show_all(window);
 
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-      gtk_widget_show (hbox);
-
-      image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG);
-      gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
-      gtk_widget_show (image);
-
-      label = gtk_label_new ("Desea eliminar al usuario");
-      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-      gtk_widget_show (label);
-
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-      gtk_widget_show (hbox);
-
-      button = gtk_button_new_from_stock (GTK_STOCK_NO);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-			G_CALLBACK (DeleteUser), (gboolean)FALSE);
-
-      button = gtk_button_new_from_stock (GTK_STOCK_YES);
-      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-      gtk_widget_show (button);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-			G_CALLBACK (DeleteUser), (gpointer)TRUE);
     }
 }
 
