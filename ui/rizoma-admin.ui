@@ -1146,7 +1146,7 @@
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="activate" handler="AddSeller"/>
+                <signal name="clicked" handler="AddSeller"/>
               </object>
               <packing>
                 <property name="expand">False</property>
