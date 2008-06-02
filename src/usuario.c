@@ -130,32 +130,31 @@ FillUsers (void)
 void
 DeleteUser (GtkWidget *widget, gpointer data)
 {
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_users));
+  GtkWidget *tree;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
   GtkTreeIter iter;
   gchar *id;
-  gboolean accepted = (gboolean) data;
   PGresult *res;
 
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE &&
-      accepted == TRUE)
+  tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_users));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (store_users), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  0, &id,
 			  -1);
 
       if (strcmp (id, "1") != 0)
 	{
 	  res = EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
-
 	  FillUsers ();
 	}
       else
-	AlertMSG (GTK_WIDGET (store_users), "No se puede elminar el usuario admin");
-
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
+	AlertMSG (tree, "No se puede elminar el usuario admin");
     }
-  else
-    gtk_widget_destroy (gtk_widget_get_toplevel (widget));
 }
 
 void
@@ -193,6 +192,8 @@ AskDelete (void)
       gtk_widget_show_all(window);
 
     }
+  else
+    AlertMSG (tree, "Debe haber seleccionado un usuario de la lista previamente");
 }
 
 void
