@@ -1077,7 +1077,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sales_day"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>%.2f</b>", g_ascii_strtod (PQvaluebycol (res, 0, "unidades_merma"), NULL)));
+                            g_strdup_printf ("<b>%.2f</b>", g_ascii_strtod (PQvaluebycol (res, 0, "stock_day"), NULL)));
 
       /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_")); */
       /* gtk_label_set_markup (GTK_LABEL (stock_dias), */
