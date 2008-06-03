@@ -1375,7 +1375,6 @@
                                             <child>
                                               <object class="GtkLabel" id="label43">
                                                 <property name="visible">True</property>
-                                                <property name="label" translatable="yes">label</property>
                                               </object>
                                               <packing>
                                                 <property name="left_attach">1</property>
@@ -1387,7 +1386,6 @@
                                             <child>
                                               <object class="GtkLabel" id="label42">
                                                 <property name="visible">True</property>
-                                                <property name="label" translatable="yes">label</property>
                                               </object>
                                               <packing>
                                                 <property name="left_attach">1</property>
@@ -1399,7 +1397,6 @@
                                             <child>
                                               <object class="GtkLabel" id="label41">
                                                 <property name="visible">True</property>
-                                                <property name="label" translatable="yes">label</property>
                                               </object>
                                               <packing>
                                                 <property name="left_attach">1</property>
@@ -1411,7 +1408,6 @@
                                             <child>
                                               <object class="GtkLabel" id="label6">
                                                 <property name="visible">True</property>
-                                                <property name="label" translatable="yes">label</property>
                                               </object>
                                               <packing>
                                                 <property name="left_attach">1</property>
@@ -2796,6 +2792,18 @@
                             <property name="n_rows">6</property>
                             <property name="n_columns">4</property>
                             <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
                               <object class="GtkLabel" id="lbl_prov_rut">
                                 <property name="visible">True</property>
                               </object>
@@ -2803,18 +2811,6 @@
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
                               </packing>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label116">
