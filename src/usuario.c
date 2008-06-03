@@ -208,10 +208,10 @@ user_box ()
 				    G_TYPE_STRING, //ID
 				    G_TYPE_STRING, //RUT
 				    G_TYPE_STRING, //nombre
-				    G_TYPE_STRING,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING,
-				    G_TYPE_STRING);
+				    G_TYPE_STRING, //apellido Paterno
+				    G_TYPE_STRING, //apellido materno
+				    G_TYPE_STRING, //ingreso
+				    G_TYPE_STRING);//salida
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
   gtk_tree_view_set_model(GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store_users));
@@ -345,6 +345,60 @@ ChangePasswd (GtkWidget *widget, gpointer data)
 
   return 0;
 }
+
+void
+ChangePasswdWin (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+  GtkWidget *tree;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  gchar *user_id;
+  PGresult *res;
+  gchar *q;
+
+  tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+
+  if (gtk_tree_selection_get_selected(selection, NULL, &iter))
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
+			  0, &user_id,
+			  -1);
+
+      q = g_strdup_printf("select usuario from select_usuario() as "
+			  "(id int,rut int4, dv varchar(1),usuario varchar(30),"
+			  "passwd varchar(400),nombre varchar(75),"
+			  "apell_p varchar(75),apell_m varchar(75),"
+			  "fecha_ingreso timestamp,\"level\" int2)"
+			  " WHERE id = %s", user_id);
+      res = EjecutarSQL(q);
+      g_free(q);
+
+      if ((res == NULL) || (PQntuples(res) == 0))
+	{
+	  g_printerr("%s: no se pudo obtener el nombre de usuario para el id=%s",
+		     G_STRFUNC, user_id);
+	  return;
+	}
+
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_changepasswd_username"));
+      gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "usuario"));
+
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_changepasswd_1"));
+      gtk_widget_grab_focus(widget);
+
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_changepasswd"));
+      gtk_widget_show_all(widget);
+    }
+  else
+    AlertMSG(tree, "Debe seleccionar un usuario de la lista para cambiar la contraseña");
+
+}
+
+////////////// Add Seller
 
 gint
 AddSeller (void)
