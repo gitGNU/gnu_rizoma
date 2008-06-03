@@ -33,6 +33,7 @@
 #include"usuario.h"
 #include"encriptar.h"
 #include"dimentions.h"
+#include"utils.h"
 
 #include<rizoma_errors.h>
 
@@ -296,51 +297,75 @@ user_box ()
   FillUsers ();
 }
 
+void
+CloseChangePasswdWin (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_changepasswd"));
+  gtk_widget_hide(widget);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_changepasswd_1"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_changepasswd_2"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+
+}
+
 gint
 ChangePasswd (GtkWidget *widget, gpointer data)
 {
-  gchar *passwd_new1 = g_strdup (gtk_entry_get_text (GTK_ENTRY (new_pass_1)));
-  gchar *passwd_new2 = g_strdup (gtk_entry_get_text (GTK_ENTRY (new_pass_2)));
-  GtkWidget *combo = (GtkWidget *) data;
-
-  GtkTreeModel *model;
+  GtkWidget *aux_widget;
+  GtkWidget *tree;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
   GtkTreeIter iter;
-  gchar *usuario;
+  gchar *user_id;
+  gchar *passwd_new1;
+  gchar *passwd_new2;
 
-  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo)) != -1)
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_changepasswd_1"));
+  passwd_new1 = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget  = GTK_WIDGET(gtk_builder_get_object(builder, "entry_changepasswd_2"));
+  passwd_new2 = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+
+  if (gtk_tree_selection_get_selected(selection, NULL, &iter))
     {
-      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
-      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
-
-      gtk_tree_model_get (model, &iter,
-			  0, &usuario,
+      gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
+			  0, &user_id,
 			  -1);
     }
   else
     {
-      AlertMSG (combo, "Debe seleccionar un usuario");
+      AlertMSG (aux_widget, "Debe seleccionar un usuario");
       return -1;
     }
 
-  if (strcmp (passwd_new1, passwd_new2) != 0)
+  if (!(g_str_equal (passwd_new1, passwd_new2)))
     {
-      AlertMSG (new_pass_2, "La Password nueva no coincide");
+      AlertMSG (aux_widget, "La Password nueva no coincide");
       return -1;
     }
 
-  if (SaveNewPassword (passwd_new1, usuario) == TRUE)
+  if (SaveNewPassword (passwd_new1, user_id) == TRUE)
     {
-      gtk_entry_set_text (GTK_ENTRY (old_pass), "");
-      gtk_entry_set_text (GTK_ENTRY (new_pass_1), "");
-      gtk_entry_set_text (GTK_ENTRY (new_pass_2), "");
-      ExitoMSG (main_window, "Su Password fue cambiada con exito");
+      CloseChangePasswdWin(NULL, NULL);
+
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push (GTK_STATUSBAR(aux_widget), "Su Password fue cambiada con exito", 3000);
     }
   else
     {
-      gtk_entry_set_text (GTK_ENTRY (old_pass), "");
-      gtk_entry_set_text (GTK_ENTRY (new_pass_1), "");
-      gtk_entry_set_text (GTK_ENTRY (new_pass_2), "");
-      ErrorMSG (main_window, "No se pudo cambiar su password");
+      CloseChangePasswdWin(NULL, NULL);
+
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+      ErrorMSG (aux_widget, "No se pudo cambiar la password");
     }
 
   return 0;
