@@ -725,7 +725,7 @@ SaveNewPassword (gchar *passwd, gchar *user)
 {
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE users SET passwd=md5('%s')WHERE usuario='%s'",
+  res = EjecutarSQL (g_strdup_printf ("UPDATE users SET passwd=md5('%s')WHERE id='%s'",
                                       passwd, user));
 
   if (res != NULL)
