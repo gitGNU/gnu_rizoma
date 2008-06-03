@@ -591,6 +591,7 @@
   </object>
   <object class="GtkWindow" id="wnd_admin">
     <property name="border_width">5</property>
+    <signal name="delete_event" handler="on_btn_quit_clicked"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -1240,6 +1241,8 @@
                         <property name="visible">True</property>
                         <property name="n_rows">7</property>
                         <property name="n_columns">2</property>
+                        <property name="column_spacing">5</property>
+                        <property name="row_spacing">5</property>
                         <child>
                           <object class="GtkEntry" id="entry_admin_printcmd">
                             <property name="visible">True</property>
