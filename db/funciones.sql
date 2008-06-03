@@ -1813,3 +1813,48 @@ resultado := (select costo_promedio from producto where barcode=barcode_in);
 return resultado;
 
 end; $$ language plpgsql;
+
+create or replace function ranking_ventas(
+       in starts date,
+       in ends date,
+       out descripcion varchar,
+       out marca varchar,
+       out contenido varchar,
+       out unidad varchar,
+       out cantidad_vendida double precision,
+       out monto_vendido double precision,
+       out npi double precision,
+       out npi2 double precision
+       )
+returns setof record as $$
+declare
+q text;
+l record;
+begin
+
+q := $S$ SELECT producto.descripcion as descripcion,
+       	      producto.marca as marca,
+	      producto.contenido as contenido,
+	      producto.unidad as unidad,
+	      SUM (venta_detalle.cantidad) as cantidad_vendida,
+	      SUM ((venta_detalle.cantidad*venta_detalle.precio)::integer) as monto_vendido,
+	      SUM ((venta_detalle.cantidad*venta_detalle.fifo)::integer) as npi,
+       	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as npi2
+	FROM venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
+	where id_venta in (SELECT id FROM venta WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$)
+       GROUP BY 1,2,3,4 $S$;
+
+for l in execute q loop
+    descripcion := l.descripcion;
+    marca := l.marca;
+    contenido := l.contenido;
+    unidad := l.unidad;
+    cantidad_vendida := l.cantidad_vendida;
+    monto_vendido := l.monto_vendido;
+    npi := l.npi;
+    npi2 := l.npi2;
+    return next;
+end loop;
+
+return;
+end; $$ language plpgsql;
