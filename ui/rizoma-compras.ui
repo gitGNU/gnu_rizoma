@@ -1263,6 +1263,7 @@
                             <child>
                               <object class="GtkVBox" id="vbox1">
                                 <property name="visible">True</property>
+                                <property name="homogeneous">True</property>
                                 <child>
                                   <object class="GtkHBox" id="hbox16">
                                     <property name="visible">True</property>
@@ -1271,10 +1272,10 @@
                                       <object class="GtkScrolledWindow" id="scrolledwindow5">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                                        <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
                                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                         <child>
-                                          <object class="GtkTreeView" id="treeview1">
+                                          <object class="GtkTreeView" id="tree_view_pending_guide">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="headers_clickable">True</property>
@@ -1333,10 +1334,10 @@
                                       <object class="GtkScrolledWindow" id="scrolledwindow6">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                                        <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
                                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                         <child>
-                                          <object class="GtkTreeView" id="treeview2">
+                                          <object class="GtkTreeView" id="tree_view_guide_invoice">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="headers_clickable">True</property>
@@ -1348,19 +1349,15 @@
                                       </packing>
                                     </child>
                                   </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                  </packing>
                                 </child>
                                 <child>
                                   <object class="GtkScrolledWindow" id="scrolledwindow7">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                                    <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
                                     <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                     <child>
-                                      <object class="GtkTreeView" id="treeview3">
+                                      <object class="GtkTreeView" id="tree_view_guide_invoice_detail">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="headers_clickable">True</property>
@@ -1482,6 +1479,10 @@
                                       </object>
                                     </child>
                                   </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                  </packing>
                                 </child>
                                 <child>
                                   <object class="GtkHButtonBox" id="hbuttonbox6">
@@ -1531,8 +1532,6 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>

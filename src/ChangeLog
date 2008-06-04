@@ -1,3 +1,8 @@
+2008-06-04  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (FillGuias): Changed query to get pending guides.
+	(compras_win): Added columns to treeviews.
+
 2008-05-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* utils.c (parse_date): Dropped, not need it anymore.
