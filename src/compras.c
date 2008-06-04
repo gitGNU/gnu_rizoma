@@ -5403,7 +5403,9 @@ on_entry_buy_barcode_activate (GtkEntry *entry, gpointer user_data)
 }
 
 void
-on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data) {
+on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
+{
+  GtkWidget *widget;
 
   switch (page_num)
     {
@@ -5419,7 +5421,13 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       /*   ClearPagosData (); */
       /*   FillPagarFacturas (NULL); */
       /*   break; */
-      /* case 4: */
+
+    case 4: //mercaderia tab
+	//put the focus in the search entry
+	widget = GTK_WIDGET(gtk_builder_get_object(builder, "find_product_entry"));
+	gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
+	gtk_widget_grab_focus(widget);
+
       /*   ReturnProductsStore (ingreso->store); */
       /*   break; */
       /* case 5: */

@@ -151,6 +151,7 @@
     <child>
       <object class="GtkVBox" id="vbox_main">
         <property name="visible">True</property>
+        <property name="border_width">5</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkNotebook" id="buy_notebook">
@@ -2401,6 +2402,7 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="entry_informerca_minstock">
+                        <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -2422,6 +2424,7 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="entry_infomerca_percentmargin">
+                        <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -2445,6 +2448,7 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="entry_informerca_price">
+                        <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -2513,6 +2517,7 @@
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkRadioButton" id="radio_mayorist_yes">
+                            <property name="width_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="label" translatable="yes">S&#xED;</property>
@@ -2523,6 +2528,7 @@
                         </child>
                         <child>
                           <object class="GtkRadioButton" id="radio_mayorist_no">
+                            <property name="width_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="label" translatable="yes">No</property>
@@ -2541,10 +2547,12 @@
                         <property name="right_attach">4</property>
                         <property name="top_attach">7</property>
                         <property name="bottom_attach">8</property>
+                        <property name="x_options"></property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkEntry" id="entry_informerca_cantmayorist">
+                        <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -2557,6 +2565,7 @@
                     </child>
                     <child>
                       <object class="GtkEntry" id="entry_informerca_pricemayorist">
+                        <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </object>
@@ -2660,6 +2669,7 @@
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Mercader&#xED;a</property>
                 <property name="use_underline">True</property>
+                <property name="mnemonic_widget">find_product_entry</property>
               </object>
               <packing>
                 <property name="position">4</property>
