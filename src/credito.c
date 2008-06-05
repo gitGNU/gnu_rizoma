@@ -667,6 +667,7 @@ DatosDeudor (GtkTreeSelection *treeselection,
   GtkTreeIter iter;
   GtkTreeView *treeview;
   GtkListStore *store;
+  gint rut;
 
   if (gtk_tree_selection_get_selected (treeselection, NULL, &iter))
     {
