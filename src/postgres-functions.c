@@ -136,10 +136,10 @@ EjecutarSQL (gchar *sentencia)
       status_res = PQresultStatus(res);
 
       if ((status_res != PGRES_COMMAND_OK) && (status_res != PGRES_TUPLES_OK))
-	g_printerr("SQL: %s\nErr: %s\nMsg: %s",
-		   sentencia,
-		   PQresStatus(status_res),
-		   PQresultErrorMessage(res));
+        g_printerr("SQL: %s\nErr: %s\nMsg: %s",
+                   sentencia,
+                   PQresStatus(status_res),
+                   PQresultErrorMessage(res));
 
       if( res == NULL )
         {
@@ -320,7 +320,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
     {
     case FACTURA: //specific operations for invoice
       if (rizoma_get_value_boolean ("PRINT_FACTURA")) //print the invoice
-	  PrintDocument(tipo_documento, rut, total, id_documento,venta->header);
+        PrintDocument(tipo_documento, rut, total, id_documento,venta->header);
       break;
 
     case SIMPLE: //specific operations for cash
@@ -438,8 +438,8 @@ InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar 
   gchar *q;
 
   q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito) "
-		       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d)",
-		       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito);
+                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d)",
+                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -767,7 +767,7 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
     }
 
   q = g_strdup_printf ("INSERT INTO users (id, usuario, passwd, rut, dv, nombre, apell_p, apell_m, fecha_ingreso, \"level\") "
-		       "VALUES (%s, '%s', md5('%s'), %s, '%s', '%s', '%s', '%s', NOW(), 1)",
+                       "VALUES (%s, '%s', md5('%s'), %s, '%s', '%s', '%s', '%s', NOW(), 1)",
                        strcmp (id, "") != 0 ? id : "DEFAULT", username, passwd, rut_splited[0], rut_splited[1], nombre, apell_p, apell_m);
   res = EjecutarSQL (q);
   g_free (q);
@@ -1097,7 +1097,7 @@ GetUnit (gchar *barcode)
   res = EjecutarSQL (g_strdup_printf ("SELECT contenido, unidad FROM select_producto(%s)", barcode));
 
   unit = g_strdup_printf ("%s %s",
-			  PQvaluebycol (res, 0, "contenido"),
+                          PQvaluebycol (res, 0, "contenido"),
                           PQvaluebycol (res, 0, "unidad"));
 
   return unit;
@@ -1128,7 +1128,7 @@ GetCurrentPrice (gchar *barcode)
   gchar *q;
 
   q = g_strdup_printf ("SELECT precio FROM select_producto(%s)",
-		       barcode);
+                       barcode);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1234,8 +1234,8 @@ SaveProductsSell (Productos *products, gint id_venta)
       else
         precio = products->product->precio;
       q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %d, %ld, %ld)",
-			   id_venta, products->product->barcode, cantidad, precio,
-			   products->product->fifo, lround (iva), lround (otros));
+                           id_venta, products->product->barcode, cantidad, precio,
+                           products->product->fifo, lround (iva), lround (otros));
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -1327,7 +1327,7 @@ GetDayToSell (gchar *barcode)
         day = 1;
 
       q = g_strdup_printf ("SELECT stock/(vendidos/%d) FROM select_producto(%s)",
-			   day, barcode);
+                           day, barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
@@ -1348,7 +1348,7 @@ GetMinStock (gchar *barcode)
   gchar *q;
 
   q = g_strdup_printf ("SELECT stock_min FROM producto WHERE barcode='%s'",
-		       barcode);
+                       barcode);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1384,8 +1384,8 @@ ReturnIncompletProducts (gint id_venta)
   gchar *q;
 
   q = g_strdup_printf ("SELECT count(*) FROM compra_detalle WHERE id_compra=%d "
-		       "AND cantidad_ingresada>0 AND cantidad_ingresada<cantidad",
-		       id_venta);
+                       "AND cantidad_ingresada>0 AND cantidad_ingresada<cantidad",
+                       id_venta);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1403,7 +1403,7 @@ ReturnProveedor (gint id_compra)
   gchar *q;
 
   q = g_strdup_printf ("SELECT * FROM proveedor WHERE rut=(SELECT rut_proveedor FROM compra"
-		       " WHERE id=%d", id_compra);
+                       " WHERE id=%d", id_compra);
   res = EjecutarSQL (q);
   g_free (q);
 
