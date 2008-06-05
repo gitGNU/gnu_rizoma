@@ -36,6 +36,7 @@
 #include"impuestos.h"
 #include"datos_negocio.h"
 #include"parametros.h"
+#include"credito.h"
 
 //the builder that contains all the UI
 GtkBuilder *builder;
@@ -207,7 +208,7 @@ admin_win()
   taxes_box(); //taxes tab
   datos_box(); //business info
   preferences_box(); //preferences tab
-
+  clientes_box(); //clients tab
   gtk_widget_show_all (admin_gui);
 }
 
