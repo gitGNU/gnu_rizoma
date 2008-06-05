@@ -29,7 +29,7 @@ void fill_credit_data (const gchar *rut, const gchar *name, const gchar *address
 void search_client (GtkWidget *widget, gpointer data);
 
 //void creditos_box (MainBox *module_box);
-void creditos_box (GtkWidget *main_box);
+void clientes_box ();
 
 void AddClient (GtkWidget *widget, gpointer data);
 
@@ -43,7 +43,7 @@ gboolean VerificarRut (gchar *rut, gchar *ver);
 
 gint FillClientStore (GtkListStore *store);
 
-void DatosDeudor (void);
+void DatosDeudor(GtkTreeSelection *treeselection, gpointer user_data);
 
 void FillVentasDeudas (gint rut);
 
