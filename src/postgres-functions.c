@@ -472,7 +472,8 @@ InsertDeuda (gint id_venta, gint rut, gint vendedor)
 {
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO deuda VALUES (DEFAULT, %d, %d, %d, DEFAULT, DEFAULT)",
+  res = EjecutarSQL (g_strdup_printf ("INSERT INTO deuda (id_venta, rut_cliente, vendedor) "
+				      "VALUES (%d, %d, %d)",
                                       id_venta, rut, vendedor));
 
   return 0;
