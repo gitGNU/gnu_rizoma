@@ -1,3 +1,18 @@
+2008-06-05  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (on_entry_srch_provider_activate): Created to deal
+	with the activate signal of entry and find on srch_provider
+	window. Search and find a provider.
+	(SelectProveedor|CloseSelectProveedor): Deleted function.
+	(ClearFactData): Modified to deal with the widget from GtkBuilder.
+
+2008-06-04  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (FillGuias): Changed query to get pending guides.
+	(compras_win): Added columns to treeviews.
+	(on_entry_guide_invoice_activate): Added function to deal with the
+	button signal.
+
 2008-05-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* utils.c (parse_date): Dropped, not need it anymore.

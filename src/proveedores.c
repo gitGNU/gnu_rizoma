@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*proveedores.c
  *
  *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -81,8 +81,8 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
   q = g_strdup_printf ("SELECT rut, dv, nombre, giro, contacto "
-		       "FROM buscar_proveedor('%%%s%%')",
-		       string);
+                       "FROM buscar_proveedor('%%%s%%')",
+                       string);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -96,14 +96,14 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   for (i = 0; i < tuples; i++)
     {
       str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
-			    PQvaluebycol (res, i, "dv"), NULL);
+                            PQvaluebycol (res, i, "dv"), NULL);
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-			  0, str_axu,
-			  1, PQvaluebycol (res, i, "nombre"),
-			  2, PQvaluebycol (res, i, "giro"),
-			  3, PQvaluebycol (res, i, "contacto"),
-			  -1);
+                          0, str_axu,
+                          1, PQvaluebycol (res, i, "nombre"),
+                          2, PQvaluebycol (res, i, "giro"),
+                          3, PQvaluebycol (res, i, "contacto"),
+                          -1);
       g_free (str_axu);
     }
 }
@@ -131,20 +131,20 @@ ListarProveedores (void)
       str_axu = g_strconcat(PQvaluebycol(res, i, "rut"), "-", PQvaluebycol(res, i, "dv"), NULL);
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-			  0, str_axu,
-			  1, PQvaluebycol (res, i, "nombre"),
-			  2, PQvaluebycol (res, i, "giro"),
-			  3, PQvaluebycol (res, i, "contacto"),
-			  -1);
+                          0, str_axu,
+                          1, PQvaluebycol (res, i, "nombre"),
+                          2, PQvaluebycol (res, i, "giro"),
+                          3, PQvaluebycol (res, i, "contacto"),
+                          -1);
       g_free (str_axu);
     }
 }
 
 void
 LlenarDatosProveedor (GtkTreeView       *tree_view,
-		      GtkTreePath       *path,
-		      GtkTreeViewColumn *column,
-		      gpointer           user_data)
+                      GtkTreePath       *path,
+                      GtkTreeViewColumn *column,
+                      gpointer           user_data)
 {
   GtkWidget *widget;
   GtkTreeSelection *selection;
@@ -161,8 +161,8 @@ LlenarDatosProveedor (GtkTreeView       *tree_view,
     return;
 
   gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-		      0, &rut_proveedor,
-		      -1);
+                      0, &rut_proveedor,
+                      -1);
 
   aux = g_strsplit(rut_proveedor, "-", 0);
   q = g_strdup_printf ("SELECT * FROM select_proveedor(%s)", aux[0]);
@@ -284,7 +284,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
       return;
     }
   else if ((GetDataByOne
-	    (g_strdup_printf ("SELECT * FROM proveedor WHERE rut=%s", rut_c))) != NULL)
+            (g_strdup_printf ("SELECT * FROM proveedor WHERE rut=%s", rut_c))) != NULL)
     {
       ErrorMSG (wnd, "Ya existe un proveedor con el mismo rut");
       return;
@@ -370,7 +370,7 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addprovider"));
   gtk_window_set_transient_for(GTK_WINDOW(aux_widget),
-  			       GTK_WINDOW(gtk_widget_get_toplevel(widget)));
+                               GTK_WINDOW(gtk_widget_get_toplevel(widget)));
   gtk_window_set_modal (GTK_WINDOW(aux_widget), TRUE);
   gtk_widget_show (aux_widget);
 }
@@ -439,10 +439,10 @@ proveedores_box ()
 
   //setup the gtktreeview and all the necesary objects
   store = gtk_list_store_new (4,
-			      G_TYPE_STRING,
-			      G_TYPE_STRING,
-			      G_TYPE_STRING,
-			      G_TYPE_STRING);
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING);
 
   proveedores_tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_prov_search"));
   gtk_tree_view_set_model(GTK_TREE_VIEW(proveedores_tree), GTK_TREE_MODEL(store));
