@@ -115,7 +115,7 @@ void SelectProveedor (GtkWidget *widget, gpointer data);
 
 void FoundProveedor (GtkWidget *widget, gpointer dawta);
 
-void FillProveedorData (GtkWidget *widget, gpointer data);
+void FillProveedorData (gchar *str_rut, gboolean guias);
 
 void AddFactura (void);
 
