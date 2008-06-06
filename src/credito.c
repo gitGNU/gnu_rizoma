@@ -880,10 +880,24 @@ Abonar (void)
 void
 CloseModificarWindow (void)
 {
-  gtk_widget_destroy (modificar_window);
+  GtkWidget *widget;
+  int i;
+  gchar *widgets_list[7] = {"entry_modclient_name",
+			   "entry_modclient_apell_p",
+			   "entry_modclient_apell_m",
+			   "entry_modclient_addr",
+			   "entry_modclient_phone",
+			   "entry_modclient_giro",
+			    "entry_modclient_limit_credit"};
 
-  modificar_window = NULL;
-  gtk_widget_set_sensitive (main_window, TRUE);
+  for (i=0 ; i<7 ; i++)
+    {
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, widgets_list[i]));
+      gtk_entry_set_text(GTK_ENTRY(widget), "");
+    }
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_modclient"));
+  gtk_widget_hide(widget);
 }
 
 void
