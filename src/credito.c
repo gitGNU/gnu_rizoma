@@ -1303,22 +1303,31 @@ ToggleClientCredit (GtkCellRendererToggle *toggle, char *path_str, gpointer data
 void
 EliminarCliente (void)
 {
+  GtkWidget *widget;
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
   gint rut;
   GtkTreeIter iter;
 
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == TRUE && user_data->user_id == 1)
+  treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_clients"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  selection = gtk_tree_view_get_selection(treeview);
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) && user_data->user_id == 1)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  0, &rut,
 			  -1);
 
-      if (ClientDelete (rut) == TRUE)
+      if (ClientDelete (rut))
 	{
-	  ExitoMSG (GTK_WIDGET (creditos->store), "El Client fue eliminado con exito");
-	  FillClientStore (creditos->store);
+	  gtk_list_store_remove(store, &iter);
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+	  statusbar_push (GTK_STATUSBAR(widget), "El Client fue eliminado con exito", 3000);
 	}
       else
-	ErrorMSG (GTK_WIDGET (creditos->selection), "No se pudo elminar el cliente");
+	ErrorMSG (GTK_WIDGET (treeview), "No se pudo elminar el cliente");
     }
 }
 
