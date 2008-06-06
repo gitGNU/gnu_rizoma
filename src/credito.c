@@ -1227,48 +1227,78 @@ EliminarCliente (void)
 void
 ModificarClienteDB (void)
 {
-  gchar *nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->entry_nombres)));
-  gchar *paterno = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->paterno)));
-  gchar *materno = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->materno)));
-  gchar *rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->rut)));
-  gchar *ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->rut_ver)));
-  gchar *direccion = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->direccion)));
-  gchar *fono = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->fono)));
-  gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->giro)));
-  gint credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->credito))));
+  GtkWidget *widget;
+  gchar *q;
+  gchar *nombre;
+  gchar *paterno;
+  gchar *materno;
+  gchar **rut;
+  gchar *direccion;
+  gchar *fono;
+  gchar *giro;
+  gint credito;
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
+  nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_apell_p"));
+  paterno = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_apell_m"));
+  materno = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_modclient_rut"));
+  rut = g_strsplit(gtk_label_get_text (GTK_LABEL (widget)), "-", 0);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_addr"));
+  direccion = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_phone"));
+  fono = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_giro"));
+  giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
+  credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
   if (strcmp (nombre, "") == 0)
-    AlertMSG (creditos->entry_nombres, "El Campo Nombre no puede estar vacio");
+    AlertMSG (widget, "El Campo Nombre no puede estar vacio");
   else if (strcmp (paterno, "") == 0)
-    AlertMSG (creditos->paterno, "El Apellido Paterno no puede estar vacio");
+    AlertMSG (widget, "El Apellido Paterno no puede estar vacio");
   else if (strcmp (materno, "") == 0)
-    AlertMSG (creditos->materno, "El Apellido Materno no puede estar vacio");
-  else if (strcmp (rut, "") == 0)
-    AlertMSG (creditos->rut, "El Campo rut no debe estar vacio");
-  else if (strcmp (ver, "") == 0)
-    AlertMSG (creditos->rut_ver, "El Campo verificador del ru no puede estar vacio");
+    AlertMSG (widget, "El Apellido Materno no puede estar vacio");
+  else if (strcmp (rut[0], "") == 0)
+    AlertMSG (widget, "El Campo rut no debe estar vacio");
+  else if (strcmp (rut[1], "") == 0)
+    AlertMSG (widget, "El Campo verificador del ru no puede estar vacio");
   else if (strcmp (direccion, "") == 0)
-    AlertMSG (creditos->direccion, "La direccion no puede estar vacia");
+    AlertMSG (widget, "La direccion no puede estar vacia");
   else if (strcmp (fono, "") == 0)
-    AlertMSG (creditos->fono, "El campo telefonico no puede estar vacio");
+    AlertMSG (widget, "El campo telefonico no puede estar vacio");
   else if (strcmp (giro, "") == 0)
-    AlertMSG (creditos->giro, "El campo giro no puede estar vació");
+    AlertMSG (widget, "El campo giro no puede estar vació");
   else if (credito == 0)
-    AlertMSG (creditos->credito, "El campo credito no puede estar vacio");
+    AlertMSG (widget, "El campo credito no puede estar vacio");
   else
     {
-      if (VerificarRut (rut, ver) == TRUE)
+      if (VerificarRut (rut[0], rut[1]))
 	{
-
-	  if (EjecutarSQL (g_strdup_printf ("UPDATE clientes SET nombre='%s', apellido_paterno='%s', apellido_materno='%s', "
-					    "direccion='%s', telefono='%s', credito=%d, giro='%s' WHERE rut=%d",
-					    nombre, paterno, materno, direccion, fono, credito, giro, atoi (rut))) != NULL)
-	    ExitoMSG (GTK_WIDGET (creditos->store), "Se modificaron los datos con exito");
+	  q = g_strdup_printf ("UPDATE cliente SET nombre='%s', apell_p='%s', apell_m='%s', "
+			       "direccion='%s', telefono='%s', credito=%d, giro='%s' WHERE rut=%d",
+			       nombre, paterno, materno, direccion, fono, credito, giro, atoi (rut[0]));
+	  if (EjecutarSQL (q) != NULL)
+	    {
+	      widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+	      statusbar_push (GTK_STATUSBAR(widget), "Se modificaron los datos con exito", 3000);
+	    }
 	    else
-	    ErrorMSG (GTK_WIDGET (creditos->store), "No se puedieron modificar los datos");
+	      ErrorMSG (widget, "No se puedieron modificar los datos");
 
 	  CloseModificarWindow ();
-	  FillClientStore (creditos->store);
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
+	  FillClientStore (GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget))));
+	  g_free(q);
 	}
       else
 	AlertMSG (creditos->rut, "El Rut no es valido!!");
