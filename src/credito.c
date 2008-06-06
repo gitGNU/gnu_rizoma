@@ -467,8 +467,17 @@ clientes_box ()
 void
 AddClient (GtkWidget *widget, gpointer data)
 {
-  gtk_widget_grab_focus (GTK_WIDGET(gtk_builder_get_object(builder, "entry_client_rut")));
-  gtk_widget_show_all (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient")));
+  GtkWidget *wnd;
+  GtkWidget *aux;
+  wnd = gtk_widget_get_toplevel(widget);
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "entry_client_rut"));
+  gtk_widget_grab_focus (aux);
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient"));
+  gtk_window_set_transient_for(GTK_WINDOW(aux), GTK_WINDOW(wnd));
+  gtk_window_set_modal (GTK_WINDOW(aux), TRUE);
+  gtk_widget_show_all (aux);
 }
 
 void
