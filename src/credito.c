@@ -1250,26 +1250,32 @@ VentaPosible (gint rut, gint total_venta)
 gint
 ToggleClientCredit (GtkCellRendererToggle *toggle, char *path_str, gpointer data)
 {
+  GtkWidget *treeview;
+  GtkTreeModel *store;
   gboolean enable;
   gint rut;
-  GtkTreePath *path = gtk_tree_path_new_from_string (path_str);
+  GtkTreePath *path;
   GtkTreeIter iter;
 
-  gtk_tree_model_get_iter (GTK_TREE_MODEL (creditos->store), &iter, path);
-  gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter, 3, &enable, -1);
-  gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter, 0, &rut, -1);
+  treeview = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
+  store = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+  path = gtk_tree_path_new_from_string (path_str);
 
-  if (enable == TRUE)
-    enable = FALSE;
-  else
-    enable = TRUE;
+  gtk_tree_model_get_iter (store, &iter, path);
+  gtk_tree_model_get (store, &iter,
+		      0, &rut,
+		      3, &enable,
+		      -1);
 
-  gtk_list_store_set (GTK_LIST_STORE (creditos->store), &iter, 3, enable);
-
-  gtk_tree_path_free (path);
+  enable = !(enable);
 
   ChangeEnableCredit (enable, rut);
 
+  gtk_list_store_set (GTK_LIST_STORE(store), &iter,
+		      3, enable,
+		      -1);
+
+  gtk_tree_path_free (path);
 
   return 0;
 }
