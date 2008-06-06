@@ -889,196 +889,75 @@ CloseModificarWindow (void)
 void
 ModificarCliente (void)
 {
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *box;
-  GtkWidget *box2;
-
-  GtkWidget *label;
-  GtkWidget *button;
-
+  GtkWidget *widget;
+  GtkTreeView *treeview;
   GtkTreeIter iter;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
 
-  gchar *nombre, *apellido_materno, *apellido_paterno;
-  gchar *fono, *direccion, *credito, *rut_ver, *giro;
+  PGresult *res;
+  gchar *q;
+  gchar *nombre;
+  gchar *apellido_materno;
+  gchar *apellido_paterno;
+  gchar *fono;
+  gchar *direccion;
+  gchar *credito;
+  gchar *rut_ver, *giro;
   gint rut;
 
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == TRUE)
-    {
-      gtk_widget_set_sensitive (main_window, FALSE);
+  treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_clients"));
+  selection = gtk_tree_view_get_selection(treeview);
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
 
-      gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter,
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  0, &rut,
 			  -1);
 
-      nombre = GetDataByOne (g_strdup_printf ("SELECT nombre FROM cliente WHERE rut=%d", rut));
-      apellido_materno = g_strdup (GetDataByOne (g_strdup_printf ("SELECT apellido_materno FROM cliente WHERE rut=%d", rut)));
-      apellido_paterno = g_strdup (GetDataByOne (g_strdup_printf ("SELECT apellido_paterno FROM cliente WHERE rut=%d", rut)));
-      fono = g_strdup (GetDataByOne (g_strdup_printf ("SELECT telefono FROM cliente WHERE rut=%d", rut)));
-      direccion = g_strdup (GetDataByOne (g_strdup_printf ("SELECT direccion FROM cliente WHERE rut=%d", rut)));
-      credito = g_strdup (GetDataByOne (g_strdup_printf ("SELECT credito FROM cliente WHERE rut=%d", rut)));
-      rut_ver = g_strdup (GetDataByOne (g_strdup_printf ("SELECT verificador FROM cliente WHERE rut=%d", rut)));
-      giro = g_strdup (GetDataByOne (g_strdup_printf ("SELECT giro FROM cliente WHERE rut=%d", rut)));
+      q = g_strdup_printf ("select nombre, apell_p, apell_m, telefono, direccion, credito, dv, giro "
+			   "FROM cliente where rut=%d", rut);
+      res = EjecutarSQL(q);
+      g_free(q);
 
-      modificar_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gtk_window_set_position (GTK_WINDOW (modificar_window), GTK_WIN_POS_CENTER_ALWAYS);
-      gtk_widget_show (modificar_window);
+      nombre = PQvaluebycol(res, 0, "nombre");
+      apellido_materno = PQvaluebycol(res, 0, "apell_m");
+      apellido_paterno = PQvaluebycol(res, 0, "apell_p");
+      fono = PQvaluebycol(res, 0, "telefono");
+      direccion = PQvaluebycol(res, 0, "direccion");
+      credito = PQvaluebycol(res, 0, "credito");
+      rut_ver = PQvaluebycol(res, 0, "dv");
+      giro = PQvaluebycol(res, 0, "giro");
 
-      g_signal_connect (G_OBJECT (modificar_window), "destroy",
-			G_CALLBACK (CloseModificarWindow), NULL);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
+      gtk_entry_set_text (GTK_ENTRY (widget), nombre);
 
-      vbox = gtk_vbox_new (FALSE, 3);
-      gtk_widget_show (vbox);
-      gtk_container_add (GTK_CONTAINER (modificar_window), vbox);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_apell_p"));
+      gtk_entry_set_text (GTK_ENTRY (widget), apellido_paterno);
 
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (hbox);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_apell_m"));
+      gtk_entry_set_text (GTK_ENTRY (widget), apellido_materno);
 
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Nombres");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->entry_nombres = gtk_entry_new_with_max_length (100);
-      gtk_entry_set_text (GTK_ENTRY (creditos->entry_nombres), nombre);
-      gtk_widget_set_size_request (creditos->entry_nombres, 100, -1);
-      gtk_box_pack_start (GTK_BOX (box), creditos->entry_nombres, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->entry_nombres);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_modclient_rut"));
+      gtk_label_set_text (GTK_LABEL (widget), g_strdup_printf ("%d-%s", rut, rut_ver));
 
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_addr"));
+      gtk_entry_set_text (GTK_ENTRY (widget), direccion);
 
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Apellido Paterno");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->paterno = gtk_entry_new_with_max_length (60);
-      gtk_entry_set_text (GTK_ENTRY (creditos->paterno), apellido_paterno);
-      gtk_widget_set_size_request (creditos->paterno, 100, -1);
-      gtk_box_pack_start (GTK_BOX (box), creditos->paterno, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->paterno);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_phone"));
+      gtk_entry_set_text (GTK_ENTRY (widget), fono);
 
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_giro"));
+      gtk_entry_set_text (GTK_ENTRY (widget), giro);
 
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Apellido Materno");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->materno = gtk_entry_new_with_max_length (60);
-      gtk_entry_set_text (GTK_ENTRY (creditos->materno), apellido_materno);
-      gtk_widget_set_size_request (creditos->materno, 100, -1);
-      gtk_box_pack_start (GTK_BOX (box), creditos->materno, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->materno);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
+      gtk_entry_set_text (GTK_ENTRY (widget), credito);
 
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_modclient"));
+      gtk_window_set_transient_for(GTK_WINDOW(widget), GTK_WINDOW(gtk_builder_get_object(builder, "wnd_admin")));
+      gtk_widget_show_all(widget);
 
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (hbox);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Rut");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-
-      box2 = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (box2);
-      gtk_box_pack_start (GTK_BOX (box), box2, FALSE, FALSE, 0);
-      creditos->rut = gtk_entry_new_with_max_length (8);
-      gtk_entry_set_text (GTK_ENTRY (creditos->rut), g_strdup_printf ("%d", rut));
-      gtk_widget_set_size_request (creditos->rut, 72, -1);
-      gtk_widget_set_sensitive (creditos->rut, FALSE);
-      gtk_box_pack_start (GTK_BOX (box2), creditos->rut, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->rut);
-      label = gtk_label_new (" - ");
-      gtk_widget_set_sensitive (label, FALSE);
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box2), label, FALSE, FALSE, 0);
-      creditos->rut_ver = gtk_entry_new_with_max_length (1);
-      gtk_entry_set_text (GTK_ENTRY (creditos->rut_ver), rut_ver);
-      gtk_widget_set_size_request (creditos->rut_ver, 25, -1);
-      gtk_widget_set_sensitive (creditos->rut_ver, FALSE);
-      gtk_widget_show (creditos->rut_ver);
-      gtk_box_pack_start (GTK_BOX (box2), creditos->rut_ver, FALSE, FALSE, 0);
-
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Direccion");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->direccion = gtk_entry_new_with_max_length (150);
-      gtk_entry_set_text (GTK_ENTRY (creditos->direccion), direccion);
-      gtk_widget_set_size_request (creditos->direccion, 150, -1);
-      gtk_box_pack_end (GTK_BOX (box), creditos->direccion, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->direccion);
-
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (hbox);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Teléfono");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->fono = gtk_entry_new_with_max_length (60);
-      gtk_entry_set_text (GTK_ENTRY (creditos->fono), fono);
-      gtk_widget_set_size_request (creditos->fono, 90, -1);
-      gtk_box_pack_start (GTK_BOX (box), creditos->fono, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->fono);
-
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Giro");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->giro = gtk_entry_new_with_max_length (60);
-      gtk_entry_set_text (GTK_ENTRY (creditos->giro), giro);
-      gtk_widget_set_size_request (creditos->giro, 90, -1);
-      gtk_box_pack_start (GTK_BOX (box), creditos->giro, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->giro);
-
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-
-      box = gtk_vbox_new (TRUE, 2);
-      gtk_widget_show (box);
-      label = gtk_label_new ("Limite de Crédito");
-      gtk_widget_show (label);
-      gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-      creditos->credito = gtk_entry_new_with_max_length (20);
-      gtk_entry_set_text (GTK_ENTRY (creditos->credito), credito);
-      gtk_widget_set_size_request (creditos->credito, 90, -1);
-      gtk_box_pack_start (GTK_BOX (box), creditos->credito, FALSE, FALSE, 0);
-      gtk_widget_show (creditos->credito);
-
-      gtk_box_pack_start (GTK_BOX (hbox), box, FALSE, FALSE, 3);
-
-      hbox = gtk_hbox_new (FALSE, 3);
-      gtk_widget_show (hbox);
-      gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-      button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
-      gtk_widget_show (button);
-      gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-			G_CALLBACK (CloseModificarWindow), NULL);
-
-      button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
-      gtk_widget_show (button);
-      gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-      g_signal_connect (G_OBJECT (button), "clicked",
-			G_CALLBACK (ModificarClienteDB), NULL);
     }
 }
 
