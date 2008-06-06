@@ -723,32 +723,43 @@ FillVentasDeudas (gint rut)
 }
 
 void
-ChangeDetalle (void)
+ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
 {
+  GtkWidget *widget;
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkListStore *store_detalle;
   GtkTreeIter iter;
+  gchar *q;
   gint id_venta, tuples;
   gint i;
   PGresult *res;
 
-  if (gtk_tree_selection_get_selected (creditos->selection_ventas, NULL, &iter) == TRUE)
+  treeview = gtk_tree_selection_get_tree_view(treeselection);
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+
+  if (gtk_tree_selection_get_selected (treeselection, NULL, &iter))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (creditos->ventas), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 			  0, &id_venta,
 			  -1);
 
-      gtk_list_store_clear (creditos->detalle);
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_sale_details"));
+      store_detalle = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+      gtk_list_store_clear (store_detalle);
 
-      res = EjecutarSQL (g_strdup_printf
-			 ("SELECT t2.codigo, t2.descripcion, t2.marca, t1.cantidad, t1.precio "
-			  "FROM venta_detalle AS t1, productos AS t2 WHERE "
-			  "t1.id_venta=%d AND t2.barcode=t1.barcode", id_venta));
+      q = g_strdup_printf ("SELECT producto.codigo_corto, producto.descripcion, producto.marca, venta_detalle.cantidad, venta_detalle.precio "
+			   "FROM venta_detalle inner join producto on producto.barcode=venta_detalle.barcode "
+			   "WHERE venta_detalle.id_venta=%d", id_venta);
+      res = EjecutarSQL (q);
+      g_free(q);
 
       tuples = PQntuples (res);
 
       for (i = 0; i < tuples; i++)
 	{
-	  gtk_list_store_append (creditos->detalle, &iter);
-	  gtk_list_store_set (creditos->detalle, &iter,
+	  gtk_list_store_append (store_detalle, &iter);
+	  gtk_list_store_set (store_detalle, &iter,
 			      0, PQgetvalue (res, i, 0),
 			      1, PQgetvalue (res, i, 1),
 			      2, PQgetvalue (res, i, 2),

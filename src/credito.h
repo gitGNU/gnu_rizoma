@@ -47,7 +47,7 @@ void DatosDeudor(GtkTreeSelection *treeselection, gpointer user_data);
 
 void FillVentasDeudas (gint rut);
 
-void ChangeDetalle (void);
+void ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data);
 
 gint AbonarWindow (void);
 
