@@ -103,7 +103,7 @@ gboolean CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint compra)
 
 void FillPagarFacturas (gchar *rut_proveedor);
 
-void FillGuias (gchar *proveedor);
+void FillGuias (gchar *rut_proveedor);
 
 void FillDetGuias (GtkTreeSelection *selection, gpointer data);
 

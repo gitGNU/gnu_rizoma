@@ -2294,7 +2294,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry6">
+                              <object class="GtkEntry" id="entry_guide_invoice_n_invoice">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                               </object>
@@ -2308,7 +2308,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry7">
+                              <object class="GtkEntry" id="entry_guide_invoice_amount">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                               </object>
