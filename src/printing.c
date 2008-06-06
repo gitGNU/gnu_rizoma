@@ -45,7 +45,7 @@ LaunchApp (gchar *file)
   pid = fork ();
   if (pid == 0)
     {
-      system (g_strdup_printf ("LANG=C gnumeric \"%s\"", file));
+      system (g_strdup_printf ("LANG=C gnumeric \"%s\" &", file));
       exit (0);
     }
 
