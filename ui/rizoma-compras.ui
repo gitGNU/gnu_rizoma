@@ -1495,6 +1495,7 @@
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
                                             <property name="response_id">0</property>
+                                            <signal name="clicked" handler="on_btn_invoice_guide_clicked"/>
                                             <child>
                                               <object class="GtkArrow" id="arrow4">
                                                 <property name="visible">True</property>
