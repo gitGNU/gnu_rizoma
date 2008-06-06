@@ -167,7 +167,7 @@ create table deuda (
   id_venta                  int4 not null,
   rut_cliente               int4 not null,
   vendedor                  int4,
-  pagada                    bool,
+  pagada                    bool default false,
   fecha_pagada              timestamp,
   constraint pk_Deuda primary key (id)
 ) ;
@@ -274,7 +274,7 @@ create table Cliente (
 
 -- documentos_detalle
 create table documentos_detalle (
-  id                        serial not null,
+  id                        serial not null primary key,
   numero                    int4,
   id_compra                 int4,
   barcode                   varchar(14),
