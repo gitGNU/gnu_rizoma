@@ -328,11 +328,8 @@ clean_container (GtkContainer *container)
   GtkWidget *widget;
   gchar *widget_name = NULL;
 
-  do
+  while (list != NULL)
     {
-
-      if (list == NULL) break;
-
       if (GTK_IS_TABLE (list->data))
         {
           clean_container (GTK_CONTAINER (list->data));
@@ -355,5 +352,5 @@ clean_container (GtkContainer *container)
         }
 
       list = g_list_next (list);
-    } while (list != NULL);
+    }
 }
