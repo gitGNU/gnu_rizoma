@@ -313,3 +313,47 @@ gtk_entry_set_alert(GtkEntry *entry)
    */
   return;
 }
+
+/**
+ * This is a helper function to clean any container with an empty
+ * string on entries and labels. Any widget without a number on the
+ * name will be set to an empty string if it's a label or entry.
+ *
+ * @param container The container to check
+ */
+void
+clean_container (GtkContainer *container)
+{
+  GList *list = gtk_container_get_children (container);
+  GtkWidget *widget;
+  gchar *widget_name = NULL;
+
+  do
+    {
+
+      if (list == NULL) break;
+
+      if (GTK_IS_TABLE (list->data))
+        {
+          clean_container (GTK_CONTAINER (list->data));
+        }
+      else
+        {
+          widget = GTK_WIDGET (list->data);
+          widget_name = g_strdup (gtk_widget_get_name (widget));
+          if (!validate_string ("[0-9]+", widget_name))
+            {
+              if (GTK_IS_ENTRY (widget))
+                {
+                  gtk_entry_set_text (GTK_ENTRY (widget), "");
+                }
+              else if (GTK_IS_LABEL (widget))
+                {
+                  gtk_label_set_text (GTK_LABEL (widget), "");
+                }
+            }
+        }
+
+      list = g_list_next (list);
+    } while (list != NULL);
+}
