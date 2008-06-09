@@ -1158,6 +1158,15 @@ ClientStatus (void)
       }
 }
 
+/**
+ * Checks if it's possible sale a given amount to a given client,
+ * based in the credit available.
+ *
+ * @param rut the rut of the client
+ * @param total_venta the amount requested
+ *
+ * @return TRUE if the client has enough credit, otherwise returns FALSE
+ */
 gboolean
 VentaPosible (gint rut, gint total_venta)
 {
@@ -1169,6 +1178,16 @@ VentaPosible (gint rut, gint total_venta)
     return FALSE;
 }
 
+/**
+ * Callback connected to the toggle button of the clients treeview
+ *
+ * This function enable or disable the credit state of the client selected.
+ * @param toggle the togle button
+ * @param path_str the path of the selected row
+ * @param data the user data
+ *
+ * @return 0 on succesfull execution
+ */
 gint
 ToggleClientCredit (GtkCellRendererToggle *toggle, char *path_str, gpointer data)
 {
@@ -1202,6 +1221,12 @@ ToggleClientCredit (GtkCellRendererToggle *toggle, char *path_str, gpointer data
   return 0;
 }
 
+/**
+ * Callback connected to the delele client button present in the
+ * clients tab.
+ *
+ * This function deletes the client selected in the treeview
+ */
 void
 EliminarCliente (void)
 {
@@ -1233,7 +1258,13 @@ EliminarCliente (void)
     }
 }
 
-void
+
+/**
+ * Callback connected to the accept button present in the modificate
+ * client dialog.
+ *
+ * This function validates the information entered by the user
+ */void
 ModificarClienteDB (void)
 {
   GtkWidget *widget;
@@ -1314,6 +1345,13 @@ ModificarClienteDB (void)
     }
 }
 
+/**
+ * Obtains the credit limit of a given client
+ *
+ * @param rut the rut of the client with the format '12345678-9'
+ *
+ * @return the credit limit, if fails returns -1
+ */
 gint
 LimiteCredito (const gchar *rut)
 {
@@ -1329,6 +1367,10 @@ LimiteCredito (const gchar *rut)
     return -1;
 }
 
+/**
+ * Callback connected to the print list of clients option
+ *
+ */
 void
 on_print_client_list_clicked()
 {
@@ -1336,12 +1378,22 @@ on_print_client_list_clicked()
 
 }
 
+/**
+ * Callback connected to the print sales of a client option
+ *
+ */
 void
 on_print_sales_of_client_clicked()
 {
   PrintTree(NULL, (gpointer) client_detail);
 }
 
+
+/**
+ * Setup the popup menu that must appear when user clicks in the print
+ * button present in the clients tab
+ *
+ */
 void
 setup_print_menu()
 {
