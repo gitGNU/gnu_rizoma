@@ -1461,3 +1461,60 @@ on_btn_admin_print_clicked(GtkButton *button, gpointer user_data)
 
   gtk_widget_show_all(widget);
 }
+
+void
+admin_search_client(void)
+{
+  GtkWidget *widget;
+  GtkWidget *aux_widget;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  gchar *string;
+  gchar *q;
+  gchar *enable;
+  gint i;
+  gint tuples;
+  PGresult *res;
+
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_search_client"));
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
+
+  q = g_strdup_printf ("SELECT rut, nombre || ' ' || apell_p || ' ' || apell_m, telefono, credito_enable "
+		       "FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
+		      "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%') OR "
+		       "rut::varchar like ('%s%%')",
+		       string, string, string, string);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  tuples = PQntuples (res);
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+
+  gtk_list_store_clear (store);
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+
+      if (user_data->user_id == 1)
+	{
+	  enable = PQvaluebycol (res, i, "credito_enable");
+	  gtk_list_store_set (store, &iter,
+			      0, atoi(PQgetvalue (res, i, 0)),
+			      1, PQgetvalue (res, i, 1),
+			      2, atoi(PQvaluebycol (res, i, "telefono")),
+			      3, strcmp (enable, "t") ? FALSE : TRUE,
+			      4, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+			      -1);
+	}
+      else
+	gtk_list_store_set (store, &iter,
+			    0, atoi(PQgetvalue (res, i, 0)),
+			    1, PQgetvalue (res, i, 1),
+			    2, atoi (PQvaluebycol (res, i, "telefono")),
+			    4, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+			    -1);
+    }
+}
