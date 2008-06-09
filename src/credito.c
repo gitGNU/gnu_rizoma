@@ -40,6 +40,12 @@
 
 GtkWidget *modificar_window;
 
+/////////do not delete
+///used for the print in the client tab
+Print *client_list;
+Print *client_detail;
+/////////
+
 /**
  * Fill the labels and the entry of the credit dialog
  *
@@ -187,8 +193,8 @@ clientes_box ()
   GtkListStore *ventas;
   GtkListStore *ventas_details;
 
-  Print *client_list = (Print *) malloc (sizeof (Print));
-  Print *client_detail = (Print *) malloc (sizeof (Print));
+  client_list = (Print *) malloc (sizeof (Print));
+  client_detail = (Print *) malloc (sizeof (Print));
   client_detail->son = (Print *) malloc (sizeof (Print));
 
 
@@ -462,6 +468,9 @@ clientes_box ()
 
   /* g_signal_connect (G_OBJECT (button), "clicked", */
   /* 		    G_CALLBACK (PrintTwoTree), (gpointer)client_detail); */
+
+  setup_print_menu();
+
 }
 
 void
@@ -1320,3 +1329,62 @@ LimiteCredito (const gchar *rut)
     return -1;
 }
 
+void
+on_print_client_list_clicked()
+{
+  PrintTree(NULL, (gpointer) client_list);
+
+}
+
+void
+on_print_sales_of_client_clicked()
+{
+  PrintTree(NULL, (gpointer) client_detail);
+}
+
+void
+setup_print_menu()
+{
+  GError *error = NULL;
+  GtkWidget *widget;
+  GtkUIManager *manager;
+  GtkAccelGroup *accel_group;
+  GtkActionGroup *action_group;
+  GtkActionEntry entry[] =
+    {
+      {"PrintClients", NULL, "Lista de clientes", NULL, NULL, on_print_client_list_clicked},
+      {"PrintSalesOfClient", NULL, "Ventas de cliente", NULL, NULL, on_print_sales_of_client_clicked}
+    };
+  manager = gtk_ui_manager_new();
+  accel_group = gtk_ui_manager_get_accel_group (manager);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_admin"));
+  gtk_window_add_accel_group(GTK_WINDOW(widget), accel_group);
+
+  action_group = gtk_action_group_new ("my print menu");
+
+  gtk_action_group_add_actions (action_group, entry, 2, NULL);
+
+  gtk_ui_manager_insert_action_group (manager, action_group, 0);
+  gtk_ui_manager_add_ui_from_file (manager, DATADIR"/ui/print-menu.xml", &error);
+  if (error != NULL)
+    g_print("%s: %s\n", G_STRFUNC, error->message);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "btn_admin_print"));
+  g_object_set_data (G_OBJECT(widget), "uimanager", (gpointer) manager);
+}
+
+void
+on_btn_admin_print_clicked(GtkButton *button, gpointer user_data)
+{
+  GtkUIManager *uimanager;
+  GtkWidget *widget;
+
+  uimanager = GTK_UI_MANAGER(g_object_get_data(G_OBJECT(button), "uimanager"));
+
+  widget = gtk_ui_manager_get_widget(uimanager, "/popup");
+
+  gtk_menu_popup (GTK_MENU(widget), NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time());
+
+  gtk_widget_show_all(widget);
+}
