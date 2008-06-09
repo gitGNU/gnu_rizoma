@@ -826,10 +826,16 @@ AbonarWindow (void)
 			  -1);
     }
 
+  deuda = DeudaTotalCliente(rut);
+
+  if (deuda == 0)
+    {
+      AlertMSG(widget, "No puede abonar a un cliente con deuda 0");
+      return 0;
+    }
+
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_rut"));
   gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", rut));
-
-  deuda = DeudaTotalCliente(rut);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_deuda"));
   gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", deuda));
@@ -894,6 +900,7 @@ Abonar (void)
 	{
 	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
 	  statusbar_push (GTK_STATUSBAR(widget), "Se ha abonado con exito el monto a la deuda", 3000);
+	  FillClientStore(GTK_LIST_STORE(store));
 	}
       else
 	ErrorMSG(widget, "No se pudo abonar el monto a la deuda");
