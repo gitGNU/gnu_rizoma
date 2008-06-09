@@ -74,7 +74,7 @@
             <child>
               <object class="GtkLabel" id="label34">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Rut:</property>
+                <property name="label" translatable="yes">C&#xF3;digo:</property>
               </object>
             </child>
           </object>
