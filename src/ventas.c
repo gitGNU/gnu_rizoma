@@ -2180,17 +2180,25 @@ Descuento (GtkWidget *widget, gpointer data)
 {
   //gboolean money_discount = (gboolean) data;
   gint money;
-  gdouble discount = strtod (CUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))))), (char **)NULL);
+  gint discount;
+  gint percent_discount;
   gint total;
   gint plata;
   GtkWidget *aux_widget;
 
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "discount_entry"));
+  discount = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
   if (tipo_documento != FACTURA && tipo_documento != GUIA)
-    money = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
+    {
+      aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "sencillo_entry"));
+      money = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+    }
 
   CalcularVentas (venta->header);
 
-  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "label_total"));
+  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (aux_widget)))));
 
   /*  if (money_discount == TRUE)
       {
@@ -2205,15 +2213,16 @@ Descuento (GtkWidget *widget, gpointer data)
       }
       else if (money_discount == FALSE)
       {*/
-  plata = lround ((gdouble)(total * discount) / 100);
+  plata = lround ((gdouble)(total * discount)/100);
+  percent_discount = lround ((gdouble)(discount * 100) / total);
 
   if (tipo_documento != FACTURA)
-    gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")),
-                        g_strdup_printf ("%d", plata));
+    gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_percent_discount")),
+                        g_strdup_printf ("%d", percent_discount));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
                         g_strdup_printf ("<span size=\"40000\">%s</span>",
-                                         PutPoints (g_strdup_printf ("%u", total - plata))));
+                                         PutPoints (g_strdup_printf ("%u", total - discount))));
   //}
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
                                                  "entry_percent_discount"));
