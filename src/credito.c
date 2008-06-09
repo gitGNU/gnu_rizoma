@@ -862,21 +862,41 @@ on_entry_admin_abonar_amount_changed (GtkEditable *editable, gpointer user_data)
 void
 Abonar (void)
 {
+  GtkWidget *widget;
   GtkTreeIter iter;
-  gint abonar = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->entry_plata))));
+  GtkTreeSelection *selection;
+  GtkTreeModel *store;
+  gint abonar;
   gint rut;
 
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == TRUE)
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
+  abonar = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  if (abonar == 0)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter,
+      AlertMSG(widget, "No puede abonar 0 pesos a una deuda");
+      return;
+    }
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+  store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (store, &iter,
 			  0, &rut,
 			  -1);
 
       CloseAbonarWindow ();
 
-      CancelarDeudas (abonar, rut);
-
-      //DatosDeudor ();
+      if (CancelarDeudas (abonar, rut) == 0)
+	{
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+	  statusbar_push (GTK_STATUSBAR(widget), "Se ha abonado con exito el monto a la deuda", 3000);
+	}
+      else
+	ErrorMSG(widget, "No se pudo abonar el monto a la deuda");
     }
 }
 
