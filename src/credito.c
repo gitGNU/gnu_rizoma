@@ -791,78 +791,72 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
 }
 
 void
-KillAbonarWindow (void)
+CloseAbonarWindow (void)
 {
-  gtk_widget_destroy (creditos->abonar_window);
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_abonar"));
+  gtk_widget_hide(widget);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
 }
 
 gint
 AbonarWindow (void)
 {
+  GtkWidget *widget;
   GtkTreeIter iter;
-  GtkWidget *frame;
-  GtkWidget *label;
-  GtkWidget *button;
-  GtkWidget *sell_button;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  gint rut;
+  gint deuda;
 
-  GtkWidget *hbox;
-  GtkWidget *vbox;
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == FALSE)
+  if (!(gtk_tree_selection_get_selected (selection, NULL, &iter)))
     return 0;
+  else
+    {
+      store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
 
-  creditos->abonar_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_widget_set_size_request (creditos->abonar_window, -1, 120);
-  gtk_window_set_position (GTK_WINDOW (creditos->abonar_window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_widget_show (creditos->abonar_window);
-  gtk_window_present (GTK_WINDOW (creditos->abonar_window));
-  gtk_window_set_title (GTK_WINDOW (creditos->abonar_window), "Abonado de Dinero");
+      gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
+			  0, &rut,
+			  -1);
+    }
 
-  g_signal_connect (G_OBJECT (creditos->abonar_window), "destroy",
-		    G_CALLBACK (KillAbonarWindow), NULL);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_rut"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", rut));
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (creditos->abonar_window), vbox);
+  deuda = DeudaTotalCliente(rut);
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_deuda"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", deuda));
 
-  sell_button = gtk_button_new_with_label ("Abonar");
-  gtk_widget_show (sell_button);
-  gtk_box_pack_end (GTK_BOX (hbox), sell_button, FALSE, FALSE, 3);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_abonar"));
+  gtk_widget_show_all(widget);
 
-  g_signal_connect (G_OBJECT (sell_button), "clicked",
-		    G_CALLBACK (Abonar), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (KillAbonarWindow), NULL);
-
-  frame = gtk_frame_new ("Abonar");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-
-  label = gtk_label_new ("Ingrese la cantidad de Dinero");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-
-  creditos->entry_plata = gtk_entry_new ();
-  gtk_widget_show (creditos->entry_plata);
-  gtk_box_pack_start (GTK_BOX (vbox), creditos->entry_plata, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (creditos->entry_plata), "activate",
-		    G_CALLBACK (SendCursorTo), (gpointer) sell_button);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
+  gtk_widget_grab_focus(widget);
 
   return 0;
+}
+
+void
+on_entry_admin_abonar_amount_changed (GtkEditable *editable, gpointer user_data)
+{
+  GtkWidget *widget;
+  gint abono;
+  gint deuda;
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_rut"));
+  deuda = DeudaTotalCliente(atoi(gtk_label_get_text(GTK_LABEL(widget))));
+  abono = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_deuda"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", deuda-abono));
+
 }
 
 void
@@ -878,7 +872,7 @@ Abonar (void)
 			  0, &rut,
 			  -1);
 
-      KillAbonarWindow ();
+      CloseAbonarWindow ();
 
       CancelarDeudas (abonar, rut);
 
