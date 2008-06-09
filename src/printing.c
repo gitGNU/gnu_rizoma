@@ -38,17 +38,9 @@
 #include"utils.h"
 
 int
-LaunchApp (gchar *file)
+LaunchApp (const gchar *file)
 {
-  pid_t pid;
-
-  pid = fork ();
-  if (pid == 0)
-    {
-      system (g_strdup_printf ("LANG=C gnumeric \"%s\" &", file));
-      exit (0);
-    }
-
+  system (g_strdup_printf ("LANG=C gnumeric \"%s\" &", file));
   return 0;
 }
 
