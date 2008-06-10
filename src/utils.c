@@ -327,10 +327,11 @@ clean_container (GtkContainer *container)
   GList *list = gtk_container_get_children (container);
   GtkWidget *widget;
   gchar *widget_name = NULL;
+  GtkTreeModel *model;
 
   while (list != NULL)
     {
-      if (GTK_IS_TABLE (list->data))
+      if (! GTK_IS_TREE_VIEW (list->data) && GTK_IS_CONTAINER (list->data))
         {
           clean_container (GTK_CONTAINER (list->data));
         }
@@ -347,6 +348,14 @@ clean_container (GtkContainer *container)
               else if (GTK_IS_LABEL (widget))
                 {
                   gtk_label_set_text (GTK_LABEL (widget), "");
+                }
+              else if (GTK_IS_TREE_VIEW (widget))
+                {
+                  model = gtk_tree_view_get_model (GTK_TREE_VIEW (widget));
+                  if (GTK_IS_LIST_STORE (model))
+                    {
+                      gtk_list_store_clear (GTK_LIST_STORE (model));
+                    }
                 }
             }
         }

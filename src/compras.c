@@ -5280,9 +5280,9 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     case 1:
       InsertarCompras ();
       break;
-    /* case 2: */
-    /*   clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "vbox_guide_invoice"))); */
-    /*   break; */
+    case 2:
+      clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "vbox_guide_invoice")));
+      break;
       /* case 3: */
       /*   ClearPagosData (); */
       /*   FillPagarFacturas (NULL); */

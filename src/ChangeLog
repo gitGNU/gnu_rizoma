@@ -1,5 +1,8 @@
 2008-06-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* utils.c (clean_container): Added support to deal with tree views
+	and treat a gtk_treeview as a widget not as a container.
+
 	* utils.h: Added declaratino of clean_container().
 
 	* compras.c (CalcularTotalesGuias|CheckMontoGuias): Changed to use the GtkBuilder interface.
