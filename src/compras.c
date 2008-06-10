@@ -1196,12 +1196,18 @@ compras_win ()
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   store = gtk_list_store_new (3,
-                              G_TYPE_INT,
-                              G_TYPE_INT,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
                               G_TYPE_STRING);
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  g_signal_connect (G_OBJECT (gtk_tree_view_get_model (treeview)), "row-inserted",
+                    G_CALLBACK (CalcularTotalesGuias), NULL);
+
+  g_signal_connect (G_OBJECT (gtk_tree_view_get_model (treeview)), "row-deleted",
+                    G_CALLBACK (CalcularTotalesGuias), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Nº Guia", renderer,
@@ -2523,7 +2529,7 @@ AddFoundProduct (void)
 
   if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (model), &iter,
+      gtk_tree_model_get (model, &iter,
                           1, &barcode,
                           -1);
 
@@ -3984,92 +3990,6 @@ FillDetGuias (GtkTreeSelection *selection, gpointer data)
         }
     }
 
-}
-
-void
-AddGuia (GtkWidget *widget, gpointer data)
-{
-  GtkTreeIter iter, iter2, iter3;
-  gchar *guia_add;
-  gchar *guia_first;
-  gchar *rut = g_strdup (gtk_label_get_text (GTK_LABEL (compra->fact_rut)));
-  gchar *fact = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->n_factura)));
-  PGresult *res;
-
-  if (gtk_tree_selection_get_selected
-      (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_guias)), NULL, &iter) == TRUE &&
-      strcmp (fact, "") != 0)
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_guias), &iter,
-                          0, &guia_add,
-                          -1);
-
-      if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (compra->store_new_guias), &iter3) == TRUE)
-        {
-          gtk_tree_model_get (GTK_TREE_MODEL (compra->store_new_guias), &iter3,
-                              0, &guia_first,
-                              -1);
-
-
-          res = EjecutarSQL
-            (g_strdup_printf
-             ("SELECT id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') FROM guias_compra WHERE numero=%s AND rut_proveedor='%s'", guia_first, rut, guia_add, rut));
-
-          if (strcmp (PQgetvalue (res, 0, 0), "t") != 0)
-            {
-              gtk_label_set_markup
-                (GTK_LABEL (compra->guias_error),
-                 "<span foreground=\"red\">No se pueden ingresar guias de distinta compra</span>");
-              return;
-            }
-
-        }
-
-      gtk_tree_store_append (compra->store_new_guias, &iter2, NULL);
-      gtk_tree_store_set (compra->store_new_guias, &iter2,
-                          0, guia_add,
-                          -1);
-
-      gtk_tree_store_remove (compra->store_guias, &iter);
-      gtk_tree_store_clear (compra->store_det_guias);
-
-      CalcularTotalesGuias ();
-    }
-}
-
-void
-DelGuia (GtkWidget *widget, gpointer data)
-{
-  GtkTreeIter iter;
-  gchar *string;
-  PGresult *res;
-  gchar *rut_proveedor = g_strdup (gtk_label_get_text (GTK_LABEL (compra->fact_rut)));
-
-  if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection
-                                       (GTK_TREE_VIEW (compra->tree_new_guias)), NULL, &iter) == TRUE)
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_new_guias), &iter,
-                          0, &string,
-                          -1);
-
-      gtk_tree_store_remove (compra->store_new_guias, &iter);
-
-      res = EjecutarSQL (g_strdup_printf ("SELECT t1.numero, t1.id_compra, date_part ('day', t1.fecha_emicion), date_part ('month', t1.fecha_emicion), date_part ('year', t1.fecha_emicion), (SELECT SUM (t2.cantidad * t2.precio) FROM documentos_detalle AS t2 WHERE t2.numero=t1.numero AND t2.id_compra=t1.id_compra), (SELECT nombre FROM formas_pago WHERE id=(SELECT forma_pago FROM compra WHERE id=t1.id_compra)) FROM guias_compra AS t1 WHERE numero=%s AND rut_proveedor='%s'", string, rut_proveedor));
-
-      gtk_tree_store_append (compra->store_guias, &iter, NULL);
-      gtk_tree_store_set (compra->store_guias, &iter,
-                          0, PQgetvalue (res, 0, 0),
-                          1, PQgetvalue (res, 0, 1),
-                          2, PQgetvalue (res, 0, 6),
-                          3, g_strdup_printf ("%.2d/%.2d/%s", atoi (PQgetvalue (res, 0, 2)),
-                                              atoi (PQgetvalue (res, 0, 3)), PQgetvalue (res, 0, 4)),
-                          4, PQgetvalue (res, 0, 5),
-                          5, CheckCompraIntegrity (PQgetvalue (res, 0, 1)) ? "Black" : "Red",
-                          6, TRUE,
-                          -1);
-
-      CalcularTotalesGuias ();
-    }
 }
 
 void
@@ -5592,8 +5512,75 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
       gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_srch_provider")));
     }
 }
+
 void
 on_tree_view_srch_provider_row_activated (GtkTreeView *tree)
 {
   on_btn_ok_srch_provider_clicked (tree);
+}
+
+
+void
+on_btn_guide_invoice_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *tree_pending_guide = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_guide"));
+  GtkTreeView *tree_guide_invoice = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice"));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree_pending_guide);
+  GtkTreeModel *model = gtk_tree_view_get_model (tree_pending_guide);
+  GtkTreeIter iter;
+  gchar *n_guide;
+  gchar *id_compra;
+  gchar *monto;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &n_guide,
+                          1, &id_compra,
+                          2, &monto,
+                          -1);
+      gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
+
+
+      model = gtk_tree_view_get_model (tree_guide_invoice);
+
+      gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+      gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                          0, n_guide,
+                          1, id_compra,
+                          2, monto,
+                          -1);
+    }
+}
+
+void
+on_btn_invoice_guide_clicked (GtkButton *button, gpointer date)
+{
+  GtkTreeView *tree_pending_guide = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_guide"));
+  GtkTreeView *tree_guide_invoice = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice"));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree_guide_invoice);
+  GtkTreeModel *model = gtk_tree_view_get_model (tree_guide_invoice);
+  GtkTreeIter iter;
+  gchar *n_guide;
+  gchar *id_compra;
+  gchar *monto;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &n_guide,
+                          1, &id_compra,
+                          2, &monto,
+                          -1);
+      gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
+
+      model = gtk_tree_view_get_model (tree_pending_guide);
+
+      gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+      gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                          0, n_guide,
+                          1, id_compra,
+                          2, monto,
+                          -1);
+    }
 }

@@ -330,7 +330,7 @@ clean_container (GtkContainer *container)
 
   while (list != NULL)
     {
-      if (GTK_IS_TABLE (list->data))
+xxxx      if (GTK_IS_TABLE (list->data))
         {
           clean_container (GTK_CONTAINER (list->data));
         }
