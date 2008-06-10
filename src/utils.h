@@ -44,4 +44,7 @@ void control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTree
 void display_calendar (GtkEntry *entry);
 
 void statusbar_push (GtkStatusbar *statusbar, const gchar *text, guint duration);
+
+void clean_container (GtkContainer *container);
+
 #endif
