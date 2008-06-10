@@ -1,3 +1,17 @@
+2008-06-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* utils.c (clean_container): Added function to clean
+	containers. Focused on GtkWindows and clean any GtkLabel or
+	GtkEntry without a number on the widget name.
+	(clean_container): Replaced the do-while for a while.
+
+2008-06-06  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c
+	(on_btn_invoice_guide_clicked|on_btn_guide_invoice_clicke): Added
+	function to handle the proper signal.
+	(AddGuia|DelGuia): Deleted function. No one use it now.
+
 2008-06-05  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (on_entry_srch_provider_activate): Created to deal
