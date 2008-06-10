@@ -1,3 +1,9 @@
+2008-06-10  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* utils.h: Added declaratino of clean_container().
+
+	* compras.c (CalcularTotalesGuias|CheckMontoGuias): Changed to use the GtkBuilder interface.
+
 2008-06-07  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* utils.c (clean_container): Added function to clean

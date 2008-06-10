@@ -1203,7 +1203,7 @@ compras_win ()
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
-  g_signal_connect (G_OBJECT (gtk_tree_view_get_model (treeview)), "row-inserted",
+  g_signal_connect (G_OBJECT (gtk_tree_view_get_model (treeview)), "row-changed",
                     G_CALLBACK (CalcularTotalesGuias), NULL);
 
   g_signal_connect (G_OBJECT (gtk_tree_view_get_model (treeview)), "row-deleted",
@@ -3924,7 +3924,7 @@ FillGuias (gchar *rut_proveedor)
   gint tuples, i;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT numero, id_compra, (SELECT SUM(cantidad*precio) FROM compra_detalle WHERE compra_detalle.id_compra=guias_compra.id_compra) as monto "
+  q = g_strdup_printf ("SELECT numero, id_compra, (SELECT SUM ((precio * cantidad) + iva + otros_impuestos) FROM compra_detalle WHERE compra_detalle.id_compra=guias_compra.id_compra) as monto "
                        "FROM guias_compra WHERE rut_proveedor='%s'", rut_proveedor);
   res = EjecutarSQL (q);
 
@@ -4304,65 +4304,61 @@ void
 CalcularTotalesGuias (void)
 {
   gint total_neto = 0, total_iva = 0, total_otros = 0, total = 0;
-  //  gint tuples, i;
   gchar *guia;
   PGresult *res;
-  gchar *rut_proveedor = g_strdup (gtk_label_get_text (GTK_LABEL (compra->fact_rut)));
+  gchar *rut_proveedor = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_rut"))));
 
+  GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice")));
   GtkTreeIter iter;
 
-  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (compra->store_new_guias), &iter) == TRUE)
+  if (gtk_tree_model_get_iter_first (model, &iter) == TRUE)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_new_guias), &iter,
+      gtk_tree_model_get (model, &iter,
                           0, &guia,
                           -1);
-
-      while (1)
+      if (guia != NULL)
         {
-          res = EjecutarSQL (g_strdup_printf ("SELECT SUM (t1.precio * t2.cantidad) AS neto, SUM (t2.iva) AS iva, SUM (t2.otros) AS otros, SUM ((t1.precio * t2.cantidad) + t2.iva + t2.otros) AS total  FROM compra_detalle AS t1, documentos_detalle AS t2 WHERE t1.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t2.numero=%s AND t1.barcode_product=t2.barcode",
-                                              guia, rut_proveedor, guia));
+          while (1)
+            {
+              res = EjecutarSQL (g_strdup_printf ("SELECT SUM (t1.precio * t2.cantidad) AS neto, SUM (t2.iva) AS iva, SUM (t2.otros) AS otros, SUM ((t1.precio * t2.cantidad) + t2.iva + t2.otros) AS total  FROM compra_detalle AS t1, documentos_detalle AS t2 WHERE t1.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t2.numero=%s AND t1.barcode_product=t2.barcode",
+                                                  guia, rut_proveedor, guia));
 
-          total_neto += atoi (PQgetvalue (res, 0, 0));
+              total_neto += atoi (PQvaluebycol (res, 0, "neto"));
 
-          total_iva += atoi (PQgetvalue (res, 0, 1));
+              total_iva += atoi (PQvaluebycol (res, 0, "iva"));
 
-          total_otros += atoi (PQgetvalue (res, 0, 2));
+              total_otros += atoi (PQvaluebycol (res, 0, "otros"));
 
-          if (gtk_tree_model_iter_next (GTK_TREE_MODEL (compra->store_new_guias), &iter) != TRUE)
-            break;
-          else
-            gtk_tree_model_get (GTK_TREE_MODEL (compra->store_new_guias), &iter,
-                                0, &guia,
-                                -1);
+              total += atoi (PQvaluebycol (res, 0, "total"));
 
+              if (gtk_tree_model_iter_next (model, &iter) != TRUE)
+                break;
+              else
+                gtk_tree_model_get (model, &iter,
+                                    0, &guia,
+                                    -1);
+
+            }
+
+          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_neto")),
+                              PutPoints (g_strdup_printf ("%d", total_neto)));
+          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_task")),
+                              PutPoints (g_strdup_printf ("%d", total_iva)));
+          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_other_tasks")),
+                              PutPoints (g_strdup_printf ("%d", total_otros)));
+
+          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_total")),
+                              PutPoints (g_strdup_printf ("%d", total)));
+
+          CheckMontoGuias ();
         }
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_neto),
-                          PutPoints (g_strdup_printf ("%d", total_neto)));
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_iva),
-                          PutPoints (g_strdup_printf ("%d", total_iva)));
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_otros),
-                          PutPoints (g_strdup_printf ("%d", total_otros)));
-
-      total = total_neto + total_iva + total_otros;
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_total),
-                          PutPoints (g_strdup_printf ("%d", total)));
-
-
-      CheckMontoGuias ();
     }
   else
     {
-      gtk_label_set_text (GTK_LABEL (compra->fact_neto), "");
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_iva), "");
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_otros), "");
-
-      gtk_label_set_text (GTK_LABEL (compra->fact_total), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_neto")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_task")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_other_tasks")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_total")), "");
     }
 }
 
@@ -4395,34 +4391,26 @@ ToggleSelect (GtkRadioButton *button, gpointer data)
 void
 CheckMontoGuias (void)
 {
-  gint total_guias = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                                (GTK_LABEL (compra->fact_total)))));
-  gint total_fact = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->fact_monto))));
+  gint total_guias = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_total"))))));
+  gint total_fact = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_guide_invoice_amount")))));
 
   if (total_guias == 0)
     return;
 
   if (total_guias < total_fact)
     {
-      gtk_label_set_markup
-        (GTK_LABEL (compra->guias_error),
-         "<span foreground=\"red\">El monto total de la(s) guia(s) es insuficiente</span>");
-      gtk_widget_set_sensitive (ok_guia, FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_guide_invoice_ok")), FALSE);
     }
   else if (total_guias > total_fact)
     {
-      gtk_label_set_markup
-        (GTK_LABEL (compra->guias_error),
-         "<span foreground=\"red\">El Monto de la(s) guia(s) es mayor alde la factura</span>");
-      gtk_widget_set_sensitive (ok_guia, FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_guide_invoice_ok")), FALSE);
     }
   else if (total_guias == total_fact)
     {
       gtk_label_set_markup (GTK_LABEL (compra->guias_error),
                             "");
-      gtk_widget_set_sensitive (ok_guia, TRUE);
-
-      SendCursorTo (ok_guia, (gpointer)ok_guia);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_guide_invoice_ok")), TRUE);
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "btn_guide_invoice_ok")));
     }
 }
 
@@ -5292,9 +5280,9 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     case 1:
       InsertarCompras ();
       break;
-      /* case 2: */
-      /*   ClearFactData (); */
-      /*   break; */
+    /* case 2: */
+    /*   clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "vbox_guide_invoice"))); */
+    /*   break; */
       /* case 3: */
       /*   ClearPagosData (); */
       /*   FillPagarFacturas (NULL); */
