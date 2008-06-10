@@ -40,6 +40,12 @@
 
 GtkWidget *modificar_window;
 
+/////////do not delete
+///used for the print in the client tab
+Print *client_list;
+Print *client_detail;
+/////////
+
 /**
  * Fill the labels and the entry of the credit dialog
  *
@@ -187,8 +193,8 @@ clientes_box ()
   GtkListStore *ventas;
   GtkListStore *ventas_details;
 
-  Print *client_list = (Print *) malloc (sizeof (Print));
-  Print *client_detail = (Print *) malloc (sizeof (Print));
+  client_list = (Print *) malloc (sizeof (Print));
+  client_detail = (Print *) malloc (sizeof (Print));
   client_detail->son = (Print *) malloc (sizeof (Print));
 
 
@@ -462,6 +468,9 @@ clientes_box ()
 
   /* g_signal_connect (G_OBJECT (button), "clicked", */
   /* 		    G_CALLBACK (PrintTwoTree), (gpointer)client_detail); */
+
+  setup_print_menu();
+
 }
 
 void
@@ -782,98 +791,119 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
 }
 
 void
-KillAbonarWindow (void)
+CloseAbonarWindow (void)
 {
-  gtk_widget_destroy (creditos->abonar_window);
+  GtkWidget *widget;
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_abonar"));
+  gtk_widget_hide(widget);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
 }
 
 gint
 AbonarWindow (void)
 {
+  GtkWidget *widget;
   GtkTreeIter iter;
-  GtkWidget *frame;
-  GtkWidget *label;
-  GtkWidget *button;
-  GtkWidget *sell_button;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  gint rut;
+  gint deuda;
 
-  GtkWidget *hbox;
-  GtkWidget *vbox;
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == FALSE)
+  if (!(gtk_tree_selection_get_selected (selection, NULL, &iter)))
     return 0;
+  else
+    {
+      store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
 
-  creditos->abonar_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_widget_set_size_request (creditos->abonar_window, -1, 120);
-  gtk_window_set_position (GTK_WINDOW (creditos->abonar_window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_widget_show (creditos->abonar_window);
-  gtk_window_present (GTK_WINDOW (creditos->abonar_window));
-  gtk_window_set_title (GTK_WINDOW (creditos->abonar_window), "Abonado de Dinero");
+      gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
+			  0, &rut,
+			  -1);
+    }
 
-  g_signal_connect (G_OBJECT (creditos->abonar_window), "destroy",
-		    G_CALLBACK (KillAbonarWindow), NULL);
+  deuda = DeudaTotalCliente(rut);
 
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (creditos->abonar_window), vbox);
+  if (deuda == 0)
+    {
+      AlertMSG(widget, "No puede abonar a un cliente con deuda 0");
+      return 0;
+    }
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_rut"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", rut));
 
-  sell_button = gtk_button_new_with_label ("Abonar");
-  gtk_widget_show (sell_button);
-  gtk_box_pack_end (GTK_BOX (hbox), sell_button, FALSE, FALSE, 3);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_deuda"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", deuda));
 
-  g_signal_connect (G_OBJECT (sell_button), "clicked",
-		    G_CALLBACK (Abonar), NULL);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_abonar"));
+  gtk_widget_show_all(widget);
 
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (KillAbonarWindow), NULL);
-
-  frame = gtk_frame_new ("Abonar");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, FALSE, FALSE, 3);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (frame), vbox);
-
-  label = gtk_label_new ("Ingrese la cantidad de Dinero");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-
-  creditos->entry_plata = gtk_entry_new ();
-  gtk_widget_show (creditos->entry_plata);
-  gtk_box_pack_start (GTK_BOX (vbox), creditos->entry_plata, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (creditos->entry_plata), "activate",
-		    G_CALLBACK (SendCursorTo), (gpointer) sell_button);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
+  gtk_widget_grab_focus(widget);
 
   return 0;
 }
 
 void
+on_entry_admin_abonar_amount_changed (GtkEditable *editable, gpointer user_data)
+{
+  GtkWidget *widget;
+  gint abono;
+  gint deuda;
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_rut"));
+  deuda = DeudaTotalCliente(atoi(gtk_label_get_text(GTK_LABEL(widget))));
+  abono = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_admin_abonar_deuda"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", deuda-abono));
+
+}
+
+void
 Abonar (void)
 {
+  GtkWidget *widget;
   GtkTreeIter iter;
-  gint abonar = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (creditos->entry_plata))));
+  GtkTreeSelection *selection;
+  GtkTreeModel *store;
+  gint abonar;
   gint rut;
 
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == TRUE)
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
+  abonar = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  if (abonar == 0)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter,
+      AlertMSG(widget, "No puede abonar 0 pesos a una deuda");
+      return;
+    }
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+  store = gtk_tree_view_get_model(GTK_TREE_VIEW(widget));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (store, &iter,
 			  0, &rut,
 			  -1);
 
-      KillAbonarWindow ();
+      CloseAbonarWindow ();
 
-      CancelarDeudas (abonar, rut);
-
-      //DatosDeudor ();
+      if (CancelarDeudas (abonar, rut) == 0)
+	{
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+	  statusbar_push (GTK_STATUSBAR(widget), "Se ha abonado con exito el monto a la deuda", 3000);
+	  FillClientStore(GTK_LIST_STORE(store));
+	}
+      else
+	ErrorMSG(widget, "No se pudo abonar el monto a la deuda");
     }
 }
 
@@ -1149,6 +1179,15 @@ ClientStatus (void)
       }
 }
 
+/**
+ * Checks if it's possible sale a given amount to a given client,
+ * based in the credit available.
+ *
+ * @param rut the rut of the client
+ * @param total_venta the amount requested
+ *
+ * @return TRUE if the client has enough credit, otherwise returns FALSE
+ */
 gboolean
 VentaPosible (gint rut, gint total_venta)
 {
@@ -1160,6 +1199,16 @@ VentaPosible (gint rut, gint total_venta)
     return FALSE;
 }
 
+/**
+ * Callback connected to the toggle button of the clients treeview
+ *
+ * This function enable or disable the credit state of the client selected.
+ * @param toggle the togle button
+ * @param path_str the path of the selected row
+ * @param data the user data
+ *
+ * @return 0 on succesfull execution
+ */
 gint
 ToggleClientCredit (GtkCellRendererToggle *toggle, char *path_str, gpointer data)
 {
@@ -1193,6 +1242,12 @@ ToggleClientCredit (GtkCellRendererToggle *toggle, char *path_str, gpointer data
   return 0;
 }
 
+/**
+ * Callback connected to the delele client button present in the
+ * clients tab.
+ *
+ * This function deletes the client selected in the treeview
+ */
 void
 EliminarCliente (void)
 {
@@ -1224,7 +1279,13 @@ EliminarCliente (void)
     }
 }
 
-void
+
+/**
+ * Callback connected to the accept button present in the modificate
+ * client dialog.
+ *
+ * This function validates the information entered by the user
+ */void
 ModificarClienteDB (void)
 {
   GtkWidget *widget;
@@ -1305,6 +1366,13 @@ ModificarClienteDB (void)
     }
 }
 
+/**
+ * Obtains the credit limit of a given client
+ *
+ * @param rut the rut of the client with the format '12345678-9'
+ *
+ * @return the credit limit, if fails returns -1
+ */
 gint
 LimiteCredito (const gchar *rut)
 {
@@ -1320,3 +1388,76 @@ LimiteCredito (const gchar *rut)
     return -1;
 }
 
+/**
+ * Callback connected to the print list of clients option
+ *
+ */
+void
+on_print_client_list_clicked()
+{
+  PrintTree(NULL, (gpointer) client_list);
+
+}
+
+/**
+ * Callback connected to the print sales of a client option
+ *
+ */
+void
+on_print_sales_of_client_clicked()
+{
+  PrintTree(NULL, (gpointer) client_detail);
+}
+
+
+/**
+ * Setup the popup menu that must appear when user clicks in the print
+ * button present in the clients tab
+ *
+ */
+void
+setup_print_menu()
+{
+  GError *error = NULL;
+  GtkWidget *widget;
+  GtkUIManager *manager;
+  GtkAccelGroup *accel_group;
+  GtkActionGroup *action_group;
+  GtkActionEntry entry[] =
+    {
+      {"PrintClients", NULL, "Lista de clientes", NULL, NULL, on_print_client_list_clicked},
+      {"PrintSalesOfClient", NULL, "Ventas de cliente", NULL, NULL, on_print_sales_of_client_clicked}
+    };
+  manager = gtk_ui_manager_new();
+  accel_group = gtk_ui_manager_get_accel_group (manager);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_admin"));
+  gtk_window_add_accel_group(GTK_WINDOW(widget), accel_group);
+
+  action_group = gtk_action_group_new ("my print menu");
+
+  gtk_action_group_add_actions (action_group, entry, 2, NULL);
+
+  gtk_ui_manager_insert_action_group (manager, action_group, 0);
+  gtk_ui_manager_add_ui_from_file (manager, DATADIR"/ui/print-menu.xml", &error);
+  if (error != NULL)
+    g_print("%s: %s\n", G_STRFUNC, error->message);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "btn_admin_print"));
+  g_object_set_data (G_OBJECT(widget), "uimanager", (gpointer) manager);
+}
+
+void
+on_btn_admin_print_clicked(GtkButton *button, gpointer user_data)
+{
+  GtkUIManager *uimanager;
+  GtkWidget *widget;
+
+  uimanager = GTK_UI_MANAGER(g_object_get_data(G_OBJECT(button), "uimanager"));
+
+  widget = gtk_ui_manager_get_widget(uimanager, "/popup");
+
+  gtk_menu_popup (GTK_MENU(widget), NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time());
+
+  gtk_widget_show_all(widget);
+}

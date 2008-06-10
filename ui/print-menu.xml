@@ -1,0 +1,6 @@
+<ui>
+  <popup>
+    <menuitem name="PrintClients" action="PrintClients" />
+    <menuitem name="PrintSalesOfClient" action="PrintSalesOfClient" />
+  </popup>
+</ui>

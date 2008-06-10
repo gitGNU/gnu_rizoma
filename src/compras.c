@@ -5165,21 +5165,10 @@ main (int argc, char **argv)
   GtkTreeIter iter;
   GtkCellRenderer *cell;
 
-  char *config_file;
   GKeyFile *key_file;
   gchar **profiles;
 
-  config_file = g_strconcat(g_getenv("HOME"),"/.rizoma", NULL);
-
-  if (!g_file_test(config_file, G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR))
-    {
-      perror (g_strdup_printf ("Opening %s", config_file));
-      g_print ("Your system must be configured, please run rizoma-config to do the job\n");
-      exit (-1);
-    }
-
-  key_file = g_key_file_new ();
-  g_key_file_load_from_file(key_file, config_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
+  key_file = rizoma_open_config();
 
   gtk_init (&argc, &argv);
 

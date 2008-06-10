@@ -67,4 +67,5 @@ void ModificarClienteDB (void);
 
 gint LimiteCredito (const gchar *rut);
 
+void setup_print_menu();
 #endif
