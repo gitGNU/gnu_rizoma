@@ -1111,7 +1111,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="vbox5">
+              <object class="GtkVBox" id="vbox_guide_invoice">
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkFrame" id="frame6">
@@ -1738,7 +1738,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="vbox_guide_invoice">
+              <object class="GtkVBox" id="vbox">
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkFrame" id="frame9">
