@@ -842,7 +842,7 @@ DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, gint preci
 
 void
 SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unidad,
-                   gchar *contenido, gchar *precio, gboolean iva, gchar *otros, gchar *barcode,
+                   gchar *contenido, gchar *precio, gboolean iva, gint otros, gchar *barcode,
                    gchar *familia, gboolean perecible, gboolean fraccion)
 {
   PGresult *res;
@@ -850,11 +850,10 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
                        "marca='%s', unidad='%s', contenido='%s', precio=%d, "
-                       "impuestos='%d', otros=(SELECT id FROM impuesto WHERE descripcion='%s'), "
+                       "impuestos='%d', otros=%d, "
                        "perecibles='%d', fraccion='%d' WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
                        iva, otros, (gint)perecible, (gint)fraccion, barcode);
-  printf("%s\n", q);
   res = EjecutarSQL(q);
   g_free(q);
 }

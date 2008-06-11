@@ -116,7 +116,7 @@ gboolean DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, g
 gboolean ExistProductHistory (gchar *barcode);
 
 void SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unidad,
-                        gchar *contenido, gchar *precio, gboolean iva, gchar *otros, gchar *barcode,
+                        gchar *contenido, gchar *precio, gboolean iva, int otros, gchar *barcode,
                         gchar *familia, gboolean perecible, gboolean fraccion);
 
 gboolean AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca, char *contenido,
