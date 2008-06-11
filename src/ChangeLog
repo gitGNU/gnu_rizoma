@@ -1,5 +1,8 @@
 2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (on_button_ok_ingress_clicked): Added code to deal
+	with partial_invoice ingress.
+
 	* tiempo.c (RefreshTime): Deleted function.
 	(__days): Deleted.
 	(__months): Deleted.
