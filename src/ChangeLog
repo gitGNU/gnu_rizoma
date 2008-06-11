@@ -11,6 +11,7 @@
 	(ElabVencCal|CloseElabVenc): Deleted.
 	(SetElabVenc|DrawAsk): Deleted
 	(AskIngreso): Deleted commented code.
+	(CloseAskIngreso): Deleted unnecessary code.
 
 2008-06-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
