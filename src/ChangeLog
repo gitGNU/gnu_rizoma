@@ -1,5 +1,8 @@
 2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (CloseAskIngreso|Canjeables|CanjeablesWindow): Deleted.
+	(CheckCanjeables): Deleted.
+
 	* ventas.c (ventas_win): Added initialize on NULL to GError.
 
 	* compras.c (on_button_ok_ingress_clicked): Added code to deal
