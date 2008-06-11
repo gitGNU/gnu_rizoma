@@ -105,6 +105,7 @@ drop table deuda cascade ;
 drop table Documentos_emitidos cascade ;
 drop table documentos_emitidos_detalle cascade ;
 drop table Cheques cascade ;
+drop table factura_compra_detall cascade ;
 drop table factura_compra cascade ;
 drop table Devolucion cascade ;
 drop table egreso cascade ;
@@ -115,6 +116,7 @@ drop table Caja cascade ;
 drop table Canje cascade ;
 drop table familias cascade ;
 drop table formas_pago cascade ;
+drop table guias_compra_detalle cascade;
 drop table guias_compra cascade ;
 drop table numeros_documentos cascade ;
 drop table pagos cascade ;
@@ -288,6 +290,19 @@ create table documentos_detalle (
   otros                     int4
 ) ;
 
+-- factura_detalle
+create table factura_compra_detalle (
+  id                        int4 not null,
+  id_factura_compra         int4 not null,
+  barcode                   int8 not null,
+  cantidad                  float8,
+  precio                    float8,
+  iva                       int4,
+  otros                     int4,
+  constraint pk_factura_compra_detalle primary key(id, id_factura_compra),
+  constraint fk_factura_compra_detalle_factura foreign key(id_factura_compra) references factura_compra(id)
+) ;
+
 -- Caja
 create table Caja (
   id                        serial not null,
@@ -332,6 +347,19 @@ create table guias_compra (
   rut_proveedor             int4,
   fecha_emision             timestamp,
   constraint pk_Guias_compra primary key (id)
+) ;
+
+-- guias_compra_detalle
+create table guias_compra_detalle (
+  id                        int4 not null,
+  id_guias_compra           int4 not null,
+  barcode                   int8 not null,
+  cantidad                  float8,
+  precio                    float8,
+  iva                       int4,
+  otros                     int4,
+  constraint pk_guias_compra_detalle primary key(id, id_guias_compra),
+  constraint fk_guias_compra_detalle_guias_compra foreign key(id_guias_compra) references guias_compra(id)
 ) ;
 
 -- numeros_documentos
@@ -716,4 +744,6 @@ alter table Caja add constraint fk_caja_users
 alter table compra_detalle add constraint fk_detallecompra_compra
   foreign key (id_compra)
   references Compra (id)  ;
-
+alter table guias_compra add constraint fk_guias_compra_compra
+  foreign key (id_compra)
+  references Compra (id) ;
