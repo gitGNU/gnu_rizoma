@@ -163,8 +163,6 @@ CanjearProducto (GtkWidget *widget, gpointer data)
 
   if (entry == NULL)
     {
-      gtk_widget_set_sensitive (main_window, TRUE);
-
       gtk_widget_destroy (gtk_widget_get_toplevel (widget));
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
@@ -199,8 +197,6 @@ CanjearProductoWin (GtkWidget *widget, gpointer data)
   GtkWidget *hbox;
   GtkWidget *label;
   GtkWidget *button;
-
-  gtk_widget_set_sensitive (main_window, FALSE);
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (window), "Canjear Producto");
@@ -2590,8 +2586,6 @@ CloseCancelWindow (void)
   gtk_widget_destroy (venta->cancel_window);
   venta->cancel_window = NULL;
 
-  gtk_widget_set_sensitive (main_window, TRUE);
-
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
 }
@@ -2818,8 +2812,6 @@ CancelWindow (GtkWidget *widget, gpointer data)
   GtkWidget *button;
   GtkWidget *entry;
   GtkWidget *calendario;
-
-  gtk_widget_set_sensitive (main_window, FALSE);
 
   venta->cancel_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 

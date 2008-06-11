@@ -106,7 +106,7 @@
           <object class="GtkScrolledWindow" id="scrolledwindow14">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+            <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
             <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
             <child>
               <object class="GtkTreeView" id="tree_view_partial_guide">
@@ -132,6 +132,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_partial_guide"/>
               </object>
             </child>
             <child>
@@ -3388,6 +3389,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="headers_clickable">True</property>
+                            <signal name="row_activated" handler="FillFields"/>
                           </object>
                         </child>
                       </object>
