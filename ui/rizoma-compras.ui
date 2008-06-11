@@ -1111,7 +1111,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="vbox5">
+              <object class="GtkVBox" id="vbox_guide_invoice">
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkFrame" id="frame6">
@@ -1619,7 +1619,7 @@
                                               </packing>
                                             </child>
                                             <child>
-                                              <object class="GtkLabel" id="label6">
+                                              <object class="GtkLabel" id="label_guide_invoice_neto">
                                                 <property name="visible">True</property>
                                               </object>
                                               <packing>
@@ -1628,7 +1628,7 @@
                                               </packing>
                                             </child>
                                             <child>
-                                              <object class="GtkLabel" id="label41">
+                                              <object class="GtkLabel" id="label_guide_invoice_task">
                                                 <property name="visible">True</property>
                                               </object>
                                               <packing>
@@ -1639,7 +1639,7 @@
                                               </packing>
                                             </child>
                                             <child>
-                                              <object class="GtkLabel" id="label42">
+                                              <object class="GtkLabel" id="label_guide_invoice_other_tasks">
                                                 <property name="visible">True</property>
                                               </object>
                                               <packing>
@@ -1650,7 +1650,7 @@
                                               </packing>
                                             </child>
                                             <child>
-                                              <object class="GtkLabel" id="label43">
+                                              <object class="GtkLabel" id="label_guide_invoice_total">
                                                 <property name="visible">True</property>
                                               </object>
                                               <packing>
@@ -1685,7 +1685,7 @@
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="GtkButton" id="button15">
+                                      <object class="GtkButton" id="btn_guide_invoice_ok">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -1738,7 +1738,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="vbox7">
+              <object class="GtkVBox" id="vbox">
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkFrame" id="frame9">

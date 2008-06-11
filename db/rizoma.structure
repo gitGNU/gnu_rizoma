@@ -277,7 +277,7 @@ create table documentos_detalle (
   id                        serial not null primary key,
   numero                    int4,
   id_compra                 int4,
-  barcode                   varchar(14),
+  barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8,
   fecha                     timestamp,
