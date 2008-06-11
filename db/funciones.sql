@@ -352,6 +352,8 @@ FOR datos IN EXECUTE query LOOP
     unidades_merma := datos.unidades_merma;
     mayorista := datos.mayorista;
     total_vendido := datos.total_vendido;
+    precio_mayor := datos.precio_mayor;
+    cantidad_mayor := datos.cantidad_mayor;
     RETURN NEXT;
 END LOOP;
 
