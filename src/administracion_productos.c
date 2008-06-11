@@ -702,6 +702,9 @@ admini_box ()
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 
+  g_signal_connect(G_OBJECT(selection), "changed",
+		   G_CALLBACK(FillFields), NULL);
+
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
   /* g_signal_connect (G_OBJECT (selection), "changed", */
