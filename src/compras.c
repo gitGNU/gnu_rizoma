@@ -1780,18 +1780,43 @@ ChangeSave (void)
 void
 Save (GtkWidget *widget, gpointer data)
 {
+  GtkWidget *aux_widget;
   GtkTreeModel *model;
   GtkTreeIter iter;
+  GtkWidget *combo_imp;
 
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_barcode)));
+  gchar *barcode;
+  gchar *codigo;
+  gchar *description;
+  gchar *marca;
+  gchar *unidad;
+  gchar *contenido;
+  gchar *precio;
+  gint otros;
+  char *familia;
 
-  gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_codigo)));
-  gchar *description = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_description)));
-  gchar *marca = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_marca)));
-  gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_unidad)));
-  gchar *contenido = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_contenido)));
-  gchar *precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_precio)));
-  gchar *otros, *familia;
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_shortcode"));
+  codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_desc"));
+  description = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_brand"));
+  marca = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_unit"));
+  unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_content"));
+  contenido = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_price"));
+  precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  combo_imp = GTK_WIDGET (gtk_builder_get_object(builder, "cmbbox_edit_prod_extratax"));
 
   if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_imp)) != -1)
     {
@@ -1803,7 +1828,7 @@ Save (GtkWidget *widget, gpointer data)
                           -1);
     }
   else
-    otros = "";
+    otros = -1;
 
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
                      iva, otros, barcode, familia, perecible, fraccion);
