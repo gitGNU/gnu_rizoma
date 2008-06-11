@@ -1890,12 +1890,6 @@ BuyWindow (void)
 }
 
 void
-GetBuyData (void)
-{
-
-}
-
-void
 CloseSearchByName (void)
 {
   gtk_widget_destroy (compra->find_win);
