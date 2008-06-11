@@ -1,5 +1,9 @@
 2008-06-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (on_tree_selection_pending_guide_changed): Added
+	function to deal with the proper signal and fill the bottom tree
+	view with the product list of the selected guide.
+
 	* utils.c (clean_container): Added support to deal with tree views
 	and treat a gtk_treeview as a widget not as a container.
 

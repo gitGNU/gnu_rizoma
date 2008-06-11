@@ -1858,3 +1858,36 @@ end loop;
 
 return;
 end; $$ language plpgsql;
+
+create or replace function get_guide_detail(
+		IN id_guia integer,
+                IN rut_proveedor integer,
+		OUT codigo_corto integer,
+		OUT descripcion varchar(50),
+		OUT marca varchar(35),
+		OUT contenido varchar(10),
+		OUT unidad varchar(10),
+		OUT precio integer,
+		OUT cantidad double precision,
+		OUT precio_compra bigint,
+		OUT barcode bigint)
+returns setof record as $$
+declare
+        list record;
+        query text;
+begin
+        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM documentos_detalle AS t1, producto AS t2, guias_compra as t3 WHERE t1.barcode=t2.barcode and t1.factura='f' and t3.id_compra=t1.id_compra and t3.numero=$S$|| id_guia ||$S$ and t3.rut_proveedor=$S$|| rut_proveedor ||$S$ and t3.numero=t1.numero $S$;
+
+		FOR list IN EXECUTE query LOOP
+		codigo_corto := list.codigo_corto;
+		descripcion := list.descripcion;
+		marca := list.marca;
+		contenido := list.contenido;
+		unidad := list.unidad;
+		precio := list.precio_venta;
+		cantidad := list.cantidad;
+		precio_compra := list.precio_compra;
+		barcode := list.barcode;
+		RETURN NEXT;
+		END LOOP;
+END; $$ LANGUAGE plpgsql;
