@@ -1168,6 +1168,9 @@ compras_win ()
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_guide"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
+  g_signal_connect (G_OBJECT (gtk_tree_view_get_selection (treeview)), "changed",
+                    G_CALLBACK (on_tree_selection_pending_guide_changed), NULL);
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Nº Guia", renderer,
                                                      "text", 0,
@@ -1236,15 +1239,12 @@ compras_win ()
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  store = gtk_list_store_new (8,
+  store = gtk_list_store_new (5,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_BOOLEAN);
+                              G_TYPE_DOUBLE);
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice_detail"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -1252,8 +1252,6 @@ compras_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
                                                      "text", 0,
-                                                     "foreground", 6,
-                                                     "foreground-set", 7,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1263,8 +1261,6 @@ compras_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
                                                      "text", 1,
-                                                     "foreground", 6,
-                                                     "foreground-set", 7,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1273,8 +1269,6 @@ compras_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer,
                                                      "text", 2,
-                                                     "foreground", 6,
-                                                     "foreground-set", 7,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1283,8 +1277,6 @@ compras_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
                                                      "text", 3,
-                                                     "foreground", 6,
-                                                     "foreground-set", 7,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1293,9 +1285,7 @@ compras_win ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer,
-                                                     "text", 5,
-                                                     "foreground", 6,
-                                                     "foreground-set", 7,
+                                                     "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -4392,7 +4382,7 @@ void
 CheckMontoGuias (void)
 {
   gint total_guias = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_total"))))));
-  gint total_fact = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_guide_invoice_amount")))));
+  gint total_fact = atoi (CutPoints (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_guide_invoice_amount"))))));
 
   if (total_guias == 0)
     return;
@@ -4407,8 +4397,6 @@ CheckMontoGuias (void)
     }
   else if (total_guias == total_fact)
     {
-      gtk_label_set_markup (GTK_LABEL (compra->guias_error),
-                            "");
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_guide_invoice_ok")), TRUE);
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "btn_guide_invoice_ok")));
     }
@@ -5570,5 +5558,52 @@ on_btn_invoice_guide_clicked (GtkButton *button, gpointer date)
                           1, id_compra,
                           2, monto,
                           -1);
+    }
+}
+
+void
+on_tree_selection_pending_guide_changed (GtkTreeSelection *selection, gpointer user_data)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice_detail"));
+  GtkTreeModel *model = gtk_tree_view_get_model (gtk_tree_selection_get_tree_view (selection));
+  GtkTreeIter iter;
+  gchar *n_guide;
+  gchar *rut_provider;
+
+  PGresult *res;
+  gint tuples, i;
+  gchar *q;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &n_guide,
+                          -1);
+      rut_provider = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_rut"))));
+
+      q = g_strdup_printf ("SELECT * FROM get_guide_detail(%s, %s)", n_guide, rut_provider);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      if (res == NULL) return;
+
+      tuples = PQntuples (res);
+
+      model = gtk_tree_view_get_model (tree);
+      gtk_list_store_clear (GTK_LIST_STORE (model));
+
+      for (i = 0; i < tuples; i++)
+        {
+          gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+          gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                              0, PQvaluebycol (res, i, "codigo_corto"),
+                              1, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
+                                                  PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
+                                                  PQvaluebycol (res, i, "unidad")),
+                              2, PQvaluebycol(res, i, "precio"),
+                              3, strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
+                              4, (gdouble) (strtod (PUT(PQvaluebycol(res, i, "precio")), (char **)NULL) * strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL)),
+                              -1);
+        }
     }
 }

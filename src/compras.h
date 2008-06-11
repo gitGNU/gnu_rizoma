@@ -151,4 +151,6 @@ void ClearPagosData (void);
 
 void ClosePagarDocumentoWin (GtkWidget *widget, gpointer data);
 
+void on_tree_selection_pending_guide_changed (GtkTreeSelection *selection, gpointer user_data);
+
 #endif
