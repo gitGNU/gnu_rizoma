@@ -937,7 +937,7 @@ ventas_win ()
   GtkCellRenderer *renderer;
   GtkTreeIter iter;
   GtkWidget *ventas_gui;
-  GError *error;
+  GError *error = NULL;
 
   venta = (Venta *) g_malloc (sizeof (Venta));
   venta->header = NULL;
