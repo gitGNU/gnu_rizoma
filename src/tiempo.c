@@ -29,68 +29,6 @@
 
 #define YEAR(x) x + 1900
 
-static gint day;
-static gint month;
-static gint year;
-
-const struct __months {
-  int month;
-  char *name;
-} months [12] =
-  {
-    {0, "Enero"},
-    {1, "Febrero"},
-    {2, "Marzo"},
-    {3, "Abril"},
-    {4, "Mayo"},
-    {5, "Junio"},
-    {6, "Julio"},
-    {7, "Agosto"},
-    {8, "Septiembre"},
-    {9, "Octubre"},
-    {10, "Noviembre"},
-    {11, "Diciembre"}
-  };
-
-static struct __days {
-  int day;
-  char *name;
-} days [7] =
-  {
-    {0, "Domingo"},
-    {1, "Lunes"},
-    {2, "Martes"},
-    {3, "Miércoles"},
-    {4, "Jueves"},
-    {5, "Viernes"},
-    {6, "Sábado"}
-  };
-
-GtkWidget *
-show_date (void)
-{
-  GtkWidget *date;
-  time_t t;
-  struct tm *fecha;
-
-  time (&t);
-
-  fecha = localtime (&t);
-
-  date = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (date),
-                        g_strdup_printf ("<span size=\"xx-large\"><b>%s %d\n%s\n%d</b></span>",
-                                         days[fecha->tm_wday].name, fecha->tm_mday,
-                                         months[fecha->tm_mon].name, YEAR (fecha->tm_year)));
-
-  gtk_label_set_justify (GTK_LABEL (date), GTK_JUSTIFY_CENTER);
-
-  day = fecha->tm_mday;
-  month = fecha->tm_mon;
-  year = fecha->tm_year;
-
-  return date;
-}
 gchar *
 CurrentDate (void)
 {
@@ -103,6 +41,7 @@ CurrentDate (void)
 
   return g_strdup_printf ("%.2d-%.2d-%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year));
 }
+
 gchar *
 CurrentTime (void)
 {

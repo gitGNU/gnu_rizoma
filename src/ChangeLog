@@ -1,6 +1,8 @@
 2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* tiempo.c (RefreshTime): Deleted function.
+	(__days): Deleted.
+	(__months): Deleted.
 
 	* Makefile.am: Added 2008 to the copyright years list.
 
