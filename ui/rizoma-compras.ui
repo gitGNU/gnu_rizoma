@@ -132,6 +132,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_partial_invoice"/>
               </object>
             </child>
             <child>
