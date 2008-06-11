@@ -1381,6 +1381,9 @@ Save (GtkWidget *widget, gpointer data)
   gchar *precio;
   gint otros;
   char *familia;
+  gboolean iva;
+  gboolean fraccion;
+  gboolean perecible;
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
   barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
@@ -1402,6 +1405,15 @@ Save (GtkWidget *widget, gpointer data)
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_price"));
   precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "checkbtn_edit_prod_fraccionaria"));
+  fraccion = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(aux_widget));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "checkbtn_edit_prod_perecible"));
+  perecible = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(aux_widget));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
+  iva = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(aux_widget));
 
   combo_imp = GTK_WIDGET (gtk_builder_get_object(builder, "cmbbox_edit_prod_extratax"));
 
