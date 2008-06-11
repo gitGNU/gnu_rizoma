@@ -26,8 +26,6 @@
 
 void SearchProductHistory (GtkEntry *entry, gchar *barcode);
 
-void ShowProductDescription (void);
-
 void ChangeSave (void);
 
 void Save (GtkWidget *widget, gpointer data);

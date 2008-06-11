@@ -1,3 +1,17 @@
+2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (AddFactura): Changed to use GDate.
+	(ShowProductDescription): Deleted function.
+	(SearchProductHistory): Deleted old commented code. Added comments
+	to keep out the use of label_canje and label_stock_pro vars.
+	(compras_win|RemoveBuyProduct): "gtk_widget_set_sensitive
+	(confirm_button, TRUE);" deleted.
+	(IngresoParcial|ChangeIngreso): Deleted function.
+	(CambiarStock): Commented function, can be used in the future.
+	(ElabVencCal|CloseElabVenc): Deleted.
+	(SetElabVenc|DrawAsk): Deleted
+	(AskIngreso): Deleted commented code.
+
 2008-06-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (on_tree_selection_pending_guide_changed): Added

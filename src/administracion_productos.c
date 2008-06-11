@@ -104,8 +104,6 @@ GtkWidget *entry_recivir;
 
 GtkWidget *mod_window;
 gboolean fraccionm = FALSE;
-GtkWidget *combo_imp;
-
 
 void
 Recepcion (GtkWidget *widget, gpointer data)
