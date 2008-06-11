@@ -1369,7 +1369,6 @@ Save (GtkWidget *widget, gpointer data)
   GtkWidget *aux_widget;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  GtkWidget *combo_imp;
 
   GtkWidget *combo_imp = GTK_WIDGET (builder_get (builder, "cmbbox_edit_prod_extratax"));
 
