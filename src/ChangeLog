@@ -12,6 +12,8 @@
 	(SetElabVenc|DrawAsk): Deleted
 	(AskIngreso): Deleted commented code.
 	(CloseAskIngreso): Deleted unnecessary code.
+	(on_button_ok_ingress_clicked): Added code to deal with
+	partial_guide ingress.
 
 2008-06-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
