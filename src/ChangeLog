@@ -1,5 +1,14 @@
 2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* tiempo.c (RefreshTime): Deleted function.
+
+	* Makefile.am: Added 2008 to the copyright years list.
+
+	* tiempo.c: Added 2008 to the copyright years list.
+
+	* tipos.h: Added 2008 to the copyright years list. Deleted some
+	vars used with the old interface.
+
 	* compras.c (AddFactura): Changed to use GDate.
 	(ShowProductDescription): Deleted function.
 	(SearchProductHistory): Deleted old commented code. Added comments
