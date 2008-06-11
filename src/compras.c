@@ -1371,11 +1371,8 @@ Save (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
   GtkWidget *combo_imp;
 
-<<<<<<< HEAD:src/compras.c
   GtkWidget *combo_imp = GTK_WIDGET (builder_get (builder, "cmbbox_edit_prod_extratax"));
 
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->see_barcode)));
-=======
   gchar *barcode;
   gchar *codigo;
   gchar *description;
@@ -1385,7 +1382,6 @@ Save (GtkWidget *widget, gpointer data)
   gchar *precio;
   gint otros;
   char *familia;
->>>>>>> a31cbf0328e76bf8e23ffc84b8cb53505fcf4465:src/compras.c
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
   barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
