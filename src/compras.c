@@ -51,9 +51,6 @@
 
 GtkBuilder *builder;
 
-GtkWidget *ask_window;
-
-gboolean ingreso_total = TRUE;
 gboolean iva = TRUE;
 gboolean perecible = TRUE;
 gboolean fraccion = FALSE;
@@ -74,10 +71,6 @@ GtkWidget *pago_monto;
 
 GtkTreeStore *pagos_store;
 GtkWidget *pagos_tree;
-
-GtkWidget *pagos_calendar;
-
-GtkWidget *label_found_compras;
 
 GtkWidget *entry_plazo;
 
@@ -3943,10 +3936,6 @@ CloseAskIngreso (GtkWidget *widget, gpointer data)
     }
   else if (answer == FALSE)
     gtk_widget_set_sensitive (main_window, TRUE);
-
-  gtk_widget_destroy (ask_window);
-
-  ask_window = NULL;
 }
 
 void
