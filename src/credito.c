@@ -816,7 +816,11 @@ AbonarWindow (void)
   selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
 
   if (!(gtk_tree_selection_get_selected (selection, NULL, &iter)))
-    return 0;
+    {
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+      statusbar_push (GTK_STATUSBAR(widget), "Debe seleccionar un cliente del listado para abonar", 3000);
+      return 0;
+    }
   else
     {
       store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
@@ -898,8 +902,18 @@ Abonar (void)
 
       if (CancelarDeudas (abonar, rut) == 0)
 	{
+	  gchar *msg;
+
 	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
-	  statusbar_push (GTK_STATUSBAR(widget), "Se ha abonado con exito el monto a la deuda", 3000);
+
+	  if (GetResto(rut) > 0)
+	    msg = g_strdup_printf("Se ha abonado con exito al cliente %d, actualmente tiene un monto de <b>%d</b> a favor",
+				  rut, GetResto(rut));
+	  else
+	    msg = g_strdup_printf("Se ha abonado con exito al cliente %d",
+				  rut);
+
+	  ExitoMSG(widget, msg);
 	  FillClientStore(GTK_LIST_STORE(store));
 	}
       else
