@@ -490,6 +490,7 @@ DeudaTotalCliente (gint rut)
                                       rut));
 
   deuda = atoi (PQgetvalue (res, 0, 0));
+  deuda -= GetResto(rut);
 
   return deuda;
 }
