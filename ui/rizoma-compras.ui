@@ -3033,10 +3033,10 @@
                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                         <child>
                           <object class="GtkTreeView" id="treeview_prov_search">
+                            <property name="height_request">150</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="headers_clickable">True</property>
-                            <signal name="row_activated" handler="LlenarDatosProveedor"/>
                           </object>
                         </child>
                       </object>

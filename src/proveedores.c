@@ -63,7 +63,6 @@ GtkWidget *indice_t;
 GtkWidget *search_entry;
 
 GtkTreeStore *proveedores_store;
-GtkWidget *proveedores_tree;
 
 void
 BuscarProveedor (GtkWidget *widget, gpointer data)
@@ -141,20 +140,18 @@ ListarProveedores (void)
 }
 
 void
-LlenarDatosProveedor (GtkTreeView       *tree_view,
-                      GtkTreePath       *path,
-                      GtkTreeViewColumn *column,
+LlenarDatosProveedor (GtkTreeSelection *selection,
                       gpointer           user_data)
 {
   GtkWidget *widget;
-  GtkTreeSelection *selection;
+  GtkTreeView *tree_view;
   GtkListStore *store;
   PGresult *res;
   GtkTreeIter iter;
   gchar *rut_proveedor;
   gchar **aux, *q;
 
-  selection = gtk_tree_view_get_selection(tree_view);
+  tree_view = gtk_tree_selection_get_tree_view(selection);
   store = GTK_LIST_STORE(gtk_tree_view_get_model(tree_view));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
@@ -429,7 +426,9 @@ ModificarProveedor (void)
 void
 proveedores_box ()
 {
+  GtkWidget *proveedores_tree;
   GtkListStore *store;
+  GtkTreeSelection *selection;
   GtkWidget *button;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
@@ -446,10 +445,10 @@ proveedores_box ()
 
   proveedores_tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_prov_search"));
   gtk_tree_view_set_model(GTK_TREE_VIEW(proveedores_tree), GTK_TREE_MODEL(store));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(proveedores_tree));
 
-  /* g_signal_connect (G_OBJECT (gtk_tree_view_get_selection */
-  /*                             (GTK_TREE_VIEW (proveedores_tree))), "changed", */
-  /*                   G_CALLBACK (LlenarDatosProveedor), NULL); */
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (LlenarDatosProveedor), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
