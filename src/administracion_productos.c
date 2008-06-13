@@ -1030,7 +1030,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       else
         mermaporc = 0;
 
-      //      contrib_proyect = (gdouble)((fifo * margen) / 100) * stock;
       contrib_proyect = contri_unit * stock;
 
       if (contrib_agreg != 0)
@@ -1068,10 +1067,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "unidad")));
 
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sold")); */
-      /* gtk_label_set_markup (GTK_LABEL (aux_widget), */
-      /*                       g_strdup_printf ("<b>%d</b>", vendidos)); */
-
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_stock"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%.2f</b>", stock));
@@ -1079,10 +1074,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sales_day"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%.2f</b>", g_ascii_strtod (PQvaluebycol (res, 0, "ventas_dia"), NULL)));
-
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_")); */
-      /* gtk_label_set_markup (GTK_LABEL (stock_dias), */
-      /*                       g_strdup_printf ("<b>%.2f</b>", GetDayToSell (barcode))); */
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -1095,10 +1086,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_extratax"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%s</b>", GetLabelImpuesto (barcode)));
-
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "")); */
-      /* gtk_label_set_markup (GTK_LABEL (perecible), */
-      /*                       g_strdup_printf ("<b>%s</b>", GetPerecible (barcode))); */
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -1118,14 +1105,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_mermauni"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%.2f</b>", merma));
-
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "")); */
-      /* gtk_label_set_markup (GTK_LABEL (mermata), */
-      /* 			    g_strdup_printf ("<b>%.2f %%</b>", mermaporc)); */
-
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "")); */
-      /* gtk_label_set_markup (GTK_LABEL (ici), */
-      /*                       g_strdup_printf ("<b>%.2f%%</b>", ici_total)); */
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_totalbuy"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
@@ -1148,15 +1127,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>$%d</b>", contrib_proyect));
 
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "")); */
-      /* gtk_label_set_markup (GTK_LABEL (stock_pro), */
-      /*                       g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "stock_pro"))); */
-
-      /* aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "")); */
-      /* gtk_entry_set_text (GTK_ENTRY (tasa_canje), PQvaluebycol (res, 0, "tasa_canje")); */
-
-
-
       if (strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0)
         {
 	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
@@ -1171,25 +1141,6 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_no"));
 	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (aux_widget), TRUE);
         }
-
-      /* q = g_strdup_printf("SELECT nombre FROM select_proveedor_for_product(%s)", */
-      /*                     barcode); */
-      /* res = EjecutarSQL (q); */
-      /* g_free(q); */
-
-      /* tuples = PQntuples (res); */
-
-      /* model_proveedores = GTK_WIDGET (gtk_list_store_new (1, */
-      /*                                                     G_TYPE_STRING)); */
-
-      /* gtk_combo_box_set_model (GTK_COMBO_BOX (combo_proveedores), */
-      /*                          GTK_TREE_MODEL (model_proveedores)); */
-
-      /* for (i = 0; i < tuples; i++) */
-      /*   gtk_combo_box_append_text (GTK_COMBO_BOX (combo_proveedores), */
-      /*                              PQvaluebycol (res, i, "nombre")); */
-
-      /* gtk_combo_box_set_active (GTK_COMBO_BOX (combo_proveedores), 0); */
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_cantmayorist"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget), g_strdup_printf ("%d", cantidad_mayorista));
