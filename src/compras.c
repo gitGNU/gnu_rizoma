@@ -3750,7 +3750,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
 
   gtk_widget_hide (wnd);
 }
-t
+
 void
 ClosePagarDocumentoWin (GtkWidget *widget, gpointer data)
 {
