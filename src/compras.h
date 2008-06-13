@@ -139,8 +139,6 @@ void SetElabVenc (GtkWidget *widget, gpointer data);
 
 void AskElabVenc (GtkWidget *wnd, gboolean invoice);
 
-void InformeComprasShow (void);
-
 void PagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 void PagarDocumento (GtkWidget *widget, gpointer data);

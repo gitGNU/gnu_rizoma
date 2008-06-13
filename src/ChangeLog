@@ -1,5 +1,7 @@
 2008-06-13  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (InformeCompras, InformeComprasShow): Deleted.
+
 	* postgres-functions.c (IngresarGuia): Added the column list to
 	insert data.
 	(IngresarDetalleDocumento): Changed to use the new tables
