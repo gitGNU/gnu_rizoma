@@ -37,7 +37,7 @@
 #include"errors.h"
 #include"printing.h"
 #include"compras.h"
-#include"dimentions.h"
+
 #include"utils.h"
 
 GtkWidget *codigo_entry;

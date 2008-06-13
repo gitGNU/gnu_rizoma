@@ -32,7 +32,7 @@
 #include"credito.h"
 #include"usuario.h"
 #include"encriptar.h"
-#include"dimentions.h"
+
 #include"utils.h"
 
 #include<rizoma_errors.h>

@@ -29,7 +29,6 @@ credito.c credito.h \
 encriptar.c encriptar.h \
 usuario.c usuario.h \
 proveedores.c proveedores.h \
-control.c control.h \
 impuestos.c impuestos.h \
 datos_negocio.c datos_negocio.h \
 config_file.c config_file.h \

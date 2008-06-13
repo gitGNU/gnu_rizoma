@@ -42,7 +42,7 @@
 #include"proveedores.h"
 #include"errors.h"
 #include"caja.h"
-#include"dimentions.h"
+
 #include"printing.h"
 #include"utils.h"
 #include"config_file.h"

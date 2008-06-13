@@ -41,7 +41,7 @@
 #include"manejo_productos.h"
 #include"boleta.h"
 #include"config_file.h"
-#include"dimentions.h"
+
 #include"utils.h"
 #include"encriptar.h"
 #include"factura_more.h"
