@@ -292,7 +292,7 @@ create table documentos_detalle (
 
 -- factura_detalle
 create table factura_compra_detalle (
-  id                        int4 not null,
+  id                        serial not null,
   id_factura_compra         int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
