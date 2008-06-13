@@ -3044,6 +3044,7 @@
                                         <property name="label" translatable="yes">gtk-ok</property>
                                         <property name="use_stock">True</property>
                                         <property name="response_id">0</property>
+                                        <signal name="clicked" handler="on_btn_guide_invoice_ok_clicked"/>
                                       </object>
                                       <packing>
                                         <property name="position">1</property>
