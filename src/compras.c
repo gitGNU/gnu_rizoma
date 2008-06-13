@@ -1099,7 +1099,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
           /* gtk_label_set_markup (GTK_LABEL (label_stock_pro), */
           /*                       g_strdup_printf ("<span weight=\"ultrabold\">%.3f</span>", */
           /*                                        strtod (PUT (PQvaluebycol(res, 0, "stock_pro")), */
-                                                         /* (char **)NULL))); */
+          /* (char **)NULL))); */
         }
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
@@ -3442,7 +3442,7 @@ AddFactura (void)
   if (g_date_compare (date_guide, date) > 0)
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_guide_invoice_date")),
-               "La fecha de emision del documento no puede ser menor al de la guia");
+                "La fecha de emision del documento no puede ser menor al de la guia");
     }
 
   if (strcmp (rut, "") == 0)
@@ -3749,195 +3749,6 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
   IngresarCompra (invoice);
 
   gtk_widget_hide (wnd);
-}
-
-void
-InformeCompras (GtkWidget *box)
-{
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *button;
-  GtkWidget *scroll;
-  GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;
-
-  Print *compras_print = (Print *) malloc (sizeof (Print));
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (box), vbox, FALSE, FALSE, 3);
-  gtk_widget_show (vbox);
-
-  scroll = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_set_size_request (scroll, 350, 430);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
-                                  GTK_POLICY_AUTOMATIC,
-                                  GTK_POLICY_AUTOMATIC);
-  gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 3);
-  gtk_widget_show (scroll);
-
-  compra->informe_store = gtk_tree_store_new (5,
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING,
-                                              G_TYPE_STRING);
-
-
-  compra->informe_tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->informe_store));
-  gtk_container_add (GTK_CONTAINER (scroll), compra->informe_tree);
-  gtk_widget_show (compra->informe_tree);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->informe_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_max_width (column, 50);
-  gtk_tree_view_column_set_min_width (column, 50);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
-                                                     "text", 1,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->informe_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_max_width (column, 250);
-  gtk_tree_view_column_set_min_width (column, 250);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
-                                                     "text", 2,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->informe_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_max_width (column, 80);
-  gtk_tree_view_column_set_min_width (column, 80);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
-                                                     "text", 3,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->informe_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
-                                                     "text", 4,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->informe_tree), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-
-  button = gtk_button_new_from_stock (GTK_STOCK_PRINT);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  compras_print->tree = GTK_TREE_VIEW (compra->informe_tree);
-  compras_print->title = "Compras";
-  compras_print->name = "compras";
-  compras_print->date_string = NULL;
-  compras_print->cols[0].name = "ID";
-  compras_print->cols[0].num = 0;
-  compras_print->cols[1].name = "Proveedor";
-  compras_print->cols[1].num = 1;
-  compras_print->cols[2].name = "Rut";
-  compras_print->cols[2].num = 2;
-  compras_print->cols[3].name = "Cantidad";;
-  compras_print->cols[3].num = 3;
-  compras_print->cols[4].name = "Monto";
-  compras_print->cols[4].num = 4;
-  compras_print->cols[5].name = NULL;
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (PrintTree), (gpointer)compras_print);
-
-
-}
-
-void
-InformeComprasShow (void)
-{
-  GtkTreeIter father;
-  GtkTreeIter son;
-  PGresult *res;
-  PGresult *res2;
-  gchar *q2;
-  gint tuples, i;
-  gint jtuples, j;
-
-  if (ventastats->selected_from_day == ventastats->selected_to_day &&
-      ventastats->selected_from_month == ventastats->selected_to_month &&
-      ventastats->selected_from_year == ventastats->selected_to_year)
-    res = EjecutarSQL //TODO: hay que arreglar estas funciones, pero
-      //son demasiado toxicas xD
-      (g_strdup_printf
-       ("SELECT id, (SELECT nombre FROM proveedor WHERE rut=compras.rut_proveedor), rut_proveedor, "
-        "(SELECT SUM (cantidad*precio) FROM compra_detalle WHERE id_compra=compras.id) FROM compra "
-        "WHERE date_part ('day', fecha)=%d AND date_part ('month', fecha)=%d AND "
-        "date_part ('year', fecha)=%d ORDER BY fecha DESC", ventastats->selected_from_day,
-        ventastats->selected_from_month, ventastats->selected_from_year));
-  else //TODO: arreglar esta sentencia que esta refea xD
-    res = EjecutarSQL
-      (g_strdup_printf
-       ("SELECT id, (SELECT nombre FROM proveedor WHERE rut=compras.rut_proveedor), rut_proveedor, "
-        "(SELECT SUM (cantidad*precio) FROM compra_detalle WHERE id_compra=compras.id) FROM compra "
-        "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-        "fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') ORDER BY fecha DESC",
-        ventastats->selected_from_day, ventastats->selected_from_month, ventastats->selected_from_year,
-        ventastats->selected_to_day, ventastats->selected_to_month, ventastats->selected_to_year));
-
-  tuples = PQntuples (res);
-
-  gtk_tree_store_clear (GTK_TREE_STORE (compra->informe_store));
-
-  for (i = 0; i < tuples; i++)
-    {
-      gtk_tree_store_append (GTK_TREE_STORE (compra->informe_store), &father, NULL);
-      gtk_tree_store_set (GTK_TREE_STORE (compra->informe_store), &father,
-                          0, PQgetvalue (res, i, 0),
-                          1, PQgetvalue (res, i, 1),
-                          2, PQgetvalue (res, i, 2),
-                          4, PQgetvalue (res, i, 3),
-                          -1);
-      q2 = g_strdup_printf ("SELECT producto.descripcion, cantidad, precio, "
-                            "precio*cantidad as subtotal "
-                            "FROM compra_detalle "
-                            "INNER JOIN producto "
-                            "ON producto.barcode = compra_detalle.barcode_product "
-                            " AND id_compra = %s",
-                            PQgetvalue (res, i, 0));
-      res2 = EjecutarSQL (q2);
-      g_free (q2);
-
-      jtuples = PQntuples (res2);
-
-      for (j = 0; j < jtuples; j++)
-        {
-          gtk_tree_store_append (GTK_TREE_STORE (compra->informe_store), &son, &father);
-          gtk_tree_store_set (GTK_TREE_STORE (compra->informe_store), &son,
-                              1, PQvaluebycol (res2, j, "producto.descripcion"),
-                              2, PQvaluebycol (res2, j, "cantidad"),
-                              3, PQvaluebycol (res2, j, "precio"),
-                              4, PQvaluebycol (res2, j, "subtotal"),
-                              -1);
-        }
-    }
-
 }
 
 void
@@ -4325,7 +4136,7 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
     {
       if (factura)
         {
-                    GtkListStore *store;
+          GtkListStore *store;
           GtkTreeView *treeview;
           GtkTreeViewColumn *column;
           GtkCellRenderer *renderer;
