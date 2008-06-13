@@ -4721,6 +4721,7 @@
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="on_wnd_compras_delete_event"/>
+                <accelerator key="F12" signal="clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
