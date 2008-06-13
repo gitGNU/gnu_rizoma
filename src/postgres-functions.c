@@ -1496,11 +1496,14 @@ IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emi
 }
 
 gboolean
-AsignarFactAGuia (gint n_guia, gint id_factura)
+AsignarFactAGuia (gint id_guia, gint id_factura)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE guias_compra SET id_factura=%d WHERE numero=%d", id_factura, n_guia));
+  q = g_strdup_printf ("SELECT guide_invoice( %d, ARRAY[%d])", id_factura, id_guia);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1948,7 +1951,7 @@ Ingreso (gint monto, gint motivo, gint usuario)
   gchar *q;
 
   q = g_strdup_printf ("INSERT INTO ingreso (monto, tipo,  fecha, usuario) "
-		       "VALUES (%d, %d, NOW(), %d)",
+                       "VALUES (%d, %d, NOW(), %d)",
                        monto, motivo, usuario);
   res = EjecutarSQL (q);
   g_free (q);

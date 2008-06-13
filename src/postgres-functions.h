@@ -169,7 +169,7 @@ gint IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint tot
 
 gint IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emision, gint y_emision);
 
-gboolean AsignarFactAGuia (gint n_guia, gint id_factura);
+gboolean AsignarFactAGuia (gint id_guia, gint id_factura);
 
 gdouble GetIVA (gchar *barcode);
 

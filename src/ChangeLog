@@ -1,5 +1,8 @@
 2008-06-13  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* postgres-functions.c (AsignarFactAGuia): Changed to use the
+	plpsql function.
+
 	* compras.c (InformeCompras, InformeComprasShow): Deleted.
 
 	* postgres-functions.c (IngresarGuia): Added the column list to
