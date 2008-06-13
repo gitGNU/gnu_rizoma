@@ -1,3 +1,10 @@
+2008-06-13  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* postgres-functions.c (IngresarGuia): Added the column list to
+	insert data.
+	(IngresarDetalleDocumento): Changed to use the new tables
+	separated for guide and invoice.
+
 2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (CloseAskIngreso|Canjeables|CanjeablesWindow): Deleted.

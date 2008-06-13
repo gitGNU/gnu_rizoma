@@ -33,7 +33,7 @@
 #include"tipos.h"
 
 #include"compras.h"
-#include"main.h"
+
 #include"ventas.h"
 #include"credito.h"
 #include"administracion_productos.h"
@@ -42,7 +42,7 @@
 #include"proveedores.h"
 #include"errors.h"
 #include"caja.h"
-#include"dimentions.h"
+
 #include"printing.h"
 #include"utils.h"
 #include"config_file.h"
@@ -229,6 +229,8 @@ Pagar (GtkWidget *widget, gpointer data)
       /*if (cajita == TRUE)
         saldo_caja = ReturnSaldoCaja ();
       */
+
+
 
       if (gtk_toggle_button_get_active (togglebutton) == TRUE)
         {
@@ -1010,6 +1012,8 @@ compras_win ()
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer,
                                                      "text", 4,
@@ -1019,6 +1023,7 @@ compras_win ()
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   /* End Guide -> Invoice */
 
@@ -2303,22 +2308,7 @@ IngresarCompra (gboolean invoice)
                       0, &id,
                       -1);
 
-  if (products != NULL)
-    {
-      do {
 
-        IngresarProducto (products->product, id);
-
-        IngresarDetalleDocumento (products->product, id, n_document, invoice);
-
-        products = products->next;
-      }
-      while (products != compra->header);
-
-      //      SetProductosIngresados ();
-
-    }
-  //TODO: usar funcion plpgsql
   q = g_strdup_printf ("SELECT proveedor FROM get_proveedor_compra( %d )", id);
   rut_proveedor = GetDataByOne (q);
   g_free (q);
@@ -2329,6 +2319,7 @@ IngresarCompra (gboolean invoice)
       g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
 
       doc = IngresarFactura (n_document, id, rut_proveedor, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), 0);
+
     }
   else
     {
@@ -2338,6 +2329,21 @@ IngresarCompra (gboolean invoice)
       doc = IngresarGuia (n_document, id, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date));
     }
 
+  if (products != NULL)
+    {
+      do {
+
+        IngresarProducto (products->product, id);
+
+        IngresarDetalleDocumento (products->product, id, doc, invoice);
+
+        products = products->next;
+      }
+      while (products != compra->header);
+
+      //      SetProductosIngresados ();
+
+    }
 
   CompraIngresada ();
 
@@ -3392,7 +3398,7 @@ AddFactura (void)
 {
   PGresult *res;
 
-  GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice")));
+  //  GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_guide_invoice")));
   GtkTreeIter iter;
 
   gchar *guia;

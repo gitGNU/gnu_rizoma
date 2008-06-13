@@ -30,9 +30,9 @@
 #include"credito.h"
 #include"postgres-functions.h"
 #include"errors.h"
-#include"main.h"
+
 #include"printing.h"
-#include"dimentions.h"
+
 #include"utils.h"
 #include"boleta.h"
 #include"config_file.h"

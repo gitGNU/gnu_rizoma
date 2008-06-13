@@ -41,7 +41,7 @@
 #include"manejo_productos.h"
 #include"boleta.h"
 #include"config_file.h"
-#include"dimentions.h"
+
 #include"utils.h"
 #include"encriptar.h"
 #include"factura_more.h"
@@ -101,17 +101,17 @@ gboolean closing_tipos = FALSE;
  */
 void
 FillProductSell (gchar *barcode,
-		 gboolean mayorista,
-		 gchar *marca,
-		 gchar *descripcion,
-		 gchar *contenido,
-		 gchar *unidad,
-		 gchar *stock,
-		 gchar *stock_day,
+                 gboolean mayorista,
+                 gchar *marca,
+                 gchar *descripcion,
+                 gchar *contenido,
+                 gchar *unidad,
+                 gchar *stock,
+                 gchar *stock_day,
                  gchar *precio,
-		 gchar *precio_mayor,
-		 gchar *cantidad_mayor,
-		 gchar *codigo_corto)
+                 gchar *precio_mayor,
+                 gchar *cantidad_mayor,
+                 gchar *codigo_corto)
 {
   GtkWidget *widget;
   gchar *str_aux;
@@ -1112,26 +1112,26 @@ SearchProductByCode (void)
   if (res != NULL && PQntuples (res) != 0)
     {
       if (PQntuples(res) > 1)
-	g_printerr("%s: the plpgsql function informacion_producto(0,'%s') returned more than 1 tuple",
-		   G_STRFUNC, codigo);
+        g_printerr("%s: the plpgsql function informacion_producto(0,'%s') returned more than 1 tuple",
+                   G_STRFUNC, codigo);
 
       if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
-	{
-	  GtkWidget *aux_widget;
-	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-	  gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
-	  AlertMSG (aux_widget, str);
-	  g_free (str);
+        {
+          GtkWidget *aux_widget;
+          aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+          gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
+          AlertMSG (aux_widget, str);
+          g_free (str);
 
-	  return FALSE;
-	}
+          return FALSE;
+        }
 
       mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
       FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
-		       PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),PQvaluebycol (res, 0, "stock"),
-		       PQvaluebycol (res, 0, "stock_day"), PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
-		       PQvaluebycol (res, 0, "cantidad_mayor"), PQvaluebycol (res, 0, "codigo_corto"));
+                       PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),PQvaluebycol (res, 0, "stock"),
+                       PQvaluebycol (res, 0, "stock_day"), PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
+                       PQvaluebycol (res, 0, "cantidad_mayor"), PQvaluebycol (res, 0, "codigo_corto"));
 
       if (PQvaluebycol (res, 0, "precio") != 0)
         {
@@ -1844,26 +1844,26 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   if (PQntuples (res) == 0)
     {
       if (strcmp (barcode, "") != 0)
-	{
-	  AlertMSG (widget, g_strdup_printf
-		    ("No existe un producto con el código de barras %s!!", barcode));
+        {
+          AlertMSG (widget, g_strdup_printf
+                    ("No existe un producto con el código de barras %s!!", barcode));
 
-	  if (ventas != FALSE)
-	    CleanSellLabels ();
-	}
+          if (ventas != FALSE)
+            CleanSellLabels ();
+        }
       else
-	if (GetCurrentStock (barcode) == 0)
-	  {
-	    AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
+        if (GetCurrentStock (barcode) == 0)
+          {
+            AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
 
-	    if (ventas != FALSE)
-	      CleanSellLabels ();
-	  }
-	else
-	  {
-	    if (ventas != FALSE)
-	      CleanSellLabels ();
-	  }
+            if (ventas != FALSE)
+              CleanSellLabels ();
+          }
+        else
+          {
+            if (ventas != FALSE)
+              CleanSellLabels ();
+          }
       return -1;
     }
 
@@ -1884,9 +1884,9 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   mayorista = strcmp (PQvaluebycol( res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
   FillProductSell (barcode, mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
-		   PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),
+                   PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),
                    PQvaluebycol (res, 0, "stock"), PQvaluebycol (res, 0, "stock_day"),
-		   PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
+                   PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
                    PQvaluebycol (res, 0, "cantidad_mayor"), PQvaluebycol (res, 0, "codigo_corto"));
 
   if (atoi (PQvaluebycol (res, 0, "precio")) != 0)
@@ -3232,9 +3232,9 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
       GtkWidget *wid;
       wid = GTK_WIDGET(gtk_builder_get_object(builder,"entry_percent_discount"));
       if (g_str_equal(gtk_entry_get_text(GTK_ENTRY(wid)),""))
-	discount = "0";
+        discount = "0";
       else
-	discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
+        discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
     }
   else
     discount = "0";
@@ -3243,9 +3243,9 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
     {
     case SIMPLE:
       if (monto >= 180)
-	ticket = get_ticket_number (tipo_documento);
+        ticket = get_ticket_number (tipo_documento);
       else
-	ticket = -1;
+        ticket = -1;
       break;
     case VENTA:
       ticket = -1;
@@ -3262,7 +3262,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
     canceled = TRUE;
 
   SaveSell (monto, maquina, vendedor, CREDITO, str_rut, discount, ticket, tipo_documento,
-	    NULL, FALSE, canceled);
+            NULL, FALSE, canceled);
 
   //clean the interface
   gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
@@ -3316,8 +3316,8 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
     }
 
   gtk_tree_model_get(GTK_TREE_MODEL(store), &iter,
-		     0, &rut,
-		     -1);
+                     0, &rut,
+                     -1);
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
   gtk_widget_hide(aux);
 
@@ -3328,13 +3328,13 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   gtk_widget_grab_focus(aux);
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono from cliente where rut = %s",
-		      strtok(g_strdup(rut),"-"));
+                      strtok(g_strdup(rut),"-"));
   res = EjecutarSQL(q);
   g_free (q);
 
   fill_credit_data(rut, PQgetvalue(res, 0, 0),
-		   PQvaluebycol(res, 0, "direccion"),
-		   PQvaluebycol(res, 0, "telefono"));
+                   PQvaluebycol(res, 0, "direccion"),
+                   PQvaluebycol(res, 0, "telefono"));
 }
 
 void
@@ -3428,8 +3428,8 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
     {
       gtk_list_store_append(GTK_LIST_STORE(model), &iter);
       gtk_list_store_set(GTK_LIST_STORE(model), &iter,
-			 0, PQgetvalue(res, i, 0),
-			 -1);
+                         0, PQgetvalue(res, i, 0),
+                         -1);
     }
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
@@ -3542,7 +3542,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   ticket = get_ticket_number (FACTURA);
 
   SaveSell (monto, maquina, vendedor, CREDITO, str_rut, "0", ticket, FACTURA,
-	    NULL, FALSE, TRUE);
+            NULL, FALSE, TRUE);
 
   //clean the interface
   //restart the invoice dialog

@@ -27,7 +27,7 @@
 
 #include"postgres-functions.h"
 #include"printing.h"
-#include"dimentions.h"
+
 #include"compras.h"
 #include"credito.h"
 #include"errors.h"

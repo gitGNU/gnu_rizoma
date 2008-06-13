@@ -199,7 +199,7 @@ display_calendar (GtkEntry *entry)
   GtkCalendar *calendar;
   GtkRequisition req;
   gint x, y;
-  gint entry_y, entry_x;
+  gint entry_height, entry_width;
 
   GDate *date;
 
@@ -237,11 +237,14 @@ display_calendar (GtkEntry *entry)
 
   gtk_widget_size_request (GTK_WIDGET (entry), &req);
 
-  entry_y = GTK_WIDGET (entry)->allocation.y;
-  entry_x = GTK_WIDGET (entry)->allocation.x;
+  entry_width = GTK_WIDGET (entry)->allocation.width;
+  entry_height = GTK_WIDGET (entry)->allocation.height;
 
-  x += entry_x - (req.width/2);
-  y += entry_y;
+  x += entry_width - (req.width);
+  y += entry_height;
+
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
 
   gtk_window_move (GTK_WINDOW (window), x, y);
   gtk_window_present (GTK_WINDOW (window));
