@@ -3106,7 +3106,7 @@
                           <object class="GtkTable" id="table12">
                             <property name="visible">True</property>
                             <property name="n_rows">5</property>
-                            <property name="n_columns">5</property>
+                            <property name="n_columns">6</property>
                             <child>
                               <placeholder/>
                             </child>
@@ -3132,19 +3132,147 @@
                               <placeholder/>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel" id="label_invoice_fono">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">5</property>
+                                <property name="right_attach">6</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options"></property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel" id="label_invoice_contact">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">5</property>
+                                <property name="right_attach">6</property>
+                                <property name="x_options"></property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkEntry" id="entry_invoice_amount">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                                <property name="x_options"></property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkEntry" id="entry_invoice_n">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                                <property name="x_options"></property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkHBox" id="hbox23">
+                                <property name="visible">True</property>
+                                <child>
+                                  <object class="GtkEntry" id="entry_invoice_date">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="button19">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="response_id">0</property>
+                                    <child>
+                                      <object class="GtkArrow" id="arrow8">
+                                        <property name="visible">True</property>
+                                        <property name="arrow_type">GTK_ARROW_DOWN</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">3</property>
+                                <property name="right_attach">4</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                                <property name="x_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_invoice_web">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">3</property>
+                                <property name="right_attach">4</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                                <property name="x_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_invoice_comuna">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">3</property>
+                                <property name="right_attach">4</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_invoice_rut">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">3</property>
+                                <property name="right_attach">4</property>
+                                <property name="x_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_invoice_mail">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                                <property name="x_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_invoice_address">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options"></property>
+                              </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label68">
@@ -3205,9 +3333,10 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry11">
+                              <object class="GtkEntry" id="entry_invoice_provider">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="editable">False</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -3326,7 +3455,7 @@
                                 <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                 <child>
-                                  <object class="GtkTreeView" id="treeview8">
+                                  <object class="GtkTreeView" id="tree_view_invoice_list">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="headers_clickable">True</property>
@@ -3341,7 +3470,7 @@
                                 <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                 <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                                 <child>
-                                  <object class="GtkTreeView" id="treeview9">
+                                  <object class="GtkTreeView" id="tree_view_invoice_detail">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="headers_clickable">True</property>
@@ -3384,6 +3513,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
+                    <property name="pack_type">GTK_PACK_END</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
