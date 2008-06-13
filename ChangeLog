@@ -1,3 +1,8 @@
+2008-06-13  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* configure.in: Added the define DEBUG when --enable-debug option
+	it's set.
+
 2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
 
 	* src/ventas.c: fixed the label of the search window when there is
