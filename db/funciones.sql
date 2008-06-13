@@ -1913,3 +1913,25 @@ begin
 		RETURN NEXT;
 		END LOOP;
 END; $$ LANGUAGE plpgsql;
+
+create or replace function guide_invoice ( IN id_invoice int,
+        IN guides int[] )
+returns integer as $$
+DECLARE
+        list record;
+        query text;
+        i integer;
+BEGIN
+
+        FOR i IN 1..array_upper( guides, 1) LOOP
+        UPDATE guias_compra SET id_factura=id_invoice WHERE id=guides[i];
+                IF FOUND IS TRUE THEN
+                INSERT INTO factura_compra_detalle SELECT nextval(quote_literal('factura_compra_detalle_id_seq')::regclass), id_invoice, barcode, cantidad, precio, iva, otros FROM guias_compra_detalle WHERE id=guides[i];
+                ELSE
+                RETURN 0;
+                END IF;
+        END LOOP;
+
+RETURN 1;
+
+END; $$ language plpgsql;
