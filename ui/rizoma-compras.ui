@@ -2683,6 +2683,7 @@
                               <object class="GtkEntry" id="entry_guide_invoice_amount">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <signal name="activate" handler="CheckMontoGuias"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
