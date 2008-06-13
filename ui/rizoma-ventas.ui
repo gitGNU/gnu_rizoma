@@ -2,6 +2,11 @@
 <interface>
   <object class="GtkWindow" id="wnd_caja_egreso">
     <property name="border_width">5</property>
+    <property name="title" translatable="yes">Egreso de dinero</property>
+    <property name="modal">True</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="transient_for">ventas_gui</property>
+    <signal name="delete_event" handler="CloseVentanaEgreso"/>
     <child>
       <object class="GtkVBox" id="vbox11">
         <property name="visible">True</property>
@@ -73,6 +78,7 @@
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="CloseVentanaEgreso"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -87,7 +93,7 @@
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="IngresarDinero"/>
+                <signal name="clicked" handler="EgresarDinero"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -108,9 +114,11 @@
   </object>
   <object class="GtkWindow" id="wnd_caja_ingreso">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Egreso de dinero</property>
+    <property name="title" translatable="yes">Ingreso de dinero</property>
     <property name="modal">True</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="transient_for">ventas_gui</property>
+    <signal name="delete_event" handler="CloseVentanaIngreso"/>
     <child>
       <object class="GtkVBox" id="vbox10">
         <property name="visible">True</property>
@@ -182,6 +190,7 @@
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="CloseVentanaIngreso"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -196,6 +205,7 @@
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="IngresarDinero"/>
               </object>
               <packing>
                 <property name="expand">False</property>

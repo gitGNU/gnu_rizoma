@@ -3584,9 +3584,14 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
   switch (event->keyval)
     {
+    case GDK_F6:
+      VentanaEgreso();
+      break;
+
     case GDK_F7:
       VentanaIngreso ();
       break;
+
       //if the key pressed is not in use let it pass
     default:
       return FALSE;

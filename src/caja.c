@@ -231,84 +231,67 @@ EgresarDinero (GtkWidget *widget, gpointer data)
 }
 
 void
-VentanaEgreso (GtkWidget *widget, gpointer data)
+CloseVentanaEgreso (void)
 {
-  GtkWidget *window;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *entry;
-  GtkWidget *label;
-  GtkWidget *button;
+  GtkWidget *wid;
 
+  wid = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
+  gtk_entry_set_text(GTK_ENTRY(wid), "");
+
+  wid = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_egreso"));
+  gtk_widget_hide(wid);
+}
+
+
+void
+VentanaEgreso ()
+{
+  GtkWidget *combo;
+  GtkWidget *aux_widget;
+  GtkListStore *store;
+  GtkTreeIter iter;
   PGresult *res;
   gint tuples, i;
 
-  gint egreso = 0;
-
-  if (data != NULL)
-    egreso = (gint) data;
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Egreso de Dinero");
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_widget_show (window);
-  gtk_window_present (GTK_WINDOW (window));
-  //  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-  gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-  gtk_widget_set_size_request (window, 220, -1);
-
-  g_signal_connect (G_OBJECT (window), "destroy",
-                    G_CALLBACK (EgresarDinero), NULL);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Cantidad a Egresar:");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (vbox), entry, FALSE, FALSE, 3);
-  gtk_widget_show (entry);
-
-  if (data != NULL)
-    gtk_entry_set_text (GTK_ENTRY (entry), g_strdup_printf ("%d", egreso));
-
-  gtk_window_set_focus (GTK_WINDOW (window), entry);
-
-  res = EjecutarSQL ("SELECT * FROM tipo_egreso");
-
+  res = EjecutarSQL ("SELECT id, descrip FROM tipo_egreso");
   tuples = PQntuples (res);
 
-  combo_egreso = gtk_combo_box_new_text ();
-  gtk_box_pack_start (GTK_BOX (vbox), combo_egreso, FALSE, FALSE, 3);
-  gtk_widget_show (combo_egreso);
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_out_motiv"));
+  store = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+
+  if (store == NULL)
+    {
+      GtkCellRenderer *cell;
+      store = gtk_list_store_new(2,
+				 G_TYPE_INT,
+				 G_TYPE_STRING);
+
+      gtk_combo_box_set_model(GTK_COMBO_BOX(combo),GTK_TREE_MODEL(store));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
+				     "text", 1,
+				     NULL);
+    }
+
+  gtk_list_store_clear(store);
 
   for (i = 0; i < tuples; i++)
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_egreso),
-                               g_strdup_printf ("%s", PQgetvalue (res, i, 1)));
+    {
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter,
+			 0, atoi(PQvaluebycol(res, i, "id")),
+			 1, PQvaluebycol(res, i, "descrip"),
+			 -1);
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
+    }
 
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
+  gtk_widget_grab_focus(aux_widget);
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (EgresarDinero), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (EgresarDinero), (gpointer)entry);
-
-  g_signal_connect (G_OBJECT (entry), "activate",
-                    G_CALLBACK (SendCursorTo), button);
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_egreso"));
+  gtk_widget_show_all(aux_widget);
 }
 
 void
