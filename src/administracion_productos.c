@@ -972,7 +972,8 @@ FillEditFields (GtkTreeSelection *selection, gpointer data)
  *
  * @param selection unused parameter
  * @param data unused paramter
- */void
+ */
+void
 FillFields(GtkTreeSelection *selection, gpointer data)
 {
   GtkTreeIter iter;
