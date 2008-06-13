@@ -33,7 +33,7 @@ gint ReturnSaldoCaja (void);
 
 void VentanaIngreso ();
 
-void VentanaEgreso (GtkWidget *widget, gpointer data);
+void VentanaEgreso ();
 
 void FillCajaData (void);
 
