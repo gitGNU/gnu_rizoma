@@ -38,6 +38,22 @@ end if;
 return prod_vendidos;
 end; $$ language plpgsql;
 
+-- return the avg of ventas day
+--
+create or replace function select_ventas_dia (
+       in codbar bigint)
+returns double precision as $$
+declare
+	total double precision;
+begin
+
+select sum (cantidad) into total from venta_detalle 
+       inner join venta on venta.fecha >= date_trunc('day', now() - interval '1 month')
+       and venta.id = venta_detalle.id_venta;
+
+return total;
+end; $$ language plpgsql;
+
 
 -- revisa si hay devoluciones de un producto dado
 -- administracion_productos.c:123
@@ -304,6 +320,7 @@ declare
 	datos record;
 	query varchar;
 	prod_vendidos double precision;
+	codbar int8;
 BEGIN
 
 select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
@@ -325,7 +342,8 @@ query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
 		    (stock::float / ($S$ || prod_vendidos || $S$::float / $S$ || days || $S$::float)::float) AS stock_day,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
-		    select_merma (producto.barcode) as unidades_merma
+		    select_merma (producto.barcode) as unidades_merma,
+		    select_ventas_dia(producto.barcode) as ventas_dia
 		FROM producto WHERE $S$;
 
 -- check if must use the barcode or the short code
@@ -354,6 +372,7 @@ FOR datos IN EXECUTE query LOOP
     total_vendido := datos.total_vendido;
     precio_mayor := datos.precio_mayor;
     cantidad_mayor := datos.cantidad_mayor;
+    ventas_dia := datos.ventas_dia;
     RETURN NEXT;
 END LOOP;
 
