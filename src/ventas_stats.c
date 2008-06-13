@@ -27,7 +27,7 @@
 #include<string.h>
 
 #include"tipos.h"
-#include"main.h"
+
 #include"ventas_stats.h"
 #include"postgres-functions.h"
 #include"caja.h"

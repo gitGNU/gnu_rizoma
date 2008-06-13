@@ -32,7 +32,7 @@
 
 #include"tipos.h"
 
-#include"main.h"
+
 #include"administracion_productos.h"
 #include"credito.h"
 #include"usuario.h"

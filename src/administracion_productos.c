@@ -31,7 +31,7 @@
 #include<math.h>
 
 #include"tipos.h"
-#include"main.h"
+
 #include"administracion_productos.h"
 #include"postgres-functions.h"
 #include"errors.h"

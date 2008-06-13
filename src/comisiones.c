@@ -24,7 +24,7 @@
 #include<gtk/gtk.h>
 
 #include"tipos.h"
-#include"main.h"
+
 
 void
 comisiones_box (GtkWidget *box)

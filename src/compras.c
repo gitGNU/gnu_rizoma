@@ -33,7 +33,7 @@
 #include"tipos.h"
 
 #include"compras.h"
-#include"main.h"
+
 #include"ventas.h"
 #include"credito.h"
 #include"administracion_productos.h"
