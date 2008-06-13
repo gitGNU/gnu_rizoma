@@ -1890,6 +1890,7 @@
                                             <property name="label" translatable="yes">Calcular</property>
                                             <property name="response_id">0</property>
                                             <signal name="clicked" handler="on_button_calculate_clicked"/>
+                                            <signal name="clicked" handler="gtk_widget_grab_focus" object="entry_buy_amount"/>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1910,6 +1911,7 @@
                                       <object class="GtkEntry" id="entry_sell_price">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <signal name="activate" handler="gtk_widget_grab_focus" object="button_calculate"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1924,6 +1926,7 @@
                                       <object class="GtkEntry" id="entry_buy_gain">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <signal name="activate" handler="gtk_widget_grab_focus" object="entry_sell_price"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1938,6 +1941,7 @@
                                       <object class="GtkEntry" id="entry_buy_price">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
+                                        <signal name="activate" handler="gtk_widget_grab_focus" object="entry_buy_gain"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -2008,6 +2012,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="width_chars">5</property>
+                                <signal name="activate" handler="gtk_widget_grab_focus" object="button_add_product_list"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
