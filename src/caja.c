@@ -719,10 +719,12 @@ gboolean
 InicializarCaja (gint monto)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("INSERT INTO caja VALUES(DEFAULT, NOW(), %d, to_timestamp('DD-MM-YY', '00-00-00'))", monto));
+  q = g_strdup_printf ("INSERT INTO caja (id_vendedor, fecha_inicio, inicio) "
+		       "VALUES(%d, NOW(), %d)", user_data->user_id, monto);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
