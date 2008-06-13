@@ -31,7 +31,7 @@ gint ArqueoCajaLastDay (void);
 
 gint ReturnSaldoCaja (void);
 
-void VentanaIngreso (GtkWidget *widget, gpointer data);
+void VentanaIngreso ();
 
 void VentanaEgreso (GtkWidget *widget, gpointer data);
 

@@ -106,7 +106,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
 {
   gint active;
   gint monto;
-  gchar *motivo;
+  gint motivo;
 
   GtkTreeModel *model;
   GtkTreeIter iter;
@@ -139,87 +139,49 @@ IngresarDinero (GtkWidget *widget, gpointer data)
 }
 
 void
-VentanaIngreso (GtkWidget *widget, gpointer data)
+VentanaIngreso ()
 {
-  GtkWidget *window;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *entry;
-  GtkWidget *label;
-  GtkWidget *button;
-
+  GtkWidget *aux_widget;
   PGresult *res;
   gint tuples, i;
-
-  gint ingreso = 0;
-
-  if (data != NULL )
-    ingreso = (gint)data;
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Ingreso de Dinero");
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_widget_show (window);
-  gtk_window_present (GTK_WINDOW (window));
-  //  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-  gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-  gtk_widget_set_size_request (window, 220, -1);
-
-  g_signal_connect (G_OBJECT (window), "destroy",
-                    G_CALLBACK (IngresarDinero), NULL);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("Cantidad a Ingresar:");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  entry = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (vbox), entry, FALSE, FALSE, 3);
-  gtk_widget_show (entry);
-
-  if (data != NULL)
-    gtk_entry_set_text (GTK_ENTRY (entry), g_strdup_printf ("%d", ingreso));
-
-  gtk_window_set_focus (GTK_WINDOW (window), entry);
+  GtkListStore *store;
+  GtkTreeIter iter;
 
   res = EjecutarSQL ("SELECT * FROM tipo_ingreso");
-
   tuples = PQntuples (res);
 
-  combo_ingreso = gtk_combo_box_new_text ();
-  gtk_box_pack_start (GTK_BOX (vbox), combo_ingreso, FALSE, FALSE, 3);
-  gtk_widget_show (combo_ingreso);
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_out_motiv"));
+  store = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(aux_widget)));
 
-  for (i = 0; i < tuples; i++)
-    gtk_combo_box_append_text (GTK_COMBO_BOX (combo_ingreso),
-                               g_strdup_printf ("%s", PQgetvalue (res, i, 1)));
+  if (store == NULL)
+    {
+      GtkCellRenderer *cell;
+      store = gtk_list_store_new (2,
+				  G_TYPE_INT,
+				  G_TYPE_STRING);
 
-  g_signal_connect (G_OBJECT (entry), "activate",
-                    G_CALLBACK (SendCursorTo), combo_ingreso);
+      gtk_combo_box_set_model(GTK_COMBO_BOX(aux_widget), GTK_TREE_MODEL(store));
 
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(aux_widget), cell, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(aux_widget), cell,
+				     "text", 1,
+				     NULL);
+    }
 
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
+  gtk_list_store_clear(store);
 
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (IngresarDinero), NULL);
+  for (i=0 ; i < tuples ; i++)
+    {
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter,
+			 0, atoi(PQvaluebycol(res, i, "id")),
+			 1, PQvaluebycol(res, i, "descrip"),
+			 -1);
+    }
 
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (IngresarDinero), (gpointer)entry);
-
-  g_signal_connect (G_OBJECT (combo_ingreso), "changed",
-                    G_CALLBACK (SendCursorTo), button);
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_ingreso"));
+  gtk_widget_show_all(aux_widget);
 }
 
 void
@@ -232,11 +194,6 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   GtkTreeModel *model;
   GtkTreeIter iter;
 
-  if (data == NULL)
-    {
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-      return;
-    }
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_egreso));
   monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (data))));
 
@@ -839,25 +796,27 @@ CalcularPerdida (void)
     return FALSE;
 }
 
-/*
-  Retornamos TRUE si la caja fue cerrada anteriormente y debemos inicilizarla otra vez
-  de lo contrario FALSE lo cual significa que la caja no se a cerrado
-*/
+/**
+ * Retornamos TRUE si la caja fue cerrada anteriormente y debemos
+ * inicilizarla otra vez de lo contrario FALSE lo cual significa que
+ * la caja no se a cerrado
+ *
+ * @return TRUE when the caja was closed previously
+ */
 gboolean
 check_caja (void)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    ("SELECT fecha_termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq) AND "
-     "date_part('day', fecha_inicio)=date_part('day', NOW()) AND "
-     "date_part('year', fecha_inicio)=date_part('year', NOW()) AND date_part('year', "
-     "fecha_inicio)=date_part('year', NOW())");
+  q = g_strdup_printf("SELECT fecha_termino FROM caja where id_vendedor=%d "
+		      "and fecha_termino=NULL order by id desc limit 1",
+		      user_data->user_id);
+  res = EjecutarSQL (q);
+  g_free(q);
 
-  if (PQntuples (res) == 0)
+  if (PQntuples (res) == 1)
     return TRUE;
-  else if (strcmp (PQgetvalue (res, 0, 0), "") == 0)
-    return FALSE;
   else
     return FALSE;
 }

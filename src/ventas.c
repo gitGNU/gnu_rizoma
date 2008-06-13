@@ -47,6 +47,7 @@
 #include"factura_more.h"
 #include"rizoma_errors.h"
 #include"proveedores.h"
+#include"caja.h"
 
 GtkBuilder *builder;
 
@@ -3573,4 +3574,23 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 
   ListClean ();
 
+}
+
+gboolean
+on_ventas_gui_key_press_event(GtkWidget   *widget,
+			      GdkEventKey *event,
+			      gpointer     user_data)
+{
+
+  switch (event->keyval)
+    {
+    case GDK_F7:
+      VentanaIngreso ();
+      break;
+      //if the key pressed is not in use let it pass
+    default:
+      return FALSE;
+    }
+
+  return TRUE;
 }

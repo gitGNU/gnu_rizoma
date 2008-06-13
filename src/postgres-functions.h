@@ -217,7 +217,7 @@ gboolean Egresar (gint monto, gchar *motivo, gint usuario);
 
 gboolean SaveVentaTarjeta (gint id_venta, gchar *insti, gchar *numero, gchar *fecha_venc);
 
-gboolean Ingreso (gint monto, gchar *motivo, gint usuario);
+gboolean Ingreso (gint monto, gint motivo, gint usuario);
 
 gboolean PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip);
 

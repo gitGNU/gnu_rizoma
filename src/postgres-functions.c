@@ -1937,12 +1937,13 @@ SaveVentaTarjeta (gint id_venta, gchar *insti, gchar *numero, gchar *fecha_venc)
 }
 
 gboolean
-Ingreso (gint monto, gchar *motivo, gint usuario)
+Ingreso (gint monto, gint motivo, gint usuario)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO ingreso VALUES (DEFAULT, %d, (SELECT id FROM tipo_ingreso WHERE descrip='%s'), NOW(), %d)",
+  q = g_strdup_printf ("INSERT INTO ingreso (monto, tipo,  fecha, usuario) "
+		       "VALUES (%d, %d, NOW(), %d)",
                        monto, motivo, usuario);
   res = EjecutarSQL (q);
   g_free (q);
