@@ -984,15 +984,15 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
     {
       q = g_strdup_printf
         ("INSERT INTO factura_compra_detalle (id, id_factura_compra, barcode, cantidad, precio, iva, otros) "
-         "VALUES (DEFAULT, %d, %s, %s, '%s', '%d', %ld, %ld)",
-         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),(gint)factura, lround (iva), lround (otros));
+         "VALUES (DEFAULT, %d, %s, %s, '%s', %ld, %ld)",
+         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)), lround (iva), lround (otros));
     }
   else
     {
       q = g_strdup_printf
         ("INSERT INTO guias_compra_detalle (id, id_guias_compra, barcode, cantidad, precio, iva, otros) "
-         "VALUES (DEFAULT, %d, %s, %s, '%s', '%d', %ld, %ld)",
-         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),(gint)factura, lround (iva), lround (otros));
+         "VALUES (DEFAULT, %d, %s, %s, '%s', %ld, %ld)",
+         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),lround (iva), lround (otros));
     }
 
   res = EjecutarSQL (q);
@@ -1481,7 +1481,7 @@ IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emi
 {
   PGresult *res;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO guias_compra (id, numero,l id_compra, id_factura, rut_proveedor, fecha_emision) "
+  res = EjecutarSQL (g_strdup_printf ("INSERT INTO guias_compra (id, numero, id_compra, id_factura, rut_proveedor, fecha_emision) "
                                       "VALUES (DEFAULT, %d, %d, 0, (SELECT rut_proveedor FROM compra WHERE id=%d), "
                                       "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'))",
                                       n_doc, id_compra, id_compra, d_emision, m_emision, y_emision));
