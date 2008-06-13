@@ -47,9 +47,10 @@ declare
 	total double precision;
 begin
 
-select sum (cantidad) into total from venta_detalle 
-       inner join venta on venta.fecha >= date_trunc('day', now() - interval '1 month')
-       and venta.id = venta_detalle.id_venta;
+select (sum (cantidad)/30) into total from venta_detalle
+       inner join venta on venta.id = venta_detalle.id_venta
+       and venta_detalle.barcode = codbar
+       and venta.fecha >= date_trunc('day', now() - interval '1 month');
 
 return total;
 end; $$ language plpgsql;
