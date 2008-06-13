@@ -102,40 +102,50 @@ ReturnSaldoCaja (void)
 }
 
 void
+CloseVentanaIngreso(void)
+{
+  GtkWidget *wid;
+
+  wid = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
+  gtk_entry_set_text(GTK_ENTRY(wid), "");
+
+  wid = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_ingreso"));
+  gtk_widget_hide(wid);
+}
+
+void
 IngresarDinero (GtkWidget *widget, gpointer data)
 {
-  gint active;
+  GtkWidget *aux_widget;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
   gint monto;
   gint motivo;
 
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-
-  if (data == NULL)
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_in_motiv"));
+  model = gtk_combo_box_get_model(GTK_COMBO_BOX(aux_widget));
+  if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(aux_widget), &iter))
     {
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
+      ErrorMSG(aux_widget, "Debe seleccionar un tipo de ingreso");
       return;
     }
 
-  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_ingreso));
-  monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (data))));
+  gtk_tree_model_get (model, &iter,
+		      0, &motivo,
+		      -1);
 
-  if (active == -1)
-    ErrorMSG (combo_ingreso, "Debe Seleccionar un tipo de ingreso");
-  else if (monto == 0)
-    ErrorMSG (data, "No pueden haber ingresos de $0");
-  else
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
+  monto = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+
+  if (monto == 0)
     {
-      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_ingreso));
-      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_ingreso), &iter);
-
-      gtk_tree_model_get (model, &iter,
-                          0, &motivo,
-                          -1);
-
-      Ingreso (monto, motivo, user_data->user_id);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
+      ErrorMSG (data, "No pueden haber ingresos de $0");
+      return;
     }
+
+  Ingreso (monto, motivo, user_data->user_id);
+
+  CloseVentanaIngreso();
 }
 
 void
@@ -147,7 +157,7 @@ VentanaIngreso ()
   GtkListStore *store;
   GtkTreeIter iter;
 
-  res = EjecutarSQL ("SELECT * FROM tipo_ingreso");
+  res = EjecutarSQL ("SELECT id, descrip FROM tipo_ingreso");
   tuples = PQntuples (res);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_out_motiv"));
@@ -179,6 +189,9 @@ VentanaIngreso ()
 			 1, PQvaluebycol(res, i, "descrip"),
 			 -1);
     }
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
+  gtk_widget_grab_focus(aux_widget);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_ingreso"));
   gtk_widget_show_all(aux_widget);

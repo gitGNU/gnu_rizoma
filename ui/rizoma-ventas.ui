@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <interface>
-  <object class="GtkWindow" id="wnd_caja_ingreso">
+  <object class="GtkWindow" id="wnd_caja_egreso">
     <property name="border_width">5</property>
     <child>
       <object class="GtkVBox" id="vbox11">
@@ -106,7 +106,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="wnd_caja_egreso">
+  <object class="GtkWindow" id="wnd_caja_ingreso">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Egreso de dinero</property>
     <property name="modal">True</property>
