@@ -351,7 +351,7 @@ create table guias_compra (
 
 -- guias_compra_detalle
 create table guias_compra_detalle (
-  id                        int4 not null,
+  id                        serial not null,
   id_guias_compra           int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
