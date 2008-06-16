@@ -1977,3 +1977,22 @@ insert into ingreso (monto, tipo, fecha, usuario, id_caja)
 
 return 0;
 end; $$ language plpgsql;
+
+create or replace function is_caja_abierta ()
+returns boolean as $$
+declare
+	current_caja int;
+	fecha_ter timestamp;
+begin
+
+select max(id) into current_caja from caja;
+
+select fecha_termino into fecha_ter from caja where id=current_caja;
+
+if (fecha_ter is NULL) then
+   return TRUE;
+else
+   return FALSE;
+end if;
+
+end; $$ language plpgsql;
