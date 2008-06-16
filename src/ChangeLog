@@ -2,6 +2,9 @@
 
 	* compras.c (AskPagarCaja): Deleted function.
 	(PagarDocumentoWin, ClosePagarDocumentoWin, PagarToggle): Deleted function
+	(on_btn_pay_invoice_clicked): Created function to deal with
+	clicked action and pay an invoice.
+	(Pagar): Deleted function.
 
 	* postgres-functions.c (PagarFactura): Commented code that insert
 	data into "pagos" table. Deleted previous parameters and just use

@@ -187,85 +187,6 @@ edit_cell (GtkCellRendererText *cellrenderertext,
 }
 
 void
-Pagar (GtkWidget *widget, gpointer data)
-{
-  GtkToggleButton *togglebutton = (GtkToggleButton *) data;
-  GtkTreeIter iter;
-  gchar *id_invoice;
-
-  gchar *doc;
-  gchar *descrip;
-  gchar *monto;
-  gchar *rut_proveedor = g_strdup (gtk_label_get_text (GTK_LABEL (pago_rut)));
-
-  if (gtk_tree_selection_get_selected
-      (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_facturas)), NULL, &iter) == TRUE &&
-      data != NULL)
-    {
-      /*      gtk_tree_model_get_iter_from_string
-              (GTK_TREE_MODEL (compra->store_facturas), &iter,
-              strtok (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (compra->store_facturas),
-              &iter), ":"));*/
-
-      //ç      gtk_tree_model_get_iter
-
-      if (strcmp (rut_proveedor, "") != 0)
-        gtk_tree_model_get (GTK_TREE_MODEL (compra->store_facturas), &iter,
-                            2, &doc,
-                            6, &monto,
-                            -1);
-      else
-        gtk_tree_model_get (GTK_TREE_MODEL (compra->store_facturas), &iter,
-                            1, &rut_proveedor,
-                            2, &doc,
-                            6, &monto,
-                            -1);
-
-      if (monto == NULL)
-        return;
-
-      monto = CutPoints (monto);
-
-      doc = strtok (strchr (doc, ' '), "");
-
-      /*if (cajita == TRUE)
-        saldo_caja = ReturnSaldoCaja ();
-      */
-
-
-
-      if (gtk_toggle_button_get_active (togglebutton) == TRUE)
-        {
-          descrip = g_strdup_printf ("%s %s %s %s",
-                                     gtk_entry_get_text (GTK_ENTRY (pago_banco)),
-                                     gtk_entry_get_text (GTK_ENTRY (pago_serie)),
-                                     gtk_entry_get_text (GTK_ENTRY (pago_fecha)),
-                                     gtk_entry_get_text (GTK_ENTRY (pago_monto)));
-        }
-      else
-        descrip = g_strdup_printf ("%s", gtk_entry_get_text (GTK_ENTRY (pago_otro)));
-
-      if (PagarFactura (doc) == FALSE)
-        ErrorMSG (pago_proveedor, "No se ingreso correctamente");
-      else
-        {
-          ExitoMSG (pago_proveedor, "La factura se pago correctamente");
-
-          gtk_label_set_text (GTK_LABEL (pago_emision), "");
-          gtk_label_set_text (GTK_LABEL (pago_monto), "");
-          gtk_label_set_text (GTK_LABEL (pago_factura), "");
-
-          gtk_tree_store_clear (compra->store_facturas);
-          gtk_tree_store_clear (pagos_store);
-
-
-          if (strcmp (rut_proveedor, "") != 0) FillPagarFacturas (rut_proveedor);
-        }
-
-    }
-}
-
-void
 FillDetPagos (void)
 {
   GtkTreeIter iter;
@@ -4468,7 +4389,27 @@ on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpoint
 }
 
 void
-on_btn_pay_invoice_activate ()
+on_btn_pay_invoice_clicked ()
 {
-  
+  GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_list")));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_list")));
+  GtkTreeIter iter;
+  gchar *id_invoice;
+  gchar *rut_provider = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_invoice_rut"))));
+
+    if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+      {
+        gtk_tree_model_get (model, &iter,
+                             0, &id_invoice,
+                             -1);
+
+        if (PagarFactura (id_invoice) == FALSE)
+          {
+            ErrorMSG (pago_proveedor, "No se ingreso correctamente");
+          }
+        else
+          {
+            FillPagarFacturas (rut_provider);
+          }
+      }
 }
