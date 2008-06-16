@@ -191,6 +191,8 @@ Pagar (GtkWidget *widget, gpointer data)
 {
   GtkToggleButton *togglebutton = (GtkToggleButton *) data;
   GtkTreeIter iter;
+  gchar *id_invoice;
+
   gchar *doc;
   gchar *descrip;
   gchar *monto;
@@ -243,7 +245,7 @@ Pagar (GtkWidget *widget, gpointer data)
       else
         descrip = g_strdup_printf ("%s", gtk_entry_get_text (GTK_ENTRY (pago_otro)));
 
-      if (PagarFactura (doc, rut_proveedor, descrip) == FALSE)
+      if (PagarFactura (doc) == FALSE)
         ErrorMSG (pago_proveedor, "No se ingreso correctamente");
       else
         {
@@ -261,89 +263,6 @@ Pagar (GtkWidget *widget, gpointer data)
         }
 
     }
-  ClosePagarDocumentoWin (widget, NULL);
-}
-
-void
-AskPagarCaja (void)
-{
-  GtkWidget *window;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *image;
-  GtkWidget *label;
-  GtkWidget *button;
-
-  GtkTreeIter iter;
-  gchar *doc, *monto;
-
-  if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_facturas)), NULL, &iter) != TRUE)
-    return;
-  else
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_facturas), &iter,
-                          0, &doc,
-                          6, &monto,
-                          -1);
-
-      if (doc == NULL || monto == NULL)
-        return;
-    }
-
-  gtk_widget_set_sensitive (main_window, FALSE);
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_title (GTK_WINDOW (window), "Pagar con Caja");
-  gtk_widget_show (window);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG);
-  gtk_widget_show (image);
-  gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Â¿Desea cancelar la factura con dinero de caja?");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Pagar), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_YES);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Pagar), (gpointer) TRUE);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_NO);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Pagar), (gpointer) FALSE);
-
-  button = gtk_button_new_with_label ("Documento");
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (PagarDocumentoWin), NULL);
 }
 
 void
@@ -3717,184 +3636,6 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
   gtk_widget_hide (wnd);
 }
 
-void
-ClosePagarDocumentoWin (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *window = gtk_widget_get_toplevel (widget);
-
-  gtk_widget_destroy (window);
-  gtk_widget_set_sensitive (main_window, TRUE);
-}
-
-void
-PagarToggle (GtkToggleButton *togglebutton, gpointer data)
-{
-  gboolean state = gtk_toggle_button_get_active (togglebutton);
-
-  if (state == FALSE)
-    {
-      gtk_widget_set_sensitive (frame_cheque, FALSE);
-      gtk_widget_set_sensitive (frame_otro, TRUE);
-    }
-  else
-    {
-      gtk_widget_set_sensitive (frame_cheque, TRUE);
-      gtk_widget_set_sensitive (frame_otro, FALSE);
-    }
-}
-
-void
-PagarDocumentoWin (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *window;
-  GtkWidget *vbox;
-  GtkWidget *vbox2;
-  GtkWidget *hbox;
-  //  GtkWidget *frame;
-  GtkWidget *button;
-  GtkWidget *button_ok;
-  GtkWidget *label;
-
-  GtkTreeIter iter;
-  gchar *monto, *doc;
-
-  if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_facturas)), NULL, &iter) != TRUE)
-    return;
-  else
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_facturas), &iter,
-                          0, &doc,
-                          6, &monto,
-                          -1);
-
-      if (doc == NULL || monto == NULL)
-        return;
-    }
-
-  gtk_widget_set_sensitive (main_window, FALSE);
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_title (GTK_WINDOW (window), "Pago con Documentos");
-  gtk_widget_show (window);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button_ok = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button_ok, FALSE, FALSE, 3);
-  gtk_widget_show (button_ok);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (ClosePagarDocumentoWin), NULL);
-
-  g_signal_connect (G_OBJECT (window), "destroy",
-                    G_CALLBACK (ClosePagarDocumentoWin),NULL);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  button = gtk_check_button_new_with_label ("Cheque");
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button_ok), "clicked",
-                    G_CALLBACK (Pagar), (gpointer)button);
-
-  g_signal_connect (G_OBJECT (button), "toggled",
-                    G_CALLBACK (PagarToggle), NULL);
-
-  frame_cheque = gtk_frame_new ("Cheque");
-  gtk_box_pack_start (GTK_BOX (vbox), frame_cheque, FALSE, FALSE, 3);
-  gtk_widget_show (frame_cheque);
-
-  gtk_widget_set_sensitive (frame_cheque, FALSE);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame_cheque), vbox2);
-  gtk_widget_show (vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Banco");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  pago_banco = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), pago_banco, FALSE, FALSE, 3);
-
-  gtk_widget_show (pago_banco);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Serie");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  pago_serie = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), pago_serie, FALSE, FALSE, 3);
-  gtk_widget_show (pago_serie);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Vencimiento");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  pago_fecha = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), pago_fecha, FALSE, FALSE, 3);
-  gtk_widget_show (pago_fecha);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Monto");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  pago_monto = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), pago_monto, FALSE, FALSE, 3);
-  gtk_widget_show (pago_monto);
-
-  frame_otro = gtk_frame_new ("Otro");
-  gtk_box_pack_end (GTK_BOX (vbox), frame_otro, FALSE, FALSE, 3);
-  gtk_widget_show (frame_otro);
-
-  vbox2 = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (frame_otro), vbox2);
-  gtk_widget_show (vbox2);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Especifique el medio de pago");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  pago_otro = gtk_entry_new ();
-  gtk_box_pack_end (GTK_BOX (hbox), pago_otro, FALSE, FALSE, 3);
-  gtk_widget_show (pago_otro);
-
-}
-
 int
 main (int argc, char **argv)
 {
@@ -4724,4 +4465,10 @@ on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpoint
                               -1);
         }
     }
+}
+
+void
+on_btn_pay_invoice_activate ()
+{
+  
 }

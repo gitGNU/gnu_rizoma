@@ -139,11 +139,7 @@ void SetElabVenc (GtkWidget *widget, gpointer data);
 
 void AskElabVenc (GtkWidget *wnd, gboolean invoice);
 
-void PagarDocumentoWin (GtkWidget *widget, gpointer data);
-
 void PagarDocumento (GtkWidget *widget, gpointer data);
-
-void ClosePagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 void on_tree_selection_pending_guide_changed (GtkTreeSelection *selection, gpointer user_data);
 

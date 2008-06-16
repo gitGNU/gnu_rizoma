@@ -1,5 +1,8 @@
 2008-06-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (AskPagarCaja): Deleted function.
+	(PagarDocumentoWin, ClosePagarDocumentoWin, PagarToggle): Deleted function
+
 	* postgres-functions.c (PagarFactura): Commented code that insert
 	data into "pagos" table. Deleted previous parameters and just use
 	id_invoice to update an invoice.
