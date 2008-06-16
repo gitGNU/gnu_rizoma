@@ -1935,3 +1935,35 @@ BEGIN
 RETURN 1;
 
 END; $$ language plpgsql;
+
+create or replace function get_invoice_detail(
+		IN id_factura integer,
+		OUT codigo_corto integer,
+		OUT descripcion varchar(50),
+		OUT marca varchar(35),
+		OUT contenido varchar(10),
+		OUT unidad varchar(10),
+		OUT precio integer,
+		OUT cantidad double precision,
+		OUT precio_compra bigint,
+		OUT barcode bigint)
+returns setof record as $$
+declare
+        list record;
+        query text;
+begin
+        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM factura_compra_detalle AS t1, producto AS t2, factura_compra as t3 WHERE t1.barcode=t2.barcode and t1.id_factura_compra=t3.id and t3.id=$S$|| id_invoice $S$;
+
+		FOR list IN EXECUTE query LOOP
+		codigo_corto := list.codigo_corto;
+		descripcion := list.descripcion;
+		marca := list.marca;
+		contenido := list.contenido;
+		unidad := list.unidad;
+		precio := list.precio_venta;
+		cantidad := list.cantidad;
+		precio_compra := list.precio_compra;
+		barcode := list.barcode;
+		RETURN NEXT;
+		END LOOP;
+END; $$ LANGUAGE plpgsql;
