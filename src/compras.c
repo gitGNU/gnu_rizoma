@@ -256,7 +256,6 @@ Pagar (GtkWidget *widget, gpointer data)
           gtk_tree_store_clear (compra->store_facturas);
           gtk_tree_store_clear (pagos_store);
 
-          ClearPagosData ();
 
           if (strcmp (rut_proveedor, "") != 0)
             FillPagarFacturas (rut_proveedor);
@@ -528,28 +527,6 @@ FillDetPagos (void)
         }
 
     }
-}
-
-void
-ClearPagosData (void)
-{
-  gtk_entry_set_text (GTK_ENTRY (pago_proveedor), "");
-  gtk_label_set_text (GTK_LABEL (pago_factura), "");
-
-  gtk_label_set_text (GTK_LABEL (pago_rut), "");
-  gtk_label_set_text (GTK_LABEL (pago_contacto), "");
-  gtk_label_set_text (GTK_LABEL (pago_direccion), "");
-  gtk_label_set_text (GTK_LABEL (pago_comuna), "");
-  gtk_label_set_text (GTK_LABEL (pago_fono), "");
-  gtk_label_set_text (GTK_LABEL (pago_email), "");
-  gtk_label_set_text (GTK_LABEL (pago_web), "");
-  gtk_label_set_text (GTK_LABEL (pago_emision), "");
-  gtk_label_set_text (GTK_LABEL (pago_monto), "");
-
-  gtk_tree_store_clear (compra->store_facturas);
-  gtk_tree_store_clear (pagos_store);
-
-  //  gtk_window_set_focus (GTK_WINDOW (main_window), pago_proveedor);
 }
 
 void
@@ -3373,34 +3350,33 @@ FillProveedorData (gchar *rut, gboolean guias)
     }
   else if (guias == FALSE)
     {
-      ClearPagosData ();
 
-      gtk_entry_set_text (GTK_ENTRY (pago_proveedor), PQvaluebycol (res, 0, "nombre"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_invoice_provider")), PQvaluebycol (res, 0, "nombre"));
 
-      gtk_label_set_markup (GTK_LABEL (pago_rut),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_rut")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
 
-      gtk_label_set_markup (GTK_LABEL (pago_contacto),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_contact")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol (res, 0, "contacto")));
 
-      gtk_label_set_markup (GTK_LABEL (pago_direccion),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_address")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol (res, 0, "direccion")));
 
-      gtk_label_set_markup (GTK_LABEL (pago_comuna),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_comuna")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol (res, 0, "comuna")));
 
-      gtk_label_set_markup (GTK_LABEL (pago_fono),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_fono")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol (res, 0, "telefono")));
 
-      gtk_label_set_markup (GTK_LABEL (pago_email),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_mail")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol (res, 0, "email")));
 
-      gtk_label_set_markup (GTK_LABEL (pago_web),
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_web")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PQvaluebycol (res, 0, "web")));
 
@@ -3411,7 +3387,7 @@ FillProveedorData (gchar *rut, gboolean guias)
   if (guias == TRUE)
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_guide_invoice_n_invoice")));
   else
-    gtk_window_set_focus (GTK_WINDOW (main_window), compra->tree_facturas);
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_invoice_n")));
 }
 
 void
@@ -4291,7 +4267,7 @@ on_btn_ok_ingress_guide_clicked (GtkWidget *widget, gpointer data)
 }
 
 void
-on_entry_guide_invoice_activate (GtkButton *button, gpointer user_data)
+on_entry_guide_invoice_activate (GtkEntry *entry, gpointer user_data)
 {
   GtkWindow *window;
   GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));;
