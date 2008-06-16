@@ -3559,7 +3559,7 @@ CalcularTotalesGuias (void)
         {
           while (1)
             {
-              res = EjecutarSQL (g_strdup_printf ("SELECT SUM (t1.precio * t2.cantidad) AS neto, SUM (t2.iva) AS iva, SUM (t2.otros) AS otros, SUM ((t1.precio * t2.cantidad) + t2.iva + t2.otros) AS total  FROM compra_detalle AS t1, documentos_detalle AS t2 WHERE t1.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t2.numero=%s AND t1.barcode_product=t2.barcode",
+              res = EjecutarSQL (g_strdup_printf ("SELECT SUM (t1.precio * t3.cantidad) AS neto, SUM (t3.iva) AS iva, SUM (t3.otros) AS otros, SUM ((t1.precio * t3.cantidad) + t3.iva + t3.otros) AS total  FROM compra_detalle AS t1, guias_compra AS t2, guias_compra_detalle AS t3 WHERE t1.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t2.numero=%s AND t1.barcode_product=t3.barcode and t3.id_guias_compra=t2.id",
                                                   guia, rut_proveedor, guia));
 
               total_neto += atoi (PQvaluebycol (res, 0, "neto"));
