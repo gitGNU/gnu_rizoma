@@ -145,4 +145,6 @@ void on_tree_selection_pending_guide_changed (GtkTreeSelection *selection, gpoin
 
 void on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpointer data);
 
+void FillPartialTree (GtkTreeView *tree);
+
 #endif

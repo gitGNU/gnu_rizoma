@@ -2251,7 +2251,6 @@ IngresoDetalle (GtkTreeSelection *selection, gpointer data)
         }
 
       CalcularTotales ();
-
     }
 }
 
@@ -3852,8 +3851,9 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
           g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
           gtk_tree_view_column_set_resizable (column, FALSE);
 
-          gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_invoice")));
+          FillPartialTree (treeview);
 
+          gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_invoice")));
         }
       else
         {
@@ -3942,6 +3942,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
           gtk_tree_view_column_set_alignment (column, 0.5);
           g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
           gtk_tree_view_column_set_resizable (column, FALSE);
+
+          FillPartialTree (treeview);
 
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_guide")));
         }
@@ -4414,4 +4416,78 @@ on_btn_pay_invoice_clicked ()
             FillPagarFacturas (rut_provider);
           }
       }
+}
+
+void
+FillPartialTree (GtkTreeView *tree)
+{
+  gint i, id, tuples;
+  gboolean color;
+  GtkTreeIter iter;
+
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (tree));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests"))));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
+
+  PGresult *res;
+
+  gdouble sol, ing;
+  gdouble cantidad;
+
+  if (compra->header != NULL)
+    CompraListClean ();
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
+                          0, &id,
+                          -1);
+
+
+      gtk_list_store_clear (store);
+
+      res = EjecutarSQL ( g_strdup_printf( "SELECT * FROM get_detalle_compra( %d ) ", id ) );
+
+      if (res == NULL)
+        return;
+
+      tuples = PQntuples (res);
+
+      if (tuples == 0)
+        return;
+
+      for (i = 0; i < tuples; i++)
+        {
+
+          sol = strtod (PUT (PQvaluebycol(res, i, "cantidad")), (char **)NULL);
+          ing = strtod (PUT (PQvaluebycol(res, i, "cantidad_ingresada")), (char **)NULL);
+
+          if (ing<sol && ing >0)
+            color = TRUE;
+          else
+            color = FALSE;
+
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQvaluebycol(res, i, "codigo_corto"),
+                              1, g_strdup_printf ("%s %s %s %s", PQvaluebycol(res, i, "descripcion"),
+                                                  PQvaluebycol(res, i, "marca"), PQvaluebycol(res, i, "contenido"),
+                                                  PQvaluebycol(res, i, "unidad")),
+                              2, PQvaluebycol(res, i, "precio"),
+                              3, strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
+                              4, strtod (PUT(PQvaluebycol(res, i, "cantidad_ingresada")), (char **)NULL),
+                              5, PutPoints (PQvaluebycol(res, i, "costo_ingresado")),
+                              6, color ? "Red" : "Black",
+                              7, TRUE,
+                              -1);
+
+          if (ing != 0)
+            cantidad = (gdouble) sol - ing;
+          else
+            cantidad = (gdouble) sol;
+
+          CompraAgregarALista (PQvaluebycol(res, i, "barcode"), cantidad, atoi (PQvaluebycol(res, i, "precio_venta")),
+                               strtod (PUT((PQvaluebycol(res, i, "precio"))), (char **)NULL), atoi (PQvaluebycol(res, i, "margen")), TRUE);
+        }
+    }
 }
