@@ -2081,7 +2081,7 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Pagar Factura</property>
                         <property name="response_id">0</property>
-                        <signal name="activate" handler="on_btn_pay_invoice_activate"/>
+                        <signal name="clicked" handler="on_btn_pay_invoice_clicked"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
