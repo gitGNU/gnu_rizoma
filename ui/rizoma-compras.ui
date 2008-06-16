@@ -2075,12 +2075,13 @@
                     <property name="visible">True</property>
                     <property name="layout_style">GTK_BUTTONBOX_END</property>
                     <child>
-                      <object class="GtkButton" id="button12">
+                      <object class="GtkButton" id="btn_pay_invoice">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Pagar Factura</property>
                         <property name="response_id">0</property>
+                        <signal name="activate" handler="on_btn_pay_invoice_activate"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
