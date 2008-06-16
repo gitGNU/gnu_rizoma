@@ -2656,7 +2656,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="editable">False</property>
-                                <signal name="activate" handler="on_entry_guide_invoice_activate"/>
+                                <signal name="activate" handler="on_entry_guide_invoice_provider_activate"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -3337,6 +3337,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="editable">False</property>
+                                <signal name="activate" handler="on_entry_invoice_provider_activate"/>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
