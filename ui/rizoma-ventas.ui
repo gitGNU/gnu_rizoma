@@ -34,7 +34,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkEntry" id="entry1">
+              <object class="GtkEntry" id="entry_caja_init_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
