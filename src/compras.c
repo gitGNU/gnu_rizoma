@@ -3260,6 +3260,7 @@ FillPagarFacturas (gchar *rut_proveedor)
     {
       gtk_list_store_append (store_invoice, &iter);
       gtk_list_store_set (store_invoice, &iter,
+                          0, PQvaluebycol (res, i, "id"),
                           1, PQvaluebycol (res, i, "rut_proveedor"),
                           2, PQvaluebycol (res, i, "num_factura"),
                           3, PQvaluebycol (res, i, "id_compra"),
@@ -4683,10 +4684,10 @@ on_entry_invoice_provider_activate (GtkEntry *entry, gpointer data)
 void
 on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpointer data)
 {
-  gint i;
+  gint i, tuples;
   gchar *id_invoice;
   gchar *q;
-  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_detail");
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_detail"));
   GtkTreeModel *model = gtk_tree_view_get_model (gtk_tree_selection_get_tree_view (selection));
   GtkTreeIter iter;
 
