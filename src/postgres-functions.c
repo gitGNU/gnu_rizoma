@@ -1908,12 +1908,12 @@ SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *margen, g
 }
 
 gboolean
-Egresar (gint monto, gchar *motivo, gint usuario)
+Egresar (gint monto, gint motivo, gint usuario)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO egreso VALUES (DEFAULT, %d, (SELECT id FROM tipo_egreso WHERE descrip='%s'), NOW(), %d)",
+  q = g_strdup_printf ("select insert_egreso (%d, %d, %d)",
                        monto, motivo, usuario);
   res = EjecutarSQL (q);
   g_free (q);
@@ -1947,8 +1947,7 @@ Ingreso (gint monto, gint motivo, gint usuario)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO ingreso (monto, tipo,  fecha, usuario) "
-		       "VALUES (%d, %d, NOW(), %d)",
+  q = g_strdup_printf ("select insert_ingreso (%d, %d, %d)",
                        monto, motivo, usuario);
   res = EjecutarSQL (q);
   g_free (q);

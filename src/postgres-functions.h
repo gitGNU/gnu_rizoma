@@ -213,7 +213,7 @@ void SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *marg
                                 gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
                                 gint cantidad_mayorista);
 
-gboolean Egresar (gint monto, gchar *motivo, gint usuario);
+gboolean Egresar (gint monto, gint motivo, gint usuario);
 
 gboolean SaveVentaTarjeta (gint id_venta, gchar *insti, gchar *numero, gchar *fecha_venc);
 

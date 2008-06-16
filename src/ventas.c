@@ -1098,6 +1098,8 @@ ventas_win ()
     CalcularVentas (venta->header);
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+  prepare_caja();
 }
 
 gboolean
@@ -3585,11 +3587,11 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
   switch (event->keyval)
     {
     case GDK_F6:
-      VentanaEgreso();
+      VentanaEgreso(0);
       break;
 
     case GDK_F7:
-      VentanaIngreso ();
+      VentanaIngreso (0);
       break;
 
       //if the key pressed is not in use let it pass

@@ -143,13 +143,17 @@ IngresarDinero (GtkWidget *widget, gpointer data)
       return;
     }
 
-  Ingreso (monto, motivo, user_data->user_id);
-
-  CloseVentanaIngreso();
+  if (Ingreso (monto, motivo, user_data->user_id))
+    CloseVentanaIngreso();
+  else
+    {
+      ErrorMSG(aux_widget, "No fue posible registrar el ingreso de dinero en la caja");
+      return;
+    }
 }
 
 void
-VentanaIngreso ()
+VentanaIngreso (gint monto)
 {
   GtkWidget *aux_widget;
   PGresult *res;
@@ -191,6 +195,7 @@ VentanaIngreso ()
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), g_strdup_printf("%d", monto));
   gtk_widget_grab_focus(aux_widget);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_ingreso"));
@@ -200,33 +205,39 @@ VentanaIngreso ()
 void
 EgresarDinero (GtkWidget *widget, gpointer data)
 {
+  GtkWidget *aux_widget;
   gint active;
   gint monto;
-  gchar *motivo;
+  gint motivo;
 
   GtkTreeModel *model;
   GtkTreeIter iter;
 
-  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo_egreso));
-  monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (data))));
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
+  monto = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
-  if (active == -1)
-    ErrorMSG (combo_egreso, "Debe Seleccionar un tipo de egreso");
-  else if (monto == 0)
-    ErrorMSG (GTK_WIDGET (data), "No pueden haber egresos de $0");
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_out_motiv"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (aux_widget));
+
+  if (monto == 0)
+    ErrorMSG (aux_widget, "No pueden haber egresos de $0");
+  else if (active == -1)
+    ErrorMSG (aux_widget, "Debe Seleccionar un tipo de egreso");
   else if (monto > ReturnSaldoCaja ())
-    ErrorMSG (GTK_WIDGET (data), "No se puede retirar mas dinero del que ahi en caja");
+    ErrorMSG (aux_widget, "No se puede retirar mas dinero del que ahi en caja");
   else
     {
-      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_egreso));
-      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_egreso), &iter);
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (aux_widget));
+      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (aux_widget), &iter);
 
       gtk_tree_model_get (model, &iter,
                           0, &motivo,
                           -1);
 
-      Egresar (monto, motivo, user_data->user_id);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
+      if (Egresar (monto, motivo, user_data->user_id))
+	CloseVentanaEgreso();
+      else
+	ErrorMSG(aux_widget, "No fue posible ingresar el egreso de dinero de la caja");
     }
 }
 
@@ -244,7 +255,7 @@ CloseVentanaEgreso (void)
 
 
 void
-VentanaEgreso ()
+VentanaEgreso (gint monto)
 {
   GtkWidget *combo;
   GtkWidget *aux_widget;
@@ -288,6 +299,7 @@ VentanaEgreso ()
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), g_strdup_printf("%d", monto));
   gtk_widget_grab_focus(aux_widget);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_egreso"));
@@ -773,13 +785,13 @@ CalcularPerdida (void)
 {
   PGresult *res;
   gint perdida, cash_sell, cierre_caja;
+  gchar *q;
 
-  cash_sell = atoi (GetDataByOne
-                    (g_strdup_printf ("SELECT SUM (monto) as total_sell FROM venta WHERE "
-                                      "date_part('day', fecha)=date_part('day', CURRENT_DATE) "
-                                      "AND date_part('month', fecha)=date_part('month', CURRENT_DATE) AND"
-                                      " date_part('year', fecha)=date_part('year', CURRENT_DATE) AND tipo_venta=%d",
-                                      CASH)));
+  q = g_strdup_printf ("SELECT SUM (monto) as total_sell FROM venta WHERE "
+		       "date_trunc('day', fecha) = CURRENT_DATE"
+		       "AND tipo_venta=%d", CASH);
+  cash_sell = atoi (GetDataByOne (q));
+  g_free(q);
 
   cierre_caja = atoi (GetDataByOne ("SELECT termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq)"));
 
@@ -805,18 +817,20 @@ gboolean
 check_caja (void)
 {
   PGresult *res;
-  gchar *q;
 
-  q = g_strdup_printf("SELECT fecha_termino FROM caja where id_vendedor=%d "
-		      "and fecha_termino=NULL order by id desc limit 1",
-		      user_data->user_id);
-  res = EjecutarSQL (q);
-  g_free(q);
+  res = EjecutarSQL ("select is_caja_abierta()");
 
-  if (PQntuples (res) == 1)
-    return TRUE;
-  else
+  if (PQntuples (res) == 0)
+    {
+      g_printerr("%s: could not retrieve the result of the sql query\n",
+		 G_STRFUNC);
+      return FALSE;
+    }
+
+  if (g_str_equal(PQgetvalue(res, 0, 0), "t"))
     return FALSE;
+    else
+      return TRUE;
 }
 
 void
@@ -832,116 +846,38 @@ CloseCajaWin (void)
 }
 
 void
-InicializarCajaWin (void)
+InicializarCajaWin (gint proposed_amount)
 {
-  GtkWidget *label;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *button;
+  GtkWidget *widget;
 
-  gchar *inicio = "0";
-  PGresult *res;
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_init_amount"));
+  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", proposed_amount));
+  gtk_widget_grab_focus(widget);
 
-  caja->win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (caja->win), "Rizoma: Inicializar Caja");
-  gtk_window_set_position (GTK_WINDOW (caja->win), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_resizable (GTK_WINDOW (caja->win), FALSE);
-  gtk_widget_set_size_request (caja->win, -1, 150);
-  gtk_window_present (GTK_WINDOW (caja->win));
-
-  g_signal_connect (G_OBJECT (caja->win), "destroy",
-                    G_CALLBACK (CloseCajaWin), NULL);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (caja->win), vbox);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label),
-                        "<span size=\"xx-large\">Iniciar Caja</span>");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Inicia con: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label), "<span size=\"xx-large\"><b>$</b></span>");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  res = EjecutarSQL ("SELECT termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq)");
-
-  if (PQntuples (res) != 0)
-    inicio = PQgetvalue (res, 0, 0);
-
-  if (inicio == NULL)
-    inicio = "";
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup
-    (GTK_LABEL (label),g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                        PutPoints (inicio)));
-  gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  caja->entry_inicio = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), caja->entry_inicio, FALSE, FALSE, 3);
-  gtk_widget_show (caja->entry_inicio);
-
-  gtk_entry_set_text (GTK_ENTRY (caja->entry_inicio), inicio);
-
-  gtk_window_set_focus (GTK_WINDOW (caja->win), caja->entry_inicio);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseCajaWin), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (IniciarLaCaja), (gpointer) inicio);
-
-  g_signal_connect (G_OBJECT (caja->entry_inicio), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer) button);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_init"));
+  gtk_widget_show_all (widget);
 }
 
 void
 IniciarLaCaja (GtkWidget *widget, gpointer data)
 {
-  gint inicio = atoi ((gchar *)data);
-  gint monto = atoi (gtk_entry_get_text (GTK_ENTRY (caja->entry_inicio)));
+  GtkWidget *aux_widget;
+  gint inicio;
+  gint monto;
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_init_amount"));
+  monto = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  inicio = caja_get_last_amount();
 
   CloseCajaWin ();
 
   InicializarCaja (inicio);
 
   if (inicio < monto)
-    VentanaIngreso (NULL, (gpointer)monto - inicio);
+    VentanaIngreso (monto - inicio);
   else if (inicio > monto)
-    VentanaEgreso (NULL, (gpointer)inicio - monto);
+    VentanaEgreso (inicio - monto);
 }
 
 void
@@ -1036,3 +972,69 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   else
     CloseCajaWin ();
 }
+
+/**
+ * 
+ *
+ */
+void
+prepare_caja (void)
+{
+  gboolean closed_caja;
+
+  closed_caja = check_caja();
+
+  if (user_data->user_id == 0)
+    {
+      if (closed_caja)
+	  open_caja (FALSE);
+    }
+  else
+    {
+      if (closed_caja)
+	open_caja (TRUE);
+    }
+}
+
+/**
+ * initializes a new caja
+ *
+ * @param automatic_mode TRUE if does NOT must prompt a dialog
+ * interaction with the user
+ */
+void
+open_caja (gboolean automatic_mode)
+{
+  gint last_amount;
+  gint last_caja;
+
+  last_caja = caja_get_last_amount();
+
+  if (automatic_mode)
+    InicializarCaja(last_amount);
+  else
+      InicializarCajaWin (last_amount);
+}
+
+
+gint
+caja_get_last_amount (void)
+{
+  PGresult *res;
+  gchar *q;
+  gint last_amount;
+  gint last_caja;
+
+  res = EjecutarSQL("select max(id) from caja");
+  last_caja = atoi(PQgetvalue(res, 0, 0));
+
+  q = g_strdup_printf("select (termino - perdida) from caja where id=%d",
+		      last_caja);
+  res = EjecutarSQL(q);
+  g_free(q);
+
+  last_amount = atoi(PQgetvalue(res, 0, 0));
+
+  return last_amount;
+}
+

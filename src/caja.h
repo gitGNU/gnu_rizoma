@@ -31,9 +31,11 @@ gint ArqueoCajaLastDay (void);
 
 gint ReturnSaldoCaja (void);
 
-void VentanaIngreso ();
+void VentanaIngreso (gint monto);
 
-void VentanaEgreso ();
+void VentanaEgreso (gint monto);
+
+void CloseVentanaEgreso (void);
 
 void FillCajaData (void);
 
@@ -47,11 +49,18 @@ gint CalcularPerdida (void);
 
 gboolean check_caja (void);
 
-void InicializarCajaWin (void);
+void InicializarCajaWin (gint proposed_amount);
 
 void IniciarLaCaja (GtkWidget *widget, gpointer data);
 
 void CerrarCajaWin (void);
 
 void CerrarLaCaja (GtkWidget *widget, gpointer data);
+
+void prepare_caja (void);
+
+void open_caja (gboolean automatic_mode);
+
+gint caja_get_last_amount (void);
+
 #endif
