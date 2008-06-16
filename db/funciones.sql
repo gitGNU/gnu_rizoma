@@ -1935,3 +1935,45 @@ BEGIN
 RETURN 1;
 
 END; $$ language plpgsql;
+
+create or replace function insert_egreso (
+       in in_monto int,
+       in in_tipo int,
+       in in_usuario int)
+returns int as $$
+declare
+	current_caja int;
+begin
+
+select max(id) into current_caja from caja;
+
+if (select fecha_termino from caja where id=current_caja) != NULL then
+   raise notice 'Adding an egreso to caja that is closed (%)', current_caja;
+end if;
+
+insert into egreso (monto, tipo, fecha, usuario, id_caja)
+       values (in_monto, in_tipo, now(), in_usuario, current_caja);
+
+return 0;
+end; $$ language plpgsql;
+
+create or replace function insert_ingreso (
+       in in_monto int,
+       in in_tipo int,
+       in in_usuario int)
+returns int as $$
+declare
+	current_caja int;
+begin
+
+select max(id) into current_caja from caja;
+
+if (select fecha_termino from caja where id=current_caja) != NULL then
+   raise notice 'Adding an ingreso to caja that is closed (%)', current_caja;
+end if;
+
+insert into ingreso (monto, tipo, fecha, usuario, id_caja)
+       values (in_monto, in_tipo, now(), in_usuario, current_caja);
+
+return 0;
+end; $$ language plpgsql;
