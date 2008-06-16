@@ -2018,7 +2018,7 @@ Asistencia (gint user_id, gboolean entrada)
 
   if (entrada == TRUE)
     {
-      q = g_strdup_printf ("INSERT INTO asistencia VALUES (DEFAULT, %d, NOW(), to_timestamp('0','0'))", user_id);
+      q = g_strdup_printf ("INSERT INTO asistencia (id_user, entrada) VALUES (%d, NOW())", user_id);
       res = EjecutarSQL (q);
     }
   else
@@ -2200,4 +2200,10 @@ provider_exist (const gchar *rut)
       return FALSE;
     else
       return TRUE;
+}
+
+gint
+users_working (void)
+{
+  return -1;
 }

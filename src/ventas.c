@@ -3145,21 +3145,28 @@ check_passwd (GtkWidget *widget, gpointer data)
 }
 
 gboolean
-on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer user_data)
+on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   GtkWidget *window;
-  window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
-  gtk_widget_show_all (window);
+  if ((user_data->user_id == 0) && (users_working() == 1))
+    {
+      CerrarCajaWin(TRUE);
+    }
+  else
+    {
+      window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+      gtk_widget_show_all (window);
+    }
   return TRUE;
 }
 
 void
-exit_response (GtkDialog *dialog, gint response_id, gpointer user_data)
+exit_response (GtkDialog *dialog, gint response_id, gpointer data)
 {
   if (response_id == GTK_RESPONSE_YES)
     {
       //TODO: find out how to get the user id
-      //Asistencia (user_data->user_id, FALSE);
+      Asistencia (user_data->user_id, FALSE);
       gtk_main_quit();
     }
   else
@@ -3581,17 +3588,19 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 gboolean
 on_ventas_gui_key_press_event(GtkWidget   *widget,
 			      GdkEventKey *event,
-			      gpointer     user_data)
+			      gpointer     data)
 {
 
   switch (event->keyval)
     {
     case GDK_F6:
-      VentanaEgreso(0);
+      if (user_data->user_id == 0)
+	VentanaEgreso(0);
       break;
 
     case GDK_F7:
-      VentanaIngreso (0);
+      if (user_data->user_id == 0)
+	VentanaIngreso (0);
       break;
 
       //if the key pressed is not in use let it pass
