@@ -4403,7 +4403,7 @@ on_btn_pay_invoice_clicked ()
                              0, &id_invoice,
                              -1);
 
-        if (PagarFactura (id_invoice) == FALSE)
+        if (PagarFactura (atoi (id_invoice)) == FALSE)
           {
             ErrorMSG (pago_proveedor, "No se ingreso correctamente");
           }
