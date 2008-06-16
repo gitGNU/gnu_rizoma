@@ -3096,6 +3096,8 @@ FillPagarFacturas (gchar *rut_proveedor)
 
   tuples = PQntuples (res);
 
+  gtk_list_store_clear (store_invoice);
+
   for (i = 0; i < tuples; i++)
     {
       gtk_list_store_append (store_invoice, &iter);
