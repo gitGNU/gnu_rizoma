@@ -2,6 +2,7 @@
 
 	* funciones.sql (get_guide_detail): Changed query to use
 	guis_compra_detalle instead of documentos_detalle.
+	(guide_invoice): Bug Fix.
 
 2008-06-15  Jonathan Gonzalez V.  <zeus@gnu.org>
 

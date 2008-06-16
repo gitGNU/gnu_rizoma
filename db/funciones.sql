@@ -1926,7 +1926,7 @@ BEGIN
         FOR i IN 1..array_upper( guides, 1) LOOP
         UPDATE guias_compra SET id_factura=id_invoice WHERE id=guides[i];
                 IF FOUND IS TRUE THEN
-                INSERT INTO factura_compra_detalle SELECT nextval(quote_literal('factura_compra_detalle_id_seq')::regclass), id_invoice, barcode, cantidad, precio, iva, otros FROM guias_compra_detalle WHERE id=guides[i];
+                INSERT INTO factura_compra_detalle SELECT nextval('factura_compra_detalle_id_seq'::regclass), id_invoice, barcode, cantidad, precio, iva, otros FROM guias_compra_detalle WHERE id_guias_compra=guides[i];
                 ELSE
                 RETURN 0;
                 END IF;
