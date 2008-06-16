@@ -237,10 +237,12 @@ create table Devolucion (
 -- egreso
 create table egreso (
   id                        serial not null,
+  id_caja                   int not null,
   monto                     int4,
   tipo                      int2,
   fecha                     timestamp,
-  usuario                   int4
+  usuario                   int4,
+  constraint pk_egreso primary key (id)
 ) ;
 
 -- Compra
@@ -404,6 +406,7 @@ create table merma (
 -- ingreso
 create table ingreso (
   id                        serial not null,
+  id_caja                   int not null,
   monto                     int4,
   tipo                      int2 not null,
   fecha                     timestamp,
@@ -747,3 +750,9 @@ alter table compra_detalle add constraint fk_detallecompra_compra
 alter table guias_compra add constraint fk_guias_compra_compra
   foreign key (id_compra)
   references Compra (id) ;
+alter table egreso add constraint fk_egreso_caja
+  foreign key (id_caja)
+  references caja(id);
+alter table ingreso add constraint fk_ingreso_caja
+  foreign key (id_caja)
+  references caja(id);
