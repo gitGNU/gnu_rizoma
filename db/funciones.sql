@@ -1996,3 +1996,19 @@ else
 end if;
 
 end; $$ language plpgsql;
+
+create or replace function trg_insert_caja()
+returns trigger as $$
+declare
+	last_sale bigint;
+begin
+select last_value into last_sale from ventas_id_seq;
+
+new.id_venta_inicio = last_sale;
+
+return new;
+end; $$ language plpgsql;
+
+create trigger trigger_insert_caja before insert
+       on caja for each row
+       execute procedure trg_insert_caja();
