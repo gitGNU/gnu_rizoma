@@ -219,7 +219,7 @@ gboolean SaveVentaTarjeta (gint id_venta, gchar *insti, gchar *numero, gchar *fe
 
 gboolean Ingreso (gint monto, gint motivo, gint usuario);
 
-gboolean PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip);
+gboolean PagarFactura (gint id_invoice);
 
 void AjusteStock (gdouble cantidad, gint motivo, gchar *barcode);
 

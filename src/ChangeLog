@@ -1,5 +1,9 @@
 2008-06-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* postgres-functions.c (PagarFactura): Commented code that insert
+	data into "pagos" table. Deleted previous parameters and just use
+	id_invoice to update an invoice.
+
 	* compras.c (CalcularTotalesGuias): Changed to use the new tables
 	guias_compra_detalle and guias_compra.
 

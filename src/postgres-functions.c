@@ -1963,21 +1963,20 @@ Ingreso (gint monto, gint motivo, gint usuario)
 }
 
 gboolean
-PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip)
+PagarFactura (gint id_invoice)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE num_factura=%s AND rut_proveedor='%s'",
-                       num_fact, rut_proveedor);
+  q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE id=%d", id_invoice );
   res = EjecutarSQL (q);
   g_free (q);
 
-  q = g_strdup_printf ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra "
-                       "WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')",
-                       num_fact, rut_proveedor,descrip);
-  res = EjecutarSQL (q);
-  g_free (q);
+  /* q = g_strdup_printf ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra " */
+  /*                      "WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')", */
+  /*                      num_fact, rut_proveedor,descrip); */
+  /* res = EjecutarSQL (q); */
+  /* g_free (q); */
 
   if (res != NULL)
     return TRUE;
