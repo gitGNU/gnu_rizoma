@@ -169,7 +169,7 @@ gint IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint tot
 
 gint IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emision, gint y_emision);
 
-gboolean AsignarFactAGuia (gint n_guia, gint id_factura);
+gboolean AsignarFactAGuia (gint id_guia, gint id_factura);
 
 gdouble GetIVA (gchar *barcode);
 
@@ -219,7 +219,7 @@ gboolean SaveVentaTarjeta (gint id_venta, gchar *insti, gchar *numero, gchar *fe
 
 gboolean Ingreso (gint monto, gint motivo, gint usuario);
 
-gboolean PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip);
+gboolean PagarFactura (gint id_invoice);
 
 void AjusteStock (gdouble cantidad, gint motivo, gchar *barcode);
 

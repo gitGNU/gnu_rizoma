@@ -1,3 +1,14 @@
+2008-06-16  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (get_guide_detail): Changed query to use
+	guis_compra_detalle instead of documentos_detalle.
+	(guide_invoice): Bug Fix.
+
+2008-06-15  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (get_invoice_detail): Added funciton get an
+	invoice detail.
+
 2008-06-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* funciones.sql (get_guide_detail): Added function to get the

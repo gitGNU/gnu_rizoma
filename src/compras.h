@@ -143,10 +143,10 @@ void PagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 void PagarDocumento (GtkWidget *widget, gpointer data);
 
-void ClearPagosData (void);
-
 void ClosePagarDocumentoWin (GtkWidget *widget, gpointer data);
 
 void on_tree_selection_pending_guide_changed (GtkTreeSelection *selection, gpointer user_data);
+
+void on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpointer data);
 
 #endif

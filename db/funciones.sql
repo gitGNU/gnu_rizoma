@@ -1898,7 +1898,7 @@ declare
         list record;
         query text;
 begin
-        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM documentos_detalle AS t1, producto AS t2, guias_compra as t3 WHERE t1.barcode=t2.barcode and t1.factura='f' and t3.id_compra=t1.id_compra and t3.numero=$S$|| id_guia ||$S$ and t3.rut_proveedor=$S$|| rut_proveedor ||$S$ and t3.numero=t1.numero $S$;
+        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM guias_compra_detalle AS t1, producto AS t2, guias_compra as t3 WHERE t1.barcode=t2.barcode and t1.id_guias_compra=t3.id and t3.numero=$S$|| id_guia ||$S$ and t3.rut_proveedor=$S$|| rut_proveedor;
 
 		FOR list IN EXECUTE query LOOP
 		codigo_corto := list.codigo_corto;
@@ -1926,7 +1926,7 @@ BEGIN
         FOR i IN 1..array_upper( guides, 1) LOOP
         UPDATE guias_compra SET id_factura=id_invoice WHERE id=guides[i];
                 IF FOUND IS TRUE THEN
-                INSERT INTO factura_compra_detalle SELECT nextval(quote_literal('factura_compra_detalle_id_seq')::regclass), id_invoice, barcode, cantidad, precio, iva, otros FROM guias_compra_detalle WHERE id=guides[i];
+                INSERT INTO factura_compra_detalle SELECT nextval('factura_compra_detalle_id_seq'::regclass), id_invoice, barcode, cantidad, precio, iva, otros FROM guias_compra_detalle WHERE id_guias_compra=guides[i];
                 ELSE
                 RETURN 0;
                 END IF;
@@ -1936,6 +1936,38 @@ RETURN 1;
 
 END; $$ language plpgsql;
 
+create or replace function get_invoice_detail(
+		IN id_invoice integer,
+		OUT codigo_corto integer,
+		OUT descripcion varchar(50),
+		OUT marca varchar(35),
+		OUT contenido varchar(10),
+		OUT unidad varchar(10),
+		OUT precio integer,
+		OUT cantidad double precision,
+		OUT precio_compra bigint,
+		OUT barcode bigint)
+returns setof record as $$
+declare
+        list record;
+        query text;
+begin
+        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM factura_compra_detalle AS t1, producto AS t2, factura_compra as t3 WHERE t1.barcode=t2.barcode and t1.id_factura_compra=t3.id and t3.id=$S$|| id_invoice;
+
+		FOR list IN EXECUTE query LOOP
+		codigo_corto := list.codigo_corto;
+		descripcion := list.descripcion;
+		marca := list.marca;
+		contenido := list.contenido;
+		unidad := list.unidad;
+		precio := list.precio_venta;
+		cantidad := list.cantidad;
+		precio_compra := list.precio_compra;
+		barcode := list.barcode;
+		RETURN NEXT;
+		END LOOP;
+END; $$ LANGUAGE plpgsql;
+
 create or replace function insert_egreso (
        in in_monto int,
        in in_tipo int,
@@ -1944,7 +1976,6 @@ returns int as $$
 declare
 	current_caja int;
 begin
-
 select max(id) into current_caja from caja;
 
 if (select fecha_termino from caja where id=current_caja) != NULL then

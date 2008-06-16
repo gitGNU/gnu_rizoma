@@ -1496,11 +1496,14 @@ IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emi
 }
 
 gboolean
-AsignarFactAGuia (gint n_guia, gint id_factura)
+AsignarFactAGuia (gint id_guia, gint id_factura)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf ("UPDATE guias_compra SET id_factura=%d WHERE numero=%d", id_factura, n_guia));
+  q = g_strdup_printf ("SELECT guide_invoice( %d, ARRAY[%d])", id_factura, id_guia);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return TRUE;
@@ -1959,21 +1962,20 @@ Ingreso (gint monto, gint motivo, gint usuario)
 }
 
 gboolean
-PagarFactura (gchar *num_fact, gchar *rut_proveedor, gchar *descrip)
+PagarFactura (gint id_invoice)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE num_factura=%s AND rut_proveedor='%s'",
-                       num_fact, rut_proveedor);
+  q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE id=%d", id_invoice );
   res = EjecutarSQL (q);
   g_free (q);
 
-  q = g_strdup_printf ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra "
-                       "WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')",
-                       num_fact, rut_proveedor,descrip);
-  res = EjecutarSQL (q);
-  g_free (q);
+  /* q = g_strdup_printf ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra " */
+  /*                      "WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')", */
+  /*                      num_fact, rut_proveedor,descrip); */
+  /* res = EjecutarSQL (q); */
+  /* g_free (q); */
 
   if (res != NULL)
     return TRUE;
