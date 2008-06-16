@@ -1937,7 +1937,7 @@ RETURN 1;
 END; $$ language plpgsql;
 
 create or replace function get_invoice_detail(
-		IN id_factura integer,
+		IN id_invoice integer,
 		OUT codigo_corto integer,
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
@@ -1952,7 +1952,7 @@ declare
         list record;
         query text;
 begin
-        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM factura_compra_detalle AS t1, producto AS t2, factura_compra as t3 WHERE t1.barcode=t2.barcode and t1.id_factura_compra=t3.id and t3.id=$S$|| id_invoice $S$;
+        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM factura_compra_detalle AS t1, producto AS t2, factura_compra as t3 WHERE t1.barcode=t2.barcode and t1.id_factura_compra=t3.id and t3.id=$S$|| id_invoice;
 
 		FOR list IN EXECUTE query LOOP
 		codigo_corto := list.codigo_corto;
