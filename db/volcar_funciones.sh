@@ -28,9 +28,9 @@ if [ -z $1 ] ; then
     exit -1
 fi
 
-psql8.3 -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}' >  /tmp/drop_functions.sql
+psql -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W -c "\df public." | grep '|' | grep 'public' | awk -F'|' '{print "DROP FUNCTION" $2 "("$4");"}' >  /tmp/drop_functions.sql
 
-psql8.3 -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W <  /tmp/drop_functions.sql
+psql -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W <  /tmp/drop_functions.sql
 rm /tmp/drop_functions.sql
 
-psql8.3 -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W < funciones.sql
+psql -h $DB_HOST -p $DB_PORT $DB_NAME -U $DB_USER -W < funciones.sql
