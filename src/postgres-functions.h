@@ -241,4 +241,6 @@ gint SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gch
 
 gboolean provider_exist (const gchar *rut);
 
+gint users_working (void);
+
 #endif

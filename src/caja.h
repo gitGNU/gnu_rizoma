@@ -53,7 +53,7 @@ void InicializarCajaWin (gint proposed_amount);
 
 void IniciarLaCaja (GtkWidget *widget, gpointer data);
 
-void CerrarCajaWin (void);
+void CerrarCajaWin (gboolean last_user);
 
 void CerrarLaCaja (GtkWidget *widget, gpointer data);
 

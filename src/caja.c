@@ -881,79 +881,22 @@ IniciarLaCaja (GtkWidget *widget, gpointer data)
 }
 
 void
-CerrarCajaWin (void)
+CerrarCajaWin (gboolean last_user)
 {
-  GtkWidget *label;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
+  GtkWidget *widget;
+  gint amount_must_have;
 
-  GtkWidget *button;
+  amount_must_have = ArqueoCaja();
 
-  gint arqueo_caja;
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("$ %d", amount_must_have));
 
-  caja->win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (caja->win), "Rizoma: Cerrar Caja");
-  gtk_window_set_position (GTK_WINDOW (caja->win), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_resizable (GTK_WINDOW (caja->win), FALSE);
-  gtk_widget_set_size_request (caja->win, -1, 120);
-  gtk_window_present (GTK_WINDOW (caja->win));
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
+  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
+  gtk_widget_grab_focus(widget);
 
-  g_signal_connect (G_OBJECT (caja->win), "destroy",
-                    G_CALLBACK (CloseCajaWin), NULL);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (caja->win), vbox);
-  gtk_widget_show (vbox);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label),
-                        "<span size=\"xx-large\">Cerrar Caja</span>");
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Cerrar con: ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup (GTK_LABEL (label), "<span size=\"xx-large\"><b>$</b></span>");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  arqueo_caja = ArqueoCaja();
-
-  label = gtk_label_new ("");
-  gtk_label_set_markup
-    (GTK_LABEL (label),g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                        PutPoints (g_strdup_printf ("%d", arqueo_caja))));
-  gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseCajaWin), NULL);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CerrarLaCaja), (gpointer)label);
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_close"));
+  gtk_widget_show_all(widget);
 }
 
 void
@@ -1037,4 +980,3 @@ caja_get_last_amount (void)
 
   return last_amount;
 }
-
