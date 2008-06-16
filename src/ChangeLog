@@ -1,6 +1,16 @@
 2008-06-15  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (ClearPagosData): Deleted Function.
+	(on_btn_ok_srch_provider_clicked): Added var tab and guide to know
+	in what tab we are so we can know if we'll set on guide or invoice
+	labels.
+	(on_entry_guide_invoice_provider_activate): Changed from
+	on_entry_guide_invoice_activate().
+	(on_entry_invoice_provider_activate): Silly function that use
+	on_entry_guide_invoice_provider_activate() to show up the search
+	provider window.
+	(compras_win): Added store to tree_view_invoice_list treeview.
+	(IngresoDetalle): Use GtkSelection received with the signal.
 
 2008-06-13  Jonathan Gonzalez V.  <zeus@gnu.org>
 
