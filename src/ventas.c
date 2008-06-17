@@ -3150,7 +3150,7 @@ on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
   GtkWidget *window;
   if ((user_data->user_id == 0) && (users_working() == 1))
     {
-      CerrarCajaWin(TRUE);
+      CerrarCajaWin();
     }
   else
     {

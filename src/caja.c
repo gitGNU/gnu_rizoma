@@ -836,13 +836,10 @@ check_caja (void)
 void
 CloseCajaWin (void)
 {
-  if (caja->win != NULL)
-    gtk_widget_destroy (caja->win);
+  GtkWidget *widget;
 
-  caja->win = NULL;
-
-  //gtk_window_set_focus (GTK_WINDOW (main_window), GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_close"));
+  gtk_widget_hide (widget);
 }
 
 void
@@ -881,7 +878,7 @@ IniciarLaCaja (GtkWidget *widget, gpointer data)
 }
 
 void
-CerrarCajaWin (gboolean last_user)
+CerrarCajaWin (void)
 {
   GtkWidget *widget;
   gint amount_must_have;
@@ -889,11 +886,19 @@ CerrarCajaWin (gboolean last_user)
   amount_must_have = ArqueoCaja();
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
-  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("$ %d", amount_must_have));
+  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", amount_must_have));
+  g_object_set_data(G_OBJECT(widget), "must-have", (gpointer)amount_must_have);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_lost"));
+  gtk_label_set_text(GTK_LABEL(widget), "");
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
+  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
+  gtk_editable_select_region (GTK_ENDITABLE(widget), 0, -1);
+  gtk_widget_grab_focus(widget);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
   gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
-  gtk_widget_grab_focus(widget);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_close"));
   gtk_widget_show_all(widget);
@@ -902,18 +907,49 @@ CerrarCajaWin (gboolean last_user)
 void
 CerrarLaCaja (GtkWidget *widget, gpointer data)
 {
-  GtkLabel *label = (GtkLabel *)data;
-  gint monto;
+  GtkWidget *aux_widget;
+  gint monto_must_have;
+  gint monto_real_que_tiene;
+  gint perdida;
+  gint monto_real_de_cierre;
+  gboolean res;
 
-  monto = atoi (CutPoints (g_strdup (gtk_label_get_text (label))));
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
+  monto_must_have = (gint)g_object_get_data(G_OBJECT(aux_widget), "must-have");
 
-  if (CerrarCaja (monto) == FALSE)
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
+  monto_real_de_cierre = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
+  monto_de_cierre = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+
+  if (monto_de_cierre < monto_real_de_cierre)
     {
-      CloseCajaWin ();
-      //ErrorMSG (main_window, "Error al intentar Cerrar la caja");
+      Egresar (monto_real_de_cierre - monto_de_cierre, 0, user_data->user_id);
+      res = CerrarCaja (monto_de_cierre);
+
     }
   else
-    CloseCajaWin ();
+    if (monto_de_cierre > monto_real_de_cierre)
+      {
+	Ingreso (monto_de_cierre - monto_real_de_cierre, 0, user_data->user_id);
+	res = CerrarCaja (monto_de_cierre);
+      }
+    else
+      {
+	res = CerrarCaja(monto_de_cierre);
+      }
+
+  CalcularPerdida();
+
+  if (res)
+    {
+      CloseCajaWin ();
+      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+      gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);
+    }
+  else
+    ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
 }
 
 /**
