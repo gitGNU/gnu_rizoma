@@ -3828,6 +3828,12 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
           gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
           renderer = gtk_cell_renderer_text_new ();
+          g_object_set (renderer,
+                        "editable", TRUE,
+                        NULL);
+          g_signal_connect (G_OBJECT (renderer), "edited",
+                            G_CALLBACK (on_partial_cell_renderer_edited), (gpointer)store);
+
           column = gtk_tree_view_column_new_with_attributes ("Cant. Ing.", renderer,
                                                              "text", 4,
                                                              "foreground", 6,
@@ -3920,6 +3926,12 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
           gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
           renderer = gtk_cell_renderer_text_new ();
+          g_object_set (renderer,
+                        "editable", TRUE,
+                        NULL);
+          g_signal_connect (G_OBJECT (renderer), "edited",
+                            G_CALLBACK (on_partial_cell_renderer_edited), (gpointer)store);
+
           column = gtk_tree_view_column_new_with_attributes ("Cant. Ing.", renderer,
                                                              "text", 4,
                                                              "foreground", 6,
@@ -4490,4 +4502,20 @@ FillPartialTree (GtkTreeView *tree)
                                strtod (PUT((PQvaluebycol(res, i, "precio"))), (char **)NULL), atoi (PQvaluebycol(res, i, "margen")), TRUE);
         }
     }
+}
+
+void
+on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_amount, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      4, strtod (PUT (new_amount), (char **)NULL),
+                      -1);
+
+  gtk_tree_path_free (path);
 }

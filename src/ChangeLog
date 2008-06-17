@@ -1,3 +1,11 @@
+2008-06-17  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (on_partial_cell_renderer_edited): Added function edit
+	a cell_renderer on partial ingress treeviews.
+	(on_button_ok_ingress_clicked): Added
+	on_partial_cell_renderer_edited as handler for signal edited on
+	"Cant. Ing." column renderer for partial invoice and guide ingress.
+
 2008-06-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (AskPagarCaja): Deleted function.

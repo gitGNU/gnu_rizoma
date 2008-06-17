@@ -147,4 +147,6 @@ void on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, g
 
 void FillPartialTree (GtkTreeView *tree);
 
+void on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_amount, gpointer data);
+
 #endif
