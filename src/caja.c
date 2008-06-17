@@ -766,13 +766,15 @@ gboolean
 CerrarCaja (gint monto)
 {
   PGresult *res;
+  gchar *q;
 
   if (monto == -1)
     monto = ArqueoCaja ();
 
-  res = EjecutarSQL
-    (g_strdup_printf ("UPDATE caja SET fecha_termino=NOW(), termino=%d WHERE id=(SELECT last_value"
-                      " FROM caja_id_seq)", monto));
+  q = g_strdup_printf ("UPDATE caja SET fecha_termino=NOW(), termino=%d WHERE id=(SELECT last_value"
+		       " FROM caja_id_seq)", monto);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL || PQntuples (res) == 0)
     return TRUE;
