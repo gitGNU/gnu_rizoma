@@ -2033,7 +2033,7 @@ returns trigger as $$
 declare
 	last_sale bigint;
 begin
-select last_value into last_sale from ventas_id_seq;
+select last_value into last_sale from venta_id_seq;
 
 new.id_venta_inicio = last_sale;
 
@@ -2049,7 +2049,7 @@ returns trigger as $$
 declare
 	last_sale bigint;
 begin
-select last_value into last_sale from ventas_id_seq;
+select last_value into last_sale from venta_id_seq;
 
 new.id_venta_termino = last_sale;
 
@@ -2059,3 +2059,29 @@ end; $$ language plpgsql;
 create trigger trigger_update_caja before update
        on caja for each row
        execute procedure trg_update_caja();
+
+create or replace function get_arqueo_caja(
+       in id_caja int)
+returns int as $$
+declare
+	id_inicio int;
+	id_termino int;
+	last_caja int;
+	arqueo int;
+begin
+
+if id_caja = -1 then
+    select last_value into last_caja from caja_id_seq;
+else
+    last_caja := id_caja;
+end if;
+
+select id_venta_inicio, id_venta_termino into id_inicio, id_termino
+       from caja where id = last_caja;
+
+select sum(cantidad * precio + iva) into arqueo
+       from venta_detalle
+       where id_venta > id_inicio and id_venta <= id_termino;
+
+return arqueo;
+end; $$ language plpgsql;
