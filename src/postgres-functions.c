@@ -2205,5 +2205,27 @@ provider_exist (const gchar *rut)
 gint
 users_working (void)
 {
-  return -1;
+  PGresult *res;
+  PGresult *res2;
+  gint tuples;
+  gchar *q;
+  gint users_working = 0;
+
+  res = EjecutarSQL("select id from users");
+
+  tuples = PQntuples(res);
+
+  for (i=0 ; i < tuples ; i++)
+    {
+      q = g_strdup_printf("select salida_year from select_asistencia(%s)",
+			  PQvaluebycol(res, i, "id"));
+      res2 = EjecutarSQL (q);
+
+      if (g_str_equal (PQvaluebycol(res2, 0, "salida_year"), "-1"))
+	users_working++;
+
+      g_free (q);
+    }
+
+  return users_working;
 }
