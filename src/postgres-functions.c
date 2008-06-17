@@ -2209,6 +2209,7 @@ users_working (void)
   PGresult *res2;
   gint tuples;
   gchar *q;
+  gint i;
   gint users_working = 0;
 
   res = EjecutarSQL("select id from users");

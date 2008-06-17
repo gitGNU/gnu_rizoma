@@ -894,7 +894,7 @@ CerrarCajaWin (void)
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
   gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
-  gtk_editable_select_region (GTK_ENDITABLE(widget), 0, -1);
+  gtk_editable_select_region (GTK_EDITABLE(widget), 0, -1);
   gtk_widget_grab_focus(widget);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
@@ -910,29 +910,28 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   GtkWidget *aux_widget;
   gint monto_must_have;
   gint monto_real_que_tiene;
-  gint perdida;
-  gint monto_real_de_cierre;
+  gint monto_de_cierre;
   gboolean res;
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
   monto_must_have = (gint)g_object_get_data(G_OBJECT(aux_widget), "must-have");
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
-  monto_real_de_cierre = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+  monto_real_que_tiene = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
   monto_de_cierre = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
-  if (monto_de_cierre < monto_real_de_cierre)
+  if (monto_de_cierre < monto_real_que_tiene)
     {
-      Egresar (monto_real_de_cierre - monto_de_cierre, 0, user_data->user_id);
+      Egresar (monto_real_que_tiene - monto_de_cierre, 0, user_data->user_id);
       res = CerrarCaja (monto_de_cierre);
 
     }
   else
-    if (monto_de_cierre > monto_real_de_cierre)
+    if (monto_de_cierre > monto_real_que_tiene)
       {
-	Ingreso (monto_de_cierre - monto_real_de_cierre, 0, user_data->user_id);
+	Ingreso (monto_de_cierre - monto_real_que_tiene, 0, user_data->user_id);
 	res = CerrarCaja (monto_de_cierre);
       }
     else
