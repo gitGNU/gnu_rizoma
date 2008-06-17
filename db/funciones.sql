@@ -2079,7 +2079,7 @@ end if;
 select id_venta_inicio, id_venta_termino into id_inicio, id_termino
        from caja where id = last_caja;
 
-select sum(cantidad * precio + iva) into arqueo
+select trunc(sum(cantidad * precio + iva)) into arqueo
        from venta_detalle
        where id_venta > id_inicio and id_venta <= id_termino;
 
