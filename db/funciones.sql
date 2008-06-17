@@ -2043,3 +2043,19 @@ end; $$ language plpgsql;
 create trigger trigger_insert_caja before insert
        on caja for each row
        execute procedure trg_insert_caja();
+
+create or replace function trg_update_caja()
+returns trigger as $$
+declare
+	last_sale bigint;
+begin
+select last_value into last_sale from ventas_id_seq;
+
+new.id_venta_termino = last_sale;
+
+return new;
+end; $$ language plpgsql;
+
+create trigger trigger_update_caja before update
+       on caja for each row
+       execute procedure trg_update_caja();
