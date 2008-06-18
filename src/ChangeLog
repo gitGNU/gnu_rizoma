@@ -8,6 +8,10 @@
 	(AskElabVenc): Now we get the data here to pass it to
 	CheckDocumentData() and then to IngresarCompra().
 	(on_button_ok_ingress_clicked): Fixed bug that duplicated columns.
+	(Save): Deleted unnecessary code.
+	(AddNewProduct): Deleted function replaced by
+	on_button_new_product_clicked.
+	(CloseAddWindow): Deleted function.
 
 	* utils.c (clean_container): Adde g_free and g_list_free to the
 	widget_name and list.

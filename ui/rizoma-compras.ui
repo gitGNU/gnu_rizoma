@@ -1130,7 +1130,7 @@
             <property name="n_columns">2</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkComboBox" id="cmbbox_imp_others">
+              <object class="GtkComboBox" id="cmbbox_new_product_imp_others">
                 <property name="visible">True</property>
               </object>
               <packing>
