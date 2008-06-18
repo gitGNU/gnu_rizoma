@@ -4492,9 +4492,9 @@ on_btn_ok_ingress_partial_guide_clicked (GtkWidget *widget, gpointer data)
 void
 on_btn_ok_ingress_partial_invoice_clicked (GtkWidget *widget, gpointer data)
 {
-  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_partial_guide"));
+  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_partial_invoice"));
 
-  AskElabVenc (wnd, FALSE);
+  AskElabVenc (wnd, TRUE);
 }
 
 void
