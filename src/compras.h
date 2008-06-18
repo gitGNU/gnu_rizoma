@@ -77,8 +77,6 @@ void IngresoParcial (void);
 
 void ChangeIngreso (GtkEntry *entry, gpointer data);
 
-void CambiarStock (GtkWidget *widget, gpointer data);
-
 void AnularCompra (void);
 
 void AnularProducto (void);

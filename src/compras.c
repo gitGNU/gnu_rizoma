@@ -2756,50 +2756,6 @@ Ingresar (GtkCellRendererToggle *cellrenderertoggle, gchar *path_str, gpointer d
 
 }
 
-/* void */
-/* CambiarStock (GtkWidget *widget, gpointer data) */
-/* { */
-/*   //  gint new_stock = atoi (gtk_entry_get_text (GTK_ENTRY (entry_stock))); */
-/*   gdouble new_stock = strtod (PUT ((gchar *)gtk_entry_get_text (GTK_ENTRY (entry_stock))), (char **)NULL); */
-/*   gchar *codigo; */
-/*   GtkWidget *window = (GtkWidget *) data; */
-/*   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->compra_tree)); */
-/*   GtkTreeIter iter; */
-/*   Productos *products; */
-
-/*   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE && */
-/*       new_stock != 0) */
-/*     { */
-/*       gtk_tree_model_get (GTK_TREE_MODEL (compra->compra_store), &iter, */
-/*                           0, &codigo, */
-/*                           -1); */
-
-/*       products = BuscarPorCodigo (compra->header, codigo); */
-
-/*       if (new_stock > products->product->cantidad) */
-/*         { */
-/*           ErrorMSG (entry_stock, "No se puede ingresar mas stock del pedido"); */
-/*           products->product->ingresar = FALSE; */
-/*         } */
-/*       else */
-/*         products->product->cantidad = (gdouble) new_stock; */
-
-/*       CloseIngresoParcial (NULL, window); */
-
-/*       CalcularTotales (); */
-
-/*       ingreso_total = FALSE; */
-
-/*       AskIngreso (GTK_WINDOW (main_window)); */
-
-/*     } */
-/*   else */
-/*     { */
-/*       ErrorMSG (entry_stock, "No se puede hacer un ingreso parcial de 0"); */
-/*     } */
-
-/* } */
-
 void
 AnularCompra (void)
 {
@@ -4510,12 +4466,28 @@ on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, 
   GtkTreeModel *model = GTK_TREE_MODEL (data);
   GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
   GtkTreeIter iter;
+  gdouble new_stock = strtod (PUT (new_amount), (char **)NULL);
+  gchar *codigo;
+  Productos *products;
 
   gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
 
-  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-                      4, strtod (PUT (new_amount), (char **)NULL),
+  gtk_tree_model_get (model, &iter,
+                      0, &codigo,
                       -1);
 
-  gtk_tree_path_free (path);
+  products = BuscarPorCodigo (compra->header, codigo);
+
+  if (new_stock > 0 && new_stock <= products->product->cantidad)
+    {
+      gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                          4, new_stock,
+                          -1);
+      CalcularTotales ();
+    }
+  else
+    {
+      ErrorMSG (GTK_WIDGET (model), "El stock a ingresa debe ser mayor a 0 y menor a la cantidad solicitada");
+    }
 }
