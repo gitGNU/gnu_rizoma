@@ -345,8 +345,9 @@ CerrarCaja (gint monto)
   if (monto == -1)
     monto = ArqueoCaja ();
 
-  q = g_strdup_printf ("UPDATE caja SET fecha_termino=NOW(), termino=%d WHERE id=(SELECT last_value"
-		       " FROM caja_id_seq)", monto);
+  q = g_strdup_printf ("UPDATE caja SET fecha_termino=NOW(), termino=%d "
+		       "WHERE id=(SELECT last_value FROM caja_id_seq)",
+		       monto);
   res = EjecutarSQL (q);
   g_free (q);
 
