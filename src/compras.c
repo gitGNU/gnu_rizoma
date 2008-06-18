@@ -51,12 +51,6 @@
 
 GtkBuilder *builder;
 
-gboolean iva = TRUE;
-gboolean perecible = TRUE;
-gboolean fraccion = FALSE;
-
-GtkWidget *combo_imp;
-
 GtkWidget *pago_proveedor;
 GtkWidget *pago_rut;
 GtkWidget *pago_contacto;
@@ -4262,6 +4256,9 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
   GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
 
+  gboolean iva = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_task_yes")));
+  gboolean fraccion = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_fractional_yes")));
+
   gchar *codigo = g_strdup (gtk_entry_get_text (entry_code));
   gchar *barcode = g_strdup (gtk_entry_get_text (entry_barcode));
   gchar *description = g_strdup (gtk_entry_get_text (entry_desc));
@@ -4302,8 +4299,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
                               -1);
         }
 
-      AddNewProductToDB (codigo, barcode, description, marca,
-                         CUT (contenido), unidad, iva, otros, familia, perecible, fraccion);
+      AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido), unidad, iva, otros, familia, FALSE, fraccion);
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 
