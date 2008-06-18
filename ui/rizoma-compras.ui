@@ -97,7 +97,7 @@
             <child>
               <object class="GtkLabel" id="label128">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Numero Guia</property>
+                <property name="label" translatable="yes" context="yes">Numero Factura</property>
               </object>
             </child>
           </object>
