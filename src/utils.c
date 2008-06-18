@@ -361,8 +361,11 @@ clean_container (GtkContainer *container)
                     }
                 }
             }
+          g_free (widget_name);
         }
 
       list = g_list_next (list);
     }
+
+  g_list_free (list);
 }
