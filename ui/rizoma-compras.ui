@@ -2175,6 +2175,7 @@
                             <property name="label" translatable="yes">Confirmar Compra</property>
                             <property name="response_id">0</property>
                             <signal name="clicked" handler="on_button_buy_clicked"/>
+                            <accelerator key="F9" signal="clicked"/>
                           </object>
                           <packing>
                             <property name="position">1</property>
