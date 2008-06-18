@@ -56,7 +56,7 @@ void InsertarCompras (void);
 
 void IngresoDetalle (GtkTreeSelection *selection, gpointer data);
 
-void IngresarCompra (gboolean invoice);
+void IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date);
 
 void SelectProveedores (GtkWidget *widget, gpointer data);
 
@@ -95,7 +95,7 @@ void DocumentoFactura (GtkWidget *widget, gpointer data);
 
 void DocumentoGuia (GtkWidget *widget, gpointer data);
 
-gboolean CheckDocumentData (GtkWidget *wnd, gboolean factura, gchar *rut_proveedor, gint compra);
+gboolean CheckDocumentData (GtkWidget *wnd, gboolean factura, gchar *rut_proveedor, gint id, gchar *n_documento, gchar *monto, GDate *date);
 
 void FillPagarFacturas (gchar *rut_proveedor);
 

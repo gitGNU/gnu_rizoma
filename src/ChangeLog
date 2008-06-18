@@ -5,6 +5,8 @@
 	passed using wnd parameter.
 	(SearchProductHistory): Deleted commented code use it with "canje"
 	feature. Added short-code to product info.
+	(AskElabVenc): Now we get the data here to pass it to
+	CheckDocumentData() and then to IngresarCompra().
 
 	* utils.c (clean_container): Adde g_free and g_list_free to the
 	widget_name and list.

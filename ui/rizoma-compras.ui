@@ -19,6 +19,7 @@
               <object class="GtkEntry" id="entry_ingress_partial_invoice_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="activate" handler="on_entry_ingress_partial_invoice_amount_activate" object="btn_ok_ingress_partial_invoice"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -179,6 +180,7 @@
               <object class="GtkEntry" id="entry_ingress_partial_guide_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="activate" handler="on_entry_ingress_partial_guide_amount_activate" object="btn_ok_ingress_partial_guide"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
