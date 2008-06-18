@@ -137,7 +137,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_ok_ingress_guide2">
+              <object class="GtkButton" id="btn_ok_ingress_partial_invoice">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -145,6 +145,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_ok_ingress_partial_invoice_clicked"/>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -295,7 +296,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="btn_ok_ingress_guide1">
+              <object class="GtkButton" id="btn_ok_ingress_partial_guide">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -303,6 +304,7 @@
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_ok_ingress_partial_guide_clicked"/>
               </object>
               <packing>
                 <property name="position">1</property>
