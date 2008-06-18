@@ -51,33 +51,7 @@
 
 GtkBuilder *builder;
 
-GtkWidget *pago_proveedor;
-GtkWidget *pago_rut;
-GtkWidget *pago_contacto;
-GtkWidget *pago_direccion;
-GtkWidget *pago_comuna;
-GtkWidget *pago_fono;
-GtkWidget *pago_email;
-GtkWidget *pago_web;
-GtkWidget *pago_factura;
-GtkWidget *pago_emision;
-GtkWidget *pago_monto;
-
-GtkTreeStore *pagos_store;
-GtkWidget *pagos_tree;
-
 GtkWidget *entry_plazo;
-
-GtkWidget *pago_plaza;
-GtkWidget *pago_banco;
-GtkWidget *pago_serie;
-GtkWidget *pago_numero;
-GtkWidget *pago_fecha;
-GtkWidget *pago_monto;
-GtkWidget *pago_otro;
-
-GtkWidget *frame_cheque;
-GtkWidget *frame_otro;
 
 void
 toggle_cell (GtkCellRendererToggle *cellrenderertoggle,
@@ -178,186 +152,6 @@ edit_cell (GtkCellRendererText *cellrenderertext,
     }
 
   gtk_tree_path_free (path);
-}
-
-void
-FillDetPagos (void)
-{
-  GtkTreeIter iter;
-  PGresult *res;
-  gchar *doc, *monto, *id;
-  gchar *rut_proveedor;
-  gchar *q;
-  gint tuples, i;
-  //  gchar *iter_string;
-
-  if (gtk_tree_selection_get_selected
-      (gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_facturas)), NULL, &iter) == TRUE)
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_facturas), &iter,
-                          0, &id,
-                          1, &rut_proveedor,
-                          2, &doc,
-                          5, &monto,
-                          -1);
-
-      if (id == NULL)
-        return;
-
-      //hay que testear si funciona este split
-      gchar **rut_split = g_strsplit (rut_proveedor, "-", 2);
-      q = g_strdup_printf ("SELECT nombre, rut || '-' || dv, direccion, ciudad,"
-                           "comuna, telefono, email, web, contacto, giro "
-                           "FROM select_proveedor(%s)",
-                           rut_split[0]);
-      g_strfreev (rut_split); //libera el arreglo de strings
-      res = EjecutarSQL (q);
-      g_free (q); //libera el string
-
-      gtk_entry_set_text (GTK_ENTRY (pago_proveedor), PQgetvalue (res, 0, 1));
-
-      gtk_label_set_markup (GTK_LABEL (pago_rut),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut_proveedor));
-
-      gtk_label_set_markup (GTK_LABEL (pago_contacto),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQgetvalue (res, 0, 9)));
-
-      gtk_label_set_markup (GTK_LABEL (pago_direccion),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQgetvalue (res, 0, 3)));
-
-      gtk_label_set_markup (GTK_LABEL (pago_comuna),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQgetvalue (res, 0, 5)));
-
-      gtk_label_set_markup (GTK_LABEL (pago_fono),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQgetvalue (res, 0, 6)));
-
-      gtk_label_set_markup (GTK_LABEL (pago_email),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQgetvalue (res, 0, 7)));
-
-      gtk_label_set_markup (GTK_LABEL (pago_web),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQgetvalue (res, 0, 8)));
-
-      doc = strtok (strchr (doc, ' '), " ");
-
-      gtk_tree_store_clear (pagos_store);
-
-      if ((gtk_tree_model_iter_n_children (GTK_TREE_MODEL (compra->store_facturas), &iter)) == 0
-          && monto == NULL)
-        {
-          if (gtk_tree_model_iter_has_child
-              (GTK_TREE_MODEL (compra->store_facturas), &iter) == FALSE)
-            { //TODO: es necesario revisar esta sentencia SQL y
-              //simplificarla
-              res = EjecutarSQL (g_strdup_printf
-                                 ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha), (SELECT num_factura FROM factura_compra WHERE id=(SELECT id_factura FROM guias_compra WHERE numero=%s)) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra WHERE numero=%s AND rut_proveedor='%s') AND t1.barcode=t2.barcode AND t2.numero=%s", doc, doc, rut_proveedor, doc));
-
-              tuples = PQntuples (res);
-
-              if (tuples == 0)
-                return;
-
-              for (i = 0; i < tuples; i++)
-                {
-                  gtk_tree_store_append (pagos_store, &iter, NULL);
-                  gtk_tree_store_set (pagos_store, &iter,
-                                      0, PQgetvalue (res, i, 0),
-                                      1, g_strdup_printf
-                                      ("%s %s %s %s", PQgetvalue (res, i, 1),
-                                       PQgetvalue (res, i, 2), PQgetvalue (res, i, 3),
-                                       PQgetvalue (res, i, 4)),
-                                      2, PQgetvalue (res, i, 5),
-                                      3, PQgetvalue (res, i, 6),
-                                      4, PutPoints(g_strdup_printf ("%ld", lround (strtod (CUT(PQgetvalue (res, i, 7)), (char **)NULL)))),
-                                      5, "Black",
-                                      6, FALSE,
-                                      -1);
-                }
-
-              gtk_label_set_markup (GTK_LABEL (pago_monto),
-                                    g_strdup_printf ("<b>$ %s</b>", PQgetvalue (res, 0, 7)));
-
-              gtk_label_set_markup (GTK_LABEL (pago_emision),
-                                    g_strdup_printf
-                                    ("<b>%.2d/%.2d/%.4d</b>", atoi (PQgetvalue (res, 0, 12)),
-                                     atoi (PQgetvalue (res, 0, 11)), atoi (PQgetvalue (res, 0, 10))));
-
-              gtk_label_set_markup (GTK_LABEL (pago_factura),
-                                    g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 13)));
-            }
-          else
-            {
-              q = g_strdup_printf ("SELECT monto, date_part('day',fecha), "
-                                   "date_part('month',fecha), "
-                                   "date_part('year',fecha) FROM "
-                                   "select_factura_compra_by_num_factura(%s)",
-                                   doc);
-              res = EjecutarSQL (q);
-              g_free (q);
-              tuples = PQntuples (res);
-
-              if (tuples == 0)
-                return;
-
-              gtk_label_set_markup (GTK_LABEL (pago_monto),
-                                    g_strdup_printf ("<b>$ %s</b>", PQgetvalue (res, 0, 0)));
-
-              gtk_label_set_markup (GTK_LABEL (pago_emision),
-                                    g_strdup_printf
-                                    ("<b>%.2d/%.2d/%.4d</b>", atoi (PQgetvalue (res, 0, 1)),
-                                     atoi (PQgetvalue (res, 0, 2)), atoi (PQgetvalue (res, 0, 3))));
-
-              gtk_label_set_markup (GTK_LABEL (pago_factura),
-                                    g_strdup_printf ("<b>%s</b>", doc));
-            }
-        }
-      else
-        {
-          //TODO: hay que revisar esta sentencia y hacerla más sencilla
-          res = EjecutarSQL (g_strdup_printf
-                             ("SELECT t1.codigo, t1.descripcion, t1.marca, t1.contenido, t1.unidad, t2.cantidad, t2.precio, (t2.cantidad * t2.precio)::double precision AS total, t2.barcode, t2.id_compra, date_part('year', t2.fecha), date_part('month', t2.fecha), date_part('day', t2.fecha) FROM producto AS t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM factura_compra WHERE num_factura=%s AND rut_proveedor='%s' OR id=%s) AND t1.barcode=t2.barcode AND t2.numero=%s", doc, rut_proveedor, id, doc));
-
-          tuples = PQntuples (res);
-
-          if (tuples == 0)
-            return;
-
-          for (i = 0; i < tuples; i++)
-            {
-              gtk_tree_store_append (pagos_store, &iter, NULL);
-              gtk_tree_store_set (pagos_store, &iter,
-                                  0, PQgetvalue (res, i, 0),
-                                  1, g_strdup_printf
-                                  ("%s %s %s %s", PQgetvalue (res, i, 1),
-                                   PQgetvalue (res, i, 2), PQgetvalue (res, i, 3),
-                                   PQgetvalue (res, i, 4)),
-                                  2, PQgetvalue (res, i, 5),
-                                  3, PQgetvalue (res, i, 6),
-                                  4, PutPoints(g_strdup_printf ("%ld", lround (strtod (CUT(PQgetvalue (res, i, 7)), (char **)NULL)))),
-                                  5, "Black",
-                                  6, FALSE,
-                                  -1);
-            }
-
-          gtk_label_set_markup (GTK_LABEL (pago_monto),
-                                g_strdup_printf ("<b>$ %s</b>", PQgetvalue (res, 0, 7)));
-
-          gtk_label_set_markup (GTK_LABEL (pago_emision),
-                                g_strdup_printf
-                                ("<b>%.2d/%.2d/%.4d</b>", atoi (PQgetvalue (res, 0, 12)),
-                                 atoi (PQgetvalue (res, 0, 11)), atoi (PQgetvalue (res, 0, 10))));
-
-          gtk_label_set_markup (GTK_LABEL (pago_factura),
-                                g_strdup_printf ("<b>%s</b>", doc));
-
-        }
-
-    }
 }
 
 void
@@ -4091,7 +3885,7 @@ on_btn_pay_invoice_clicked ()
 
       if (PagarFactura (atoi (id_invoice)) == FALSE)
         {
-          ErrorMSG (pago_proveedor, "No se ingreso correctamente");
+          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_invoice_provider")), "No se ingreso correctamente");
         }
       else
         {

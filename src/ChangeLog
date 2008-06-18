@@ -14,6 +14,9 @@
 	(CloseAddWindow): Deleted function.
 	(AddNew): Deleted function, replaced by on_btn_add_new_product_clicked.
 	(ToggleSelect): Deleted function.
+	(FillDetPagos): Deleted function.
+	(on_btn_pay_invoice_clicked): Fixed to use GtkBuilder to get the
+	GtkWidget for ErrorMSG().
 
 	* utils.c (clean_container): Adde g_free and g_list_free to the
 	widget_name and list.
