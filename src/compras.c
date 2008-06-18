@@ -3194,6 +3194,7 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
         }
     }
 
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_product")));
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 }
 
