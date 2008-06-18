@@ -4491,3 +4491,19 @@ on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, 
       ErrorMSG (GTK_WIDGET (model), "El stock a ingresa debe ser mayor a 0 y menor a la cantidad solicitada");
     }
 }
+
+void
+on_btn_ok_ingress_partial_guide_clicked (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_partial_guide"));
+
+  AskElabVenc (wnd, FALSE);
+}
+
+void
+on_btn_ok_ingress_partial_invoice_clicked (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_partial_guide"));
+
+  AskElabVenc (wnd, FALSE);
+}

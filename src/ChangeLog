@@ -6,6 +6,8 @@
 	on_partial_cell_renderer_edited as handler for signal edited on
 	"Cant. Ing." column renderer for partial invoice and guide ingress.
 	(CambiarStock): Deleted function.
+	(on_btn_ok_ingress_partial_guide_clicked)
+	(on_btn_ok_ingress_partial_invoice_clicked): Added function.
 
 2008-06-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
