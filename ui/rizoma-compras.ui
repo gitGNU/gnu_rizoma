@@ -16,7 +16,7 @@
             <property name="column_spacing">4</property>
             <property name="row_spacing">4</property>
             <child>
-              <object class="GtkEntry" id="entry_ingress_guide_amount2">
+              <object class="GtkEntry" id="entry_ingress_partial_invoice_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -28,7 +28,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_ingress_guide_n2">
+              <object class="GtkEntry" id="entry_ingress_partial_invoice_n">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -41,7 +41,7 @@
               <object class="GtkHBox" id="hbox22">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkEntry" id="entry_ingress_guide_date2">
+                  <object class="GtkEntry" id="entry_ingress_partial_invoice_date">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
@@ -175,7 +175,7 @@
             <property name="column_spacing">4</property>
             <property name="row_spacing">4</property>
             <child>
-              <object class="GtkEntry" id="entry_ingress_guide_amount1">
+              <object class="GtkEntry" id="entry_ingress_partial_guide_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -187,7 +187,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_ingress_guide_n1">
+              <object class="GtkEntry" id="entry_ingress_partial_guide_n">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -200,7 +200,7 @@
               <object class="GtkHBox" id="hbox21">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkEntry" id="entry_ingress_guide_date1">
+                  <object class="GtkEntry" id="entry_ingress_partial_guide_date">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
