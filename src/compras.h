@@ -125,8 +125,6 @@ void CalcularTotales (void);
 
 void CalcularTotalesGuias (void);
 
-void ToggleSelect (GtkRadioButton *button, gpointer data);
-
 void CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc);
 
 void CheckMontoGuias (void);
