@@ -1200,7 +1200,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_new_product_mark">
+              <object class="GtkEntry" id="entry_new_product_brand">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>

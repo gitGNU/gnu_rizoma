@@ -12,6 +12,7 @@
 	(AddNewProduct): Deleted function replaced by
 	on_button_new_product_clicked.
 	(CloseAddWindow): Deleted function.
+	(AddNew): Deleted function, replaced by on_btn_add_new_product_clicked.
 
 	* utils.c (clean_container): Adde g_free and g_list_free to the
 	widget_name and list.

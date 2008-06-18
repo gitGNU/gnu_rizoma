@@ -1346,65 +1346,6 @@ AddToProductsList (void)
 }
 
 void
-AddNew (GtkWidget *widget, gpointer data)
-{
-  GtkTreeModel *model;
-  GtkTreeIter iter;
-
-  gchar *codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_codigo)));
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_barcode)));
-  gchar *description = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_description)));
-  gchar *marca = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_marca)));
-  gchar *contenido = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_contenido)));
-  gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->new_unidad)));
-  gchar *otros, *familia;
-
-  if (strcmp (codigo, "") == 0)
-    ErrorMSG (compra->new_codigo, "Debe ingresar un codigo corto");
-  else if (strcmp (barcode, "") == 0)
-    ErrorMSG (compra->new_barcode, "Debe Ingresar un Codigo de Barras");
-  else if (strcmp (description, "") == 0)
-    ErrorMSG (compra->new_description, "Debe Ingresar una Descripcion");
-  else if (strcmp (marca, "") == 0)
-    ErrorMSG (compra->new_marca, "Debe Ingresar al Marca del producto");
-  else if (strcmp (contenido, "") == 0)
-    ErrorMSG (compra->new_contenido, "Debe Ingresar el Contenido del producto");
-  else if (strcmp (unidad, "") == 0)
-    ErrorMSG (compra->new_unidad, "Debe Ingresar la Unidad del producto");
-  else
-    {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM select_producto('%s')", codigo)))
-        {
-          ErrorMSG (compra->new_codigo, "Ya existe un producto con el mismo codigo corto");
-          return;
-        }
-
-      if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_imp)) == 0)
-        otros = "";
-      else
-        {
-          model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo_imp));
-          gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo_imp), &iter);
-
-          gtk_tree_model_get (model, &iter,
-                              0, &otros,
-                              -1);
-        }
-
-      AddNewProductToDB (codigo, barcode, description, marca,
-                         CUT (contenido), unidad, iva, otros, familia, perecible, fraccion);
-
-      //      SearchProductHistory (NULL, "");
-
-      CloseAddWindow (NULL, NULL);
-
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
-    }
-
-  return;
-}
-
-void
 AddToTree (void)
 {
   GtkTreeIter iter;
@@ -4330,4 +4271,70 @@ on_entry_ingress_partial_guide_amount_activate (GtkWidget *btn_ok)
   gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_partial_guide_amount")))));
 
   CheckMontoIngreso (btn_ok, total, total_doc);
+}
+
+void
+on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
+  GtkEntry *entry_code = GTK_ENTRY (builder_get (builder, "entry_new_product_code"));
+  GtkEntry *entry_barcode = GTK_ENTRY (builder_get (builder, "entry_new_product_barcode"));
+  GtkEntry *entry_desc = GTK_ENTRY (builder_get (builder, "entry_new_product_desc"));
+  GtkEntry *entry_brand = GTK_ENTRY (builder_get (builder, "entry_new_product_brand"));
+  GtkEntry *entry_cont = GTK_ENTRY (builder_get (builder, "entry_new_product_cont"));
+  GtkEntry *entry_unit = GTK_ENTRY (builder_get (builder, "entry_new_product_unit"));
+
+  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
+
+  gchar *codigo = g_strdup (gtk_entry_get_text (entry_code));
+  gchar *barcode = g_strdup (gtk_entry_get_text (entry_barcode));
+  gchar *description = g_strdup (gtk_entry_get_text (entry_desc));
+  gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
+  gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
+  gchar *unidad = g_strdup (gtk_entry_get_text (entry_unit));
+  gchar *otros;
+  gchar *familia;
+
+  if (strcmp (codigo, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
+  else if (strcmp (barcode, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
+  else if (strcmp (description, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripcion");
+  else if (strcmp (marca, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_brand), "Debe Ingresar al Marca del producto");
+  else if (strcmp (contenido, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cont), "Debe Ingresar el Contenido del producto");
+  else if (strcmp (unidad, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_unit), "Debe Ingresar la Unidad del producto");
+  else
+    {
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM select_producto('%s')", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
+          return;
+        }
+
+      if (gtk_combo_box_get_active (combo) == 0)
+        otros = "";
+      else
+        {
+          model = gtk_combo_box_get_model (combo);
+          gtk_combo_box_get_active_iter (combo, &iter);
+          gtk_tree_model_get (model, &iter,
+                              0, &otros,
+                              -1);
+        }
+
+      AddNewProductToDB (codigo, barcode, description, marca,
+                         CUT (contenido), unidad, iva, otros, familia, perecible, fraccion);
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
+
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
+    }
+
+  return;
 }
