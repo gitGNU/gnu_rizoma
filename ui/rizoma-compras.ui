@@ -1130,7 +1130,7 @@
             <property name="n_columns">2</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkComboBox" id="combobox1">
+              <object class="GtkComboBox" id="cmbbox_imp_others">
                 <property name="visible">True</property>
               </object>
               <packing>
@@ -1144,7 +1144,7 @@
               <object class="GtkHBox" id="hbox9">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton3">
+                  <object class="GtkRadioButton" id="radio_btn_fractional_yes">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">Si</property>
@@ -1154,14 +1154,14 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton4">
+                  <object class="GtkRadioButton" id="radio_btn_fractional_no">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">No</property>
                     <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">radiobutton3</property>
+                    <property name="group">radio_btn_fractional_yes</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -1176,7 +1176,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry9">
+              <object class="GtkEntry" id="entry_new_product_unit">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -1188,7 +1188,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry8">
+              <object class="GtkEntry" id="entry_new_product_cont">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -1200,7 +1200,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry4">
+              <object class="GtkEntry" id="entry_new_product_mark">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -1212,7 +1212,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry3">
+              <object class="GtkEntry" id="entry_new_product_desc">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -1224,7 +1224,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry2">
+              <object class="GtkEntry" id="entry_new_product_barcode">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -1236,7 +1236,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry1">
+              <object class="GtkEntry" id="entry_new_product_code">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -1249,7 +1249,7 @@
               <object class="GtkHBox" id="hbox8">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton1">
+                  <object class="GtkRadioButton" id="radio_btn_task_yes">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">Si</property>
@@ -1259,14 +1259,14 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton2">
+                  <object class="GtkRadioButton" id="radio_btn_task_no">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">No</property>
                     <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">radiobutton1</property>
+                    <property name="group">radio_btn_task_yes</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -1371,7 +1371,7 @@
         <child>
           <object class="GtkHButtonBox" id="hbuttonbox13">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
+            <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
             <child>
               <object class="GtkButton" id="button4">
                 <property name="visible">True</property>
@@ -1380,10 +1380,11 @@
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_new_product"/>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="button5">
+              <object class="GtkButton" id="btn_add_new_product">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
