@@ -2920,42 +2920,56 @@ AskForCurrentPrice (gchar *barcode)
 }
 
 gboolean
-CheckDocumentData (gboolean invoice, gchar *rut_proveedor, gint id)
+CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint id)
 {
   PGresult *res;
+
+  GList *list = gtk_container_get_children (GTK_CONTAINER (wnd));
+  gchar *widget_name = NULL;
 
   GDate *date = g_date_new ();
   GDate *date_buy = g_date_new ();
   gchar *n_documento = NULL;
   gchar *monto = NULL;
 
-  if (invoice)
+  while (list != NULL)
     {
-      n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_n"))));
-      monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount"))));
-
-      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"))));
-
-      if (!g_date_valid (date))
+      if (GTK_IS_ENTRY (list->data))
         {
-          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
-                    "Debe ingresar una fecha de emision para el documento");
-          return FALSE;
+          widget_name = g_strdup (gtk_widget_get_name (GTK_WIDGET (list->data)));
+
+          if (validate_string ("*_n", widget_name))
+            {
+              n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (list->data)));
+            }
+          else if (validate_string ("*_amount", widget_name))
+            {
+              monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (list->data)));
+            }
+          else if (validate_string ("*_date", widget_name))
+            {
+              g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (list->data)));
+
+              if (!g_date_valid (date))
+                {
+                  ErrorMSG (GTK_WIDGET (list->data), "Debe ingresar una fecha de emision para el documento");
+
+                  g_free (list);
+                  g_free (widget_name);
+                  return FALSE;
+                }
+            }
+          g_free (widget_name);
         }
+      list = g_list_next (list);
     }
-  else
+  g_list_free (list);
+
+  if (!g_date_valid (date))
     {
-      n_documento = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_n"))));
-      monto = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_amount"))));
-
-      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_date"))));
-
-      if (!g_date_valid (date))
-        {
-          ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_guide_date")),
-                    "Debe ingresar una fecha de emision para el documento");
-          return FALSE;
-        }
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_date")),
+                "Debe ingresar una fecha de emision para el documento");
+      return FALSE;
     }
 
   res = EjecutarSQL (g_strdup_printf ("SELECT date_part('day', fecha), "
@@ -3507,7 +3521,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
 
   rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id));
 
-  if (CheckDocumentData (invoice, rut_proveedor, id) == FALSE) return;
+  if (CheckDocumentData (wnd, invoice, rut_proveedor, id) == FALSE) return;
 
   IngresarCompra (invoice);
 

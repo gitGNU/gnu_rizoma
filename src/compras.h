@@ -95,7 +95,7 @@ void DocumentoFactura (GtkWidget *widget, gpointer data);
 
 void DocumentoGuia (GtkWidget *widget, gpointer data);
 
-gboolean CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint compra);
+gboolean CheckDocumentData (GtkWidget *wnd, gboolean factura, gchar *rut_proveedor, gint compra);
 
 void FillPagarFacturas (gchar *rut_proveedor);
 
