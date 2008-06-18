@@ -3028,32 +3028,6 @@ CalcularTotalesGuias (void)
     }
 }
 
-
-void
-ToggleSelect (GtkRadioButton *button, gpointer data)
-{
-  gint var = atoi ((char *)data);
-
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (button)) == TRUE)
-    {
-      if (var == 1)
-        iva = TRUE;
-      else if (var == 2)
-        perecible = TRUE;
-      else if (var == 3)
-        fraccion = TRUE;
-    }
-  else
-    {
-      if (var == 1)
-        iva = FALSE;
-      else if (var == 2)
-        perecible = FALSE;
-      else if (var == 3)
-        fraccion = FALSE;
-    }
-}
-
 void
 CheckMontoGuias (void)
 {
