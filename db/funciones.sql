@@ -2068,6 +2068,8 @@ declare
 	id_termino int;
 	last_caja int;
 	arqueo int;
+	egresos int;
+	ingresos int;
 begin
 
 if id_caja = -1 then
@@ -2079,9 +2081,27 @@ end if;
 select id_venta_inicio, id_venta_termino into id_inicio, id_termino
        from caja where id = last_caja;
 
-select trunc(sum(cantidad * precio + iva)) into arqueo
-       from venta_detalle
-       where id_venta > id_inicio and id_venta <= id_termino;
+select sum(monto) into arqueo
+       from venta
+       where id > id_inicio and id <= id_termino;
 
-return arqueo;
+if arqueo is null then
+   arqueo := 0;
+end if;
+
+select sum(monto) into egresos from egreso
+       where id_caja = last_caja;
+
+if egresos is null then
+   egresos := 0;
+end if;
+
+select sum(monto) into ingresos from ingreso
+       where id_caja = last_caja;
+
+if ingresos is null then
+   ingresos := 0;
+end if;
+
+return (arqueo + ingresos - egresos);
 end; $$ language plpgsql;
