@@ -1665,10 +1665,27 @@
                               <placeholder/>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel" id="label_code">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">5</property>
+                                <property name="right_attach">6</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel" id="label71">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Codigo</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">4</property>
+                                <property name="right_attach">5</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                              </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label_unit">
