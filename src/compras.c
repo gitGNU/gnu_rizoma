@@ -1048,14 +1048,12 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
         {
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")),
                                 g_strdup_printf ("<span weight=\"ultrabold\">%.2f dias"
-                                                 "</span>",
-                                                 day_to_sell));
+                                                 "</span>", day_to_sell));
         }
       else
         {
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")),
-                                g_strdup_printf ("<span weight=\"ultrabold\">"
-                                                 "indefinidos dias</span>"));
+                                g_strdup_printf ("<span weight=\"ultrabold\">indefinidos dias</span>"));
         }
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_sell_price")),
@@ -1067,18 +1065,9 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              GetDataByOne (q)));
       g_free(q);
-      q = g_strdup_printf ("SELECT marca, costo_promedio, canje, stock_pro "
-                           "FROM select_producto(%s)",
-                           barcode);
+      q = g_strdup_printf ("SELECT codigo_corto, marca, costo_promedio, canje, stock_pro "
+                           "FROM select_producto(%s)", barcode);
       res = EjecutarSQL(q);
-      if (g_str_equal (PQvaluebycol(res, 0, "canje"), "t"))
-        {
-          /* gtk_label_set_markup (GTK_LABEL (label_canje), "Stock Pro: "); */
-          /* gtk_label_set_markup (GTK_LABEL (label_stock_pro), */
-          /*                       g_strdup_printf ("<span weight=\"ultrabold\">%.3f</span>", */
-          /*                                        strtod (PUT (PQvaluebycol(res, 0, "stock_pro")), */
-          /* (char **)NULL))); */
-        }
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
@@ -1091,6 +1080,9 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
                                              PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
+
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }

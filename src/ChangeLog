@@ -3,6 +3,8 @@
 	* compras.c (CheckDocumentData): Added a new way to find the
 	proper entry to check data. We check on all the entries on the wnd
 	passed using wnd parameter.
+	(SearchProductHistory): Deleted commented code use it with "canje"
+	feature. Added short-code to product info.
 
 	* utils.c (clean_container): Adde g_free and g_list_free to the
 	widget_name and list.
