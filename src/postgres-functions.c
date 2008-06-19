@@ -2222,7 +2222,13 @@ users_working (void)
 			  PQvaluebycol(res, i, "id"));
       res2 = EjecutarSQL (q);
 
-      if (g_str_equal (PQvaluebycol(res2, 0, "salida_year"), "-1"))
+      if (PQntuples(res2) == 0)
+	{
+	  g_free (q);
+	  continue;
+	}
+
+      if (g_str_equal (PQvaluebycol(res2, 0, "salida_year"), "-1") || (g_str_equal(PQvaluebycol(res2, 0, "salida_year"), "")))
 	users_working++;
 
       g_free (q);
