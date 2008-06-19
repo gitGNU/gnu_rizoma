@@ -2067,9 +2067,11 @@ declare
 	id_inicio int;
 	id_termino int;
 	last_caja int;
-	arqueo int;
-	egresos int;
-	ingresos int;
+	arqueo bigint;
+	egresos bigint;
+	ingresos bigint;
+	q varchar;
+	l record;
 begin
 
 if id_caja = -1 then
@@ -2081,27 +2083,32 @@ end if;
 select id_venta_inicio, id_venta_termino into id_inicio, id_termino
        from caja where id = last_caja;
 
+if id_termino is null then
+   select last_value into id_termino from venta_id_seq;
+end if;
+
 select sum(monto) into arqueo
        from venta
-       where id > id_inicio and id <= id_termino;
+       where id > id_inicio and id <= id_termino
+       and tipo_documento = 0;
 
 if arqueo is null then
    arqueo := 0;
 end if;
 
-select sum(monto) into egresos from egreso
-       where id_caja = last_caja;
+egresos := 0;
+q := $S$ select monto from egreso where id_caja = $S$ || last_caja;
+for l in execute q loop
+    egresos := egresos + l.monto;
+end loop;
 
-if egresos is null then
-   egresos := 0;
-end if;
+ingresos := 0;
 
-select sum(monto) into ingresos from ingreso
-       where id_caja = last_caja;
+q := $S$ select monto from ingreso where id_caja = $S$ || last_caja;
 
-if ingresos is null then
-   ingresos := 0;
-end if;
+for l in execute q loop
+    ingresos := ingresos + l.monto;
+end loop;
 
 return (arqueo + ingresos - egresos);
 end; $$ language plpgsql;
