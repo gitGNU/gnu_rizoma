@@ -82,19 +82,10 @@ ReturnSaldoCaja (void)
   PGresult *res;
   gint caja;
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("SELECT (SELECT inicio FROM caja WHERE date_trunc ('day', fecha_inicio)=date_trunc('day', localtimestamp)) AS inicio, (SELECT SUM (monto) FROM venta WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp))) AS ventas_doc, (SELECT SUM (monto) FROM egreso WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo=1) AS retiros, (SELECT SUM(monto_abonado) FROM abono WHERE date_trunc('day', fecha_abono)=date_trunc('day', localtimestamp)) AS pago_credit, (SELECT SUM(monto) FROM ingreso WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp)) AS otros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', localtimestamp) AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM factura_compra WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_trunc('day', fecha)=date_trunc('day', localtimestamp))) AS facturas", CASH));
+  res = EjecutarSQL ("select * from get_arqueo_caja(-1)");
 
   if (res != NULL && PQntuples (res) != 0)
-    caja = atoi
-      ((g_strdup_printf ("%d",
-                         (atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) +
-                          atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 4)) +
-                          atoi (PQgetvalue (res, 0, 5))) -
-                         (atoi (PQgetvalue (res, 0, 8)) +
-                          atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) +
-                          atoi (PQgetvalue (res, 0, 7))))));
+    caja = atoi (PQgetvalue(res, 0, 0));
   else
     caja = 0;
 
@@ -612,4 +603,33 @@ caja_get_last_amount (void)
   last_amount = atoi(PQgetvalue(res, 0, 0));
 
   return last_amount;
+}
+
+void
+on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
+{
+  GtkWidget *widget;
+  gint monto;
+  gint must_have;
+
+  monto = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
+
+  if (monto < 0)
+      AlertMSG(GTK_WIDGET(editable), "no puede ingresar un monto de perdida menor que 0");
+  else
+    {
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
+      must_have = (gint)g_object_get_data(G_OBJECT(widget), "must-have");
+
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_lost"));
+      gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", must_have - monto));
+      if (must_have > monto)
+	{
+	  gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("<span color=\"red\">%d</span>", must_have - monto));
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
+	  gtk_entry_set_text (GTK_ENTRY(widget), g_strdup_printf("%d", monto));
+	}
+      else if (must_have <= monto)
+	gtk_label_set_markup (GTK_LABEL(widget), "0");
+    }
 }
