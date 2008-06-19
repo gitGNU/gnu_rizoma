@@ -124,7 +124,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_in_motiv"));
   model = gtk_combo_box_get_model(GTK_COMBO_BOX(aux_widget));
-  if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(aux_widget), &iter))
+  if (!(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(aux_widget), &iter)))
     {
       ErrorMSG(aux_widget, "Debe seleccionar un tipo de ingreso");
       return;
@@ -164,7 +164,7 @@ VentanaIngreso (gint monto)
   res = EjecutarSQL ("SELECT id, descrip FROM tipo_ingreso");
   tuples = PQntuples (res);
 
-  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_out_motiv"));
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_in_motiv"));
   store = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(aux_widget)));
 
   if (store == NULL)
@@ -369,7 +369,7 @@ CalcularPerdida (void)
 
   perdida = cash_sell - cierre_caja;
 
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO caja (perdida) VALUES(%d) WHERE id="
+  res = EjecutarSQL (g_strdup_printf ("update caja set perdida=%d WHERE id="
                                       "(SELECT last_value FROM caja_id_seq)", perdida));
 
   if (res != NULL)
@@ -457,6 +457,9 @@ IniciarLaCaja (GtkWidget *widget, gpointer data)
   CloseCajaWin ();
 
   InicializarCaja (inicio);
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_init"));
+  gtk_widget_hide (aux_widget);
 
   if (inicio < monto)
     VentanaIngreso (monto - inicio);
@@ -560,16 +563,8 @@ prepare_caja (void)
 
   closed_caja = check_caja();
 
-  if (user_data->user_id == 0)
-    {
-      if (closed_caja)
-	  open_caja (FALSE);
-    }
-  else
-    {
-      if (closed_caja)
-	open_caja (TRUE);
-    }
+  if (closed_caja)
+    open_caja ( user_data->user_id == 1 ? FALSE : TRUE);
 }
 
 /**
@@ -582,9 +577,8 @@ void
 open_caja (gboolean automatic_mode)
 {
   gint last_amount;
-  gint last_caja;
 
-  last_caja = caja_get_last_amount();
+  last_amount = caja_get_last_amount();
 
   if (automatic_mode)
     InicializarCaja(last_amount);
