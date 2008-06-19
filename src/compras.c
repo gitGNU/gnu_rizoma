@@ -491,8 +491,7 @@ compras_win ()
 
   /* Guide -> Invoice */
 
-  store = gtk_list_store_new (4,
-                              G_TYPE_STRING,
+  store = gtk_list_store_new (3,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING);
@@ -522,7 +521,7 @@ compras_win ()
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID Compra", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
                                                      "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -530,17 +529,7 @@ compras_win ()
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
-                                                     "text", 3,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  store = gtk_list_store_new (4,
-                              G_TYPE_STRING,
+  store = gtk_list_store_new (3,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING);
@@ -573,17 +562,8 @@ compras_win ()
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID Compra", renderer,
-                                                     "text", 2,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
-                                                     "text", 3,
+                                                     "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -2498,7 +2478,7 @@ FillGuias (gchar *rut_proveedor)
   gint tuples, i;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT id, numero, id_compra, (SELECT SUM ((precio * cantidad) + iva + otros_impuestos) FROM compra_detalle WHERE compra_detalle.id_compra=guias_compra.id_compra) as monto "
+  q = g_strdup_printf ("SELECT id, numero, (SELECT SUM ((precio * cantidad) + iva + otros_impuestos) FROM compra_detalle WHERE compra_detalle.id_compra=guias_compra.id_compra) as monto "
                        "FROM guias_compra WHERE rut_proveedor='%s'", rut_proveedor);
   res = EjecutarSQL (q);
 
@@ -2512,8 +2492,7 @@ FillGuias (gchar *rut_proveedor)
       gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "id"),
                           1, PQvaluebycol (res, i, "numero"),
-                          2, PQvaluebycol (res, i, "id_compra"),
-                          3, PQvaluebycol (res, i, "monto"),
+                          2, PQvaluebycol (res, i, "monto"),
                           -1);
     }
 }
@@ -3606,7 +3585,6 @@ on_btn_guide_invoice_clicked (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   gchar *id;
   gchar *n_guide;
-  gchar *id_compra;
   gchar *monto;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
@@ -3614,8 +3592,7 @@ on_btn_guide_invoice_clicked (GtkButton *button, gpointer data)
       gtk_tree_model_get (model, &iter,
                           0, &id,
                           1, &n_guide,
-                          2, &id_compra,
-                          3, &monto,
+                          2, &monto,
                           -1);
       gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 
@@ -3626,8 +3603,7 @@ on_btn_guide_invoice_clicked (GtkButton *button, gpointer data)
       gtk_list_store_set (GTK_LIST_STORE (model), &iter,
                           0, id,
                           1, n_guide,
-                          2, id_compra,
-                          3, monto,
+                          2, monto,
                           -1);
     }
 }
@@ -3642,7 +3618,6 @@ on_btn_invoice_guide_clicked (GtkButton *button, gpointer date)
   GtkTreeIter iter;
   gchar *id;
   gchar *n_guide;
-  gchar *id_compra;
   gchar *monto;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
@@ -3650,8 +3625,7 @@ on_btn_invoice_guide_clicked (GtkButton *button, gpointer date)
       gtk_tree_model_get (model, &iter,
                           0, &id,
                           1, &n_guide,
-                          2, &id_compra,
-                          3, &monto,
+                          2, &monto,
                           -1);
       gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 
@@ -3661,8 +3635,7 @@ on_btn_invoice_guide_clicked (GtkButton *button, gpointer date)
       gtk_list_store_set (GTK_LIST_STORE (model), &iter,
                           0, id,
                           1, n_guide,
-                          2, id_compra,
-                          3, monto,
+                          2, monto,
                           -1);
     }
 }
