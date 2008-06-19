@@ -25,6 +25,7 @@ INSERT INTO impuesto VALUES (DEFAULT, 'Piscos y Whisky', 27);
 INSERT INTO impuesto VALUES (DEFAULT, 'Vinos y Cervezas', 15);
 
 INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Sencillo');
+INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Exceso de caja');
 
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Retiro');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Perdida');
