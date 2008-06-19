@@ -3585,7 +3585,6 @@ on_btn_guide_invoice_clicked (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   gchar *id;
   gchar *n_guide;
-  gchar *id_compra;
   gchar *monto;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
@@ -3619,7 +3618,6 @@ on_btn_invoice_guide_clicked (GtkButton *button, gpointer date)
   GtkTreeIter iter;
   gchar *id;
   gchar *n_guide;
-  gchar *id_compra;
   gchar *monto;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
