@@ -550,11 +550,7 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
 void
 prepare_caja (void)
 {
-  gboolean closed_caja;
-
-  closed_caja = check_caja();
-
-  if (closed_caja)
+  if (check_caja())
     open_caja ( user_data->user_id == 1 ? FALSE : TRUE);
 }
 
@@ -567,14 +563,10 @@ prepare_caja (void)
 void
 open_caja (gboolean automatic_mode)
 {
-  gint last_amount;
-
-  last_amount = caja_get_last_amount();
-
   if (automatic_mode)
-    InicializarCaja(last_amount);
+    InicializarCaja(caja_get_last_amount());
   else
-      InicializarCajaWin (last_amount);
+      InicializarCajaWin (caja_get_last_amount());
 }
 
 
