@@ -326,7 +326,7 @@ BEGIN
 
 select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
 
-if prod_vendidos = 0 or prod_vendidos = NULL then
+if prod_vendidos = 0 or prod_vendidos IS NULL then
    prod_vendidos := 1; -- to avoid division by zero
 end if;
 
