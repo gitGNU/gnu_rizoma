@@ -326,7 +326,7 @@ BEGIN
 
 select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
 
-if prod_vendidos = 0 or prod_vendidos = NULL then
+if prod_vendidos = 0 or prod_vendidos IS NULL then
    prod_vendidos := 1; -- to avoid division by zero
 end if;
 
@@ -1978,7 +1978,7 @@ declare
 begin
 select max(id) into current_caja from caja;
 
-if (select fecha_termino from caja where id=current_caja) != NULL then
+if (select fecha_termino from caja where id=current_caja) IS NOT NULL then
    raise notice 'Adding an egreso to caja that is closed (%)', current_caja;
 end if;
 
@@ -1999,7 +1999,7 @@ begin
 
 select max(id) into current_caja from caja;
 
-if (select fecha_termino from caja where id=current_caja) != NULL then
+if (select fecha_termino from caja where id=current_caja) IS NOT NULL then
    raise notice 'Adding an ingreso to caja that is closed (%)', current_caja;
 end if;
 
