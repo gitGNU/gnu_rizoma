@@ -56,7 +56,7 @@ void InsertarCompras (void);
 
 void IngresoDetalle (GtkTreeSelection *selection, gpointer data);
 
-void IngresarCompra (gboolean invoice);
+void IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date);
 
 void SelectProveedores (GtkWidget *widget, gpointer data);
 
@@ -77,8 +77,6 @@ void IngresoParcial (void);
 
 void ChangeIngreso (GtkEntry *entry, gpointer data);
 
-void CambiarStock (GtkWidget *widget, gpointer data);
-
 void AnularCompra (void);
 
 void AnularProducto (void);
@@ -97,7 +95,7 @@ void DocumentoFactura (GtkWidget *widget, gpointer data);
 
 void DocumentoGuia (GtkWidget *widget, gpointer data);
 
-gboolean CheckDocumentData (gboolean factura, gchar *rut_proveedor, gint compra);
+gboolean CheckDocumentData (GtkWidget *wnd, gboolean factura, gchar *rut_proveedor, gint id, gchar *n_documento, gchar *monto, GDate *date);
 
 void FillPagarFacturas (gchar *rut_proveedor);
 
@@ -127,8 +125,6 @@ void CalcularTotales (void);
 
 void CalcularTotalesGuias (void);
 
-void ToggleSelect (GtkRadioButton *button, gpointer data);
-
 void CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc);
 
 void CheckMontoGuias (void);
@@ -146,5 +142,7 @@ void on_tree_selection_pending_guide_changed (GtkTreeSelection *selection, gpoin
 void on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpointer data);
 
 void FillPartialTree (GtkTreeView *tree);
+
+void on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_amount, gpointer data);
 
 #endif

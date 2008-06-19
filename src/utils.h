@@ -45,6 +45,8 @@ void display_calendar (GtkEntry *entry);
 
 void statusbar_push (GtkStatusbar *statusbar, const gchar *text, guint duration);
 
+gboolean validate_string (gchar *pattern, gchar *subject);
+
 void clean_container (GtkContainer *container);
 
 #endif

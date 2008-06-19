@@ -1,3 +1,37 @@
+2008-06-18  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (CheckDocumentData): Added a new way to find the
+	proper entry to check data. We check on all the entries on the wnd
+	passed using wnd parameter.
+	(SearchProductHistory): Deleted commented code use it with "canje"
+	feature. Added short-code to product info.
+	(AskElabVenc): Now we get the data here to pass it to
+	CheckDocumentData() and then to IngresarCompra().
+	(on_button_ok_ingress_clicked): Fixed bug that duplicated columns.
+	(Save): Deleted unnecessary code.
+	(AddNewProduct): Deleted function replaced by
+	on_button_new_product_clicked.
+	(CloseAddWindow): Deleted function.
+	(AddNew): Deleted function, replaced by on_btn_add_new_product_clicked.
+	(ToggleSelect): Deleted function.
+	(FillDetPagos): Deleted function.
+	(on_btn_pay_invoice_clicked): Fixed to use GtkBuilder to get the
+	GtkWidget for ErrorMSG().
+
+	* utils.c (clean_container): Adde g_free and g_list_free to the
+	widget_name and list.
+
+2008-06-17  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (on_partial_cell_renderer_edited): Added function edit
+	a cell_renderer on partial ingress treeviews.
+	(on_button_ok_ingress_clicked): Added
+	on_partial_cell_renderer_edited as handler for signal edited on
+	"Cant. Ing." column renderer for partial invoice and guide ingress.
+	(CambiarStock): Deleted function.
+	(on_btn_ok_ingress_partial_guide_clicked)
+	(on_btn_ok_ingress_partial_invoice_clicked): Added function.
+
 2008-06-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (AskPagarCaja): Deleted function.
