@@ -362,13 +362,8 @@ CalcularPerdida (void)
 {
   PGresult *res;
   gint perdida, cash_sell, cierre_caja;
-  gchar *q;
 
-  q = g_strdup_printf ("SELECT SUM (monto) as total_sell FROM venta WHERE "
-		       "date_trunc('day', fecha) = CURRENT_DATE"
-		       "AND tipo_venta=%d", CASH);
-  cash_sell = atoi (GetDataByOne (q));
-  g_free(q);
+  cash_sell = atoi (GetDataByOne ("select * from get_arqueo_caja(-1)"));
 
   cierre_caja = atoi (GetDataByOne ("SELECT termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq)"));
 
