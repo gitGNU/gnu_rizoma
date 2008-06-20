@@ -517,7 +517,6 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
     {
       Egresar (monto_real_que_tiene - monto_de_cierre, 0, user_data->user_id);
       res = CerrarCaja (monto_de_cierre);
-
     }
   else
     if (monto_de_cierre > monto_real_que_tiene)
@@ -587,7 +586,7 @@ caja_get_last_amount (void)
   res = EjecutarSQL("select max(id) from caja");
   last_caja = atoi(PQgetvalue(res, 0, 0));
 
-  q = g_strdup_printf("select (termino - perdida) from caja where id=%d",
+  q = g_strdup_printf("select termino from caja where id=%d",
 		      last_caja);
   res = EjecutarSQL(q);
   g_free(q);
