@@ -2060,6 +2060,9 @@ create trigger trigger_update_caja before update
        on caja for each row
        execute procedure trg_update_caja();
 
+--
+-- returns the amount of money that must have a given 'caja'
+-- if is passed -1 then checks the current caja
 create or replace function get_arqueo_caja(
        in id_caja int)
 returns int as $$
@@ -2070,6 +2073,7 @@ declare
 	arqueo bigint;
 	egresos bigint;
 	ingresos bigint;
+	monto_apertura bigint;
 	q varchar;
 	l record;
 begin
@@ -2078,6 +2082,13 @@ if id_caja = -1 then
     select last_value into last_caja from caja_id_seq;
 else
     last_caja := id_caja;
+end if;
+
+select inicio into monto_apertura
+       from caja where id = last_caja;
+
+if monto_apertura is null then
+   monto_apertura := 0;
 end if;
 
 select id_venta_inicio, id_venta_termino into id_inicio, id_termino
@@ -2110,5 +2121,5 @@ for l in execute q loop
     ingresos := ingresos + l.monto;
 end loop;
 
-return (arqueo + ingresos - egresos);
+return (monto_apertura + arqueo + ingresos - egresos);
 end; $$ language plpgsql;
