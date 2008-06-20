@@ -597,6 +597,13 @@ caja_get_last_amount (void)
   return last_amount;
 }
 
+/**
+ * Uodates the entry of amount to close and the label of lost money in
+ * the close 'caja' dialog.
+ *
+ * @param editable the entry that emits the signal
+ * @param data the user data
+ */
 void
 on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
 {
