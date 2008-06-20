@@ -98,7 +98,7 @@ FillUsers (void)
 					 PQvaluebycol (res2, 0, "entrada_hour"),
 					 PQvaluebycol (res2, 0, "entrada_min"));
 
-	      if (!(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1")))
+	      if (!(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1")) && !(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "")))
 		salida = g_strdup_printf ("%s/%s/%s %s:%s",
 					  PQvaluebycol (res2, 0, "salida_day"),
 					  PQvaluebycol (res2, 0, "salida_month"),
