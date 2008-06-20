@@ -618,7 +618,7 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
 
       if (must_have > monto)
 	gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("<span color=\"red\">%d</span>", must_have - monto));
-      else if (must_have <= monto)
+      else
 	gtk_label_set_markup (GTK_LABEL(widget), "0");
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
