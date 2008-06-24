@@ -168,8 +168,8 @@ volcar_db (GtkWidget *button, gpointer user_data)
       return;
     }
 
-  command = g_strdup_printf ("su - %s -c \\\"dropdb %s; createdb -O %s %s;\\\"",
-                             local_user_pg, name_db, user_pg, name_db);
+  command = g_strdup_printf ("su - %s -c \\\"dropdb -h %s -p %s %s; createdb -h %s -p %s -O %s %s;\\\"",
+                             local_user_pg, host_pg, port_pg, name_db, host_pg, port_pg, user_pg, name_db);
   if (!run_gksu_command (command))
     {
       dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_db");
@@ -228,7 +228,7 @@ volcar_db (GtkWidget *button, gpointer user_data)
                          " VALUES (DEFAULT, '%s', md5('%s'), 0, 0, 'Administrador', '', '', NOW(), 0)",
                          user_admin, pass_admin);
 
-  command = g_strdup_printf ("psql -f %s -d %s -c \"%s\"", path, name_db, sql);
+  command = g_strdup_printf ("psql -h %s -p %s -f %s -d %s -c \"%s\"", host_pg, port_pg, path, name_db, sql);
   if (system (command) != 0)
     {
       dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_admin_user");
@@ -238,7 +238,7 @@ volcar_db (GtkWidget *button, gpointer user_data)
     }
 
   path = g_strdup_printf ("%s/funciones.sql", sql_data);
-  command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
+  command = g_strdup_printf ("psql -h %s -p %s -f %s -d %s", host_pg, port_pg, path, name_db);
   if (system (command) != 0)
     {
       dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_plsql");
@@ -287,8 +287,8 @@ create_db_user (GtkWidget *button, gpointer user_data)
     }
   else
     {
-      command = g_strdup_printf ("su %s -c \\\"psql template1 -c \\\\\\\"CREATE USER %s ENCRYPTED PASSWORD \'%s\' CREATEDB NOCREATEUSER;\\\\\\\"\\\"",
-                                 local_user_pg, user_pg, pass_pg);
+      command = g_strdup_printf ("su %s -c \\\"psql -h %s -p %s template1 -c \\\\\\\"CREATE USER %s ENCRYPTED PASSWORD \'%s\' CREATEDB NOCREATEUSER;\\\\\\\"\\\"",
+                                 local_user_pg, host_pg, port_pg, user_pg, pass_pg);
 
       pgpass_string = g_strdup_printf ("%s:%s:*:%s:%s", host_pg, port_pg, user_pg, pass_pg);
 
