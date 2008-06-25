@@ -57,8 +57,7 @@ rizoma_open_config()
 
   if (!res)
     {
-      g_printerr("\n*** funcion %s: no pudo ser cargado el "
-                 "archivo de configuracion", G_STRFUNC);
+      g_printerr("\n*** funcion %s: no pudo ser cargado el archivo de configuracion", G_STRFUNC);
       g_printerr("\npath: %s", rizoma_path);
 
       return NULL;

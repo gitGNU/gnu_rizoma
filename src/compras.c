@@ -2954,6 +2954,12 @@ main (int argc, char **argv)
 
   key_file = rizoma_open_config();
 
+  if (key_file == NULL)
+    {
+      g_error ("Cannot open config file\n");
+      return -1;
+    }
+
   gtk_init (&argc, &argv);
 
   builder = gtk_builder_new ();

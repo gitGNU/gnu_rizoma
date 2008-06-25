@@ -1,3 +1,14 @@
+2008-06-25  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (main): Added an error message when
+	rizoma_open_config() returns NULL.
+
+	* admin.c (main): Added an error message when rizoma_open_config()
+	returns NULL.
+
+	* compras.c (main): Added an error message when
+	rizoma_open_config() returns NULL.
+
 2008-06-18  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (CheckDocumentData): Added a new way to find the
