@@ -32,4 +32,6 @@ gint AddSeller (void);
 
 void CloseAddSellerWin (GtkButton *button, gpointer user_data);
 
+void FillUsers (void);
+
 #endif

@@ -245,3 +245,31 @@ on_quit_application (GtkButton *button, gpointer user_data)
 {
   gtk_main_quit ();
 }
+
+
+/**
+ * Callback connected to the switch-page signal of the main
+ * gtknotebook in rizoma-admin
+ *
+ * This function refresh the information that contains every page when
+ * the user switch to the page_num.
+ *
+ * @param notebook the notebook that emits the signal
+ * @param page the current page
+ * @param page_num the page number
+ * @param data the user data
+ */
+void
+on_notebook1_switch_page (GtkNotebook *notebook,
+			  GtkNotebookPage *page,
+			  guint page_num,
+			  gpointer data)
+{
+
+  switch (page_num)
+    {
+    case 0:
+      FillUsers();
+    }
+
+}
