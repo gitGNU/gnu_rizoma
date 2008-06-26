@@ -3161,6 +3161,7 @@ on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
   else
     {
       window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+      gtk_dialog_set_default_response (GTK_DIALOG(window), GTK_RESPONSE_YES);
       gtk_widget_show_all (window);
     }
   return TRUE;
