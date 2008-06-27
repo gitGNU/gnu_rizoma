@@ -3103,6 +3103,15 @@ main (int argc, char **argv)
 }
 
 
+/**
+ * Connected to accept button of the login window
+ *
+ * This funcion is in charge of validate the user/password and then
+ * call the initialization functions
+ *
+ * @param widget the widget that emits the signal
+ * @param data the user data
+ */
 void
 check_passwd (GtkWidget *widget, gpointer data)
 {
@@ -3150,6 +3159,22 @@ check_passwd (GtkWidget *widget, gpointer data)
     }
 }
 
+/**
+ * Callback connected to delete-event of the sales window and the exit
+ * button in the same window.
+ *
+ * Checks if must be closed the caja, if must be closed then calls the
+ * propers functions, otherwise raise the confirmation dialog.
+ *
+ * Note: do not use the parameters of this function, because they are
+ * not secure.
+ *
+ * @param widget the widget that emits the signal
+ * @param event the event
+ * @param data the user data
+ *
+ * @return TRUE to stop other handlers of being invoked
+ */
 gboolean
 on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -3161,11 +3186,23 @@ on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
   else
     {
       window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+      gtk_dialog_set_default_response (GTK_DIALOG(window), GTK_RESPONSE_YES);
       gtk_widget_show_all (window);
     }
   return TRUE;
 }
 
+/**
+ * Callback connected to response signal emited by the confirmation
+ * dialog of rizoma-ventas
+ *
+ * This function must contain all the necesary finalization code, like
+ * the exit time of the sales man
+ *
+ * @param dialog the dialog that emits the signal
+ * @param response_id the response
+ * @param data the user data
+ */
 void
 exit_response (GtkDialog *dialog, gint response_id, gpointer data)
 {
@@ -3591,6 +3628,20 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 
 }
 
+
+/**
+ * Callback connected the key-press-event in the main window.
+ *
+ * This function must be simple, because can lead to a performance
+ * issues. It currently only handles the global keys that are
+ * associated to nothing.
+ *
+ * @param widget the widget that emits the signal
+ * @param event the event
+ * @param data the user data
+ *
+ * @return TRUE on key captured, FALSE to let the key pass.
+ */
 gboolean
 on_ventas_gui_key_press_event(GtkWidget   *widget,
 			      GdkEventKey *event,
