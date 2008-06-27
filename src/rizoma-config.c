@@ -319,9 +319,9 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
     }
   else if (current_page == 2)
     {
-      gboolean network = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_type_network")));
       gboolean client = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_client")));
       GtkNotebook *notebook = GTK_NOTEBOOK (gtk_builder_get_object (builder, "ntbk_data_ingress"));
+
       if (client)
         {
           gtk_notebook_set_current_page (notebook, 1);
