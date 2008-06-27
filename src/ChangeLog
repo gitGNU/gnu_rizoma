@@ -1,3 +1,9 @@
+2008-06-27  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma-config.c (on_radio_btn_type_network_toggled): Added
+	function to handle the toggle on network button.
+	(on_page_change): Prefer the use of if-elseif instead of many if.
+
 2008-06-25  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (main): Added an error message when
