@@ -330,12 +330,16 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
         {
           gtk_notebook_set_current_page (notebook, 2);
         }
+
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
   else if (current_page == 3)
     {
       GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
 
       gtk_entry_set_text (ruta_sql, DATADIR);
+
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
   else if (current_page == 4)
     {
