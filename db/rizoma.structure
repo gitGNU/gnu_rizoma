@@ -28,70 +28,6 @@
 -- 
 -- ================================================================================
 
-
-
--- Generated SQL Constraints Drop statements
--- --------------------------------------------------------------------
---     Target Database:   postgres
---     SQL Generator:     tedia2sql -- v1.2.12
---     Generated at:      Sat Nov 10 12:10:10 2007
---     Input Files:       modelo.dia
-
--- alter table venta_detalle drop constraint fk_productos_barcode-- (is implicitly done)
--- alter table venta_detalle drop constraint fk_venta_id-- (is implicitly done)
--- alter table producto_recibido drop constraint fk_productos_recibidos_productos-- (is implicitly done)
--- alter table producto_recibido drop constraint fk_compras_productos_recibidos-- (is implicitly done)
--- alter table Compra drop constraint fk_proveedor_compra-- (is implicitly done)
--- alter table Cheques drop constraint fk_venta_cheque-- (is implicitly done)
--- alter table compra_detalle drop constraint fk_producto_detalle_compra-- (is implicitly done)
--- alter table compra_detalle drop constraint fk_impuesto_detalle_compra-- (is implicitly done)
--- alter table Asistencia drop constraint fk_asistencia_users-- (is implicitly done)
--- alter table merma drop constraint fk_merma_producto-- (is implicitly done)
--- alter table merma drop constraint fk_merma_tipo_merma-- (is implicitly done)
--- alter table Abono drop constraint fk_abono_cliente-- (is implicitly done)
--- alter table Tarjetas drop constraint fk_tarjeta_venta-- (is implicitly done)
--- alter table Canje drop constraint fk_canje_producto-- (is implicitly done)
--- alter table deuda drop constraint fk_deuda_venta-- (is implicitly done)
--- alter table deuda drop constraint fk_deuda_cliente-- (is implicitly done)
--- alter table deuda drop constraint fk_deuda_user-- (is implicitly done)
--- alter table Devolucion drop constraint fk_devolucion_producto-- (is implicitly done)
--- alter table ingreso drop constraint fk_ingreso_tipo_ingreso-- (is implicitly done)
--- alter table ingreso drop constraint fk_ingreso_users-- (is implicitly done)
--- alter table egreso drop constraint fk_egreso_tipo_egreso-- (is implicitly done)
--- alter table egreso drop constraint fk_egreso_users-- (is implicitly done)
--- alter table factura_compra drop constraint fk_factura_compra_compra-- (is implicitly done)
--- alter table factura_compra drop constraint fk_factura_compra_proveedor-- (is implicitly done)
--- alter table guias_compra drop constraint fk_guia_compra_proveedor-- (is implicitly done)
--- alter table guias_compra drop constraint fk_guia_compra_factura-- (is implicitly done)
--- alter table guias_compra drop constraint fk_guia_compra_compra-- (is implicitly done)
--- alter table pagos drop constraint fk_pagos_factura_compra-- (is implicitly done)
--- alter table documentos_emitidos_detalle drop constraint fk_documento_emitido_documento_emitido_detalle-- (is implicitly done)
--- alter table documentos_emitidos_detalle drop constraint fk_documento_emitido_detalle_producto-- (is implicitly done)
--- alter table documentos_detalle drop constraint fk_documento_detalle_compra-- (is implicitly done)
--- alter table Compra drop constraint fk_compras_forma_pago-- (is implicitly done)
--- alter table Caja drop constraint fk_caja_users-- (is implicitly done)
--- alter table compra_detalle drop constraint fk_detallecompra_compra-- (is implicitly done)
-
-
--- Generated Permissions Drops
--- --------------------------------------------------------------------
---     Target Database:   postgres
---     SQL Generator:     tedia2sql -- v1.2.12
---     Generated at:      Sat Nov 10 12:10:10 2007
---     Input Files:       modelo.dia
-
-
-
-
--- Generated SQL View Drop Statements
--- --------------------------------------------------------------------
---     Target Database:   postgres
---     SQL Generator:     tedia2sql -- v1.2.12
---     Generated at:      Sat Nov 10 12:10:10 2007
---     Input Files:       modelo.dia
-
-
-
 -- Generated SQL Schema Drop statements
 -- --------------------------------------------------------------------
 --     Target Database:   postgres
@@ -99,42 +35,42 @@
 --     Generated at:      Sat Nov 10 12:10:10 2007
 --     Input Files:       modelo.dia
 
-drop table Abono cascade ;
-drop table Asistencia cascade ;
-drop table deuda cascade ;
-drop table Documentos_emitidos cascade ;
-drop table documentos_emitidos_detalle cascade ;
-drop table Cheques cascade ;
-drop table factura_compra_detall cascade ;
-drop table factura_compra cascade ;
-drop table Devolucion cascade ;
-drop table egreso cascade ;
-drop table Compra cascade ;
-drop table Cliente cascade ;
-drop table documentos_detalle cascade ;
-drop table Caja cascade ;
-drop table Canje cascade ;
-drop table familias cascade ;
-drop table formas_pago cascade ;
-drop table guias_compra_detalle cascade;
-drop table guias_compra cascade ;
-drop table numeros_documentos cascade ;
-drop table pagos cascade ;
-drop table negocio cascade ;
-drop table merma cascade ;
-drop table ingreso cascade ;
-drop table impuesto cascade ;
-drop table producto cascade ;
-drop table producto_recibido cascade ;
-drop table compra_detalle cascade ;
-drop table venta_detalle cascade ;
-drop table proveedor cascade ;
-drop table Tarjetas cascade ;
-drop table tipo_egreso cascade ;
-drop table tipo_ingreso cascade ;
-drop table tipo_merma cascade ;
-drop table users cascade ;
-drop table venta cascade ;
+drop table if exists Abono cascade;
+drop table if exists Asistencia cascade;
+drop table if exists deuda cascade;
+drop table if exists documentos_emitidos_detalle cascade;
+drop table if exists Documentos_emitidos cascade;
+drop table if exists Cheques cascade;
+drop table if exists factura_compra_detalle cascade;
+drop table if exists factura_compra cascade;
+drop table if exists Devolucion cascade;
+drop table if exists egreso cascade;
+drop table if exists Compra cascade;
+drop table if exists Cliente cascade;
+drop table if exists documentos_detalle cascade;
+drop table if exists Caja cascade;
+drop table if exists Canje cascade;
+drop table if exists familias cascade;
+drop table if exists formas_pago cascade;
+drop table if exists guias_compra cascade;
+drop table if exists guias_compra_detalle cascade;
+drop table if exists numeros_documentos cascade;
+drop table if exists pagos cascade;
+drop table if exists negocio cascade;
+drop table if exists merma cascade;
+drop table if exists ingreso cascade;
+drop table if exists impuesto cascade;
+drop table if exists producto cascade;
+drop table if exists producto_recibido cascade;
+drop table if exists compra_detalle cascade;
+drop table if exists venta_detalle cascade;
+drop table if exists proveedor cascade;
+drop table if exists Tarjetas cascade;
+drop table if exists tipo_egreso cascade;
+drop table if exists tipo_ingreso cascade;
+drop table if exists tipo_merma cascade;
+drop table if exists users cascade;
+drop table if exists venta cascade;
 
 
 -- Generated SQL Schema
@@ -572,73 +508,13 @@ create table venta (
   constraint pk_Venta primary key (id)
 ) ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 comment on column producto.barcode is 'llave primaria';
 comment on column producto.codigo_corto is 'crear ckeck point';
 comment on column producto.costo_promedio is 'antes fifo';
 
-
 comment on table compra_detalle is 'antes products_buy_history';
 
 comment on table venta_detalle is 'antes era products_sell_history';
-
-
-
-
-
-
-
-
-
-
--- Generated SQL Views
--- --------------------------------------------------------------------
---     Target Database:   postgres
---     SQL Generator:     tedia2sql -- v1.2.12
---     Generated at:      Sat Nov 10 12:10:10 2007
---     Input Files:       modelo.dia
-
-
-
-
--- Generated Permissions
--- --------------------------------------------------------------------
---     Target Database:   postgres
---     SQL Generator:     tedia2sql -- v1.2.12
---     Generated at:      Sat Nov 10 12:10:10 2007
---     Input Files:       modelo.dia
-
-
-
--- Generated SQL Insert statements
--- --------------------------------------------------------------------
---     Target Database:   postgres
---     SQL Generator:     tedia2sql -- v1.2.12
---     Generated at:      Sat Nov 10 12:10:10 2007
---     Input Files:       modelo.dia
-
-
 
 -- Generated SQL Constraints
 -- --------------------------------------------------------------------
