@@ -3650,13 +3650,18 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
   switch (event->keyval)
     {
+    case GDK_F5:
+      if (user_data->user_id == 1)
+	nullify_sale_win ();
+      break;
+
     case GDK_F6:
-      if (user_data->user_id == 0)
+      if (user_data->user_id == 1)
 	VentanaEgreso(0);
       break;
 
     case GDK_F7:
-      if (user_data->user_id == 0)
+      if (user_data->user_id == 1)
 	VentanaIngreso (0);
       break;
 
@@ -3666,4 +3671,111 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
     }
 
   return TRUE;
+}
+
+void
+nullify_sale_win (void)
+{
+  GtkWidget *widget;
+
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+
+  GtkTreeView *treeview_sales;
+  GtkTreeView *treeview_details;
+
+  GtkListStore *store_sales;
+  GtkListStore *store_details;
+
+  treeview_sales = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale"));
+
+  store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_sales));
+
+  if (store_sales == NULL)
+    {
+      store_sales = gtk_list_store_new (4,
+					G_TYPE_INT,    //id
+					G_TYPE_STRING, //date
+					G_TYPE_INT,    //salesman
+					G_TYPE_INT);   //total amount
+
+      gtk_tree_view_set_model(treeview_sales, GTK_TREE_MODEL(store_sales));
+
+      //ID
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("ID", renderer,
+							"text", 0,
+							NULL);
+      gtk_tree_view_append_column (treeview_sales, column);
+
+      //date
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Fecha", renderer,
+							"text", 1,
+							NULL);
+      gtk_tree_view_append_column (treeview_sales, column);
+
+      //Salesman
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Vendedor", renderer,
+							"text", 2,
+							NULL);
+      gtk_tree_view_append_column (treeview_sales, column);
+
+      //Total amount
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+							"text", 3,
+							NULL);
+      gtk_tree_view_append_column (treeview_sales, column);
+    }
+
+  gtk_list_store_clear(store_sales);
+
+
+  treeview_details = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
+
+  store_details = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_details));
+
+  if (store_details == NULL)
+    {
+      store_sales = gtk_list_store_new (4,
+					G_TYPE_INT,    //barcode
+					G_TYPE_STRING, //description
+					G_TYPE_INT,    //cantity
+					G_TYPE_INT);   //price
+
+      gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
+
+      //barcode
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Cod. Barras", renderer,
+							"text", 0,
+							NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+
+      //description
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Descripcion", renderer,
+							"text", 1,
+							NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+
+      //cantity
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Cantidad", renderer,
+							"text", 2,
+							NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+
+      //price
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
+							"text", 3,
+							NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+    }
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_sale"));
+  gtk_widget_show_all (widget);
 }
