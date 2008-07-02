@@ -1,52 +1,347 @@
 <?xml version="1.0"?>
+<!--Generated with glade3 3.4.1 on Wed Feb 13 17:11:21 2008 -->
 <interface>
-  <object class="GtkMessageDialog" id="error_config_file">
+  <object class="GtkAssistant" id="asistente">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="border_width">5</property>
-    <property name="resizable">False</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="message_type">GTK_MESSAGE_ERROR</property>
-    <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">Hubo un problema desconocido mientras se creaba el archivo de configuraci&#xF3;n.</property>
-    <signal name="response" handler="dialog_close"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox19">
+    <property name="title" translatable="yes">Configuraci&#xF3;n de POS Rizoma Comercio</property>
+    <property name="window_position">GTK_WIN_POS_CENTER</property>
+    <property name="gravity">GDK_GRAVITY_CENTER</property>
+    <signal handler="gtk_main_quit" name="close"/>
+    <signal handler="gtk_main_quit" name="cancel"/>
+    <signal handler="create_config" name="apply"/>
+    <signal handler="on_page_change" name="prepare"/>
+    <child>
+      <object class="GtkLabel" id="label1">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area19">
+        <property name="label" translatable="yes">Con el siguiente Wizard, podra configurar sus los usuarios, crear la base de datos y asignar los datos iniciales para la configuracion de sus POS.
+
+Para la configuracion de PostgreSQL se requiere accesso root por lo que es recomendable correr esta aplicacion usando gksu
+</property>
+        <property name="wrap">True</property>
+      </object>
+      <packing>
+        <property name="page_type">GTK_ASSISTANT_PAGE_INTRO</property>
+        <property name="title">Introducci&#xF3;n</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <child>
+          <object class="GtkTable" id="table1">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <property name="n_rows">6</property>
+            <property name="n_columns">2</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <object class="GtkEntry" id="port_pg">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="text" translatable="yes">5432</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Puerto de la BD</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label13">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Usuario local de PostgreSQL</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label15">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">El host donde esta ubicada la BD</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label17">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Usuario para acceceder a la BD</property>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label19">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Contrase&#xF1;a de accesso a la BD</property>
+              </object>
+              <packing>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="local_pg_user">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="text" translatable="yes">postgres</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="host_pg">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="text" translatable="yes">127.0.0.1</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="user_pg">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="pass_pg">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="visibility">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Crear Usuario</property>
+                <signal handler="create_db_user" name="clicked"/>
+                <signal handler="create_db_user" name="activate"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="padding">6</property>
           </packing>
         </child>
       </object>
+      <packing>
+        <property name="title">Crear el usuario de PostgreSQL</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkTable" id="table2">
+        <property name="visible">True</property>
+        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <property name="n_rows">5</property>
+        <property name="n_columns">2</property>
+        <property name="homogeneous">True</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkButton" id="button2">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label" translatable="yes">Volcar Datos</property>
+            <signal handler="volcar_db" name="clicked"/>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">4</property>
+            <property name="bottom_attach">5</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="ruta_sql">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">3</property>
+            <property name="bottom_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="db_name">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="text" translatable="yes">rizoma</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">2</property>
+            <property name="bottom_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="admin_pass">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="visibility">False</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">1</property>
+            <property name="bottom_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="admin_user">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label4">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label" translatable="yes">La ruta a los archivos SQL</property>
+          </object>
+          <packing>
+            <property name="top_attach">3</property>
+            <property name="bottom_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label10">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label" translatable="yes">Nombre de la Base de datos</property>
+          </object>
+          <packing>
+            <property name="top_attach">2</property>
+            <property name="bottom_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label9">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label" translatable="yes">Contrase&#xF1;a del administrador del POS</property>
+          </object>
+          <packing>
+            <property name="top_attach">1</property>
+            <property name="bottom_attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label5">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="label" translatable="yes">Usuario administrador del POS</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="title">Datos Iniciales de la BD</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="label6">
+        <property name="visible">True</property>
+        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <property name="label" translatable="yes">Hemos creado la base de datos junto con usuario y contrase&#xF1;a ahora puede usar el POS.
+Al finalizar el Wizard se creara el archivo de configuracion para el POS.</property>
+      </object>
+      <packing>
+        <property name="page_type">GTK_ASSISTANT_PAGE_CONFIRM</property>
+        <property name="title">Fin</property>
+      </packing>
+    </child>
+    <child>
+      <placeholder/>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="ok_config_file">
+  <object class="GtkMessageDialog" id="ok_pg_user">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="skip_taskbar_hint">True</property>
+    <property name="gravity">GDK_GRAVITY_CENTER</property>
     <property name="buttons">GTK_BUTTONS_OK</property>
-    <property name="text">El archivo de configuracion se creo con exito</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">El usuario de postgres se ha creado con exito.</property>
+    <signal handler="pg_user_created" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox17">
+      <object class="GtkVBox" id="dialog-vbox3">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area17">
+          <object class="GtkHButtonBox" id="dialog-action_area3">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
@@ -59,36 +354,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="ok_volcado">
-    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="border_width">5</property>
-    <property name="resizable">False</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="buttons">GTK_BUTTONS_OK</property>
-    <property name="text">Se ha creado con exito la base de datos con la informacion inicial.</property>
-    <signal name="response" handler="dialog_close"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox15">
-        <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area15">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkMessageDialog" id="error_create_plsql">
+  <object class="GtkMessageDialog" id="missing_data">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
@@ -97,25 +363,18 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">Hubo un problema desconocido mientras se creaban las funciones PL/SQL</property>
-    <property name="secondary_text">Sin estas funciones el sistema no puede funcionar por lo que el problema debe ser resuelto.</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">Faltan datos que ingresar</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox14">
+      <object class="GtkVBox" id="dialog-vbox5">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area14">
+          <object class="GtkHButtonBox" id="dialog-action_area5">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -125,7 +384,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="error_create_admin_user">
+  <object class="GtkMessageDialog" id="error_sql_data_schema">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
@@ -134,24 +393,19 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">Hubo un problema desconocido mientras se creaba el usuario administrador.</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">No fue posible encontrar el archivo SQL con la estructura de las tablas</property>
+    <property name="secondary_text">Por favor, asegurese de que la ruta es correcta.</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox13">
+      <object class="GtkVBox" id="dialog-vbox6">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area13">
+          <object class="GtkHButtonBox" id="dialog-action_area6">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -161,7 +415,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="error_sql_insert_values">
+  <object class="GtkMessageDialog" id="error_sql_data_values">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
@@ -170,52 +424,16 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">Hubo un problema desconocido mientras se intentaba ingresar los datos inicialess.</property>
-    <property name="secondary_text">Por favor, asegurese de tener los permisos necesarios y que esta usando gksu.</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">No fue posible encontrar el archivo SQL con los datos iniciales de rizoma</property>
+    <property name="secondary_text">Por favor, asegurese de que la ruta es correcta.</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox12">
+      <object class="GtkVBox" id="dialog-vbox7">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area12">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="layout_style">GTK_BUTTONBOX_END</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkMessageDialog" id="error_sql_create_schema">
-    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="border_width">5</property>
-    <property name="resizable">False</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="message_type">GTK_MESSAGE_WARNING</property>
-    <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">Hubo un problema desconocido mientras se intentaba crear las tablas</property>
-    <signal name="response" handler="dialog_close"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox11">
-        <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area11">
+          <object class="GtkHButtonBox" id="dialog-action_area7">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
@@ -245,7 +463,7 @@
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo problemas mientras se creaba la base de datos.</property>
     <property name="secondary_text">Por favor, asegurese de tener los permisos necesarios y que esta usando gksu.</property>
-    <signal name="response" handler="dialog_close"/>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox9">
         <property name="visible">True</property>
@@ -271,7 +489,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="error_sql_data_values">
+  <object class="GtkMessageDialog" id="error_sql_create_schema">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
@@ -280,16 +498,15 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">No fue posible encontrar el archivo SQL con los datos iniciales de rizoma</property>
-    <property name="secondary_text">Por favor, asegurese de que la ruta es correcta.</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">Hubo un problema desconocido mientras se intentaba crear las tablas</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox7">
+      <object class="GtkVBox" id="dialog-vbox11">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area7">
+          <object class="GtkHButtonBox" id="dialog-action_area11">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
@@ -308,7 +525,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="error_sql_data_schema">
+  <object class="GtkMessageDialog" id="error_sql_insert_values">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
@@ -317,19 +534,25 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">No fue posible encontrar el archivo SQL con la estructura de las tablas</property>
-    <property name="secondary_text">Por favor, asegurese de que la ruta es correcta.</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">Hubo un problema desconocido mientras se intentaba ingresar los datos inicialess.</property>
+    <property name="secondary_text">Por favor, asegurese de tener los permisos necesarios y que esta usando gksu.</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox6">
+      <object class="GtkVBox" id="dialog-vbox12">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area6">
+          <object class="GtkHButtonBox" id="dialog-action_area12">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -339,7 +562,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="missing_data">
+  <object class="GtkMessageDialog" id="error_create_admin_user">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
@@ -348,18 +571,24 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
-    <property name="text">Faltan datos que ingresar</property>
-    <signal name="response" handler="dialog_close"/>
+    <property name="text">Hubo un problema desconocido mientras se creaba el usuario administrador.</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox5">
+      <object class="GtkVBox" id="dialog-vbox13">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area5">
+          <object class="GtkHButtonBox" id="dialog-action_area13">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -369,24 +598,60 @@
       </object>
     </child>
   </object>
-  <object class="GtkMessageDialog" id="ok_pg_user">
+  <object class="GtkMessageDialog" id="error_create_plsql">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
     <property name="resizable">False</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
     <property name="skip_taskbar_hint">True</property>
-    <property name="gravity">GDK_GRAVITY_CENTER</property>
+    <property name="message_type">GTK_MESSAGE_WARNING</property>
+    <property name="buttons">GTK_BUTTONS_CLOSE</property>
+    <property name="text">Hubo un problema desconocido mientras se creaban las funciones PL/SQL</property>
+    <property name="secondary_text">Sin estas funciones el sistema no puede funcionar por lo que el problema debe ser resuelto.</property>
+    <signal handler="dialog_close" name="response"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox14">
+        <property name="visible">True</property>
+        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area14">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="ok_volcado">
+    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+    <property name="border_width">5</property>
+    <property name="resizable">False</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
+    <property name="skip_taskbar_hint">True</property>
     <property name="buttons">GTK_BUTTONS_OK</property>
-    <property name="text">El usuario de postgres se ha creado con exito.</property>
-    <signal name="response" handler="pg_user_created"/>
+    <property name="text">Se ha creado con exito la base de datos con la informacion inicial.</property>
+    <signal handler="dialog_close" name="response"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox3">
+      <object class="GtkVBox" id="dialog-vbox15">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area3">
+          <object class="GtkHButtonBox" id="dialog-action_area15">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">GTK_BUTTONBOX_END</property>
@@ -399,499 +664,63 @@
       </object>
     </child>
   </object>
-  <object class="GtkAssistant" id="asistente">
+  <object class="GtkMessageDialog" id="ok_config_file">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="title" translatable="yes">Configuraci&#xF3;n de POS Rizoma Comercio</property>
-    <property name="window_position">GTK_WIN_POS_CENTER</property>
-    <property name="gravity">GDK_GRAVITY_CENTER</property>
-    <signal name="close" handler="gtk_main_quit"/>
-    <signal name="cancel" handler="gtk_main_quit"/>
-    <signal name="apply" handler="create_config"/>
-    <signal name="prepare" handler="on_page_change"/>
-    <child>
-      <object class="GtkLabel" id="label1">
+    <property name="border_width">5</property>
+    <property name="resizable">False</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="buttons">GTK_BUTTONS_OK</property>
+    <property name="text">El archivo de configuracion se creo con exito</property>
+    <signal handler="dialog_close" name="response"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox17">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="label" translatable="yes">Con el siguiente Wizard, podra configurar sus los usuarios, crear la base de datos y asignar los datos iniciales para la configuracion de sus POS.
-
-Para la configuracion de PostgreSQL se requiere accesso root por lo que es recomendable correr esta aplicacion usando gksu
-</property>
-        <property name="wrap">True</property>
-      </object>
-      <packing>
-        <property name="page_type">GTK_ASSISTANT_PAGE_INTRO</property>
-        <property name="title">Introducci&#xF3;n</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkVBox" id="vbox2">
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkLabel" id="label3">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">El tipo de instalacion puede variar segun el uso que va a darle a su POS.
-
-Si solamente tendra un punto de venta la instalacion recomendada es del tipo Local.
-Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkTable" id="table3">
-            <property name="visible">True</property>
-            <property name="n_rows">1</property>
-            <property name="n_columns">1</property>
-            <child>
-              <object class="GtkHBox" id="hbox1">
-                <property name="visible">True</property>
-                <child>
-                  <object class="GtkVBox" id="vbox3">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_btn_type_local">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Local</property>
-                        <property name="response_id">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_btn_type_network">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Red</property>
-                        <property name="response_id">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_btn_type_local</property>
-                        <signal name="toggled" handler="on_radio_btn_type_network_toggled" object="vbox_serv_client" after="yes"/>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkVBox" id="vbox_serv_client">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_btn_server">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Servidor</property>
-                        <property name="response_id">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radio_btn_client">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Cliente</property>
-                        <property name="response_id">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radio_btn_server</property>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkNotebook" id="ntbk_data_ingress">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="show_tabs">False</property>
-        <property name="show_border">False</property>
-        <property name="tab_border">0</property>
-        <property name="tab_hborder">0</property>
-        <property name="tab_vborder">0</property>
-        <child>
-          <object class="GtkTable" id="table4">
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area17">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="n_rows">5</property>
-            <property name="n_columns">2</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkButton" id="button3">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Crear Usuario</property>
-                <property name="response_id">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="pass_pg">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="visibility">False</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="user_pg">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="local_pg_user">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="text" translatable="yes">postgres</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label7">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Contrase&#xF1;a de accesso a la BD</property>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label8">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Usuario para acceceder a la BD</property>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label12">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Usuario local de PostgreSQL</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label14">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Puerto de la BD</property>
-              </object>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="port_pg">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="text" translatable="yes">5432</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-          </object>
-        </child>
-        <child type="tab">
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkTable" id="table1">
-            <property name="visible">True</property>
-            <property name="n_rows">4</property>
-            <property name="n_columns">2</property>
-            <child>
-              <object class="GtkEntry" id="entry4">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry3">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry2">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry1">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label15">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Nombre Base</property>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label13">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Contrase&#xF1;a</property>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label11">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Usuario</property>
-              </object>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label2">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Host Base de Datos</property>
-              </object>
-            </child>
+            <property name="layout_style">GTK_BUTTONBOX_END</property>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
           </packing>
-        </child>
-        <child type="tab">
-          <placeholder/>
         </child>
       </object>
     </child>
-    <child>
-      <object class="GtkTable" id="table2">
+  </object>
+  <object class="GtkMessageDialog" id="error_config_file">
+    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+    <property name="border_width">5</property>
+    <property name="resizable">False</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_DIALOG</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="message_type">GTK_MESSAGE_ERROR</property>
+    <property name="buttons">GTK_BUTTONS_CLOSE</property>
+    <property name="text">Hubo un problema desconocido mientras se creaba el archivo de configuraci&#xF3;n.</property>
+    <signal handler="dialog_close" name="response"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox19">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="n_rows">5</property>
-        <property name="n_columns">2</property>
-        <property name="homogeneous">True</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label5">
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area19">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Usuario administrador del POS</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label9">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Contrase&#xF1;a del administrador del POS</property>
+            <property name="layout_style">GTK_BUTTONBOX_END</property>
           </object>
           <packing>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label10">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Nombre de la Base de datos</property>
-          </object>
-          <packing>
-            <property name="top_attach">2</property>
-            <property name="bottom_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label4">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">La ruta a los archivos SQL</property>
-          </object>
-          <packing>
-            <property name="top_attach">3</property>
-            <property name="bottom_attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="admin_user">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="admin_pass">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="visibility">False</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="db_name">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="text" translatable="yes">rizoma</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">2</property>
-            <property name="bottom_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="ruta_sql">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">3</property>
-            <property name="bottom_attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="button2">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Volcar Datos</property>
-            <property name="response_id">0</property>
-            <signal name="clicked" handler="volcar_db"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">4</property>
-            <property name="bottom_attach">5</property>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
           </packing>
         </child>
       </object>
-      <packing>
-        <property name="title">Datos Iniciales de la BD</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkVBox" id="vbox1">
-        <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="title">Crear el usuario de PostgreSQL</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkLabel" id="label6">
-        <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="label" translatable="yes">Hemos creado la base de datos junto con usuario y contrase&#xF1;a ahora puede usar el POS.
-Al finalizar el Wizard se creara el archivo de configuracion para el POS.</property>
-      </object>
-      <packing>
-        <property name="page_type">GTK_ASSISTANT_PAGE_CONFIRM</property>
-        <property name="title">Fin</property>
-      </packing>
     </child>
   </object>
 </interface>
