@@ -1109,12 +1109,12 @@ SearchProductByCode (void)
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT *  FROM informacion_producto (0, '%s')", codigo));
+  res = EjecutarSQL (g_strdup_printf ("SELECT *  FROM informacion_producto_venta (0, '%s')", codigo));
 
   if (res != NULL && PQntuples (res) != 0)
     {
       if (PQntuples(res) > 1)
-        g_printerr("%s: the plpgsql function informacion_producto(0,'%s') returned more than 1 tuple",
+        g_printerr("%s: the plpgsql function informacion_producto_venta(0,'%s') returned more than 1 tuple",
                    G_STRFUNC, codigo);
 
       if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
@@ -1836,7 +1836,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
   gtk_entry_set_text (GTK_ENTRY (widget), barcode);
 
-  q = g_strdup_printf ("SELECT * FROM informacion_producto (%s,'')", barcode);
+  q = g_strdup_printf ("SELECT * FROM informacion_producto_venta (%s,'')", barcode);
   res = EjecutarSQL(q);
   g_free(q);
 
