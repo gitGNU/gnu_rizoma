@@ -3696,7 +3696,7 @@ nullify_sale_win (void)
       store_sales = gtk_list_store_new (4,
 					G_TYPE_INT,    //id
 					G_TYPE_STRING, //date
-					G_TYPE_INT,    //salesman
+					G_TYPE_STRING, //salesman
 					G_TYPE_INT);   //total amount
 
       gtk_tree_view_set_model(treeview_sales, GTK_TREE_MODEL(store_sales));
@@ -3778,4 +3778,156 @@ nullify_sale_win (void)
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_sale"));
   gtk_widget_show_all (widget);
+}
+
+/**
+ * Callback connected to the search button of the nullify sale.
+ *
+ * This function fills the treeview of sale accordgin with the filters
+ * applied by the user.
+ *
+ * @param button the button that emited the signal
+ * @param data the user data
+ */
+void
+on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *treeview;
+  GtkListStore *store_sales;
+  GtkTreeIter iter;
+  GtkEntry *entry;
+  gchar *sale_id;
+  gchar *barcode;
+  gchar *date;
+  gchar *amount;
+  gchar *q;
+  gchar *condition = "";
+  PGresult *res;
+  gint i;
+  gint tuples;
+  GDate *gdate;
+  gchar **date_splited;
+  gchar str_date[256];
+
+  entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_nullify_id"));
+
+  if (g_str_equal(gtk_entry_get_text(entry), ""))
+    sale_id = NULL;
+  else
+    sale_id = g_strdup(gtk_entry_get_text(entry));
+
+  entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_nullify_barcode"));
+
+  if (g_str_equal(gtk_entry_get_text(entry), ""))
+    barcode = NULL;
+  else
+    barcode = g_strdup(gtk_entry_get_text(entry));
+
+  entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_nullify_date"));
+
+  if (g_str_equal(gtk_entry_get_text(entry), ""))
+    date = NULL;
+  else
+    date = g_strdup(gtk_entry_get_text(entry));
+
+  entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_nullify_amount"));
+
+  if (g_str_equal(gtk_entry_get_text(entry), ""))
+    amount = NULL;
+  else
+    amount = g_strdup(gtk_entry_get_text(entry));
+
+  q = "SELECT id, date_trunc('day',fecha) as fecha, (select usuario from users where id=venta.vendedor) as usuario, monto from venta";
+
+  if (sale_id != NULL)
+    {
+      if (atoi(sale_id) == 0)
+	{
+	  AlertMSG(GTK_WIDGET(entry), "Debe ingresar un Nº de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacio");
+	  return;
+	}
+      else
+	condition = g_strconcat (condition, " AND id=", sale_id, NULL);
+    }
+
+  if (date != NULL)
+    {
+      GDate *date_aux;
+      gchar *str_date;
+      date_aux = g_date_new();
+
+      g_date_set_parse (date_aux, date);
+      str_date = g_strdup_printf("%d-%d-%d",
+				 g_date_get_year(date_aux),
+				 g_date_get_month(date_aux),
+				 g_date_get_day(date_aux));
+
+      condition = g_strconcat (condition, " AND date_trunc('day', fecha)='", str_date, "'", NULL);
+      g_date_free (date_aux);
+      g_free (str_date);
+    }
+
+  if (barcode != NULL)
+    {
+      if (atoi(barcode) == 0)
+	{
+	  AlertMSG(GTK_WIDGET(entry), "No puede ingresar un codigo de barras 0, o con caracteres\n"
+		   "Si no sabe el codigo de barras deje el campo vacio");
+	  return;
+	}
+      else
+	condition = g_strconcat(condition, " AND id in (select id_venta from venta_detalle where barcode=", barcode, ")", NULL);
+    }
+
+  if (amount != NULL)
+    {
+      if (atoi(amount) == 0)
+	{
+	  AlertMSG(GTK_WIDGET(entry), "No puede ingresar un monto 0\nSi no sabe el monto puede dejar el campo vacio");
+	  return;
+	}
+      else
+	condition = g_strconcat(condition, "AND monto=", amount, NULL);
+    }
+
+  if (!(g_str_equal(condition, "")))
+    q = g_strconcat (q, " WHERE TRUE ", condition, NULL);
+
+  res = EjecutarSQL(q);
+  g_free (condition);
+  g_free (q);
+
+  tuples = PQntuples (res);
+
+  treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
+  gtk_list_store_clear (GTK_LIST_STORE(gtk_tree_view_get_model(treeview)));
+
+  treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale"));
+  store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  gtk_list_store_clear (store_sales);
+
+  for (i=0 ; i < tuples ; i++)
+    {
+
+      date_splited = g_strsplit(PQvaluebycol(res, i, "fecha"), "-", -1);
+
+      gdate = g_date_new();
+
+      g_date_set_year(gdate, atoi(date_splited[0]));
+      g_date_set_month(gdate, atoi(date_splited[1]));
+      g_date_set_day(gdate, atoi(date_splited[2]));
+
+      g_date_strftime (str_date, sizeof(str_date), "%x", gdate);
+
+      g_strfreev(date_splited);
+      g_date_free(gdate);
+
+      gtk_list_store_append (store_sales, &iter);
+      gtk_list_store_set(store_sales, &iter,
+			 0, atoi(PQvaluebycol(res, i, "id")),
+			 1, str_date,
+			 2, PQvaluebycol(res, i, "usuario"),
+			 3, atoi(PQvaluebycol(res, i, "monto")),
+			 -1);
+    }
 }
