@@ -152,7 +152,7 @@ control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel
 
 }
 
-/*
+/**
  * This callbacks handle the double-click event for the
  * display_calendar function
  *
