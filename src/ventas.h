@@ -93,4 +93,6 @@ void exit_response (GtkDialog *dialog, gint response_id, gpointer data);
 
 void clean_credit_data ();
 
+void nullify_sale_win (void);
+
 #endif
