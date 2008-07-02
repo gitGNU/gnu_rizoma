@@ -1,3 +1,8 @@
+2008-07-02  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c: Replaced informacion_producto() for
+	informacion_producto_venta().
+
 2008-06-27  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma-config.c (on_radio_btn_type_network_toggled): Added

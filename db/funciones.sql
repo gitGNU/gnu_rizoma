@@ -2123,3 +2123,91 @@ end loop;
 
 return (monto_apertura + arqueo + ingresos - egresos);
 end; $$ language plpgsql;
+
+
+create or replace function select_merma( IN barcode_in bigint,
+		OUT unidades_merma double precision )
+returns double precision as $$
+declare
+   aux int;
+BEGIN
+
+  aux := (SELECT count(*) FROM merma WHERE barcode = barcode_in);
+  IF aux = 0 THEN
+     unidades_merma := 0;
+  ELSE
+     unidades_merma := (SELECT sum(unidades) FROM merma WHERE barcode = barcode_in);
+  END IF;
+
+RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION informacion_producto_venta( IN codigo_barras bigint,
+		IN in_codigo_corto varchar(10),
+		OUT codigo_corto varchar(10),
+                OUT barcode bigint,
+		OUT descripcion varchar(50),
+		OUT marca varchar(35),
+		OUT contenido varchar(10),
+		OUT unidad varchar(10),
+		OUT stock double precision,
+		OUT precio integer,
+		OUT precio_mayor integer,
+		OUT cantidad_mayor integer,
+		OUT mayorista boolean,
+		OUT stock_day double precision)
+RETURNS SETOF record AS $$
+declare
+	days double precision;
+	datos record;
+	query varchar;
+	prod_vendidos double precision;
+	codbar int8;
+BEGIN
+
+select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
+
+if prod_vendidos = 0 or prod_vendidos IS NULL then
+   prod_vendidos := 1; -- to avoid division by zero
+end if;
+
+SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
+       FROM compra_detalle, producto, compra
+       WHERE (producto.barcode= codigo_barras or producto.codigo_corto = in_codigo_corto) AND compra_detalle.barcode_product=producto.barcode
+       AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
+
+IF NOT FOUND THEN
+   days := 1;
+END IF;
+
+query := $S$ SELECT *,
+		    (stock::float / ($S$ || prod_vendidos || $S$::float / $S$ || days || $S$::float)::float) AS stock_day
+		FROM producto WHERE $S$;
+
+-- check if must use the barcode or the short code
+IF codigo_barras != 0 THEN
+   query := query || $S$ barcode=$S$ || codigo_barras;
+ELSE
+   query := query || $S$ codigo_corto=$S$ || quote_literal(in_codigo_corto);
+END IF;
+
+FOR datos IN EXECUTE query LOOP
+    codigo_corto := datos.codigo_corto;
+    barcode := datos.barcode;
+    descripcion := datos.descripcion;
+    marca := datos.marca;
+    contenido := datos.contenido;
+    unidad := datos.unidad;
+    stock := datos.stock;
+    precio := datos.precio;
+    stock_day := datos.stock_day;
+    mayorista := datos.mayorista;
+    precio_mayor := datos.precio_mayor;
+    cantidad_mayor := datos.cantidad_mayor;
+    RETURN NEXT;
+END LOOP;
+
+RETURN;
+END;
+$$ LANGUAGE plpgsql;
