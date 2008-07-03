@@ -3673,6 +3673,12 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
   return TRUE;
 }
 
+/**
+ * This function loads the nullify sale dialog.
+ *
+ * Here must stay all the configuration of the dialog that is needed
+ * when the dialog will be showed to the user.
+ */
 void
 nullify_sale_win (void)
 {
