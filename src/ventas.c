@@ -3950,6 +3950,15 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
     }
 }
 
+/**
+ * Callback connected to 'changed' signal of the treeview that
+ * displays the sales in the nullify sale dialog.
+ *
+ * This function load the details of the selected sale in the treeview details.
+ *
+ * @param treeselection the tree selection that emited the signal
+ * @param data the user data
+ */
 void
 on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer data)
 {
