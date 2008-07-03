@@ -3682,13 +3682,13 @@ nullify_sale_win (void)
   GtkTreeViewColumn *column;
 
   GtkTreeView *treeview_sales;
+  GtkTreeSelection *selection_sales;
   GtkTreeView *treeview_details;
 
   GtkListStore *store_sales;
   GtkListStore *store_details;
 
   treeview_sales = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale"));
-
   store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_sales));
 
   if (store_sales == NULL)
@@ -3700,6 +3700,12 @@ nullify_sale_win (void)
 					G_TYPE_INT);   //total amount
 
       gtk_tree_view_set_model(treeview_sales, GTK_TREE_MODEL(store_sales));
+
+      selection_sales = gtk_tree_view_get_selection (treeview_sales);
+      g_signal_connect (G_OBJECT(selection_sales), "changed",
+			G_CALLBACK(on_selection_nullify_sales_change), NULL);
+
+      gtk_tree_selection_set_mode (selection_sales, GTK_SELECTION_SINGLE);
 
       //ID
       renderer = gtk_cell_renderer_text_new();
@@ -3739,11 +3745,14 @@ nullify_sale_win (void)
 
   if (store_details == NULL)
     {
-      store_details = gtk_list_store_new (4,
+      store_details = gtk_list_store_new (7,
 					  G_TYPE_INT,    //barcode
 					  G_TYPE_STRING, //description
-					  G_TYPE_INT,    //cantity
-					  G_TYPE_INT);   //price
+					  G_TYPE_FLOAT,  //cantity
+					  G_TYPE_INT,    //price
+					  G_TYPE_INT,    //subtotal
+					  G_TYPE_INT,    //id (detail)
+					  G_TYPE_INT);   //id_venta
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
 
@@ -3772,6 +3781,13 @@ nullify_sale_win (void)
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
 							"text", 3,
+							NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+
+      //subtotal
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Subtotal", renderer,
+							"text", 4,
 							NULL);
       gtk_tree_view_append_column (treeview_details, column);
     }
@@ -3931,5 +3947,58 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
 			 2, PQvaluebycol(res, i, "usuario"),
 			 3, atoi(PQvaluebycol(res, i, "monto")),
 			 -1);
+    }
+}
+
+void
+on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer data)
+{
+  GtkListStore *store_sales;
+  GtkListStore *store_details;
+  GtkTreeView *treeview_sales;
+  GtkTreeView *treeview_details;
+  GtkTreeIter iter;
+
+
+  PGresult *res;
+  gint i;
+  gint tuples;
+  gchar *q;
+  gint sale_id;
+
+  treeview_sales = gtk_tree_selection_get_tree_view(treeselection);
+  store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_sales));
+
+  treeview_details = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
+  store_details = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_details));
+
+  gtk_list_store_clear(store_details);
+
+  gtk_tree_selection_get_selected(treeselection, NULL, &iter);
+
+  gtk_tree_model_get (GTK_TREE_MODEL(store_sales), &iter,
+		      0, &sale_id,
+		      -1);
+
+  q = g_strdup_printf("select id, id_venta, barcode, cantidad, precio, "
+		      "(select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
+		      "(cantidad*precio) as subtotal from venta_detalle where id_venta = %d", sale_id);
+  res = EjecutarSQL(q);
+  g_free (q);
+
+  tuples = PQntuples(res);
+
+  for (i=0 ; i<tuples ; i++)
+    {
+      gtk_list_store_append (store_details, &iter);
+      gtk_list_store_set (store_details, &iter,
+			  0, atoi(PQvaluebycol(res, i, "barcode")),
+			  1, PQvaluebycol(res, i, "descripcion"),
+			  2, g_ascii_strtod(PQvaluebycol(res, i, "cantidad"), NULL),
+			  3, atoi(PQvaluebycol(res, i, "precio")),
+			  4, atoi (PQvaluebycol(res, i, "subtotal")),
+			  5, atoi(PQvaluebycol(res, i, "id")),
+			  6, atoi(PQvaluebycol(res, i, "id_venta")),
+			  -1);
     }
 }

@@ -95,4 +95,6 @@ void clean_credit_data ();
 
 void nullify_sale_win (void);
 
+void on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer data);
+
 #endif
