@@ -3739,11 +3739,11 @@ nullify_sale_win (void)
 
   if (store_details == NULL)
     {
-      store_sales = gtk_list_store_new (4,
-					G_TYPE_INT,    //barcode
-					G_TYPE_STRING, //description
-					G_TYPE_INT,    //cantity
-					G_TYPE_INT);   //price
+      store_details = gtk_list_store_new (4,
+					  G_TYPE_INT,    //barcode
+					  G_TYPE_STRING, //description
+					  G_TYPE_INT,    //cantity
+					  G_TYPE_INT);   //price
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
 
@@ -3775,6 +3775,8 @@ nullify_sale_win (void)
 							NULL);
       gtk_tree_view_append_column (treeview_details, column);
     }
+
+  gtk_list_store_clear(store_details);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_sale"));
   gtk_widget_show_all (widget);
