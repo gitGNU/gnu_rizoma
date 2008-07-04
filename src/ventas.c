@@ -1408,7 +1408,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA && tipo_documento != FACTURA)
     paga_con = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
 
-  if (paga_con <= 0)
+  if (tipo_documento != VENTA && paga_con <= 0)
     {
       GtkWidget *aux;
       aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_type"));
@@ -1451,7 +1451,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   else
     canceled = TRUE;
 
-  SaveSell (monto, maquina, vendedor, venta->tipo_venta, rut, discount, ticket, tipo_documento,
+  SaveSell (monto, maquina, vendedor, CASH, rut, discount, ticket, tipo_documento,
             cheque_date, cheques, canceled);
 
   gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
@@ -3644,25 +3644,25 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
  */
 gboolean
 on_ventas_gui_key_press_event(GtkWidget   *widget,
-			      GdkEventKey *event,
-			      gpointer     data)
+                              GdkEventKey *event,
+                              gpointer     data)
 {
 
   switch (event->keyval)
     {
     case GDK_F5:
       if (user_data->user_id == 1)
-	nullify_sale_win ();
+        nullify_sale_win ();
       break;
 
     case GDK_F6:
       if (user_data->user_id == 1)
-	VentanaEgreso(0);
+        VentanaEgreso(0);
       break;
 
     case GDK_F7:
       if (user_data->user_id == 1)
-	VentanaIngreso (0);
+        VentanaIngreso (0);
       break;
 
       //if the key pressed is not in use let it pass
@@ -3700,45 +3700,45 @@ nullify_sale_win (void)
   if (store_sales == NULL)
     {
       store_sales = gtk_list_store_new (4,
-					G_TYPE_INT,    //id
-					G_TYPE_STRING, //date
-					G_TYPE_STRING, //salesman
-					G_TYPE_INT);   //total amount
+                                        G_TYPE_INT,    //id
+                                        G_TYPE_STRING, //date
+                                        G_TYPE_STRING, //salesman
+                                        G_TYPE_INT);   //total amount
 
       gtk_tree_view_set_model(treeview_sales, GTK_TREE_MODEL(store_sales));
 
       selection_sales = gtk_tree_view_get_selection (treeview_sales);
       g_signal_connect (G_OBJECT(selection_sales), "changed",
-			G_CALLBACK(on_selection_nullify_sales_change), NULL);
+                        G_CALLBACK(on_selection_nullify_sales_change), NULL);
 
       gtk_tree_selection_set_mode (selection_sales, GTK_SELECTION_SINGLE);
 
       //ID
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("ID", renderer,
-							"text", 0,
-							NULL);
+                                                        "text", 0,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_sales, column);
 
       //date
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Fecha", renderer,
-							"text", 1,
-							NULL);
+                                                        "text", 1,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_sales, column);
 
       //Salesman
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Vendedor", renderer,
-							"text", 2,
-							NULL);
+                                                        "text", 2,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_sales, column);
 
       //Total amount
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
-							"text", 3,
-							NULL);
+                                                        "text", 3,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_sales, column);
     }
 
@@ -3752,49 +3752,49 @@ nullify_sale_win (void)
   if (store_details == NULL)
     {
       store_details = gtk_list_store_new (7,
-					  G_TYPE_INT,    //barcode
-					  G_TYPE_STRING, //description
-					  G_TYPE_FLOAT,  //cantity
-					  G_TYPE_INT,    //price
-					  G_TYPE_INT,    //subtotal
-					  G_TYPE_INT,    //id (detail)
-					  G_TYPE_INT);   //id_venta
+                                          G_TYPE_INT,    //barcode
+                                          G_TYPE_STRING, //description
+                                          G_TYPE_FLOAT,  //cantity
+                                          G_TYPE_INT,    //price
+                                          G_TYPE_INT,    //subtotal
+                                          G_TYPE_INT,    //id (detail)
+                                          G_TYPE_INT);   //id_venta
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
 
       //barcode
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Cod. Barras", renderer,
-							"text", 0,
-							NULL);
+                                                        "text", 0,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_details, column);
 
       //description
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Descripcion", renderer,
-							"text", 1,
-							NULL);
+                                                        "text", 1,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_details, column);
 
       //cantity
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Cantidad", renderer,
-							"text", 2,
-							NULL);
+                                                        "text", 2,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_details, column);
 
       //price
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
-							"text", 3,
-							NULL);
+                                                        "text", 3,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_details, column);
 
       //subtotal
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Subtotal", renderer,
-							"text", 4,
-							NULL);
+                                                        "text", 4,
+                                                        NULL);
       gtk_tree_view_append_column (treeview_details, column);
     }
 
@@ -3866,12 +3866,12 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
   if (sale_id != NULL)
     {
       if (atoi(sale_id) == 0)
-	{
-	  AlertMSG(GTK_WIDGET(entry), "Debe ingresar un Nº de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacio");
-	  return;
-	}
+        {
+          AlertMSG(GTK_WIDGET(entry), "Debe ingresar un Nº de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacio");
+          return;
+        }
       else
-	condition = g_strconcat (condition, " AND id=", sale_id, NULL);
+        condition = g_strconcat (condition, " AND id=", sale_id, NULL);
     }
 
   if (date != NULL)
@@ -3882,9 +3882,9 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
 
       g_date_set_parse (date_aux, date);
       str_date = g_strdup_printf("%d-%d-%d",
-				 g_date_get_year(date_aux),
-				 g_date_get_month(date_aux),
-				 g_date_get_day(date_aux));
+                                 g_date_get_year(date_aux),
+                                 g_date_get_month(date_aux),
+                                 g_date_get_day(date_aux));
 
       condition = g_strconcat (condition, " AND date_trunc('day', fecha)='", str_date, "'", NULL);
       g_date_free (date_aux);
@@ -3894,24 +3894,24 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
   if (barcode != NULL)
     {
       if (atoi(barcode) == 0)
-	{
-	  AlertMSG(GTK_WIDGET(entry), "No puede ingresar un codigo de barras 0, o con caracteres\n"
-		   "Si no sabe el codigo de barras deje el campo vacio");
-	  return;
-	}
+        {
+          AlertMSG(GTK_WIDGET(entry), "No puede ingresar un codigo de barras 0, o con caracteres\n"
+                   "Si no sabe el codigo de barras deje el campo vacio");
+          return;
+        }
       else
-	condition = g_strconcat(condition, " AND id in (select id_venta from venta_detalle where barcode=", barcode, ")", NULL);
+        condition = g_strconcat(condition, " AND id in (select id_venta from venta_detalle where barcode=", barcode, ")", NULL);
     }
 
   if (amount != NULL)
     {
       if (atoi(amount) == 0)
-	{
-	  AlertMSG(GTK_WIDGET(entry), "No puede ingresar un monto 0\nSi no sabe el monto puede dejar el campo vacio");
-	  return;
-	}
+        {
+          AlertMSG(GTK_WIDGET(entry), "No puede ingresar un monto 0\nSi no sabe el monto puede dejar el campo vacio");
+          return;
+        }
       else
-	condition = g_strconcat(condition, "AND monto=", amount, NULL);
+        condition = g_strconcat(condition, "AND monto=", amount, NULL);
     }
 
   if (!(g_str_equal(condition, "")))
@@ -3948,11 +3948,11 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
 
       gtk_list_store_append (store_sales, &iter);
       gtk_list_store_set(store_sales, &iter,
-			 0, atoi(PQvaluebycol(res, i, "id")),
-			 1, str_date,
-			 2, PQvaluebycol(res, i, "usuario"),
-			 3, atoi(PQvaluebycol(res, i, "monto")),
-			 -1);
+                         0, atoi(PQvaluebycol(res, i, "id")),
+                         1, str_date,
+                         2, PQvaluebycol(res, i, "usuario"),
+                         3, atoi(PQvaluebycol(res, i, "monto")),
+                         -1);
     }
 }
 
@@ -3992,12 +3992,12 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
   gtk_tree_selection_get_selected(treeselection, NULL, &iter);
 
   gtk_tree_model_get (GTK_TREE_MODEL(store_sales), &iter,
-		      0, &sale_id,
-		      -1);
+                      0, &sale_id,
+                      -1);
 
   q = g_strdup_printf("select id, id_venta, barcode, cantidad, precio, "
-		      "(select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
-		      "(cantidad*precio) as subtotal from venta_detalle where id_venta = %d", sale_id);
+                      "(select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
+                      "(cantidad*precio) as subtotal from venta_detalle where id_venta = %d", sale_id);
   res = EjecutarSQL(q);
   g_free (q);
 
@@ -4007,13 +4007,13 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
     {
       gtk_list_store_append (store_details, &iter);
       gtk_list_store_set (store_details, &iter,
-			  0, atoi(PQvaluebycol(res, i, "barcode")),
-			  1, PQvaluebycol(res, i, "descripcion"),
-			  2, g_ascii_strtod(PQvaluebycol(res, i, "cantidad"), NULL),
-			  3, atoi(PQvaluebycol(res, i, "precio")),
-			  4, atoi (PQvaluebycol(res, i, "subtotal")),
-			  5, atoi(PQvaluebycol(res, i, "id")),
-			  6, atoi(PQvaluebycol(res, i, "id_venta")),
-			  -1);
+                          0, atoi(PQvaluebycol(res, i, "barcode")),
+                          1, PQvaluebycol(res, i, "descripcion"),
+                          2, g_ascii_strtod(PQvaluebycol(res, i, "cantidad"), NULL),
+                          3, atoi(PQvaluebycol(res, i, "precio")),
+                          4, atoi (PQvaluebycol(res, i, "subtotal")),
+                          5, atoi(PQvaluebycol(res, i, "id")),
+                          6, atoi(PQvaluebycol(res, i, "id_venta")),
+                          -1);
     }
 }

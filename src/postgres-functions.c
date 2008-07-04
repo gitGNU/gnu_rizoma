@@ -311,6 +311,8 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
       if (GetResto (atoi (rut)) != 0)
         CancelarDeudas (0, atoi (rut));
       break;
+    case CASH:
+      break;
     default:
       g_printerr("%s: Trying to sale without a proper sell type", G_STRFUNC);
       return FALSE;
