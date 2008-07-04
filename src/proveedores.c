@@ -451,14 +451,14 @@ proveedores_box ()
                     G_CALLBACK (LlenarDatosProveedor), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
                                                      "text", 0,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
