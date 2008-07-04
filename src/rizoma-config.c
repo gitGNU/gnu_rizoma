@@ -313,24 +313,37 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
 
   current_page = gtk_assistant_get_current_page (assistant);
 
-  if (current_page == 2)
+  if (current_page == 1)
+    {
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
+    }
+  else if (current_page == 2)
+    {
+      gboolean client = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_client")));
+      GtkNotebook *notebook = GTK_NOTEBOOK (gtk_builder_get_object (builder, "ntbk_data_ingress"));
+
+      if (client)
+        {
+          gtk_notebook_set_current_page (notebook, 1);
+        }
+      else
+        {
+          gtk_notebook_set_current_page (notebook, 2);
+        }
+
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
+    }
+  else if (current_page == 3)
     {
       GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
 
       gtk_entry_set_text (ruta_sql, DATADIR);
+
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
-
-  if (current_page == 3)
+  else if (current_page == 4)
     {
-      GtkAssistant *asistente;
-      GtkWidget *page;
-      gint current_page;
-
-      asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
-
-      current_page = gtk_assistant_get_current_page (asistente);
-      page = gtk_assistant_get_nth_page (asistente, current_page);
-      gtk_assistant_set_page_complete (asistente, page, TRUE);
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
 }
 
@@ -363,4 +376,12 @@ main (int argc, char *argv[])
   gtk_main ();
 
   return 0;
+}
+
+void
+on_radio_btn_type_network_toggled (GtkWidget *vbox, GtkToggleButton *button)
+{
+  gboolean active = gtk_toggle_button_get_active (button);
+
+  gtk_widget_set_sensitive (vbox, active);
 }

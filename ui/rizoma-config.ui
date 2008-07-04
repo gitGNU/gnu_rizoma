@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
-<!--Generated with glade3 3.4.1 on Wed Feb 13 17:11:21 2008 -->
 <interface>
   <object class="GtkAssistant" id="asistente">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+    <property name="type">GTK_WINDOW_POPUP</property>
     <property name="title" translatable="yes">Configuraci&#xF3;n de POS Rizoma Comercio</property>
-    <property name="window_position">GTK_WIN_POS_CENTER</property>
+    <property name="window_position">GTK_WIN_POS_MOUSE</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_TOOLBAR</property>
     <property name="gravity">GDK_GRAVITY_CENTER</property>
-    <signal handler="gtk_main_quit" name="close"/>
-    <signal handler="gtk_main_quit" name="cancel"/>
-    <signal handler="create_config" name="apply"/>
-    <signal handler="on_page_change" name="prepare"/>
+    <signal name="close" handler="gtk_main_quit"/>
+    <signal name="cancel" handler="gtk_main_quit"/>
+    <signal name="apply" handler="create_config"/>
+    <signal name="prepare" handler="on_page_change"/>
     <child>
       <object class="GtkLabel" id="label1">
         <property name="visible">True</property>
@@ -26,16 +27,116 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
       </packing>
     </child>
     <child>
-      <object class="GtkVBox" id="vbox1">
+      <object class="GtkVBox" id="vbox2">
         <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <child>
-          <object class="GtkTable" id="table1">
+          <object class="GtkLabel" id="label3">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">El tipo de instalacion puede variar segun el uso que va a darle a su POS.
+
+Si solamente tendra un punto de venta la instalacion recomendada es del tipo Local.
+Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkTable" id="table3">
+            <property name="visible">True</property>
+            <property name="n_rows">1</property>
+            <property name="n_columns">1</property>
+            <child>
+              <object class="GtkHBox" id="hbox1">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkVBox" id="vbox3">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_btn_type_local">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Local</property>
+                        <property name="response_id">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_btn_type_network">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Red</property>
+                        <property name="response_id">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_btn_type_local</property>
+                        <signal name="toggled" handler="on_radio_btn_type_network_toggled" object="vbox_serv_client" after="yes"/>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkVBox" id="vbox_serv_client">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_btn_server">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Servidor</property>
+                        <property name="response_id">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="radio_btn_client">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">Cliente</property>
+                        <property name="response_id">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">radio_btn_server</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkNotebook" id="ntbk_data_ingress">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="show_tabs">False</property>
+        <property name="show_border">False</property>
+        <property name="tab_border">0</property>
+        <property name="tab_hborder">0</property>
+        <property name="tab_vborder">0</property>
+        <child>
+          <object class="GtkTable" id="table4">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="n_rows">6</property>
+            <property name="n_rows">5</property>
             <property name="n_columns">2</property>
             <property name="homogeneous">True</property>
+            <child>
+              <placeholder/>
+            </child>
             <child>
               <object class="GtkEntry" id="port_pg">
                 <property name="visible">True</property>
@@ -46,36 +147,15 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label2">
+              <object class="GtkLabel" id="label14">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Puerto de la BD</property>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label13">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">Usuario local de PostgreSQL</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label15">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes">El host donde esta ubicada la BD</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -83,25 +163,32 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label17">
+              <object class="GtkLabel" id="label12">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Usuario local de PostgreSQL</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label8">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Usuario para acceceder a la BD</property>
               </object>
               <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label19">
+              <object class="GtkLabel" id="label7">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Contrase&#xF1;a de accesso a la BD</property>
               </object>
               <packing>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
               </packing>
             </child>
             <child>
@@ -117,20 +204,6 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="host_pg">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="text" translatable="yes">127.0.0.1</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="user_pg">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -139,8 +212,8 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
               </packing>
             </child>
             <child>
@@ -153,37 +226,149 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button1">
+              <object class="GtkButton" id="button3">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Crear Usuario</property>
-                <signal handler="create_db_user" name="clicked"/>
-                <signal handler="create_db_user" name="activate"/>
+                <property name="response_id">0</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child type="tab">
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkTable" id="table1">
+            <property name="visible">True</property>
+            <property name="n_rows">5</property>
+            <property name="n_columns">2</property>
+            <child>
+              <object class="GtkEntry" id="entry_client_port">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label16">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Puerto</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Host Base de Datos</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label11">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Usuario</property>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label13">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Contrase&#xF1;a</property>
+              </object>
+              <packing>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label15">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Nombre Base</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_client_host">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_client_user">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_client_pass">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_client_bd">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="padding">6</property>
+            <property name="position">1</property>
           </packing>
         </child>
+        <child type="tab">
+          <placeholder/>
+        </child>
       </object>
-      <packing>
-        <property name="title">Crear el usuario de PostgreSQL</property>
-      </packing>
     </child>
     <child>
       <object class="GtkTable" id="table2">
@@ -202,7 +387,8 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
             <property name="receives_default">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="label" translatable="yes">Volcar Datos</property>
-            <signal handler="volcar_db" name="clicked"/>
+            <property name="response_id">0</property>
+            <signal name="clicked" handler="volcar_db"/>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -309,6 +495,15 @@ Para la configuracion de PostgreSQL se requiere accesso root por lo que es recom
       </packing>
     </child>
     <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+    <child>
       <object class="GtkLabel" id="label6">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -319,9 +514,6 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
         <property name="page_type">GTK_ASSISTANT_PAGE_CONFIRM</property>
         <property name="title">Fin</property>
       </packing>
-    </child>
-    <child>
-      <placeholder/>
     </child>
   </object>
   <object class="GtkMessageDialog" id="ok_pg_user">
@@ -334,7 +526,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="gravity">GDK_GRAVITY_CENTER</property>
     <property name="buttons">GTK_BUTTONS_OK</property>
     <property name="text">El usuario de postgres se ha creado con exito.</property>
-    <signal handler="pg_user_created" name="response"/>
+    <signal name="response" handler="pg_user_created"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox3">
         <property name="visible">True</property>
@@ -364,7 +556,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Faltan datos que ingresar</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox5">
         <property name="visible">True</property>
@@ -395,7 +587,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">No fue posible encontrar el archivo SQL con la estructura de las tablas</property>
     <property name="secondary_text">Por favor, asegurese de que la ruta es correcta.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox6">
         <property name="visible">True</property>
@@ -426,7 +618,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">No fue posible encontrar el archivo SQL con los datos iniciales de rizoma</property>
     <property name="secondary_text">Por favor, asegurese de que la ruta es correcta.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox7">
         <property name="visible">True</property>
@@ -463,7 +655,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo problemas mientras se creaba la base de datos.</property>
     <property name="secondary_text">Por favor, asegurese de tener los permisos necesarios y que esta usando gksu.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox9">
         <property name="visible">True</property>
@@ -499,7 +691,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo un problema desconocido mientras se intentaba crear las tablas</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox11">
         <property name="visible">True</property>
@@ -536,7 +728,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo un problema desconocido mientras se intentaba ingresar los datos inicialess.</property>
     <property name="secondary_text">Por favor, asegurese de tener los permisos necesarios y que esta usando gksu.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox12">
         <property name="visible">True</property>
@@ -572,7 +764,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="message_type">GTK_MESSAGE_WARNING</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo un problema desconocido mientras se creaba el usuario administrador.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox13">
         <property name="visible">True</property>
@@ -609,7 +801,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo un problema desconocido mientras se creaban las funciones PL/SQL</property>
     <property name="secondary_text">Sin estas funciones el sistema no puede funcionar por lo que el problema debe ser resuelto.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox14">
         <property name="visible">True</property>
@@ -644,7 +836,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="skip_taskbar_hint">True</property>
     <property name="buttons">GTK_BUTTONS_OK</property>
     <property name="text">Se ha creado con exito la base de datos con la informacion inicial.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox15">
         <property name="visible">True</property>
@@ -673,7 +865,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="skip_taskbar_hint">True</property>
     <property name="buttons">GTK_BUTTONS_OK</property>
     <property name="text">El archivo de configuracion se creo con exito</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox17">
         <property name="visible">True</property>
@@ -703,7 +895,7 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
     <property name="message_type">GTK_MESSAGE_ERROR</property>
     <property name="buttons">GTK_BUTTONS_CLOSE</property>
     <property name="text">Hubo un problema desconocido mientras se creaba el archivo de configuraci&#xF3;n.</property>
-    <signal handler="dialog_close" name="response"/>
+    <signal name="response" handler="dialog_close"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox19">
         <property name="visible">True</property>
