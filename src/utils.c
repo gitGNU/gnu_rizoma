@@ -369,3 +369,28 @@ clean_container (GtkContainer *container)
 
   g_list_free (list);
 }
+
+/**
+ * This function aim to parse without any errors a rut.
+ * This function will return a gchar ** with the rut as the element 0
+ * and the dv as the element 1.
+ *
+ * @param rut The rut to parse.
+ */
+gchar **
+parse_rut (gchar *rut)
+{
+  gchar *pattern_clean = "[[:^alnum:]]";
+  gchar **parsed_rut = g_new (gchar *, 2);
+  GRegex *regex = g_regex_new (pattern_clean, 0, 0, NULL);
+  size_t str_len = 0;
+
+  subject = g_regex_replace (regex, subject, -1, 0, "", G_REGEX_MATCH_NOTEMPTY, NULL);
+
+  str_len = strlen (subject);
+
+  parsed_rut[0] = g_strndup (subject, (gsize)(str_len - 1));
+  parsed_rut[1] = g_strdup_printf("%c", subject[str_len-1]);
+
+  return parsed_rut;
+}

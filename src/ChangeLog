@@ -1,5 +1,7 @@
 2008-07-04  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* utils.c (parse_rut): Added function.
+
 	* ventas.c (on_sell_button_clicked): Added 'CHASH' to sell type
 	when sell directly.
 	Indented some lines, deleted tabs.
