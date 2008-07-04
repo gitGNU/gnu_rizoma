@@ -385,12 +385,12 @@ parse_rut (gchar *rut)
   GRegex *regex = g_regex_new (pattern_clean, 0, 0, NULL);
   size_t str_len = 0;
 
-  subject = g_regex_replace (regex, subject, -1, 0, "", G_REGEX_MATCH_NOTEMPTY, NULL);
+  rut = g_regex_replace (regex, rut, -1, 0, "", G_REGEX_MATCH_NOTEMPTY, NULL);
 
-  str_len = strlen (subject);
+  str_len = strlen (rut);
 
-  parsed_rut[0] = g_strndup (subject, (gsize)(str_len - 1));
-  parsed_rut[1] = g_strdup_printf("%c", subject[str_len-1]);
+  parsed_rut[0] = g_strndup (rut, (gsize)(str_len - 1));
+  parsed_rut[1] = g_strdup_printf("%c", rut[str_len-1]);
 
   return parsed_rut;
 }

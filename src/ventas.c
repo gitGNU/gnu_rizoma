@@ -3236,7 +3236,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gboolean canceled;
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
-  str_splited = g_strsplit(gtk_entry_get_text(GTK_ENTRY(widget)), "-", 0);
+  str_splited = parse_rut(g_strdup (gtk_entry_get_text(GTK_ENTRY(widget))));
 
   rut = atoi(str_splited[0]);
   dv = g_strdup(str_splited[1]);

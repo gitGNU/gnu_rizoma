@@ -1,5 +1,9 @@
 2008-07-04  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* ventas.c (on_btn_credit_sale_clicked): Replaced g_strsplit() for
+	parse_rut, this should prevent an error of parse when a user
+	decide to introduce a rut with or without dots and strips.
+
 	* utils.c (parse_rut): Added function.
 
 	* ventas.c (on_sell_button_clicked): Added 'CHASH' to sell type
