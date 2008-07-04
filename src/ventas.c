@@ -3248,7 +3248,6 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   //amount
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "label_total"));
   monto = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget)))));
-
   //maquina
   maquina = rizoma_get_value_int ("MAQUINA");
 

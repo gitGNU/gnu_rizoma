@@ -49,4 +49,6 @@ gboolean validate_string (gchar *pattern, gchar *subject);
 
 void clean_container (GtkContainer *container);
 
+gchar ** parse_rut (gchar *rut);
+
 #endif

@@ -2434,6 +2434,7 @@ FillPagarFacturas (gchar *rut_proveedor)
   gchar *q;
   gint tuples, i;
   GtkListStore *store_invoice = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_list"))));
+  GtkListStore *store_invoice_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_detail"))));
   GtkTreeIter iter;
 
   PGresult *res;
@@ -2450,6 +2451,7 @@ FillPagarFacturas (gchar *rut_proveedor)
   tuples = PQntuples (res);
 
   gtk_list_store_clear (store_invoice);
+  gtk_list_store_clear (store_invoice_detail);
 
   for (i = 0; i < tuples; i++)
     {
