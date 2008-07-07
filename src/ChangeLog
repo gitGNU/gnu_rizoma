@@ -1,3 +1,8 @@
+2008-07-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma-config.c (on_page_change): Deleted the code that set to
+	TRUE the complete state of page four.
+
 2008-07-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma-config.c (on_btn_conneciton_test_clicked): Created to
