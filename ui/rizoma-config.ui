@@ -772,7 +772,6 @@ Al finalizar el Wizard se creara el archivo de configuracion para el POS.</prope
   <object class="GtkMessageDialog" id="wnd_ok_pg_user">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
     <property name="border_width">5</property>
-    <property name="type">GTK_WINDOW_POPUP</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
