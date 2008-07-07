@@ -21,6 +21,8 @@
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include<libpq-fe.h>
+
 #include<gtk/gtk.h>
 #include<libgksu.h>
 
@@ -32,6 +34,17 @@
 
 /* The Builder */
 GtkBuilder *builder;
+
+gchar *server_host;
+gchar *server_port;
+gchar *server_db_name;
+gchar *server_db_user;
+gchar *server_db_pass;
+gboolean server_ssl;
+
+gboolean local;
+gboolean network;
+gboolean client;
 
 gchar *local_user_pg;
 gchar *host_pg;
@@ -51,30 +64,33 @@ create_config (GtkAssistant *asistente, gpointer data_user)
 {
   GKeyFile *file;
   gchar *rizoma_path;
-  GtkMessageDialog *dialog;
+  gchar *ssl;
 
   rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
 
   file = g_key_file_new();
 
-  name_db = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "db_name"))));
-  host_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "host_pg"))));
-  port_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "port_pg"))));
-  user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "user_pg"))));
-  pass_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "pass_pg"))));
+  if (local || (network && !client))
+    {
+    }
+  else
+    {
+      g_key_file_set_string (file, "DEFAULT", "DB_NAME", server_db_name);
+      g_key_file_set_string (file, "DEFAULT", "USER", server_db_user);
+      g_key_file_set_string (file, "DEFAULT", "PASSWORD", server_db_pass);
+      g_key_file_set_string (file, "DEFAULT", "SERVER_HOST", server_host);
+      g_key_file_set_string (file, "DEFAULT", "PORT", server_port);
 
-  g_key_file_set_string (file, "DEFAULT", "DB_NAME", name_db);
-  g_key_file_set_string (file, "DEFAULT", "USER", user_pg);
-  g_key_file_set_string (file, "DEFAULT", "PASSWORD", pass_pg);
-  g_key_file_set_string (file, "DEFAULT", "SERVER_HOST", host_pg);
-  g_key_file_set_string (file, "DEFAULT", "PORT", port_pg);
+      ssl = server_ssl ? "require" : "disable";
+      g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
+    }
+
   g_key_file_set_string (file, "DEFAULT", "TEMP_FILES", "/tmp");
   g_key_file_set_string (file, "DEFAULT", "VALE_DIR", "/tmp");
   g_key_file_set_string (file, "DEFAULT", "VALE_COPY", "1");
   g_key_file_set_string (file, "DEFAULT", "VENDEDOR", "1");
   g_key_file_set_string (file, "DEFAULT", "MAQUINA", "1");
   g_key_file_set_string (file, "DEFAULT", "VENTA_DIRECTA", "0");
-  g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
   g_key_file_set_string (file, "DEFAULT", "PRINT_COMMAND", "lpr");
   g_key_file_set_string (file, "DEFAULT", "LOGO", "");
   g_key_file_set_string (file, "DEFAULT", "FULLSCREEN", "no");
@@ -82,16 +98,11 @@ create_config (GtkAssistant *asistente, gpointer data_user)
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
     {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_config_file");
-
-      gtk_widget_show_all ( (GtkWidget *)dialog);
+      gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "error_config_file")));
     }
   else
     {
-      g_remove (g_strdup_printf ("%s/.pgpass", g_getenv ("HOME")));
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_config_file");
-
-      gtk_widget_show_all ( (GtkWidget *)dialog);
+       gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "ok_config_file")));
     }
 
 }
@@ -137,7 +148,7 @@ run_gksu_command (gchar *command)
   gksu_context_free (context);
   if (error != NULL )
     {
-      g_print ("error: %s\n", error->message);
+      g_error ("%s\n", error->message);
       return FALSE;
     }
   else
@@ -311,6 +322,10 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
 {
   gint current_page;
 
+  local = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_local")));
+  network = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_network")));
+  client = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_client")));
+
   current_page = gtk_assistant_get_current_page (assistant);
 
   if (current_page == 1)
@@ -319,26 +334,26 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
     }
   else if (current_page == 2)
     {
-      gboolean client = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radio_btn_client")));
       GtkNotebook *notebook = GTK_NOTEBOOK (gtk_builder_get_object (builder, "ntbk_data_ingress"));
+      g_print ("\nLocal: %d\nNetwork: %d\nClient: %d\n", local, network, client);
 
-      if (client)
+      if (local || (network && !client))
         {
-          gtk_notebook_set_current_page (notebook, 1);
+          gtk_notebook_set_current_page (notebook, 0);
         }
       else
         {
-          gtk_notebook_set_current_page (notebook, 2);
+          gtk_notebook_set_current_page (notebook, 1);
         }
-
-      gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
   else if (current_page == 3)
     {
-      GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
+      if ((local || network) && client)
+        {
+          GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
 
-      gtk_entry_set_text (ruta_sql, DATADIR);
-
+          gtk_entry_set_text (ruta_sql, DATADIR);
+        }
       gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
   else if (current_page == 4)
@@ -347,11 +362,22 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
     }
 }
 
+gint
+forward_function (gint current_page, gpointer data)
+{
+  if (current_page == 2 && client && network)
+    {
+      return 4;
+    }
+
+  return current_page + 1;
+}
+
 int
 main (int argc, char *argv[])
 {
   GError *err = NULL;
-  GtkAssistant *asistente;
+  GtkAssistant *assistant;
   GtkWidget *page;
 
   gtk_init (&argc, &argv);
@@ -366,17 +392,20 @@ main (int argc, char *argv[])
 
   gtk_builder_connect_signals (builder, NULL);
 
-  asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente");
+  assistant = GTK_ASSISTANT (gtk_builder_get_object (builder, "asistente"));
 
-  page = gtk_assistant_get_nth_page (asistente, 0 );
-  gtk_assistant_set_page_complete (asistente, page, TRUE);
+  page = gtk_assistant_get_nth_page (assistant, 0 );
+  gtk_assistant_set_page_complete (assistant, page, TRUE);
 
-  gtk_widget_show_all ( (GtkWidget *) asistente);
+  gtk_assistant_set_forward_page_func (assistant, forward_function, NULL, NULL);
+
+  gtk_widget_show_all (GTK_WIDGET (assistant));
 
   gtk_main ();
 
   return 0;
 }
+
 
 void
 on_radio_btn_type_network_toggled (GtkWidget *vbox, GtkToggleButton *button)
@@ -384,4 +413,52 @@ on_radio_btn_type_network_toggled (GtkWidget *vbox, GtkToggleButton *button)
   gboolean active = gtk_toggle_button_get_active (button);
 
   gtk_widget_set_sensitive (vbox, active);
+}
+
+void
+on_btn_conneciton_test_clicked (GtkAssistant *assistant)
+{
+  GtkWidget *wnd;
+  GtkWidget *page = gtk_assistant_get_nth_page (assistant, gtk_assistant_get_current_page (assistant));
+
+  PGconn *connection;
+  ConnStatusType status;
+
+  gchar *ssl;
+  gchar *str_conn;
+
+  server_host = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_client_host"))));
+  server_port = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_client_port"))));
+  server_db_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_client_db"))));
+  server_db_user = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_client_user"))));
+  server_db_pass = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_client_pass"))));
+  server_ssl = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "chk_btn_ssl")));
+
+  ssl = server_ssl ? "require" : "disable";
+
+  str_conn = g_strdup_printf ("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+                              server_host, server_port, server_db_name, server_db_user, server_db_pass, ssl);
+
+  connection = PQconnectdb (str_conn);
+  g_free (str_conn);
+
+  status = PQstatus (connection);
+
+  switch (status)
+    {
+    case CONNECTION_OK:
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_server_conn_ok"));
+      PQfinish (connection);
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
+      break;
+    case CONNECTION_BAD:
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_server_conn_bad"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQerrorMessage (connection));
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+      break;
+    default: /* We cover all the other options that we do not need */
+      break;
+    }
+
+  gtk_widget_show_all (wnd);
 }

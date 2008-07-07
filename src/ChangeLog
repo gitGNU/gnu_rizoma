@@ -1,3 +1,8 @@
+2008-07-06  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma-config.c (on_btn_conneciton_test_clicked): Created to
+	test connection.
+
 2008-07-04  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (on_btn_credit_sale_clicked): Replaced g_strsplit() for

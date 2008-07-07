@@ -1,11 +1,77 @@
 <?xml version="1.0"?>
 <interface>
+  <object class="GtkMessageDialog" id="wnd_server_conn_bad">
+    <property name="border_width">5</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="has_separator">False</property>
+    <property name="message_type">GTK_MESSAGE_ERROR</property>
+    <property name="buttons">GTK_BUTTONS_CLOSE</property>
+    <property name="text">No se pudo establecer la conecci&#xF3;n con el servidor</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox31">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area31">
+            <property name="visible">True</property>
+            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="wnd_server_conn_ok">
+    <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">GTK_WIN_POS_CENTER</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">asistente</property>
+    <property name="has_separator">False</property>
+    <property name="buttons">GTK_BUTTONS_OK</property>
+    <property name="text">La conecci&#xF3;n con el servidor fue exitosa.</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox30">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area30">
+            <property name="visible">True</property>
+            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkAssistant" id="asistente">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="type">GTK_WINDOW_POPUP</property>
     <property name="title" translatable="yes">Configuraci&#xF3;n de POS Rizoma Comercio</property>
-    <property name="window_position">GTK_WIN_POS_MOUSE</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_TOOLBAR</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
     <property name="gravity">GDK_GRAVITY_CENTER</property>
     <signal name="close" handler="gtk_main_quit"/>
     <signal name="cancel" handler="gtk_main_quit"/>
@@ -50,7 +116,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                   <object class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkRadioButton" id="radio_btn_type_local">
+                      <object class="GtkRadioButton" id="radio_btn_local">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Local</property>
@@ -60,14 +126,14 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                       </object>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="radio_btn_type_network">
+                      <object class="GtkRadioButton" id="radio_btn_network">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Red</property>
                         <property name="response_id">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">radio_btn_type_local</property>
+                        <property name="group">radio_btn_local</property>
                         <signal name="toggled" handler="on_radio_btn_type_network_toggled" object="vbox_serv_client" after="yes"/>
                       </object>
                       <packing>
@@ -122,7 +188,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
       <object class="GtkNotebook" id="ntbk_data_ingress">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="show_tabs">False</property>
         <property name="show_border">False</property>
         <property name="tab_border">0</property>
         <property name="tab_hborder">0</property>
@@ -133,7 +198,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="n_rows">5</property>
             <property name="n_columns">2</property>
-            <property name="homogeneous">True</property>
             <child>
               <placeholder/>
             </child>
@@ -149,6 +213,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -160,6 +225,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -168,6 +234,9 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Usuario local de PostgreSQL</property>
               </object>
+              <packing>
+                <property name="x_options">GTK_EXPAND</property>
+              </packing>
             </child>
             <child>
               <object class="GtkLabel" id="label8">
@@ -178,6 +247,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -189,6 +259,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -201,6 +272,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -214,6 +286,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="right_attach">2</property>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -228,22 +301,25 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="right_attach">2</property>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button3">
+              <object class="GtkButton" id="btn_create_pg_user">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Crear Usuario</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_create_pg_user_clicked" object="asistente"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
           </object>
@@ -254,18 +330,52 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
         <child>
           <object class="GtkTable" id="table1">
             <property name="visible">True</property>
-            <property name="n_rows">5</property>
+            <property name="n_rows">6</property>
             <property name="n_columns">2</property>
+            <child>
+              <object class="GtkCheckButton" id="chk_btn_ssl">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="label" translatable="yes">SSL</property>
+                <property name="response_id">0</property>
+                <property name="active">True</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+                <property name="x_options">GTK_EXPAND</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_conneciton_test">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="label" translatable="yes">Probar Datos</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_conneciton_test_clicked" object="asistente"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+                <property name="x_options">GTK_EXPAND</property>
+              </packing>
+            </child>
             <child>
               <object class="GtkEntry" id="entry_client_port">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="text" translatable="yes">5432</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -276,6 +386,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -283,6 +394,9 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Host Base de Datos</property>
               </object>
+              <packing>
+                <property name="x_options">GTK_EXPAND</property>
+              </packing>
             </child>
             <child>
               <object class="GtkLabel" id="label11">
@@ -292,6 +406,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -302,6 +417,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -312,6 +428,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -322,6 +439,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -334,6 +452,7 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="right_attach">2</property>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
@@ -346,23 +465,27 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="right_attach">2</property>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_client_bd">
+              <object class="GtkEntry" id="entry_client_db">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="text" translatable="yes">rizoma</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
+                <property name="x_options">GTK_EXPAND</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="position">1</property>
+            <property name="tab_fill">False</property>
           </packing>
         </child>
         <child type="tab">
@@ -371,134 +494,137 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
       </object>
     </child>
     <child>
-      <object class="GtkTable" id="table2">
+      <object class="GtkNotebook" id="notebook1">
         <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="n_rows">5</property>
-        <property name="n_columns">2</property>
-        <property name="homogeneous">True</property>
+        <property name="can_focus">True</property>
         <child>
+          <object class="GtkTable" id="table2">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="n_rows">5</property>
+            <property name="n_columns">2</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label10">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Usuario administrador del POS</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label17">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Contrase&#xF1;a del administrador del POS</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label18">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Nombre de la Base de datos</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label19">
+                <property name="visible">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">La ruta a los archivos SQL</property>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="admin_user">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="admin_pass">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="visibility">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="db_name">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="text" translatable="yes">rizoma</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="ruta_sql">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="label" translatable="yes">Volcar Datos</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="volcar_db"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child type="tab">
           <placeholder/>
         </child>
         <child>
-          <object class="GtkButton" id="button2">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Volcar Datos</property>
-            <property name="response_id">0</property>
-            <signal name="clicked" handler="volcar_db"/>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">4</property>
-            <property name="bottom_attach">5</property>
-          </packing>
+          <placeholder/>
         </child>
-        <child>
-          <object class="GtkEntry" id="ruta_sql">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">3</property>
-            <property name="bottom_attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="db_name">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="text" translatable="yes">rizoma</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">2</property>
-            <property name="bottom_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="admin_pass">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="visibility">False</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="admin_user">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="right_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label4">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">La ruta a los archivos SQL</property>
-          </object>
-          <packing>
-            <property name="top_attach">3</property>
-            <property name="bottom_attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label10">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Nombre de la Base de datos</property>
-          </object>
-          <packing>
-            <property name="top_attach">2</property>
-            <property name="bottom_attach">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label9">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Contrase&#xF1;a del administrador del POS</property>
-          </object>
-          <packing>
-            <property name="top_attach">1</property>
-            <property name="bottom_attach">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label5">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="label" translatable="yes">Usuario administrador del POS</property>
-          </object>
-        </child>
-      </object>
-      <packing>
-        <property name="title">Datos Iniciales de la BD</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkVBox" id="vbox1">
-        <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <child>
+        <child type="tab">
           <placeholder/>
         </child>
       </object>

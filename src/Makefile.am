@@ -39,6 +39,7 @@ vale.c vale.h \
 factura_more.c factura_more.h \
 printing.c printing.h \
 tiempo.c tiempo.h
+
 rizoma_ventas_SOURCES = ventas.c ventas.h  dimentions.h tipos.h \
 credito.c credito.h \
 postgres-functions.c postgres-functions.h \
@@ -93,6 +94,6 @@ INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(
 
 rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS) $(GKSU_LIBS)
 rizoma_config_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CONFUSE_FLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CONFUSE_FLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ChangeLog
