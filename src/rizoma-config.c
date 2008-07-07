@@ -35,6 +35,7 @@
 /* The Builder */
 GtkBuilder *builder;
 
+/* Server data info - Used when the user select client mode */
 gchar *server_host;
 gchar *server_port;
 gchar *server_db_name;
@@ -46,18 +47,23 @@ gboolean local;
 gboolean network;
 gboolean client;
 
-gchar *local_user_pg;
-gchar *host_pg;
-gchar *user_pg;
-gchar *pass_pg;
-gchar *port_pg;
+/* Store the info to access the PostgreSQL to create a pguser */
+gchar *pg_port;
+gchar *pg_user;
+gchar *pg_pass;
+gboolean pg_ssl;
 
-gchar *user_admin;
-gchar *pass_admin;
-gchar *name_db;
-gchar *sql_data;
+/* User and pass to connect the DB */
+gchar *user_db_name;
+gchar *user_db_pass;
 
-gchar *user;
+/* DB Info */
+gchar *db_name;
+gchar *admin_user;
+gchar *admin_pass;
+
+/* Path to SQL files */
+gchar *sql_path;
 
 void
 create_config (GtkAssistant *asistente, gpointer data_user)
@@ -72,6 +78,14 @@ create_config (GtkAssistant *asistente, gpointer data_user)
 
   if (local || (network && !client))
     {
+      g_key_file_set_string (file, "DEFAULT", "DB_NAME", db_name);
+      g_key_file_set_string (file, "DEFAULT", "USER", user_db_name);
+      g_key_file_set_string (file, "DEFAULT", "PASSWORD", user_db_pass);
+      g_key_file_set_string (file, "DEFAULT", "SERVER_HOST", "localhost");
+      g_key_file_set_string (file, "DEFAULT", "PORT", pg_port);
+
+      ssl = pg_ssl ? "require" : "disable";
+      g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
     }
   else
     {
@@ -102,219 +116,9 @@ create_config (GtkAssistant *asistente, gpointer data_user)
     }
   else
     {
-       gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "ok_config_file")));
+      gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "ok_config_file")));
     }
 
-}
-
-
-void
-dialog_close (GtkDialog *dialog, gint response_id, gpointer user_data)
-{
-  if (response_id == GTK_RESPONSE_CLOSE || response_id == GTK_RESPONSE_NO)
-    {
-      gtk_widget_hide ( (GtkWidget *) dialog);
-    }
-  else if (response_id == GTK_RESPONSE_YES || response_id == GTK_RESPONSE_OK)
-    {
-      GtkAssistant *asistente;
-      GtkWidget *page;
-      gint current_page;
-
-      asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
-
-      current_page = gtk_assistant_get_current_page (asistente);
-      page = gtk_assistant_get_nth_page (asistente, current_page);
-      gtk_assistant_set_page_complete (asistente, page, TRUE);
-
-      gtk_widget_hide ( (GtkWidget *) dialog);
-    }
-}
-
-gboolean
-run_gksu_command (gchar *command)
-{
-  GksuContext *context = NULL;
-  GError *error = NULL;
-
-  context = gksu_context_new ();
-  gksu_context_set_user (context, "root");
-  gksu_context_set_description (context, "POS Rizoma Comercio - Configuración");
-  //gksu_context_set_debug (context, TRUE);
-
-  gksu_context_set_command (context, command);
-
-  gksu_su_full (context, NULL, NULL, NULL, NULL, &error);
-  gksu_context_free (context);
-  if (error != NULL )
-    {
-      g_error ("%s\n", error->message);
-      return FALSE;
-    }
-  else
-    {
-      return TRUE;
-    }
-}
-
-void
-volcar_db (GtkWidget *button, gpointer user_data)
-{
-  FILE *fp;
-  gchar *path;
-  gchar *command;
-  gchar *sql;
-
-  GtkMessageDialog *dialog;
-
-  user_admin = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "admin_user"))));
-  pass_admin = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "admin_pass"))));
-  name_db = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "db_name"))));
-  sql_data = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "ruta_sql"))));
-
-  if( g_ascii_strcasecmp (user_admin, "") == 0 || g_ascii_strcasecmp (pass_admin, "") == 0 || g_ascii_strcasecmp (name_db, "") == 0 || g_ascii_strcasecmp (sql_data, "") == 0 )
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "missing_data");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-      return;
-    }
-
-  command = g_strdup_printf ("su - %s -c \\\"dropdb -h %s -p %s %s; createdb -h %s -p %s -O %s %s;\\\"",
-                             local_user_pg, host_pg, port_pg, name_db, host_pg, port_pg, user_pg, name_db);
-  if (!run_gksu_command (command))
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_db");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-
-      return;
-    }
-
-  path = g_strdup_printf ("%s/rizoma.structure", sql_data);
-  fp = fopen (path, "r");
-
-  if (fp == NULL)
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_data_schema");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-      return;
-    }
-  else
-    {
-      fclose (fp);
-
-      command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
-      if (system (command) != 0)
-        {
-          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_create_schema");
-          gtk_widget_show_all ( (GtkWidget *) dialog );
-          return;
-        }
-    }
-
-  path = g_strdup_printf ("%s/rizoma.initvalues", sql_data);
-
-  fp = fopen (path, "r");
-  if (fp == NULL)
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_data_values");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-
-      return;
-    }
-  else
-    {
-      fclose (fp);
-
-      command = g_strdup_printf ("psql -f %s -d %s", path, name_db);
-      if (system (command) != 0)
-        {
-          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_sql_insert_values");
-          gtk_widget_show_all ( (GtkWidget *) dialog );
-
-          return;
-        }
-    }
-
-  sql = g_strdup_printf ("INSERT INTO users (id, usuario, passwd, rut, dv, nombre, apell_p, apell_m, fecha_ingreso, level )"
-                         " VALUES (DEFAULT, '%s', md5('%s'), 0, 0, 'Administrador', '', '', NOW(), 0)",
-                         user_admin, pass_admin);
-
-  command = g_strdup_printf ("psql -h %s -p %s -f %s -d %s -c \"%s\"", host_pg, port_pg, path, name_db, sql);
-  if (system (command) != 0)
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_admin_user");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-
-      return;
-    }
-
-  path = g_strdup_printf ("%s/funciones.sql", sql_data);
-  command = g_strdup_printf ("psql -h %s -p %s -f %s -d %s", host_pg, port_pg, path, name_db);
-  if (system (command) != 0)
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_create_plsql");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-
-      return;
-    }
-
-  dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_volcado");
-  gtk_widget_show_all ( (GtkWidget *) dialog );
-}
-
-void
-pg_user_created (GtkDialog *dialog, gint response_id, gpointer user_data)
-{
-  GtkAssistant *asistente;
-  GtkWidget *page;
-  gint current_page;
-
-  asistente = (GtkAssistant *) gtk_builder_get_object (builder, "asistente" );
-
-  current_page = gtk_assistant_get_current_page (asistente);
-  page = gtk_assistant_get_nth_page (asistente, current_page);
-  gtk_assistant_set_page_complete (asistente, page, TRUE);
-
-  gtk_widget_hide ( (GtkWidget *)dialog);
-}
-
-void
-create_db_user (GtkWidget *button, gpointer user_data)
-{
-  gchar *command;
-  gchar *pgpass_string;
-  GtkMessageDialog *dialog;
-
-  local_user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "local_pg_user"))));
-  host_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "host_pg"))));
-  port_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "port_pg"))));
-  user_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "user_pg"))));
-  pass_pg = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "pass_pg"))));
-
-  if( g_ascii_strcasecmp (local_user_pg, "") == 0|| g_ascii_strcasecmp (user_pg, "") == 0 )
-    {
-      dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "missing_data");
-      gtk_widget_show_all ( (GtkWidget *) dialog );
-    }
-  else
-    {
-      command = g_strdup_printf ("su %s -c \\\"psql -h %s -p %s template1 -c \\\\\\\"CREATE USER %s ENCRYPTED PASSWORD \'%s\' CREATEDB NOCREATEUSER;\\\\\\\"\\\"",
-                                 local_user_pg, host_pg, port_pg, user_pg, pass_pg);
-
-      pgpass_string = g_strdup_printf ("%s:%s:*:%s:%s", host_pg, port_pg, user_pg, pass_pg);
-
-      if (run_gksu_command (command) && g_file_set_contents (g_strdup_printf ("%s/.pgpass", g_getenv ("HOME")), pgpass_string, -1, NULL))
-        {
-          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "ok_pg_user");
-          gtk_widget_show_all ( (GtkWidget *) dialog );
-
-        }
-      else
-        {
-          dialog = (GtkMessageDialog *) gtk_builder_get_object (builder, "error_pg_user");
-          gtk_widget_show_all ( (GtkWidget *) dialog );
-        }
-    }
 }
 
 void
@@ -335,7 +139,6 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
   else if (current_page == 2)
     {
       GtkNotebook *notebook = GTK_NOTEBOOK (gtk_builder_get_object (builder, "ntbk_data_ingress"));
-      g_print ("\nLocal: %d\nNetwork: %d\nClient: %d\n", local, network, client);
 
       if (local || (network && !client))
         {
@@ -348,11 +151,9 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
     }
   else if (current_page == 3)
     {
-      if ((local || network) && client)
+      if (local || (network && client))
         {
-          GtkEntry *ruta_sql = (GtkEntry *) gtk_builder_get_object (builder, "ruta_sql");
-
-          gtk_entry_set_text (ruta_sql, DATADIR);
+          gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sql_path")), DATADIR);
         }
       gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
@@ -461,4 +262,273 @@ on_btn_conneciton_test_clicked (GtkAssistant *assistant)
     }
 
   gtk_widget_show_all (wnd);
+}
+
+void
+on_btn_create_pg_user_clicked (GtkAssistant *assistant)
+{
+  PGconn *connection;
+  ConnStatusType status;
+  PGresult *res;
+  ExecStatusType status_res;
+
+  gchar *ssl;
+  gchar *str_conn;
+
+  gchar *sql_query;
+
+  GtkWidget *wnd;
+  GtkWidget *page = gtk_assistant_get_nth_page (assistant, gtk_assistant_get_current_page (assistant));
+
+  pg_user = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "pg_user"))));
+  pg_pass = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "pg_pass"))));
+  pg_port = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "pg_port"))));
+  pg_ssl = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "chk_btn_ssl_pg")));
+
+  user_db_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "user_db_name"))));
+  user_db_pass = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "user_db_pass"))));
+
+  ssl = pg_ssl ? "require" : "disable";
+
+  if (g_str_equal (pg_user, "") || g_str_equal (pg_port, "") || g_str_equal (user_db_name, ""))
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_missing_data"));
+    }
+  else
+    {
+      str_conn = g_strdup_printf ("host=localhost port=%s dbname=template1 user=%s password=%s sslmode=%s",
+                                  pg_port, pg_user, pg_pass, ssl);
+
+      connection = PQconnectdb (str_conn);
+      g_free (str_conn);
+
+      status = PQstatus (connection);
+
+      switch (status)
+        {
+        case  CONNECTION_OK:
+          if (g_str_equal (user_db_pass, ""))
+            {
+              sql_query = g_strdup_printf ("CREATE USER %s CREATEDB NOCREATEUSER", user_db_name);
+            }
+          else
+            {
+              sql_query = g_strdup_printf ("CREATE USER %s ENCRYPTED PASSWORD '%s' CREATEDB NOCREATEUSER", user_db_name, user_db_pass);
+            }
+
+          res = PQexec (connection, sql_query);
+          status_res = PQresultStatus (res);
+
+          if ((status_res != PGRES_COMMAND_OK) && (status_res != PGRES_TUPLES_OK))
+            {
+              wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_pg_user"));
+              gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd),
+                                                        g_strdup_printf( "Error: %s\nMsg:%s",
+                                                                         PQresStatus (status_res),
+                                                                         PQresultErrorMessage (res)));
+              gtk_assistant_set_page_complete (assistant, page, FALSE);
+            }
+          else
+            {
+              wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ok_pg_user"));
+              gtk_assistant_set_page_complete (assistant, page, TRUE);
+            }
+          break;
+        case CONNECTION_BAD:
+          wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_server_conn_bad"));
+          gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQerrorMessage (connection));
+          gtk_assistant_set_page_complete (assistant, page, FALSE);
+          break;
+        default:
+          break;
+        }
+    }
+  PQfinish (connection);
+
+  gtk_widget_show_all (wnd);
+}
+
+void
+on_btn_dump_data_clicked (GtkAssistant *assistant)
+{
+  gchar *str_conn;
+  gchar *ssl;
+
+  gchar *sql_query;
+  gchar *content;
+
+  PGconn *connection;
+  PGresult *res;
+  ConnStatusType status;
+  ExecStatusType est;
+
+  GtkWidget *wnd;
+  GtkWidget *page = gtk_assistant_get_nth_page (assistant, gtk_assistant_get_current_page (assistant));
+  GError *error = NULL;
+
+  db_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "db_name"))));
+  admin_user = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "admin_user"))));
+  admin_pass = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "admin_pass"))));
+  sql_path = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sql_path"))));
+
+  if (g_str_equal (db_name, "") || g_str_equal (admin_user, "") || g_str_equal (admin_pass, "") || g_str_equal (sql_path, ""))
+    {
+      gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_missing_data")));
+      return;
+    }
+
+  ssl = pg_ssl ? "require" : "disable";
+
+  str_conn = g_strdup_printf ("host=localhost port=%s dbname=template1 user=%s password=%s sslmode=%s",
+                              pg_port, user_db_name, user_db_pass, ssl);
+
+  connection = PQconnectdb (str_conn);
+  g_free (str_conn);
+
+  status = PQstatus (connection);
+
+  if (status == CONNECTION_OK)
+    {
+      sql_query = g_strdup_printf ("CREATE DATABASE %s;", db_name);
+
+      res = PQexec (connection, sql_query);
+      g_free (sql_query);
+      est = PQresultStatus (res);
+
+      if ((est != PGRES_COMMAND_OK) && (est != PGRES_TUPLES_OK))
+        {
+          wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_create_db"));
+          gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd),
+                                                    g_strdup_printf( "Error: %s\nMsg:%s",
+                                                                     PQresStatus (est),
+                                                                     PQresultErrorMessage (res)));
+          gtk_widget_show_all (wnd);
+          gtk_assistant_set_page_complete (assistant, page, FALSE);
+          return;
+        }
+    }
+  else if (status == CONNECTION_BAD)
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_create_db"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQerrorMessage (connection));
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+      gtk_widget_show_all (wnd);
+      return;
+    }
+
+  PQfinish (connection);
+
+  str_conn = g_strdup_printf ("host=localhost port=%s dbname=%s user=%s password=%s sslmode=%s",
+                              pg_port, db_name, user_db_name, user_db_pass, ssl);
+  connection = PQconnectdb (str_conn);
+  g_free (str_conn);
+
+  status = PQstatus (connection);
+
+  if (status == CONNECTION_BAD)
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_server_conn_bad"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQerrorMessage (connection));
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+      gtk_widget_show_all (wnd);
+      return;
+    }
+
+
+  if (!g_file_get_contents (g_strdup_printf ("%s/rizoma.structure", sql_path), &content, NULL, &error))
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_sql_data_schema"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), error->message);
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+        gtk_widget_show_all (wnd);
+      return;
+    }
+  else
+    {
+      res = PQexec (connection, content);
+      est = PQresultStatus (res);
+
+      if (est == PGRES_BAD_RESPONSE || est ==PGRES_NONFATAL_ERROR || est == PGRES_FATAL_ERROR)
+        {
+          wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_sql_create_schema"));
+          gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
+          gtk_assistant_set_page_complete (assistant, page, FALSE);
+          gtk_widget_show_all (wnd);
+          return;
+        }
+    }
+
+  g_free (content);
+  content = NULL;
+
+  if (!g_file_get_contents (g_strdup_printf ("%s/rizoma.initvalues", sql_path), &content, NULL, &error))
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_sql_data_values"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), error->message);
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+      gtk_widget_show_all (wnd);
+      return;
+    }
+  else
+    {
+      res = PQexec (connection, content);
+      est = PQresultStatus (res);
+
+      if (est == PGRES_BAD_RESPONSE || est ==PGRES_NONFATAL_ERROR || est == PGRES_FATAL_ERROR)
+        {
+          wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_sql_insert_values"));
+          gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
+          gtk_assistant_set_page_complete (assistant, page, FALSE);
+          gtk_widget_show_all (wnd);
+          return;
+        }
+    }
+
+  sql_query = g_strdup_printf ("INSERT INTO users (id, usuario, passwd, rut, dv, nombre, apell_p, apell_m, fecha_ingreso, level )"
+                               " VALUES (DEFAULT, '%s', md5('%s'), 0, 0, 'Administrador', '', '', NOW(), 0)",
+                               admin_user, admin_pass);
+
+  res = PQexec (connection, sql_query);
+  g_free (sql_query);
+  est = PQresultStatus (res);
+
+  if (est == PGRES_BAD_RESPONSE || est ==PGRES_NONFATAL_ERROR || est == PGRES_FATAL_ERROR)
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_create_admin_user"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+      gtk_widget_show_all (wnd);
+      return;
+    }
+
+  g_free (content);
+  content = NULL;
+
+  if (!g_file_get_contents (g_strdup_printf ("%s/funciones.sql", sql_path), &content, NULL, &error))
+    {
+      wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_create_plsql"));
+      gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), error->message);
+      gtk_assistant_set_page_complete (assistant, page, FALSE);
+      gtk_widget_show_all (wnd);
+      return;
+    }
+  else
+    {
+      res = PQexec (connection, content);
+      est = PQresultStatus (res);
+
+      if (est == PGRES_BAD_RESPONSE || est ==PGRES_NONFATAL_ERROR || est == PGRES_FATAL_ERROR)
+        {
+          wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_create_plsql"));
+          gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
+          gtk_assistant_set_page_complete (assistant, page, FALSE);
+          gtk_widget_show_all (wnd);
+          return;
+        }
+    }
+
+  PQfinish (connection);
+
+  gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ok_volcado")));
+  gtk_assistant_set_page_complete (assistant, page, TRUE);
 }
