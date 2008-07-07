@@ -3240,8 +3240,8 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
 
   rut = atoi(str_splited[0]);
   dv = g_strdup(str_splited[1]);
+  g_free (str_splited);
   str_rut = g_strdup_printf("%d-%s",rut,dv);
-  g_strfreev(str_splited);
 
   tipo_vendedor = rizoma_get_value_int ("VENDEDOR");
 
