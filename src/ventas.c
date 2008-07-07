@@ -3281,11 +3281,11 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA)
     {
       GtkWidget *wid;
-      wid = GTK_WIDGET(gtk_builder_get_object(builder,"entry_percent_discount"));
-      if (g_str_equal(gtk_entry_get_text(GTK_ENTRY(wid)),""))
+      wid = GTK_WIDGET (gtk_builder_get_object (builder,"entry_percent_discount"));
+      if (g_str_equal (gtk_entry_get_text (GTK_ENTRY (wid)),""))
         discount = "0";
       else
-        discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (venta->discount_entry)));
+        discount = g_strdup(gtk_entry_get_text (GTK_ENTRY (wid)));
     }
   else
     discount = "0";
