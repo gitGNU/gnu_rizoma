@@ -2,7 +2,7 @@
    c-indentation-style: gnu -*- */
 /*caja.c
  *
- *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
  *    This file is part of rizoma.
  *
