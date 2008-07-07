@@ -122,8 +122,8 @@ IngresarDinero (GtkWidget *widget, gpointer data)
     }
 
   gtk_tree_model_get (model, &iter,
-		      0, &motivo,
-		      -1);
+                      0, &motivo,
+                      -1);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
   monto = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
@@ -162,16 +162,16 @@ VentanaIngreso (gint monto)
     {
       GtkCellRenderer *cell;
       store = gtk_list_store_new (2,
-				  G_TYPE_INT,
-				  G_TYPE_STRING);
+                                  G_TYPE_INT,
+                                  G_TYPE_STRING);
 
       gtk_combo_box_set_model(GTK_COMBO_BOX(aux_widget), GTK_TREE_MODEL(store));
 
       cell = gtk_cell_renderer_text_new();
       gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(aux_widget), cell, TRUE);
       gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(aux_widget), cell,
-				     "text", 1,
-				     NULL);
+                                     "text", 1,
+                                     NULL);
     }
 
   gtk_list_store_clear(store);
@@ -180,9 +180,9 @@ VentanaIngreso (gint monto)
     {
       gtk_list_store_append(store, &iter);
       gtk_list_store_set(store, &iter,
-			 0, atoi(PQvaluebycol(res, i, "id")),
-			 1, PQvaluebycol(res, i, "descrip"),
-			 -1);
+                         0, atoi(PQvaluebycol(res, i, "id")),
+                         1, PQvaluebycol(res, i, "descrip"),
+                         -1);
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
@@ -226,9 +226,9 @@ EgresarDinero (GtkWidget *widget, gpointer data)
                           -1);
 
       if (Egresar (monto, motivo, user_data->user_id))
-	CloseVentanaEgreso();
+        CloseVentanaEgreso();
       else
-	ErrorMSG(aux_widget, "No fue posible ingresar el egreso de dinero de la caja");
+        ErrorMSG(aux_widget, "No fue posible ingresar el egreso de dinero de la caja");
     }
 }
 
@@ -265,16 +265,16 @@ VentanaEgreso (gint monto)
     {
       GtkCellRenderer *cell;
       store = gtk_list_store_new(2,
-				 G_TYPE_INT,
-				 G_TYPE_STRING);
+                                 G_TYPE_INT,
+                                 G_TYPE_STRING);
 
       gtk_combo_box_set_model(GTK_COMBO_BOX(combo),GTK_TREE_MODEL(store));
 
       cell = gtk_cell_renderer_text_new();
       gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
       gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
-				     "text", 1,
-				     NULL);
+                                     "text", 1,
+                                     NULL);
     }
 
   gtk_list_store_clear(store);
@@ -283,9 +283,9 @@ VentanaEgreso (gint monto)
     {
       gtk_list_store_append(store, &iter);
       gtk_list_store_set(store, &iter,
-			 0, atoi(PQvaluebycol(res, i, "id")),
-			 1, PQvaluebycol(res, i, "descrip"),
-			 -1);
+                         0, atoi(PQvaluebycol(res, i, "id")),
+                         1, PQvaluebycol(res, i, "descrip"),
+                         -1);
 
     }
 
@@ -304,7 +304,7 @@ InicializarCaja (gint monto)
   gchar *q;
 
   q = g_strdup_printf ("INSERT INTO caja (id_vendedor, fecha_inicio, inicio) "
-		       "VALUES(%d, NOW(), %d)", user_data->user_id, monto);
+                       "VALUES(%d, NOW(), %d)", user_data->user_id, monto);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -337,8 +337,8 @@ CerrarCaja (gint monto)
     monto = ArqueoCaja ();
 
   q = g_strdup_printf ("UPDATE caja SET fecha_termino=NOW(), termino=%d "
-		       "WHERE id=(SELECT last_value FROM caja_id_seq)",
-		       monto);
+                       "WHERE id=(SELECT last_value FROM caja_id_seq)",
+                       monto);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -386,14 +386,14 @@ check_caja (void)
   if (PQntuples (res) == 0)
     {
       g_printerr("%s: could not retrieve the result of the sql query\n",
-		 G_STRFUNC);
+                 G_STRFUNC);
       return FALSE;
     }
 
   if (g_str_equal(PQgetvalue(res, 0, 0), "t"))
     return FALSE;
-    else
-      return TRUE;
+  else
+    return TRUE;
 }
 
 /**
@@ -521,12 +521,12 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   else
     if (monto_de_cierre > monto_real_que_tiene)
       {
-	Ingreso (monto_de_cierre - monto_real_que_tiene, 0, user_data->user_id);
-	res = CerrarCaja (monto_de_cierre);
+        Ingreso (monto_de_cierre - monto_real_que_tiene, 0, user_data->user_id);
+        res = CerrarCaja (monto_de_cierre);
       }
     else
       {
-	res = CerrarCaja(monto_de_cierre);
+        res = CerrarCaja(monto_de_cierre);
       }
 
   CalcularPerdida();
@@ -565,7 +565,7 @@ open_caja (gboolean automatic_mode)
   if (automatic_mode)
     InicializarCaja(caja_get_last_amount());
   else
-      InicializarCajaWin (caja_get_last_amount());
+    InicializarCajaWin (caja_get_last_amount());
 }
 
 
@@ -587,7 +587,7 @@ caja_get_last_amount (void)
   last_caja = atoi(PQgetvalue(res, 0, 0));
 
   q = g_strdup_printf("select termino from caja where id=%d",
-		      last_caja);
+                      last_caja);
   res = EjecutarSQL(q);
   g_free(q);
 
@@ -613,7 +613,7 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
   monto = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
 
   if (monto < 0)
-      AlertMSG(GTK_WIDGET(editable), "no puede ingresar un monto de perdida menor que 0");
+    AlertMSG(GTK_WIDGET(editable), "no puede ingresar un monto de perdida menor que 0");
   else
     {
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
@@ -623,9 +623,9 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
       gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", must_have - monto));
 
       if (must_have > monto)
-	gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("<span color=\"red\">%d</span>", must_have - monto));
+        gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("<span color=\"red\">%d</span>", must_have - monto));
       else
-	gtk_label_set_markup (GTK_LABEL(widget), "0");
+        gtk_label_set_markup (GTK_LABEL(widget), "0");
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
       gtk_entry_set_text (GTK_ENTRY(widget), g_strdup_printf("%d", monto));
