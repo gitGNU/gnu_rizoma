@@ -335,7 +335,7 @@ SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detal
        WHERE (producto.barcode= codigo_barras or producto.codigo_corto = in_codigo_corto) AND compra_detalle.barcode_product=producto.barcode
        AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
 
-IF NOT FOUND THEN
+IF NOT FOUND OR days = 0 THEN
    days := 1;
 END IF;
 
