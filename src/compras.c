@@ -1832,7 +1832,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
       return;
     }
   else if ((GetDataByOne
-            (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s-%s'", rut, rut_ver))) != NULL)
+            (g_strdup_printf ("SELECT * FROM proveedor WHERE rut='%s'", rut))) != NULL)
     {
       ErrorMSG (compra->rut_add, "Ya existe un proveedor con el mismo rut");
       return;

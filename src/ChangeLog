@@ -1,3 +1,8 @@
+2008-07-08  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (AddProveedor): To check if a provider exists we just
+	use "rut" without the verify digit.
+
 2008-07-07  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* caja.c (caja_get_last_amount): Make sure that we have something
