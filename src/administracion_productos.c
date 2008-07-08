@@ -1294,9 +1294,10 @@ BuscarProductosParaListar (void)
  * This function saves the modifications that the user entedered in
  * the modification product window
  *
+ * @param widget_barcode The widget with the barcode to search and edit.
  */
 void
-ModificarProducto (void)
+ModificarProducto (GtkWidget *widget_barcode)
 {
   GtkWidget *widget;
   GtkWidget *combo_imp;
@@ -1311,8 +1312,17 @@ ModificarProducto (void)
   PGresult *res;
   gint tuples, i;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
-  barcode = g_strdup(gtk_label_get_text(GTK_LABEL(widget)));
+  if (GTK_IS_ENTRY (widget_barcode))
+    {
+      barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_barcode)));
+    }
+  else if (GTK_IS_LABEL (widget_barcode))
+    {
+      barcode = g_strdup (gtk_label_get_text (GTK_LABEL (widget_barcode)));
+    }
+
+  if (g_str_equal (barcode, "")) return;
+
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
@@ -1327,6 +1337,8 @@ ModificarProducto (void)
       g_printerr("error en %s\n%s",G_STRFUNC, PQresultErrorMessage(res));
       return;
     }
+
+  if (PQntuples (res) == 0) return;
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_shortcode"));
   gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "codigo_corto"));
@@ -1423,18 +1435,4 @@ ModificarProducto (void)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_product"));
   gtk_widget_show_all(widget);
-}
-
-/**
- * This function closes the modification product window
- *
- */
-void
-CloseProductDescription (void)
-{
-  GtkWidget *widget;
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_product"));
-
-  gtk_widget_hide (widget);
 }

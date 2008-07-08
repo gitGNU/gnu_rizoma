@@ -44,9 +44,8 @@ void SaveChanges (void);
 
 void BuscarProductosParaListar (void);
 
-void ModificarProducto (void);
-
-void CloseProductDescription (void);
+void ModificarProducto (GtkWidget *widget_barcode);
 
 void CloseAjusteWin (GtkButton *button, gpointer data);
+
 #endif

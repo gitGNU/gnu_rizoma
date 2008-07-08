@@ -1,5 +1,9 @@
 2008-07-08  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* administracion_productos.c (CloseProductDescription): Deleted function.
+	(ModificarProducto): Added paramater widget_barcode to get the barcode
+	from that widget.
+
 	* compras.c (AddProveedor): To check if a provider exists we just
 	use "rut" without the verify digit.
 
