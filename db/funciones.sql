@@ -1733,7 +1733,7 @@ create or replace function get_iva(
 returns double precision as $$
 begin
 
-		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=0;
+		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=1;
 
 end; $$ language plpgsql;
 
