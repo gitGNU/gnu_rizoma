@@ -1,5 +1,8 @@
 2008-07-07  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* caja.c (caja_get_last_amount): Make sure that we have something
+	to get from the last SQL excecuted.
+
 	* rizoma-config.c (on_page_change): Deleted the code that set to
 	TRUE the complete state of page four.
 

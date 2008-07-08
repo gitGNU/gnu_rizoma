@@ -563,9 +563,9 @@ void
 open_caja (gboolean automatic_mode)
 {
   if (automatic_mode)
-    InicializarCaja(caja_get_last_amount());
+    InicializarCaja (caja_get_last_amount ());
   else
-    InicializarCajaWin (caja_get_last_amount());
+    InicializarCajaWin (caja_get_last_amount ());
 }
 
 
@@ -580,18 +580,20 @@ caja_get_last_amount (void)
 {
   PGresult *res;
   gchar *q;
-  gint last_amount;
+  gint last_amount = 0;
   gint last_caja;
 
   res = EjecutarSQL("select max(id) from caja");
-  last_caja = atoi(PQgetvalue(res, 0, 0));
+  last_caja = atoi (PQgetvalue (res, 0, 0));
 
-  q = g_strdup_printf("select termino from caja where id=%d",
-                      last_caja);
-  res = EjecutarSQL(q);
-  g_free(q);
+  q = g_strdup_printf ("select termino from caja where id=%d", last_caja);
+  res = EjecutarSQL (q);
+  g_free (q);
 
-  last_amount = atoi(PQgetvalue(res, 0, 0));
+  if (PQntuples (res) != 0)
+    {
+      last_amount = atoi (PQgetvalue (res, 0, 0));
+    }
 
   return last_amount;
 }
