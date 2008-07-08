@@ -634,9 +634,3 @@ alter table egreso add constraint fk_egreso_caja
 alter table ingreso add constraint fk_ingreso_caja
   foreign key (id_caja)
   references caja(id);
-alter table caja add constraint fk_caja_inicio_venta
-  foreign key (id_venta_inicio)
-  references venta (id);
-alter table caja add constraint fk_caja_termino_venta
-  foreign key (id_venta_termino)
-  references venta (id);
