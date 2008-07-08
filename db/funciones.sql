@@ -2018,6 +2018,10 @@ begin
 
 select max(id) into current_caja from caja;
 
+if current_caja IS NULL then
+   return FALSE;
+end if;
+
 select fecha_termino into fecha_ter from caja where id=current_caja;
 
 if (fecha_ter is NULL) then
