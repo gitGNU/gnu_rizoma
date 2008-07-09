@@ -3111,7 +3111,7 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
       else
         {
           GtkWindow *wnd_guide = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guide"));
-          clean_container (GTK_CONTAINER (wnd_invoice));
+          clean_container (GTK_CONTAINER (wnd_guide));
           gtk_widget_show_all (GTK_WIDGET (wnd_guide));
         }
     }
