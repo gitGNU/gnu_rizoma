@@ -1018,7 +1018,14 @@ IngresarProducto (Producto *product, gint compra)
 
   cantidad = CUT (g_strdup_printf ("%.2f", product->cantidad));
 
-  canjeado = product->stock_pro * ((double)1 / product->tasa_canje);
+  if (product->stock_pro != 0 && product->tasa_canje != NULL && product->tasa_canje != 0)
+    {
+      canjeado = product->stock_pro * ((double)1 / product->tasa_canje);
+    }
+  else
+    {
+      canjeado = 0;
+    }
 
   stock_pro = product->stock_pro - (product->cuanto - canjeado);
 

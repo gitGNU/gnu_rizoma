@@ -1,3 +1,9 @@
+2008-07-09  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* postgres-functions.c (IngresarProducto): Fix possible bug that
+	can produce a bad calculation when try to get how many products
+	where interchanged.
+
 2008-07-08  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* administracion_productos.c (CloseProductDescription): Deleted function.
