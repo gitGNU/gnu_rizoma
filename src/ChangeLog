@@ -9,6 +9,8 @@
 	(CloseSelectProveedores): Deleted function.
 	(Ingresar): Deleted function.
 	(RemoveBuyProduct): Deleted function.
+	(on_button_ok_ingress_clicked): Added clean_container() to all the
+	windows called by this function.
 
 	* postgres-functions.c (IngresarProducto): Fix possible bug that
 	can produce a bad calculation when try to get how many products

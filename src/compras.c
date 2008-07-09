@@ -3105,11 +3105,13 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
       if (factura)
         {
           GtkWindow *wnd_invoice = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
+          clean_container (GTK_CONTAINER (wnd_invoice));
           gtk_widget_show_all (GTK_WIDGET (wnd_invoice));
         }
       else
         {
           GtkWindow *wnd_guide = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guide"));
+          clean_container (GTK_CONTAINER (wnd_invoice));
           gtk_widget_show_all (GTK_WIDGET (wnd_guide));
         }
     }
@@ -3211,7 +3213,7 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
               gtk_tree_view_column_set_resizable (column, FALSE);
             }
           FillPartialTree (treeview);
-
+          clean_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_partial_invoice")));
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_invoice")));
         }
       else
@@ -3311,6 +3313,7 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
             }
           FillPartialTree (treeview);
 
+          clean_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_partial_guide")));
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_guide")));
         }
     }
