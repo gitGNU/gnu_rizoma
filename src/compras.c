@@ -779,6 +779,8 @@ compras_win ()
   //setup the providers tab
   proveedores_box();
 
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+
   gtk_widget_show_all (compras_gui);
 }
 
