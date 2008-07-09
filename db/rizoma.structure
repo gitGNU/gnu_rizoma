@@ -508,6 +508,15 @@ create table venta (
   constraint pk_Venta primary key (id)
 ) ;
 
+-- venta_anulada
+create table venta_anulada (
+  id_detail                 int not null,
+  id_sale                   int not null,
+  fecha                     timestamp default now(),
+  vendedor                  int not null,
+  constraint pk_venta_anulada primary key (id_detail, id_sale)
+) ;
+
 comment on column producto.barcode is 'llave primaria';
 comment on column producto.codigo_corto is 'crear ckeck point';
 comment on column producto.costo_promedio is 'antes fifo';
@@ -634,3 +643,9 @@ alter table egreso add constraint fk_egreso_caja
 alter table ingreso add constraint fk_ingreso_caja
   foreign key (id_caja)
   references caja(id);
+alter table venta_anulada add constraint fk_venta_anulada_users
+  foreign key (vendedor)
+  references users(id);
+alter table venta_anulada add constraint fk_venta_anulada_venta_detalle
+  foreign key (id_detail, id_sale)
+  references venta_detalle(id, id_venta);
