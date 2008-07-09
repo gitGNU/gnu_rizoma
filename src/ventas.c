@@ -4016,3 +4016,66 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
                           -1);
     }
 }
+
+/**
+ * Callback connected to cancel button in the nullify sale dialog.
+ *
+ * @param button the button that emited the signal
+ * @param data the user data
+ */
+void
+on_btn_nullify_cancel_clicked (GtkButton *button, gpointer data)
+{
+  close_nullify_sale_dialog();
+}
+
+/**
+ * Callback connected to the delete-event of the nullify sale dialog.
+ *
+ * @param widget the widget that emited the signal
+ * @param event the event wich triggered the signal
+ * @param data the user data
+ *
+ * @return TRUE stop other handlers from being invoked
+ */
+gboolean
+on_wnd_nullify_sale_delete_event (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  close_nullify_sale_dialog();
+  return TRUE;
+}
+
+/**
+ * Closes the nullify sale dialog and reset the data contained
+ *
+ */
+void
+close_nullify_sale_dialog(void)
+{
+  GtkWidget *widget;
+  GtkListStore *store;
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_sale"));
+  gtk_widget_hide(widget);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_nullify_id"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+  gtk_widget_grab_focus(widget);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_nullify_barcode"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_nullify_amount"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_nullify_date"));
+  gtk_entry_set_text(GTK_ENTRY(widget), "");
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_nullify_sale"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+  gtk_list_store_clear(store);
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+  gtk_list_store_clear(store);
+}

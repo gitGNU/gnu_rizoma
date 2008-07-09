@@ -97,4 +97,6 @@ void nullify_sale_win (void);
 
 void on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer data);
 
+void close_nullify_sale_dialog(void);
+
 #endif
