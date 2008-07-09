@@ -2294,6 +2294,7 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Anular Compra</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="on_btn_nullify_buy_clicked"/>
                           </object>
                           <packing>
                             <property name="position">1</property>
