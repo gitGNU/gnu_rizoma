@@ -2216,12 +2216,16 @@ on_btn_nullify_buy_clicked (void)
 }
 
 void
-AnularProducto (void)
+on_btn_nullify_product_clicked (void)
 {
   PGresult *res;
 
-  GtkTreeSelection *selection1 = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
-  GtkTreeSelection *selection2 = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->compra_tree));
+  GtkTreeSelection *selection1 = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
+
+  GtkTreeSelection *selection2 = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests_detail")));
+  GtkListStore *store_pending_request_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests_detail"))));
+
   GtkTreeIter iter1, iter2;
   gint id_compra;
   gchar *codigo_producto;
@@ -2230,12 +2234,13 @@ AnularProducto (void)
   if (gtk_tree_selection_get_selected (selection1, NULL, &iter1) &&
       gtk_tree_selection_get_selected (selection2, NULL, &iter2))
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter1,
+      gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter1,
                           0, &id_compra,
                           -1);
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->compra_store), &iter2,
+      gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request_detail), &iter2,
                           0, &codigo_producto,
                           -1);
+
       //TODO: pasar esto a funciones de la base pero por el momento funciona
       q = g_strdup_printf ("UPDATE compra_detalle SET anulado='t' WHERE barcode_product=(SELECT barcode FROM producto WHERE codigo_corto='%s') AND id_compra=%d", codigo_producto, id_compra);
       res = EjecutarSQL (q);

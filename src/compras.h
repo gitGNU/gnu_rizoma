@@ -60,7 +60,6 @@ void IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *dat
 
 void SelectProveedores (GtkWidget *widget, gpointer data);
 
-//void FillProveedores (GtkWidget *widget, gpointer data);
 void FillProveedores (void);
 
 void AddProveedor (GtkWidget *widget, gpointer data);
@@ -76,10 +75,6 @@ void Ingresar (GtkCellRendererToggle *cellrenderertoggle, gchar *arg1, gpointer 
 void IngresoParcial (void);
 
 void ChangeIngreso (GtkEntry *entry, gpointer data);
-
-void AnularCompra (void);
-
-void AnularProducto (void);
 
 void CleanStatusProduct (void);
 
