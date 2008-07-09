@@ -2238,3 +2238,32 @@ users_working (void)
 
   return users_working;
 }
+
+/**
+ * Nullify a detail of a the given sale.
+ *
+ * Note: this is dummy function, because the real functionality is
+ * implemented inside of a plpgsql function.
+ *
+ * @param sale_id the sale id
+ * @param sale_detail_id the id of the sale detail.
+ *
+ * @return 0 when was executed without error.
+ */
+gint
+nullify_sale_details (gint sale_id, gint sale_detail_id)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf("select * from nullify_sale(%d, %d)", sale_id, sale_detail_id);
+
+  res = EjecutarSQL(q);
+  g_free (q);
+
+  if ((res != NULL) && (PQntuples(res) == 1) && (g_str_equal(PQgetvalue(res, 0, 0), "t")))
+    return 0;
+
+  g_printerr("\n%s: could not be nullified the sale (%d, %d)\n", G_STRFUNC, sale_id, sale_detail_id);
+  return -1;
+}

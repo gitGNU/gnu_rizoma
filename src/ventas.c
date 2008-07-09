@@ -4082,11 +4082,23 @@ close_nullify_sale_dialog(void)
   gtk_list_store_clear(store);
 }
 
+/**
+ * This function is called for each of the selected rows in the
+ * details sale treeview in the nullify sale dialog.
+ *
+ * Take the ids stored in the list store and call the function that
+ * take care of nullify the sales in the database.
+ *
+ * @param model the tree model
+ * @param path the path of the selected row
+ * @param iter the iter pointing to the selected row
+ * @param data the treeview
+ */
 void
 nullify_sale_datail (GtkTreeModel  *model,
 		     GtkTreePath   *path,
 		     GtkTreeIter   *iter,
-		     gpointer       userdata)
+		     gpointer       data)
 {
   gint id_detail;
   gint id_sale;
@@ -4097,6 +4109,11 @@ nullify_sale_datail (GtkTreeModel  *model,
 		      -1);
 
   g_print ("(%d, %d) is selected\n", id_sale, id_detail);
+  if (nullify_sale_datail(id_sale, id_detail) != 0)
+    {
+      AlertMSG(GTK_WIDGET(data), "No fue posible anular la venta, por favor intente nuevamente");
+      return;
+    }
 }
 
 /**
@@ -4118,5 +4135,5 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   treeview_details = GTK_TREE_VIEW (gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
   selection = gtk_tree_view_get_selection(treeview_details);
 
-  gtk_tree_selection_selected_foreach(selection, nullify_sale_datail, NULL);
+  gtk_tree_selection_selected_foreach(selection, nullify_sale_datail, (gpointer)treeview_details);
 }
