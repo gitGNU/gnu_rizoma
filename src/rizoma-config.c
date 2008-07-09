@@ -157,6 +157,10 @@ on_page_change (GtkAssistant *assistant, GtkWidget *page, gpointer user_data)
         }
       gtk_assistant_set_page_complete (assistant, page, TRUE);
     }
+  else if (current_page == 4)
+    {
+      gtk_assistant_set_page_complete (assistant, page, TRUE);
+    }
 }
 
 gint
