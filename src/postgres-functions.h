@@ -120,7 +120,7 @@ void SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *
                         gchar *familia, gboolean perecible, gboolean fraccion);
 
 gboolean AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca, char *contenido,
-                            gchar *unidad, gboolean iva, gchar *otros, gchar *familia, gboolean perecible,
+                            gchar *unidad, gboolean iva, gint otros, gchar *familia, gboolean perecible,
                             gboolean fraccion);
 
 void AgregarCompra (gchar *rut, gchar *nota, gint dias_pago);

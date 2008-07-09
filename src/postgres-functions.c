@@ -863,7 +863,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 
 gboolean
 AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca,
-                   gchar *contenido, gchar *unidad, gboolean iva, gchar *otros, gchar *familia,
+                   gchar *contenido, gchar *unidad, gboolean iva, gint otros, gchar *familia,
                    gboolean perecible, gboolean fraccion)
 {
   gint insertado;
@@ -871,7 +871,7 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
 
   q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, %s::varchar,"
                        "upper('%s')::varchar, upper('%s')::varchar,%s::varchar, upper('%s')::varchar, "
-                       "%d::boolean, (SELECT id FROM impuesto WHERE descripcion='%s'),0::smallint, %d::boolean,"
+                       "%d::boolean, %d,0::smallint, %d::boolean,"
                        "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
                        otros, perecible, fraccion);
   insertado = atoi (GetDataByOne (q));

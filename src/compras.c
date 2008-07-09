@@ -4048,8 +4048,8 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
   gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
   gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
   gchar *unidad = g_strdup (gtk_entry_get_text (entry_unit));
-  gchar *otros;
   gchar *familia;
+  gint otros;
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
@@ -4072,7 +4072,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
         }
 
       if (gtk_combo_box_get_active (combo) == 0)
-        otros = "";
+        otros = 0;
       else
         {
           model = gtk_combo_box_get_model (combo);
