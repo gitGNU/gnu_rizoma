@@ -3989,8 +3989,7 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
 
   gtk_list_store_clear(store_details);
 
-  if (!(gtk_tree_selection_get_selected(treeselection, NULL, &iter)))
-    return;
+  if (!(gtk_tree_selection_get_selected(treeselection, NULL, &iter))) return;
 
   gtk_tree_model_get (GTK_TREE_MODEL(store_sales), &iter,
                       0, &sale_id,
@@ -4095,21 +4094,21 @@ close_nullify_sale_dialog(void)
  * @param data the treeview
  */
 void
-nullify_sale_datail (GtkTreeModel  *model,
-		     GtkTreePath   *path,
-		     GtkTreeIter   *iter,
-		     gpointer       data)
+nullify_sale_datail (GtkTreeModel *model,
+                     GtkTreePath *path,
+                     GtkTreeIter *iter,
+                     gpointer data)
 {
   gint id_detail;
   gint id_sale;
 
   gtk_tree_model_get (model, iter,
-		      5, &id_detail,
-		      6, &id_sale,
-		      -1);
+                      5, &id_detail,
+                      6, &id_sale,
+                      -1);
 
   g_print ("(%d, %d) is selected\n", id_sale, id_detail);
-  if (nullify_sale_datail(id_sale, id_detail) != 0)
+  if (nullify_sale_details(id_sale, id_detail) != 0)
     {
       AlertMSG(GTK_WIDGET(data), "No fue posible anular la venta, por favor intente nuevamente");
       return;
