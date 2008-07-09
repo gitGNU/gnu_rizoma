@@ -2215,3 +2215,26 @@ END LOOP;
 RETURN;
 END;
 $$ LANGUAGE plpgsql;
+
+----
+-- nullify sale
+create or replace function nullify_sale (
+       in salesman_id int,
+       in sale_id int,
+       in detail_id int)
+returns boolean as $$
+declare
+	l record;
+begin
+
+insert into venta_anulada(id_detail, id_sale, vendedor)
+       values (sale_id, detail_id, salesman_id);
+
+select barcode, cantidad into l
+       from venta_detalle
+       where id = detail_id and id_venta = sale_id;
+
+update producto set stock= stock+l.cantidad where barcode = l.barcode;
+
+return 't';
+end; $$ language plpgsql;
