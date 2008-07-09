@@ -553,8 +553,6 @@ alter table Cheques add constraint fk_venta_cheque
 alter table compra_detalle add constraint fk_producto_detalle_compra
   foreign key (barcode_product)
   references producto (barcode)  ;
-alter table compra_detalle add constraint fk_impuesto_detalle_compra
-  foreign key (otros_impuestos)
   references impuesto (id)  ;
 alter table Asistencia add constraint fk_asistencia_users
   foreign key (id_user)
