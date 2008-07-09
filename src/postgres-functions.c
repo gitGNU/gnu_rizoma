@@ -2263,7 +2263,7 @@ nullify_sale_details (gint sale_id, gint sale_detail_id)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf("select * from nullify_sale(%d, %d)", sale_id, sale_detail_id);
+  q = g_strdup_printf("select * from nullify_sale(%d, %d, %d)", user_data->user_id, sale_id, sale_detail_id);
 
   res = EjecutarSQL(q);
   g_free (q);
