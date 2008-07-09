@@ -4,6 +4,11 @@
 	clean_container() at the begging so we clean and then set the text.
 	(on_btn_get_request_clicked): Added function.
 	(on_btn_nullify_buy_clicked): Added as handler to btn_nullify_buy.
+	(ChangeSave): Deleted function.
+	(CloseSearchByName): Deleted function.
+	(CloseSelectProveedores): Deleted function.
+	(Ingresar): Deleted function.
+	(RemoveBuyProduct): Deleted function.
 
 	* postgres-functions.c (IngresarProducto): Fix possible bug that
 	can produce a bad calculation when try to get how many products

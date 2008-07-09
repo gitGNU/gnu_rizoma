@@ -26,8 +26,6 @@
 
 void SearchProductHistory (GtkEntry *entry, gchar *barcode);
 
-void ChangeSave (void);
-
 void Save (GtkWidget *widget, gpointer data);
 
 void CalcularPrecioFinal (void);
@@ -67,8 +65,6 @@ void AddProveedor (GtkWidget *widget, gpointer data);
 void AddProveedorWindow (GtkWidget *widget, gpointer user_data);
 
 void Seleccionado (GtkTreeSelection *selection, gpointer data);
-
-void ActiveBuy (GtkWidget *widget, gpointer data);
 
 void Ingresar (GtkCellRendererToggle *cellrenderertoggle, gchar *arg1, gpointer data);
 
@@ -113,8 +109,6 @@ void AddFactura (void);
 void ClearFactData (void);
 
 void CallBacksTabs (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data);
-
-void RemoveBuyProduct (void);
 
 void CalcularTotales (void);
 

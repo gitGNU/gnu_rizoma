@@ -862,12 +862,6 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
     }
 }
 
-void
-ChangeSave (void)
-{
-  gtk_widget_set_sensitive (compra->see_button, TRUE);
-}
-
 /**
  * Callback connected to the button of the dialog used to modificate a
  * product in the 'Mercaderia' tab
@@ -1336,17 +1330,6 @@ BuyWindow (void)
 }
 
 void
-CloseSearchByName (void)
-{
-  gtk_widget_destroy (compra->find_win);
-
-  compra->find_win = NULL;
-
-  gtk_widget_set_sensitive (main_window, TRUE);
-  gtk_window_set_focus (GTK_WINDOW (main_window), compra->barcode_history_entry);
-}
-
-void
 AddFoundProduct (void)
 {
   GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
@@ -1768,18 +1751,6 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 }
 
 void
-CloseSelectProveedores (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *window = gtk_widget_get_toplevel (widget);
-  gboolean cancel = (gboolean) data;
-
-  gtk_widget_destroy (window);
-
-  if (cancel == TRUE)
-    gtk_window_set_focus (GTK_WINDOW (main_window), compra->fact_proveedor);
-}
-
-void
 FillProveedores ()
 {
   PGresult *res;
@@ -2155,49 +2126,6 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
 }
 
 void
-ActiveBuy (GtkWidget *widget, gpointer data)
-{
-  /* gchar *precio = g_strdup (gtk_entry_get_text (GTK_ENTRY (ingreso_entry))); */
-  /* gchar *barcode_history = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry))); */
-
-  /* if (strcmp (precio, "") != 0 && strcmp (barcode_history, "") != 0) */
-  /*   gtk_widget_set_sensitive (add_button, TRUE); */
-  /* else */
-  /*   gtk_widget_set_sensitive (add_button, FALSE); */
-
-}
-
-void
-Ingresar (GtkCellRendererToggle *cellrenderertoggle, gchar *path_str, gpointer data)
-{
-  GtkTreePath *path = gtk_tree_path_new_from_string (path_str);
-  GtkTreeIter iter;
-  gchar *codigo;
-  //  Productos *producto;
-
-  gtk_tree_model_get_iter (GTK_TREE_MODEL (compra->compra_store), &iter, path);
-  gtk_tree_model_get (GTK_TREE_MODEL (compra->compra_store), &iter,
-                      0, &codigo,
-                      -1);
-
-  /*
-    if (ingresar == FALSE)
-    ingresar = TRUE;
-    else
-    ingresar = FALSE;
-
-    gtk_list_store_set (GTK_LIST_STORE (compra->compra_store), &iter,
-    0, ingresar,
-    -1);
-
-    producto = BuscarPorCodigo (codigo);
-
-    producto->product->ingresar = ingresar;
-  */
-
-}
-
-void
 on_btn_nullify_buy_clicked (void)
 {
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
@@ -2287,6 +2215,7 @@ CloseAskForCurrentPrice (GtkWidget *widget, gpointer data)
 
   gtk_widget_set_sensitive (main_window, TRUE);
 }
+
 
 void
 AcceptCurrentPrice (GtkWidget *widget, gpointer data)
@@ -2663,40 +2592,6 @@ FillProveedorData (gchar *rut, gboolean guias)
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_guide_invoice_n_invoice")));
   else
     gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_invoice_n")));
-}
-
-void
-RemoveBuyProduct (void)
-{
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_list));
-  GtkTreeIter iter;
-  gchar *product;
-
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
-    {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_list), &iter,
-                          0, &product,
-                          -1);
-
-      DropBuyProduct (product);
-
-      gtk_list_store_clear (compra->store_list);
-
-      if (compra->header_compra != NULL)
-        {
-          compra->products_compra = compra->header_compra;
-
-          do {
-            compra->current = compra->products_compra->product;
-
-            AddToTree ();
-
-            compra->products_compra = compra->products_compra->next;
-          } while (compra->products_compra != compra->header_compra);
-
-        }
-
-    }
 }
 
 void
