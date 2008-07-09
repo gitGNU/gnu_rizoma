@@ -2198,31 +2198,26 @@ Ingresar (GtkCellRendererToggle *cellrenderertoggle, gchar *path_str, gpointer d
 }
 
 void
-AnularCompra (void)
+on_btn_nullify_buy_clicked (void)
 {
-  //  PGresult *res;
-
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
   gint id_compra;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->ingreso_store), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store_pending_request), &iter,
                           0, &id_compra,
                           -1);
-
       AnularCompraDB (id_compra);
-
       InsertarCompras ();
-
     }
 }
 
 void
 AnularProducto (void)
 {
-
   PGresult *res;
 
   GtkTreeSelection *selection1 = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->ingreso_tree));
