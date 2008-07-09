@@ -404,6 +404,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
                                                                      PQresultErrorMessage (res)));
           gtk_widget_show_all (wnd);
           gtk_assistant_set_page_complete (assistant, page, FALSE);
+          PQfinish (connection);
           return;
         }
     }
@@ -413,6 +414,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQerrorMessage (connection));
       gtk_assistant_set_page_complete (assistant, page, FALSE);
       gtk_widget_show_all (wnd);
+      PQfinish (connection);
       return;
     }
 
@@ -431,6 +433,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQerrorMessage (connection));
       gtk_assistant_set_page_complete (assistant, page, FALSE);
       gtk_widget_show_all (wnd);
+      PQfinish (connection);
       return;
     }
 
@@ -440,7 +443,8 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
       wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_error_sql_data_schema"));
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), error->message);
       gtk_assistant_set_page_complete (assistant, page, FALSE);
-        gtk_widget_show_all (wnd);
+      gtk_widget_show_all (wnd);
+      PQfinish (connection);
       return;
     }
   else
@@ -454,6 +458,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
           gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
           gtk_assistant_set_page_complete (assistant, page, FALSE);
           gtk_widget_show_all (wnd);
+          PQfinish (connection);
           return;
         }
     }
@@ -467,6 +472,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), error->message);
       gtk_assistant_set_page_complete (assistant, page, FALSE);
       gtk_widget_show_all (wnd);
+      PQfinish (connection);
       return;
     }
   else
@@ -480,6 +486,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
           gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
           gtk_assistant_set_page_complete (assistant, page, FALSE);
           gtk_widget_show_all (wnd);
+          PQfinish (connection);
           return;
         }
     }
@@ -498,6 +505,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
       gtk_assistant_set_page_complete (assistant, page, FALSE);
       gtk_widget_show_all (wnd);
+      PQfinish (connection);
       return;
     }
 
@@ -510,6 +518,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
       gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), error->message);
       gtk_assistant_set_page_complete (assistant, page, FALSE);
       gtk_widget_show_all (wnd);
+      PQfinish (connection);
       return;
     }
   else
@@ -523,6 +532,7 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
           gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (wnd), PQresultErrorMessage (res));
           gtk_assistant_set_page_complete (assistant, page, FALSE);
           gtk_widget_show_all (wnd);
+          PQfinish (connection);
           return;
         }
     }
