@@ -2847,7 +2847,7 @@ CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc)
 }
 
 void
-AskIngreso (GtkWindow *win_mother)
+AskIngreso ()
 {
   GtkWindow *wnd_ingress = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_buy"));
 
@@ -4090,4 +4090,10 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     }
 
   return;
+}
+
+void
+on_btn_get_request_clicked ()
+{
+  AskIngreso();
 }

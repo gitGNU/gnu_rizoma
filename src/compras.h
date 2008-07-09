@@ -129,7 +129,7 @@ void CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc);
 
 void CheckMontoGuias (void);
 
-void AskIngreso (GtkWindow *win_mother);
+void AskIngreso ();
 
 void SetElabVenc (GtkWidget *widget, gpointer data);
 

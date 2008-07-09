@@ -2,6 +2,7 @@
 
 	* compras.c (on_button_new_product_clicked): Move
 	clean_container() at the begging so we clean and then set the text.
+	(on_btn_get_request_clicked): Added function.
 
 	* postgres-functions.c (IngresarProducto): Fix possible bug that
 	can produce a bad calculation when try to get how many products
