@@ -854,6 +854,10 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
+  else
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "button_new_product")));
+    }
 }
 
 void
