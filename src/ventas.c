@@ -3760,6 +3760,7 @@ nullify_sale_win (void)
                                           G_TYPE_INT);   //id_venta
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
+      gtk_tree_selection_set_mode (selection_sales, GTK_SELECTION_MULTIPLE);
 
       //barcode
       renderer = gtk_cell_renderer_text_new();
@@ -3988,7 +3989,8 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
 
   gtk_list_store_clear(store_details);
 
-  gtk_tree_selection_get_selected(treeselection, NULL, &iter);
+  if (!(gtk_tree_selection_get_selected(treeselection, NULL, &iter)))
+    return;
 
   gtk_tree_model_get (GTK_TREE_MODEL(store_sales), &iter,
                       0, &sale_id,
@@ -4078,4 +4080,43 @@ close_nullify_sale_dialog(void)
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
   gtk_list_store_clear(store);
+}
+
+void
+nullify_sale_datail (GtkTreeModel  *model,
+		     GtkTreePath   *path,
+		     GtkTreeIter   *iter,
+		     gpointer       userdata)
+{
+  gint id_detail;
+  gint id_sale;
+
+  gtk_tree_model_get (model, iter,
+		      5, &id_detail,
+		      6, &id_sale,
+		      -1);
+
+  g_print ("(%d, %d) is selected\n", id_sale, id_detail);
+}
+
+/**
+ * Callback connected to the accept button of the nullify sale dialog
+ *
+ * This function collects the user selected details of the selected
+ * sale to nullify the sale.
+ *
+ * @param button the button that emited the signal
+ * @param data the use data
+ */
+void
+on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
+{
+
+  GtkTreeView *treeview_details;
+  GtkTreeSelection *selection;
+
+  treeview_details = GTK_TREE_VIEW (gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
+  selection = gtk_tree_view_get_selection(treeview_details);
+
+  gtk_tree_selection_selected_foreach(selection, nullify_sale_datail, NULL);
 }
