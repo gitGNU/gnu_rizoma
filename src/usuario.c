@@ -1,25 +1,25 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*usuarios.c
-*
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 
 #include<gtk/gtk.h>
@@ -67,11 +67,11 @@ FillUsers (void)
   gchar *q;
 
   res = EjecutarSQL ("SELECT id, rut||'-'||dv, nombre, apell_p, apell_m "
-		     "FROM select_usuario() as "
-		     "(id int,rut int4, dv varchar(1),usuario varchar(30),"
-		     "passwd varchar(400),nombre varchar(75),"
-		     "apell_p varchar(75),apell_m varchar(75),"
-		     "fecha_ingreso timestamp,\"level\" int2);");
+                     "FROM select_usuario() as "
+                     "(id int,rut int4, dv varchar(1),usuario varchar(30),"
+                     "passwd varchar(400),nombre varchar(75),"
+                     "apell_p varchar(75),apell_m varchar(75),"
+                     "fecha_ingreso timestamp,\"level\" int2);");
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
@@ -83,48 +83,48 @@ FillUsers (void)
       gtk_list_store_clear (store);
 
       for (i = 0; i < tuples; i++)
-	{
-	  q = g_strdup_printf ("select * from select_asistencia(%s)",
-			       PQvaluebycol (res, i, "id"));
-	  res2 = EjecutarSQL (q);
-	  g_free (q);
+        {
+          q = g_strdup_printf ("select * from select_asistencia(%s)",
+                               PQvaluebycol (res, i, "id"));
+          res2 = EjecutarSQL (q);
+          g_free (q);
 
-	  if (res2 != NULL && PQntuples (res2) != 0)
-	    {
-	      entrada = g_strdup_printf ("%s/%s/%s %s:%s",
-					 PQvaluebycol (res2, 0, "entrada_day"),
-					 PQvaluebycol (res2, 0, "entrada_month"),
-					 PQvaluebycol (res2, 0, "entrada_year"),
-					 PQvaluebycol (res2, 0, "entrada_hour"),
-					 PQvaluebycol (res2, 0, "entrada_min"));
+          if (res2 != NULL && PQntuples (res2) != 0)
+            {
+              entrada = g_strdup_printf ("%s/%s/%s %s:%s",
+                                         PQvaluebycol (res2, 0, "entrada_day"),
+                                         PQvaluebycol (res2, 0, "entrada_month"),
+                                         PQvaluebycol (res2, 0, "entrada_year"),
+                                         PQvaluebycol (res2, 0, "entrada_hour"),
+                                         PQvaluebycol (res2, 0, "entrada_min"));
 
-	      if (!(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1")) && !(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "")))
-		salida = g_strdup_printf ("%s/%s/%s %s:%s",
-					  PQvaluebycol (res2, 0, "salida_day"),
-					  PQvaluebycol (res2, 0, "salida_month"),
-					  PQvaluebycol (res2, 0, "salida_year"),
-					  PQvaluebycol (res2, 0, "salida_hour"),
-					  PQvaluebycol (res2, 0, "salida_min"));
-	      else
-		salida = "Trabajando";
-	    }
-	  else
-	    {
-	      entrada = "No ha Ingresado";
-	      salida = "No ha Ingresado";
-	    }
+              if (!(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "-1")) && !(g_str_equal(PQvaluebycol (res2, 0, "salida_year"), "")))
+                salida = g_strdup_printf ("%s/%s/%s %s:%s",
+                                          PQvaluebycol (res2, 0, "salida_day"),
+                                          PQvaluebycol (res2, 0, "salida_month"),
+                                          PQvaluebycol (res2, 0, "salida_year"),
+                                          PQvaluebycol (res2, 0, "salida_hour"),
+                                          PQvaluebycol (res2, 0, "salida_min"));
+              else
+                salida = "Trabajando";
+            }
+          else
+            {
+              entrada = "No ha Ingresado";
+              salida = "No ha Ingresado";
+            }
 
-	  gtk_list_store_append (store, &iter);
-	  gtk_list_store_set (store, &iter,
-			      0, PQvaluebycol (res, i, "id"),
-			      1, PQgetvalue (res, i, 1), //rut
-			      2, PQvaluebycol (res, i, "nombre"),
-			      3, PQvaluebycol (res, i, "apell_p"),
-			      4, PQvaluebycol (res, i, "apell_m"),
-			      5, entrada,
-			      6, salida,
-			      -1);
-	}
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQvaluebycol (res, i, "id"),
+                              1, PQgetvalue (res, i, 1), //rut
+                              2, PQvaluebycol (res, i, "nombre"),
+                              3, PQvaluebycol (res, i, "apell_p"),
+                              4, PQvaluebycol (res, i, "apell_m"),
+                              5, entrada,
+                              6, salida,
+                              -1);
+        }
     }
 }
 
@@ -145,23 +145,23 @@ DeleteUser (GtkWidget *widget, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-			  0, &id,
-			  -1);
+                          0, &id,
+                          -1);
 
       if (strcmp (id, "1") != 0)
-	{
-	  res = EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
-	  FillUsers ();
-	}
+        {
+          res = EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
+          FillUsers ();
+        }
       else
-	AlertMSG (tree, "No se puede elminar el usuario admin");
+        AlertMSG (tree, "No se puede elminar el usuario admin");
     }
 }
 
 void
 on_ask_delete_user_response (GtkDialog *dialog,
-			     gint       response_id,
-			     gpointer   user_data)
+                             gint       response_id,
+                             gpointer   user_data)
 {
   if (response_id == GTK_RESPONSE_YES)
     DeleteUser (NULL, (gpointer)TRUE);
@@ -206,21 +206,21 @@ user_box ()
   GtkListStore *store_users;
 
   store_users = gtk_list_store_new (7,
-				    G_TYPE_STRING, //ID
-				    G_TYPE_STRING, //RUT
-				    G_TYPE_STRING, //nombre
-				    G_TYPE_STRING, //apellido Paterno
-				    G_TYPE_STRING, //apellido materno
-				    G_TYPE_STRING, //ingreso
-				    G_TYPE_STRING);//salida
+                                    G_TYPE_STRING, //ID
+                                    G_TYPE_STRING, //RUT
+                                    G_TYPE_STRING, //nombre
+                                    G_TYPE_STRING, //apellido Paterno
+                                    G_TYPE_STRING, //apellido materno
+                                    G_TYPE_STRING, //ingreso
+                                    G_TYPE_STRING);//salida
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
   gtk_tree_view_set_model(GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store_users));
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
-						     "text", 0,
-						     NULL);
+                                                     "text", 0,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -230,8 +230,8 @@ user_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
-						     "text", 1,
-						     NULL);
+                                                     "text", 1,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -241,8 +241,8 @@ user_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
-						     "text", 2,
-						     NULL);
+                                                     "text", 2,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -252,8 +252,8 @@ user_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Apellido P.", renderer,
-						     "text", 3,
-						     NULL);
+                                                     "text", 3,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -263,8 +263,8 @@ user_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Apellido M.", renderer,
-						     "text", 4,
-						     NULL);
+                                                     "text", 4,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -274,8 +274,8 @@ user_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Ingreso", renderer,
-						     "text", 5,
-						     NULL);
+                                                     "text", 5,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -285,8 +285,8 @@ user_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Salida", renderer,
-						     "text", 6,
-						     NULL);
+                                                     "text", 6,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -338,8 +338,8 @@ ChangePasswd (GtkWidget *widget, gpointer data)
   if (gtk_tree_selection_get_selected(selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
-			  0, &user_id,
-			  -1);
+                          0, &user_id,
+                          -1);
     }
   else
     {
@@ -390,24 +390,24 @@ ChangePasswdWin (GtkButton *button, gpointer user_data)
   if (gtk_tree_selection_get_selected(selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
-			  0, &user_id,
-			  -1);
+                          0, &user_id,
+                          -1);
 
       q = g_strdup_printf("select usuario from select_usuario() as "
-			  "(id int,rut int4, dv varchar(1),usuario varchar(30),"
-			  "passwd varchar(400),nombre varchar(75),"
-			  "apell_p varchar(75),apell_m varchar(75),"
-			  "fecha_ingreso timestamp,\"level\" int2)"
-			  " WHERE id = %s", user_id);
+                          "(id int,rut int4, dv varchar(1),usuario varchar(30),"
+                          "passwd varchar(400),nombre varchar(75),"
+                          "apell_p varchar(75),apell_m varchar(75),"
+                          "fecha_ingreso timestamp,\"level\" int2)"
+                          " WHERE id = %s", user_id);
       res = EjecutarSQL(q);
       g_free(q);
 
       if ((res == NULL) || (PQntuples(res) == 0))
-	{
-	  g_printerr("%s: no se pudo obtener el nombre de usuario para el id=%s",
-		     G_STRFUNC, user_id);
-	  return;
-	}
+        {
+          g_printerr("%s: no se pudo obtener el nombre de usuario para el id=%s",
+                     G_STRFUNC, user_id);
+          return;
+        }
 
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_changepasswd_username"));
       gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "usuario"));
@@ -554,13 +554,13 @@ CloseAddSellerWin (GtkButton *button, gpointer user_data)
   gtk_widget_hide (widget);
 
   gchar *entries[8] = {"entry_adduser_rut",
-		       "entry_adduser_dv",
-		       "entry_adduser_username",
-		       "entry_adduser_name",
-		       "entry_adduser_apell_p",
-		       "entry_adduser_apell_m",
-		       "entry_adduser_passwd",
-		       "entry_adduser_passwd2"};
+                       "entry_adduser_dv",
+                       "entry_adduser_username",
+                       "entry_adduser_name",
+                       "entry_adduser_apell_p",
+                       "entry_adduser_apell_m",
+                       "entry_adduser_passwd",
+                       "entry_adduser_passwd2"};
 
   for (i=0 ; i < 8 ; i++)
     {

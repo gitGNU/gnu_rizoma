@@ -103,95 +103,95 @@ PrintTree (GtkWidget *widget, gpointer data)
   do
     {
       for (i = 0; i < columns; i++)
-	{
-	  column_type = gtk_tree_model_get_column_type (model, i);
+        {
+          column_type = gtk_tree_model_get_column_type (model, i);
 
 
-	  switch (column_type)
-	    {
-	    case G_TYPE_STRING:
-	      {
-		gchar *value_char;
-		gtk_tree_model_get (model, &iter,
-				    i, &value_char,
-				    -1);
-		if (value_char != NULL)
-		  fprintf (fp, "\"%s\",", value_char);
-		else
-		  fprintf (fp, ",");
-	      }
-	      break;
-	    case G_TYPE_INT:
-	      {
-		gint value_int;
-		gtk_tree_model_get (model, &iter,
-				    i, &value_int,
-				    -1);
+          switch (column_type)
+            {
+            case G_TYPE_STRING:
+              {
+                gchar *value_char;
+                gtk_tree_model_get (model, &iter,
+                                    i, &value_char,
+                                    -1);
+                if (value_char != NULL)
+                  fprintf (fp, "\"%s\",", value_char);
+                else
+                  fprintf (fp, ",");
+              }
+              break;
+            case G_TYPE_INT:
+              {
+                gint value_int;
+                gtk_tree_model_get (model, &iter,
+                                    i, &value_int,
+                                    -1);
 
-		fprintf (fp, "\"%d\",", value_int);
-	      }
-	      break;
-	    case G_TYPE_DOUBLE:
-	      {
-		gdouble value_double;
-		gtk_tree_model_get (model, &iter,
-				    i, &value_double,
-				    -1);
-		fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
-	      }
-	      break;
-	    }
-	}
+                fprintf (fp, "\"%d\",", value_int);
+              }
+              break;
+            case G_TYPE_DOUBLE:
+              {
+                gdouble value_double;
+                gtk_tree_model_get (model, &iter,
+                                    i, &value_double,
+                                    -1);
+                fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
+              }
+              break;
+            }
+        }
       fprintf (fp, "\n");
 
       if (gtk_tree_model_iter_has_child (model, &iter) == TRUE)
-	{
-	  gtk_tree_model_iter_children (model, &son, &iter);
+        {
+          gtk_tree_model_iter_children (model, &son, &iter);
 
-	  do {
+          do {
 
-	    for (i = 0; i < columns; i++)
-	      {
-		column_type = gtk_tree_model_get_column_type (model, i);
+            for (i = 0; i < columns; i++)
+              {
+                column_type = gtk_tree_model_get_column_type (model, i);
 
-		switch (column_type)
-		  {
-		  case G_TYPE_STRING:
-		    {
-		      gchar *value_char;
-		      gtk_tree_model_get (model, &son,
-					  i, &value_char,
-					  -1);
-		      if (value_char != NULL)
-			fprintf (fp, "\"%s\",", value_char);
-		      else
-			fprintf (fp, ",");
-		    }
-		    break;
-		  case G_TYPE_INT:
-		    {
-		      gint value_int;
-		      gtk_tree_model_get (model, &son,
-					  i, &value_int,
-					  -1);
-		      fprintf (fp, "\"%d\",", value_int);
-		    }
-		    break;
-		  case G_TYPE_DOUBLE:
-		    {
-		      gdouble value_double;
-		      gtk_tree_model_get (model, &son,
-					  i, &value_double,
-					  -1);
-		      fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
-		    }
-		    break;
-		  }	  column_type = gtk_tree_model_get_column_type (model, i);
+                switch (column_type)
+                  {
+                  case G_TYPE_STRING:
+                    {
+                      gchar *value_char;
+                      gtk_tree_model_get (model, &son,
+                                          i, &value_char,
+                                          -1);
+                      if (value_char != NULL)
+                        fprintf (fp, "\"%s\",", value_char);
+                      else
+                        fprintf (fp, ",");
+                    }
+                    break;
+                  case G_TYPE_INT:
+                    {
+                      gint value_int;
+                      gtk_tree_model_get (model, &son,
+                                          i, &value_int,
+                                          -1);
+                      fprintf (fp, "\"%d\",", value_int);
+                    }
+                    break;
+                  case G_TYPE_DOUBLE:
+                    {
+                      gdouble value_double;
+                      gtk_tree_model_get (model, &son,
+                                          i, &value_double,
+                                          -1);
+                      fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
+                    }
+                    break;
+                  }  column_type = gtk_tree_model_get_column_type (model, i);
 
-	      }
-	    fprintf (fp, "\n");
-	  } while ((gtk_tree_model_iter_next (model, &son)) != FALSE);
-	}
+              }
+            fprintf (fp, "\n");
+          } while ((gtk_tree_model_iter_next (model, &son)) != FALSE);
+        }
       fprintf (fp, "\n");
     } while ((gtk_tree_model_iter_next (model, &iter)) != FALSE);
 
@@ -232,7 +232,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
     print->date_string = CurrentDate (); /* Asumismo la fecha actual */
 
   file = g_strdup_printf ("%s/informe-%s-%s.csv", temp_directory,
-			  print->name, print->date_string);
+                          print->name, print->date_string);
 
   fp = fopen (file, "w");
 
@@ -256,41 +256,41 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
   do
     {
       for (i = 0; i < father_cols; i++)
-	{
-	  column_type = gtk_tree_model_get_column_type (model_father, print->cols[i].num);
+        {
+          column_type = gtk_tree_model_get_column_type (model_father, print->cols[i].num);
 
 
-	  switch (column_type)
-	    {
-	    case G_TYPE_STRING:
-	      {
-		gchar *value_char;
-		gtk_tree_model_get (model_father, &iter_father,
-				    print->cols[i].num, &value_char,
-				    -1);
-		fprintf (fp, "%s,", CutPoints (value_char));
-	      }
-	      break;
-	    case G_TYPE_INT:
-	      {
-		gint value_int;
-		gtk_tree_model_get (model_father, &iter_father,
-				    print->cols[i].num, &value_int,
-				    -1);
-		fprintf (fp, "%d,", value_int);
-	      }
-	      break;
-	    case G_TYPE_DOUBLE:
-	      {
-		gdouble value_double;
-		gtk_tree_model_get (model_father, &iter_father,
-				    print->cols[i].num, &value_double,
-				    -1);
-		fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
-	      }
-	      break;
-	    }
-	}
+          switch (column_type)
+            {
+            case G_TYPE_STRING:
+              {
+                gchar *value_char;
+                gtk_tree_model_get (model_father, &iter_father,
+                                    print->cols[i].num, &value_char,
+                                    -1);
+                fprintf (fp, "%s,", CutPoints (value_char));
+              }
+              break;
+            case G_TYPE_INT:
+              {
+                gint value_int;
+                gtk_tree_model_get (model_father, &iter_father,
+                                    print->cols[i].num, &value_int,
+                                    -1);
+                fprintf (fp, "%d,", value_int);
+              }
+              break;
+            case G_TYPE_DOUBLE:
+              {
+                gdouble value_double;
+                gtk_tree_model_get (model_father, &iter_father,
+                                    print->cols[i].num, &value_double,
+                                    -1);
+                fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
+              }
+              break;
+            }
+        }
 
       fprintf (fp, "\n");
 
@@ -299,50 +299,50 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
       gtk_tree_model_get_iter_first (model_son, &iter_son);
 
       do
-	{
-	  fprintf (fp, ",");
+        {
+          fprintf (fp, ",");
 
-	  for (j = 0; j < son_cols; j++)
-	    {
-	      column_type = gtk_tree_model_get_column_type
-		(model_son, print->son->cols[j].num);
+          for (j = 0; j < son_cols; j++)
+            {
+              column_type = gtk_tree_model_get_column_type
+                (model_son, print->son->cols[j].num);
 
-	      switch (column_type)
-		{
-		case G_TYPE_STRING:
-		  {
-		    gchar *value_char = NULL;
+              switch (column_type)
+                {
+                case G_TYPE_STRING:
+                  {
+                    gchar *value_char = NULL;
 
-		    gtk_tree_model_get (model_son, &iter_son,
-					print->son->cols[j].num, &value_char,
-					-1);
+                    gtk_tree_model_get (model_son, &iter_son,
+                                        print->son->cols[j].num, &value_char,
+                                        -1);
 
-		    fprintf (fp, "\"%s\",", value_char);
-		  }
-		  break;
-		case G_TYPE_INT:
-		  {
-		    gint value_int;
-		    gtk_tree_model_get (model_son, &iter_son,
-					print->son->cols[j].num, &value_int,
-					-1);
-		    fprintf (fp, "%d,", value_int);
-		  }
-		  break;
-		case G_TYPE_DOUBLE:
-		  {
-		    gdouble value_double;
-		    gtk_tree_model_get (model_son, &iter_son,
-					print->son->cols[j].num, &value_double,
-					-1);
-		    fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
-		  }
-		  break;
-		}
-	    }
+                    fprintf (fp, "\"%s\",", value_char);
+                  }
+                  break;
+                case G_TYPE_INT:
+                  {
+                    gint value_int;
+                    gtk_tree_model_get (model_son, &iter_son,
+                                        print->son->cols[j].num, &value_int,
+                                        -1);
+                    fprintf (fp, "%d,", value_int);
+                  }
+                  break;
+                case G_TYPE_DOUBLE:
+                  {
+                    gdouble value_double;
+                    gtk_tree_model_get (model_son, &iter_son,
+                                        print->son->cols[j].num, &value_double,
+                                        -1);
+                    fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
+                  }
+                  break;
+                }
+            }
 
-	  fprintf (fp, "\n");
-	} while ((gtk_tree_model_iter_next (model_son, &iter_son)) != FALSE);
+          fprintf (fp, "\n");
+        } while ((gtk_tree_model_iter_next (model_son, &iter_son)) != FALSE);
 
     } while ((gtk_tree_model_iter_next (model_father, &iter_father)) != FALSE);
 

@@ -25,7 +25,7 @@
 
 #include<stdio.h>
 #include<string.h>
- 
+
 #include<rpc/des_crypt.h>
 
 #include"tipos.h"
@@ -35,7 +35,7 @@
 
 /*gchar *
 EncriptarPasswd (gchar *passwd)
-{  
+{
   des_setparity (key);
 
   ecb_crypt (key, passwd, strlen (passwd), DES_ENCRYPT);
@@ -56,7 +56,7 @@ CompararPassword (gchar *passwd_db, gchar *passwd)
     return FALSE;
 }
 
-gboolean 
+gboolean
 AcceptPassword (gchar *passwd, gchar *user)
 {
   /*gchar *passwd_db = ReturnPasswd (user);
@@ -64,23 +64,23 @@ AcceptPassword (gchar *passwd, gchar *user)
 
   if (passwd_db == NULL)
     return FALSE;
-  
+
   if (CompararPassword (passwd_db, passwd) == FALSE)
     return FALSE;
   else
   return TRUE;*/
 
   PGresult *res;
-  
-  /*  res = EjecutarSQL (g_strdup_printf 
-		     ("SELECT * FROM users WHERE passwd=md5('%s') AND usuario='%s' AND (SELECT date_part ('year', asistencia.salida) "
-		      "FROM asistencia WHERE id_user=users.id ORDER BY entrada DESC LIMIT 1)!=0; ", passwd, user));
+
+  /*  res = EjecutarSQL (g_strdup_printf
+     ("SELECT * FROM users WHERE passwd=md5('%s') AND usuario='%s' AND (SELECT date_part ('year', asistencia.salida) "
+      "FROM asistencia WHERE id_user=users.id ORDER BY entrada DESC LIMIT 1)!=0; ", passwd, user));
   */
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM users WHERE passwd=md5('%s') AND usuario='%s'", passwd, user));
 
   if (res != NULL && PQntuples (res) == 0)
     rizoma_errors_set ("El usuario o la contraseña no son correctos", "AcceptPassword ()", ALERT);
-    
+
   if (res != NULL && PQntuples (res) != 0)
     return TRUE;
   else

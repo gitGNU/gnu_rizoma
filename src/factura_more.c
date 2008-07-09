@@ -1,25 +1,25 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*facutra_more.c
-*
-*    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #define _XOPEN_SOURCE 600
 #include<features.h>
 
@@ -69,8 +69,8 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
   print_command = rizoma_get_value ("PRINT_COMMAND");
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p || ' ' || apell_m AS name, "
-		      "direccion, giro, comuna, telefono FROM cliente where rut=%s",
-		      strtok(aux_rut,"-"));
+                      "direccion, giro, comuna, telefono FROM cliente where rut=%s",
+                      strtok(aux_rut,"-"));
   res = EjecutarSQL(q);
   g_free (q);
   client = PQvaluebycol(res, 0, "name");
@@ -85,20 +85,20 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
       aux_list = NULL;
       i = 0;
       do {
-	aux_list = g_list_append(aux_list, products->product);
-	products = products->next;
-	i++;
+        aux_list = g_list_append(aux_list, products->product);
+        products = products->next;
+        i++;
       } while ((i < max_lines) && (products != header));
 
       if (sell_type == FACTURA)
-	{
-	  fact_num = get_ticket_number (FACTURA);
-	  file_to_print = PrintFactura(client, rut, address, giro, comuna, fono, aux_list, fact_num);
-	  set_ticket_number (fact_num, FACTURA);
-	  system (g_strdup_printf ("%s %s", print_command, file_to_print));
-	}
+        {
+          fact_num = get_ticket_number (FACTURA);
+          file_to_print = PrintFactura(client, rut, address, giro, comuna, fono, aux_list, fact_num);
+          set_ticket_number (fact_num, FACTURA);
+          system (g_strdup_printf ("%s %s", print_command, file_to_print));
+        }
       else
-	g_printerr ("%s: calling without the proper sell_type\n", G_STRFUNC);
+        g_printerr ("%s: calling without the proper sell_type\n", G_STRFUNC);
 
     } while (products != header);
   return 0;
@@ -120,7 +120,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
  */
 gchar *
 PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *comuna, gchar *fono,
-	      GList *products, gint num)
+              GList *products, gint num)
 {
   gchar *filename;
   PSDoc *psdoc;
@@ -235,9 +235,9 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
 
       //check if must be used the mayorist price or not
       if ((product->cantidad < product->cantidad_mayorista) || (product->mayorista == FALSE))
-	precio = product->precio;              ///(((gdouble)products->product->iva/100)+1);
+        precio = product->precio;              ///(((gdouble)products->product->iva/100)+1);
       else
-	precio = product->precio_mayor;        ///(((gdouble)products->product->iva/100)+1);
+        precio = product->precio_mayor;        ///(((gdouble)products->product->iva/100)+1);
 
       str_aux = g_strdup_printf ("%.0f", precio);
       PS_show_xy (psdoc, str_aux, fact_uni[0], initial);

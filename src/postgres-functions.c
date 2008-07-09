@@ -2228,17 +2228,18 @@ users_working (void)
   for (i=0 ; i < tuples ; i++)
     {
       q = g_strdup_printf("select salida_year from select_asistencia(%s)",
-			  PQvaluebycol(res, i, "id"));
+                          PQvaluebycol(res, i, "id"));
       res2 = EjecutarSQL (q);
 
       if (PQntuples(res2) == 0)
-	{
-	  g_free (q);
-	  continue;
-	}
+        {
+          g_free (q);
+          continue;
+        }
 
       if (g_str_equal (PQvaluebycol(res2, 0, "salida_year"), "-1") || (g_str_equal(PQvaluebycol(res2, 0, "salida_year"), "")))
-	users_working++;
+        users_working++;
+
 
       g_free (q);
     }

@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*admin.c
  *
  *    Copyright (C) 2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
@@ -261,9 +261,9 @@ on_quit_application (GtkButton *button, gpointer user_data)
  */
 void
 on_notebook1_switch_page (GtkNotebook *notebook,
-			  GtkNotebookPage *page,
-			  guint page_num,
-			  gpointer data)
+                          GtkNotebookPage *page,
+                          guint page_num,
+                          gpointer data)
 {
 
   switch (page_num)

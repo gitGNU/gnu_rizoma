@@ -61,9 +61,9 @@ refresh_labels (void)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_razon"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			razon_social_value !=NULL ?
-			"*Razón Social:":
-			"<span color=\"red\">*Razón Social:</span>");
+                        razon_social_value !=NULL ?
+                        "*Razón Social:":
+                        "<span color=\"red\">*Razón Social:</span>");
 
   //rut
   if (rut_value != NULL)
@@ -74,9 +74,9 @@ refresh_labels (void)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_rut"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			rut_value != NULL ?
-			"*Rut:":
-			"<span color=\"red\">*Rut:</span>");
+                        rut_value != NULL ?
+                        "*Rut:":
+                        "<span color=\"red\">*Rut:</span>");
 
   //nombre de fantasia
   if (nombre_fantasia_value != NULL)
@@ -86,9 +86,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fantasy"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			nombre_fantasia_value != NULL ?
-			"Nombre de Fantasia:":
-			"<span color=\"red\">Nombre de Fantasia</span>");
+                        nombre_fantasia_value != NULL ?
+                        "Nombre de Fantasia:":
+                        "<span color=\"red\">Nombre de Fantasia</span>");
 
   //direccion
   if (direccion_value != NULL)
@@ -98,9 +98,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_addr"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			direccion_value != NULL ?
-			"*Direccion:":
-			"<span color=\"red\">*Dirección</span>");
+                        direccion_value != NULL ?
+                        "*Direccion:":
+                        "<span color=\"red\">*Dirección</span>");
 
   //comuna
   if (comuna_value != NULL)
@@ -110,9 +110,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_comuna"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			comuna_value != NULL ?
-			"*Comuna:":
-			"<span color=\"red\">*Comuna</span>");
+                        comuna_value != NULL ?
+                        "*Comuna:":
+                        "<span color=\"red\">*Comuna</span>");
 
   //ciudad
   if (ciudad_value != NULL)
@@ -122,9 +122,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_city"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			ciudad_value != NULL ?
-			"*Ciudad:":
-			"<span color=\"red\">*Ciudad</span>");
+                        ciudad_value != NULL ?
+                        "*Ciudad:":
+                        "<span color=\"red\">*Ciudad</span>");
 
 
   //fono
@@ -135,9 +135,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_phone"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			fono_value != NULL ?
-			"*Fono":
-			"<span color=\"red\">*Fono</span>");
+                        fono_value != NULL ?
+                        "*Fono":
+                        "<span color=\"red\">*Fono</span>");
 
   //fax
   if (fax_value != NULL)
@@ -147,9 +147,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_fax"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			fax_value != NULL ?
-			"Fax:":
-			"<span color=\"red\">Fax</span>");
+                        fax_value != NULL ?
+                        "Fax:":
+                        "<span color=\"red\">Fax</span>");
 
   //Giro
   if (giro_value != NULL)
@@ -159,9 +159,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_giro"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			giro_value != NULL ?
-			"*Giro:":
-			"<span color=\"red\">*Giro</span>");
+                        giro_value != NULL ?
+                        "*Giro:":
+                        "<span color=\"red\">*Giro</span>");
 
   //AT
   if (at_value != NULL)
@@ -171,9 +171,9 @@ refresh_labels (void)
     }
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_at"));
   gtk_label_set_markup (GTK_LABEL (widget),
-			at_value != NULL ?
-			"A.T.:":
-			"<span color=\"red\">A.T.</span>");
+                        at_value != NULL ?
+                        "A.T.:":
+                        "<span color=\"red\">A.T.</span>");
 }
 
 void
@@ -217,18 +217,18 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
   if (g_str_equal(PQgetvalue (res, 0, 0), "0"))
     {
       res = EjecutarSQL
-	(g_strdup_printf
-	 ("INSERT INTO negocio (razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at) "
-	  "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", razon_social_value, rut_value, nombre_fantasia_value,
-	  fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
+        (g_strdup_printf
+         ("INSERT INTO negocio (razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at) "
+          "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", razon_social_value, rut_value, nombre_fantasia_value,
+          fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
     }
   else
     {
       res = EjecutarSQL
-	(g_strdup_printf
-	 ("UPDATE negocio SET razon_social='%s', rut='%s', nombre='%s', fono='%s', fax='%s', "
-	  "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, rut_value, nombre_fantasia_value,
-	  fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
+        (g_strdup_printf
+         ("UPDATE negocio SET razon_social='%s', rut='%s', nombre='%s', fono='%s', fax='%s', "
+          "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, rut_value, nombre_fantasia_value,
+          fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
     }
 
   if (res != NULL)
@@ -248,7 +248,7 @@ get_datos (void)
   PGresult *res;
 
   res = EjecutarSQL ("SELECT razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at "
-		     "FROM negocio");
+                     "FROM negocio");
 
   if (PQntuples (res) != 1)
     return -1;

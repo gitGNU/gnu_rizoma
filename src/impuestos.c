@@ -54,14 +54,14 @@ FillImpuestos (void)
   if (tuples != 0)
     {
       for (i = 0; i < tuples; i++)
-	{
-	  gtk_list_store_append (store, &iter);
-	  gtk_list_store_set (store, &iter,
-			      0, PQvaluebycol (res, i, "id"),
-			      1, PQvaluebycol (res, i, "descripcion"),
-			      2, PQvaluebycol (res, i, "monto"),
-			      -1);
-	}
+        {
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQvaluebycol (res, i, "id"),
+                              1, PQvaluebycol (res, i, "descripcion"),
+                              2, PQvaluebycol (res, i, "monto"),
+                              -1);
+        }
     }
 }
 
@@ -80,7 +80,7 @@ AddImpuesto (void)
   task_tasa = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   res = EjecutarSQL (g_strdup_printf ("SELECT insert_impuesto('%s', %s)",
-				      task_name, task_tasa));
+                                      task_name, task_tasa));
 
   if (res != NULL)
     {
@@ -119,64 +119,64 @@ DelTask (void)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-			  0, &id,
-			  -1);
+                          0, &id,
+                          -1);
 
       if (!(g_str_equal (id, "0")))
-	{
-	  q = g_strdup_printf("select count(*) from producto where otros = %s", id);
-	  res = EjecutarSQL(q);
-	  g_free (q);
+        {
+          q = g_strdup_printf("select count(*) from producto where otros = %s", id);
+          res = EjecutarSQL(q);
+          g_free (q);
 
-	  if ((res != NULL) && (g_str_equal(PQgetvalue(res, 0, 0), "0")))
-	    borrar = TRUE;
-	  else
-	    {
-	      GtkWidget *dialog;
-	      gint result;
-	      GtkWidget *label;
-	      dialog = gtk_dialog_new_with_buttons ("Impuestos",
-						    GTK_WINDOW(gtk_widget_get_toplevel(widget)),
-						    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-						    GTK_STOCK_CANCEL,
-						    GTK_RESPONSE_REJECT,
-						    GTK_STOCK_OK,
-						    GTK_RESPONSE_ACCEPT,
-						    NULL);
-	      label = gtk_label_new(g_strdup_printf("Actualmente hay <b>%s</b> productos utilizando el impuesto que ud desea borrar.\n"
-						    "¿Desea realmente eliminar el impuesto?", PQgetvalue(res, 0, 0)));
-	      gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
+          if ((res != NULL) && (g_str_equal(PQgetvalue(res, 0, 0), "0")))
+            borrar = TRUE;
+          else
+            {
+              GtkWidget *dialog;
+              gint result;
+              GtkWidget *label;
+              dialog = gtk_dialog_new_with_buttons ("Impuestos",
+                                                    GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                    GTK_STOCK_CANCEL,
+                                                    GTK_RESPONSE_REJECT,
+                                                    GTK_STOCK_OK,
+                                                    GTK_RESPONSE_ACCEPT,
+                                                    NULL);
+              label = gtk_label_new(g_strdup_printf("Actualmente hay <b>%s</b> productos utilizando el impuesto que ud desea borrar.\n"
+                                                    "¿Desea realmente eliminar el impuesto?", PQgetvalue(res, 0, 0)));
+              gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
 
-	      gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
-				 label);
-	      gtk_widget_show_all (dialog);
-	      result = gtk_dialog_run (GTK_DIALOG (dialog));
-	      if (result == GTK_RESPONSE_ACCEPT)
-		borrar = TRUE;
+              gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+                                 label);
+              gtk_widget_show_all (dialog);
+              result = gtk_dialog_run (GTK_DIALOG (dialog));
+              if (result == GTK_RESPONSE_ACCEPT)
+                borrar = TRUE;
 
-	      gtk_widget_destroy (dialog);
+              gtk_widget_destroy (dialog);
 
-	    }
-	  if (borrar)
-	    {
-	      q = g_strdup_printf ("UPDATE producto SET otros=-1 WHERE otros=%s", id);
-	      res = EjecutarSQL (q);
-	      g_free(q);
+            }
+          if (borrar)
+            {
+              q = g_strdup_printf ("UPDATE producto SET otros=-1 WHERE otros=%s", id);
+              res = EjecutarSQL (q);
+              g_free(q);
 
-	      res = EjecutarSQL (g_strdup_printf ("DELETE FROM impuesto WHERE id=%s", id));
+              res = EjecutarSQL (g_strdup_printf ("DELETE FROM impuesto WHERE id=%s", id));
 
-	      if (res != NULL)
-		{
-		  widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-		  statusbar_push (GTK_STATUSBAR(widget), "El impuesto se elimino con exito", 3000);
-		  FillImpuestos ();
-		}
-	      else
-		ErrorMSG (widget, "No se pudo eliminar el impuesto");
-	    }
-	}
+              if (res != NULL)
+                {
+                  widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+                  statusbar_push (GTK_STATUSBAR(widget), "El impuesto se elimino con exito", 3000);
+                  FillImpuestos ();
+                }
+              else
+                ErrorMSG (widget, "No se pudo eliminar el impuesto");
+            }
+        }
       else
-	ErrorMSG (widget, "No se puede eliminar el imipuesto IVA");
+        ErrorMSG (widget, "No se puede eliminar el imipuesto IVA");
     }
   else
     AlertMSG(widget, "Debe seleccionar un impuesto de la lista");
@@ -210,21 +210,21 @@ EditTask (GtkWidget *widget, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-			  0, &id,
-			  -1);
+                          0, &id,
+                          -1);
       q = g_strdup_printf ("UPDATE impuesto SET descripcion='%s', "
-			   "monto=%s WHERE id=%s", new_name, CUT(new_tasa), id);
+                           "monto=%s WHERE id=%s", new_name, CUT(new_tasa), id);
       res = EjecutarSQL (q);
       g_free(q);
 
       if (res != NULL)
-	{
-	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-	  statusbar_push (GTK_STATUSBAR(aux_widget), "Su Impuesto se edito con exito", 3000);
-	  FillImpuestos ();
-	}
+        {
+          aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
+          statusbar_push (GTK_STATUSBAR(aux_widget), "Su Impuesto se edito con exito", 3000);
+          FillImpuestos ();
+        }
       else
-	ErrorMSG (GTK_WIDGET (selection), "No se pudo editar su impuesto");
+        ErrorMSG (GTK_WIDGET (selection), "No se pudo editar su impuesto");
     }
   else
     ErrorMSG (GTK_WIDGET (selection), "No se pudo editar el impuesto");
@@ -248,9 +248,9 @@ EditTaskWin (void)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-			  1, &name,
-			  2, &tasa,
-			  -1);
+                          1, &name,
+                          2, &tasa,
+                          -1);
 
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_tax_value"));
       gtk_entry_set_text (GTK_ENTRY (widget), tasa);
@@ -287,17 +287,17 @@ taxes_box ()
   GtkCellRenderer *renderer;
 
   store = gtk_list_store_new (3,
-			      G_TYPE_STRING, //ID
-			      G_TYPE_STRING,
-			      G_TYPE_STRING);
+                              G_TYPE_STRING, //ID
+                              G_TYPE_STRING,
+                              G_TYPE_STRING);
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_taxes"));
   gtk_tree_view_set_model(GTK_TREE_VIEW(widget), GTK_TREE_MODEL(store));
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
-						     "text", 0,
-						     NULL);
+                                                     "text", 0,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
@@ -307,8 +307,8 @@ taxes_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
-						     "text", 1,
-						     NULL);
+                                                     "text", 1,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
@@ -318,8 +318,8 @@ taxes_box ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Tasa %", renderer,
-						     "text", 2,
-						     NULL);
+                                                     "text", 2,
+                                                     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);

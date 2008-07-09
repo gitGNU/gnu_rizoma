@@ -1,25 +1,25 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4;
-       c-indentation-style: gnu -*- */
+   c-indentation-style: gnu -*- */
 /*rizoma_errors.c
-*
-*    Copyright (C) 2006 Rizoma Tecnologia Limitada <info@rizoma.cl>
-*
-*    This file is part of rizoma.
-*
-*    Rizoma is free software; you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation; either version 2 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program; if not, write to the Free Software
-*    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ *
+ *    Copyright (C) 2006 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *
+ *    This file is part of rizoma.
+ *
+ *    Rizoma is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -67,7 +67,7 @@ close_rizoma_error_window (GtkButton *button, gpointer data)
       gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), TRUE);
 
       gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)),
-			    widget);
+                            widget);
 
       gtk_widget_destroy (error_window);
 
@@ -95,7 +95,7 @@ rizoma_error_window (GtkWidget *widget)
     return -1;
 
   if( widget != NULL )
-	  gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
+    gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
 
   error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_size_request (error_window, -1, -1);
@@ -107,7 +107,7 @@ rizoma_error_window (GtkWidget *widget)
   gtk_container_set_border_width (GTK_CONTAINER (error_window), 20);
 
   g_signal_connect (G_OBJECT (error_window), "destroy",
-		    G_CALLBACK (close_rizoma_error_window), NULL);
+                    G_CALLBACK (close_rizoma_error_window), NULL);
 
   vbox = gtk_vbox_new (FALSE, 3);
   gtk_widget_show (vbox);
@@ -164,7 +164,7 @@ rizoma_error_window (GtkWidget *widget)
   gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
 
   g_signal_connect (G_OBJECT (button), "clicked",
-		    G_CALLBACK (close_rizoma_error_window), (gpointer)widget);
+                    G_CALLBACK (close_rizoma_error_window), (gpointer)widget);
 
   gtk_window_set_focus (GTK_WINDOW (error_window), button);
 
