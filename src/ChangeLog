@@ -1,3 +1,12 @@
+2008-07-09  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (on_button_new_product_clicked): Move
+	clean_container() at the begging so we clean and then set the text.
+
+	* postgres-functions.c (IngresarProducto): Fix possible bug that
+	can produce a bad calculation when try to get how many products
+	where interchanged.
+
 2008-07-08  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* administracion_productos.c (CloseProductDescription): Deleted function.

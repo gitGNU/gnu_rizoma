@@ -854,6 +854,10 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
+  else
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "button_new_product")));
+    }
 }
 
 void
@@ -3126,6 +3130,8 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
   GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
   GtkListStore *combo_store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
 
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_product")));
+
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")), barcode);
 
   if (strlen (barcode) > 0 && strlen (barcode) <= 6)
@@ -3181,7 +3187,6 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
         }
     }
 
-  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_product")));
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 }
 
