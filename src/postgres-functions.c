@@ -869,7 +869,7 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
   gint insertado;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, %s::varchar,"
+  q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, '%s'::varchar,"
                        "upper('%s')::varchar, upper('%s')::varchar,%s::varchar, upper('%s')::varchar, "
                        "%d::boolean, %d,0::smallint, %d::boolean,"
                        "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
