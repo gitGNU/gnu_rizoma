@@ -39,7 +39,7 @@ CreateNew (gchar *barcode, gdouble cantidad)
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
                        "unidad, precio, costo_promedio, margen_promedio, "
-                       "(SELECT monto FROM impuesto WHERE id=0 AND producto.impuestos='t') as impuesto_normal, "
+                       "(SELECT monto FROM impuesto WHERE id=1 AND producto.impuestos='t') as impuesto_normal, "
                        "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
                        "canje, stock_pro, precio_mayor, cantidad_mayor, mayorista "
                        "FROM select_producto(%s) as producto",
