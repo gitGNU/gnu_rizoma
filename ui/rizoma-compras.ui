@@ -3875,6 +3875,7 @@
                     <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
+                    <property name="group">radio_btn_fractional_no</property>
                   </object>
                 </child>
                 <child>
@@ -3885,7 +3886,6 @@
                     <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
-                    <property name="group">radio_btn_fractional_yes</property>
                   </object>
                   <packing>
                     <property name="position">1</property>
