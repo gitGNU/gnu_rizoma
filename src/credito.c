@@ -90,6 +90,9 @@ search_client (GtkWidget *widget, gpointer data)
   gchar *q;
 
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_client_search")));
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_search_client")), string);
+
   q = g_strdup_printf ("SELECT rut::varchar || '-' || dv, nombre || ' ' || apell_p, telefono, credito_enable, direccion "
                        "FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
                        "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%') OR "
@@ -99,17 +102,6 @@ search_client (GtkWidget *widget, gpointer data)
   g_free (q);
 
   tuples = PQntuples (res);
-
-  if (!(g_str_equal(string, "")) && (tuples == 1))
-    {
-      fill_credit_data(PQgetvalue (res, 0, 0),
-                       PQgetvalue (res, 0, 1),
-                       PQvaluebycol (res, 0, "direccion"),
-                       PQvaluebycol (res, 0, "telefono"));
-      aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "btn_credit_sale"));
-      gtk_widget_grab_focus(aux_widget);
-      return;
-    }
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
@@ -177,6 +169,7 @@ search_client (GtkWidget *widget, gpointer data)
                             2, atoi (PQgetvalue (res, i, 7)),
                             -1);
     }
+
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
   gtk_widget_show_all (aux_widget);
 }

@@ -3389,6 +3389,12 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
 }
 
 void
+on_treeview_clients_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2, gpointer data)
+{
+  on_btn_client_ok_clicked (NULL, NULL);
+}
+
+void
 on_btn_cancel_sale_credit_clicked (GtkButton *button, gpointer data)
 {
   GtkWidget *widget;
