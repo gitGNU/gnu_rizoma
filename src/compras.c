@@ -3212,8 +3212,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
               g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
               gtk_tree_view_column_set_resizable (column, FALSE);
             }
-          FillPartialTree (treeview);
           clean_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_partial_invoice")));
+          FillPartialTree (treeview);
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_invoice")));
         }
       else
@@ -3311,9 +3311,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
               g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
               gtk_tree_view_column_set_resizable (column, FALSE);
             }
-          FillPartialTree (treeview);
-
           clean_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_partial_guide")));
+          FillPartialTree (treeview);
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_guide")));
         }
     }
