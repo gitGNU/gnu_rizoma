@@ -420,7 +420,7 @@ create table compra_detalle (
 -- venta_detalle
 -- antes era products_sell_history
 create table venta_detalle (
-  id                        serial not null,
+  id                        int4 not null,
   id_venta                  int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
