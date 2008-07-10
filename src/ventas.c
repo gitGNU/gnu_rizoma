@@ -3598,7 +3598,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 
   ticket = get_ticket_number (FACTURA);
 
-  SaveSell (monto, maquina, vendedor, CREDITO, str_rut, "0", ticket, FACTURA,
+  SaveSell (monto, maquina, vendedor, CASH, str_rut, "0", ticket, FACTURA,
             NULL, FALSE, TRUE);
 
   //clean the interface
