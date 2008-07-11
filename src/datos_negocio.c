@@ -2,7 +2,7 @@
    c-indentation-style: gnu -*- */
 /*datos_negocio.c
  *
- *    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
  *    This file is part of rizoma.
  *
@@ -24,6 +24,7 @@
 #include<gtk/gtk.h>
 
 #include<string.h>
+#include<stdlib.h>
 
 #include"tipos.h"
 #include"postgres-functions.h"
@@ -46,8 +47,10 @@ void
 refresh_labels (void)
 {
   GtkWidget *widget;
-  /* We get all the new data */
 
+  gchar **rut;
+
+  /* We get all the new data */
   get_datos ();
 
   /* We refresh all labesl */
@@ -69,7 +72,8 @@ refresh_labels (void)
   if (rut_value != NULL)
     {
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_admin_rut"));
-      gtk_entry_set_text (GTK_ENTRY (widget), rut_value);
+      rut = parse_rut (rut_value);
+      gtk_entry_set_text (GTK_ENTRY (widget), g_strdup_printf ("%s-%s", rut[0], rut[1]));
     }
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_rut"));
@@ -181,12 +185,15 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
 {
   PGresult *res;
   GtkWidget *aux_widget;
+  gchar **rut;
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_razon"));
   razon_social_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_rut"));
   rut_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  rut = parse_rut (rut_value);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_fantasy"));
   nombre_fantasia_value = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
@@ -218,16 +225,16 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
     {
       res = EjecutarSQL
         (g_strdup_printf
-         ("INSERT INTO negocio (razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at) "
-          "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", razon_social_value, rut_value, nombre_fantasia_value,
+         ("INSERT INTO negocio (razon_social, rut, dv, nombre, fono, fax, direccion, comuna, ciudad, giro, at) "
+          "VALUES ('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", razon_social_value, atoi (rut[0]), rut[1], nombre_fantasia_value,
           fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
     }
   else
     {
       res = EjecutarSQL
         (g_strdup_printf
-         ("UPDATE negocio SET razon_social='%s', rut='%s', nombre='%s', fono='%s', fax='%s', "
-          "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, rut_value, nombre_fantasia_value,
+         ("UPDATE negocio SET razon_social='%s', rut='%d', dv='%s', nombre='%s', fono='%s', fax='%s', "
+          "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, atoi (rut[0]), rut[1], nombre_fantasia_value,
           fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
     }
 
@@ -247,7 +254,7 @@ get_datos (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT razon_social, rut, nombre, fono, fax, direccion, comuna, ciudad, giro, at "
+  res = EjecutarSQL ("SELECT razon_social, rut, dv, nombre, fono, fax, direccion, comuna, ciudad, giro, at "
                      "FROM negocio");
 
   if (PQntuples (res) != 1)
@@ -259,7 +266,7 @@ get_datos (void)
     razon_social_value = NULL;
 
   if (strcmp (PQvaluebycol (res, 0, "rut"), "") != 0)
-    rut_value = PQvaluebycol (res, 0, "rut");
+    rut_value = g_strdup_printf ("%s-%s", PQvaluebycol (res, 0, "rut"), PQvaluebycol (res, 0, "dv"));
   else
     rut_value = NULL;
 
