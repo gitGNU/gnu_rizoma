@@ -1346,6 +1346,8 @@ AddFoundProduct (void)
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
       gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_buscador")));
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
+
+      SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
     }
 }
 
@@ -2195,6 +2197,7 @@ CleanStatusProduct (void)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_sell_price")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")), "");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_code")), "");
 
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), "");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "");
