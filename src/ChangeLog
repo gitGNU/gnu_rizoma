@@ -1,3 +1,9 @@
+2008-07-11  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (CloseWindowClientSelection, WindowClientSelection)
+	(SeleccionarCliente, SelectClient, AddDataEmisor, CancelarTipo):
+	Deleted functions.
+
 2008-07-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* utils.c (clean_container): Fixed bug that was deleting labels of
