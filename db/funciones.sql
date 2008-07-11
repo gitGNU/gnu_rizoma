@@ -49,9 +49,13 @@ declare
 	total double precision;
 begin
 
-select date_trunc ('day', fecha) into oldest from venta join venta_detalle on venta.id = id_venta where venta.fecha >= date_trunc('day', now() - interval '1 month') order by fecha asc limit 1;
+select date_trunc ('day', venta.fecha) into oldest from venta_detalle join venta on id_venta = venta.id  where barcode = codbar and venta.fecha >= date_trunc('day', now() - interval '1 month') order by fecha asc limit 1;
 
 passed_days = date_trunc ('day', now()) - oldest;
+
+IF passed_days < interval '1 days' THEN
+   passed_days = interval '1 days';
+END IF;
 
 IF passed_days = interval '30 days' THEN
 select (sum (cantidad)/30) into total from venta_detalle
@@ -63,6 +67,10 @@ select (sum (cantidad)/ (date_part ('day', passed_days))) into total from venta_
        inner join venta on venta.id = venta_detalle.id_venta
        and venta_detalle.barcode = codbar
        and venta.fecha >= date_trunc('day', now() - interval '1 month');
+END IF;
+
+IF total = 0 THEN
+   total = 1;
 END IF;
 
 return total;
@@ -333,28 +341,12 @@ declare
 	days double precision;
 	datos record;
 	query varchar;
-	prod_vendidos double precision;
 	codbar int8;
 BEGIN
 
-select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
-
-if prod_vendidos = 0 or prod_vendidos IS NULL then
-   prod_vendidos := 1; -- to avoid division by zero
-end if;
-
-SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
-       FROM compra_detalle, producto, compra
-       WHERE (producto.barcode= codigo_barras or producto.codigo_corto = in_codigo_corto) AND compra_detalle.barcode_product=producto.barcode
-       AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
-
-IF NOT FOUND OR days = 0 THEN
-   days := 1;
-END IF;
-
 query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
-		    (stock::float / ($S$ || prod_vendidos || $S$::float / $S$ || days || $S$::float)::float) AS stock_day,
+		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
 		    select_merma (producto.barcode) as unidades_merma,
 		    select_ventas_dia(producto.barcode) as ventas_dia
@@ -2179,27 +2171,11 @@ declare
 	days double precision;
 	datos record;
 	query varchar;
-	prod_vendidos double precision;
 	codbar int8;
 BEGIN
 
-select select_vendidos(codigo_barras, in_codigo_corto) into prod_vendidos;
-
-if prod_vendidos = 0 or prod_vendidos IS NULL then
-   prod_vendidos := 1; -- to avoid division by zero
-end if;
-
-SELECT date_part ('day', (SELECT NOW() - fecha FROM compra WHERE id=compra_detalle.id_compra)) INTO days
-       FROM compra_detalle, producto, compra
-       WHERE (producto.barcode= codigo_barras or producto.codigo_corto = in_codigo_corto) AND compra_detalle.barcode_product=producto.barcode
-       AND compra.id=compra_detalle.id_compra ORDER BY compra.fecha ASC;
-
-IF NOT FOUND OR days = 0 THEN
-   days := 1;
-END IF;
-
 query := $S$ SELECT *,
-		    (stock::float / ($S$ || prod_vendidos || $S$::float / $S$ || days || $S$::float)::float) AS stock_day
+		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day
 		FROM producto WHERE $S$;
 
 -- check if must use the barcode or the short code
