@@ -37,10 +37,13 @@ CloseErrorWindow (GtkButton *button, gpointer data)
         {
             closing = TRUE;
 
-            gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), TRUE);
+            if (widget != NULL)
+                {
+                    gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), TRUE);
 
-            gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)),
-                                  widget);
+                    gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)),
+                                          widget);
+                }
 
             gtk_widget_destroy (error_window);
 
@@ -63,7 +66,7 @@ ErrorMSG (GtkWidget *widget, gchar *motivo)
     if (error_window != NULL)
         return -1;
 
-    gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
+    if (widget != NULL) gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
 
     error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_size_request (error_window, -1, 130);
