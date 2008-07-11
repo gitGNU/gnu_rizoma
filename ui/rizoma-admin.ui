@@ -931,7 +931,6 @@
                         <property name="can_focus">True</property>
                         <property name="headers_clickable">True</property>
                         <property name="rules_hint">True</property>
-                        <signal name="row_activated" handler="ClientStatus"/>
                       </object>
                     </child>
                   </object>
