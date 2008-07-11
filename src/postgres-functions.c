@@ -628,14 +628,14 @@ ReturnClientAdress (gint rut)
   return PQgetvalue (res, 0, 0);
 }
 
-gchar *
+gint
 ReturnClientCredit (gint rut)
 {
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente WHERE rut=%d", rut));
 
-  return PQgetvalue (res, 0, 0);
+  return atoi (PQgetvalue (res, 0, 0));
 }
 
 gchar *

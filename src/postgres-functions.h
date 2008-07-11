@@ -84,7 +84,7 @@ gchar * ReturnClientPhone (gint rut);
 
 gchar * ReturnClientAdress (gint rut);
 
-gchar * ReturnClientCredit (gint rut);
+gint ReturnClientCredit (gint rut);
 
 gchar * ReturnClientStatusCredit (gint rut);
 
