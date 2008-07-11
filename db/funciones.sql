@@ -44,13 +44,26 @@ create or replace function select_ventas_dia (
        in codbar bigint)
 returns double precision as $$
 declare
+        oldest date;
+        passed_days interval;
 	total double precision;
 begin
 
+select date_trunc ('day', fecha) into oldest from venta join venta_detalle on venta.id = id_venta where venta.fecha >= date_trunc('day', now() - interval '1 month') order by fecha asc limit 1;
+
+passed_days = date_trunc ('day', now()) - oldest;
+
+IF passed_days = interval '30 days' THEN
 select (sum (cantidad)/30) into total from venta_detalle
        inner join venta on venta.id = venta_detalle.id_venta
        and venta_detalle.barcode = codbar
        and venta.fecha >= date_trunc('day', now() - interval '1 month');
+ELSE
+select (sum (cantidad)/ (date_part ('day', passed_days))) into total from venta_detalle
+       inner join venta on venta.id = venta_detalle.id_venta
+       and venta_detalle.barcode = codbar
+       and venta.fecha >= date_trunc('day', now() - interval '1 month');
+END IF;
 
 return total;
 end; $$ language plpgsql;
