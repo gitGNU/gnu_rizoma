@@ -3908,10 +3908,24 @@ on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, 
                           -1);
       products->product->cantidad = new_stock;
       CalcularTotales ();
+
+      if (GTK_WIDGET_VISIBLE (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_invoice"))))
+        {
+          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_partial_invoice_amount")),
+                              CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
+          gtk_editable_select_region (GTK_EDITABLE (builder_get (builder, "entry_ingress_partial_invoice_amount")), 0, -1);
+        }
+      else if (GTK_WIDGET_VISIBLE (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_guide"))))
+        {
+          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_partial_guide_amount")),
+                              CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
+          gtk_editable_select_region (GTK_EDITABLE (builder_get (builder, "entry_ingress_partial_guide_amount")), 0, -1);
+        }
+
     }
   else
     {
-      ErrorMSG (GTK_WIDGET (model), "El stock a ingresa debe ser mayor a 0 y menor a la cantidad solicitada");
+      ErrorMSG (NULL, "El stock a ingresa debe ser mayor a 0 y menor a la cantidad solicitada");
     }
 }
 
