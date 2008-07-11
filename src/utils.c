@@ -381,9 +381,11 @@ gchar **
 parse_rut (gchar *rut)
 {
   gchar *pattern_clean = "[[:^alnum:]]";
-  gchar **parsed_rut = g_new (gchar *, 2);
+  gchar **parsed_rut = g_new0 (gchar *, 2);
   GRegex *regex = g_regex_new (pattern_clean, 0, 0, NULL);
   size_t str_len = 0;
+
+  if (strlen (rut) == 0) return parsed_rut;
 
   rut = g_regex_replace (regex, rut, -1, 0, "", G_REGEX_MATCH_NOTEMPTY, NULL);
 
