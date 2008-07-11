@@ -485,15 +485,7 @@ AddClient (GtkWidget *widget, gpointer data)
 void
 CloseAddClientWindow (void)
 {
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_name")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_apell_p")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_apell_m")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_rut")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_dv")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_addr")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_phone")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_giro")), "");
-  gtk_entry_set_text(GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_limit_credit")), "");
+  clean_container (builder_get (builder, "wnd_addclient"));
 
   gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient")));
 }
