@@ -1,5 +1,10 @@
 2008-07-11  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* credito.c (ClientStatus, CloseClientStatus): Deleted function.
+
+	* postgres-functions.c (ReturnClientCredit): Changed the return
+	type from gchar * to gint.
+
 	* ventas.c (CloseWindowClientSelection, WindowClientSelection)
 	(SeleccionarCliente, SelectClient, AddDataEmisor, CancelarTipo):
 	Deleted functions.

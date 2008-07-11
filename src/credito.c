@@ -192,12 +192,14 @@ clientes_box ()
 
 
   ///////////////// clients
-  store = gtk_list_store_new (5,
+  store = gtk_list_store_new (7,
                               G_TYPE_INT,    // id
                               G_TYPE_STRING, //name + apell_p + apell_m
                               G_TYPE_INT,    //phone
                               G_TYPE_BOOLEAN,//credit enabled
-                              G_TYPE_INT);   //deuda
+                              G_TYPE_INT, // Cupo
+                              G_TYPE_INT,   //deuda
+                              G_TYPE_INT); // saldo
   FillClientStore (store);
 
   tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
@@ -248,8 +250,28 @@ clientes_box ()
                     G_CALLBACK (ToggleClientCredit), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Deuda", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Cupo", renderer,
                                                      "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, TRUE);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Deuda", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, TRUE);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Saldo", renderer,
+                                                     "text", 6,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -647,7 +669,9 @@ FillClientStore (GtkListStore *store)
                                                   PQvaluebycol(res, i, "apell_p"), PQvaluebycol(res, i, "apell_m")),
                               2, atoi (PQvaluebycol (res, i, "telefono")),
                               3, strcmp (enable, "t") ? FALSE : TRUE,
-                              4, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                              4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
+                              5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                              6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
                               -1);
         }
       else
@@ -656,7 +680,9 @@ FillClientStore (GtkListStore *store)
                             1, g_strdup_printf ("%s %s %s", PQgetvalue (res, i, 1),
                                                 PQgetvalue (res, i, 2), PQgetvalue (res, i, 3)),
                             2, atoi (PQgetvalue (res, i, 7)),
-                            4, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                            4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
+                            5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                            6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
                             -1);
     }
   return 0;
@@ -1004,180 +1030,6 @@ ModificarCliente (void)
     }
 }
 
-void
-CloseClientStatus (void)
-{
-  gtk_widget_destroy (creditos->status_window);
-
-  creditos->status_window = NULL;
-}
-
-void
-ClientStatus (void)
-{
-  GtkWidget *vbox;
-  GtkWidget *hbox;
-  GtkWidget *button;
-  GtkWidget *table;
-  GtkWidget *label;
-
-  GtkTreeIter iter;
-  gint rut;
-
-  if (gtk_tree_selection_get_selected (creditos->selection, NULL, &iter) == TRUE)
-    if (creditos->status_window == NULL)
-      {
-        creditos->status_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-        gtk_window_set_title (GTK_WINDOW (creditos->status_window),
-                              "Estado actual del Cliente");
-        gtk_window_set_resizable (GTK_WINDOW (creditos->status_window),
-                                  FALSE);
-        gtk_container_set_border_width (GTK_CONTAINER (creditos->status_window), 8);
-        gtk_widget_set_size_request (creditos->status_window, 270, -1);
-        g_signal_connect (G_OBJECT (creditos->status_window), "destroy",
-                          G_CALLBACK (CloseClientStatus), NULL);
-
-        gtk_widget_show (creditos->status_window);
-
-        vbox = gtk_vbox_new (FALSE, 3);
-        gtk_widget_show (vbox);
-        gtk_container_add (GTK_CONTAINER (creditos->status_window), vbox);
-
-        gtk_tree_model_get (GTK_TREE_MODEL (creditos->store), &iter,
-                            0, &rut,
-                            -1);
-
-        table = gtk_table_new (8, 2, FALSE);
-        gtk_widget_show (table);
-        gtk_table_set_row_spacings (GTK_TABLE (table), 5);
-        gtk_table_set_col_spacings (GTK_TABLE (table), 3);
-        gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 3);
-
-        label = gtk_label_new ("Nombre: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   0, 1);
-
-        label = gtk_label_new (ReturnClientName (rut));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   0, 1);
-
-        label = gtk_label_new ("Código: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   1, 2);
-
-        label = gtk_label_new (g_strdup_printf ("%d", rut));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   1, 2);
-
-        label = gtk_label_new ("Teléfono: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   2, 3);
-
-        label = gtk_label_new (ReturnClientPhone (rut));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   2, 3);
-
-        label = gtk_label_new ("Direccion: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   3, 4);
-
-        label = gtk_label_new (ReturnClientAdress (rut));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   3, 4);
-
-        label = gtk_label_new ("Estado del Crédito: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   4, 5);
-
-        label = gtk_label_new (ReturnClientStatusCredit (rut));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   4, 5);
-
-        label = gtk_label_new ("Cupo: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   5, 6);
-
-        label = gtk_label_new (g_strdup_printf ("$%s", ReturnClientCredit (rut)));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   5, 6);
-
-        label = gtk_label_new ("Saldo: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   6, 7);
-
-        label = gtk_label_new (g_strdup_printf ("$%d", CreditoDisponible (rut)));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   6, 7);
-
-        label = gtk_label_new ("Deuda: ");
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   0, 1,
-                                   7, 8);
-
-        label = gtk_label_new (g_strdup_printf ("$%s", PutPoints (g_strdup_printf ("%d", DeudaTotalCliente (rut)))));
-        gtk_widget_show (label);
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.0);
-        gtk_table_attach_defaults (GTK_TABLE (table), label,
-                                   1, 2,
-                                   7, 8);
-
-        hbox = gtk_hbox_new (FALSE, 3);
-        gtk_widget_show (hbox);
-        gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-        button = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
-        gtk_widget_show (button);
-        gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-        g_signal_connect (G_OBJECT (button), "clicked",
-                          G_CALLBACK (CloseClientStatus), NULL);
-      }
-}
-
 /**
  * Checks if it's possible sale a given amount to a given client,
  * based in the credit available.
@@ -1505,7 +1357,9 @@ admin_search_client(void)
                               1, PQgetvalue (res, i, 1),
                               2, atoi(PQvaluebycol (res, i, "telefono")),
                               3, strcmp (enable, "t") ? FALSE : TRUE,
-                              4, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                              4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
+                              5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                              6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
                               -1);
         }
       else
@@ -1513,7 +1367,9 @@ admin_search_client(void)
                             0, atoi(PQgetvalue (res, i, 0)),
                             1, PQgetvalue (res, i, 1),
                             2, atoi (PQvaluebycol (res, i, "telefono")),
-                            4, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                            4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
+                            5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
+                            6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
                             -1);
     }
 }
