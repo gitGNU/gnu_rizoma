@@ -485,7 +485,7 @@ AddClient (GtkWidget *widget, gpointer data)
 void
 CloseAddClientWindow (void)
 {
-  clean_container (builder_get (builder, "wnd_addclient"));
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_addclient")));
 
   gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient")));
 }
