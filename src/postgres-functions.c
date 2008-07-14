@@ -1174,7 +1174,7 @@ FiFo (gchar *barcode, gint compra)
 
   suma += current_stock * fifo;
 
-  suma += atoi (PQgetvalue (res, 0, 1)) * atoi (PQgetvalue (res, 0, 0));
+  suma += atoi (PQgetvalue (res, 0, 1)) * atoi (PQgetvalue (res, 0, 2));
 
   current_stock += atoi (PQgetvalue (res, 0, 2));
 
