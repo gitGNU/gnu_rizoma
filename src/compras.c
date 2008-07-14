@@ -2371,6 +2371,7 @@ FillPagarFacturas (gchar *rut_proveedor)
 {
   gchar *q;
   gint tuples, i;
+  gint total_amount = 0;
   GtkListStore *store_invoice = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_list"))));
   GtkListStore *store_invoice_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_detail"))));
   GtkTreeIter iter;
@@ -2405,7 +2406,12 @@ FillPagarFacturas (gchar *rut_proveedor)
                                               atoi (PQvaluebycol (res, i, "pay_month")), atoi (PQvaluebycol (res, i, "pay_year"))),
                           6, PQvaluebycol (res, i, "monto"),
                           -1);
+      total_amount += atoi (PQvaluebycol (res, i, "monto"));
     }
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_invoice_total_amount")),
+                        g_strdup_printf ("<b>$ %s</b>", PUT(g_strdup_printf("%d", total_amount))));
+
 }
 
 void
