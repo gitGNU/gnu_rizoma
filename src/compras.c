@@ -2600,7 +2600,7 @@ FillProveedorData (gchar *rut, gboolean guias)
   if (guias == TRUE)
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_guide_invoice_n_invoice")));
   else
-    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_invoice_n")));
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_invoice_provider")));
 }
 
 void
@@ -3510,7 +3510,7 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
 
       FillProveedorData (*strs, guide);
 
-      gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_srch_provider")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
     }
 }
 
