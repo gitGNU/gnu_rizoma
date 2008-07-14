@@ -333,7 +333,7 @@ DevolucionWindow (GtkWidget *widget, gpointer data)
    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
    cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)))), &endptr);
 
-   if ((cantidad == 0) && g_str_equal(endptr, ""))
+   if ((cantidad < 0) && g_str_equal(endptr, ""))
      {
        ErrorMSG(aux_widget, "Debe ingresar un número mayor que cero");
        return;
@@ -1187,7 +1187,7 @@ EliminarProductoDB (GtkButton *button, gpointer data)
                       "aun debe encontrarse en uso por alguna parte del sistema");
         }
       else
-        ErrorMSG (GTK_WIDGET (treeview), "Solo se puede eliminar productos \n con stock mayor a 0");
+        ErrorMSG (GTK_WIDGET (treeview), "Solo se puede eliminar productos \n con stock 0");
       Deleting = FALSE;
     }
 }
