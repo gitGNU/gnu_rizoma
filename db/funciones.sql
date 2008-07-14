@@ -1694,7 +1694,7 @@ end; $$ language plpgsql;
 
 create or replace function get_detalle_compra(
 		IN id_compra integer,
-		OUT codigo_corto integer,
+		OUT codigo_corto varchar(10),
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
