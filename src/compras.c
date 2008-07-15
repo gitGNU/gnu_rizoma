@@ -2322,12 +2322,12 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
 
   if (invoice)
     {
-      if (strcmp (n_documento, "") == 0)
+      if (strcmp (n_documento, "") == 0 || atoi (n_documento) <= 0)
         {
           ErrorMSG (wnd, "Debe Obligatoriamente ingresar el numero del documento");
           return FALSE;
         }
-      else if (strcmp (monto, "") == 0)
+      else if (strcmp (monto, "") == 0 || atoi (monto) <= 0)
         {
           ErrorMSG (wnd, "El Monto del documento debe ser ingresado");
           return FALSE;
@@ -2344,12 +2344,12 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
     }
   else
     {
-      if (strcmp (n_documento, "") == 0)
+      if (strcmp (n_documento, "") == 0 || atoi (n_documento) <= 0)
         {
           ErrorMSG (wnd, "Debe Obligatoriamente ingresar el numero del documento");
           return FALSE;
         }
-      else if (strcmp (monto, "") == 0)
+      else if (strcmp (monto, "") == 0 || atoi (monto) <= 0)
         {
           ErrorMSG (wnd, "El Monto del documento debe ser ingresado");
           return FALSE;
@@ -2842,6 +2842,12 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
                       -1);
 
   rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id));
+
+  if (validate_string ("[a-zA-Z ]", monto) || validate_string ("[a-zA-Z ]", n_documento))
+    {
+      ErrorMSG (GTK_WIDGET (entry_amount), "El formulario contiene caracteres invalidos.");
+      return;
+    }
 
   if (CheckDocumentData (wnd, invoice, rut_proveedor, id, n_documento, monto, date) == FALSE) return;
 
