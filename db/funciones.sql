@@ -45,11 +45,14 @@ create or replace function select_ventas_dia (
 returns double precision as $$
 declare
         oldest date;
+        last_month date;
         passed_days interval;
 	total double precision;
 begin
 
-select date_trunc ('day', venta.fecha) into oldest from venta_detalle join venta on id_venta = venta.id  where barcode = codbar and venta.fecha >= date_trunc('day', now() - interval '1 month') order by fecha asc limit 1;
+last_month = now() - interval '1 month';
+
+select date_trunc ('day', fecha ) into oldest from venta, venta_detalle where venta.id=id_venta and barcode=codbar and venta.fecha>=last_month order by fecha asc limit 1;
 
 passed_days = date_trunc ('day', now()) - oldest;
 
@@ -58,15 +61,15 @@ IF passed_days < interval '1 days' THEN
 END IF;
 
 IF passed_days = interval '30 days' THEN
-select (sum (cantidad)/30) into total from venta_detalle
-       inner join venta on venta.id = venta_detalle.id_venta
-       and venta_detalle.barcode = codbar
-       and venta.fecha >= date_trunc('day', now() - interval '1 month');
+select (sum (cantidad)/30) into total from venta_detalle, venta
+       where venta.fecha >= last_month
+       and barcode=codbar
+       and venta.id=id_venta;
 ELSE
-select (sum (cantidad)/ (date_part ('day', passed_days))) into total from venta_detalle
-       inner join venta on venta.id = venta_detalle.id_venta
-       and venta_detalle.barcode = codbar
-       and venta.fecha >= date_trunc('day', now() - interval '1 month');
+select (sum (cantidad)/(date_part ('day', passed_days))) into total from venta_detalle, venta
+       where venta.fecha >= last_month
+       and barcode=codbar
+       and venta.id=id_venta;
 END IF;
 
 IF total = 0 THEN
