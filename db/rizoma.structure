@@ -646,3 +646,8 @@ alter table venta_anulada add constraint fk_venta_anulada_users
 alter table venta_anulada add constraint fk_venta_anulada_venta_detalle
   foreign key (id_detail, id_sale)
   references venta_detalle(id, id_venta);
+
+-- Indices
+
+CREATE INDEX indx_venta_detalle_barcode ON venta_detalle ( barcode );
+CREATE INDEX indx_venta_fecha ON venta USING btree (fecha);
