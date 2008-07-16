@@ -277,7 +277,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   SaveProductsSell (venta->header, venta_id);
 
-  if ((vale_dir == NULL) || g_str_equal(vale_dir, ""))
+  if (vale_dir != NULL && !g_str_equal(vale_dir, ""))
     PrintVale (venta->header, venta_id, total);
 
   switch (tipo_venta)
