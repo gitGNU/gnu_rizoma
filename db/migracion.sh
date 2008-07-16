@@ -162,7 +162,7 @@ psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-a
 echo -- compras -\> compra
 echo compras > /dev/stderr
 echo 
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada from compras" | awk -F'|' '{printf ("COPY compra (id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, substr($3,0,length($3)-2), $4, $5, $6, $7)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, fecha, rut_proveedor, pedido, (select id from formas_pago where days=compras.forma_pago) as forma_pago, ingresada, anulada from compras" | awk -F'|' '{printf ("COPY compra (id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, substr($3,0,length($3)-2), $4, $5, $6, $7)}'
 
 
 echo -- devoluciones -\> devolucion
@@ -198,7 +198,7 @@ psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-a
 echo -- facturas_compras
 echo facturas_compras > /dev/stderr
 echo 
-psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, id_compra, rut_proveedor, num_factura, fecha, valor_neto, valor_iva, descuento, pagada, monto, fecha_pago, forma_pago from facturas_compras" | awk -F'|' '{printf ("COPY factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto, valor_iva, descuento, pagada, monto, fecha_pago, forma_pago) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, substr($1,0,length($3)-2), $4, $5, $6, $7, $8, $9, $10, $11, $12)}'
+psql -h $BD_HOST -p $BD_PORT $BD_NAME $BD_USER -P null=NULL --tuples-only --no-align --command "select id, id_compra, rut_proveedor, num_factura, fecha, valor_neto, valor_iva, descuento, pagada, monto, fecha_pago, forma_pago from facturas_compras" | awk -F'|' '{printf ("COPY factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto, valor_iva, descuento, pagada, monto, fecha_pago, forma_pago) FROM stdin NULL as \047NULL\047;\n%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\011%s\n\\.\n", $1, $2, substr($3,0,length($3)-2), $4, $5, $6, $7, $8, $9, $10, $11, $12)}'
 
 
 echo -- guias_compra
