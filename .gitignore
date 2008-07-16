@@ -34,4 +34,5 @@ src/rizoma-config
 src/rizoma-ventas
 src/rizoma-admin
 src/rizoma-compras
+src/rizoma-inventario
 doc/*
