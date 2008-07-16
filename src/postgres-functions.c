@@ -1294,7 +1294,7 @@ AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gc
 
   q = g_strdup_printf ("INSERT INTO proveedor(rut, dv, nombre, direccion, ciudad,"
                        "comuna, telefono, email, web, contacto, giro) VALUES "
-                       "(%s, '%s', '%s', '%s', '%s', '%s', %s, '%s', '%s', '%s', '%s')",
+                       "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
                        aux[0], aux[1], nombre, direccion, ciudad,
                        comuna, telefono, email, web, contacto, giro);
   res = EjecutarSQL (q);
