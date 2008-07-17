@@ -35,4 +35,5 @@ src/rizoma-ventas
 src/rizoma-admin
 src/rizoma-compras
 src/rizoma-inventario
+src/rizoma-informes
 doc/*
