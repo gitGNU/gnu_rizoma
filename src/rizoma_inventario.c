@@ -162,7 +162,7 @@ int main (int argc, char **argv)
 
         cant = strtod (strtok (NULL, ","), &pEnd);
 
-        if ((DataExist (g_strdup_printf ("SELECT barcode FROM productos WHERE barcode='%s", barcode))) == TRUE)
+        if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))) == TRUE)
           CompraAgregarALista (barcode, cant, precio, pcomp, margen, FALSE);
         else
           printf ("El producto %s no esta en la bd\n", barcode);

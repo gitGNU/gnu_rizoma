@@ -18,7 +18,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-bin_PROGRAMS = rizoma-admin rizoma-config rizoma-ventas rizoma-compras rizoma-inventario
+bin_PROGRAMS = rizoma-admin rizoma-config rizoma-ventas rizoma-compras rizoma-inventario rizoma-informes
 
 rizoma_admin_SOURCES = admin.c tipos.h admin.h \
 datos.h dimentions.h \
@@ -99,6 +99,25 @@ tiempo.c tiempo.h \
 utils.c utils.h \
 factura_more.c factura_more.h
 
+rizoma_informes_SOURCES = rizoma_informes.c \
+administracion_productos.c administracion_productos.h \
+postgres-functions.c postgres-functions.h \
+errors.c errors.h \
+manejo_productos.c manejo_productos.h \
+encriptar.c encriptar.h \
+usuario.c usuario.h \
+proveedores.c proveedores.h \
+impuestos.c impuestos.h \
+config_file.c config_file.h \
+rizoma_errors.c rizoma_errors.h \
+credito.c credito.h \
+printing.c printing.h \
+boleta.c boleta.h \
+vale.c vale.h \
+tiempo.c tiempo.h \
+utils.c utils.h \
+factura_more.c factura_more.h
+
 rizoma_admin_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
 rizoma_admin_LDFLAGS = -Wl,--export-dynamic
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
@@ -117,6 +136,10 @@ INCLUDES = $(CONFUSE_FLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATAD
 
 rizoma_inventario_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
 rizoma_inventario_LDFLAGS = -Wl,--export-dynamic
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+
+rizoma_informes_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_informes_LDFLAGS = -Wl,--export-dynamic
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ChangeLog
