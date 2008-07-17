@@ -24,7 +24,6 @@
 #include<libpq-fe.h>
 
 #include<gtk/gtk.h>
-#include<libgksu.h>
 
 #include<glib/gstdio.h>
 
