@@ -387,9 +387,10 @@
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow3">
+                    <property name="height_request">430</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
                     <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                     <child>
                       <object class="GtkTreeView" id="tree_view_sell_rank">
@@ -486,7 +487,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label8">
+                          <object class="GtkLabel" id="lbl_rank_sold">
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -495,7 +496,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label9">
+                          <object class="GtkLabel" id="lbl_rank_cost">
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -506,7 +507,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label10">
+                          <object class="GtkLabel" id="lbl_rank_contrib">
                             <property name="visible">True</property>
                           </object>
                           <packing>
@@ -517,7 +518,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label11">
+                          <object class="GtkLabel" id="lbl_rank_margin">
                             <property name="visible">True</property>
                           </object>
                           <packing>
