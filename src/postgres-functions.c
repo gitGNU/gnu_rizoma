@@ -1267,13 +1267,13 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT t1.descripcion, t1.marca, (SELECT contenido FROM producto WHERE "
+     ("SELECT t2.descripcion, t2.marca, (SELECT contenido FROM producto WHERE "
       "barcode=t1.barcode),(SELECT unidad FROM producto WHERE barcode=t1.barcode), "
       "SUM(t1.cantidad), SUM((t1.cantidad*t1.precio)::integer), SUM ((t1.cantidad*t1.fifo)::integer), "
-      "SUM(((precio*cantidad)-((iva+otros)+(fifo*cantidad)))::integer) FROM venta_detalle AS"
-      " t1 WHERE id_venta IN (SELECT id FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', "
+      "SUM(((t1.precio*t1.cantidad)-((t1.iva+t1.otros)+(t1.fifo*t1.cantidad)))::integer) FROM venta_detalle AS"
+      " t1, producto AS t2 WHERE t2.barcode=t1.barcode and id_venta IN (SELECT id FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', "
       "'DD MM YYYY') AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')) GROUP BY "
-      "t1.descripcion, t1.marca, t1.barcode",
+      "t2.descripcion, t2.marca, t1.barcode",
       from_day, from_month, from_year, to_day+1, to_month, to_year));
 
   if (res != NULL)
