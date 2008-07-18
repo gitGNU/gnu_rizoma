@@ -33,7 +33,6 @@
 #include"config_file.h"
 #include"postgres-functions.h"
 #include"printing.h"
-#include"tiempo.h"
 
 #include"utils.h"
 
