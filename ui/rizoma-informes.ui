@@ -582,6 +582,7 @@
                           <object class="GtkEntry" id="entry_money_box_date">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <signal name="changed" handler="on_btn_get_stat_clicked"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -594,6 +595,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="response_id">0</property>
+                            <signal name="clicked" handler="display_calendar" object="entry_money_box_date"/>
                             <child>
                               <object class="GtkArrow" id="arrow3">
                                 <property name="visible">True</property>
@@ -647,7 +649,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkTable" id="table3">
+                  <object class="GtkTable" id="table_data">
                     <property name="visible">True</property>
                     <property name="n_rows">6</property>
                     <property name="n_columns">4</property>
@@ -670,28 +672,100 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_out_other">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_out_total">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_out">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_out_invoice">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_ingr_total">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_other">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_doc">
+                        <property name="visible">True</property>
+                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_cash">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_mbox_start">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label36">
@@ -707,16 +781,6 @@
                       <packing>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label38">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Credito</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
                       </packing>
                     </child>
                     <child>
@@ -815,7 +879,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label46">
+                      <object class="GtkLabel" id="lbl_money_box_total">
                         <property name="visible">True</property>
                       </object>
                       <packing>

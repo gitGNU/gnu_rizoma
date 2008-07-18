@@ -653,23 +653,112 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
 }
 
 void
+fill_caja_data (GDate *date)
+{
+  PGresult *res;
+  gint year = g_date_get_year (date);
+  gint month = g_date_get_month (date);
+  gint day = g_date_get_day (date);
+
+  clean_container (GTK_CONTAINER (builder_get (builder, "table_data")));
+
+  res = EjecutarSQL (g_strdup_printf
+                     ("SELECT (SELECT inicio FROM caja WHERE date_part('year', fecha_inicio)=%d AND date_part('month', fecha_inicio)=%d AND date_part('day', fecha_inicio)=%d) AS inicio, (SELECT SUM (monto) FROM venta WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM venta WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND date_part('year', fecha)=date_part('year', t1.fecha) AND date_part('month', fecha)=date_part('month', t1.fecha) AND date_part('day', fecha)=date_part('day', t1.fecha))) AS ventas_doc, (SELECT SUM (monto) FROM egreso WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=1) AS retiros, (SELECT SUM(monto_abonado) FROM abono WHERE date_part('year', fecha_abono)=%d AND date_part('month', fecha_abono)=%d AND date_part('day', fecha_abono)=%d) AS pago_credit, (SELECT SUM(monto) FROM ingreso WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d) AS otros, (SELECT SUM (monto) FROM egreso WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=3) AS gasto, (SELECT SUM (monto) FROM egreso WHERE date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM factura_compra WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND date_part('day', fecha)=%d)) AS facturas",
+                      year, month+1, day, year, month+1, day, CASH, year, month+1, day, year, month+1,
+                      day, year, month+1, day, year, month+1, day, year, month+1, day, year,
+                      month+1, day, year, month+1, day));
+
+  if (res != NULL && PQntuples (res) != 0 && strcmp (PQgetvalue (res, 0, 0), "") != 0)
+    {
+      if (strcmp (PQgetvalue (res, 0, 0), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_start")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 0))));
+
+      if (strcmp (PQgetvalue (res, 0, 1), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 1))));
+
+      if (strcmp (PQgetvalue (res, 0, 2), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_doc")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 2))));
+
+      /* if (strcmp (PQgetvalue (res, 0, 4), "") != 0) */
+      /*   gtk_label_set_markup (GTK_LABEL (pago_ventas), */
+      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 4)))); */
+
+      if (strcmp (PQgetvalue (res, 0, 5), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_other")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 5))));
+
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_ingr_total")),
+                            g_strdup_printf
+                            ("<b>$\t%s</b>", PutPoints
+                             (g_strdup_printf
+                              ("%d", atoi (PQgetvalue (res, 0, 0)) +
+                               atoi (PQgetvalue (res, 0, 1)) + atoi (PQgetvalue (res, 0, 2)) +
+                               atoi (PQgetvalue (res, 0, 4)) + atoi (PQgetvalue (res, 0, 5))))));
+
+      if (strcmp (PQgetvalue (res, 0, 8), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_invoice")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 8))));
+
+      if (strcmp (PQgetvalue (res, 0, 3), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 3))));
+
+      /* if (strcmp (PQgetvalue (res, 0, 6), "") != 0) */
+      /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
+      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 6)))); */
+
+      if (strcmp (PQgetvalue (res, 0, 7), "") != 0)
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_other")),
+                              g_strdup_printf ("<b>%s</b>", PutPoints (PQgetvalue (res, 0, 7))));
+
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_total")),
+                            g_strdup_printf
+                            ("<b>$\t%s</b>", PutPoints
+                             (g_strdup_printf
+                              ("%d", atoi (PQgetvalue (res, 0, 8)) +
+                               atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) +
+                               atoi (PQgetvalue (res, 0, 7))))));
+
+      gtk_label_set_markup
+        (GTK_LABEL (builder_get (builder, "lbl_money_box_total")),
+         g_strdup_printf
+         ("<span size=\"xx-large\"><b>$\t%s</b></span>",
+          PutPoints
+          (g_strdup_printf
+           ("%d",
+            (atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) +
+             atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 4)) +
+             atoi (PQgetvalue (res, 0, 5))) -
+            (atoi (PQgetvalue (res, 0, 8)) +
+             atoi (PQgetvalue (res, 0, 3)) + atoi (PQgetvalue (res, 0, 6)) +
+             atoi (PQgetvalue (res, 0, 7)))))));
+
+
+    }
+}
+
+
+void
 on_btn_get_stat_clicked ()
 {
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_reports"));
-  gint page_num;
-
+  gint page_num = gtk_notebook_get_current_page (notebook);;
   const gchar *str_begin = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_begin")));
   const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
-
   GDate *date_begin = g_date_new ();
   GDate *date_end = g_date_new ();
+  GDate *date = g_date_new ();
 
-  if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
+  if (page_num != 2)
+    {
+      if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
 
-  g_date_set_parse (date_begin, str_begin);
-  g_date_set_parse (date_end, str_end);
-
-  page_num = gtk_notebook_get_current_page (notebook);
+      g_date_set_parse (date_begin, str_begin);
+      g_date_set_parse (date_end, str_end);
+    }
 
   switch (page_num)
     {
@@ -681,7 +770,8 @@ on_btn_get_stat_clicked ()
       fill_products_rank (date_begin, date_end);
       break;
     case 2:
-      //FillCajaData ();
+      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_money_box_date"))));
+      if (g_date_valid (date)) fill_caja_data (date);
       break;
     default:
       break;
