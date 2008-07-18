@@ -26,4 +26,5 @@ rizoma-login.ui \
 rizoma.ui \
 rizoma-ventas.ui \
 rizoma-compras.ui \
+rizoma-informes.ui \
 print-menu.xml
