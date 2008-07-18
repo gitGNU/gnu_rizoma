@@ -376,7 +376,7 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
   //que se vaya de segfault
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT SUM ((SELECT SUM (cantidad * precio) FROM venta_detalle WHERE id_venta=ventas.id)), "
+     ("SELECT SUM ((SELECT SUM (cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
       "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
       "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND (SELECT forma_pago FROM documentos_emitidos "
       "WHERE id=id_documento)=%d", from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
@@ -397,7 +397,7 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=ventas.id)), "
+     ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
       "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
       "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND ((SELECT forma_pago FROM documentos_emitidos "
       "WHERE id=id_documento)=%d OR (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d)",
@@ -419,7 +419,7 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL (g_strdup_printf
                      ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE "
-                      "id_venta=ventas.id)), count (*) FROM venta WHERE "
+                      "id_venta=venta.id)), count (*) FROM venta WHERE "
                       "fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
                       "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
                       from_day, from_month, from_year, to_day+1, to_month, to_year));
