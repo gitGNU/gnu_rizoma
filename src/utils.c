@@ -27,6 +27,8 @@
 #include<string.h>
 #include<stdlib.h>
 
+#include "utils.h"
+
 void
 SetToggleMode (GtkToggleButton *widget, gpointer data)
 {
@@ -395,4 +397,30 @@ parse_rut (gchar *rut)
   parsed_rut[1] = g_strdup_printf("%c", rut[str_len-1]);
 
   return parsed_rut;
+}
+
+gchar *
+CurrentDate (void)
+{
+  time_t t;
+  struct tm *fecha;
+
+  time (&t);
+
+  fecha = localtime (&t);
+
+  return g_strdup_printf ("%.2d-%.2d-%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year));
+}
+
+gchar *
+CurrentTime (void)
+{
+  time_t t;
+  struct tm *hora;
+
+  time (&t);
+
+  hora = localtime (&t);
+
+  return g_strdup_printf ("%2.2d:%2.2d:%2.2d", hora->tm_hour, hora->tm_min, hora->tm_sec);
 }

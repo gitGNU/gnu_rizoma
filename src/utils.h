@@ -21,13 +21,16 @@
 */
 
 #ifndef UTILS_H_
-# define UTILS_H_
+
+#define UTILS_H_
 
 #define CUT(num) CutComa (num)
 
 #define PUT(num) PutComa (num)
 
 #define builder_get(builder,object) gtk_builder_get_object(builder,object)
+
+#define YEAR(x) x + 1900
 
 void SetToggleMode (GtkToggleButton *widget, gpointer data);
 
@@ -50,5 +53,9 @@ gboolean validate_string (gchar *pattern, gchar *subject);
 void clean_container (GtkContainer *container);
 
 gchar ** parse_rut (gchar *rut);
+
+gchar * CurrentDate (void);
+
+gchar * CurrentTime (void);
 
 #endif
