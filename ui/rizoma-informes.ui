@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <interface>
-  <object class="GtkWindow" id="window1">
+  <object class="GtkWindow" id="wnd_reports">
+    <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -23,6 +24,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="display_calendar" object="entry_date_begin"/>
                     <child>
                       <object class="GtkArrow" id="arrow1">
                         <property name="visible">True</property>
@@ -55,6 +57,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="response_id">0</property>
+                    <signal name="clicked" handler="display_calendar" object="entry_date_end"/>
                     <child>
                       <object class="GtkArrow" id="arrow2">
                         <property name="visible">True</property>
@@ -81,6 +84,7 @@
                 <property name="label" translatable="yes">gtk-execute</property>
                 <property name="use_stock">True</property>
                 <property name="response_id">0</property>
+                <signal name="clicked" handler="on_btn_get_stat_clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -96,7 +100,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook" id="notebook1">
+          <object class="GtkNotebook" id="ntbk_reports">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
@@ -113,6 +117,8 @@
                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                         <child>
                           <object class="GtkTreeView" id="tree_view_sells">
+                            <property name="width_request">250</property>
+                            <property name="height_request">200</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="headers_clickable">True</property>
@@ -127,7 +133,9 @@
                         <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                         <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                         <child>
-                          <object class="GtkTreeView" id="treev_view_sell_detail">
+                          <object class="GtkTreeView" id="tree_view_sell_detail">
+                            <property name="width_request">450</property>
+                            <property name="height_request">150</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="headers_clickable">True</property>
@@ -144,137 +152,36 @@
                         <property name="n_rows">3</property>
                         <property name="n_columns">6</property>
                         <child>
-                          <object class="GtkLabel" id="lbl_sell_average">
+                          <object class="GtkLabel" id="label14">
                             <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Ventas Contado&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
                           </object>
-                          <packing>
-                            <property name="left_attach">5</property>
-                            <property name="right_attach">6</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="lbl_sell_credit_average">
+                          <object class="GtkLabel" id="label15">
                             <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">5</property>
-                            <property name="right_attach">6</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_cash_average">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">5</property>
-                            <property name="right_attach">6</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_total_n">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">3</property>
-                            <property name="right_attach">4</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_credit_n">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">3</property>
-                            <property name="right_attach">4</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_total_amount">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_cash_n">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">3</property>
-                            <property name="right_attach">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_credit_amount">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="lbl_sell_cash_amount">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label22">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Ventas Credito&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
-                            <property name="left_attach">4</property>
-                            <property name="right_attach">5</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label21">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">4</property>
-                            <property name="right_attach">5</property>
                             <property name="top_attach">1</property>
                             <property name="bottom_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label20">
+                          <object class="GtkLabel" id="label16">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Total&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
-                            <property name="left_attach">4</property>
-                            <property name="right_attach">5</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label19">
+                          <object class="GtkLabel" id="label17">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
@@ -282,8 +189,6 @@
                           <packing>
                             <property name="left_attach">2</property>
                             <property name="right_attach">3</property>
-                            <property name="top_attach">2</property>
-                            <property name="bottom_attach">3</property>
                           </packing>
                         </child>
                         <child>
@@ -300,7 +205,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label17">
+                          <object class="GtkLabel" id="label19">
                             <property name="visible">True</property>
                             <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
@@ -308,36 +213,139 @@
                           <packing>
                             <property name="left_attach">2</property>
                             <property name="right_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label16">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Total&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
-                          <packing>
                             <property name="top_attach">2</property>
                             <property name="bottom_attach">3</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label15">
+                          <object class="GtkLabel" id="label20">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Ventas Credito&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
+                            <property name="left_attach">4</property>
+                            <property name="right_attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label21">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">4</property>
+                            <property name="right_attach">5</property>
                             <property name="top_attach">1</property>
                             <property name="bottom_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label14">
+                          <object class="GtkLabel" id="label22">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Ventas Contado&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
+                          <packing>
+                            <property name="left_attach">4</property>
+                            <property name="right_attach">5</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_cash_amount">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_credit_amount">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_cash_n">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="right_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_total_amount">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_credit_n">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="right_attach">4</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_total_n">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="right_attach">4</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_cash_average">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">5</property>
+                            <property name="right_attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_credit_average">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">5</property>
+                            <property name="right_attach">6</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_sell_average">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">5</property>
+                            <property name="right_attach">6</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
                         </child>
                       </object>
                       <packing>
@@ -438,23 +446,50 @@
                         <property name="n_rows">2</property>
                         <property name="n_columns">4</property>
                         <child>
-                          <object class="GtkLabel" id="label11">
+                          <object class="GtkLabel" id="label4">
                             <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Vendido&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label5">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Costo&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
                           </object>
                           <packing>
-                            <property name="left_attach">3</property>
-                            <property name="right_attach">4</property>
-                            <property name="top_attach">1</property>
-                            <property name="bottom_attach">2</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label10">
+                          <object class="GtkLabel" id="label6">
                             <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Contrib.&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>
                             <property name="right_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label7">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Margen&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">3</property>
+                            <property name="right_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label8">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
                             <property name="top_attach">1</property>
                             <property name="bottom_attach">2</property>
                           </packing>
@@ -471,53 +506,26 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label8">
+                          <object class="GtkLabel" id="label10">
                             <property name="visible">True</property>
                           </object>
                           <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
                             <property name="top_attach">1</property>
                             <property name="bottom_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label7">
+                          <object class="GtkLabel" id="label11">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Margen&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
                             <property name="right_attach">4</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
                           </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label6">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Contrib.&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label5">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Costo&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="right_attach">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label4">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Vendido&lt;/b&gt;</property>
-                            <property name="use_markup">True</property>
-                          </object>
                         </child>
                       </object>
                       <packing>
@@ -685,27 +693,70 @@
                       <placeholder/>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label45">
+                      <object class="GtkLabel" id="label36">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Inicio</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label37">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Efectivo</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label38">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Credito</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label39">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Otros</property>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
-                        <property name="right_attach">3</property>
+                        <property name="top_attach">4</property>
+                        <property name="bottom_attach">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label40">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Documentado</property>
+                      </object>
+                      <packing>
                         <property name="top_attach">2</property>
                         <property name="bottom_attach">3</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label44">
+                      <object class="GtkLabel" id="label41">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Retiros</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Sub Total&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label42">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Facturas</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
                         <property name="right_attach">3</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                     <child>
@@ -722,71 +773,28 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label42">
+                      <object class="GtkLabel" id="label44">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Facturas</property>
+                        <property name="label" translatable="yes">Retiros</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
                         <property name="right_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label41">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Sub Total&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label40">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Documentado</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label39">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Otros</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">4</property>
-                        <property name="bottom_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label38">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Credito</property>
-                      </object>
-                      <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label37">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Efectivo</property>
-                      </object>
-                      <packing>
                         <property name="top_attach">1</property>
                         <property name="bottom_attach">2</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label36">
+                      <object class="GtkLabel" id="label45">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Inicio</property>
+                        <property name="label" translatable="yes">Otros</property>
                       </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
