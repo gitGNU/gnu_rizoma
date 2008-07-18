@@ -37,8 +37,7 @@ rizoma_errors.c rizoma_errors.h \
 utils.c utils.h \
 vale.c vale.h \
 factura_more.c factura_more.h \
-printing.c printing.h \
-tiempo.c tiempo.h
+printing.c printing.h
 
 rizoma_ventas_SOURCES = ventas.c ventas.h  dimentions.h tipos.h \
 credito.c credito.h \
@@ -55,7 +54,6 @@ utils.c utils.h \
 factura_more.c factura_more.h \
 caja.c caja.h \
 vale.c vale.h \
-tiempo.c tiempo.h \
 encriptar.c encriptar.h \
 proveedores.c proveedores.h
 
@@ -74,7 +72,6 @@ credito.c credito.h \
 printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
-tiempo.c tiempo.h \
 utils.c utils.h \
 factura_more.c factura_more.h
 
@@ -95,7 +92,6 @@ credito.c credito.h \
 printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
-tiempo.c tiempo.h \
 utils.c utils.h \
 factura_more.c factura_more.h
 
@@ -114,32 +110,31 @@ credito.c credito.h \
 printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
-tiempo.c tiempo.h \
 utils.c utils.h \
 factura_more.c factura_more.h
 
-rizoma_admin_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_admin_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 rizoma_admin_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
-rizoma_ventas_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_ventas_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 rizoma_ventas_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
-rizoma_compras_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_compras_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 rizoma_compras_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
-rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS) $(GKSU_LIBS)
+rizoma_config_LDADD = $(CONFUSE_LIBS) $(GTK_LIBS)
 rizoma_config_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CONFUSE_FLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CONFUSE_FLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
-rizoma_inventario_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_inventario_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 rizoma_inventario_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
-rizoma_informes_LDADD = $(GTK_LIBS) $(PSLIB_LIBS) $(GKSU_LIBS)
+rizoma_informes_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)
 rizoma_informes_LDFLAGS = -Wl,--export-dynamic
-INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) $(GKSU_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
+INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ChangeLog
