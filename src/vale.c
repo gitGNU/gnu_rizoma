@@ -29,8 +29,6 @@
 #include"tipos.h"
 #include"config_file.h"
 
-#include"tiempo.h"
-
 void
 PrintVale (Productos *header, gint venta_id, gint total)
 {
