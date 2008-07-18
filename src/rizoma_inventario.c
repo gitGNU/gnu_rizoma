@@ -113,9 +113,6 @@ int main (int argc, char **argv)
 
   FILE *fp;
   char *line = NULL;
-  char *value;
-
-  gint id_compra;
 
   char *barcode;
   double cant = 100.0;
@@ -123,8 +120,6 @@ int main (int argc, char **argv)
   int precio = 1000;
   int margen = 20;
   char * pEnd;
-  int config;
-  char *config_file;
 
   fp = fopen (argv[1], "r");
 

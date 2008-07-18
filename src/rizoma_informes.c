@@ -21,12 +21,18 @@
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include<gtk/gtk.h>
+#include <gtk/gtk.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "tipos.h"
 #include "postgres-functions.h"
 #include "config_file.h"
 #include "utils.h"
+#include "encriptar.h"
+#include "rizoma_errors.h"
 
 GtkBuilder *builder;
 
@@ -595,6 +601,7 @@ fill_totals (GDate *date_begin, GDate *date_end)
                                            PutPoints (g_strdup_printf ("%d", total_sell / total_ventas))));
 }
 
+void
 fill_products_rank (GDate *date_begin, GDate *date_end)
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"))));

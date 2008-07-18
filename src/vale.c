@@ -28,6 +28,7 @@
 
 #include"tipos.h"
 #include"config_file.h"
+#include"utils.h"
 
 void
 PrintVale (Productos *header, gint venta_id, gint total)
