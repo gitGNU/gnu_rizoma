@@ -16,6 +16,7 @@
                   <object class="GtkEntry" id="entry_date_begin">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                   </object>
                 </child>
                 <child>
@@ -49,6 +50,7 @@
                   <object class="GtkEntry" id="entry_date_end">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="editable">False</property>
                   </object>
                 </child>
                 <child>
@@ -582,6 +584,7 @@
                           <object class="GtkEntry" id="entry_money_box_date">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="editable">False</property>
                             <signal name="changed" handler="on_btn_get_stat_clicked"/>
                           </object>
                           <packing>
