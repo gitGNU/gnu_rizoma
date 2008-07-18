@@ -1702,7 +1702,7 @@ create or replace function get_detalle_compra(
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
 		OUT unidad varchar(10),
-		OUT precio integer,
+		OUT precio double precision,
 		OUT cantidad double precision,
 		OUT cantidad_ingresada double precision,
 		OUT costo_ingresado bigint,
