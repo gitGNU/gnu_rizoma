@@ -65,49 +65,8 @@ get_line (FILE *fd)
     return NULL;
 }
 
-/* void */
-/* IngresarFakeCompra (void) */
-/* { */
-/*   Productos *products = compra->header_compra; */
-/*   gint id, doc; */
-/*   gchar *rut_proveedor; */
-
-/*   PGresult *res; */
-
-/*   res = EjecutarSQL ("SELECT id FROM compras ORDER BY id DESC LIMIT 1"); */
-
-/*   id = atoi (PQgetvalue (res, 0, 0)); */
-
-/*   if (products != NULL) */
-/*     { */
-/*       do { */
-
-/*         IngresarProducto (products->product, id); */
-
-/*         IngresarDetalleDocumento (products->product, id, */
-/*                                   -1, */
-/*                                   -1); */
-
-/*         products = products->next; */
-/*       } */
-/*       while (products != compra->header_compra); */
-
-/*       //      SetProductosIngresados (); */
-
-/*     } */
-
-/*   rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compras WHERE id=%d", */
-/*                                                  id)); */
-
-
-/*   doc = IngresarFactura ("-1", id, rut_proveedor, -1, "25", "3", "06", 0); */
-
-
-/*   CompraIngresada (); */
-
-/* } */
-
-int main (int argc, char **argv)
+int
+main (int argc, char **argv)
 {
   GKeyFile *key_file;
 
@@ -151,11 +110,11 @@ int main (int argc, char **argv)
       {
         barcode = strtok (line, ",");
 
-        pcomp = strtod (strtok (NULL, ","), &pEnd);
+        pcomp = g_ascii_strtod (strtok (NULL, ","), &pEnd);
 
         precio = atoi (strtok (NULL, ","));
 
-        cant = strtod (strtok (NULL, ","), &pEnd);
+        cant = g_ascii_strtod (strtok (NULL, ","), &pEnd);
 
         if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))) == TRUE)
           CompraAgregarALista (barcode, cant, precio, pcomp, margen, FALSE);
