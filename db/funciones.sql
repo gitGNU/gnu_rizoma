@@ -1946,7 +1946,7 @@ END; $$ language plpgsql;
 
 create or replace function get_invoice_detail(
 		IN id_invoice integer,
-		OUT codigo_corto integer,
+		OUT codigo_corto varchar(10),
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
