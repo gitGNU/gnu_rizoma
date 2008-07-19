@@ -2782,6 +2782,7 @@ main (int argc, char **argv)
   login_window = GTK_WINDOW(gtk_builder_get_object (builder, "login_window"));
 
   profiles = g_key_file_get_groups (key_file, NULL);
+
   g_key_file_free (key_file);
 
   model = gtk_list_store_new (1,
@@ -2803,6 +2804,7 @@ main (int argc, char **argv)
                               0, *profiles,
                               -1
                               );
+          g_free (*profiles);
         }
     } while (*profiles++ != NULL);
 
