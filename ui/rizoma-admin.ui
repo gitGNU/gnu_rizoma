@@ -43,7 +43,6 @@
                         <property name="receives_default">True</property>
                         <property name="tooltip" translatable="yes">Cambiar la contrase&#xF1;a del usuario seleccionado</property>
                         <property name="label" translatable="yes">Contrase&#xF1;a</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="ChangePasswdWin"/>
                       </object>
                       <packing>
@@ -61,7 +60,6 @@
                         <property name="tooltip" translatable="yes">Borrar el usuario seleccionado</property>
                         <property name="label" translatable="yes">gtk-delete</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="AskDelete"/>
                       </object>
                       <packing>
@@ -78,7 +76,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="AddSellerWin"/>
                       </object>
                       <packing>
@@ -155,7 +152,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="AddImpuesto"/>
                       </object>
                       <packing>
@@ -197,7 +193,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-edit</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="EditTaskWin"/>
                           </object>
                           <packing>
@@ -214,7 +209,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-delete</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="DelTask"/>
                           </object>
                           <packing>
@@ -497,7 +491,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-save</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="SaveDatosNegocio"/>
                       </object>
                       <packing>
@@ -573,7 +566,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Modificar</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="ModificarNumber"/>
                           </object>
                           <packing>
@@ -630,7 +622,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Modificar</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="ModificarNumberF"/>
                           </object>
                           <packing>
@@ -846,7 +837,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-save</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="guardar_parametros"/>
                           </object>
                           <packing>
@@ -905,7 +895,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-find</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="admin_search_client"/>
                       </object>
                       <packing>
@@ -948,7 +937,6 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Abonar</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="AbonarWindow"/>
                       </object>
                       <packing>
@@ -964,7 +952,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-print</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="on_btn_admin_print_clicked"/>
                       </object>
                       <packing>
@@ -980,7 +967,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="AddClient"/>
                       </object>
                       <packing>
@@ -996,7 +982,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-delete</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="EliminarCliente"/>
                       </object>
                       <packing>
@@ -1012,7 +997,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-edit</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="ModificarCliente"/>
                       </object>
                       <packing>
@@ -1093,7 +1077,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-quit</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_quit_clicked"/>
                 <accelerator key="Q" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
@@ -1348,7 +1331,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseAddSellerWin"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -1364,7 +1346,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="AddSeller"/>
               </object>
               <packing>
@@ -1448,7 +1429,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseEditTaxWin"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -1464,7 +1444,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="EditTask"/>
               </object>
               <packing>
@@ -1510,7 +1489,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-no</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="quit_message"/>
               </object>
             </child>
@@ -1521,7 +1499,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-yes</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_quit_application"/>
               </object>
               <packing>
@@ -1676,7 +1653,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseChangePasswdWin"/>
               </object>
               <packing>
@@ -1692,7 +1668,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="ChangePasswd"/>
               </object>
               <packing>
@@ -1931,7 +1906,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseModificarWindow"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -1948,7 +1922,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="ModificarClienteDB"/>
               </object>
               <packing>
@@ -2060,7 +2033,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseAbonarWindow"/>
               </object>
               <packing>
@@ -2074,7 +2046,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="Abonar"/>
               </object>
               <packing>

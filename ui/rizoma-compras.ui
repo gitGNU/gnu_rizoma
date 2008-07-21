@@ -53,7 +53,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="display_calendar" object="entry_ingress_partial_invoice_date"/>
                     <child>
                       <object class="GtkArrow" id="arrow7">
@@ -134,7 +133,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_partial_invoice"/>
               </object>
             </child>
@@ -146,7 +144,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_ok_ingress_partial_invoice_clicked"/>
               </object>
               <packing>
@@ -214,7 +211,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="display_calendar" object="entry_ingress_partial_guide_date"/>
                     <child>
                       <object class="GtkArrow" id="arrow6">
@@ -295,7 +291,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_partial_guide"/>
               </object>
             </child>
@@ -307,7 +302,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_ok_ingress_partial_guide_clicked"/>
               </object>
               <packing>
@@ -424,7 +418,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseAjusteWin"/>
               </object>
               <packing>
@@ -439,7 +432,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="AjustarMercaderia"/>
               </object>
               <packing>
@@ -541,7 +533,6 @@
               <object class="GtkCheckButton" id="checkbtn_edit_prod_iva">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="response_id">0</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -556,7 +547,6 @@
               <object class="GtkCheckButton" id="checkbtn_edit_prod_perecible">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="response_id">0</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -571,7 +561,6 @@
               <object class="GtkCheckButton" id="checkbtn_edit_prod_fraccionaria">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="response_id">0</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -770,7 +759,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_mod_product"/>
               </object>
               <packing>
@@ -785,7 +773,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-save</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="Save"/>
               </object>
               <packing>
@@ -861,7 +848,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes" context="yes">Guia</property>
-                <property name="response_id">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
                 <property name="group">radiobutton_ingress_document</property>
@@ -884,7 +870,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes" context="yes">Completa</property>
-                <property name="response_id">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -898,7 +883,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes" context="yes">Parcial</property>
-                <property name="response_id">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
                 <property name="group">radiobutton_ingress_complete</property>
@@ -923,7 +907,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes" context="yes">Factura</property>
-                <property name="response_id">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -946,7 +929,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_buy"/>
               </object>
             </child>
@@ -957,7 +939,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_button_ok_ingress_clicked"/>
               </object>
               <packing>
@@ -1026,7 +1007,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="display_calendar" object="entry_ingress_factura_date"/>
                     <child>
                       <object class="GtkArrow" id="arrow1">
@@ -1088,7 +1068,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_invoice"/>
               </object>
             </child>
@@ -1100,7 +1079,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_ok_ingress_invoice_clicked"/>
               </object>
               <packing>
@@ -1148,7 +1126,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">Si</property>
-                    <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radio_btn_fractional_no</property>
@@ -1159,7 +1136,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">No</property>
-                    <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -1253,7 +1229,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">Si</property>
-                    <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -1263,7 +1238,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="label" translatable="yes" context="yes">No</property>
-                    <property name="response_id">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <property name="group">radio_btn_task_yes</property>
@@ -1378,7 +1352,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_new_product"/>
               </object>
             </child>
@@ -1389,7 +1362,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-add</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_add_new_product_clicked"/>
               </object>
               <packing>
@@ -1456,7 +1428,6 @@
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="label" translatable="yes" context="yes">gtk-find</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
                   </object>
                 </child>
                 <child>
@@ -1467,7 +1438,6 @@
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="label" translatable="yes" context="yes">gtk-add</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="AddFoundProduct"/>
                   </object>
                   <packing>
@@ -1518,7 +1488,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes" context="yes">gtk-close</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_buscador"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -1612,7 +1581,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-add</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="on_button_new_product_clicked"/>
                           </object>
                         </child>
@@ -1623,7 +1591,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-edit</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="ModificarProducto" object="entry_buy_barcode"/>
                           </object>
                           <packing>
@@ -1922,7 +1889,6 @@
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
                                     <property name="label" translatable="yes">Calcular</property>
-                                    <property name="response_id">0</property>
                                     <signal name="clicked" handler="on_button_calculate_clicked"/>
                                     <signal name="clicked" handler="gtk_widget_grab_focus" object="entry_buy_amount"/>
                                   </object>
@@ -2064,7 +2030,6 @@
                                     <property name="receives_default">True</property>
                                     <property name="label" translatable="yes">gtk-add</property>
                                     <property name="use_stock">True</property>
-                                    <property name="response_id">0</property>
                                     <signal name="clicked" handler="on_button_add_product_list_clicked"/>
                                   </object>
                                   <packing>
@@ -2079,7 +2044,6 @@
                                     <property name="receives_default">True</property>
                                     <property name="label" translatable="yes">gtk-clear</property>
                                     <property name="use_stock">True</property>
-                                    <property name="response_id">0</property>
                                     <signal name="clicked" handler="CleanStatusProduct"/>
                                   </object>
                                   <packing>
@@ -2154,7 +2118,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-remove</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2167,7 +2130,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Confirmar Compra</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="on_button_buy_clicked"/>
                             <accelerator key="F9" signal="clicked"/>
                           </object>
@@ -2280,7 +2242,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Recibir Pedido</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="on_btn_get_request_clicked"/>
                           </object>
                           <packing>
@@ -2294,7 +2255,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Anular Compra</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="on_btn_nullify_buy_clicked"/>
                           </object>
                           <packing>
@@ -2307,7 +2267,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Anular Producto</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="on_btn_nullify_product_clicked"/>
                           </object>
                           <packing>
@@ -2535,7 +2494,6 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <property name="response_id">0</property>
                                     <signal name="clicked" handler="display_calendar" object="entry_guide_invoice_date"/>
                                     <child>
                                       <object class="GtkArrow" id="arrow5">
@@ -2875,7 +2833,6 @@
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
-                                            <property name="response_id">0</property>
                                             <signal name="clicked" handler="on_btn_guide_invoice_clicked"/>
                                             <child>
                                               <object class="GtkArrow" id="arrow3">
@@ -2893,7 +2850,6 @@
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
-                                            <property name="response_id">0</property>
                                             <signal name="clicked" handler="on_btn_invoice_guide_clicked"/>
                                             <child>
                                               <object class="GtkArrow" id="arrow4">
@@ -3084,7 +3040,6 @@
                                         <property name="receives_default">True</property>
                                         <property name="label" translatable="yes">gtk-clear</property>
                                         <property name="use_stock">True</property>
-                                        <property name="response_id">0</property>
                                         <signal name="clicked" handler="ClearFactData"/>
                                       </object>
                                       <packing>
@@ -3099,7 +3054,6 @@
                                         <property name="receives_default">True</property>
                                         <property name="label" translatable="yes">gtk-ok</property>
                                         <property name="use_stock">True</property>
-                                        <property name="response_id">0</property>
                                         <signal name="clicked" handler="on_btn_guide_invoice_ok_clicked"/>
                                       </object>
                                       <packing>
@@ -3465,7 +3419,6 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">Pagar Factura</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="on_btn_pay_invoice_clicked"/>
                           </object>
                           <packing>
@@ -3534,7 +3487,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-find</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="BuscarProductosParaListar"/>
                           </object>
                           <packing>
@@ -3712,7 +3664,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="label" translatable="yes">S&#xED;</property>
-                            <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                           </object>
@@ -3723,7 +3674,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="label" translatable="yes">No</property>
-                            <property name="response_id">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_mayorist_yes</property>
@@ -4284,7 +4234,6 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Modificar</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="ModificarProducto" object="lbl_informerca_barcode"/>
                       </object>
                     </child>
@@ -4295,7 +4244,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-print</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -4307,7 +4255,6 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">Ajuste</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="AjusteWin"/>
                       </object>
                       <packing>
@@ -4321,7 +4268,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-delete</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="EliminarProductoDB"/>
                       </object>
                       <packing>
@@ -4335,7 +4281,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-save</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="GuardarModificacionesProducto"/>
                       </object>
                       <packing>
@@ -4397,7 +4342,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-find</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="BuscarProveedor"/>
                           </object>
                         </child>
@@ -4408,7 +4352,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-add</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="AgregarProveedorWindow"/>
                           </object>
                           <packing>
@@ -4461,7 +4404,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-print</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                           </object>
                         </child>
                       </object>
@@ -4780,7 +4722,6 @@
                             <property name="receives_default">True</property>
                             <property name="label" translatable="yes">gtk-save</property>
                             <property name="use_stock">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="ModificarProveedor"/>
                           </object>
                         </child>
@@ -4827,7 +4768,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-quit</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_wnd_compras_delete_event"/>
                 <accelerator key="F12" signal="clicked"/>
               </object>
@@ -4910,7 +4850,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="display_calendar" object="entry_ingress_guide_date"/>
                     <child>
                       <object class="GtkArrow" id="arrow2">
@@ -4972,7 +4911,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_ingress_guide"/>
               </object>
             </child>
@@ -4984,7 +4922,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_ok_ingress_guide_clicked"/>
               </object>
               <packing>
@@ -5028,7 +4965,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-find</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_find_srch_provider_clicked" object="entry_srch_provider"/>
               </object>
               <packing>
@@ -5071,7 +5007,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_srch_provider"/>
               </object>
             </child>
@@ -5082,7 +5017,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_ok_srch_provider_clicked" object="tree_view_srch_provider"/>
               </object>
               <packing>

@@ -24,7 +24,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="display_calendar" object="entry_date_begin"/>
                     <child>
                       <object class="GtkArrow" id="arrow1">
@@ -58,7 +57,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="display_calendar" object="entry_date_end"/>
                     <child>
                       <object class="GtkArrow" id="arrow2">
@@ -85,7 +83,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-execute</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_get_stat_clicked"/>
               </object>
               <packing>
@@ -413,7 +410,6 @@
                         <property name="receives_default">True</property>
                         <property name="label" translatable="yes">gtk-print</property>
                         <property name="use_stock">True</property>
-                        <property name="response_id">0</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -597,7 +593,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="response_id">0</property>
                             <signal name="clicked" handler="display_calendar" object="entry_money_box_date"/>
                             <child>
                               <object class="GtkArrow" id="arrow3">

@@ -197,7 +197,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Local</property>
-                        <property name="response_id">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -207,7 +206,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Red</property>
-                        <property name="response_id">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radio_btn_local</property>
@@ -228,7 +226,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Servidor</property>
-                        <property name="response_id">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -238,7 +235,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="label" translatable="yes">Cliente</property>
-                        <property name="response_id">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radio_btn_server</property>
@@ -281,7 +277,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes">SSL</property>
-                <property name="response_id">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -401,7 +396,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Crear Usuario</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_create_pg_user_clicked" object="asistente"/>
               </object>
               <packing>
@@ -452,7 +446,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes">SSL</property>
-                <property name="response_id">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -468,7 +461,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">Probar Datos</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_conneciton_test_clicked" object="asistente"/>
               </object>
               <packing>
@@ -732,7 +724,6 @@ Si desea tener mas de un punto de venta Multi-Punto deberia ser su eleccion.</pr
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes">Volcar Datos</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_dump_data_clicked" object="asistente"/>
               </object>
               <packing>

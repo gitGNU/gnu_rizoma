@@ -311,7 +311,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseAgregarProveedorWindow"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -328,7 +327,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-add</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="AgregarProveedor"/>
               </object>
               <packing>
@@ -603,7 +601,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseAddClientWindow"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -620,7 +617,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-add</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="AgregarClienteABD"/>
               </object>
               <packing>
