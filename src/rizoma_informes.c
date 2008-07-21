@@ -620,22 +620,22 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
 
   for (i = 0; i < tuples; i++)
     {
-      vendidos += atoi (PQgetvalue (res, i, 5));
-      costo += atoi (PQgetvalue (res, i, 6));
-      contrib += atoi (PQgetvalue (res, i, 7));
+      vendidos += atoi (PQvaluebycol (res, i, "sold_amount"));
+      costo += atoi (PQvaluebycol (res, i, "costo"));
+      contrib += atoi (PQvaluebycol (res, i, "contrib"));
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-                          0, PQgetvalue (res, i, 0),
-                          1, PQgetvalue (res, i, 1),
-                          2, atoi (PQgetvalue (res, i, 2)),
-                          3, PQgetvalue (res, i, 3),
-                          4, g_ascii_strtod (PQgetvalue (res, i, 4), (gchar **)NULL),
-                          5, atoi (PQgetvalue (res, i, 5)),
-                          6, atoi (PQgetvalue (res, i, 6)),
-                          7, atoi (PQgetvalue (res, i, 7)),
-                          8, (((gdouble)atoi (PQgetvalue (res, i, 7)) /
-                               atoi (PQgetvalue (res, i, 6))) * 100),
+                          0, PQvaluebycol (res, i, "descrpipcion"),
+                          1, PQvaluebycol (res, i, "marca"),
+                          2, atoi (PQvaluebycol (res, i, "contenido")),
+                          3, PQvaluebycol (res, i, "unidad"),
+                          4, g_ascii_strtod (PQvaluebycol (res, i, "amount"), (gchar **)NULL),
+                          5, atoi (PQvaluebycol (res, i, "sold_amount")),
+                          6, atoi (PQvaluebycol (res, i, "costo")),
+                          7, atoi (PQvaluebycol (res, i, "contrib")),
+                          8, (((gdouble)atoi (PQvaluebycol (res, i, "contrib")) /
+                               atoi (PQvaluebycol (res, i, "costo"))) * 100),
                           -1);
     }
 
