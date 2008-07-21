@@ -1264,17 +1264,16 @@ PGresult *
 ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("SELECT t2.descripcion, t2.marca, (SELECT contenido FROM producto WHERE "
-      "barcode=t1.barcode),(SELECT unidad FROM producto WHERE barcode=t1.barcode), "
-      "SUM(t1.cantidad), SUM((t1.cantidad*t1.precio)::integer), SUM ((t1.cantidad*t1.fifo)::integer), "
-      "SUM(((t1.precio*t1.cantidad)-((t1.iva+t1.otros)+(t1.fifo*t1.cantidad)))::integer) FROM venta_detalle AS"
-      " t1, producto AS t2 WHERE t2.barcode=t1.barcode and id_venta IN (SELECT id FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', "
-      "'DD MM YYYY') AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')) GROUP BY "
-      "t2.descripcion, t2.marca, t1.barcode",
-      from_day, from_month, from_year, to_day+1, to_month, to_year));
+  q = g_strdup_printf
+     ("SELECT t2.descripcion, t2.marca, t2.contenido, t2.unidad, SUM(t1.cantidad) as amount, SUM((t1.cantidad*t1.precio)::integer) as sold_amount, "
+      "SUM ((t1.cantidad*t1.fifo)::integer) as costo, SUM(((t1.precio*t1.cantidad)-((t1.iva+t1.otros)+(t1.fifo*t1.cantidad)))::integer) as contrib "
+      "FROM venta_detalle AS t1, producto AS t2 WHERE t2.barcode=t1.barcode and id_venta IN (SELECT id FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', "
+      "'DD MM YYYY') AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')) GROUP BY t2.descripcion, t2.marca, t2.contenido, t2.unidad",
+      from_day, from_month, from_year, to_day+1, to_month, to_year);
+  res = EjecutarSQL (q);
+  g_free (q);
 
   if (res != NULL)
     return res;
