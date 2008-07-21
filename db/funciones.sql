@@ -590,7 +590,7 @@ declare
 	list record;
 	query varchar(255);
 begin
-query := 'SELECT id, descripcion, monto FROM impuesto WHERE id != 0';
+query := 'SELECT id, descripcion, monto FROM impuesto WHERE id != 1';
 
 FOR list IN EXECUTE query LOOP
     id := list.id;
