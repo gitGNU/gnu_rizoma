@@ -3079,13 +3079,6 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
           gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell,
                                           "text", 1,
                                           NULL);
-          gtk_list_store_append (combo_store, &iter);
-          gtk_list_store_set (combo_store, &iter,
-                              0, -1,
-                              1, "Ninguno",
-                              2, 0.0,
-                              -1);
-
           for (i = 0; i < tuples; i++)
             {
               gtk_list_store_append (combo_store, &iter);
@@ -3095,9 +3088,10 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
                                   2, g_ascii_strtod (PQvaluebycol(res, i, "monto"), NULL),
                                   -1);
             }
-          gtk_combo_box_set_active (combo, 0);
         }
     }
+
+  gtk_combo_box_set_active (combo, 0);
 
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 }
