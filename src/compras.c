@@ -4034,6 +4034,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 
+      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), barcode);
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
 
