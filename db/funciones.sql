@@ -2220,7 +2220,7 @@ declare
 begin
 
 insert into venta_anulada(id_detail, id_sale, vendedor)
-       values (sale_id, detail_id, salesman_id);
+       values (detail_id, sale_id, salesman_id);
 
 select barcode, cantidad into l
        from venta_detalle
