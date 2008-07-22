@@ -1,3 +1,11 @@
+2008-07-22  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (Descuento): Deleted commented code.
+	(TipoVenta): Use clean_container() to clean up the container
+	tipo_venta_win_venta.
+	(Descuento): Fixed function to deal better with percent and money
+	discount.
+
 2008-07-17  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma-config.c: Deleted include of libgksu.h

@@ -83,6 +83,8 @@ gboolean mayorista = FALSE;
 
 gboolean closing_tipos = FALSE;
 
+gboolean block_discount = FALSE;
+
 /**
  * Display the information of a product on the main sales window
  *
@@ -1426,7 +1428,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
     }
 
   if (tipo_documento != VENTA)
-    discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry"))));
+    discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_discount_money"))));
 
   if (strlen (discount) == 0 )
     discount = "0";
@@ -1534,11 +1536,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
       tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "tipo_venta_win_venta"));
 
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")), "0");
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "discount_entry")));
-
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")), "");
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")), "");
+      clean_container (GTK_CONTAINER (window));
       gtk_widget_show_all (GTK_WIDGET (window));
     }
   return;
@@ -2044,53 +2042,47 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 void
 Descuento (GtkWidget *widget, gpointer data)
 {
-  //gboolean money_discount = (gboolean) data;
-  gint money;
-  gint discount;
-  gint percent_discount;
+  const gchar *widget_name = gtk_widget_get_name (widget);
+
+  gint amount = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
   gint total;
-  gint plata;
-  GtkWidget *aux_widget;
+  gint money_discount = 0;
+  gint percent_discount = 0;
 
-  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "discount_entry"));
-  discount = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
-
-  if (tipo_documento != FACTURA && tipo_documento != GUIA)
+  if (amount <= 0)
     {
-      aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "sencillo_entry"));
-      money = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_money")), "");
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_percent")), "");
+
+      CalcularVentas (venta->header);
+      return;
     }
 
+  if (block_discount) return;
+
+  block_discount = TRUE;
+
   CalcularVentas (venta->header);
+  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_total"))))));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "label_total"));
-  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (aux_widget)))));
+  if (g_str_equal (widget_name, "entry_discount_money"))
+    {
+      money_discount = amount;
+      percent_discount = lround ( (gdouble) (total / money_discount) * 100);
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_percent")),
+                          g_strdup_printf ("%d", percent_discount));
+    }
+  else if (g_str_equal (widget_name, "entry_discount_percent"))
+    {
+      money_discount = lround ( (gdouble) (total * amount) / 100);
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_money")),
+                          g_strdup_printf ("%d", money_discount));
+    }
 
-  /*  if (money_discount == TRUE)
-      {
-      porcentaje = (gdouble)(100 * money) / total;
-
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "discount_entry")),
-      g_strdup_printf ("%.2f", porcentaje));
-
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-      g_strdup_printf ("<span size=\"40000\">%s</span>",
-      PutPoints (g_strdup_printf ("%u", total - money))));
-      }
-      else if (money_discount == FALSE)
-      {*/
-  plata = lround ((gdouble)(total * discount)/100);
-  percent_discount = lround ((gdouble)(discount * 100) / total);
-
-  if (tipo_documento != FACTURA)
-    gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_percent_discount")),
-                        g_strdup_printf ("%d", percent_discount));
+  block_discount = FALSE;
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-                        g_strdup_printf ("<span size=\"40000\">%s</span>", PutPoints (g_strdup_printf ("%u", total - discount))));
-  //}
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
-                                                 "entry_percent_discount"));
+                        g_strdup_printf ("<span size=\"40000\">%s</span>", PutPoints (g_strdup_printf ("%u", total - money_discount))));
 }
 
 gboolean
@@ -2991,7 +2983,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   if (tipo_documento != VENTA)
     {
       GtkWidget *wid;
-      wid = GTK_WIDGET (gtk_builder_get_object (builder,"entry_percent_discount"));
+      wid = GTK_WIDGET (gtk_builder_get_object (builder,"entry_discount_percent"));
       if (g_str_equal (gtk_entry_get_text (GTK_ENTRY (wid)),""))
         discount = "0";
       else
