@@ -2091,10 +2091,6 @@ Descuento (GtkWidget *widget, gpointer data)
   //}
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
                                                  "entry_percent_discount"));
-
-  if (aux_widget == widget)
-    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "sencillo_entry"));
-  gtk_widget_grab_focus(aux_widget);
 }
 
 gboolean
