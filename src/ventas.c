@@ -2087,15 +2087,13 @@ Descuento (GtkWidget *widget, gpointer data)
                         g_strdup_printf ("%d", percent_discount));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-                        g_strdup_printf ("<span size=\"40000\">%s</span>",
-                                         PutPoints (g_strdup_printf ("%u", total - discount))));
+                        g_strdup_printf ("<span size=\"40000\">%s</span>", PutPoints (g_strdup_printf ("%u", total - discount))));
   //}
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
                                                  "entry_percent_discount"));
 
   if (aux_widget == widget)
-    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder,
-                                                   "sencillo_entry"));
+    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "sencillo_entry"));
   gtk_widget_grab_focus(aux_widget);
 }
 
