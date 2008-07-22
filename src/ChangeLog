@@ -5,6 +5,10 @@
 	tipo_venta_win_venta.
 	(Descuento): Fixed function to deal better with percent and money
 	discount.
+	(on_btn_nullify_search_clicked): Fixed to properly free the memory
+	allocated by condition var.
+	(on_selection_nullify_sales_change): Fixed query to not include
+	the products already nullified.
 
 2008-07-17  Jonathan Gonzalez V.  <zeus@gnu.org>
 

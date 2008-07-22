@@ -3415,10 +3415,9 @@ nullify_sale_win (void)
       gtk_tree_view_set_model(treeview_sales, GTK_TREE_MODEL(store_sales));
 
       selection_sales = gtk_tree_view_get_selection (treeview_sales);
+      gtk_tree_selection_set_mode (selection_sales, GTK_SELECTION_SINGLE);
       g_signal_connect (G_OBJECT(selection_sales), "changed",
                         G_CALLBACK(on_selection_nullify_sales_change), NULL);
-
-      gtk_tree_selection_set_mode (selection_sales, GTK_SELECTION_SINGLE);
 
       //ID
       renderer = gtk_cell_renderer_text_new();
@@ -3468,7 +3467,7 @@ nullify_sale_win (void)
                                           G_TYPE_INT);   //id_venta
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
-      gtk_tree_selection_set_mode (selection_sales, GTK_SELECTION_MULTIPLE);
+      gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_MULTIPLE);
 
       //barcode
       renderer = gtk_cell_renderer_text_new();
@@ -3569,7 +3568,7 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
   else
     amount = g_strdup(gtk_entry_get_text(entry));
 
-  q = "SELECT id, date_trunc('day',fecha) as fecha, (select usuario from users where id=venta.vendedor) as usuario, monto from venta";
+  q = g_strdup ("SELECT id, date_trunc('day',fecha) as fecha, (select usuario from users where id=venta.vendedor) as usuario, monto FROM venta");
 
   if (sale_id != NULL)
     {
@@ -3623,10 +3622,12 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
     }
 
   if (!(g_str_equal(condition, "")))
-    q = g_strconcat (q, " WHERE TRUE ", condition, NULL);
+    {
+      q = g_strconcat (q, " WHERE TRUE ", condition, NULL);
+      g_free (condition);
+    }
 
   res = EjecutarSQL(q);
-  g_free (condition);
   g_free (q);
 
   tuples = PQntuples (res);
@@ -3703,9 +3704,10 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
                       0, &sale_id,
                       -1);
 
-  q = g_strdup_printf("select id, id_venta, barcode, cantidad, precio, "
-                      "(select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
-                      "(cantidad*precio) as subtotal from venta_detalle where id_venta = %d", sale_id);
+  q = g_strdup_printf("select id, id_venta, barcode, cantidad, precio, (select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
+                      "(cantidad*precio) as subtotal from venta_detalle where id_venta=%d and id not in (select id_detail from venta_anulada where id_sale=%d)",
+                      sale_id, sale_id);
+
   res = EjecutarSQL(q);
   g_free (q);
 
@@ -3815,12 +3817,14 @@ nullify_sale_datail (GtkTreeModel *model,
                       6, &id_sale,
                       -1);
 
-  g_print ("(%d, %d) is selected\n", id_sale, id_detail);
   if (nullify_sale_details(id_sale, id_detail) != 0)
     {
       AlertMSG(GTK_WIDGET(data), "No fue posible anular la venta, por favor intente nuevamente");
-      return;
     }
+
+  on_btn_nullify_search_clicked (NULL, NULL);
+
+  return;
 }
 
 /**
