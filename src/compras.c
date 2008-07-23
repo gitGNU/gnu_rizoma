@@ -3098,7 +3098,8 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
 
 void
 on_button_buy_clicked (GtkButton *button, gpointer data) {
-  BuyWindow ();
+  if (compra->header_compra != NULL)
+    BuyWindow ();
 }
 
 void
@@ -4045,4 +4046,28 @@ void
 on_btn_get_request_clicked ()
 {
   AskIngreso();
+}
+
+void
+on_btn_remove_buy_product_clicked (void)
+{
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list")));
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list"))));
+  GtkTreeIter iter;
+  gchar *short_code;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &short_code,
+                          -1);
+
+      DropBuyProduct (short_code);
+
+      gtk_list_store_remove (store, &iter);
+
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
+                            g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
+                                             PutPoints (g_strdup_printf ("%.2f", CalcularTotalCompra (compra->header_compra)))));
+    }
 }

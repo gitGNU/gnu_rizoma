@@ -1,3 +1,10 @@
+2008-07-23  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (on_btn_remove_buy_product_clicked): Added
+	function. It must remove a product from the products buy list.
+	(on_button_buy_clicked): Check if we really have products on the
+	buy list.
+
 2008-07-22  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (Descuento): Deleted commented code.
