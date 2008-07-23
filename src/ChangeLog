@@ -1,5 +1,10 @@
 2008-07-23  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* utils.c (display_calendar): Added calendar_focus_out() to
+	handler "focus-out-event" event, this will destroy the widget if
+	the user release the focus of the calendar. Now display_calender
+	sets the current date as the one on the entry if has one.
+
 	* compras.c (on_btn_remove_buy_product_clicked): Added
 	function. It must remove a product from the products buy list.
 	(on_button_buy_clicked): Check if we really have products on the

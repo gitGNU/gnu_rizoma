@@ -185,7 +185,15 @@ on_calendar_day_selected_double_click (GtkCalendar *calendar, gpointer user_data
   gtk_widget_destroy (GTK_WIDGET (gtk_widget_get_parent_window (GTK_WIDGET (calendar))));
 }
 
-/*
+gboolean
+calendar_focus_out (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+  gtk_widget_destroy (widget);
+
+  return TRUE;
+}
+
+/**
  * display_calendar must be attached to a button, and the with clicked
  * event this will display a GtkCalender just under the GtkEntry
  * passed as the argument. When a double-click event occur on the
@@ -202,7 +210,7 @@ display_calendar (GtkEntry *entry)
   GtkRequisition req;
   gint x, y;
   gint entry_height, entry_width;
-
+  const gchar *previous_date = gtk_entry_get_text (entry);
   GDate *date;
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -214,6 +222,9 @@ display_calendar (GtkEntry *entry)
   gtk_widget_set_parent_window (window, GTK_WIDGET (entry)->window);
   gtk_window_set_modal (GTK_WINDOW (window), TRUE);
 
+  g_signal_connect (G_OBJECT (window), "focus-out-event",
+                    G_CALLBACK (calendar_focus_out), NULL);
+
   calendar = GTK_CALENDAR (gtk_calendar_new ());
   gtk_container_add (GTK_CONTAINER (window), GTK_WIDGET (calendar));
   gtk_widget_show (GTK_WIDGET (calendar));
@@ -221,7 +232,15 @@ display_calendar (GtkEntry *entry)
   gtk_widget_set_parent_window (GTK_WIDGET (calendar), (GdkWindow *)window);
 
   date = g_date_new ();
-  g_date_set_time_t (date, time (NULL));
+
+  if (g_str_equal (previous_date, ""))
+    {
+      g_date_set_time_t (date, time (NULL));
+    }
+  else
+    {
+      g_date_set_parse (date, previous_date);
+    }
 
   if ( ! g_date_valid (date))
     {
