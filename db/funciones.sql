@@ -683,37 +683,6 @@ UPDATE numeros_documentos SET num_guias=$1;
 RETURN;
 END; $$ language plpgsql;
 
--- inicializa la caja
--- caja.c:780
-create or replace function inicializar_caja(int4)
-returns setof record as '
-declare
-
-	list record;
-	query varchar(255);
-
-begin
-
-INSERT INTO caja VALUES(DEFAULT, NOW(), $1, to_timestamp(''DD-MM-YY'', ''00-00-00''));
-RETURN;
-
-END; ' language plpgsql;
-
--- cierra la caja
--- caja.c:815
-create or replace function cerrar_caja(int4)
-returns setof record as '
-declare
-
-	list record;
-	query varchar(255);
-
-begin
-UPDATE caja SET fecha_termino=NOW(), termino=$1 WHERE id=(SELECT last_value FROM caja_id_seq);
-RETURN;
-
-END; ' language plpgsql;
-
 -- se retornan todas las filas que contengan el numero de factura dado
 -- compras.c:725
 create or replace function select_factura_compra_by_num_factura
