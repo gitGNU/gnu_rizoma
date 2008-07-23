@@ -891,6 +891,8 @@ Save (GtkWidget *widget, gpointer data)
   gboolean fraccion;
   gboolean perecible;
 
+  gint tab = gtk_notebook_get_current_page ( GTK_NOTEBOOK (builder_get (builder, "buy_notebook")));
+
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
   barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
@@ -938,7 +940,14 @@ Save (GtkWidget *widget, gpointer data)
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
                      iva, otros, barcode, familia, perecible, fraccion);
 
-  SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
+  if (tab == 1)
+    {
+      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
+    }
+  else if (tab == 4)
+    {
+      FillFields (NULL, NULL);
+    }
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_mod_product")));
 }
 
