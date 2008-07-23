@@ -229,6 +229,8 @@ reports_win (void)
   /* End Sells */
 
 
+  /* Sells Rank */
+
   store = gtk_list_store_new (9,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
@@ -626,7 +628,7 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-                          0, PQvaluebycol (res, i, "descrpipcion"),
+                          0, PQvaluebycol (res, i, "descripcion"),
                           1, PQvaluebycol (res, i, "marca"),
                           2, atoi (PQvaluebycol (res, i, "contenido")),
                           3, PQvaluebycol (res, i, "unidad"),
