@@ -3004,22 +3004,10 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     case 2:
       clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "vbox_guide_invoice")));
       break;
-      /* case 3: */
-      /*   ClearPagosData (); */
-      /*   FillPagarFacturas (NULL); */
-      /*   break; */
-
     case 4: //mercaderia tab
-      //put the focus in the search entry
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "find_product_entry"));
       gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
       gtk_widget_grab_focus(widget);
-
-      /*   ReturnProductsStore (ingreso->store); */
-      /*   break; */
-      /* case 5: */
-      /*   ListarProveedores (); */
-      /*   break; */
     default:
       break;
     }

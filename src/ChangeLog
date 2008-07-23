@@ -6,6 +6,7 @@
 	buy list.
 	(Save): Added ShowProductHistory() at the end of the function so
 	it will reflect the changes on buy window.
+	(on_buy_notebook_switch_page): Deleted some commented code.
 
 2008-07-22  Jonathan Gonzalez V.  <zeus@gnu.org>
 
