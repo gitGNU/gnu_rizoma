@@ -4,6 +4,8 @@
 	function. It must remove a product from the products buy list.
 	(on_button_buy_clicked): Check if we really have products on the
 	buy list.
+	(Save): Added ShowProductHistory() at the end of the function so
+	it will reflect the changes on buy window.
 
 2008-07-22  Jonathan Gonzalez V.  <zeus@gnu.org>
 

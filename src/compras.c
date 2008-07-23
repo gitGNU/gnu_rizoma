@@ -938,6 +938,7 @@ Save (GtkWidget *widget, gpointer data)
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
                      iva, otros, barcode, familia, perecible, fraccion);
 
+  SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_mod_product")));
 }
 
