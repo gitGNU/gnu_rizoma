@@ -1884,11 +1884,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHButtonBox" id="hbuttonbox2">
+          <object class="GtkHBox" id="hbox29">
             <property name="visible">True</property>
-            <property name="spacing">10</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_START</property>
+            <property name="spacing">5</property>
             <child>
               <object class="GtkButton" id="button_delete_product">
                 <property name="visible">True</property>
@@ -1915,6 +1913,8 @@
                         <property name="label" translatable="yes" context="yes">Quitar Producto</property>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1941,6 +1941,10 @@
                         <property name="visible">True</property>
                         <property name="stock">gtk-refresh</property>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label22">
@@ -1948,6 +1952,8 @@
                         <property name="label" translatable="yes" context="yes">Cambiar Vendedor</property>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1964,18 +1970,20 @@
               <object class="GtkButton" id="btn_invoice">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
                 <property name="label" translatable="yes">_Facturar</property>
                 <property name="use_underline">True</property>
                 <signal name="clicked" handler="on_btn_invoice_clicked"/>
               </object>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">2</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="btn_sale">
                 <property name="visible">True</property>
+                <property name="can_focus">True</property>
                 <property name="label" translatable="yes" context="yes">_Vender</property>
                 <property name="use_underline">True</property>
                 <signal name="clicked" handler="TipoVenta"/>
