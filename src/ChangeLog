@@ -1,10 +1,17 @@
 2008-07-24  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* config_file.c (rizoma_get_value, rizoma_get_value_int)
+	(rizoma_get_value_boolean, rizoma_get_double_list): Added check of
+	DEBUG define to know if we must show an error message when a key
+	isn't found on rizoma config file.
+
 	* ventas.c (Descuento): Fixed some problem to calculate percent
 	from an amount of money.
 	Deleted some commented code.
 	(DatosCheque): Deleted commented code.
 	Deleted commented functions. TipoVenta() and FillDatosVenta().
+	(ventas_win): Added function that must show cash_box buttons when
+	the client has set to 1 the value of CAJA on rizoma config file.
 
 2008-07-23  Jonathan Gonzalez V.  <zeus@gnu.org>
 

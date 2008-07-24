@@ -84,7 +84,9 @@ rizoma_get_value (gchar *var_name)
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
+#ifdef DEBUG
       g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
+#endif
       return NULL;
     }
 
@@ -113,7 +115,9 @@ rizoma_get_value_int (gchar *var_name)
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
+#ifdef DEBUG
       g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
+#endif
       return G_MININT;
     }
 
@@ -144,7 +148,9 @@ rizoma_get_value_boolean (gchar *var_name)
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
+#ifdef DEBUG
       g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
+#endif
       return FALSE;
     }
 
@@ -237,7 +243,9 @@ rizoma_get_double_list (gchar *var_name, gsize length)
 
   if (!g_key_file_has_key(file, config_profile, var_name, NULL))
     {
+#ifdef DEBUG
       g_printerr("\n*** funcion %s: el archivo de configuracion no tiene la clave %s\n", G_STRFUNC, var_name);
+#endif
       return FALSE;
     }
 

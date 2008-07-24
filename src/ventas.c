@@ -529,7 +529,6 @@ CancelarTipo (GtkWidget *widget, gpointer data)
   closing_tipos = FALSE;
 }
 
-
 void
 ventas_win ()
 {
@@ -568,6 +567,12 @@ ventas_win ()
       GtkWidget *aux_widget;
       aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "btn_invoice"));
       gtk_widget_hide (aux_widget);
+    }
+
+  if (!(rizoma_get_value_boolean ("CAJA")))
+    {
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box_open")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box_close")));
     }
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
