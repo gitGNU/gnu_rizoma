@@ -975,7 +975,7 @@ ventas_win ()
       gtk_widget_hide (aux_widget);
     }
 
-  ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "ventas_gui"));
+  ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
 
   // check if the window must be set to fullscreen
   if (rizoma_get_value_boolean("FULLSCREEN"))
@@ -1742,7 +1742,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
       //the product has not stock, so display a message
       //and abort the operation
       GtkWidget *aux_widget;
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sell"));
       gchar *str = g_strdup_printf("El producto %s no tiene stock", barcode);
       AlertMSG (aux_widget, str);
       g_free (str);
