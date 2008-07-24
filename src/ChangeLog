@@ -2,6 +2,7 @@
 
 	* ventas.c (Descuento): Fixed some problem to calculate percent
 	from an amount of money.
+	Deleted some commented code.
 
 2008-07-23  Jonathan Gonzalez V.  <zeus@gnu.org>
 
