@@ -1,5 +1,7 @@
 2008-07-24  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* ventas.c (ventas_win): Removed call to prepare_caja() at the end.
+
 	* config_file.c (rizoma_get_value, rizoma_get_value_int)
 	(rizoma_get_value_boolean, rizoma_get_double_list): Added check of
 	DEBUG define to know if we must show an error message when a key
