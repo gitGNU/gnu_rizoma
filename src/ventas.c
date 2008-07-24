@@ -571,8 +571,7 @@ ventas_win ()
 
   if (!(rizoma_get_value_boolean ("CAJA")))
     {
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box_open")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box_close")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box")));
     }
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
@@ -702,6 +701,8 @@ ventas_win ()
     CalcularVentas (venta->header);
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+  prepare_caja ();
 }
 
 gboolean

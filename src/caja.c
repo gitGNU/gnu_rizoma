@@ -550,7 +550,7 @@ void
 prepare_caja (void)
 {
   if (check_caja())
-    open_caja ( user_data->user_id == 1 ? FALSE : TRUE);
+    open_caja (FALSE);
 }
 
 /**
@@ -638,7 +638,7 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
 void
 on_btn_cash_box_clicked (void)
 {
-  if (check_caja)
+  if (check_caja())
     {
       InicializarCajaWin (caja_get_last_amount ());
     }
