@@ -3,6 +3,8 @@
 	* ventas.c (Descuento): Fixed some problem to calculate percent
 	from an amount of money.
 	Deleted some commented code.
+	(DatosCheque): Deleted commented code.
+	Deleted commented functions. TipoVenta() and FillDatosVenta().
 
 2008-07-23  Jonathan Gonzalez V.  <zeus@gnu.org>
 
