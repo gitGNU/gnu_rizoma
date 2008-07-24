@@ -2051,31 +2051,46 @@ Descuento (GtkWidget *widget, gpointer data)
   gint money_discount = 0;
   gint percent_discount = 0;
 
+  if (block_discount) return;
+
+  block_discount = TRUE;
+
   if (amount <= 0)
     {
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_money")), "");
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_percent")), "");
 
       CalcularVentas (venta->header);
+      block_discount = FALSE;
       return;
     }
 
-  if (block_discount) return;
-
-  block_discount = TRUE;
 
   CalcularVentas (venta->header);
   total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_total"))))));
 
   if (g_str_equal (widget_name, "entry_discount_money"))
     {
+      if (amount > total)
+        {
+          block_discount = FALSE;
+          return;
+        }
+
       money_discount = amount;
-      percent_discount = lround ( (gdouble) (total / money_discount) * 100);
+      percent_discount = lround ( (gdouble) (money_discount * 100) / total);
+
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_percent")),
                           g_strdup_printf ("%d", percent_discount));
     }
   else if (g_str_equal (widget_name, "entry_discount_percent"))
     {
+      if (amount > 100)
+        {
+          block_discount = FALSE;
+          return;
+        }
+
       money_discount = lround ( (gdouble) (total * amount) / 100);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_money")),
                           g_strdup_printf ("%d", money_discount));

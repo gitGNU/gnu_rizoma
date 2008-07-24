@@ -1,3 +1,8 @@
+2008-07-24  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (Descuento): Fixed some problem to calculate percent
+	from an amount of money.
+
 2008-07-23  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (TipoVenta): Set the focus to entry_discount_money
