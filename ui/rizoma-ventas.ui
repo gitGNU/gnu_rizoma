@@ -1210,31 +1210,18 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="btn_cash_box_open">
+              <object class="GtkButton" id="btn_cash_box">
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="no_show_all">True</property>
-                <property name="label" translatable="yes">Abrir Caja</property>
-                <signal name="clicked" handler="on_btn_cash_box_open_clicked"/>
+                <property name="label" translatable="yes">Caja</property>
+                <signal name="clicked" handler="on_btn_cash_box_clicked"/>
                 <accelerator key="F3" signal="clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_cash_box_close">
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="no_show_all">True</property>
-                <property name="label" translatable="yes">Cerrar Caja</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">5</property>
               </packing>
             </child>
           </object>
