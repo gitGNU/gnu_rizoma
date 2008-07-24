@@ -571,7 +571,7 @@ ventas_win ()
 
   if (!(rizoma_get_value_boolean ("CAJA")))
     {
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box_close")));
     }
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
@@ -702,7 +702,14 @@ ventas_win ()
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
-  prepare_caja ();
+  if (check_caja())
+    {
+      open_caja (FALSE);
+    }
+  else
+    {
+      gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_opened")));
+    }
 }
 
 gboolean
@@ -3274,3 +3281,19 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   gtk_tree_selection_selected_foreach(selection, nullify_sale_datail, (gpointer)treeview_details);
 }
 
+void
+on_dialog_cash_box_opened_response (GtkDialog *dialog, gint response_id, gpointer user_data)
+{
+  switch (response_id)
+    {
+    case -8:
+      CerrarCajaWin ();
+      break;
+    case -9:
+      break;
+    default:
+      break;
+    }
+
+  gtk_widget_hide (GTK_WIDGET (dialog));
+}

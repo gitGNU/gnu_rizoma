@@ -636,14 +636,7 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
 }
 
 void
-on_btn_cash_box_clicked (void)
+on_btn_cash_box_close_clicked (void)
 {
-  if (check_caja())
-    {
-      InicializarCajaWin (caja_get_last_amount ());
-    }
-  else
-    {
-      CerrarCajaWin ();
-    }
+  CerrarCajaWin ();
 }

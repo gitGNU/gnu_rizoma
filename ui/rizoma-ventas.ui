@@ -1,5 +1,41 @@
 <?xml version="1.0"?>
 <interface>
+  <object class="GtkMessageDialog" id="dialog_cash_box_opened">
+    <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_sell</property>
+    <property name="has_separator">False</property>
+    <property name="message_type">GTK_MESSAGE_WARNING</property>
+    <property name="buttons">GTK_BUTTONS_YES_NO</property>
+    <property name="text">La caja  no ha sido cerrada</property>
+    <property name="secondary_text">&#xBF;Desea cerrar la caja ahora? La aplicaci&#xF3;n sera cerrada una vez que la caja sea cerrada</property>
+    <property name="image"></property>
+    <signal name="response" handler="on_dialog_cash_box_opened_response"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox3">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area3">
+            <property name="visible">True</property>
+            <property name="layout_style">GTK_BUTTONBOX_END</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">GTK_PACK_END</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="wnd_nullify_sale">
     <property name="height_request">400</property>
     <property name="border_width">5</property>
@@ -1210,12 +1246,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="btn_cash_box">
+              <object class="GtkButton" id="btn_cash_box_close">
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="no_show_all">True</property>
-                <property name="label" translatable="yes">Caja</property>
-                <signal name="clicked" handler="on_btn_cash_box_clicked"/>
+                <property name="label" translatable="yes">Cerrar Caja</property>
+                <signal name="clicked" handler="on_btn_cash_box_close_clicked"/>
                 <accelerator key="F3" signal="clicked"/>
               </object>
               <packing>
@@ -1276,6 +1312,16 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStatusbar" id="statusbar1">
+            <property name="visible">True</property>
+            <property name="spacing">2</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>
