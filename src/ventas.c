@@ -2310,16 +2310,11 @@ gboolean
 on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
 {
   GtkWidget *window;
-  if ((user_data->user_id == 1) && (users_working() == 1))
-    {
-      CerrarCajaWin();
-    }
-  else
-    {
-      window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
-      gtk_dialog_set_default_response (GTK_DIALOG(window), GTK_RESPONSE_YES);
-      gtk_widget_show_all (window);
-    }
+
+  window = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+  gtk_dialog_set_default_response (GTK_DIALOG(window), GTK_RESPONSE_YES);
+  gtk_widget_show_all (window);
+
   return TRUE;
 }
 
@@ -3278,8 +3273,3 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   gtk_tree_selection_selected_foreach(selection, nullify_sale_datail, (gpointer)treeview_details);
 }
 
-void
-on_btn_cash_box_open_clicked (void)
-{
-
-}
