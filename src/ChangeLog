@@ -3,6 +3,7 @@
 	* caja.c (on_btn_cash_box_open_clicked)
 	(on_btn_cash_box_close_clicked): Added functions to open and close
 	the cash box using buttons from the main sell window.
+	(on_btn_cash_box_clicked): Added function.
 
 	* ventas.c (ventas_win): Removed call to prepare_caja() at the end.
 	(on_delete_ventas_gui): Deleted code that was asking to close the
