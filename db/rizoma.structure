@@ -517,6 +517,16 @@ create table venta_anulada (
   constraint pk_venta_anulada primary key (id_detail, id_sale)
 ) ;
 
+-- log
+create table log (
+  id                   serial not null,
+  fecha                timestamp,
+  maquina              int4,
+  vendedor             int4,
+  texto                text,
+  constraint pk_log primary key (id)
+) ;
+
 comment on column producto.barcode is 'llave primaria';
 comment on column producto.codigo_corto is 'crear ckeck point';
 comment on column producto.costo_promedio is 'antes fifo';
