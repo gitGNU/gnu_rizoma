@@ -1,5 +1,8 @@
 2008-07-25  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* postgres-functions.c (PutComa): Any coma or point will be
+	replaced by the decimal point defined with the locale.
+
 	* manejo_productos.c (CalcularTotalCompra): Changed to gdouble the
 	type of variable total.
 

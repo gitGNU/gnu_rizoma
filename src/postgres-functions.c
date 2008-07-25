@@ -29,6 +29,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>
+#include<locale.h>
 
 #include"tipos.h"
 #include"config_file.h"
@@ -63,14 +64,17 @@ CutComa (gchar *number)
 gchar *
 PutComa (gchar *number)
 {
+  struct lconv *locale  = localeconv ();
+  gchar *decimal_point = locale->decimal_point;
+
   gchar *num = g_strdup (number);
   gint len = (int)strlen (num);
 
   while (len != -1)
     {
-      if (num[len] == '.')
+      if (num[len] == '.' || num[len] == ',')
         {
-          num[len]=',';
+          num[len] = *decimal_point;
           break;
         }
       len--;
