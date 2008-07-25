@@ -29,6 +29,7 @@
 
 #include "tipos.h"
 #include "postgres-functions.h"
+#include "config_file.h"
 #include "utils.h"
 
 void
