@@ -58,4 +58,6 @@ gchar * CurrentDate (void);
 
 gchar * CurrentTime (void);
 
+gboolean log_register_access (User *info_user, gboolean login);
+
 #endif
