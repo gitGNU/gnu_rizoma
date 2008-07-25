@@ -1,5 +1,8 @@
 2008-07-25  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* manejo_productos.c (CalcularTotalCompra): Changed to gdouble the
+	type of variable total.
+
 	* compras.c (SearchProductHistory): Used only the plpsql function
 	informacion_producto() to get the info to show on buy tab. This
 	will speed up the time that take show this information.

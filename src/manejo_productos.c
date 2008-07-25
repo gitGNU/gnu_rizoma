@@ -505,7 +505,7 @@ gdouble
 CalcularTotalCompra (Productos *header)
 {
   Productos *cal = header;
-  guint64 total = 0;
+  gdouble total = 0;
 
   if (cal == NULL)
     return total;
