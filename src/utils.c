@@ -27,6 +27,8 @@
 #include<string.h>
 #include<stdlib.h>
 
+#include "tipos.h"
+#include "postgres-functions.h"
 #include "utils.h"
 
 void

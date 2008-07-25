@@ -2345,7 +2345,7 @@ exit_response (GtkDialog *dialog, gint response_id, gpointer data)
   if (response_id == GTK_RESPONSE_YES)
     {
       Asistencia (user_data->user_id, FALSE);
-      log_register_access (user_data, FALSE)
+      log_register_access (user_data, FALSE);
       gtk_main_quit();
     }
   else
