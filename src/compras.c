@@ -1088,11 +1088,8 @@ AddToProductsList (void)
 
           gtk_list_store_set (store_buy, &check->iter,
                               2, check->cantidad,
-                              4, PutPoints (g_strdup_printf ("%.2f", check->cantidad *
-                                                             check->precio_compra)),
+                              4, PutPoints (g_strdup_printf ("%li", lround ((gdouble)check->cantidad * check->precio_compra))),
                               -1);
-
-
         }
 
 
@@ -1132,8 +1129,7 @@ AddToTree (void)
                                           compra->current->unidad),
                       2, compra->current->cantidad,
                       3, PutPoints (g_strdup_printf ("%.2f", compra->current->precio_compra)),
-                      4, PutPoints (g_strdup_printf ("%.2f", compra->current->cantidad *
-                                                     compra->current->precio_compra)),
+                      4, PutPoints (g_strdup_printf ("%li", lround ((gdouble) compra->current->cantidad * compra->current->precio_compra))),
                       -1);
 
   compra->current->iter = iter;
