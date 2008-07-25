@@ -1319,45 +1319,6 @@ SetProductosIngresados (void)
   return TRUE;
 }
 
-gdouble
-GetDayToSell (gchar *barcode)
-{
-  PGresult *res;
-  gint day;
-  gchar *days;
-  gchar *q;
-  if (GetCurrentStock (barcode) != 0)
-    {
-      q = g_strdup_printf ("SELECT date_part ('day', (SELECT now() - fecha FROM compra WHERE id=t1.id_compra)) "
-                           "FROM compra_detalle AS t1, producto AS t2, compra AS t3 WHERE t2.barcode='%s' AND "
-                           "t1.barcode_product='%s' AND t3.id=t1.id_compra ORDER BY t3.fecha ASC",
-                           barcode, barcode);
-      days = GetDataByOne (q);
-      g_free (q);
-
-      if (days == NULL)
-        return 0;
-      else
-        day = atoi (days);
-
-      if (day == 0)
-        day = 1;
-
-      q = g_strdup_printf ("SELECT stock/(vendidos/%d) FROM select_producto(%s)",
-                           day, barcode);
-      res = EjecutarSQL (q);
-      g_free (q);
-    }
-  else
-    return 0;
-
-
-  if (res != NULL && PQntuples (res) != 0)
-    return strtod (PQgetvalue (res, 0, 0), (char **)NULL);
-  else
-    return 0;
-}
-
 gint
 GetMinStock (gchar *barcode)
 {
