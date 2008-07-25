@@ -1,5 +1,9 @@
 2008-07-25  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (SearchProductHistory): Used only the plpsql function
+	informacion_producto() to get the info to show on buy tab. This
+	will speed up the time that take show this information.
+
 	* ventas.c (check_passwd, exit_response): Added the use of
 	log_register_access () to log the login/logout of a user.
 

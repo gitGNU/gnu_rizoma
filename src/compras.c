@@ -811,10 +811,16 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
     {
       ShowProductHistory ();
 
+      q = g_strdup_printf ("select * from informacion_producto (%s, '')", barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
-                                             GetCurrentStock (barcode)));
-      if ((day_to_sell = GetDayToSell (barcode)) != 0)
+                            g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>", g_ascii_strtod (PQvaluebycol (res, 0, "stock"), NULL)));
+
+      day_to_sell = atoi (PQvaluebycol (res, 0, "stock_day"));
+
+      if (day_to_sell != 0)
         {
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")),
                                 g_strdup_printf ("<span weight=\"ultrabold\">%.2f dias"
@@ -828,24 +834,16 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_sell_price")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PutPoints (GetCurrentPrice (barcode))));
-      g_free (q);
-      q = g_strdup_printf ("SELECT descripcion FROM select_producto(%s)", barcode);
+                                             PutPoints (PQvaluebycol (res, 0, "precio"))));
+
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             GetDataByOne (q)));
-      g_free(q);
-      q = g_strdup_printf ("SELECT codigo_corto, marca, costo_promedio, canje, stock_pro "
-                           "FROM select_producto(%s)", barcode);
-      res = EjecutarSQL(q);
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "descripcion")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQvaluebycol(res, 0, "marca")));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "marca")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             GetUnit (barcode)));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "unidad")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
