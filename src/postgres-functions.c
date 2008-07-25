@@ -1730,17 +1730,6 @@ GetElabDate (gchar *barcode, gint current_stock)
   if (tuples == 0)
     return "";
 
-  /*  if (current_stock != 0)
-      {
-      for (i = 0; stock < current_stock; i++)
-      stock += atoi (PQgetvalue (res, i, 0));
-
-      i--;
-
-      date = g_strdup_printf ("%.2d/%.2d/%.4d", atoi (PQgetvalue (res, i, 1)),
-      atoi (PQgetvalue (res, i, 2)), atoi (PQgetvalue (res, i, 3)));
-      }*/
-
   if (strcmp (PQgetvalue (res, 0, 1), "") != 0)
     date = g_strdup_printf ("%.2d/%.2d/%.4d", atoi (PQgetvalue (res, 0, 1)),
                             atoi (PQgetvalue (res, 0, 2)), atoi (PQgetvalue (res, 0, 3)));
@@ -1772,16 +1761,6 @@ GetVencDate (gchar *barcode, gint current_stock)
   if (tuples == 0)
     return "";
 
-  /*  if (current_stock != 0)
-      {
-      for (i = 0; stock < current_stock; i++)
-      stock += atoi (PQgetvalue (res, i, 0));
-
-      i--;
-
-      date = g_strdup_printf ("%.2d/%.2d/%.4d", atoi (PQgetvalue (res, i, 1)),
-      atoi (PQgetvalue (res, i, 2)), atoi (PQgetvalue (res, i, 3)));
-      } */
   if (strcmp (PQgetvalue (res, 0, 1), "") != 0)
     date = g_strdup_printf ("%.2d/%.2d/%.4d", atoi (PQgetvalue (res, 0, 1)),
                             atoi (PQgetvalue (res, 0, 2)), atoi (PQgetvalue (res, 0, 3)));
@@ -1943,12 +1922,6 @@ PagarFactura (gint id_invoice)
   q = g_strdup_printf ("UPDATE factura_compra SET pagada='t' WHERE id=%d", id_invoice );
   res = EjecutarSQL (q);
   g_free (q);
-
-  /* q = g_strdup_printf ("INSERT INTO pagos VALUES ((SELECT id FROM factura_compra " */
-  /*                      "WHERE num_factura=%s AND rut_proveedor='%s'), NOW(), 'f', '%s')", */
-  /*                      num_fact, rut_proveedor,descrip); */
-  /* res = EjecutarSQL (q); */
-  /* g_free (q); */
 
   if (res != NULL)
     return TRUE;
