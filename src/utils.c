@@ -462,11 +462,11 @@ log_register_access (User *info_user, gboolean login)
 
   if (login)
     {
-      query = g_strdup_printf ("insert into log (id, fecha, maquina, seller, text) values (DEFAULT, NOW(), %d, %d, 'Login'", machine, seller);
+      query = g_strdup_printf ("insert into log (id, fecha, maquina, seller, text) values (DEFAULT, NOW(), %d, %d, 'Login')", machine, seller);
     }
   else
     {
-      query = g_strdup_printf ("insert into log (id, fecha, maquina, seller, text) values (DEFAULT, NOW(), %d, %d, 'Logout'", machine, seller);
+      query = g_strdup_printf ("insert into log (id, fecha, maquina, seller, text) values (DEFAULT, NOW(), %d, %d, 'Logout')", machine, seller);
     }
 
   res = EjecutarSQL (query);
