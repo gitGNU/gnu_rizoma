@@ -443,3 +443,32 @@ CurrentTime (void)
 
   return g_strdup_printf ("%2.2d:%2.2d:%2.2d", hora->tm_hour, hora->tm_min, hora->tm_sec);
 }
+
+/**
+ * Register log in/out of a user from the system
+ *
+ * @param User info
+ * @param TRUE if the user will login, FALSE if he will logout.
+ */
+gboolean
+log_register_access (User *info_user, gboolean login)
+{
+  gint machine = rizoma_get_value_int ("MAQUINA");
+  gint seller = info_user->user_id;
+  gchar *query;
+  PGresult *res;
+
+  if (login)
+    {
+      query = g_strdup_printf ("insert into log (id, fecha, maquina, seller, text) values (DEFAULT, NOW(), %d, %d, 'Login'", machine, seller);
+    }
+  else
+    {
+      query = g_strdup_printf ("insert into log (id, fecha, maquina, seller, text) values (DEFAULT, NOW(), %d, %d, 'Logout'", machine, seller);
+    }
+
+  res = EjecutarSQL (query);
+  g_free (query);
+
+  return res != NULL ? TRUE : FALSE;
+}
