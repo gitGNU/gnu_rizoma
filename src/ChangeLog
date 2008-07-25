@@ -1,3 +1,11 @@
+2008-07-25  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (check_passwd, exit_response): Added the use of
+	log_register_access () to log the login/logout of a user.
+
+	* utils.c (log_register_access): Added function to register a log
+	in/out of a user into the log table.
+
 2008-07-24  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* caja.c (on_btn_cash_box_open_clicked)

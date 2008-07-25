@@ -2281,6 +2281,8 @@ check_passwd (GtkWidget *widget, gpointer data)
 
       Asistencia (user_data->user_id, TRUE);
 
+      log_register_access (user_data, TRUE);
+
       gtk_widget_destroy (GTK_WIDGET(gtk_builder_get_object (builder,"login_window")));
       g_object_unref ((gpointer) builder);
       builder = NULL;
@@ -2342,8 +2344,8 @@ exit_response (GtkDialog *dialog, gint response_id, gpointer data)
 {
   if (response_id == GTK_RESPONSE_YES)
     {
-      //TODO: find out how to get the user id
       Asistencia (user_data->user_id, FALSE);
+      log_register_access (user_data, FALSE)
       gtk_main_quit();
     }
   else
