@@ -930,7 +930,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
           (gdouble)products->product->otros / 100;
 
       cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
-      precio_compra=g_strdup_printf ("%.2f", products->product->precio_compra);
+      precio_compra = g_strdup_printf ("%.2f", products->product->precio_compra);
 
       q = g_strdup_printf("SELECT * FROM insertar_detalle_compra(%d, "
                           "%s::double precision, %s::double precision, %d, "
