@@ -1062,6 +1062,9 @@ AddToProductsList (void)
   gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")))));
   Producto *check;
 
+  if (g_str_equal (barcode, ""))
+    return;
+
   GtkListStore *store_history, *store_buy;
 
   store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
@@ -1079,8 +1082,14 @@ AddToProductsList (void)
 
       if (check == NULL)
         {
-          CompraAgregarALista (barcode, cantidad, precio, precio_compra, margen, FALSE);
-          AddToTree ();
+          if (CompraAgregarALista (barcode, cantidad, precio, precio_compra, margen, FALSE))
+            {
+              AddToTree ();
+            }
+          else
+            {
+              return;
+            }
         }
       else
         {
@@ -1103,10 +1112,6 @@ AddToProductsList (void)
       CleanStatusProduct ();
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-    }
-  else if (precio == 0 && strcmp (GetCurrentPrice (barcode), "0") != 0)
-    {
-      AskForCurrentPrice (barcode);
     }
   else
     {
@@ -2208,89 +2213,6 @@ CleanStatusProduct (void)
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), "");
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-}
-
-void
-CloseAskForCurrentPrice (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *window = (GtkWidget *)data;
-
-  gtk_widget_destroy (window);
-
-  gtk_widget_set_sensitive (main_window, TRUE);
-}
-
-
-void
-AcceptCurrentPrice (GtkWidget *widget, gpointer data)
-{
-  /* gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->barcode_history_entry))); */
-
-  /* gtk_entry_set_text (GTK_ENTRY (precio_final_entry), GetCurrentPrice (barcode)); */
-
-  /* AddToProductsList (); */
-
-  /* CloseAskForCurrentPrice (NULL, data); */
-}
-
-void
-AskForCurrentPrice (gchar *barcode)
-{
-  GtkWidget *window;
-
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-
-  GtkWidget *label;
-  GtkWidget *image;
-
-  GtkWidget *button;
-
-  gtk_widget_set_sensitive (main_window, FALSE);
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Confirmar Precio");
-  //  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (main_window));
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_widget_show (window);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_QUESTION, GTK_ICON_SIZE_DIALOG);
-  gtk_widget_show (image);
-  gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
-
-  label = gtk_label_new (g_strdup_printf ("Â¿Desea mantener el $%s como precio actual?",
-                                          GetCurrentPrice (barcode)));
-  gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_NO);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseAskForCurrentPrice), (gpointer)window);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_YES);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (AcceptCurrentPrice), (gpointer)window);
-
-  gtk_window_set_focus (GTK_WINDOW (window), button);
-
 }
 
 gboolean

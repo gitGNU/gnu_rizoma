@@ -298,6 +298,9 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   res = EjecutarSQL (q);
   g_free (q);
 
+  if (PQntuples (res) == 0)
+    return NULL;
+
   new = (Productos *) g_malloc (sizeof (Productos));
 
   new->product = (Producto *) g_malloc (sizeof (Producto));
@@ -331,7 +334,7 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   return new;
 }
 
-gint
+gboolean
 CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdouble precio_compra,
                      gint margen, gboolean ingreso)
 {
@@ -342,6 +345,10 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
       if (compra->header == NULL)
         {
           new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+
+          if (new == NULL)
+            return FALSE;
+
           compra->header = new;
 
           compra->products_list = new;
@@ -354,6 +361,9 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
           Productos *end = compra->header;
 
           new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+
+          if (new == NULL)
+            return FALSE;
 
           while (end->next != compra->header)
             end = end->next;
@@ -372,6 +382,10 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
       if (compra->header_compra == NULL)
         {
           new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+
+          if (new == NULL)
+            return FALSE;
+
           compra->header_compra = new;
 
           compra->products_compra = new;
@@ -385,6 +399,9 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
           Productos *end = compra->header_compra;
 
           new = CompraCreateNew (barcode, cantidad, precio_final, precio_compra, margen);
+
+          if (new == NULL)
+            return FALSE;
 
           while (end->next != compra->header_compra)
             end = end->next;
@@ -400,7 +417,7 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
         }
     }
 
-  return 0;
+  return TRUE;
 }
 
 void

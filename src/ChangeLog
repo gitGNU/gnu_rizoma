@@ -1,5 +1,18 @@
 2008-07-25  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
 
+	* manejo_productos.c (CompraCreateNew): If the product doesn't
+	exist we return NULL.
+	(CompraAgregarALista): If we couldn't get the info of a product we
+	return FALSE.
+
+	* compras.c (AddToProductsList): Deleted code that was launching
+	AskForCurrentPrice() function. If the barcode it's empty we just
+	return without doing nothing.
+	(AskForCurrentPrice, AcceptCurrentPrice)
+	(CloseAskForCurrentPrice): Deleted functions.
+	(AddToProductsList): Added check to know if the product was added
+	to the list.
+
 	* postgres-functions.c (GetDayToSell): Deleted function.
 	(GetVencDate, GetElabDate, PagarFactura): Deleted commented code.
 
