@@ -1099,9 +1099,7 @@ AddToProductsList (void)
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
                             g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
                                              PutPoints (g_strdup_printf
-                                                        ("%.2f",
-                                                         CalcularTotalCompra
-                                                         (compra->header_compra)))));
+                                                        ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
       store_history = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
       gtk_list_store_clear (store_history);
 
@@ -4063,6 +4061,6 @@ on_btn_remove_buy_product_clicked (void)
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
                             g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                             PutPoints (g_strdup_printf ("%.2f", CalcularTotalCompra (compra->header_compra)))));
+                                             PutPoints (g_strdup_printf ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
     }
 }
