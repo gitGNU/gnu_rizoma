@@ -1066,7 +1066,7 @@ AddToProductsList (void)
 
   store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
 
-  cantidad = g_ascii_strtod (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")))), NULL);
+  cantidad = g_ascii_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))))), NULL);
 
   if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
       && strcmp (barcode, "") != 0) //&& margen >= 0)
