@@ -522,8 +522,8 @@ create table log (
   id                   serial not null,
   fecha                timestamp,
   maquina              int4,
-  vendedor             int4,
-  texto                text,
+  seller               int4,
+  text                 text,
   constraint pk_log primary key (id)
 ) ;
 
