@@ -1,3 +1,8 @@
+2008-07-27  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (ranking_ventas): Fixed to return a proper rank
+	with a proportional discount if the sell has a discount.
+
 2008-07-08  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* funciones.sql (informacion_producto): We check even if days it's

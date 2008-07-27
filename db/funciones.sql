@@ -1820,10 +1820,10 @@ create or replace function ranking_ventas(
        out marca varchar,
        out contenido varchar,
        out unidad varchar,
-       out cantidad_vendida double precision,
-       out monto_vendido double precision,
-       out npi double precision,
-       out npi2 double precision
+       out amount double precision,
+       out sold_amount double precision,
+       out costo double precision,
+       out contrib double precision
        )
 returns setof record as $$
 declare
@@ -1835,23 +1835,23 @@ q := $S$ SELECT producto.descripcion as descripcion,
        	      producto.marca as marca,
 	      producto.contenido as contenido,
 	      producto.unidad as unidad,
-	      SUM (venta_detalle.cantidad) as cantidad_vendida,
-	      SUM ((venta_detalle.cantidad*venta_detalle.precio)::integer) as monto_vendido,
-	      SUM ((venta_detalle.cantidad*venta_detalle.fifo)::integer) as npi,
-       	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as npi2
-	FROM venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
-	where id_venta in (SELECT id FROM venta WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$)
-       GROUP BY 1,2,3,4 $S$;
+	      SUM (venta_detalle.cantidad) as amount,
+	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento/((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer) as sold_amount,
+	      SUM ((venta_detalle.cantidad*venta_detalle.fifo)::integer) as costo,
+       	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as contrib
+      FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
+      where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+      GROUP BY 1,2,3,4 $S$;
 
 for l in execute q loop
     descripcion := l.descripcion;
     marca := l.marca;
     contenido := l.contenido;
     unidad := l.unidad;
-    cantidad_vendida := l.cantidad_vendida;
-    monto_vendido := l.monto_vendido;
-    npi := l.npi;
-    npi2 := l.npi2;
+    amount := l.amount;
+    sold_amount := l.sold_amount;
+    costo := l.costo;
+    contrib := l.contrib;
     return next;
 end loop;
 
