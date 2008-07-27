@@ -1,5 +1,8 @@
 2008-07-27  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* rizoma_informes.c (fill_products_rank): Avoided the problem that
+	was showing a nan% when there wasn't a margin.
+
 	* postgres-functions.c (ReturnProductsRank): Replaced the long
 	query for the use of ranking_ventas() plpsql function.
 

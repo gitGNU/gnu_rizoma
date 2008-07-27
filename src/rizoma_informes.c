@@ -653,7 +653,7 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
 
   margen = (((gdouble) contrib / costo) * 100);
 
-  if (margen != 0)
+  if (margen > 0)
     gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                           g_strdup_printf ("<span size=\"x-large\">%.2f%%</span>", margen));
   else
