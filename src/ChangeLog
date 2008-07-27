@@ -1,3 +1,8 @@
+2008-07-27  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* postgres-functions.c (ReturnProductsRank): Replaced the long
+	query for the use of ranking_ventas() plpsql function.
+
 2008-07-25  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
 
 	* manejo_productos.c (CompraCreateNew): If the product doesn't
