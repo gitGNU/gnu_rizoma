@@ -1,3 +1,11 @@
+2008-07-28  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
+
+	* ventas.c (FillProductSell): Replaced g_ascii_strtod() for
+	g_strtod() and PUT macro.
+	(SearchProductByCode): Added a gdouble stock var to eval if the
+	product really has stock. This avoid any problem of products with
+	stock between 0 and 1.
+
 2008-07-27  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma_informes.c (fill_products_rank): Avoided the problem that

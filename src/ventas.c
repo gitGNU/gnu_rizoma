@@ -128,10 +128,10 @@ FillProductSell (gchar *barcode,
   if (g_ascii_strtod (stock, NULL) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
                           g_strdup_printf("<span foreground=\"red\"><b>%.2f dia(s)</b></span>",
-                                          g_ascii_strtod (stock_day, NULL)));
+                                          g_strtod (PUT (stock_day), NULL)));
   else
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
-                          g_strdup_printf ("<b>%.2f dia(s)</b>", g_ascii_strtod (stock_day, NULL)));
+                          g_strdup_printf ("<b>%.2f dia(s)</b>", g_strtod (PUT (stock_day), NULL)));
 
   //precio
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
@@ -149,10 +149,10 @@ FillProductSell (gchar *barcode,
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
                         g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
-                                         g_ascii_strtod (stock, NULL)));
+                                         g_strtod (PUT (stock), NULL)));
 
   str_aux = g_strdup(gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))));
-  str_aux = g_strdup_printf ("%.0f", g_strtod (str_aux, NULL) * atoi (precio));
+  str_aux = g_strdup_printf ("%.0f", g_strtod (PUT (str_aux), NULL) * atoi (precio));
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
                         g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", str_aux));
 
@@ -716,6 +716,7 @@ gboolean
 SearchProductByCode (void)
 {
   gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
+  gdouble stock = 0;
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
@@ -727,7 +728,9 @@ SearchProductByCode (void)
         g_printerr("%s: the plpgsql function informacion_producto_venta(0,'%s') returned more than 1 tuple",
                    G_STRFUNC, codigo);
 
-      if (atoi(PQvaluebycol(res, 0, "stock")) <= 0)
+      stock = g_strtod (PUT (PQvaluebycol (res, 0, "stock")), NULL);
+
+      if (stock <= 0)
         {
           GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
@@ -796,8 +799,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   GtkWidget *aux_widget;
 
-  cantidad = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))),
-                     (char **)NULL);
+  cantidad = g_strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), NULL);
 
   if (cantidad <= 0)
     {
