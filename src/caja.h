@@ -24,11 +24,6 @@
 
 #define CAJA_H
 
-/* We need to see this var from the venta_stats.c file */
-GtkWidget *caja_button;
-
-gint ArqueoCajaLastDay (void);
-
 gint ReturnSaldoCaja (void);
 
 void VentanaIngreso (gint monto);

@@ -54,29 +54,6 @@ GtkWidget *combo_egreso;
 GtkWidget *combo_ingreso;
 
 gint
-ArqueoCajaLastDay (void)
-{
-  PGresult *res;
-  gint monto;
-
-  res = EjecutarSQL
-    (g_strdup_printf
-     ("SELECT (SELECT inicio FROM caja WHERE date_trunc ('day', fecha_inicio)=date_trunc('day', t1.fecha_inicio)) AS inicio, (SELECT SUM (monto) FROM venta WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo_venta=%d) AS ventas_efect, (SELECT SUM(t1.monto) FROM cheques AS t1 WHERE id_venta IN (SELECT id FROM ventas WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS ventas_doc, (SELECT SUM(monto_abonado) FROM abono WHERE date_trunc('day', fecha_abono)=date_trunc('day', fecha_inicio)) AS pago_credit, (SELECT SUM(monto) FROM ingreso WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio)) AS otros, (SELECT SUM (monto) FROM egreso WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=1) AS retiros, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=3) AS gastos, (SELECT SUM (monto) FROM egresos WHERE date_trunc('day', fecha)=date_trunc('day', fecha_inicio) AND tipo=2) AS otros_egresos, (SELECT SUM(monto) FROM factura_compra WHERE id IN (SELECT id_fact FROM pagos  WHERE caja='t' AND date_trunc('day', fecha)=date_trunc('day', fecha_inicio))) AS facturas, fecha_inicio FROM caja AS t1 WHERE t1.fecha_termino=to_timestamp('DD-MM-YY', '00-00-00')", CASH));
-
-  if (res != NULL && PQntuples (res) != 0)
-    monto = ((atoi (PQgetvalue (res, 0, 0)) + atoi (PQgetvalue (res, 0, 1)) +
-              atoi (PQgetvalue (res, 0, 2)) + atoi (PQgetvalue (res, 0, 3)) +
-              atoi (PQgetvalue (res, 0, 4))) -
-             (atoi (PQgetvalue (res, 0, 5)) +
-              atoi (PQgetvalue (res, 0, 6)) + atoi (PQgetvalue (res, 0, 7)) +
-              atoi (PQgetvalue (res, 0, 8))));
-  else
-    monto = 0;
-
-  return monto;
-}
-
-gint
 ReturnSaldoCaja (void)
 {
   PGresult *res;
