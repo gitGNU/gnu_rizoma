@@ -1836,7 +1836,7 @@ q := $S$ SELECT producto.descripcion as descripcion,
 	      producto.contenido as contenido,
 	      producto.unidad as unidad,
 	      SUM (venta_detalle.cantidad) as amount,
-	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento/((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer) as sold_amount,
+	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer) as sold_amount,
 	      SUM ((venta_detalle.cantidad*venta_detalle.fifo)::integer) as costo,
        	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
