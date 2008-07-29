@@ -2199,3 +2199,63 @@ update producto set stock= stock+l.cantidad where barcode = l.barcode;
 
 return 't';
 end; $$ language plpgsql;
+
+-- Cash Box Report
+
+create or replace function cash_box_report (
+        in prepare_to date,
+        out open_date timestamp,
+        out close_date timestamp,
+        out cash_box_start integer,
+        out cash_box_end integer,
+        out cash_sells integer,
+        out cash_outcome integer,
+        out cash_income integer)
+returns setof record as $$
+declare
+        query varchar;
+        dat record;
+        sell_first_id integer;
+        sell_last_id integer;
+        first_cash_box_id integer;
+        last_cash_box_id integer;
+begin
+
+        select id, id_venta_inicio, fecha_inicio, inicio into first_cash_box_id, sell_first_id, open_date, cash_box_start
+        from caja
+        where fecha_inicio =
+                (select min (fecha_inicio)from caja where fecha_inicio::date>=prepare_to and fecha_inicio::date<=prepare_to);
+
+        select id, id_venta_termino, fecha_termino, termino into last_cash_box_id, sell_last_id, close_date, cash_box_end
+        from caja
+        where fecha_termino =
+                (select max (fecha_termino) from caja where fecha_inicio::date>=prepare_to and fecha_inicio::date<=prepare_to);
+
+        select sum (monto) into cash_sells
+        from venta
+        where id > sell_first_id and id <= sell_last_id;
+
+        if cash_sells is null then
+                cash_sells := 0;
+        end if;
+
+        select sum (monto) into cash_outcome
+        from egreso
+        where id_caja >= first_cash_box_id and id_caja <= last_cash_box_id;
+
+        if cash_outcome is null then
+                cash_outcome := 0;
+        end if;
+
+        select sum (monto) into cash_income
+        from ingreso
+        where id_caja >= first_cash_box_id and id_caja <= last_cash_box_id;
+
+        if cash_income is null then
+                cash_income := 0;
+        end if;
+
+return next;
+return;
+
+end; $$ language plpgsql;

@@ -1,3 +1,8 @@
+2008-07-29  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
+
+	* funciones.sql (cash_box_report): Added function to return a cash
+	box report.
+
 2008-07-28  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
 
 	* funciones.sql (ranking_ventas): Fixed problem that produce an
