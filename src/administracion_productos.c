@@ -40,274 +40,7 @@
 
 #include"utils.h"
 
-GtkWidget *codigo_entry;
-GtkWidget *product_entry;
-GtkWidget *precio_entry;
-GtkWidget *barcode_entry;
-GtkWidget *stock_entry;
-GtkWidget *marca_entry;
-GtkWidget *cantidad_entry;
-GtkWidget *unidad_entry;
-
-GtkWidget *impuesto_adic;
-GtkWidget *familia;
-GtkWidget *perecible;
-GtkWidget *ventas_dias;
-GtkWidget *stock_dias;
-GtkWidget *stock_min;
-GtkWidget *margen_entry;
-GtkWidget *total_unidades_vendidas;
-
-GtkWidget *costo_promedio;
-GtkWidget *contrib_unit;
-GtkWidget *precio_venta;
-GtkWidget *mermita;
-GtkWidget *mermata;
-GtkWidget *ici;
-
-GtkWidget *comp_totales;
-GtkWidget *total_vendido;
-GtkWidget *indice_t;
-GtkWidget *contri_agr;
-GtkWidget *contri_proy;
-GtkWidget *stock_valor;
-
-GtkWidget *elab_date;
-GtkWidget *venc_date;
-
-gboolean Deleting;
-
-GtkWidget *inv_total_stock;
-GtkWidget *valor_total_stock;
-GtkWidget *contri_total_stock;
-
-GtkWidget *combo_merma;
-
-GtkWidget *label_found;
-
-GtkWidget *canje_buttons_t;
-GtkWidget *canje_buttons_f;
-GtkWidget *stock_pro;
-
-GtkWidget *tasa_canje;
-
-GtkWidget *mayor_buttons_t;
-GtkWidget *mayor_buttons_f;
-GtkWidget *mayor_cantidad;
-GtkWidget *mayor_precio;
-
-GtkWidget *combo_proveedores;
-GtkWidget *model_proveedores;
-
-GtkWidget *entry_devolucion;
-GtkWidget *entry_recivir;
-
-GtkWidget *mod_window;
-gboolean fraccionm = FALSE;
-
-void
-Recepcion (GtkWidget *widget, gpointer data)
-{
-  gboolean out = (gboolean) data;
-  gchar *q;
-
-  if (out == FALSE)
-    {
-      gtk_widget_set_sensitive (main_window, TRUE);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-    }
-  else if (out == TRUE)
-    {
-      gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (barcode_entry)));
-      gchar *cantidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry_recivir)));
-
-      if (strcmp (cantidad, "") != 0)
-        {
-          q = g_strdup_printf ("SELECT id FROM hay_devolucion(%s) as (id int4)", barcode);
-          if (GetDataByOne
-              (q) == NULL)
-            {
-              AlertMSG (entry_recivir, "No existe devoluciones de este producto");
-              return;
-            }
-          g_free(q);
-          q = g_strdup_printf ("SELECT respuesta FROM puedo_devolver(%s,%s) "
-                               "as (respuesta bool)", CUT (cantidad), barcode);
-          if (g_str_equal(GetDataByOne(q), "t"))
-            {
-              g_free(q);
-              q = g_strdup_printf ("SELECT cantidad FROM max_prods_a_devolver"
-                                   "(%s)", barcode);
-
-              gchar *msg;
-              msg = g_strdup_printf("En esta recepción no puede recibir mas "
-                                    "de %s productos", GetDataByOne (q));
-
-              AlertMSG (entry_recivir, msg);
-
-              g_free(q);
-              g_free(msg);
-              return;
-            }
-
-          Recivir (barcode, cantidad);
-        }
-
-      gtk_widget_set_sensitive (main_window, TRUE);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-
-      FillFields (ingreso->selection, NULL);
-    }
-}
-
-void
-RecivirWindow (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *window;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *button;
-  GtkWidget *label;
-
-  gtk_widget_set_sensitive (main_window, FALSE);
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Recepción de Mercadería");
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-  gtk_widget_show (window);
-
-  g_signal_connect (G_OBJECT (window), "destroy",
-                    G_CALLBACK (Recepcion), (gpointer)FALSE);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Cantidad a recibir : ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  entry_recivir = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), entry_recivir, FALSE, FALSE, 3);
-  gtk_widget_show (entry_recivir);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Recepcion), (gpointer) FALSE);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (entry_recivir), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Recepcion), (gpointer)TRUE);
-
-}
-
-void
-Devolucion (GtkWidget *widget, gpointer data)
-{
-  gboolean out = (gboolean) data;
-
-  if (out == FALSE)
-    {
-      gtk_widget_set_sensitive (main_window, TRUE);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-    }
-  else if (out == TRUE)
-    {
-      gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (barcode_entry)));
-      gchar *cantidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry_devolucion)));
-
-      if (strcmp (cantidad, "") != 0)
-        {
-          if (strtod (PUT (cantidad), (char **)NULL) > GetCurrentStock (barcode))
-            {
-              AlertMSG (entry_devolucion, "No puede devolver mas del stock actual");
-              return;
-            }
-
-          Devolver (barcode, cantidad);
-        }
-
-      gtk_widget_set_sensitive (main_window, TRUE);
-      gtk_widget_destroy (gtk_widget_get_toplevel (widget));
-
-      FillFields (ingreso->selection, NULL);
-    }
-}
-
-void
-DevolucionWindow (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *window;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *button;
-  GtkWidget *label;
-
-  gtk_widget_set_sensitive (main_window, FALSE);
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Devolución de Mercadería");
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-  gtk_widget_show (window);
-
-  g_signal_connect (G_OBJECT (window), "destroy",
-                    G_CALLBACK (Devolucion), (gpointer)FALSE);
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-  gtk_widget_show (vbox);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  label = gtk_label_new ("Cantidad a devolver : ");
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-  gtk_widget_show (label);
-
-  entry_devolucion = gtk_entry_new ();
-  gtk_box_pack_start (GTK_BOX (hbox), entry_devolucion, FALSE, FALSE, 3);
-  gtk_widget_show (entry_devolucion);
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-  gtk_widget_show (hbox);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Devolucion), (gpointer)FALSE);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_OK);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-  gtk_widget_show (button);
-
-  g_signal_connect (G_OBJECT (entry_devolucion), "activate",
-                    G_CALLBACK (SendCursorTo), (gpointer)button);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (Devolucion), (gpointer)TRUE);
-}
+gboolean deleting;
 
 /**
  * This function is connected the accept button of the adjust stock window.
@@ -503,11 +236,11 @@ GuardarModificacionesProducto (void)
   cantidad_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
   if (g_str_equal (stock_minimo, ""))
-    ErrorMSG (stock_min, "Debe setear stock minimo");
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Debe setear stock minimo");
   else if (g_str_equal (margen, ""))
-    ErrorMSG (margen_entry, "Debe poner un valor de margen para el producto");
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "Debe poner un valor de margen para el producto");
   else if (g_str_equal (new_venta, ""))
-    ErrorMSG (precio_venta, "Debe insertar un precio de venta");
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "Debe insertar un precio de venta");
   else
     {
       SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
@@ -557,17 +290,17 @@ GuardarModificacionesProducto (void)
  ModificarMargenVenta (GtkEditable *editable, gpointer data)
  {
    gboolean margen = (gboolean) data;
-   gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (barcode_entry)));
-   gint new_margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (margen_entry))));
-   gint new_venta = new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (precio_venta))));
-   gint fifo = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (costo_promedio))));
+   gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_barcode"))));
+   gint new_margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")))));
+   gint new_venta = new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")))));
+   gint fifo = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost")))));
    gint contri_unit, stock;
    gdouble precio;
    gdouble iva = GetIVA (barcode);
    gdouble otros = GetOtros (barcode);
 
-   if (strcmp (gtk_entry_get_text (GTK_ENTRY (margen_entry)), "") == 0 &&
-       strcmp (gtk_entry_get_text (GTK_ENTRY (precio_venta)), "") == 0)
+   if (strcmp (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin"))), "") == 0 &&
+       strcmp (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price"))), "") == 0)
      return;
 
    if (fifo == 0)
@@ -579,7 +312,7 @@ GuardarModificacionesProducto (void)
 
    if (margen == TRUE)
      {
-       gtk_entry_set_text (GTK_ENTRY (precio_venta), "");
+       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), "");
 
        if (otros == -1)
          precio = (gdouble) ((gdouble)(fifo * (gdouble)(new_margen + 100)) * (iva+1)) / 100;
@@ -590,16 +323,16 @@ GuardarModificacionesProducto (void)
                               (gdouble)(precio * otros) + (gdouble) precio);
          }
 
-       gtk_entry_set_text (GTK_ENTRY (precio_venta),
+       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")),
                            g_strdup_printf ("%ld", lround (precio)));
 
-       gtk_label_set_markup (GTK_LABEL (contrib_unit),
+       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_contrib_unit")),
                              g_strdup_printf
                              ("<b>%ld</b>", lround ((gdouble)fifo * (gdouble)new_margen / 100)));
      }
    else if (margen == FALSE)
      {
-       gtk_entry_set_text (GTK_ENTRY (margen_entry), "");
+       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), "");
 
        if (otros == -1)
          precio = (gdouble) ((new_venta / (gdouble)((iva+1) * fifo)) - 1) * 100;
@@ -610,24 +343,24 @@ GuardarModificacionesProducto (void)
            precio = (gdouble)(precio / fifo) * 100;
          }
 
-       gtk_entry_set_text (GTK_ENTRY (margen_entry),
+       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")),
                            g_strdup_printf ("%ld", lround (precio)));
 
-       gtk_label_set_markup (GTK_LABEL (contrib_unit),
+       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_contrib_unit")),
                              g_strdup_printf
                              ("<b>%ld</b>", lround ((gdouble)fifo * (gdouble)new_margen / 100)));
      }
 
-   contri_unit = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (contrib_unit))));
+   contri_unit = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_contrib_unit")))));
 
-   new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (precio_venta))));
+   new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")))));
 
    stock = GetCurrentStock (barcode);
 
-   gtk_label_set_markup (GTK_LABEL (contri_proy),
+   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_contribproyectada")),
                          g_strdup_printf ("<b>$%d</b>", contri_unit * stock));
 
-   gtk_label_set_markup (GTK_LABEL (stock_valor),
+   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_invstock")),
                          g_strdup_printf ("<b>$%d</b>", stock * new_venta));
  }
 
@@ -653,20 +386,17 @@ admini_box ()
   print = (Print *) malloc (sizeof (Print));
 
   //stock valorizado
-  inv_total_stock = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_merca_stock_valorizado"));
-  gtk_label_set_markup (GTK_LABEL (inv_total_stock),
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_stock_valorizado")),
                         g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (InversionTotalStock ())));
 
   //valorizado de venta
-  valor_total_stock = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_merca_valorizado_venta"));
-  gtk_label_set_markup (GTK_LABEL (valor_total_stock),
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_valorizado_venta")),
                         g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (ValorTotalStock ())));
 
   //contribucion proyectada
-  contri_total_stock = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_merca_contrib_proyectada"));
-  gtk_label_set_markup (GTK_LABEL (contri_total_stock),
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_contrib_proyectada")),
                         g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (ContriTotalStock ())));
   //products list
@@ -892,12 +622,12 @@ ReturnProductsStore (GtkListStore *store)
   tuples = PQntuples (res);
 
   if (tuples == 1)
-    gtk_label_set_markup (GTK_LABEL (label_found),
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_find_num_products")),
                           g_strdup_printf ("<b>%d producto</b>", tuples));
   else if (tuples == 0)
-    gtk_label_set_markup (GTK_LABEL (label_found),"<b>Sin Productos</b>");
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_find_num_products")),"<b>Sin Productos</b>");
   else
-    gtk_label_set_markup (GTK_LABEL (label_found),
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_find_num_products")),
                           g_strdup_printf ("<b>%d productos</b>", tuples));
 
   gtk_list_store_clear (store);
@@ -934,7 +664,7 @@ FillEditFields (GtkTreeSelection *selection, gpointer data)
   GtkWidget *entry;
   GtkListStore *store;
 
-  if (Deleting != TRUE)
+  if (deleting != TRUE)
     {
       treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_find_products"));
       selec = gtk_tree_view_get_selection (GTK_TREE_VIEW(treeview));
@@ -1171,7 +901,7 @@ EliminarProductoDB (GtkButton *button, gpointer data)
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
-      Deleting = TRUE;
+      deleting = TRUE;
 
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           1, &codigo,
@@ -1188,7 +918,7 @@ EliminarProductoDB (GtkButton *button, gpointer data)
         }
       else
         ErrorMSG (GTK_WIDGET (treeview), "Solo se puede eliminar productos \n con stock 0");
-      Deleting = FALSE;
+      deleting = FALSE;
     }
 }
 
