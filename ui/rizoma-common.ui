@@ -636,4 +636,20 @@
       </object>
     </child>
   </object>
+  <object class="GnomeAbout" id="POS Rizoma Comercio">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">POS Rizoma Comercio</property>
+    <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_MENU</property>
+    <property name="has_separator">False</property>
+    <property name="version">1.0 beta 1</property>
+    <property name="copyright" translatable="yes">Copyright (C) 2004,2007,2008 Rizoma Tecnolog&#xED;a Ltda.</property>
+    <property name="comments" translatable="yes">Web: http://www.rizoma.cl
+E-Mail: info@rizoma.cl</property>
+    <property name="authors">Jaime Navarrete F. &lt;janf@rizoma.cl
+Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;
+Felipe Reyes A. &lt;felipereyes@gmail.com&gt;
+
+</property>
+  </object>
 </interface>
