@@ -1,3 +1,8 @@
+2008-07-29  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
+
+	* rizoma_informes.c (fill_caja_data): Replaced the use of a big
+	query for a plpsql function.
+
 2008-07-29  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* administracion_productos.c (ModificarMargenVenta): Fixed to fit
