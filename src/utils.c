@@ -296,14 +296,15 @@ validate_string (gchar *pattern, gchar *subject)
 gboolean
 statusbar_pop (GtkStatusbar *statusbar)
 {
-
-  guint *context_id;
+  guint *context_id = NULL;
 
   context_id = g_object_get_data (G_OBJECT(statusbar), "context_id");
 
-  gtk_statusbar_pop (GTK_STATUSBAR(statusbar), *context_id);
-
-  g_free (context_id);
+  if (context_id != NULL)
+    {
+      gtk_statusbar_pop (GTK_STATUSBAR(statusbar), *context_id);
+      g_free (context_id);
+    }
 
   return FALSE;
 }
