@@ -2,7 +2,7 @@
    c-indentation-style: gnu -*- */
 /*facutra_more.c
  *
- *    Copyright (C) 2005 Rizoma Tecnologia Limitada <info@rizoma.cl>
+ *    Copyright (C) 2005,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
  *
  *    This file is part of rizoma.
  *
