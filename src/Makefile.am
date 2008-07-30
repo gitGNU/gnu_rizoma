@@ -21,7 +21,7 @@
 bin_PROGRAMS = rizoma-admin rizoma-config rizoma-ventas rizoma-compras rizoma-inventario rizoma-informes
 
 rizoma_admin_SOURCES = admin.c tipos.h admin.h \
-datos.h dimentions.h \
+datos.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
 boleta.c boleta.h \
@@ -39,7 +39,7 @@ vale.c vale.h \
 factura_more.c factura_more.h \
 printing.c printing.h
 
-rizoma_ventas_SOURCES = ventas.c ventas.h  dimentions.h tipos.h \
+rizoma_ventas_SOURCES = ventas.c ventas.h tipos.h \
 credito.c credito.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
