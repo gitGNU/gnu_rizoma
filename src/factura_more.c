@@ -37,6 +37,8 @@
 #include"postgres-functions.h"
 #include"boleta.h"
 
+#define COEF_PULGADA 0.3528
+
 /**
  * Generate the neccesary invoice postscript files to be printed.
  *
@@ -170,7 +172,12 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   fact_size = rizoma_get_double_list("FACTURA_SIZE", 2);
   g_assert(fact_size != NULL);
 
-  str_aux = g_strdup_printf ("0 0 %f %f", fact_size[0], fact_size[1]);
+  PS_set_info (psdoc, "Creator", "POS Rizoma Comercio");
+  PS_set_info (psdoc, "Author", "POS Rizoma Comercio");
+  PS_set_info (psdoc, "Title", "Invoice");
+  PS_set_info (psdoc, "Orientation", "Portraint");
+
+  str_aux = g_strdup_printf ("0 0 %f %f", fact_size[0]/COEF_PULGADA, fact_size[1]/COEF_PULGADA);
   PS_set_info (psdoc, "BoundingBox", str_aux);
   g_free(str_aux);
 
@@ -183,37 +190,37 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
       return NULL;
     }
 
-  PS_begin_page (psdoc, fact_size[0], fact_size[1]);
+  PS_begin_page (psdoc, fact_size[0]/COEF_PULGADA, fact_size[1]/COEF_PULGADA);
   PS_setfont (psdoc, psfont, 10);
 
   fact_client = rizoma_get_double_list ("FACTURA_CLIENTE", 2);
   g_assert (fact_client != NULL);
-  PS_show_xy (psdoc, client, fact_client[0], fact_client[1]);
+  PS_show_xy (psdoc, client, fact_client[0]/COEF_PULGADA, fact_client[1]/COEF_PULGADA);
 
   fact_rut = rizoma_get_double_list ("FACTURA_RUT", 2);
   g_assert (fact_rut != NULL);
-  PS_show_xy (psdoc, rut, fact_rut[0], fact_rut[1]);
+  PS_show_xy (psdoc, rut, fact_rut[0]/COEF_PULGADA, fact_rut[1]/COEF_PULGADA);
 
   fact_address = rizoma_get_double_list ("FACTURA_ADDRESS", 2);
   g_assert (fact_address != NULL);
-  PS_show_xy (psdoc, address, fact_address[0], fact_address[1]);
+  PS_show_xy (psdoc, address, fact_address[0]/COEF_PULGADA, fact_address[1]/COEF_PULGADA);
 
   fact_giro = rizoma_get_double_list ("FACTURA_GIRO", 2);
   g_assert (fact_giro != NULL);
-  PS_show_xy (psdoc, giro, fact_giro[0], fact_giro[1]);
+  PS_show_xy (psdoc, giro, fact_giro[0]/COEF_PULGADA, fact_giro[1]/COEF_PULGADA);
 
   fact_comuna = rizoma_get_double_list("FACTURA_COMUNA", 2);
   g_assert (fact_comuna != NULL);
-  PS_show_xy (psdoc, comuna, fact_comuna[0], fact_comuna[1]);
+  PS_show_xy (psdoc, comuna, fact_comuna[0]/COEF_PULGADA, fact_comuna[1]/COEF_PULGADA);
 
   fact_phone = rizoma_get_double_list("FACTURA_PHONE", 2);
-  g_assert (fact_phone != NULL);
-  PS_show_xy (psdoc, fono, fact_phone[0], fact_phone[1]);
+  if (fact_phone != NULL)
+    PS_show_xy (psdoc, fono, fact_phone[0]/COEF_PULGADA, fact_phone[1]/COEF_PULGADA);
 
   /* We draw the products detail */
   fact_detail = rizoma_get_double_list ("FACTURA_DETAIL", 2);
   g_assert (fact_detail != NULL);
-  initial = fact_detail[1];
+  initial = fact_detail[1]/COEF_PULGADA;
 
   fact_code = rizoma_get_double_list ("FACTURA_CODIGO", 2);
   fact_desc = rizoma_get_double_list ("FACTURA_DESCRIPCION", 2);
@@ -225,12 +232,12 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
     {
       product = g_list_nth_data (products, i);
 
-      PS_show_xy (psdoc, product->codigo, fact_code[0], initial);
+      PS_show_xy (psdoc, product->codigo, fact_code[0]/COEF_PULGADA, initial);
 
-      PS_show_xy (psdoc, product->producto, fact_desc[0], initial);
+      PS_show_xy (psdoc, product->producto, fact_desc[0]/COEF_PULGADA, initial);
 
       str_aux = g_strdup_printf ("%.3f", product->cantidad);
-      PS_show_xy (psdoc, str_aux, fact_cant[0], initial);
+      PS_show_xy (psdoc, str_aux, fact_cant[0]/COEF_PULGADA, initial);
       g_free (str_aux);
 
       //check if must be used the mayorist price or not
@@ -240,11 +247,11 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
         precio = product->precio_mayor;        ///(((gdouble)products->product->iva/100)+1);
 
       str_aux = g_strdup_printf ("%.0f", precio);
-      PS_show_xy (psdoc, str_aux, fact_uni[0], initial);
+      PS_show_xy (psdoc, str_aux, fact_uni[0]/COEF_PULGADA, initial);
       g_free (str_aux);
 
       str_aux = g_strdup_printf ("%.0f", product->cantidad * precio);
-      PS_show_xy (psdoc, str_aux, fact_total[0], initial);
+      PS_show_xy (psdoc, str_aux, fact_total[0]/COEF_PULGADA, initial);
       g_free (str_aux);
 
       pepe = lround ((gdouble)precio/current_iva);
@@ -262,17 +269,17 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   fact_subtotal = rizoma_get_double_list ("FACTURA_SUBTOTAL", 2);
   g_assert (fact_subtotal != NULL);
   str_aux = g_strdup_printf ("%.0f", subtotal);
-  PS_show_xy (psdoc, str_aux, fact_subtotal[0], fact_subtotal[1]);
+  PS_show_xy (psdoc, str_aux, fact_subtotal[0]/COEF_PULGADA, fact_subtotal[1]/COEF_PULGADA);
 
   total = subtotal + iva;
 
   fact_iva = rizoma_get_double_list ("FACTURA_IVA", 2);
-  PS_show_xy (psdoc, g_strdup_printf ("%.0f", iva), fact_iva[0], fact_iva[1]);
+  PS_show_xy (psdoc, g_strdup_printf ("%.0f", iva), fact_iva[0]/COEF_PULGADA, fact_iva[1]/COEF_PULGADA);
 
   fact_total_final = rizoma_get_double_list ("FACTURA_TOTAL_FINAL", 2);
   g_assert (fact_total_final != NULL);
   str_aux = g_strdup_printf ("%.0f", total);
-  PS_show_xy (psdoc, str_aux, fact_total_final[0], fact_total_final[1]);
+  PS_show_xy (psdoc, str_aux, fact_total_final[0]/COEF_PULGADA, fact_total_final[1]/COEF_PULGADA);
   g_free (str_aux);
 
   PS_end_page (psdoc);
