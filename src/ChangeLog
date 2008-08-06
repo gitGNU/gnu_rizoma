@@ -1,3 +1,10 @@
+2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* postgres-functions.c (nullify_sale): Modified to accept only one
+	argument, the sale id.
+
+	* ventas.c (nullify_sale_datail): Deleted function.
+
 2008-07-29  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
 
 	* rizoma_informes.c (fill_caja_data): Replaced the use of a big
