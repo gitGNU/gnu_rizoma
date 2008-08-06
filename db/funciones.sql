@@ -963,9 +963,7 @@ declare
 	list record;
 	query text;
 begin
-	INSERT INTO impuesto VALUES (DEFAULT,
-	       	    	      	     imp_descripcion,
-				     imp_monto);
+	INSERT INTO impuesto (id, descripcion, monto, removable) VALUES (DEFAULT, imp_descripcion, imp_monto, DEFAULT);
 return;
 end; $$ language plpgsql;
 
@@ -2259,3 +2257,19 @@ return next;
 return;
 
 end; $$ language plpgsql;
+
+create or replace function trg_tasks_delete()
+returns trigger as $$
+begin
+
+if old.removable = 'f' then
+return NULL;
+else
+return old;
+end if;
+
+end; $$ language plpgsql;
+
+create trigger trigger_tasks_delete before delete
+       on impuesto for each row
+       execute procedure trg_tasks_delete();

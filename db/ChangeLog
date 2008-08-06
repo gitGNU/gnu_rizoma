@@ -1,3 +1,9 @@
+2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (trg_tasks_delete): Added to handle a trigger on
+	impuesto table.
+	(insert_impuesto): Modified to deal with the new table.
+
 2008-07-29  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
 
 	* funciones.sql (cash_box_report): Added function to return a cash
