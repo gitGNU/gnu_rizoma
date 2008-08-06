@@ -1,5 +1,8 @@
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* ventas.c (on_btn_nullify_ok_clicked): Modified to deal with the
+	new nullify concept.
+
 	* postgres-functions.c (nullify_sale): Modified to accept only one
 	argument, the sale id.
 

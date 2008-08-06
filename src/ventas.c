@@ -3241,8 +3241,15 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_sale"));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (treeview);
   GtkTreeModel *model = GTK_TREE_MODEL (gtk_tree_view_get_model (treeview));
+
+  GtkListStore *sell = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get ("sell_products_list")));
+
   GtkTreeIter iter;
   gint sale_id;
+
+  PGresult *res;
+  gchar *q;
+  gint tuples, i;
 
   if (! gtk_tree_selection_get_selected (selection, NULL, &iter)) return;
 
@@ -3250,9 +3257,45 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
                       0, sale_id,
                       -1);
 
+  gtk_list_store_clear (sell);
+  CleanEntryAndLabelData ();
+  ListClean ();
 
+  q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);
+  res = EjecutarSQL (q);
 
+  if (res != NULL && PQntuples (res) != 0)
+    {
+      tuples = PQntuples (res);
 
+      for (i = 0; i < tuples; i++)
+        {
+          AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), g_strtod (PUT (PQvaluebycol (res, i, "amount"))));
+
+          venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
+
+          gtk_list_store_insert_after (venta->store, &iter, NULL);
+          gtk_list_store_set (venta->store, &iter,
+                              0, venta->products->product->codigo,
+                              1, venta->products->product->producto,
+                              2, venta->products->product->marca,
+                              3, venta->products->product->contenido,
+                              4, venta->products->product->unidad,
+                              5, g_strdup_printf ("%.3f", venta->products->product->cantidad),
+                              6, precio,
+                              7, PutPoints (g_strdup_printf
+                                            ("%.0f", venta->products->product->cantidad * precio)),
+                              -1);
+
+          venta->products->product->iter = iter;
+        }
+    }
+
+  total = llround (CalcularTotal (venta->header));
+
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+                        g_strdup_printf ("<span size=\"40000\">%s</span>",
+                                         PutPoints (g_strdup_printf ("%u", total))));
 }
 
 void
