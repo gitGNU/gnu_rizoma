@@ -3060,7 +3060,7 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
 
   if (!(g_str_equal(condition, "")))
     {
-      q = g_strconcat (q, " WHERE TRUE ", condition, NULL);
+      q = g_strconcat (q, condition, NULL);
       g_free (condition);
     }
 
@@ -3264,7 +3264,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   CleanEntryAndLabelData ();
   ListClean ();
 
-  q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);g_print ("%s\n", q);
+  q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);
   res = EjecutarSQL (q);
 
   if (res != NULL && PQntuples (res) != 0)
