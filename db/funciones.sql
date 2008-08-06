@@ -2236,6 +2236,14 @@ begin
         where fecha_termino =
                 (select max (fecha_termino) from caja where fecha_inicio::date>=prepare_to and fecha_inicio::date<=prepare_to);
 
+        if sell_last_id = 0 or sell_last_id is null then
+                sell_last_id := sell_first_id + 1;
+        end if;
+
+        if last_cash_box_id = 0 or last_cash_box_id is null then
+                last_cash_box_id := first_cash_box_id + 1;
+        end if;
+
         select sum (monto) into cash_sells
         from venta
         where id > sell_first_id and id <= sell_last_id;
