@@ -654,9 +654,9 @@ alter table ingreso add constraint fk_ingreso_caja
 alter table venta_anulada add constraint fk_venta_anulada_users
   foreign key (vendedor)
   references users(id);
-alter table venta_anulada add constraint fk_venta_anulada_venta_detalle
+alter table venta_anulada add constraint fk_venta_anulada_venta
   foreign key (id_sale)
-  references venta_detalle(id_venta);
+  references venta(id);
 
 -- Indices
 
