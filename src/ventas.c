@@ -3228,46 +3228,9 @@ close_nullify_sale_dialog(void)
 }
 
 /**
- * This function is called for each of the selected rows in the
- * details sale treeview in the nullify sale dialog.
- *
- * Take the ids stored in the list store and call the function that
- * take care of nullify the sales in the database.
- *
- * @param model the tree model
- * @param path the path of the selected row
- * @param iter the iter pointing to the selected row
- * @param data the treeview
- */
-void
-nullify_sale_datail (GtkTreeModel *model,
-                     GtkTreePath *path,
-                     GtkTreeIter *iter,
-                     gpointer data)
-{
-  gint id_detail;
-  gint id_sale;
-
-  gtk_tree_model_get (model, iter,
-                      5, &id_detail,
-                      6, &id_sale,
-                      -1);
-
-  if (nullify_sale_details(id_sale, id_detail) != 0)
-    {
-      AlertMSG(GTK_WIDGET(data), "No fue posible anular la venta, por favor intente nuevamente");
-    }
-
-  on_btn_nullify_search_clicked (NULL, NULL);
-
-  return;
-}
-
-/**
  * Callback connected to the accept button of the nullify sale dialog
  *
- * This function collects the user selected details of the selected
- * sale to nullify the sale.
+ * This function get the selected sale and nullify it.
  *
  * @param button the button that emited the signal
  * @param data the use data
@@ -3275,14 +3238,21 @@ nullify_sale_datail (GtkTreeModel *model,
 void
 on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 {
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_sale"));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (treeview);
+  GtkTreeModel *model = GTK_TREE_MODEL (gtk_tree_view_get_model (treeview));
+  GtkTreeIter iter;
+  gint sale_id;
 
-  GtkTreeView *treeview_details;
-  GtkTreeSelection *selection;
+  if (! gtk_tree_selection_get_selected (selection, NULL, &iter)) return;
 
-  treeview_details = GTK_TREE_VIEW (gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
-  selection = gtk_tree_view_get_selection(treeview_details);
+  gtk_tree_model_get (model, &iter,
+                      0, sale_id,
+                      -1);
 
-  gtk_tree_selection_selected_foreach(selection, nullify_sale_datail, (gpointer)treeview_details);
+
+
+
 }
 
 void
