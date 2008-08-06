@@ -357,6 +357,7 @@ create table impuesto (
   id                        serial not null,
   descripcion               varchar(250),
   monto                     float8,
+  removable                 boolean default 't',
   constraint pk_Impuesto primary key (id)
 ) ;
 
