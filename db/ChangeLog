@@ -2,6 +2,7 @@
 
 	* funciones.sql (get_sale_detail): Added function to get the
 	detail of a specified sell, this aim to help the nullify process.
+	(nullify_sale): Fixed to add the proper stock to the product list.
 
 	* rizoma.structure: Removed id_detail column since we will not use
 	it anymore.

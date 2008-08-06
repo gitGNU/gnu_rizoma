@@ -2184,22 +2184,23 @@ returns boolean as $$
 declare
         sale_amount integer;
         id_tipo_egreso integer;
+        query text;
 	l record;
 begin
 
         select monto into sale_amount from venta where id=sale_id;
-        select id into id_tipo_egreso where descrip='Nulidad de Venta';
+        select id into id_tipo_egreso from tipo_egreso where descrip='Nulidad de Venta';
 
-        insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
+        perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
 
-        insert into venta_anulada(id_detail, id_sale, vendedor)
-                values (detail_id, sale_id, salesman_id);
+        insert into venta_anulada(id_sale, vendedor)
+                values (sale_id, salesman_id);
 
-        select barcode, cantidad into l
-        from venta_detalle
-        where id = detail_id and id_venta = sale_id;
+        query := $S$ select * from get_sale_detail ($S$||sale_id||$S$)$S$;
 
-        update producto set stock= stock+l.cantidad where barcode = l.barcode;
+        for l in execute query loop
+                execute $S$update producto set stock = stock+$S$||l.amount||$S$ where barcode = $S$||l.barcode;
+        end loop;
 
 return 't';
 end; $$ language plpgsql;
