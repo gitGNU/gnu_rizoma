@@ -2206,6 +2206,6 @@ nullify_sale (gint sale_id)
   if ((res != NULL) && (PQntuples(res) == 1) && (g_str_equal(PQgetvalue(res, 0, 0), "t")))
     return 0;
 
-  g_printerr("\n%s: could not be nullified the sale (%d, %d)\n", G_STRFUNC, sale_id, sale_detail_id);
+  g_printerr("\n%s: could not be nullified the sale (%d)\n", G_STRFUNC, sale_id);
   return -1;
 }
