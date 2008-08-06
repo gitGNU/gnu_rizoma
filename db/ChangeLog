@@ -1,5 +1,8 @@
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* rizoma.structure: Removed id_detail column since we will not use
+	it anymore.
+
 	* funciones.sql (trg_tasks_delete): Added to handle a trigger on
 	impuesto table.
 	(insert_impuesto): Modified to deal with the new table.

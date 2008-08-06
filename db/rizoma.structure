@@ -512,11 +512,10 @@ create table venta (
 
 -- venta_anulada
 create table venta_anulada (
-  id_detail                 int not null,
   id_sale                   int not null,
   fecha                     timestamp default now(),
   vendedor                  int not null,
-  constraint pk_venta_anulada primary key (id_detail, id_sale)
+  constraint pk_venta_anulada primary key (id_sale)
 ) ;
 
 -- log
