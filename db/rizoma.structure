@@ -462,6 +462,7 @@ create table Tarjetas (
 create table tipo_egreso (
   id                        serial not null,
   descrip                   varchar(20),
+  removable                 boolean default 't',
   constraint pk_Tipo_egreso primary key (id)
 ) ;
 
