@@ -2179,21 +2179,27 @@ $$ LANGUAGE plpgsql;
 -- nullify sale
 create or replace function nullify_sale (
        in salesman_id int,
-       in sale_id int,
-       in detail_id int)
+       in sale_id int)
 returns boolean as $$
 declare
+        sale_amount integer;
+        id_tipo_egreso integer;
 	l record;
 begin
 
-insert into venta_anulada(id_detail, id_sale, vendedor)
-       values (detail_id, sale_id, salesman_id);
+        select monto into sale_amount from venta where id=sale_id;
+        select id into id_tipo_egreso where descrip='Nulidad de Venta';
 
-select barcode, cantidad into l
-       from venta_detalle
-       where id = detail_id and id_venta = sale_id;
+        insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
 
-update producto set stock= stock+l.cantidad where barcode = l.barcode;
+        insert into venta_anulada(id_detail, id_sale, vendedor)
+                values (detail_id, sale_id, salesman_id);
+
+        select barcode, cantidad into l
+        from venta_detalle
+        where id = detail_id and id_venta = sale_id;
+
+        update producto set stock= stock+l.cantidad where barcode = l.barcode;
 
 return 't';
 end; $$ language plpgsql;
@@ -2273,3 +2279,21 @@ end; $$ language plpgsql;
 create trigger trigger_tasks_delete before delete
        on impuesto for each row
        execute procedure trg_tasks_delete();
+
+create or replace function trg_egress_delete()
+returns trigger as $$
+begin
+
+if old.removable = 'f' then
+return NULL;
+else
+return old;
+end if;
+
+end; $$ language plpgsql;
+
+create trigger trigger_egress_delete before delete
+       on tipo_egreso for each row
+       execute procedure trg_egress_delete();
+
+create or replace function nullify

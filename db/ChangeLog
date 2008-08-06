@@ -3,6 +3,8 @@
 	* funciones.sql (trg_tasks_delete): Added to handle a trigger on
 	impuesto table.
 	(insert_impuesto): Modified to deal with the new table.
+	(nullify_sale): Modified function to add an egress when a sell is
+	nullified. Now we mark all the sell as nullified and not just a detail.
 
 2008-07-29  Jonathan Gonzalez V.  <zeus@lunareja.lunareja>
 
