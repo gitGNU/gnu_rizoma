@@ -1,5 +1,8 @@
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* funciones.sql (get_sale_detail): Added function to get the
+	detail of a specified sell, this aim to help the nullify process.
+
 	* rizoma.structure: Removed id_detail column since we will not use
 	it anymore.
 

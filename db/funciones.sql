@@ -2296,4 +2296,26 @@ create trigger trigger_egress_delete before delete
        on tipo_egreso for each row
        execute procedure trg_egress_delete();
 
-create or replace function nullify
+create or replace function get_sale_detail (
+        in sale_id int,
+        out barcode bigint,
+        out price int,
+        out amount double precision
+        )
+returns setof record as $$
+declare
+        list record;
+        query varchar (255);
+begin
+
+query := $S$ select barcode, precio, cantidad from venta_detalle where id_venta=$S$ || sale_id;
+
+for list in execute query loop
+        barcode := list.barcode;
+        price := list.precio;
+        amount := list.cantidad;
+        return next;
+end loop;
+
+return;
+end; $$ language plpgsql;
