@@ -3142,7 +3142,7 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
                       -1);
 
   q = g_strdup_printf("select id, id_venta, barcode, cantidad, precio, (select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
-                      "(cantidad*precio) as subtotal from venta_detalle where id_venta=%d and id not in (select id_detail from venta_anulada where id_sale=%d)",
+                      "(cantidad*precio) as subtotal from venta_detalle where id_venta=%d)",
                       sale_id, sale_id);
 
   res = EjecutarSQL(q);

@@ -3,6 +3,8 @@
 	* ventas.c (on_btn_nullify_search_clicked): Modified the query
 	that gets the sales to nullify.
 	(on_btn_nullify_ok_clicked): Fixed some minor bugs.
+	(on_selection_nullify_sales_change): Removed condition that was
+	asking for the id_detail on venta_anulada.
 
 	* manejo_productos.c (ListClean): Fixed to not pass anything when
 	venta->header is a null pointer.
