@@ -3004,7 +3004,8 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
   else
     amount = g_strdup(gtk_entry_get_text(entry));
 
-  q = g_strdup ("SELECT id, date_trunc('day',fecha) as fecha, (select usuario from users where id=venta.vendedor) as usuario, monto FROM venta");
+  q = g_strdup ("SELECT id, date_trunc('day',fecha) as fecha, (select usuario from users where id=venta.vendedor) as usuario, monto FROM venta"
+                " WHERE id not in (select id_sale from venta_anulada where id_sale=venta.id) ");
 
   if (sale_id != NULL)
     {
@@ -3242,7 +3243,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   GtkTreeSelection *selection = gtk_tree_view_get_selection (treeview);
   GtkTreeModel *model = GTK_TREE_MODEL (gtk_tree_view_get_model (treeview));
 
-  GtkListStore *sell = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get ("sell_products_list")));
+  GtkListStore *sell = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))));
 
   GtkTreeIter iter;
   gint sale_id;
@@ -3251,17 +3252,19 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   gchar *q;
   gint tuples, i;
 
+  guint32 total;
+
   if (! gtk_tree_selection_get_selected (selection, NULL, &iter)) return;
 
   gtk_tree_model_get (model, &iter,
-                      0, sale_id,
+                      0, &sale_id,
                       -1);
 
   gtk_list_store_clear (sell);
   CleanEntryAndLabelData ();
   ListClean ();
 
-  q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);
+  q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);g_print ("%s\n", q);
   res = EjecutarSQL (q);
 
   if (res != NULL && PQntuples (res) != 0)
@@ -3270,32 +3273,34 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 
       for (i = 0; i < tuples; i++)
         {
-          AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), g_strtod (PUT (PQvaluebycol (res, i, "amount"))));
+          AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), g_strtod (PUT (PQvaluebycol (res, i, "amount")), NULL));
 
           venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
 
-          gtk_list_store_insert_after (venta->store, &iter, NULL);
-          gtk_list_store_set (venta->store, &iter,
+          gtk_list_store_insert_after (sell, &iter, NULL);
+          gtk_list_store_set (sell, &iter,
                               0, venta->products->product->codigo,
                               1, venta->products->product->producto,
                               2, venta->products->product->marca,
                               3, venta->products->product->contenido,
                               4, venta->products->product->unidad,
                               5, g_strdup_printf ("%.3f", venta->products->product->cantidad),
-                              6, precio,
+                              6, venta->products->product->precio,
                               7, PutPoints (g_strdup_printf
-                                            ("%.0f", venta->products->product->cantidad * precio)),
+                                            ("%.0f", venta->products->product->cantidad * venta->products->product->precio)),
                               -1);
 
           venta->products->product->iter = iter;
         }
+
+      total = llround (CalcularTotal (venta->header));
+
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+                            g_strdup_printf ("<span size=\"40000\">%s</span>",
+                                             PutPoints (g_strdup_printf ("%u", total))));
     }
 
-  total = llround (CalcularTotal (venta->header));
-
-  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-                        g_strdup_printf ("<span size=\"40000\">%s</span>",
-                                         PutPoints (g_strdup_printf ("%u", total))));
+  close_nullify_sale_dialog ();
 }
 
 void

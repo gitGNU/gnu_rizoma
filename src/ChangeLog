@@ -1,5 +1,9 @@
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* ventas.c (on_btn_nullify_search_clicked): Modified the query
+	that gets the sales to nullify.
+	(on_btn_nullify_ok_clicked): Fixed some minor bugs.
+
 	* manejo_productos.c (ListClean): Fixed to not pass anything when
 	venta->header is a null pointer.
 
