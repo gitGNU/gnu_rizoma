@@ -229,9 +229,12 @@ ListClean (void)
 {
   Productos *alter = venta->header;
   Productos *tofree;
-  gint total = ReturnTotalProducts (venta->header);
+  gint total;
   gint i;
 
+  if (venta->header == NULL) return 0;
+
+  total = ReturnTotalProducts (venta->header);
 
   for (i = 0; i < total; i++)
     {

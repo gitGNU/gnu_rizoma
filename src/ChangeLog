@@ -1,5 +1,8 @@
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* manejo_productos.c (ListClean): Fixed to not pass anything when
+	venta->header is a null pointer.
+
 	* ventas.c (on_btn_nullify_ok_clicked): Modified to deal with the
 	new nullify concept.
 
