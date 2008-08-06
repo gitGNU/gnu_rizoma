@@ -518,7 +518,7 @@ CancelarTipo (GtkWidget *widget, gpointer data)
 
   if ((gboolean)data == TRUE)
     {
-    //TiposVenta (NULL, NULL);
+      //TiposVenta (NULL, NULL);
     }
   else
     {
@@ -3142,7 +3142,7 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
                       -1);
 
   q = g_strdup_printf("select id, id_venta, barcode, cantidad, precio, (select descripcion from producto where barcode=venta_detalle.barcode) as descripcion, "
-                      "(cantidad*precio) as subtotal from venta_detalle where id_venta=%d)",
+                      "(cantidad*precio) as subtotal from venta_detalle where id_venta=%d",
                       sale_id);
 
   res = EjecutarSQL(q);
@@ -3260,47 +3260,52 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
                       0, &sale_id,
                       -1);
 
-  gtk_list_store_clear (sell);
-  CleanEntryAndLabelData ();
-  ListClean ();
-
-  q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);
-  res = EjecutarSQL (q);
-
-  if (res != NULL && PQntuples (res) != 0)
+  if (nullify_sale (sale_id) == 0)
     {
-      tuples = PQntuples (res);
 
-      for (i = 0; i < tuples; i++)
+      gtk_list_store_clear (sell);
+      CleanEntryAndLabelData ();
+      ListClean ();
+
+      q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      if (res != NULL && PQntuples (res) != 0)
         {
-          AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), g_strtod (PUT (PQvaluebycol (res, i, "amount")), NULL));
+          tuples = PQntuples (res);
 
-          venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
+          for (i = 0; i < tuples; i++)
+            {
+              AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), g_strtod (PUT (PQvaluebycol (res, i, "amount")), NULL));
 
-          gtk_list_store_insert_after (sell, &iter, NULL);
-          gtk_list_store_set (sell, &iter,
-                              0, venta->products->product->codigo,
-                              1, venta->products->product->producto,
-                              2, venta->products->product->marca,
-                              3, venta->products->product->contenido,
-                              4, venta->products->product->unidad,
-                              5, g_strdup_printf ("%.3f", venta->products->product->cantidad),
-                              6, venta->products->product->precio,
-                              7, PutPoints (g_strdup_printf
-                                            ("%.0f", venta->products->product->cantidad * venta->products->product->precio)),
-                              -1);
+              venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
 
-          venta->products->product->iter = iter;
+              gtk_list_store_insert_after (sell, &iter, NULL);
+              gtk_list_store_set (sell, &iter,
+                                  0, venta->products->product->codigo,
+                                  1, venta->products->product->producto,
+                                  2, venta->products->product->marca,
+                                  3, venta->products->product->contenido,
+                                  4, venta->products->product->unidad,
+                                  5, g_strdup_printf ("%.3f", venta->products->product->cantidad),
+                                  6, venta->products->product->precio,
+                                  7, PutPoints (g_strdup_printf
+                                                ("%.0f", venta->products->product->cantidad * venta->products->product->precio)),
+                                  -1);
+
+              venta->products->product->iter = iter;
+            }
+
+          total = llround (CalcularTotal (venta->header));
+
+          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+                                g_strdup_printf ("<span size=\"40000\">%s</span>",
+                                                 PutPoints (g_strdup_printf ("%u", total))));
         }
 
-      total = llround (CalcularTotal (venta->header));
-
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
-                            g_strdup_printf ("<span size=\"40000\">%s</span>",
-                                             PutPoints (g_strdup_printf ("%u", total))));
+      close_nullify_sale_dialog ();
     }
-
-  close_nullify_sale_dialog ();
 }
 
 void
