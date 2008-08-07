@@ -4,6 +4,7 @@
 	columns on tree_view_sell_rank tree view.
 	(reports_win): Added the proper symbol at the end of every column
 	to show if they are money or percent numbers.
+	(fill_caja_data): Added payed cash to the cash box report.
 
 	* administracion_productos.c (admini_box): Changed the column type
 	stock from INT to DOUBLE.
