@@ -1,3 +1,9 @@
+2008-08-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (cash_box_report): Fixed bug that wasn't
+	considering all the sells when ask for the cash box report and the
+	cash box wasn't closed.
+
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* funciones.sql (get_sale_detail): Added function to get the
