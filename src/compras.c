@@ -852,7 +852,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
 
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
     }
   else
     {
@@ -952,10 +952,10 @@ Save (GtkWidget *widget, gpointer data)
 void
 CalcularPrecioFinal (void)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode"))));
-  gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price"))))), (char **)NULL);
-  gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")))));
-  gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")))));
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
+  gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
+  gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
+  gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
   gdouble precio;
   gdouble porcentaje;
   gdouble iva = GetIVA (barcode);
@@ -1001,7 +1001,7 @@ CalcularPrecioFinal (void)
         {
           precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
         }
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")),
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")),
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else if (ganancia == 0 && ingresa != 0 && precio_final != 0)
@@ -1048,18 +1048,18 @@ CalcularPrecioFinal (void)
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else
-    ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), "Solamente 2 campos deben ser llenados");
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), "Solamente 2 campos deben ser llenados");
 
 }
 
 void
 AddToProductsList (void)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode"))));
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble cantidad;
-  gdouble precio_compra = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price"))))), (char **)NULL);
-  gint margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")))));
-  gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")))));
+  gdouble precio_compra = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
+  gint margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
+  gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
   Producto *check;
 
   if (g_str_equal (barcode, ""))
@@ -1338,7 +1338,7 @@ BuyWindow (void)
 void
 AddFoundProduct (void)
 {
-  GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_buscador"));
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
   gchar *barcode;
@@ -1349,9 +1349,8 @@ AddFoundProduct (void)
                           1, &barcode,
                           -1);
 
-      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
-      gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_buscador")));
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
 
       SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
     }
@@ -3947,7 +3946,6 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 
       SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")));
     }
 
   return;
