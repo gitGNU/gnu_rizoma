@@ -2807,6 +2807,9 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
       break;
 
       //if the key pressed is not in use let it pass
+    case GDK_F10:
+      on_btn_credit_clicked (NULL, NULL);
+      break;
     default:
       return FALSE;
     }
