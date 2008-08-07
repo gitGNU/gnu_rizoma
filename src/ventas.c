@@ -2373,8 +2373,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gchar *discount;
   gboolean canceled;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
-  str_splited = parse_rut(g_strdup (gtk_entry_get_text(GTK_ENTRY(widget))));
+  str_splited = parse_rut (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_credit_rut")))));
 
   rut = atoi(str_splited[0]);
   dv = g_strdup(str_splited[1]);
@@ -2407,7 +2406,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
 
   if (LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
-      ErrorMSG (venta->venta_rut, "El cliente sobrepasa su limite de Credito");
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_credit_out")));
       return;
     }
 
@@ -2476,10 +2475,9 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
 void
 on_btn_credit_clicked (GtkButton *button, gpointer data)
 {
-  GtkWidget *widget;
+  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_sale_credit")));
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_credit"));
-  gtk_widget_show_all(widget);
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_sale_type")));
 }
 
 void
