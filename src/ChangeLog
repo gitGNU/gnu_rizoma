@@ -1,5 +1,8 @@
 2008-08-07  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* ventas.c (nullify_sale_win): Set to selection none the tree view
+	with the details of a sale.
+
 	* rizoma_informes.c (reports_win): Removed the max width to
 	columns on tree_view_sell_rank tree view.
 	(reports_win): Added the proper symbol at the end of every column

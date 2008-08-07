@@ -2901,7 +2901,7 @@ nullify_sale_win (void)
                                           G_TYPE_INT);   //id_venta
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
-      gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_MULTIPLE);
+      gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_NONE);
 
       //barcode
       renderer = gtk_cell_renderer_text_new();
