@@ -799,11 +799,11 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_stock"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>%.2f</b>", stock));
+                            g_strdup_printf ("<b>%.3f</b>", stock));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sales_day"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>%.2f</b>", g_ascii_strtod (PQvaluebycol (res, 0, "ventas_dia"), NULL)));
+                            g_strdup_printf ("<b>%.3f</b>", g_ascii_strtod (PQvaluebycol (res, 0, "ventas_dia"), NULL)));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -811,7 +811,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_avg_cost"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>%d</b>", fifo));
+                            g_strdup_printf ("<b>$ %d</b>", fifo));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_extratax"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
@@ -823,14 +823,14 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_contrib_unit"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$%d</b>", contri_unit));
+                            g_strdup_printf ("<b>$ %d</b>", contri_unit));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_price"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget), PQvaluebycol (res, 0, "precio"));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_invstock"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$%d</b>", valor_stock));
+                            g_strdup_printf ("<b>$ %d</b>", valor_stock));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_mermauni"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
@@ -838,7 +838,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_totalbuy"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$%d</b>", compras_totales));
+                            g_strdup_printf ("<b>$ %d</b>", compras_totales));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sold"));
       if(g_str_equal (PQvaluebycol (res, 0, "contrib_agregada"), ""))
@@ -851,11 +851,11 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_contribadded"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$%d</b>", contrib_agreg));
+                            g_strdup_printf ("<b>$ %d</b>", contrib_agreg));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_contribproyectada"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$%d</b>", contrib_proyect));
+                            g_strdup_printf ("<b>$ %d</b>", contrib_proyect));
 
       if (strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0)
         {
