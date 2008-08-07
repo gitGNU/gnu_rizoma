@@ -3,6 +3,8 @@
 	* funciones.sql (cash_box_report): Fixed bug that wasn't
 	considering all the sells when ask for the cash box report and the
 	cash box wasn't closed.
+	(cash_box_report): Added payed cash to the list of thing to show
+	on cash report.
 
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 

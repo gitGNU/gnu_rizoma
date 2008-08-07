@@ -2215,7 +2215,8 @@ create or replace function cash_box_report (
         out cash_box_end integer,
         out cash_sells integer,
         out cash_outcome integer,
-        out cash_income integer)
+        out cash_income integer,
+        out cash_payed_money integer)
 returns setof record as $$
 declare
         query varchar;
@@ -2235,6 +2236,10 @@ begin
         from caja
         where fecha_termino =
                 (select max (fecha_termino) from caja where fecha_inicio::date>=prepare_to and fecha_inicio::date<=prepare_to);
+
+        if close_date is null then
+                close_date := now();
+        end if;
 
         if sell_last_id = 0 or sell_last_id is null then
                 select sum (monto) into cash_sells
@@ -2268,6 +2273,14 @@ begin
 
         if cash_income is null then
                 cash_income := 0;
+        end if;
+
+        select sum (monto_abonado) into cash_payed_money
+        from abono
+        where fecha_abono >= open_date and fecha_abono <= close_date;
+
+        if cash_payed_money is null then
+                cash_payed_money := 0;
         end if;
 
 return next;
