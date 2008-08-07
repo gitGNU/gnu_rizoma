@@ -254,7 +254,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_min_width (column, 160);
-  gtk_tree_view_column_set_max_width (column, 160);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -266,7 +265,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_min_width (column, 90);
-  gtk_tree_view_column_set_max_width (column, 90);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -278,7 +276,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_min_width (column, 60);
-  gtk_tree_view_column_set_max_width (column, 60);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -290,7 +287,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_min_width (column, 40);
-  gtk_tree_view_column_set_max_width (column, 40);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -302,7 +298,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_min_width (column, 50);
-  gtk_tree_view_column_set_max_width (column, 50);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
@@ -316,13 +311,12 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 5);
   gtk_tree_view_column_set_min_width (column, 70);
-  gtk_tree_view_column_set_max_width (column, 70);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Costo", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
                                                      "text", 6,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -330,13 +324,12 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 6);
   gtk_tree_view_column_set_min_width (column, 50);
-  gtk_tree_view_column_set_max_width (column, 50);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Contrib.", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Contrib. $", renderer,
                                                      "text", 7,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -344,13 +337,12 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 7);
   gtk_tree_view_column_set_min_width (column, 60);
-  gtk_tree_view_column_set_max_width (column, 60);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Margen", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Margen %", renderer,
                                                      "text", 8,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -358,7 +350,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 8);
   gtk_tree_view_column_set_min_width (column, 50);
-  gtk_tree_view_column_set_max_width (column, 50);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
