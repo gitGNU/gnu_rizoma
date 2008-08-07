@@ -735,7 +735,7 @@
     <property name="modal">True</property>
     <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
     <property name="destroy_with_parent">True</property>
-    <property name="transient_for">wnd_sale_type</property>
+    <property name="transient_for">tipo_venta_win_venta</property>
     <signal name="delete_event" handler="gtk_button_clicked" object="btn_cancel_sale_credit"/>
     <child>
       <object class="GtkVBox" id="vbox6">
@@ -1340,6 +1340,9 @@
                           </packing>
                         </child>
                       </object>
+                      <packing>
+                        <property name="padding">5</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="vuelto_label">
