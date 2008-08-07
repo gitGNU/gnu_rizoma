@@ -669,20 +669,20 @@ fill_caja_data (GDate *date)
 
   if (res != NULL && PQntuples (res) != 0)
     {
-
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_open")),
                             g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "open_date_formatted")));
+
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_close")),
                             g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "close_date_formatted")));
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_start")),
-                            g_strdup_printf ("<b>$ %s</b>", PutPoints (PQvaluebycol (res, 0, "cash_box_start"))));
+                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_box_start"))));
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
-                            g_strdup_printf ("<b>$ %s</b>", PutPoints (PQvaluebycol (res, 0, "cash_sells"))));
+                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_sells"))));
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_payed_money")),
-                            g_strdup_printf ("<b>$ %s</b>", PutPoints (PQvaluebycol (res, 0, "cash_payed_money"))));
+                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_payed_money"))));
 
       /* if (strcmp (PQvaluebycol (res, 0, 2), "") != 0) */
       /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_doc")), */
@@ -705,7 +705,7 @@ fill_caja_data (GDate *date)
       /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 8)))); */
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out")),
-                            g_strdup_printf ("<b>$ %s</b>", PutPoints (PQvaluebycol (res, 0, "cash_outcome"))));
+                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_outcome"))));
 
       /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
       /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
@@ -717,22 +717,20 @@ fill_caja_data (GDate *date)
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_total")),
                             g_strdup_printf
-                            ("<b>$\t%s</b>", PutPoints
+                            ("<b>$ %s</b>", PutPoints
                              (g_strdup_printf
                               ("%d", atoi (PQvaluebycol (res, 0, "cash_outcome"))))));
 
       gtk_label_set_markup
         (GTK_LABEL (builder_get (builder, "lbl_money_box_total")),
          g_strdup_printf
-         ("<span size=\"xx-large\"><b>$\t%s</b></span>",
+         ("<span size=\"xx-large\"><b>$ %s</b></span>",
           PutPoints
           (g_strdup_printf ("%d",
                             (atoi (PQvaluebycol (res, 0, "cash_box_start")) + atoi (PQvaluebycol (res, 0, "cash_sells")) +
                              atoi (PQvaluebycol (res, 0, "cash_income")) + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
                             -
                             (atoi (PQvaluebycol (res, 0, "cash_outcome")))))));
-
-
     }
 }
 
