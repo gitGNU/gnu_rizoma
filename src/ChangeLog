@@ -1,3 +1,8 @@
+2008-08-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* administracion_productos.c (admini_box): Changed the column type
+	stock from INT to DOUBLE.
+
 2008-08-06  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (on_btn_nullify_search_clicked): Modified the query

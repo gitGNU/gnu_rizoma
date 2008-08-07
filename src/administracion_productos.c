@@ -407,7 +407,7 @@ admini_box ()
                               G_TYPE_STRING,  //3 brand
                               G_TYPE_INT,     //4 cantidad
                               G_TYPE_STRING,  //5 unit
-                              G_TYPE_INT,     //6 stock
+                              G_TYPE_DOUBLE,     //6 stock
                               G_TYPE_INT,     //7 price
                               G_TYPE_STRING,  //8
                               G_TYPE_BOOLEAN);//9
@@ -522,6 +522,8 @@ admini_box ()
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 6);
   gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
@@ -1011,7 +1013,7 @@ BuscarProductosParaListar (void)
                           3, PQvaluebycol (res, i, "marca"),
                           4, atoi (PQvaluebycol (res, i, "contenido")),
                           5, PQvaluebycol (res, i, "unidad"),
-                          6, atoi (PQvaluebycol (res, i, "stock")),
+                          6, g_strtod (PUT (PQvaluebycol (res, i, "stock")), NULL),
                           7, atoi (PQvaluebycol (res, i, "precio")),
                           8, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&
                               atoi (PQvaluebycol (res, i, "stock_min")) != 0) ? "Red" : "Black",
