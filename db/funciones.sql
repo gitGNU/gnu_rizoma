@@ -2241,6 +2241,11 @@ begin
                 close_date := now();
         end if;
 
+        -- To avoid problems with the first sell
+        if sell_first_id = 1 then
+                sell_first_id := 0;
+        end if;
+
         if sell_last_id = 0 or sell_last_id is null then
                 select sum (monto) into cash_sells
                 from venta
