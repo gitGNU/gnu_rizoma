@@ -23,7 +23,6 @@ rizomaUI_DATA = rizoma-admin.ui \
 rizoma-common.ui \
 rizoma-config.ui \
 rizoma-login.ui \
-rizoma.ui \
 rizoma-ventas.ui \
 rizoma-compras.ui \
 rizoma-informes.ui \
