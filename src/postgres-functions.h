@@ -243,6 +243,6 @@ gboolean provider_exist (const gchar *rut);
 
 gint users_working (void);
 
-gint nullify_sale_details (gint sale_id);
+gint nullify_sale (gint sale_id);
 
 #endif
