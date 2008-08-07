@@ -642,13 +642,13 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
     }
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
-                        g_strdup_printf ("<span size=\"x-large\">$%s</span>", PutPoints
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
                                          (g_strdup_printf ("%d", vendidos))));
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
-                        g_strdup_printf ("<span size=\"x-large\">$%s</span>", PutPoints
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
                                          (g_strdup_printf ("%d", costo))));
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_contrib")),
-                        g_strdup_printf ("<span size=\"x-large\">$%s</span>", PutPoints
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
                                          (g_strdup_printf ("%d", contrib))));
 
   margen = (((gdouble) contrib / costo) * 100);
