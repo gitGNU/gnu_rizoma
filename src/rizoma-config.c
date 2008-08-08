@@ -77,36 +77,36 @@ create_config (GtkAssistant *asistente, gpointer data_user)
 
   if (local || (network && !client))
     {
-      g_key_file_set_string (file, "DEFAULT", "DB_NAME", db_name);
-      g_key_file_set_string (file, "DEFAULT", "USER", user_db_name);
-      g_key_file_set_string (file, "DEFAULT", "PASSWORD", user_db_pass);
-      g_key_file_set_string (file, "DEFAULT", "SERVER_HOST", "localhost");
-      g_key_file_set_string (file, "DEFAULT", "PORT", pg_port);
+      g_key_file_set_string (file, "RIZOMA", "DB_NAME", db_name);
+      g_key_file_set_string (file, "RIZOMA", "USER", user_db_name);
+      g_key_file_set_string (file, "RIZOMA", "PASSWORD", user_db_pass);
+      g_key_file_set_string (file, "RIZOMA", "SERVER_HOST", "localhost");
+      g_key_file_set_string (file, "RIZOMA", "PORT", pg_port);
 
       ssl = pg_ssl ? "require" : "disable";
-      g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
+      g_key_file_set_string (file, "RIZOMA", "SSLMODE", "require");
     }
   else
     {
-      g_key_file_set_string (file, "DEFAULT", "DB_NAME", server_db_name);
-      g_key_file_set_string (file, "DEFAULT", "USER", server_db_user);
-      g_key_file_set_string (file, "DEFAULT", "PASSWORD", server_db_pass);
-      g_key_file_set_string (file, "DEFAULT", "SERVER_HOST", server_host);
-      g_key_file_set_string (file, "DEFAULT", "PORT", server_port);
+      g_key_file_set_string (file, "RIZOMA", "DB_NAME", server_db_name);
+      g_key_file_set_string (file, "RIZOMA", "USER", server_db_user);
+      g_key_file_set_string (file, "RIZOMA", "PASSWORD", server_db_pass);
+      g_key_file_set_string (file, "RIZOMA", "SERVER_HOST", server_host);
+      g_key_file_set_string (file, "RIZOMA", "PORT", server_port);
 
       ssl = server_ssl ? "require" : "disable";
-      g_key_file_set_string (file, "DEFAULT", "SSLMODE", "require");
+      g_key_file_set_string (file, "RIZOMA", "SSLMODE", "require");
     }
 
-  g_key_file_set_string (file, "DEFAULT", "TEMP_FILES", "/tmp");
-  g_key_file_set_string (file, "DEFAULT", "VALE_DIR", "/tmp");
-  g_key_file_set_string (file, "DEFAULT", "VALE_COPY", "1");
-  g_key_file_set_string (file, "DEFAULT", "VENDEDOR", "1");
-  g_key_file_set_string (file, "DEFAULT", "MAQUINA", "1");
-  g_key_file_set_string (file, "DEFAULT", "VENTA_DIRECTA", "0");
-  g_key_file_set_string (file, "DEFAULT", "PRINT_COMMAND", "lpr");
-  g_key_file_set_string (file, "DEFAULT", "LOGO", "");
-  g_key_file_set_string (file, "DEFAULT", "FULLSCREEN", "no");
+  g_key_file_set_string (file, "RIZOMA", "TEMP_FILES", "/tmp");
+  g_key_file_set_string (file, "RIZOMA", "VALE_DIR", "/tmp");
+  g_key_file_set_string (file, "RIZOMA", "VALE_COPY", "1");
+  g_key_file_set_string (file, "RIZOMA", "VENDEDOR", "1");
+  g_key_file_set_string (file, "RIZOMA", "MAQUINA", "1");
+  g_key_file_set_string (file, "RIZOMA", "VENTA_DIRECTA", "0");
+  g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
+  g_key_file_set_string (file, "RIZOMA", "LOGO", "");
+  g_key_file_set_string (file, "RIZOMA", "FULLSCREEN", "no");
 
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
