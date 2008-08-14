@@ -1,3 +1,8 @@
+2008-08-13  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (on_btn_add_new_product_clicked): Added the proper
+	check looking for repeated short code and barcode.
+
 2008-08-07  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma-config.c (create_config): Changed the default profile

@@ -3924,9 +3924,14 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_unit), "Debe Ingresar la Unidad del producto");
   else
     {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM select_producto('%s')", codigo)))
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
         {
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
+          return;
+        }
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
 
