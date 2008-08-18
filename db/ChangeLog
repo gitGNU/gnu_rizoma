@@ -1,6 +1,6 @@
 2008-08-18  Jonathan Gonzalez V.  <zeus@gnu.org>
 
-	* funciones.sql (calculate_fifo): Added function to calculate the average cost
+	* funciones.sql (calculate_fifo): Added function to calculate the average cost.
 
 2008-08-07  Jonathan Gonzalez V.  <zeus@gnu.org>
 
