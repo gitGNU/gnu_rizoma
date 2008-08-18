@@ -1159,30 +1159,15 @@ GetCurrentPrice (gchar *barcode)
 gint
 FiFo (gchar *barcode, gint compra)
 {
-
   PGresult *res;
   gchar *q;
-  gint suma = 0;
-  gint fifo = GetFiFo (barcode);
+  gint fifo;
 
-  gdouble current_stock = GetCurrentStock (barcode);
-
-  q = g_strdup_printf ("SELECT cantidad, precio, cantidad_ingresada "
-                       "FROM compra_detalle, compra WHERE "
-                       "barcode_product='%s' AND compra.id=%d AND "
-                       "compra_detalle.id_compra=%d "
-                       "ORDER BY compra.fecha DESC LIMIT 1",
-                       barcode, compra, compra);
+  q = g_strdup_printf ("select calculate_fifo (%d,%d)", barcode, compra);
   res = EjecutarSQL (q);
   g_free (q);
 
-  suma += current_stock * fifo;
-
-  suma += atoi (PQgetvalue (res, 0, 1)) * atoi (PQgetvalue (res, 0, 2));
-
-  current_stock += atoi (PQgetvalue (res, 0, 2));
-
-  fifo = lround ((double) (suma / current_stock));
+  fifo = atoi (PQgetvalue (res, 0, 0));
 
   return fifo;
 }

@@ -1,3 +1,8 @@
+2008-08-18  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* postgres-functions.c (FiFo): Changed to use the plpgsql function
+	calculate_fifo.
+
 2008-08-13  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (on_btn_add_new_product_clicked): Added the proper
