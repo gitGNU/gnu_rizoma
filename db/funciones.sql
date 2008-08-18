@@ -2348,3 +2348,29 @@ end loop;
 
 return;
 end; $$ language plpgsql;
+
+create or replace function calculate_fifo (
+        in product_barcode bigint,
+        in compra_id int)
+returns integer as $$
+declare
+        current_fifo double precision;
+        current_stock double precision;
+        costo double precision;
+        stock_add double precision;
+        suma double precision;
+        fifo integer;
+begin
+
+        select costo_promedio, stock into current_fifo, current_stock from producto where barcode=product_barcode;
+        select precio, cantidad_ingresada into costo, stock_add from compra_detalle where barcode_product=product_barcode and id_compra=compra_id;
+
+        suma = current_stock * current_fifo;
+        suma = suma + (stock_add * costo);
+
+        current_stock = current_stock + stock_add;
+
+        fifo = (suma / current_stock)::integer;
+
+        return fifo;
+end; $$ language plpgsql;
