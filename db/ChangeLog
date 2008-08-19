@@ -1,3 +1,8 @@
+2008-08-19  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (ranking_ventas): Added the condition to avoid all
+	the sales that are null.
+
 2008-08-18  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* funciones.sql (calculate_fifo): Added function to calculate the average cost.
