@@ -355,13 +355,13 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
     res = EjecutarSQL (g_strdup_printf
                        ("SELECT %s FROM venta WHERE "
                         "date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND "
-                        "date_part('day', fecha)=%d ORDER BY fecha DESC",
+                        "date_part('day', fecha)=%d and id not in  (select id_sale from venta_anulada) ORDER BY fecha DESC",
                         fields, from_year, from_month, from_day));
   else
     res = EjecutarSQL (g_strdup_printf
                        ("SELECT %s FROM venta WHERE "
                         "%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-                        "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') ORDER BY fecha DESC",
+                        "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and id not in  (select id_sale from venta_anulada) ORDER BY fecha DESC",
                         fields, date_column, from_day, from_month, from_year,
                         date_column, to_day+1, to_month, to_year));
 
