@@ -101,7 +101,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "TEMP_FILES", "/tmp");
   g_key_file_set_string (file, "RIZOMA", "VALE_DIR", "/tmp");
   g_key_file_set_string (file, "RIZOMA", "VALE_COPY", "1");
-  g_key_file_set_string (file, "RIZOMA", "VENDEDOR", "1");
+  g_key_file_set_string (file, "RIZOMA", "VENDEDOR", "0");
   g_key_file_set_string (file, "RIZOMA", "MAQUINA", "1");
   g_key_file_set_string (file, "RIZOMA", "VENTA_DIRECTA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
