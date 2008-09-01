@@ -1,3 +1,7 @@
+2008-09-01  Jonathan Gonzalez V.  <zeus@lunareja>
+
+	* credito.c (search_client): Fixed bug reported by Victor.
+
 2008-08-19  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* postgres-functions.c (SearchTuplesByDate): Added a condition to
