@@ -1163,7 +1163,7 @@ FiFo (gchar *barcode, gint compra)
   gchar *q;
   gint fifo;
 
-  q = g_strdup_printf ("select calculate_fifo (%d,%d)", barcode, compra);
+  q = g_strdup_printf ("select calculate_fifo (%s,%d)", barcode, compra);
   res = EjecutarSQL (q);
   g_free (q);
 

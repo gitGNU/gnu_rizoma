@@ -1,3 +1,7 @@
+2008-09-02  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* postgres-functions.c (FiFo): Fixed bug. Replaced %d for a proper %s.
+
 2008-09-01  Jonathan Gonzalez V.  <zeus@lunareja>
 
 	* credito.c (search_client): Fixed bug reported by Victor.
