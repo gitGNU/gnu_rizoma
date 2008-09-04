@@ -2365,6 +2365,10 @@ begin
         select costo_promedio, stock into current_fifo, current_stock from producto where barcode=product_barcode;
         select precio, cantidad_ingresada into costo, stock_add from compra_detalle where barcode_product=product_barcode and id_compra=compra_id;
 
+        if current_fifo is null then
+            current_fifo = 0;
+        end if;
+
         suma = current_stock * current_fifo;
         suma = suma + (stock_add * costo);
 
