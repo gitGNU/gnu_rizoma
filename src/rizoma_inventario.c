@@ -80,6 +80,12 @@ main (int argc, char **argv)
   int margen = 20;
   char * pEnd;
 
+  if (argc < 2)
+    {
+      g_printerr ("You have some parameters missing. The first argument needs to be a file and the seacond a profile from the ~/.rizoma file\n");
+      return -1;
+    }
+
   fp = fopen (argv[1], "r");
 
   compra = (Compra *) g_malloc (sizeof (Compra));
@@ -97,10 +103,10 @@ main (int argc, char **argv)
       return -1;
     }
 
-  rizoma_set_profile ("DEFAULT");
+  rizoma_set_profile (argv[2]);
 
   if (!DataExist ("SELECT rut FROM proveedor WHERE rut=99999999"))
-    AddProveedorToDB ("99999999-9", "Inventario", "Portugal 201", "Santiago", "Santiago", "", "", "", "Victor", "Inventario");
+    AddProveedorToDB ("99999999-9", "Inventario", "", "", "", "0", "", "", "Inventario", "Inventario");
 
   do {
 

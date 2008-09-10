@@ -1,3 +1,9 @@
+2008-09-10  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma_inventario.c (main): Added some checks related to what
+	parms are passed using the command line.
+	(main): Set to "Inventario" all the info of the first big buy.
+
 2008-09-02  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* postgres-functions.c (FiFo): Fixed bug. Replaced %d for a proper %s.
