@@ -1,3 +1,7 @@
+2008-09-10  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* configure.in: Removed the check of libgnomeprint.
+
 2008-07-17  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* configure.in: Removed check of libgksu.
