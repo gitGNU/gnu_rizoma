@@ -1,3 +1,7 @@
+2008-09-14  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* encriptar.c: Clean up of commented code.
+
 2008-09-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma_inventario.c (main): Added some checks related to what

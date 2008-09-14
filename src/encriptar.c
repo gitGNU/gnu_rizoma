@@ -2,7 +2,7 @@
        c-indentation-style: gnu -*- */
 /*encriptar.c
 *
-*    Copyright (C) 2004 Rizoma Tecnologia Limitada <info@rizoma.cl>
+*    Copyright (C) 2004,2008 Rizoma Tecnologia Limitada <info@rizoma.cl>
 *
 *    This file is part of rizoma.
 *
@@ -26,30 +26,14 @@
 #include<stdio.h>
 #include<string.h>
 
-#include<rpc/des_crypt.h>
-
 #include"tipos.h"
 
 #include<rizoma_errors.h>
 #include"postgres-functions.h"
 
-/*gchar *
-EncriptarPasswd (gchar *passwd)
-{
-  des_setparity (key);
-
-  ecb_crypt (key, passwd, strlen (passwd), DES_ENCRYPT);
-
-  return passwd;
-}
-*/
 gboolean
 CompararPassword (gchar *passwd_db, gchar *passwd)
 {
-  /*  des_setparity (llave);
-
-  ecb_crypt (llave, passwd, strlen (passwd), DES_ENCRYPT);
-  */
   if (strcmp (passwd_db, passwd) == 0)
     return TRUE;
   else
@@ -59,23 +43,8 @@ CompararPassword (gchar *passwd_db, gchar *passwd)
 gboolean
 AcceptPassword (gchar *passwd, gchar *user)
 {
-  /*gchar *passwd_db = ReturnPasswd (user);
-  gchar *llave = ReturnLlave (user);
-
-  if (passwd_db == NULL)
-    return FALSE;
-
-  if (CompararPassword (passwd_db, passwd) == FALSE)
-    return FALSE;
-  else
-  return TRUE;*/
-
   PGresult *res;
 
-  /*  res = EjecutarSQL (g_strdup_printf
-     ("SELECT * FROM users WHERE passwd=md5('%s') AND usuario='%s' AND (SELECT date_part ('year', asistencia.salida) "
-      "FROM asistencia WHERE id_user=users.id ORDER BY entrada DESC LIMIT 1)!=0; ", passwd, user));
-  */
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM users WHERE passwd=md5('%s') AND usuario='%s'", passwd, user));
 
   if (res != NULL && PQntuples (res) == 0)
@@ -85,5 +54,6 @@ AcceptPassword (gchar *passwd, gchar *user)
     return TRUE;
   else
     return FALSE;
+
 
 }
