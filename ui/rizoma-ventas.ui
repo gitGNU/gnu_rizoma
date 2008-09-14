@@ -146,7 +146,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="response_id">0</property>
                         <signal name="clicked" handler="display_calendar" object="entry_nullify_date"/>
                         <child>
                           <object class="GtkArrow" id="arrow7">
@@ -216,7 +215,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-find</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_nullify_search_clicked"/>
               </object>
               <packing>
@@ -283,7 +281,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_nullify_cancel_clicked"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -299,7 +296,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_nullify_ok_clicked"/>
               </object>
               <packing>
@@ -396,7 +392,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseVentanaEgreso"/>
               </object>
               <packing>
@@ -411,7 +406,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="EgresarDinero"/>
               </object>
               <packing>
@@ -508,7 +502,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseVentanaIngreso"/>
               </object>
               <packing>
@@ -523,7 +516,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="IngresarDinero"/>
               </object>
               <packing>
@@ -640,7 +632,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_cancel_invoice_clicked"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -656,7 +647,6 @@
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_make_invoice_clicked"/>
                 <child>
                   <object class="GtkHBox" id="hbox20">
@@ -749,7 +739,6 @@
                     <property name="sensitive">False</property>
                     <property name="label" context="yes">gtk-add</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="AgregarProducto"/>
                   </object>
                   <packing>
@@ -762,7 +751,6 @@
                     <property name="visible">True</property>
                     <property name="label" context="yes">gtk-clear</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="CleanEntryAndLabelData"/>
                   </object>
                   <packing>
@@ -874,7 +862,6 @@
                     <property name="visible">True</property>
                     <property name="extension_events">GDK_EXTENSION_EVENTS_CURSOR</property>
                     <property name="label" translatable="yes" context="yes">Buscar</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="BuscarProducto"/>
                     <accelerator key="F5" signal="clicked"/>
                   </object>
@@ -1188,7 +1175,6 @@
             <child>
               <object class="GtkButton" id="button_delete_product">
                 <property name="visible">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="EliminarProducto"/>
                 <child>
                   <object class="GtkHBox" id="hbox3">
@@ -1231,7 +1217,6 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="WindowChangeSeller"/>
                 <child>
                   <object class="GtkHBox" id="hbox4">
@@ -1272,7 +1257,6 @@
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes">_Facturar</property>
                 <property name="use_underline">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_invoice_clicked"/>
               </object>
               <packing>
@@ -1287,7 +1271,6 @@
                 <property name="can_focus">True</property>
                 <property name="label" translatable="yes" context="yes">_Vender</property>
                 <property name="use_underline">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="TipoVenta"/>
                 <accelerator key="F9" signal="clicked"/>
               </object>
@@ -1303,7 +1286,6 @@
                 <property name="receives_default">True</property>
                 <property name="no_show_all">True</property>
                 <property name="label" translatable="yes">Cerrar Caja</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_cash_box_close_clicked"/>
                 <accelerator key="F3" signal="clicked"/>
               </object>
@@ -1331,7 +1313,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-quit</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_delete_ventas_gui"/>
                 <accelerator key="F12" signal="clicked"/>
               </object>
@@ -1546,7 +1527,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="tipo_venta_win_venta"/>
               </object>
               <packing>
@@ -1561,7 +1541,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes" context="yes">_Vender</property>
                 <property name="use_underline">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_sell_button_clicked"/>
               </object>
               <packing>
@@ -1628,7 +1607,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseWindowChangeSeller"/>
               </object>
             </child>
@@ -1640,7 +1618,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="ChangeSeller"/>
               </object>
               <packing>
@@ -1703,7 +1680,6 @@
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="label" translatable="yes" context="yes">gtk-find</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="SearchAndFill"/>
                   </object>
                 </child>
@@ -1715,7 +1691,6 @@
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="label" translatable="yes" context="yes">gtk-add</property>
                     <property name="use_stock">True</property>
-                    <property name="response_id">0</property>
                     <signal name="clicked" handler="FillSellData"/>
                   </object>
                   <packing>
@@ -1767,7 +1742,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="label" translatable="yes" context="yes">gtk-close</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseBuscarWindow"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -1858,7 +1832,6 @@
             <property name="receives_default">True</property>
             <property name="label" translatable="yes" context="yes">gtk-cancel</property>
             <property name="use_stock">True</property>
-            <property name="response_id">0</property>
             <signal name="clicked" handler="gtk_widget_hide" object="vendedor_venta"/>
           </object>
         </child>
@@ -1869,7 +1842,6 @@
             <property name="receives_default">True</property>
             <property name="label" translatable="yes" context="yes">gtk-print</property>
             <property name="use_stock">True</property>
-            <property name="response_id">0</property>
             <signal name="clicked" handler="on_sell_button_clicked"/>
           </object>
           <packing>
@@ -1896,7 +1868,6 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="label" translatable="yes" context="yes">Cr&#xE9;dito</property>
-            <property name="response_id">0</property>
             <signal name="clicked" handler="on_btn_credit_clicked"/>
           </object>
           <packing>
@@ -1914,7 +1885,6 @@
             <property name="receives_default">True</property>
             <property name="label" translatable="yes" context="yes">gtk-cancel</property>
             <property name="use_stock">True</property>
-            <property name="response_id">0</property>
             <signal name="clicked" handler="gtk_widget_hide" object="wnd_sale_type"/>
           </object>
           <packing>
@@ -2040,7 +2010,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_cancel_sale_credit_clicked"/>
               </object>
               <packing>
@@ -2054,7 +2023,6 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">Vender</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_credit_sale_clicked"/>
               </object>
               <packing>
@@ -2402,7 +2370,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide"/>
               </object>
               <packing>
@@ -2416,7 +2383,6 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">Vender</property>
-                <property name="response_id">0</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2467,7 +2433,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-find</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="search_client" object="entry_search_client"/>
               </object>
               <packing>
@@ -2483,7 +2448,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-add</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="AddClient" object="entry_search_client"/>
               </object>
               <packing>
@@ -2528,7 +2492,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_client_search"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -2544,7 +2507,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes" context="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_btn_client_ok_clicked"/>
               </object>
               <packing>
@@ -2625,7 +2587,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="IniciarLaCaja"/>
               </object>
               <packing>
@@ -2778,7 +2739,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CloseCajaWin"/>
                 <accelerator key="Escape" signal="clicked"/>
               </object>
@@ -2793,7 +2753,6 @@
                 <property name="receives_default">True</property>
                 <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="CerrarLaCaja"/>
               </object>
               <packing>
