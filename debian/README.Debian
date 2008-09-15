@@ -1,0 +1,10 @@
+rizoma for Debian
+-----------------
+
+POS Rizoma Comercio use a PostgreSQL database to work. You will ned to know the password of the postgres users to setup the proper database using the programn rizoma-config. To set the password of the postgres user to this as root:
+
+    # passwd postgres
+
+And it will ask you for the new password which will be asked later on the rizoma-config.
+
+ -- Jonathan Gonzalez V. <jonathan@rizoma.cl>, Fri Sep 12 17:08:28 2008

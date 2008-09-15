@@ -1,0 +1,4 @@
+?package(rizoma-ventas):needs="X11" section="Applications/Office" title="Rizoma Ventas" command="/usr/bin/rizoma-ventas"
+?package(rizoma):needs="X11" section="Applications/Office" title="Rizoma Compras" command="/usr/bin/rizoma-compras"
+?package(rizoma):needs="X11" section="Applications/Office" title="Rizoma Admin" command="/usr/bin/rizoma-admin"
+?package(rizoma):needs="X11" section="Applications/Office" title="Rizoma Informes" command="/usr/bin/rizoma-informes"
