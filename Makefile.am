@@ -10,6 +10,4 @@ dist-hook:
 	gpg -b --use-agent $(distdir).tar.gz
 
 	chmod 644 $(distdir).tar.*
-	rsync $(distdir).tar.* $(SV_USER)@dl.sv.nongnu.org:/releases/rizoma/
 
-	rm -rf `find $(distdir)/debian -name CVS`

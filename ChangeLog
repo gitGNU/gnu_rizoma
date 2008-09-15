@@ -1,3 +1,8 @@
+2008-09-15  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* Makefile.am: Removed un-necessary code that was doing a rsync
+	with savannah.
+
 2008-09-10  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* configure.in: Removed the check of libgnomeprint.
