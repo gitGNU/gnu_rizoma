@@ -8,6 +8,6 @@ Homepage: http://www.rizoma.cl
 
 Package: rizoma
 Architecture: any
-Depends: libgtk (>= 2.0), libpq (>= 5), postgresql
+Depends: ${shlibs:Depends}, ${misc:Depends}, postgresql
 Description: POS Rizoma Comercio it's a tiny Point-of-Sell
  POS Rizoma Comercio aims to be a cheap and useful solution for small markets.
