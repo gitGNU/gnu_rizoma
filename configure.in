@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-AC_INIT(rizoma, 1.0-git, info@rizoma.cl)
+AC_INIT(rizoma, 1.0, info@rizoma.cl)
 AM_INIT_AUTOMAKE(dist-bzip2)
 AM_CONFIG_HEADER(config.h)
 
