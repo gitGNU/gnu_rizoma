@@ -376,14 +376,13 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
                   guint to_year, guint to_month, guint to_day, gint *total)
 {
   PGresult *res;
-  //TODO: arreglar este select para ajustarse al nuevo esquema, hace
-  //que se vaya de segfault
+
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT SUM ((SELECT SUM (cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
       "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
       "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND (SELECT forma_pago FROM documentos_emitidos "
-      "WHERE id=id_documento)=%d", from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
+      "WHERE id=id_documento)=%d and venta.id not in ( select id_sale from venta_anulada)", from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
 
   if (res == NULL)
     return 0;
@@ -404,7 +403,7 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
      ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
       "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
       "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND ((SELECT forma_pago FROM documentos_emitidos "
-      "WHERE id=id_documento)=%d OR (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d)",
+      "WHERE id=id_documento)=%d OR (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d) and venta.id not in ( select id_sale from venta_anulada)",
       from_day, from_month, from_year, to_day+1, to_month, to_year, CREDITO, TARJETA));
 
   if (res == NULL)
@@ -425,7 +424,7 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
                      ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE "
                       "id_venta=venta.id)), count (*) FROM venta WHERE "
                       "fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-                      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
+                      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and venta.id not in ( select id_sale from venta_anulada)",
                       from_day, from_month, from_year, to_day+1, to_month, to_year));
 
   if (res == NULL)
