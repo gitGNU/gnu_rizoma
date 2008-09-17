@@ -1,3 +1,8 @@
+2008-09-17  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma_informes.c (reports_win): Added function to missing print
+	buttons.
+
 2008-09-16  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* postgres-functions.c (GetTotalCashSell, GetTotalSell)

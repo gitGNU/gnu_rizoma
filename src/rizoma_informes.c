@@ -89,6 +89,11 @@ reports_win (void)
 
   GError *error = NULL;
 
+  Print *print = (Print *) malloc (sizeof (Print));
+
+  Print *libro = (Print *) malloc (sizeof (Print));
+  libro->son = (Print *) malloc (sizeof (Print));
+
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-informes.ui", &error);
@@ -178,6 +183,16 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
 
+  libro->tree = treeview;
+  libro->title = "Libro de Ventas";
+  libro->name = "ventas";
+  libro->date_string = NULL;
+  libro->cols[0].name = "Fecha";
+  libro->cols[0].num = 0;
+  libro->cols[1].name = "Monto";
+  libro->cols[1].num = 4;
+  libro->cols[2].name = NULL;
+
 
   store = gtk_list_store_new (4,
                               G_TYPE_STRING,
@@ -225,6 +240,21 @@ reports_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+
+  libro->son->tree = treeview;
+  libro->son->cols[0].name = "Producto";
+  libro->son->cols[0].num = 0;
+  libro->son->cols[1].name = "Cantidad";
+  libro->son->cols[1].num = 1;
+  libro->son->cols[2].name = "Unitario";
+  libro->son->cols[2].num = 2;
+  libro->son->cols[3].name = "Total";
+  libro->son->cols[3].num = 3;
+  libro->son->cols[4].name = NULL;
+
+  g_signal_connect (builder_get (builder, "btn_print_sells", "clicked",
+                    G_CALLBACK (PrintTwoTree), (gpointer)libro);
+
 
   /* End Sells */
 
@@ -353,6 +383,23 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
+
+  print->tree = treeview
+  print->title = "Ranking de Ventas";
+  print->date_string = NULL;
+  print->cols[0].name = "Producto";
+  print->cols[1].name = "Marca";
+  print->cols[2].name = "Medida";
+  print->cols[3].name = "Unidad";
+  print->cols[4].name = "Unidades";
+  print->cols[5].name = "Vendido $";
+  print->cols[6].name = "Costo";
+  print->cols[7].name = "Contrib";
+  print->cols[8].name = "Margen";
+  print->cols[9].name = NULL;
+
+  g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+                    G_CALLBACK (PrintTree), (gpointer)print);
 
 
   /* End Sells Rank */
