@@ -33,6 +33,7 @@
 #include "utils.h"
 #include "encriptar.h"
 #include "rizoma_errors.h"
+#include "printing.h"
 
 GtkBuilder *builder;
 
@@ -252,8 +253,8 @@ reports_win (void)
   libro->son->cols[3].num = 3;
   libro->son->cols[4].name = NULL;
 
-  g_signal_connect (builder_get (builder, "btn_print_sells", "clicked",
-                    G_CALLBACK (PrintTwoTree), (gpointer)libro);
+  g_signal_connect (builder_get (builder, "btn_print_sells"), "clicked",
+                                 G_CALLBACK (PrintTwoTree), (gpointer)libro);
 
 
   /* End Sells */
@@ -384,7 +385,7 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
 
-  print->tree = treeview
+  print->tree = treeview;
   print->title = "Ranking de Ventas";
   print->date_string = NULL;
   print->cols[0].name = "Producto";
