@@ -2230,7 +2230,7 @@ begin
         select id, id_venta_inicio, fecha_inicio, inicio into first_cash_box_id, sell_first_id, open_date, cash_box_start
         from caja
         where fecha_inicio =
-                (select min (fecha_inicio)from caja where fecha_inicio::date>=prepare_to and fecha_inicio::date<=prepare_to);
+                (select min (fecha_inicio) from caja where fecha_inicio::date>=prepare_to and fecha_inicio::date<=prepare_to or id_venta_termino is null);
 
         select id, id_venta_termino, fecha_termino, termino into last_cash_box_id, sell_last_id, close_date, cash_box_end
         from caja
