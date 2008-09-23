@@ -528,6 +528,8 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
   GtkTreeIter iter;
   PGresult *res;
 
+  gtk_list_store_clear (store);
+
   res = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
@@ -539,8 +541,6 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
 
   if (tuples == 0)
     return;
-
-  gtk_list_store_clear (store);
 
   for (i = 0; i < tuples; i++)
     {
@@ -805,7 +805,9 @@ on_btn_get_stat_clicked ()
   switch (page_num)
     {
     case 0:
+
       fill_sells_list (date_begin, date_end);
+      clean_container (GTK_CONTAINER (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
       fill_totals (date_begin, date_end);
       break;
     case 1:
