@@ -166,7 +166,7 @@ search_client (GtkWidget *widget, gpointer data)
         gtk_list_store_set (store, &iter,
                             0, PQgetvalue (res, i, 0),
                             1, PQgetvalue (res, i, 1),
-                            2, atoi (PQgetvalue (res, i, "telefono")),
+                            2, atoi (PQvaluebycol (res, i, "telefono")),
                             -1);
     }
 
