@@ -2378,3 +2378,31 @@ begin
 
         return fifo;
 end; $$ language plpgsql;
+
+create or replace function sells_get_totals (
+        in starts timestamp,
+        in ends timestamp,
+        out total_cash_sell integer,
+        out total_cash integer,
+        out total_cash_discount integer,
+        out total_discount integer,
+        out total_credit_sell integer,
+        out total_credit integer,
+        out total_ventas integer
+        )
+returns setof record as $$
+declare
+       q text;
+       l record;
+begin
+        select SUM (descuento) into total_cash_discount from venta where fecha >= starts and fecha < ends and descuento!=0
+                and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
+
+        select count(*) into total_discount from venta where fecha >= starts and fecha < ends and descuento!=0
+                and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
+
+
+
+return next;
+return;
+end; $$ language plpgsql;
