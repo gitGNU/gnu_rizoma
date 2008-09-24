@@ -422,7 +422,7 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL (g_strdup_printf
                      ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE "
-                      "id_venta=venta.id)), count (*) FROM venta WHERE "
+                      "id_venta=venta.id)-descuento), count (*) FROM venta WHERE "
                       "fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
                       "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and venta.id not in ( select id_sale from venta_anulada)",
                       from_day, from_month, from_year, to_day+1, to_month, to_year));
