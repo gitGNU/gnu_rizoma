@@ -529,6 +529,7 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
   PGresult *res;
 
   gtk_list_store_clear (store);
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail"))));
 
   res = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
