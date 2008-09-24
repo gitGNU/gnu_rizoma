@@ -1,3 +1,8 @@
+2008-09-24  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma_informes.c (fill_totals): Added new row to show the
+	discounts.
+
 2008-09-17  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma_informes.c (reports_win): Added function to missing print
