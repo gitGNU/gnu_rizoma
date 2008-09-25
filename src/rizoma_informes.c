@@ -79,6 +79,101 @@ ChangeVenta (void)
     }
 }
 
+
+void
+fill_caja_data (void)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_cash_box_lists"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkTreeIter iter;
+
+  PGresult *res;
+  gchar *query;
+  gint cash_box_id;
+
+  clean_container (GTK_CONTAINER (builder_get (builder, "table_data")));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &cash_box_id,
+                          -1);
+
+      query = g_strdup_printf ("select to_char (open_date, 'DD-MM-YYYY HH24:MI') as open_date_formatted, "
+                               "to_char (close_date, 'DD-MM-YYYY HH24:MI') as close_date_formatted, * from cash_box_report (%d)", cash_box_id);
+      res = EjecutarSQL (query);
+      g_free (query);
+
+      if (res != NULL && PQntuples (res) != 0)
+        {
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_open")),
+                                g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "open_date_formatted")));
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_close")),
+                                g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "close_date_formatted")));
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_start")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_box_start"))));
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_sells"))));
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_payed_money")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_payed_money"))));
+
+          /* if (strcmp (PQvaluebycol (res, 0, 2), "") != 0) */
+          /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_doc")), */
+          /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 2)))); */
+
+          /* if (strcmp (PQvaluebycol (res, 0, 4), "") != 0) */
+          /*   gtk_label_set_markup (GTK_LABEL (pago_ventas), */
+          /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 4)))); */
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_other")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_income"))));
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_ingr_total")),
+                                g_strdup_printf
+                                ("<b>$ %s</b>", PutPoints
+                                 (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells")) + atoi (PQvaluebycol (res, 0, "cash_income"))))));
+
+          /* if (strcmp (PQvaluebycol (res, 0, 8), "") != 0) */
+          /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_invoice")), */
+          /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 8)))); */
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_outcome"))));
+
+          /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
+          /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
+          /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 6)))); */
+
+          /* if (strcmp (PQvaluebycol (res, 0, 7), "") != 0) */
+          /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_other")), */
+          /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 7)))); */
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_total")),
+                                g_strdup_printf
+                                ("<b>$ %s</b>", PutPoints
+                                 (g_strdup_printf
+                                  ("%d", atoi (PQvaluebycol (res, 0, "cash_outcome"))))));
+
+          gtk_label_set_markup
+            (GTK_LABEL (builder_get (builder, "lbl_money_box_total")),
+             g_strdup_printf
+             ("<span size=\"xx-large\"><b>$ %s</b></span>",
+              PutPoints
+              (g_strdup_printf ("%d",
+                                (atoi (PQvaluebycol (res, 0, "cash_box_start")) + atoi (PQvaluebycol (res, 0, "cash_sells")) +
+                                 atoi (PQvaluebycol (res, 0, "cash_income")) + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
+                                -
+                                (atoi (PQvaluebycol (res, 0, "cash_outcome")))))));
+        }
+    }
+}
+
+
 void
 reports_win (void)
 {
@@ -254,7 +349,7 @@ reports_win (void)
   libro->son->cols[4].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_sells"), "clicked",
-                                 G_CALLBACK (PrintTwoTree), (gpointer)libro);
+                    G_CALLBACK (PrintTwoTree), (gpointer)libro);
 
 
   /* End Sells */
@@ -405,6 +500,70 @@ reports_win (void)
 
   /* End Sells Rank */
 
+  /* Cash Box */
+
+  store = gtk_list_store_new (5,
+                              G_TYPE_INT,
+                              G_TYPE_STRING,
+                              G_TYPE_INT,
+                              G_TYPE_STRING,
+                              G_TYPE_INT);
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_cash_box_lists"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (fill_caja_data), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Id", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha Apertura", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Apertura", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha Cierre", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Cierre", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  /* End Cash Box */
+
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
 }
 
@@ -529,7 +688,7 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
   PGresult *res;
 
   gtk_list_store_clear (store);
-  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail"))));
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
 
   res = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
@@ -729,87 +888,39 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
 }
 
 void
-fill_caja_data (GDate *date)
+fill_cash_box_list (GDate *date_begin, GDate *date_end)
 {
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_cash_box_lists"))));
+  GtkTreeIter iter;
   PGresult *res;
   gchar *query;
-  gint year = g_date_get_year (date);
-  gint month = g_date_get_month (date);
-  gint day = g_date_get_day (date);
+  gint i, tuples;
 
-  clean_container (GTK_CONTAINER (builder_get (builder, "table_data")));
-
-  query = g_strdup_printf ("select to_char (open_date, 'DD-MM-YYYY HH24:MI') as open_date_formatted, to_char (close_date, 'DD-MM-YYYY HH24:MI') as close_date_formatted, * from cash_box_report (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))", day, month, year);
+  query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                           "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null)", g_date_get_day (date_begin),
+                           g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end), g_date_get_month (date_end),
+                           g_date_get_year (date_begin));
   res = EjecutarSQL (query);
   g_free (query);
 
-  if (res != NULL && PQntuples (res) != 0)
+  if (res == NULL) return;
+
+  tuples = PQntuples (res);
+
+  gtk_list_store_clear (store);
+
+  for (i = 0; i < tuples; i++)
     {
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_open")),
-                            g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "open_date_formatted")));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_close")),
-                            g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "close_date_formatted")));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_start")),
-                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_box_start"))));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
-                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_sells"))));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_payed_money")),
-                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_payed_money"))));
-
-      /* if (strcmp (PQvaluebycol (res, 0, 2), "") != 0) */
-      /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_doc")), */
-      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 2)))); */
-
-      /* if (strcmp (PQvaluebycol (res, 0, 4), "") != 0) */
-      /*   gtk_label_set_markup (GTK_LABEL (pago_ventas), */
-      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 4)))); */
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_other")),
-                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_income"))));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_ingr_total")),
-                            g_strdup_printf
-                            ("<b>$ %s</b>", PutPoints
-                             (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells")) + atoi (PQvaluebycol (res, 0, "cash_income"))))));
-
-      /* if (strcmp (PQvaluebycol (res, 0, 8), "") != 0) */
-      /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_invoice")), */
-      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 8)))); */
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out")),
-                            g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_outcome"))));
-
-      /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
-      /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
-      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 6)))); */
-
-      /* if (strcmp (PQvaluebycol (res, 0, 7), "") != 0) */
-      /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_other")), */
-      /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 7)))); */
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_total")),
-                            g_strdup_printf
-                            ("<b>$ %s</b>", PutPoints
-                             (g_strdup_printf
-                              ("%d", atoi (PQvaluebycol (res, 0, "cash_outcome"))))));
-
-      gtk_label_set_markup
-        (GTK_LABEL (builder_get (builder, "lbl_money_box_total")),
-         g_strdup_printf
-         ("<span size=\"xx-large\"><b>$ %s</b></span>",
-          PutPoints
-          (g_strdup_printf ("%d",
-                            (atoi (PQvaluebycol (res, 0, "cash_box_start")) + atoi (PQvaluebycol (res, 0, "cash_sells")) +
-                             atoi (PQvaluebycol (res, 0, "cash_income")) + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
-                            -
-                            (atoi (PQvaluebycol (res, 0, "cash_outcome")))))));
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+                          0, atoi (PQvaluebycol (res, i, "id")),
+                          1, PQvaluebycol (res, i, "fecha_inicio"),
+                          2, atoi (PQvaluebycol (res, i, "inicio")),
+                          3, PQvaluebycol (res, i, "fecha_termino"),
+                          4, atoi (PQvaluebycol (res, i, "termino")),
+                          -1);
     }
 }
-
 
 void
 on_btn_get_stat_clicked ()
@@ -820,15 +931,11 @@ on_btn_get_stat_clicked ()
   const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
   GDate *date_begin = g_date_new ();
   GDate *date_end = g_date_new ();
-  GDate *date = g_date_new ();
 
-  if (page_num != 2)
-    {
-      if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
+  if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
 
-      g_date_set_parse (date_begin, str_begin);
-      g_date_set_parse (date_end, str_end);
-    }
+  g_date_set_parse (date_begin, str_begin);
+  g_date_set_parse (date_end, str_end);
 
   switch (page_num)
     {
@@ -842,8 +949,7 @@ on_btn_get_stat_clicked ()
       fill_products_rank (date_begin, date_end);
       break;
     case 2:
-      g_date_set_parse (date, gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_money_box_date"))));
-      if (g_date_valid (date)) fill_caja_data (date);
+      fill_cash_box_list (date_begin, date_end);
       break;
     default:
       break;
