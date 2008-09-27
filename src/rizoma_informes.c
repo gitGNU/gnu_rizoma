@@ -823,6 +823,7 @@ fill_totals (GDate *date_begin, GDate *date_end)
                         g_strdup_printf ("<span>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_discount))));
 
+  if (total_cash_discount != 0)
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_avarage")),
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_discount / total_discount))));
