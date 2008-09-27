@@ -59,10 +59,11 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
     if (products->product->iva != 0)
       {
-        if (products->product->mayorista == FALSE)
-          precio = products->product->precio;
-        else
+        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && products->product->cantidad >= products->product->cantidad_mayorista &&
+            products->product->mayorista == TRUE)
           precio = products->product->precio_mayor;
+        else
+          precio = products->product->precio;
 
         fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
                  products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
@@ -80,10 +81,11 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
     if (products->product->iva == 0)
       {
-        if (products->product->mayorista == FALSE)
-          precio = products->product->precio;
-        else
+        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && products->product->cantidad >= products->product->cantidad_mayorista &&
+            products->product->mayorista == TRUE)
           precio = products->product->precio_mayor;
+        else
+          precio = products->product->precio;
 
         fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
                  products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
