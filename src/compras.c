@@ -1428,7 +1428,7 @@ SearchByName()
       gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Codigo Simple", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
                                                          "text", 0,
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
@@ -1449,8 +1449,8 @@ SearchByName()
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
       gtk_tree_view_column_set_alignment (column, 0.5);
-      gtk_tree_view_column_set_min_width (column, 200);
-      gtk_tree_view_column_set_max_width (column, 200);
+      gtk_tree_view_column_set_min_width (column, 400);
+      //      gtk_tree_view_column_set_max_width (column, 300);
       gtk_tree_view_column_set_resizable (column, FALSE);
 
       renderer = gtk_cell_renderer_text_new ();
