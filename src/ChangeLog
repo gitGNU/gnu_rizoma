@@ -1,5 +1,8 @@
 2008-09-29  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* ventas.c (TipoVenta): With and without the VENDEDOR option set
+	it to 1 or 0 the we will emit a ticket.
+
 	* compras.c (on_button_ok_ingress_clicked): Added the current date
 	as the default value for the invoice/guide ingress.
 
