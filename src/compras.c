@@ -3018,6 +3018,10 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
   gboolean complete = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radiobutton_ingress_complete")));
   gboolean factura = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radiobutton_ingress_document")));
 
+  gchar str_date[256];
+  GtkEntry *entry;
+  GDate *date = g_date_new ();
+
   gtk_widget_hide_all (GTK_WIDGET (wnd_ingress));
 
   if (complete)
@@ -3026,6 +3030,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
         {
           GtkWindow *wnd_invoice = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
           clean_container (GTK_CONTAINER (wnd_invoice));
+
+          entry = GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"));
 
           /* Suggested amount */
           gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount")),
@@ -3038,6 +3044,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
         {
           GtkWindow *wnd_guide = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_guide"));
           clean_container (GTK_CONTAINER (wnd_guide));
+
+          entry = GTK_ENTRY (builder_get (builder, "entry_ingress_guide_date"));
 
           /* Suggested amount */
           gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_guide_amount")),
@@ -3146,6 +3154,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
             }
           clean_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_partial_invoice")));
 
+          entry = GTK_ENTRY (builder_get (builder, "entry_ingress_partial_invoice_date"));
+
           /* Suggested amount */
           gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_partial_invoice_amount")),
                               CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
@@ -3252,6 +3262,8 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
             }
           clean_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_partial_guide")));
 
+          entry = GTK_ENTRY (builder_get (builder, "entry_ingress_partial_guide_date"));
+
           /* Suggested amount */
           gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_partial_guide_amount")),
                               CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
@@ -3261,6 +3273,11 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data) {
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_ingress_partial_guide")));
         }
     }
+
+  g_date_set_time_t (date, time (NULL));
+
+  if (g_date_strftime (str_date, sizeof (str_date), "%x", date) == 0) strcpy (str_date, "---");
+  gtk_entry_set_text (entry, str_date);
 }
 
 void

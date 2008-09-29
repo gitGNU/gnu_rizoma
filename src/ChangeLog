@@ -1,5 +1,8 @@
 2008-09-29  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (on_button_ok_ingress_clicked): Added the current date
+	as the default value for the invoice/guide ingress.
+
 	* ventas.c (ventas_win): Added check if CAJA option was set to
 	zero we will not show the close cash box button and will not ask
 	to close it.
