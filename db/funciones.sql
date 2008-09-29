@@ -278,7 +278,7 @@ query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
 		    otros, familia, perecibles, stock_min, margen_promedio,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista
-		    FROM producto$S$;
+		    FROM producto ORDER BY descripcion, marca$S$;
 
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;
@@ -474,7 +474,7 @@ query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
 		    cantidad_mayor, mayorista
              FROM producto WHERE lower(descripcion) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR lower(marca) LIKE lower($S$
-	|| quote_literal(expresion) || $S$) $S$;
+	|| quote_literal(expresion) || $S$) order by descripcion, marca $S$;
 
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;
@@ -1588,7 +1588,7 @@ begin
 	END IF;
 	END LOOP;
 
-        query := query || $S$)$S$;
+        query := query || $S$) order by descripcion, marca$S$;
 
 	FOR list IN EXECUTE query LOOP
 	barcode := list.barcode;
@@ -1709,7 +1709,7 @@ returns double precision as $$
 begin
 
 		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=1;
-
+f
 end; $$ language plpgsql;
 
 create or replace function get_otro_impuesto(

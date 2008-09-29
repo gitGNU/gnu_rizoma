@@ -2,6 +2,8 @@
 
 	* funciones.sql (cash_box_report): Some fixes and speed up on
 	functionaility.
+	(buscar_productos, buscar_producto, select_product): Added an
+	order by columns "descripcion" and "marca".
 
 2008-08-19  Jonathan Gonzalez V.  <zeus@gnu.org>
 
