@@ -1,3 +1,9 @@
+2008-09-29  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (ventas_win): Added check if CAJA option was set to
+	zero we will not show the close cash box button and will not ask
+	to close it.
+
 2008-09-24  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* rizoma_informes.c (fill_totals): Added new row to show the
