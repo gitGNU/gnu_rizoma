@@ -2227,10 +2227,15 @@ declare
         last_cash_box_id integer;
 begin
 
-        select id, id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino
-        into first_cash_box_id, sell_first_id, open_date, cash_box_start, last_cash_box_id, sell_last_id, close_date, cash_box_end
+        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino
+        into sell_first_id, open_date, cash_box_start, sell_last_id, close_date, cash_box_end
         from caja
         where id = cash_box_id;
+
+        -- select id_venta_inicio into sell_first_id, fecha_inicio into open_date, inicio into cintoh_box_start, id_venta_termino into sell_lintot_id, fecha_termino into close_date,
+        --         termino into cintoh_box_end
+        -- from caja
+        -- where id = cintoh_box_id;
 
         if close_date is null then
                 close_date := now();
@@ -2255,13 +2260,9 @@ begin
                 cash_sells := 0;
         end if;
 
-        if last_cash_box_id = 0 or last_cash_box_id is null then
-                last_cash_box_id := first_cash_box_id + 1;
-        end if;
-
         select sum (monto) into cash_outcome
         from egreso
-        where id_caja >= first_cash_box_id and id_caja <= last_cash_box_id;
+        where id_caja = cash_box_id;
 
         if cash_outcome is null then
                 cash_outcome := 0;
@@ -2269,7 +2270,7 @@ begin
 
         select sum (monto) into cash_income
         from ingreso
-        where id_caja >= first_cash_box_id and id_caja <= last_cash_box_id;
+        where id_caja = cash_box_id;
 
         if cash_income is null then
                 cash_income := 0;

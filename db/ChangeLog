@@ -1,3 +1,8 @@
+2008-09-29  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* funciones.sql (cash_box_report): Some fixes and speed up on
+	functionaility.
+
 2008-08-19  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* funciones.sql (ranking_ventas): Added the condition to avoid all
