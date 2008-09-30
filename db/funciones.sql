@@ -590,7 +590,7 @@ declare
 	list record;
 	query varchar(255);
 begin
-query := 'SELECT id, descripcion, monto FROM impuesto WHERE id != 1';
+query := 'SELECT id, descripcion, monto FROM impuesto WHERE id != 1 ORDER BY id';
 
 FOR list IN EXECUTE query LOOP
     id := list.id;
@@ -1709,7 +1709,7 @@ returns double precision as $$
 begin
 
 		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=1;
-f
+
 end; $$ language plpgsql;
 
 create or replace function get_otro_impuesto(
