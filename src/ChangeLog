@@ -1,5 +1,9 @@
 2008-09-30  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* administracion_productos.c (ModificarProducto): Use the
+	select_otros_impuestos () to get the list of other tasks and show
+	them on modified product window.
+
 	* compras.c (SearchProductHistory): Added a field to show the
 	content of a product.
 

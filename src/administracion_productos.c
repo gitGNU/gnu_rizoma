@@ -1134,20 +1134,11 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   gtk_list_store_clear (combo_store);
 
-  gtk_list_store_append (combo_store, &iter);
-
-  gtk_list_store_set (combo_store, &iter,
-                      0, -1,
-                      1, "Ninguno",
-                      2, 0.0,
-                      -1);
-
 
   otros_index = GetOtrosIndex(barcode);
   active = -1;
 
-  res = EjecutarSQL ("SELECT id, descripcion, monto "
-                     "FROM impuesto WHERE id!=0");
+  res = EjecutarSQL ("SELECT id, descripcion, monto FROM select_otros_impuestos ()");
   tuples = PQntuples (res);
 
   for (i = 0; i < tuples; i++)
@@ -1159,8 +1150,7 @@ ModificarProducto (GtkWidget *widget_barcode)
                           1, PQvaluebycol (res, i, "descripcion"),
                           2, g_ascii_strtod (PQvaluebycol(res, i, "monto"), NULL),
                           -1);
-      if (atoi (PQvaluebycol(res, i, "id")) == otros_index)
-        active = i+1;
+      if (atoi (PQvaluebycol(res, i, "id")) == otros_index) active = i;
     }
 
   gtk_combo_box_set_active (GTK_COMBO_BOX (combo_imp), active != -1 ? active : 0);
