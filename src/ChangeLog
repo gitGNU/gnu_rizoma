@@ -1,3 +1,8 @@
+2008-09-30  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* compras.c (SearchProductHistory): Added a field to show the
+	content of a product.
+
 2008-09-29  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (TipoVenta): With and without the VENDEDOR option set
