@@ -1,5 +1,8 @@
 2008-09-30  Jonathan Gonzalez V.  <zeus@gnu.org>
 
+	* compras.c (InsertarCompras): The first request will be selected
+	as default.
+
 	* administracion_productos.c (ModificarProducto): Use the
 	select_otros_impuestos () to get the list of other tasks and show
 	them on modified product window.

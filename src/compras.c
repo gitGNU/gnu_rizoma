@@ -1597,9 +1597,10 @@ ClearAllCompraData (void)
 void
 InsertarCompras (void)
 {
+  GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"));
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (treeview);
   GtkTreeIter iter;
-
-  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
+  GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   GtkListStore *store_pending_request_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_request_detail"))));
 
   PGresult *res;
@@ -1632,6 +1633,8 @@ InsertarCompras (void)
                           4, ReturnIncompletProducts (id_compra) ? "Red" : "Black",
                           5, TRUE,
                           -1);
+
+      if (i == 0) gtk_tree_selection_select_iter (selection, &iter);
     }
 }
 
