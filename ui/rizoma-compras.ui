@@ -1860,7 +1860,7 @@
                             <child>
                               <object class="GtkLabel" id="label22">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Precio Venta</property>
+                                <property name="label" translatable="yes">Precio Venta/Mayor</property>
                                 <property name="justify">GTK_JUSTIFY_RIGHT</property>
                               </object>
                               <packing>
