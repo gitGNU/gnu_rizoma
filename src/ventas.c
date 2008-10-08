@@ -1559,11 +1559,12 @@ SearchAndFill (void)
   gint resultados, i;
   gchar *q;
   gchar *string;
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"));
   GtkTreeIter iter;
   GtkListStore *store;
 
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "ventas_buscar_entry"))));
-  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"))));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (tree));
 
   if (!(g_str_equal (string, "")))
     {
@@ -1608,9 +1609,8 @@ SearchAndFill (void)
                               -1);
         }
     }
-
-  gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "ventas_search_treeview"))),
-                                  gtk_tree_path_new_from_string ("0"));
+  gtk_widget_grab_focus (GTK_WIDGET (tree));
+  gtk_tree_selection_select_path (gtk_tree_view_get_selection (tree), gtk_tree_path_new_from_string ("0"));
 }
 
 void
