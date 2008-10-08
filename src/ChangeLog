@@ -1,3 +1,8 @@
+2008-10-08  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* ventas.c (SearchAndFill): Added the selection of the first item
+	when search.
+
 2008-09-30  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* compras.c (InsertarCompras): The first request will be selected

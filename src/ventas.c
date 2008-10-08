@@ -1608,6 +1608,9 @@ SearchAndFill (void)
                               -1);
         }
     }
+
+  gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "ventas_search_treeview"))),
+                                  gtk_tree_path_new_from_string ("0"));
 }
 
 void
