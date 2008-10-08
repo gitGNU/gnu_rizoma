@@ -1046,15 +1046,15 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 
   switch (tipo_documento)
     {
-    case SIMPLE:
+    case SIMPLE: case VENTA:
       if (monto >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
       break;
-    case VENTA:
-      ticket = -1;
-      break;
+      /* case VENTA: */
+      /*   ticket = -1; */
+      /*   break; */
     default:
       g_printerr("Could not be found the document type %s", G_STRFUNC);
     }
@@ -1137,7 +1137,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
 
   if (g_str_equal (tipo_vendedor, "1"))
     {
-      tipo_documento = SIMPLE;
+      tipo_documento = VENTA;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "vendedor_venta"));
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "button_imprimir")));
       gtk_widget_show_all (GTK_WIDGET (window));
