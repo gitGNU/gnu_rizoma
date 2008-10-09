@@ -107,6 +107,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
   g_key_file_set_string (file, "RIZOMA", "LOGO", "");
   g_key_file_set_string (file, "RIZOMA", "FULLSCREEN", "no");
+  g_key_file_set_string (file, "RIZOMA", "CAJA", "0");
 
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
