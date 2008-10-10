@@ -1398,7 +1398,10 @@ SearchName ()
                           -1);
     }
 
-  if (resultado != 0) gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buscar")));
+  if (resultado != 0) {
+    gtk_tree_selection_select_path (gtk_tree_view_get_selection (treeview), gtk_tree_path_new_from_string ("0"));
+    gtk_widget_grab_focus (GTK_WIDGET (treeview));
+  }
 }
 
 void
