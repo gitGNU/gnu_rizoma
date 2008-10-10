@@ -1262,7 +1262,8 @@ begin
 q := 'SELECT rut,dv,nombre,direccion,ciudad,comuna,telefono,email,web,contacto,giro
      	     FROM proveedor WHERE lower(nombre) LIKE lower('
 	     || quote_literal($1) || ') '
-	     || 'OR lower(rut::varchar) LIKE lower(' || quote_literal($1) || ')';
+	     || 'OR lower(rut::varchar) LIKE lower(' || quote_literal($1) || ') ORDER BY nombre';
+
 for l in execute q loop
     rut = l.rut;
     dv = l.dv;
@@ -1299,7 +1300,7 @@ declare
 	q varchar(255);
 begin
 q := 'SELECT rut, dv, nombre, direccion, ciudad, comuna, telefono,
-     email, web, contacto, giro FROM proveedor';
+     email, web, contacto, giro FROM proveedor ORDER BY nombre';
 
 for l in execute q loop
     rut := l.rut;
