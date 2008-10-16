@@ -2204,23 +2204,24 @@ CleanStatusProduct (void)
 
   gtk_list_store_clear (store);
 
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock_further")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_sell_price")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_code")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_product_desc")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_mark")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_unit")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_stock")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_stock_further")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_sell_price")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_fifo")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_code")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "label_cont")), "");
 
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), "");
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "");
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), "");
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), "1");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), "1");
 
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), "");
 
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
 }
 
 gboolean
