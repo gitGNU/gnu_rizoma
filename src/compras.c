@@ -2927,6 +2927,7 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   switch (page_num)
     {
     case 0:
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
       break;
     case 1:
       InsertarCompras ();
