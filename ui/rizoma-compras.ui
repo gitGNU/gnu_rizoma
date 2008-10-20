@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <interface>
+  <!-- interface-requires gtk+ 2.12 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="wnd_ingress_partial_invoice">
     <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Guia</property>
     <property name="modal">True</property>
@@ -1629,6 +1631,7 @@
                         <property name="is_focus">True</property>
                         <property name="activates_default">True</property>
                         <signal name="activate" handler="on_entry_buy_barcode_activate"/>
+                        <signal name="activate" handler="gtk_widget_grab_focus" object="entry_buy_price" after="yes"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
