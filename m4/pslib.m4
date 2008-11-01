@@ -34,7 +34,7 @@ AC_DEFUN([AM_CHECK_PSLIB],[
 
 	   AC_MSG_RESULT( yes (version $PSLIB_VERSION));
 	else
-	AC_MSG_ERROR( Debes tener instalado libps )
+	AC_MSG_ERROR( Debes tener instalado pslib )
 	fi
 
 	AC_SUBST(PSLIB_LIBS)
