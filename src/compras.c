@@ -2821,8 +2821,6 @@ main (int argc, char **argv)
   }
   gtk_builder_connect_signals (builder, NULL);
 
-  login_window = GTK_WINDOW(gtk_builder_get_object (builder, "login_window"));
-
   profiles = g_key_file_get_groups (key_file, NULL);
   g_key_file_free (key_file);
 
@@ -2851,7 +2849,7 @@ main (int argc, char **argv)
   gtk_combo_box_set_model (combo, (GtkTreeModel *)model);
   gtk_combo_box_set_active (combo, 0);
 
-  gtk_widget_show_all ((GtkWidget *)login_window);
+  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "login_window")));
 
   gtk_main ();
 
