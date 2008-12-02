@@ -29,7 +29,6 @@
 #include<string.h>
 #include<ctype.h>
 #include<math.h>
-
 #include"tipos.h"
 
 #include"compras.h"
@@ -3352,6 +3351,9 @@ on_entry_guide_invoice_provider_activate (GtkEntry *entry, gpointer user_data)
   GtkListStore *store;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
+  gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
+  gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
+
 
   if (gtk_tree_view_get_model (tree) == NULL )
     {
@@ -3377,6 +3379,9 @@ on_entry_guide_invoice_provider_activate (GtkEntry *entry, gpointer user_data)
     }
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_provider"));
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_srch_provider")), str_schr);
+  on_entry_srch_provider_activate(entry);
+
   gtk_widget_show_all (GTK_WIDGET (window));
 }
 
@@ -3680,6 +3685,8 @@ ClearFactData (void)
 void
 on_entry_invoice_provider_activate (GtkEntry *entry, gpointer data)
 {
+
+  //on_entry_srch_provider_activate(entry);
   on_entry_guide_invoice_provider_activate (entry, data);
 }
 
