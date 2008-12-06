@@ -23,6 +23,10 @@
 
 #ifndef   	ADMIN_H_
 # define   	ADMIN_H_
+
+/*
+ * This function check the password given by the user
+ */
 void check_passwd (GtkWidget *widget, gpointer data);
 
 void admin_win();
