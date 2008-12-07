@@ -48,13 +48,13 @@ PrintVale (Productos *header, gint venta_id, gint total)
   gdouble siva = 0.0, civa = 0.0;
 
   fp = fopen (vale_file, "w+");
-
+  fprintf (fp, "\t CONTROL INTERNO");
   fprintf (fp, "%s", start);
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(), CurrentTime());
   fprintf (fp, "Numero de venta: %d\n", venta_id);
   fprintf (fp, "Vendedor: %s\n", user_data->user);
   fprintf (fp, "==========================================\n\n");
-
+  fprintf (fp, "Gracias por su compra");
   do {
 
     if (products->product->iva != 0)
