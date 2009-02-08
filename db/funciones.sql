@@ -2399,7 +2399,17 @@ begin
                 and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
 
 
-
 return next;
 return;
 end; $$ language plpgsql;
+
+
+create or replace function incr_fecha(
+	in pfecha date
+	)
+returns date as $$
+begin
+	return pfecha + integer '1';
+end;
+ $$ language plpgsql;
+

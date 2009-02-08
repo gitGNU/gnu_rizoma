@@ -1171,23 +1171,32 @@ FiFo (gchar *barcode, gint compra)
   return fifo;
 }
 
+/**
+ * Calcula iva y otros y luego registra la venta en la tabla venta_detalle
+ *
+ *
+ * @param products puntero que apunta a los valores del producto que se va vender
+ * @param id_venta es el id de la venta que se esta realizando
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
+
 gboolean
 SaveProductsSell (Productos *products, gint id_venta)
 {
   PGresult *res;
   Productos *header = products;
-  gdouble iva, otros = 0;
+  gdouble iva,iva2=1, otros = 0;
   gint margen;
   gchar *cantidad;
   gint precio;
   gchar *q;
+  gint pre;
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
 
       iva = GetIVA (products->product->barcode);
       otros = GetOtros (products->product->barcode);
-
       iva = (gdouble) iva / 100;
 
       if (otros != -1)
@@ -1209,10 +1218,19 @@ SaveProductsSell (Productos *products, gint id_venta)
       else
         margen = products->product->margen;
 
-
-      iva = (gdouble) ((products->product->precio_compra * ((gdouble)margen /
-                                                            100 + 1))*
-                       products->product->cantidad) * (gdouble)products->product->iva / 100;
+      if(lround(iva2)==-1)
+	    {
+	      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
+	      res = EjecutarSQL (q);
+          pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+	      iva = (gdouble) ((pre *((gdouble)margen /100 + 1))*
+		  products->product->cantidad) * (gdouble)products->product->iva / 100;
+	    }
+      else
+	    {
+	      iva = (gdouble) ((products->product->precio_compra * ((gdouble)margen /100 + 1))*
+          products->product->cantidad) * (gdouble)products->product->iva / 100;
+	    }
 
       if (products->product->otros != -1)
         otros = (gdouble)((products->product->precio_compra * ((gdouble)margen /

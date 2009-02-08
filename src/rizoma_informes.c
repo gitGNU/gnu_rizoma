@@ -770,6 +770,7 @@ fill_totals (GDate *date_begin, GDate *date_end)
       total_discount = atoi (PQvaluebycol (res, 0, "total_discount"));
     }
 
+
   total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
                                           g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
                                           &total_credit);
@@ -818,6 +819,7 @@ fill_totals (GDate *date_begin, GDate *date_end)
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount")),
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_discount))));
+    
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_n")),
                         g_strdup_printf ("<span>%s</span>",
