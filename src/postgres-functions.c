@@ -1185,7 +1185,7 @@ SaveProductsSell (Productos *products, gint id_venta)
 {
   PGresult *res;
   Productos *header = products;
-  gdouble iva,iva2=1, otros = 0;
+  gdouble iva,precioPro, otros = 0;
   gint margen;
   gchar *cantidad;
   gint precio;
@@ -1218,7 +1218,9 @@ SaveProductsSell (Productos *products, gint id_venta)
       else
         margen = products->product->margen;
 
-      if(lround(iva2)==-1)
+      precioPro = products->product->precio_compra;
+
+      if(lround(precioPro) == -1)
 	    {
 	      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
 	      res = EjecutarSQL (q);
