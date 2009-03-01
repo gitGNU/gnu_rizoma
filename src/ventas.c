@@ -1084,6 +1084,12 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   ListClean ();
 }
 
+/**
+ *Al recibir un signal del entry, cambia el foco al boton "sell_add_button"
+ *
+ *@parametro entry tipo GtkEntry * que recive la señal
+ *@parametro data tipo gpointer entrega el puntero para el procedimiento interno
+ */
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 {
