@@ -253,6 +253,24 @@ InsertNewDocument (gint document_type, gint sell_type)
     return -1;
 }
 
+/**
+ * Es llamada por las funciones on_sell_button_clicked[ventas.c],
+ * on_btn_credit_sale_clicked[ventas.c], on_btn_make_invoice_clicked[ventas.c]
+ * Esta funciom  registra los datos en la tabla venta.
+ *
+ * @param total entero que contiene el precio total de los productos vendidos.
+ * @param machine entero que contiene el id de la maquina.
+ * @param seller entero que contiene el id del vendedor.
+ * @param tipo_venta entero que contiene el tipo de venta que es.
+ * @param rut cadena que contiene el rut del cliente deudor
+ * @param discount cadena que contiene el descuento
+ * @param boleta entero que contien el id de la boleta
+ * @param tipo_documento cadena que contiene tipo de documento
+ * @param cheque_date cadena que contiene los cheque_date
+ * @param cheques boolean que dice si (1) es o no(0) cheque 
+ * @param cancele boolean que dice si (1) la venta es o no (0) cancelada
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
 gboolean
 SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount, gint boleta,
           gint tipo_documento, gchar *cheque_date, gboolean cheques, gboolean canceled)
@@ -1133,7 +1151,7 @@ GetCurrentStock (gchar *barcode)
   return stock;
 }
 
-/*
+/**
  * Returns the current price of the product
  * @param barcode barcode of the product that must return the price
  * @return the price, if the could not be found the price returns -1
@@ -1172,8 +1190,9 @@ FiFo (gchar *barcode, gint compra)
 }
 
 /**
- * Calcula iva y otros y luego registra la venta en la tabla venta_detalle
- *
+ * Es llamada por la funcion SaveSell
+ * Esta funciom calcula el iva, otros, ademas de descontar los productos
+ * vendidos del stock y luego registra la venta en la tabla venta_detalle
  *
  * @param products puntero que apunta a los valores del producto que se va vender
  * @param id_venta es el id de la venta que se esta realizando
@@ -1219,7 +1238,11 @@ SaveProductsSell (Productos *products, gint id_venta)
         margen = products->product->margen;
 
       precioPro = products->product->precio_compra;
-
+      /*
+        Si el costo promedio es -1, vuelve a preguntar el valor de costo
+        promedio, a traves de la funcion de postgres "informacion_producto"
+        
+       */
       if(lround(precioPro) == -1)
 	    {
 	      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
@@ -1228,6 +1251,9 @@ SaveProductsSell (Productos *products, gint id_venta)
 	      iva = (gdouble) ((pre *((gdouble)margen /100 + 1))*
 		  products->product->cantidad) * (gdouble)products->product->iva / 100;
 	    }
+      /*
+        
+       */
       else
 	    {
 	      iva = (gdouble) ((products->product->precio_compra * ((gdouble)margen /100 + 1))*
@@ -1255,6 +1281,11 @@ SaveProductsSell (Productos *products, gint id_venta)
         precio = products->product->precio_mayor;
       else
         precio = products->product->precio;
+
+      /*
+        Registra los productos con sus respectivos datos(barcode,cantidad,
+        precio,fifo,iva,otros) en la tabla venta_detalle
+       */
       q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %d, %ld, %ld)",
                            id_venta, products->product->barcode, cantidad, precio,
                            products->product->fifo, lround (iva), lround (otros));
@@ -2130,6 +2161,15 @@ SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *c
   return 0;
 }
 
+/**
+ * Esta funciom  reviza si existe  el rut de un proveedor, a traves de una
+ * consulta a la BD
+ *
+ * @param rut es el rut del proveedor
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ *
+ */
+
 gboolean
 provider_exist (const gchar *rut)
 {
@@ -2213,3 +2253,86 @@ nullify_sale (gint sale_id)
   g_printerr("\n%s: could not be nullified the sale (%d)\n", G_STRFUNC, sale_id);
   return -1;
 }
+
+/**
+ * Es llamada por la funcion on_btn_devolucion_clicked [ventas.c]
+ * Esta funciom  registra los datos en la tabla devolucion
+ *
+ * @param total entero que contiene el precio total de los productos
+ * devueltos al proveedor
+ * @param rut es el rut del proveedor
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
+
+gboolean
+SaveDevolucion (gint total, gint rut) 
+{
+  gint devolucion_id;
+  gchar *q;
+  
+  q = g_strdup_printf( "SELECT inserted_id FROM registrar_devolucion( %d, %d) ", total, rut);
+  devolucion_id = atoi (GetDataByOne (q));
+  g_free (q);
+
+  SaveProductsDevolucion (venta->header, devolucion_id);
+
+  return TRUE;
+}
+
+/**
+ * Es llamada por la funcion SaveDevolucion
+ * Esta funciom descuenta del stock los productos devueltos al proveedor y
+ * luego registra los productos devueltos al proveedor, en la tabla devolucion_detalle
+ *
+ * @param products puntero que apunta a los valores del producto que se va vender
+ * @param id_devolucion  es el id de la devolucion que se esta realizando
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
+
+gboolean
+SaveProductsDevolucion (Productos *products, gint id_devolucion)
+{
+  PGresult *res;
+  Productos *header = products;
+  gchar *cantidad;
+  gint precio,precioCompra;
+  gchar *q;
+  gint pre;
+  do
+    {
+      cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
+      res = EjecutarSQL
+        (g_strdup_printf
+         ("UPDATE producto SET stock=%s WHERE barcode='%s'",
+          CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
+      /*      res = EjecutarSQL (g_strdup_printf
+              ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
+              cantidad, products->product->barcode));
+      */          
+      
+      precioCompra = products->product->precio_compra;
+      precio = products->product->precio;
+      
+      if(lround(precioCompra) == -1)
+        {
+          q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
+          res = EjecutarSQL (q);
+          pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+             
+          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %d)",
+                               id_devolucion, products->product->barcode, cantidad,precio, pre);
+        }
+      else
+         q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %d)",
+                              id_devolucion, products->product->barcode, cantidad, precio,precioCompra);
+        
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      products = products->next;
+    }
+  while (products != header);
+
+  return TRUE;
+}
+

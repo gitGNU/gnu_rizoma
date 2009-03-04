@@ -43,7 +43,7 @@ drop table if exists Documentos_emitidos cascade;
 drop table if exists Cheques cascade;
 drop table if exists factura_compra_detalle cascade;
 drop table if exists factura_compra cascade;
-drop table if exists Devolucion cascade;
+--drop table if exists Devolucion cascade;
 drop table if exists egreso cascade;
 drop table if exists Compra cascade;
 drop table if exists Cliente cascade;
@@ -160,15 +160,41 @@ create table factura_compra (
   constraint pk_Factura_compra primary key (id)
 ) ;
 
--- Devolucion
-create table Devolucion (
-  id                        serial not null,
-  barcode_product           int8 not null,
-  cantidad                  float8,
-  cantidad_recibida         float8 default 0.0,
-  devuelto                  bool default false,
+-- devolucion
+
+create table devolucion
+(
+  id 			    serial not null,
+  monto		 	    integer not null,
+  fecha 		    timestamp without time zone ,
+  proveedor	 	    integer not null,
   constraint pk_Devolucion primary key (id)
+);
+
+-- devolucion_detalle
+
+-- devolucion_detalle
+
+create table devolucion_detalle (
+  id                        int4 not null,
+  id_devolucion             int4 not null,
+  barcode                   int8 not null,
+  cantidad                  float8 not null,
+  precio                    int4 not null,
+  precio_compra		   				int4 not null,
+  constraint pk_Devolucion_detalle primary key (id,id_devolucion)
 ) ;
+
+
+-- Devolucion
+--create table Devolucion (
+--  id                        serial not null,
+--  barcode_product           int8 not null,
+--  cantidad                  float8,
+--  cantidad_recibida         float8 default 0.0,
+--  devuelto                  bool default false,
+--  constraint pk_Devolucion primary key (id)
+--) ;
 
 -- egreso
 create table egreso (
@@ -591,9 +617,18 @@ alter table deuda add constraint fk_deuda_cliente
 alter table deuda add constraint fk_deuda_user
   foreign key (vendedor)
   references users (id)  ;
-alter table Devolucion add constraint fk_devolucion_producto
-  foreign key (barcode_product)
+--alter table Devolucion add constraint fk_devolucion_producto
+--  foreign key (barcode_product)
+--  references producto (barcode)  ;
+alter table devolucion add constraint fk_proveedor_rut
+  foreign key (proveedor)
+  references proveedor (rut)  ;
+alter table devolucion_detalle add constraint fk_productos_barcode
+  foreign key (barcode)
   references producto (barcode)  ;
+alter table devolucion_detalle add constraint fk_devolucion_id
+  foreign key (id_devolucion)
+  references devolucion (id) ;
 alter table ingreso add constraint fk_ingreso_tipo_ingreso
   foreign key (tipo)
   references tipo_ingreso (id)  ;

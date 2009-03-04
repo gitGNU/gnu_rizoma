@@ -1490,6 +1490,7 @@ BEGIN
 	return;
 END; $$ language plpgsql;
 
+--registra el detalle de una venta
 create or replace function registrar_venta_detalle(
        in in_id_venta int,
        in in_barcode bigint,
@@ -2403,7 +2404,8 @@ return next;
 return;
 end; $$ language plpgsql;
 
-
+--Funcion incr_fecha
+--Esta funcion incrementa la fecha en un dia mas
 create or replace function incr_fecha(
 	in pfecha date
 	)
@@ -2412,4 +2414,56 @@ begin
 	return pfecha + integer '1';
 end;
  $$ language plpgsql;
+
+-- Registrar una devolucion
+create or replace function registrar_devolucion( 
+	IN monto integer,
+	IN proveedor integer,
+	OUT inserted_id integer)
+returns integer as $$
+BEGIN
+	EXECUTE $S$ INSERT INTO devolucion( id, monto, fecha, proveedor)
+	VALUES ( DEFAULT, $S$|| monto ||$S$, NOW(),$S$|| proveedor ||$S$ )$S$;
+
+	SELECT currval( 'devolucion_id_seq' ) INTO inserted_id;
+	return;
+END; $$ language plpgsql;
+
+
+--registra el detalle de una devolucion
+create or replace function registrar_devolucion_detalle(
+       in in_id_devolucion int,
+       in in_barcode bigint,
+       in in_cantidad double precision,
+       in in_precio int,
+       in in_precio_compra int )
+returns void as $$
+declare
+aux int;
+num_linea int;
+begin
+	aux := (select count(*) from devolucion_detalle where id_devolucion = in_id_devolucion);
+
+	if aux = 0 then
+	   num_linea := 0;
+	else
+	   num_linea := (select max(id) from devolucion_detalle where id_devolucion = in_id_devolucion);
+	   num_linea := num_linea + 1;
+	end if;
+	INSERT INTO devolucion_detalle (id,
+					id_devolucion,
+					barcode,
+					cantidad,
+					precio,
+					precio_compra)
+	       	    VALUES(num_linea,
+		    	   in_id_devolucion,
+			   in_barcode,
+			   in_cantidad,
+			   in_precio,
+			   in_precio_compra);
+
+end;$$ language plpgsql;
+
+
 
