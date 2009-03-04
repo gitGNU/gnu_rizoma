@@ -169,6 +169,12 @@ compras_win ()
 
   GError *error = NULL;
 
+  /*ComboBox - PrecioCompra*/
+  GtkComboBox *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+  GtkCellRenderer *cell2;
+
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
   compra->products_list = NULL;
@@ -770,6 +776,23 @@ compras_win ()
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
+  /*ComboBox - PrecioCompra*/
+  modelo = gtk_list_store_new (1, G_TYPE_STRING);
+  combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  cell2 = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell2, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);
+
+  /*Se agregan las opciones al combobox*/
+  gtk_list_store_append (modelo, &iter);
+  gtk_list_store_set (modelo, &iter, 0, "Precio neto", -1);  
+
+  gtk_list_store_append (modelo, &iter);
+  gtk_list_store_set (modelo, &iter, 0, "Precio bruto", -1);
+
+  gtk_combo_box_set_model (combo, (GtkTreeModel *)modelo);
+  gtk_combo_box_set_active (combo, 0);
+
   /* End Pay Invoices */
 
   //mercaderia
@@ -854,7 +877,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
     }
   else
     {
@@ -951,6 +974,13 @@ Save (GtkWidget *widget, gpointer data)
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_mod_product")));
 }
 
+/**
+*Es llamada por la funcion "CalcularPrecioFinal"
+*
+*Esta funcion se encarga de calcular la cifra restante entre: porcentaje de ganancia,
+*el precio de compra, tomando en cuenta si es bruto o neto y calculando sus impuestos 
+*en el caso correspondiente y el precio final.
+*/
 void
 CalcularPrecioFinal (void)
 {
@@ -963,11 +993,18 @@ CalcularPrecioFinal (void)
   gdouble iva = GetIVA (barcode);
   gdouble otros = GetOtros (barcode);
 
+  /*Obtener valores cmbPrecioCompra*/
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gchar *opcion;
+  gtk_tree_model_get (model, &iter, 0, &opcion, -1);
+
   if (iva != -1)
     iva = (gdouble)iva / 100 + 1;
   else
     iva = -1;
-
 
   /*
     IVA = 1,19;
@@ -988,9 +1025,9 @@ CalcularPrecioFinal (void)
     }
   else if (ingresa == 0 && ganancia >= 0 && precio_final != 0)
     {
-      if (otros == -1 && iva != -1)
+      if (otros == -1 && iva != -1 && g_str_equal(opcion,"Precio neto"))
         precio = (gdouble) ((gdouble)(precio_final / iva) / (gdouble) (ganancia + 100)) * 100;
-      else if (iva != -1 && otros != -1)
+      else if (iva != -1 && otros != -1 && g_str_equal(opcion,"Precio neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -999,7 +1036,7 @@ CalcularPrecioFinal (void)
           precio = (gdouble) precio / (gdouble)(ganancia / 100 + 1);
 
         }
-      else if (iva == -1 && otros == -1)
+      else if (iva == -1 && otros == -1 || g_str_equal(opcion,"Precio bruto"))
         {
           precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
         }
@@ -1008,9 +1045,9 @@ CalcularPrecioFinal (void)
     }
   else if (ganancia == 0 && ingresa != 0 && precio_final != 0)
     {
-      if (otros == -1 && iva != -1)
+      if (otros == -1 && iva != -1 && g_str_equal(opcion,"Precio neto"))
         porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
-      else if (iva != -1 && otros != -1)
+      else if (iva != -1 && otros != -1 && g_str_equal(opcion,"Precio neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1020,7 +1057,7 @@ CalcularPrecioFinal (void)
           porcentaje = (gdouble)(ganancia / ingresa) * 100;
 
         }
-      else if (iva == -1 && otros == -1)
+      else if (iva == -1 && otros == -1 || g_str_equal(opcion,"Precio bruto"))
         porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
 
 
@@ -1029,9 +1066,9 @@ CalcularPrecioFinal (void)
     }
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
     {
-      if (otros == -1 && iva != -1)
+      if (otros == -1 && iva != -1 && g_str_equal(opcion,"Precio neto"))
         precio = (gdouble) ((gdouble)(ingresa * (gdouble)(ganancia + 100)) * iva) / 100;
-      else if (iva != -1 && otros != -1)
+      else if (iva != -1 && otros != -1 && g_str_equal(opcion,"Precio neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1040,7 +1077,7 @@ CalcularPrecioFinal (void)
           precio = (gdouble)((gdouble)(precio * iva) +
                              (gdouble)(precio * otros) + (gdouble) precio);
         }
-      else if (iva == -1 && otros == -1)
+      else if (iva == -1 && otros == -1 || g_str_equal(opcion,"Precio bruto"))
         precio = (gdouble)(ingresa * (gdouble)(ganancia + 100)) / 100;
 
       if (ganancia == 0)
