@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <interface>
-  <requires lib="gtk+" version="2.12"/>
   <object class="GtkWindow" id="wnd_ingress_partial_invoice">
     <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Guia</property>
     <property name="modal">True</property>
