@@ -942,6 +942,14 @@ AgregarProducto (GtkButton *button, gpointer data)
   return TRUE;
 }
 
+
+/*
+ * Es llamada por las funciones SearchBarcodeProduct y SearchProductByCode.
+ *
+ * Esta funcion limpia las etiquetas (label) de los datos del producto
+ *
+ */
+  
 void
 CleanSellLabels (void)
 {
@@ -952,6 +960,13 @@ CleanSellLabels (void)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
 }
+
+/*
+ * Es llamada por las funciones SearchBarcodeProduct y SearchProductByCode.
+ *
+ * Esta funcion limpia las etiquetas (label) de los datos del producto
+ *
+ */
 
 void
 CleanEntryAndLabelData (void)
@@ -2182,6 +2197,15 @@ WindowChangeSeller ()
   gtk_widget_show_all (GTK_WIDGET (window));
 }
 
+
+/**
+ * Funcion Principal
+ *
+ * Carga los valores de rizoma-login.ui y visualiza la ventana del
+ * login "login_window", ademas de cargar el archivo de configuracion "/.rizoma"
+ *
+ */
+
 int
 main (int argc, char **argv)
 {
@@ -3397,7 +3421,7 @@ on_btn_devolver_clicked (GtkWidget *widget, gpointer data)
  * un proveedor) y ademas  carga el tree_view para luego visualizar la
  * busqueda de proveedores encontrados.
  *
- * @param entryt the entry that emits the signal
+ * @param entry the entry that emits the signal
  * @param data the user data
  *
  */
@@ -3570,6 +3594,17 @@ FillProveedorData (gchar *rut)
     gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_devolucion")));
 }
 
+/**
+ * Es llamada cuando el boton "btn_devolucion" es presionado (signal click).
+ * 
+ * Esta funcion llama a la funcion SaveDevolucion(que registra en la BD la
+ * devolucion(tablas devolucion y devolucion_detalle)) ademas de limpiar
+ * treeview de los productos vendidos, la etiqueta(label) total, y el numero
+ * de ventas.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
 
 void
 on_btn_devolucion_clicked (GtkButton *button, gpointer data)
