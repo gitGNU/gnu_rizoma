@@ -975,12 +975,14 @@ Save (GtkWidget *widget, gpointer data)
 }
 
 /**
-*Es llamada por la funcion "CalcularPrecioFinal"
-*
-*Esta funcion se encarga de calcular la cifra restante entre: porcentaje de ganancia,
-*el precio de compra, tomando en cuenta si es bruto o neto y calculando sus impuestos 
-*en el caso correspondiente y el precio final.
-*/
+ * Es llamada por las funciones "AddToProductsList" y "on_button_calculate_clicked"
+ *
+ * Esta funcion se encarga de calcular la cifra restante entre: porcentaje de ganancia,
+ * el precio de compra, tomando en cuenta si es bruto o neto y calculando sus impuestos 
+ * en el caso correspondiente y el precio final.
+ *
+ */
+
 void
 CalcularPrecioFinal (void)
 {
@@ -2979,10 +2981,28 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     }
 }
 
+/**
+ * Es llamada cuando el boton "button_calculate" es presionado (signal click).
+ * 
+ * Esta funcion llama a la funcion CalcularPrecioFinal.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+
 void
 on_button_calculate_clicked (GtkButton *button, gpointer data) {
   CalcularPrecioFinal();
 }
+
+/**
+ * Es llamada cuando el boton "button_add_product_list" es presionado (signal click).
+ * 
+ * Esta funcion llama a la funcion  AddToProductsList.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
 
 void
 on_button_add_product_list_clicked (GtkButton *button, gpointer data) {

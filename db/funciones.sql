@@ -2102,7 +2102,7 @@ for l in execute q loop
     ingresos := ingresos + l.monto;
 end loop;
 
-return (monto_apertura + arqueo + ingresos - egresos);
+return (monto_apertura + arqueo - egresos); 
 end; $$ language plpgsql;
 
 
@@ -2218,7 +2218,8 @@ create or replace function cash_box_report (
         out cash_sells integer,
         out cash_outcome integer,
         out cash_income integer,
-        out cash_payed_money integer)
+        out cash_payed_money integer
+	out cash_loss_money integer)
 returns setof record as $$
 declare
         query varchar;
@@ -2229,8 +2230,8 @@ declare
         last_cash_box_id integer;
 begin
 
-        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino
-        into sell_first_id, open_date, cash_box_start, sell_last_id, close_date, cash_box_end
+        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino, perdida
+        into sell_first_id, open_date, cash_box_start, sell_last_id, close_date, cash_box_end, cash_loss_money
         from caja
         where id = cash_box_id;
 

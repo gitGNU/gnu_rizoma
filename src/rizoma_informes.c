@@ -114,7 +114,11 @@ fill_caja_data (void)
                                 g_strdup_printf ("<b>%s</b>", PQvaluebycol (res, 0, "close_date_formatted")));
 
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_start")),
-                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_box_start"))));
+                                g_strdup_printf ("<b>%s</b>",
+                                                 PutPoints(g_strdup_printf ("%d",
+                                                                            (atoi (PQvaluebycol (res, 0, "cash_box_start"))
+                                                                             - atoi (PQvaluebycol (res, 0, "cash_income"))
+                                                                             )))));
 
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_sells"))));
@@ -136,7 +140,11 @@ fill_caja_data (void)
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_ingr_total")),
                                 g_strdup_printf
                                 ("<b>$ %s</b>", PutPoints
-                                 (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells")) + atoi (PQvaluebycol (res, 0, "cash_income"))))));
+                                 (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells"))
+                                                   + atoi (PQvaluebycol (res, 0, "cash_income"))
+                                                   + atoi (PQvaluebycol (res, 0, "cash_box_start"))
+                                                   - atoi (PQvaluebycol (res, 0, "cash_income"))
+                                                   ))));
 
           /* if (strcmp (PQvaluebycol (res, 0, 8), "") != 0) */
           /*   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out_invoice")), */
@@ -144,6 +152,9 @@ fill_caja_data (void)
 
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_out")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_outcome"))));
+
+          gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_loss")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_loss_money"))));
 
           /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
           /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
@@ -165,10 +176,10 @@ fill_caja_data (void)
              ("<span size=\"xx-large\"><b>$ %s</b></span>",
               PutPoints
               (g_strdup_printf ("%d",
-                                (atoi (PQvaluebycol (res, 0, "cash_box_start")) + atoi (PQvaluebycol (res, 0, "cash_sells")) +
-                                 atoi (PQvaluebycol (res, 0, "cash_income")) + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
-                                -
-                                (atoi (PQvaluebycol (res, 0, "cash_outcome")))))));
+                                (atoi (PQvaluebycol (res, 0, "cash_box_start"))
+                                 + atoi (PQvaluebycol (res, 0, "cash_sells"))
+                                 + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
+                                - atoi (PQvaluebycol (res, 0, "cash_loss_money"))))));
         }
     }
 }
@@ -758,7 +769,7 @@ fill_totals (GDate *date_begin, GDate *date_end)
   total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
                                       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
                                       &total_cash);
-
+  
   res = EjecutarSQL
     (g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
                       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
@@ -898,11 +909,22 @@ fill_cash_box_list (GDate *date_begin, GDate *date_end)
   PGresult *res;
   gchar *query;
   gint i, tuples;
+  if(g_date_get_julian (date_begin) == g_date_get_julian (date_end))
+    {
+           query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                               "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id", g_date_get_day (date_begin),
+                               g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end)+1, g_date_get_month (date_end),
+                               g_date_get_year (date_begin));
+    }
 
-  query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                           "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null)", g_date_get_day (date_begin),
-                           g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end), g_date_get_month (date_end),
-                           g_date_get_year (date_begin));
+  else
+    {
+      query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                               "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id", g_date_get_day (date_begin),
+                               g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end), g_date_get_month (date_end),
+                               g_date_get_year (date_begin));
+    }
+  
   res = EjecutarSQL (query);
   g_free (query);
 

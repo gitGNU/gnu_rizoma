@@ -191,8 +191,11 @@ EgresarDinero (GtkWidget *widget, gpointer data)
     ErrorMSG (aux_widget, "No pueden haber egresos de $0");
   else if (active == -1)
     ErrorMSG (aux_widget, "Debe Seleccionar un tipo de egreso");
+  
+
   else if (monto > ReturnSaldoCaja ())
-    ErrorMSG (aux_widget, "No se puede retirar mas dinero del que ahi en caja");
+    ErrorMSG (aux_widget, "No se puede retirar mas dinero del que ahi en caja" );
+
   else
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (aux_widget));
@@ -424,15 +427,26 @@ IniciarLaCaja (GtkWidget *widget, gpointer data)
 
   CloseCajaWin ();
 
-  InicializarCaja (inicio);
-
+  
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_init"));
   gtk_widget_hide (aux_widget);
 
-  if (inicio < monto)
-    VentanaIngreso (monto - inicio);
+  if (inicio == monto)
+    {
+      InicializarCaja (inicio);
+    }
+  
+  else if (inicio < monto)
+    {
+      VentanaIngreso (monto -inicio);
+      InicializarCaja (monto);
+    }
+  
   else if (inicio > monto)
-    VentanaEgreso (inicio - monto);
+    {
+      VentanaEgreso (inicio - monto);
+      InicializarCaja (inicio);
+    }
 }
 
 /**
@@ -496,6 +510,7 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
       res = CerrarCaja (monto_de_cierre);
     }
   else
+    {
     if (monto_de_cierre > monto_real_que_tiene)
       {
         Ingreso (monto_de_cierre - monto_real_que_tiene, 0, user_data->user_id);
@@ -505,6 +520,7 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
       {
         res = CerrarCaja(monto_de_cierre);
       }
+    }
 
   CalcularPerdida();
 
