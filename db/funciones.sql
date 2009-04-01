@@ -2218,7 +2218,7 @@ create or replace function cash_box_report (
         out cash_sells integer,
         out cash_outcome integer,
         out cash_income integer,
-        out cash_payed_money integer
+        out cash_payed_money integer,
 	out cash_loss_money integer)
 returns setof record as $$
 declare
@@ -2465,6 +2465,55 @@ begin
 			   in_precio_compra);
 
 end;$$ language plpgsql;
+
+create or replace function registrar_traspaso(
+  IN monto integer,
+  IN origen integer,
+  IN destino integer,
+  IN vendedor integer,
+  OUT inserted_id integer)
+  returns integer as $$
+
+BEGIN
+	EXECUTE $S$ INSERT INTO traspaso( id, monto, fecha, origen, destino, vendedor)
+	VALUES ( DEFAULT, $S$|| monto ||$S$, NOW(),$S$|| origen ||$S$,$S$|| destino ||$S$,$S$|| vendedor ||$S$) $S$;
+
+	SELECT currval( 'traspaso_id_seq' ) INTO inserted_id;
+
+	return;
+	END; $$ language plpgsql;
+
+create or replace function registrar_traspaso_detalle(
+       in in_id_traspaso int,
+       in in_barcode bigint,
+       in in_cantidad double precision,
+       in in_precio int)
+returns void as $$
+declare
+aux int;
+num_linea int;
+begin
+	aux := (select count(*) from traspaso_detalle where id_traspaso = in_id_traspaso);
+
+	if aux = 0 then
+	   num_linea := 0;
+	else
+	   num_linea := (select max(id) from traspaso_detalle where id_traspaso = in_id_traspaso);
+	   num_linea := num_linea + 1;
+	end if;
+	INSERT INTO traspaso_detalle(id,
+	       	    		  id_traspaso,
+				  barcode,
+				  cantidad,
+				  precio)
+	       	    VALUES(num_linea,
+		    	   in_id_traspaso,
+			   in_barcode,
+			   in_cantidad,
+			   in_precio);
+
+end;$$ language plpgsql;
+
 
 
 

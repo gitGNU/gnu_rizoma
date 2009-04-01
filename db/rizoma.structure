@@ -37,12 +37,15 @@
 
 drop table if exists Abono cascade;
 drop table if exists Asistencia cascade;
+drop table if exists bodega cascade;
 drop table if exists deuda cascade;
 drop table if exists documentos_emitidos_detalle cascade;
 drop table if exists Documentos_emitidos cascade;
 drop table if exists Cheques cascade;
 drop table if exists factura_compra_detalle cascade;
 drop table if exists factura_compra cascade;
+drop table if exists devolucion cascade;
+drop table if exists devolucion_detalle cascade;
 --drop table if exists Devolucion cascade;
 drop table if exists egreso cascade;
 drop table if exists Compra cascade;
@@ -69,6 +72,8 @@ drop table if exists Tarjetas cascade;
 drop table if exists tipo_egreso cascade;
 drop table if exists tipo_ingreso cascade;
 drop table if exists tipo_merma cascade;
+drop table if exists traspaso cascade;
+drop table if exists traspaso_detalle cascade;
 drop table if exists users cascade;
 drop table if exists venta cascade;
 
@@ -98,6 +103,16 @@ create table Asistencia (
   salida                    timestamp,
   constraint pk_Asistencia primary key (id)
 ) ;
+
+--Bodega
+create table bodega
+(
+  id serial not null,
+  nombre character varying(50),
+  tipo character varying(50),
+  constraint pk_bodega primary key (id)
+);
+
 
 -- deuda
 create table deuda (
@@ -506,6 +521,29 @@ create table tipo_merma (
   constraint pk_Tipo_merma primary key (id)
 ) ;
 
+-- traspasos
+create table traspaso (
+  id                        serial not null,
+  monto                     int4,
+  fecha                     timestamp,
+  origen                    int4,
+  destino	            int4,
+  vendedor                  int4,
+  constraint pk_Traspaso primary key (id)
+) ;
+
+-- traspaso_detalle
+
+create table traspaso_detalle (
+  id                        int4 not null,
+  id_traspaso               int4 not null,
+  barcode                   int8 not null,
+  cantidad                  float8,
+  precio                    int4 not null,
+  constraint pk_Traspaso_detalle primary key (id,id_traspaso)
+) ;
+
+
 -- users
 create table users (
   id                        serial not null,
@@ -692,6 +730,13 @@ alter table venta_anulada add constraint fk_venta_anulada_users
 alter table venta_anulada add constraint fk_venta_anulada_venta
   foreign key (id_sale)
   references venta(id);
+alter table traspaso_detalle add constraint fk_productos_barcode
+  foreign key (barcode)
+  references producto (barcode)  ;
+alter table traspaso_detalle add constraint fk_traspaso_id
+  foreign key (id_traspaso)
+  references traspaso (id) ;
+
 
 -- Indices
 

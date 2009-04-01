@@ -183,7 +183,7 @@ refresh_labels (void)
 void
 SaveDatosNegocio (GtkWidget *widget, gpointer data)
 {
-  PGresult *res;
+  PGresult *res, *res2;
   GtkWidget *aux_widget;
   gchar **rut;
 
@@ -229,6 +229,7 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
           "VALUES ('%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", razon_social_value, atoi (rut[0]), rut[1], nombre_fantasia_value,
           fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
     }
+
   else
     {
       res = EjecutarSQL
@@ -236,6 +237,8 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
          ("UPDATE negocio SET razon_social='%s', rut='%d', dv='%s', nombre='%s', fono='%s', fax='%s', "
           "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, atoi (rut[0]), rut[1], nombre_fantasia_value,
           fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
+
+      res2 = EjecutarSQL(g_strdup_printf ("UPDATE bodega SET nombre='%s' where id=1", nombre_fantasia_value));
     }
 
   if (res != NULL)
