@@ -2218,7 +2218,7 @@ create or replace function cash_box_report (
         out cash_sells integer,
         out cash_outcome integer,
         out cash_income integer,
-        out cash_payed_money integer
+        out cash_payed_money integer,
 	out cash_loss_money integer)
 returns setof record as $$
 declare
