@@ -427,27 +427,17 @@ IniciarLaCaja (GtkWidget *widget, gpointer data)
 
   CloseCajaWin ();
 
-  
+  InicializarCaja (inicio);
+
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_init"));
   gtk_widget_hide (aux_widget);
 
-  if (inicio == monto)
-    {
-      InicializarCaja (inicio);
-    }
-  
-  else if (inicio < monto)
-    {
-      VentanaIngreso (monto -inicio);
-      InicializarCaja (monto);
-    }
-  
+  if (inicio < monto)
+    VentanaIngreso (monto - inicio);
   else if (inicio > monto)
-    {
-      VentanaEgreso (inicio - monto);
-      InicializarCaja (inicio);
-    }
+    VentanaEgreso (inicio - monto);
 }
+
 
 /**
  * Raise the close caja dialog

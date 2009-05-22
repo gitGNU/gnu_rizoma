@@ -2102,7 +2102,7 @@ for l in execute q loop
     ingresos := ingresos + l.monto;
 end loop;
 
-return (monto_apertura + arqueo - egresos); 
+return (monto_apertura + arqueo + ingresos - egresos);
 end; $$ language plpgsql;
 
 

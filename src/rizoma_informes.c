@@ -117,7 +117,6 @@ fill_caja_data (void)
                                 g_strdup_printf ("<b>%s</b>",
                                                  PutPoints(g_strdup_printf ("%d",
                                                                             (atoi (PQvaluebycol (res, 0, "cash_box_start"))
-                                                                             - atoi (PQvaluebycol (res, 0, "cash_income"))
                                                                              )))));
 
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
@@ -143,7 +142,6 @@ fill_caja_data (void)
                                  (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_income"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_box_start"))
-                                                   - atoi (PQvaluebycol (res, 0, "cash_income"))
                                                    ))));
 
           /* if (strcmp (PQvaluebycol (res, 0, 8), "") != 0) */
@@ -168,7 +166,10 @@ fill_caja_data (void)
                                 g_strdup_printf
                                 ("<b>$ %s</b>", PutPoints
                                  (g_strdup_printf
-                                  ("%d", atoi (PQvaluebycol (res, 0, "cash_outcome"))))));
+                                  ("%d",
+                                   atoi (PQvaluebycol (res, 0, "cash_outcome"))
+                                   + atoi (PQvaluebycol (res, 0, "cash_loss_money"))
+                                   ))));
 
           gtk_label_set_markup
             (GTK_LABEL (builder_get (builder, "lbl_money_box_total")),
@@ -177,9 +178,13 @@ fill_caja_data (void)
               PutPoints
               (g_strdup_printf ("%d",
                                 (atoi (PQvaluebycol (res, 0, "cash_box_start"))
-                                 + atoi (PQvaluebycol (res, 0, "cash_sells"))
-                                 + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
-                                - atoi (PQvaluebycol (res, 0, "cash_loss_money"))))));
+                                + atoi (PQvaluebycol (res, 0, "cash_sells"))
+                                + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
+                                + atoi (PQvaluebycol (res, 0, "cash_income"))
+                                - atoi (PQvaluebycol (res, 0, "cash_loss_money"))
+                                - atoi (PQvaluebycol (res, 0, "cash_outcome"))
+                                        ))));
+         
         }
     }
 }
@@ -914,15 +919,15 @@ fill_cash_box_list (GDate *date_begin, GDate *date_end)
            query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
                                "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id", g_date_get_day (date_begin),
                                g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end)+1, g_date_get_month (date_end),
-                               g_date_get_year (date_begin));
+                               g_date_get_year (date_end));
     }
 
   else
     {
       query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
                                "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id", g_date_get_day (date_begin),
-                               g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end), g_date_get_month (date_end),
-                               g_date_get_year (date_begin));
+                               g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end)+1, g_date_get_month (date_end),
+                               g_date_get_year (date_end));
     }
   
   res = EjecutarSQL (query);
