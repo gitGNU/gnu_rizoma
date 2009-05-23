@@ -2075,14 +2075,23 @@ end if;
 select id_venta_inicio, id_venta_termino into id_inicio, id_termino
        from caja where id = last_caja;
 
+
 if id_termino is null then
    select last_value into id_termino from venta_id_seq;
 end if;
 
-select sum(monto) into arqueo
-       from venta
-       where id > id_inicio and id <= id_termino
-       and tipo_documento = 0;
+if id_inicio = 1 then 
+		select sum(monto) into arqueo
+    			 from venta
+      	   where id > 0 and id <= id_termino
+           and tipo_documento = 0;
+else 
+		select sum(monto) into arqueo
+    			 from venta
+      	   where id > id_inicio and id <= id_termino
+           and tipo_documento = 0;
+end if;
+
 
 if arqueo is null then
    arqueo := 0;

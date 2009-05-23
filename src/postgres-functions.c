@@ -1444,7 +1444,7 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, g
 
   q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
                        " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', %d, "
-                       "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'), 0, 0, 0,'f', %d)",
+                       "to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'), 0, 0, 0,'f', %d)",
                        id_compra, rut_proveedor, n_doc, d_emision, m_emision, y_emision,
                        total);
   res = EjecutarSQL (q);
@@ -1489,7 +1489,7 @@ IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emi
 
   res = EjecutarSQL (g_strdup_printf ("INSERT INTO guias_compra (id, numero, id_compra, id_factura, rut_proveedor, fecha_emision) "
                                       "VALUES (DEFAULT, %d, %d, 0, (SELECT rut_proveedor FROM compra WHERE id=%d), "
-                                      "to_timestamp('%.2d %.2d %.2d', 'DD MM YY'))",
+                                      "to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'))",
                                       n_doc, id_compra, id_compra, d_emision, m_emision, y_emision));
 
   res = EjecutarSQL ("SELECT last_value FROM guias_compra_id_seq");
