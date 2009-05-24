@@ -141,6 +141,7 @@ fill_caja_data (void)
                                 ("<b>$ %s</b>", PutPoints
                                  (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_income"))
+                                                   + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_box_start"))
                                                    ))));
 

@@ -2057,6 +2057,12 @@ declare
 	monto_apertura bigint;
 	q varchar;
 	l record;
+        open_date timestamp without time zone;
+	close_date timestamp without time zone;
+	close_date_back timestamp without time zone;
+	cash_payed_money bigint;
+	monto1 bigint;
+	monto2 bigint;
 begin
 
 if id_caja = -1 then
@@ -2080,16 +2086,18 @@ if id_termino is null then
    select last_value into id_termino from venta_id_seq;
 end if;
 
-if id_inicio = 1 then 
-		select sum(monto) into arqueo
-    			 from venta
-      	   where id > 0 and id <= id_termino
-           and tipo_documento = 0;
-else 
-		select sum(monto) into arqueo
-    			 from venta
-      	   where id > id_inicio and id <= id_termino
-           and tipo_documento = 0;
+if id_inicio = 1 then
+   select sum(monto) into arqueo
+          from venta
+          where id > 0 and id <= id_termino
+          and tipo_documento = 0
+          and tipo_venta = 0;
+else
+   select sum(monto) into arqueo
+          from venta
+          where id > id_inicio and id <= id_termino
+          and tipo_documento = 0
+          and tipo_venta = 0;
 end if;
 
 
@@ -2111,7 +2119,31 @@ for l in execute q loop
     ingresos := ingresos + l.monto;
 end loop;
 
-return (monto_apertura + arqueo + ingresos - egresos);
+select fecha_inicio into open_date
+       from caja where id=last_caja;
+
+close_date := now();
+
+select fecha_termino into close_date_back
+       from caja where id = last_caja - 1;
+
+select sum (monto_abonado) into monto1
+       from abono where fecha_abono > open_date and fecha_abono < close_date;
+
+if monto1 is null then
+   monto1 := 0;
+end if;
+
+select sum (monto_abonado) into monto2
+       from abono where fecha_abono > close_date_back and  fecha_abono < open_date;
+
+if monto2 is null then
+   monto2 := 0;
+end if;
+
+cash_payed_money := monto1 + monto2;
+
+return (monto_apertura + arqueo + cash_payed_money + ingresos - egresos);
 end; $$ language plpgsql;
 
 
@@ -2237,6 +2269,11 @@ declare
         sell_last_id integer;
         first_cash_box_id integer;
         last_cash_box_id integer;
+	open_date2 timestamp without time zone;
+	close_date_now timestamp without time zone;
+	close_date_back timestamp without time zone;
+	monto1 bigint;
+	monto2 bigint;
 begin
 
         select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino, perdida
@@ -2288,13 +2325,32 @@ begin
                 cash_income := 0;
         end if;
 
-        select sum (monto_abonado) into cash_payed_money
-        from abono
-        where fecha_abono >= open_date and fecha_abono <= close_date;
+        select last_value into last_cash_box_id from caja_id_seq;
 
-        if cash_payed_money is null then
-                cash_payed_money := 0;
+        select fecha_inicio into open_date2
+               from caja where id = last_cash_box_id;
+
+        close_date_now := now();
+
+        select fecha_termino into close_date_back
+               from caja where id = last_cash_box_id - 1;
+
+        select sum (monto_abonado) into monto1
+        from abono where fecha_abono > open_date and fecha_abono < close_date;
+
+        if monto1 is null then
+           monto1 := 0;
         end if;
+
+        select sum (monto_abonado) into monto2
+               from abono where fecha_abono > close_date_back and  fecha_abono < open_date;
+
+        if monto2 is null then
+           monto2 := 0;
+        end if;
+
+        cash_payed_money := monto1 + monto2;
+
 
 return next;
 return;
