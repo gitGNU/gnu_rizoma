@@ -37,6 +37,13 @@
 
 GtkBuilder *builder;
 
+/**
+ * Es llamada cuando se presiona en el tree_view_sells (signal changed).
+ * 
+ * Esta funcion visualiza los productos de un detalle de la venta en el tree_view
+ *
+ */
+
 void
 ChangeVenta (void)
 {
@@ -57,6 +64,8 @@ ChangeVenta (void)
 
       gtk_list_store_clear (GTK_LIST_STORE (store_detail));
 
+      /* consulta que arroja el detalle de una venta*/
+      
       res = EjecutarSQL
         (g_strdup_printf
          ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, (cantidad * venta_detalle.precio)::int AS "
@@ -79,6 +88,63 @@ ChangeVenta (void)
     }
 }
 
+/**
+ * Es llamada cuando se presiona en el tree_view_devolucion (signal changed).
+ * 
+ * Esta funcion visualiza los productos de un detalle de la devolucion en el tree_view
+ *
+ */
+
+void
+ChangeDevolucion (void)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkListStore *store_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion_detalle"))));
+  GtkTreeIter iter;
+  gchar *iddevolucion;
+  gint i, tuples;
+  PGresult *res;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          1, &iddevolucion,
+                          -1);
+
+      gtk_list_store_clear (GTK_LIST_STORE (store_detail));
+
+      /* consulta que arroja el detalle de una devolucion*/
+      res = EjecutarSQL
+        (g_strdup_printf
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, devolucion_detalle.precio, (cantidad * devolucion_detalle.precio)::int AS "
+          "monto FROM devolucion_detalle, producto WHERE producto.barcode = devolucion_detalle.barcode and id_devolucion=%s", iddevolucion));
+
+      tuples = PQntuples (res);
+
+      for (i = 0; i < tuples; i++)
+        {
+          gtk_list_store_append (store_detail, &iter);
+          gtk_list_store_set (store_detail, &iter,
+                              0, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
+                                                  PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
+                                                  PQvaluebycol (res, i, "unidad")),
+                              1, PQvaluebycol (res, i, "cantidad"),
+                              2, PutPoints (PQvaluebycol (res, i, "precio")),
+                              3, PQvaluebycol (res, i, "monto"),
+                              -1);
+        }
+    }
+}
+
+/**
+ * Es llamada cuando se presiona en el tree_view_cash_box_lists (signal changed).
+ * 
+ * Esta funcion visualiza los datos de caja de cada apertura y cierre (montos
+ * de ventas, perdidad, ingresos, egresos, etc)
+ *
+ */
 
 void
 fill_caja_data (void)
@@ -191,6 +257,19 @@ fill_caja_data (void)
 }
 
 
+
+
+/**
+ * Es llamada por la funcion "check_passwd".
+ *
+ * Esta funcion carga los datos "rizoma-informe.ui" y visualiza la
+ * ventana wnd_reports" con sus respectivos tree_views e informacion, ademas
+ * de generar los datos para exportarlos a GNumeric.
+ *
+ *
+ */
+
+
 void
 reports_win (void)
 {
@@ -205,7 +284,10 @@ reports_win (void)
   Print *print = (Print *) malloc (sizeof (Print));
 
   Print *libro = (Print *) malloc (sizeof (Print));
+  Print *libro2 = (Print *) malloc (sizeof (Print));
   libro->son = (Print *) malloc (sizeof (Print));
+  libro2->son = (Print *) malloc (sizeof (Print));
+
 
   builder = gtk_builder_new ();
 
@@ -247,7 +329,13 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_resizable (column, FALSE);
+
+
+
+
+  
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("ID Venta", renderer,
@@ -256,6 +344,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -265,6 +354,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -274,6 +364,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -284,6 +375,7 @@ reports_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_alignment (column, 0.5);
+   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -293,6 +385,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 5);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
 
@@ -323,6 +416,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_min_width (column, 260);
   gtk_tree_view_column_set_max_width (column, 260);
@@ -334,6 +428,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -343,6 +438,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -352,6 +448,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   libro->son->tree = treeview;
@@ -581,8 +678,155 @@ reports_win (void)
 
   /* End Cash Box */
 
+   /* Devoluciones*/
+  store = gtk_list_store_new (4,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING);
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (ChangeDevolucion), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 0);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID Devolución", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+ 
+  
+  libro2->tree = treeview;
+  libro2->title = "Libro de Devoluciones";
+  libro2->name = "devoluciones";
+  libro2->date_string = NULL;
+  libro2->cols[0].name = "Fecha";
+  libro2->cols[0].num = 0;
+  libro2->cols[1].name = "Monto";
+  libro2->cols[1].num = 4;
+  libro2->cols[2].name = NULL;
+
+  
+  
+  store = gtk_list_store_new (4,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING);
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion_detalle"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 0);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 260);
+  gtk_tree_view_column_set_max_width (column, 260);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+   gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  
+  
+  libro2->son->tree = treeview;
+  libro2->son->cols[0].name = "Producto";
+  libro2->son->cols[0].num = 0;
+  libro2->son->cols[1].name = "Cantidad";
+  libro2->son->cols[1].num = 1;
+  libro2->son->cols[2].name = "Unitario";
+  libro2->son->cols[2].num = 2;
+  libro2->son->cols[3].name = "Total";
+  libro2->son->cols[3].num = 3;
+  libro2->son->cols[4].name = NULL;
+  
+  
+  g_signal_connect (builder_get (builder, "btn_print_devolucion"), "clicked",
+                    G_CALLBACK (PrintTwoTree), (gpointer)libro2);
+
+
+  /* End Devoluciones */
+
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
 }
+
+/**
+ * Funcion Principal
+ *
+ * Carga los valores de rizoma-login.ui y visualiza la ventana del
+ * login "login_window"
+ *
+ */
 
 int
 main (int argc, char **argv)
@@ -655,6 +899,16 @@ main (int argc, char **argv)
   return 0;
 }
 
+/**
+ * Connected to accept button of the login window
+ *
+ * This funcion is in charge of validate the user/password and then
+ * call the initialization functions
+ *
+ * @param widget the widget that emits the signal
+ * @param data the user data
+ */
+
 void
 check_passwd (GtkWidget *widget, gpointer data)
 {
@@ -693,6 +947,20 @@ check_passwd (GtkWidget *widget, gpointer data)
     }
 }
 
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 0 del switch" 
+ *
+ * Esta funcion a traves de una consulta sql llama a una funcion que retorna
+ * los datos de las ventas en un lapso de tiempo, luego las visualiza a
+ * traves de el tree_view correspondiente.
+ *
+ * @param date_begin  fecha de inicio de la consulta
+ * @param date_end fecha de termino de la consulta
+ */
+
+
+
 void
 fill_sells_list (GDate *date_begin, GDate *date_end)
 {
@@ -707,6 +975,8 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
   gtk_list_store_clear (store);
   gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
 
+  /* esta funcion  SearchTuplesByDate() llama a una consulta de ssl, que
+     retorna los datos de ventas en un intervalo de fechas*/ 
   res = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
@@ -719,6 +989,7 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
   if (tuples == 0)
     return;
 
+  /* verifica que tipo de venta es*/
   for (i = 0; i < tuples; i++)
     {
       sell_type = atoi (PQgetvalue (res, i, 9));
@@ -759,6 +1030,124 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
 
 }
 
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 3 del switch.  
+ *
+ * Esta funcion a traves de una consulta sql retorna los datos de una
+ * devolcion en un lapso de tiempo, luego las visualiza a traves de el
+ * tree_view correspondiente.
+ *
+ * @param date_begin  fecha de inicio de la consulta
+ * @param date_end fecha de termino de la consulta
+ */
+
+void
+fill_devolucion (GDate *date_begin, GDate *date_end)
+{
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion"))));
+  gchar *query;
+  gint tuples, i;
+  GtkTreeIter iter;
+  PGresult *res;
+
+  gtk_list_store_clear (store);
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion_detalle")))));
+
+
+  /* consulta de sql que retorna los datos necesarios de una devolucion en
+     un intrevalo de tiempo*/
+  query = g_strdup_printf ("select fecha, id, monto, proveedor from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                           "and fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')  order by id"
+                           , g_date_get_day (date_begin),g_date_get_month (date_begin), g_date_get_year (date_begin)
+                           , g_date_get_day (date_end) + 1,g_date_get_month (date_end),  g_date_get_year (date_end));
+    
+  
+  res = EjecutarSQL (query);
+  g_free (query);
+
+  tuples = PQntuples (res);
+
+  if (tuples == 0) return;
+  
+  /* visualiza los datos de la devolucion en el tree_view */
+  
+  gtk_list_store_append (store, &iter);
+  gtk_list_store_set (store, &iter,
+                      0, PQgetvalue (res, i, 0),
+                      1, PQgetvalue (res, i, 1),
+                      2, PQgetvalue (res, i, 2),
+                      3, PQgetvalue (res, i, 3),
+                      -1);
+
+  
+
+}
+
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 3 del switch.  
+ *
+ * Esta funcion a traves de una consulta sql retorna los montos totales,
+ * promedio, y numero de devoluciones en un lapso de tiempo,luego las
+ * visualiza  a traves los labels  correspondientes.
+ *
+ * @param date_begin  fecha de inicio de la consulta
+ * @param date_end fecha de termino de la consulta
+ */
+
+
+void
+fill_totals_dev (GDate *date_begin, GDate *date_end)
+{
+  PGresult *res;
+
+  /* consulta de sql que retona las suma, promedio y numero de devoluciones */
+  
+  res = EjecutarSQL
+    (g_strdup_printf ("select count(*), sum(monto), avg(monto) from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                      "and fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
+                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end))
+     );
+
+  if (res == NULL) return;
+
+  /*se visualizan los datos en las correspondientes etiquetas (labels)*/
+  else    
+    {
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devolucion_amount_total")),
+                            g_strdup_printf ("<b>%s</b>",
+                                             PutPoints(g_strdup_printf ("%d",
+                                                                        (atoi (PQvaluebycol (res, 0,"sum"))
+                                                                         )))));
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devoluciones_num")),
+                            g_strdup_printf ("<b>%s</b>",
+                                             PutPoints(g_strdup_printf ("%d",
+                                                                        (atoi (PQvaluebycol (res, 0,"count"))
+                                                                         )))));
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devoluciones_avg")),
+                            g_strdup_printf ("<b>%s</b>",
+                                             PutPoints(g_strdup_printf ("%d",
+                                                                        (atoi (PQvaluebycol (res, 0,"avg"))
+                                                                         )))));
+    }
+ 
+
+}
+
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 0 del switch.  
+ *
+ * Esta funcion a traves de una consulta sql retorna los montos totales,
+ * promedio, y numero de ventas al contado, credito o descuentos en un lapso
+ * de tiempo,luego las  visualiza a traves los labels correspondiente.
+ *
+ * @param date_begin  fecha de inicio de la consulta
+ * @param date_end fecha de termino de la consulta
+ */
+
 void
 fill_totals (GDate *date_begin, GDate *date_end)
 {
@@ -771,11 +1160,12 @@ fill_totals (GDate *date_begin, GDate *date_end)
   gint total_credit;
   gint total_sell;
   gint total_ventas;
-
+  
+  /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
   total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
                                       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
                                       &total_cash);
-  
+
   res = EjecutarSQL
     (g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
                       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
@@ -849,6 +1239,18 @@ fill_totals (GDate *date_begin, GDate *date_end)
 
 }
 
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 1 del switch.  
+ *
+ * Esta funcion a traves de una consulta sql retorna los productos vendidos
+ * pero rankiados y luego los visualiza en el tree_view correspondiente. 
+ *
+ * @param date_begin  fecha de inicio de la consulta
+ * @param date_end fecha de termino de la consulta
+ */
+
+
 void
 fill_products_rank (GDate *date_begin, GDate *date_end)
 {
@@ -859,12 +1261,16 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
   gint vendidos = 0, costo = 0, contrib = 0;
   gdouble margen = 0;
 
+  /* funcion que llama una funcion sql que retorna los productos vendidos y
+     los ordena por mas vendidos ademas de agregarle otros parametros */
   res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
                             g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
 
   tuples = PQntuples (res);
 
   gtk_list_store_clear (store);
+
+  /* viualiza los productos en el tree_view*/
 
   for (i = 0; i < tuples; i++)
     {
@@ -887,6 +1293,8 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
                           -1);
     }
 
+  /* visualiza las sumas de los productos en sus respectivos labels */
+  
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
                                          (g_strdup_printf ("%d", vendidos))));
@@ -907,6 +1315,17 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
                           g_strdup_printf ("<span size=\"x-large\">0%%</span>"));
 }
 
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 2 del switch.  
+ *
+ * Esta funcion a traves de una consulta sql retorna los datos de caja en un
+ * intrevalo de tiempo, luego las  visualiza en el tree_view correspondiente.
+ *
+ * @param date_begin  fecha de inicio de la consulta
+ * @param date_end fecha de termino de la consulta
+ */
+
 void
 fill_cash_box_list (GDate *date_begin, GDate *date_end)
 {
@@ -915,21 +1334,13 @@ fill_cash_box_list (GDate *date_begin, GDate *date_end)
   PGresult *res;
   gchar *query;
   gint i, tuples;
-  if(g_date_get_julian (date_begin) == g_date_get_julian (date_end))
-    {
-           query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                               "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id", g_date_get_day (date_begin),
-                               g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end)+1, g_date_get_month (date_end),
-                               g_date_get_year (date_end));
-    }
 
-  else
-    {
-      query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                               "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id", g_date_get_day (date_begin),
-                               g_date_get_month (date_begin), g_date_get_year (date_begin), g_date_get_day (date_end)+1, g_date_get_month (date_end),
-                               g_date_get_year (date_end));
-    }
+  /* consultas que retorna los datos de caja en un intervalo de fechas  */
+  query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                               "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id"
+                               , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin)
+                               , g_date_get_day (date_end) + 1, g_date_get_month (date_end), g_date_get_year (date_end));   
+
   
   res = EjecutarSQL (query);
   g_free (query);
@@ -940,6 +1351,7 @@ fill_cash_box_list (GDate *date_begin, GDate *date_end)
 
   gtk_list_store_clear (store);
 
+  /* visualiza en el tree_view los datos de caja */
   for (i = 0; i < tuples; i++)
     {
       gtk_list_store_append (store, &iter);
@@ -952,6 +1364,13 @@ fill_cash_box_list (GDate *date_begin, GDate *date_end)
                           -1);
     }
 }
+
+/**
+ * Es llamada cuando se presiona el boton "btn_get_stat" (signal clicked)
+ *
+ * Esta funcion extrae las fechas ingresadas, y segun notebook se escoge una opcion*
+ *
+ */
 
 void
 on_btn_get_stat_clicked ()
@@ -970,17 +1389,23 @@ on_btn_get_stat_clicked ()
 
   switch (page_num)
     {
-    case 0:
+    
+    case 0:  /* Informe de ventas */
 
       fill_sells_list (date_begin, date_end);
       clean_container (GTK_CONTAINER (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
       fill_totals (date_begin, date_end);
       break;
-    case 1:
+      
+    case 1:   /* Informe de ranking de ventas */
       fill_products_rank (date_begin, date_end);
       break;
-    case 2:
+    case 2:   /* Informe de caja*/
       fill_cash_box_list (date_begin, date_end);
+      break;
+    case 3:   /* Informe de devolucion */
+      fill_devolucion (date_begin, date_end);
+      fill_totals_dev (date_begin, date_end);
       break;
     default:
       break;
