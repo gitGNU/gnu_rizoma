@@ -1532,7 +1532,9 @@ begin
 end;$$ language plpgsql;
 
 
-
+-- busca productos en base un patron con el formate de LIKE
+-- Si variable de entrada con_stock > 0, Productos para la venta
+-- Si no, son para visualizar en mercaderia 
 create or replace function buscar_producto(IN expresion varchar(255),
 	IN columnas varchar[],
 	IN usar_like boolean,
@@ -1590,7 +1592,7 @@ begin
 	END IF;
 	END LOOP;
 
-        query := query || $S$) order by descripcion, marca$S$;
+        query := query || $S$) and estado=true order by descripcion, marca$S$;
 
 	FOR list IN EXECUTE query LOOP
 	barcode := list.barcode;
@@ -1664,6 +1666,8 @@ begin
 
 end; $$ language plpgsql;
 
+--retorna el detalle de una compra 
+--
 create or replace function get_detalle_compra(
 		IN id_compra integer,
 		OUT codigo_corto varchar(10),
@@ -1704,6 +1708,8 @@ begin
 END; $$ LANGUAGE plpgsql;
 
 
+-- retorna el iva de un producto
+--
 create or replace function get_iva(
 		IN barcode bigint,
 		OUT valor double precision)
@@ -1711,6 +1717,10 @@ returns double precision as $$
 begin
 
 		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=1;
+                       
+                if valor is null then
+                   valor=-1;
+                end if;
 
 end; $$ language plpgsql;
 

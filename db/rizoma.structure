@@ -412,6 +412,7 @@ create table producto (
   precio_mayor              int4,
   cantidad_mayor            int4,
   mayorista                 bool default false,
+  estado                    bool default true,
   constraint pk_Producto primary key (barcode),
   CONSTRAINT unique_short_code UNIQUE (codigo_corto)
 ) ;

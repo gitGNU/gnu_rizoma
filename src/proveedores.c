@@ -64,6 +64,19 @@ GtkWidget *search_entry;
 
 GtkTreeStore *proveedores_store;
 
+/**
+ * Es llamada cuando el boton "btn_prov_search" es presionado (signal click).
+ * 
+ * Esta funcion llama a una consulta de sql que a su vez llama a la funcion
+ * buscar_proveedor(), esta retorna al o a los proveedores, segun por los
+ * parametros que se ingreso. Despues este o estos los agrega a la tree_view
+ * correspondiente.
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ *
+ */
+
 void
 BuscarProveedor (GtkWidget *widget, gpointer data)
 {
@@ -79,6 +92,8 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_search"));
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
 
+  /*consulta de sql que llama a la funcion que retorna a el o los
+    proveedores, dependiendo de los datos de entrada*/
   q = g_strdup_printf ("SELECT rut, dv, nombre, giro, contacto "
                        "FROM buscar_proveedor('%%%s%%')",
                        string);
@@ -92,6 +107,7 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
   gtk_list_store_clear (store);
 
+  /* se agrega al proveedor al tree view y sus datos*/
   for (i = 0; i < tuples; i++)
     {
       str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
@@ -106,6 +122,13 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
       g_free (str_axu);
     }
 }
+
+/**
+ * Es llamada por la funcion "AddProveedor()".
+ * 
+ * Esta funcion agrega al proveedor a la lista (tree view) de la busqueda de proveedores.
+ *
+ */
 
 void
 ListarProveedores (void)
@@ -139,6 +162,20 @@ ListarProveedores (void)
     }
 }
 
+
+
+/**
+ * Es llamada cuando se selecciona un proveedor de la lista
+ * "treeview_prov_search".
+ * 
+ * Esta funcionagrega la informacion del proveedor a los
+ * respectivos campos de texto (entry)
+ *
+ * @param selection the row data
+ * @param data the user data
+ *
+ */
+
 void
 LlenarDatosProveedor (GtkTreeSelection *selection,
                       gpointer           user_data)
@@ -162,6 +199,10 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
                       -1);
 
   aux = g_strsplit(rut_proveedor, "-", 0);
+
+  /* consulta de sql que llama a funcion select_proveedor, que dado el id de
+     este devuelve la informacion del mismo*/
+  
   q = g_strdup_printf ("SELECT * FROM select_proveedor(%s)", aux[0]);
   res = EjecutarSQL (q);
   g_free (q);
@@ -203,6 +244,16 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
   gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "giro"));
 }
 
+/**
+ * Es llamada por la funcion "AddProveedor()".
+ * 
+ * Esta funcion cierra la ventana de "wnd_addprovider".
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ *
+ */
+
 void
 CloseAgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
 {
@@ -215,6 +266,18 @@ CloseAgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   gtk_widget_hide(window);
 
 }
+
+/**
+ * Es llamada cuando el boton "btn_prov_ad" es presionado (signal click).
+ * 
+ * Esta funcion verifica que todos los campos de proveedor sean correctamente
+ * rellenados y luego llama a la funcion "AddProveedorToDB()" que registra al
+ * proveedor en la base de datos.
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ *
+ */
 
 void
 AgregarProveedor (GtkWidget *widget, gpointer user_data)
@@ -318,6 +381,12 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
       return;
     }
 
+  if(atoi(telefono_c) == 0)
+    {
+      ErrorMSG (wnd, "Debe ingresar sólo números en el campo telefono");
+      return;
+    }
+
   CloseAgregarProveedorWindow (NULL, user_data);
 
   str_rut = g_strdup_printf ("%s-%s", rut_c, rut_ver);
@@ -326,6 +395,17 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
   //ListarProveedores (); <- this does not correspond
 
 }
+
+/**
+ * Es llamada cuando el boton "btn_prov_ad" es presionado (signal click).
+ * 
+ * Esta funcion visualiza la ventana para agregar un proveedor y sus
+ * respectivos entry para llenar con los campos de este.
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ *
+ */
 
 void
 AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
@@ -371,6 +451,14 @@ AgregarProveedorWindow (GtkWidget *widget, gpointer user_data)
   gtk_window_set_modal (GTK_WINDOW(aux_widget), TRUE);
   gtk_widget_show (aux_widget);
 }
+
+/**
+ * Es llamada cuando el boton "btn_prov_save" es presionado (signal click).
+ * 
+ * Esta funcion carga los datos llenados con los datos del proveedor y luego
+ * llama a la funcion "SetModificacionesProveedor() que actualiza los datos
+ * de este en la base de datos.
+ */
 
 void
 ModificarProveedor (void)
@@ -422,6 +510,14 @@ ModificarProveedor (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
   statusbar_push (GTK_STATUSBAR(widget), "El proveedor ha sido actualizado exitosamente", 3000);
 }
+
+/**
+ * Es llamada por la funcion "compras_win()"[compras.c] 
+ * 
+ * Esta funcion visualiza los nombres de cada columna del tree view de
+ * proveedores, y los datos para poder exportarlos a Gnumeric.
+ *
+ */
 
 void
 proveedores_box ()

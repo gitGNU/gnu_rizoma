@@ -214,7 +214,8 @@ GetDataByOne (gchar *setencia)
 }
 
 /**
- * Borrar un producto de la tabla 'producto' en base a su barcode
+ * Actualiza el producto y cambia el atributo estado a false, si el producto
+ * tiene su estado false significa que no existe para el sistema
  *
  * @param codigo codigo de barras del producto que quiere ser borrado
  *
@@ -226,7 +227,7 @@ DeleteProduct (gchar *codigo)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("DELETE FROM producto WHERE barcode=%s", codigo);
+  q = g_strdup_printf ("UPDATE producto SET estado=false WHERE barcode=%s", codigo);
   res = EjecutarSQL (q);
   g_free (q);
 

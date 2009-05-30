@@ -1804,6 +1804,13 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
   InsertarCompras ();
 }
 
+/**
+ * Es llamada por la funcion "AddProveedor()".
+ * 
+ * Esta funcion agrega al proveedor a la lista (tree view) de la busqueda de proveedores.
+ *
+ */
+
 void
 FillProveedores ()
 {
@@ -1811,7 +1818,9 @@ FillProveedores ()
   gint tuples, i;
 
   GtkTreeIter iter;
-
+  
+  /*consulta de sql que llama a la funcion select_proveedor() que retorna
+    los proveedores */
   res = EjecutarSQL ("SELECT rut, nombre FROM select_proveedor() "
                      "ORDER BY nombre ASC");
 
@@ -1822,6 +1831,7 @@ FillProveedores ()
 
   gtk_list_store_clear (compra->store_prov);
 
+  /* aqui se agregan los proveedores al tree view*/
   for (i = 0; i < tuples; i++)
     {
       gtk_list_store_append (compra->store_prov, &iter);
@@ -1831,6 +1841,16 @@ FillProveedores ()
                           -1);
     }
 }
+
+/**
+ * Es llamada por la funcion "AddProveedor()".
+ * 
+ * Esta funcion cierra la ventana de "AddProveedorWindow()".
+ *
+ * @param button the button
+ * @param user_data the user data
+ *
+ */
 
 void
 CloseAddProveedorWindow (GtkWidget *button, gpointer data)
@@ -1842,6 +1862,17 @@ CloseAddProveedorWindow (GtkWidget *button, gpointer data)
   gtk_window_set_focus (GTK_WINDOW (compra->buy_window), compra->tree_prov);
 }
 
+/**
+ * Es llamada cuando el boton aceptar de "AddProveedorWindow()" es presionado (signal click).
+ * 
+ * Esta funcion verifica que todos los campos de proveedor sean correctamente
+ * rellenados y luego llama a la funcion "AddProveedorToDB()" que registra al
+ * proveedor en la base de datos.
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ *
+ */
 void
 AddProveedor (GtkWidget *widget, gpointer data)
 {
@@ -1857,6 +1888,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
   gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
   gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
 
+             
   if (strcmp (rut, "") == 0)
     {
       ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
@@ -1893,6 +1925,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
       ErrorMSG (compra->telefono_add, "Debe escribir el telefono");
       return;
     }
+
   else if (g_str_equal (giro, ""))
     {
       ErrorMSG (compra->giro_add, "Debe escribir el giro");
@@ -1902,6 +1935,12 @@ AddProveedor (GtkWidget *widget, gpointer data)
   if (VerificarRut (rut, rut_ver) != TRUE)
     {
       ErrorMSG (compra->rut_ver, "El rut no es valido!");
+      return;
+    }
+  
+  if(atoi(telefono) == 0)
+    {
+      ErrorMSG (compra->telefono_add, "Debe ingresar sólo números en el campo telefono");
       return;
     }
 
@@ -1921,6 +1960,17 @@ AddProveedor (GtkWidget *widget, gpointer data)
 
   FillProveedores ();
 }
+
+/**
+ * Es llamada por la funcion "AddProveedor()".
+ * 
+ * Esta funcion visualiza la ventana para agregar un proveedor y agrega dos señales
+ *
+ * @param widget the widget that emited the signal
+ * @param data the user data
+ *
+ */
+
 
 void
 AddProveedorWindow (GtkWidget *widget, gpointer user_data)
@@ -2177,6 +2227,8 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
       gtk_label_set_text (GTK_LABEL (compra->nombre_label),
                           PQvaluebycol( res, 0, "nombre"));
     }
+
+  ;
 }
 
 void
