@@ -472,9 +472,9 @@ query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
 		    otros, familia, perecibles, stock_min, margen_promedio,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista
-             FROM producto WHERE lower(descripcion) LIKE lower($S$
+             FROM producto WHERE estado = true and lower(descripcion) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR lower(marca) LIKE lower($S$
-	|| quote_literal(expresion) || $S$) order by descripcion, marca $S$;
+	|| quote_literal(expresion) || $S$) and estado = true order by descripcion, marca $S$;
 
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;

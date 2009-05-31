@@ -93,8 +93,9 @@ void
 inventario_win ()
 {
   
-  GtkWidget *inventario_gui;
+  GtkWidget *inventario_gui,*fcb;
   GError *error = NULL;
+  GtkFileFilter *filter;
 
   builder = gtk_builder_new ();
 
@@ -109,6 +110,16 @@ inventario_win ()
   if (error != NULL) {
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
   }
+  /*filtro para seleccionar archivos*/
+  filter = gtk_file_filter_new();
+  gtk_file_filter_add_pattern (filter, "*.csv");
+  gtk_file_filter_set_name (filter, "CSV Hojas de Calculo");
+
+  fcb = GTK_WIDGET (gtk_builder_get_object (builder, "filechooserbutton1"));
+
+  /* añade el filtro al filechooserbutton*/
+  gtk_file_chooser_set_filter(GTK_FILE_CHOOSER (fcb), 
+			      filter);
 
   gtk_builder_connect_signals (builder, NULL);
   inventario_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_inventario"));
@@ -172,41 +183,6 @@ check_passwd (GtkWidget *widget, gpointer data)
     default:
       break;
     }
-}
-
-/**
- * Es llamada por la funcion "on_btn_ejecutar_Inv" y recibe los parametros
- * char cadena y int indice
- *
- * Esta funcion recibe una cadena de texto en este caso la direccion del
- * archivo, y corta los primeros 7 caracteres, en este caso (File://) y
- * retorna la cadena resultante
- *
- * @param cadena es un cadena de texto que contiene la direccion del archivo.
- * @param indice es un entero que contiene el valor
- * @return subcadena cadena resultante del recorte
- */
-
-char *
-cortar(char *cadena, int indice)
-{
-   char *subcadena;
-   int i;
-   /* Verifica longitud */
-
-   if(indice>strlen (cadena)-1)
-     return '\0';
-   
-   /* Realiza copia desde el indice hasta el final de la cadena */
-   
-   for(i=indice; i<strlen (cadena); i++)
-     subcadena[i-indice] = cadena[i];
-
-   /* Coloca caracter de fin de cadena */
-
-   subcadena[i-indice] = '\0';
-
-   return subcadena;
 }
 
 /**
@@ -309,11 +285,25 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   int precio = 1000;
   int margen = 20;
   int cont_products_no_BD = 0,cont_products = 0;
-  char * pEnd, *dir,*dir2;
-  dir = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "direccion_entry"))));
-  dir2 = cortar(dir,7);
-  
-  fp = fopen (dir2, "r");
+  char * pEnd;
+  gchar *dir, *string, *stringfinal;
+  GtkTextBuffer *buffer;
+  GtkTextMark *mark;
+  GtkTextIter iter;
+  GdkColor color;
+
+  gdk_color_parse ("red", &color);
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (gtk_builder_get_object (builder, "textview1")));
+  gtk_text_buffer_create_tag (buffer, "color_red", "foreground-gdk", &color, NULL);
+
+ 
+  gtk_text_buffer_create_tag (buffer, "size_medium", "scale", PANGO_SCALE_LARGE, NULL);
+  gtk_text_buffer_create_tag (buffer, "style_italic", "style", PANGO_STYLE_ITALIC, NULL); 
+
+
+
+  dir = gtk_file_chooser_get_filename (GTK_WIDGET (builder_get (builder, "filechooserbutton1")));
+  fp = fopen (dir, "r");
 
   if (fp == NULL)
     {
@@ -354,11 +344,30 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
           cant = g_ascii_strtod (strtok (NULL, ","), &pEnd);
           
           if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))))
+            {
             CompraAgregarALista (barcode, cant, precio, pcomp, margen,FALSE);
+            
+            string = g_strdup_printf (" El producto con barcode %s se ingreso correctamente \n", barcode);
+            
+            mark = gtk_text_buffer_get_insert(buffer);
+            gtk_text_buffer_get_iter_at_offset (buffer, &iter, mark);
+            gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
+                                                     ,"size_medium", "style_italic" ,NULL);
+            
+            //gtk_text_buffer_get_iter_at_offset (buffer, &iter, 0);
+            //gtk_text_buffer_insert_with_tags_by_name (buffer, &iter, "Hello", -1,
+            // "size_medium", "style_italic", "color_blue", NULL); 
+                          
+            }
           
           else
             {
-              printf ("El producto %s no esta en la bd y \n",barcode);
+              string = g_strdup_printf ("El producto %s no esta en la bd \n", barcode);
+              mark = gtk_text_buffer_get_insert(buffer);
+              gtk_text_buffer_get_iter_at_offset (buffer, &iter, mark);
+              gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
+                                                       ,"size_medium", "style_italic" ,"color_red",NULL);
+     
               cont_products_no_BD++;
             }
 
@@ -366,9 +375,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 
         }
     } while (line != NULL);
-  
-  fclose (fp);
-  //IngresarFakeCompra ();
+
 
   /* Mensaje si no realiza ningun inventario */
   if (cont_products_no_BD == cont_products)
@@ -396,51 +403,3 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
     }   
 }
 
-/**
- * Es llamada cuando el boton "btn_abrir" es presionado (signal click).
- *
- * Esta funcion carga los datos de FileChooser y visualiza la ventana filechooserdialog
- *
- * @param button the button
- * @param user_data the user data
- */
-
-void
-on_btn_abrir_clicked (GtkButton *button, gpointer data)
-{
-
-  GtkFileChooser *window;
-  GtkFileFilter *filter;
-  
-  filter = gtk_file_filter_new ();
-  gtk_file_filter_add_pattern (filter, "*.csv");
-  gtk_file_filter_set_name (filter, "CSV Hojas de Calculo");
-  window = GTK_FILE_CHOOSER (gtk_builder_get_object (builder, "filechooserdialog"));
-  gtk_file_chooser_add_filter (window, filter);
-
-  clean_container (GTK_CONTAINER (window));
-  gtk_widget_show_all (GTK_WIDGET (window));
-
-}
-
-/**
- * Es llamada cuando el boton "btn_abrir_filechooser" es presionado (signal
- * click) o cuando se hace doble click sobre el archivo seleccionado .
- *
- * Esta funcion carga la direccion del arhivo y visuliza la dirreccion en el
- * entry "direccion_entry"
- *
- * @param chooser es el valor tipo Filechooser
- * @param user_data the user data
- */
-
-void
-on_btn_abrir_filechooser (GtkFileChooser *chooser, gpointer data)
-{
-  gchar *q;
-  q = gtk_file_chooser_get_uri(chooser);
-  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"direccion_entry"),q);
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "filechooserdialog")));
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_abrir")));
-        
-}
