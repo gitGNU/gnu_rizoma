@@ -2337,3 +2337,232 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
   return TRUE;
 }
 
+/**
+ * Es llamada por la funcion on_enviar_button_clicked() [ventas.c]
+ *
+ * Esta funciom  registra los datos en la tabla traspaso y llama a la funcion SaveProductsTraspaso()
+ *
+ * @param total entero que contiene el precio total de los productos
+ * devueltos al proveedor
+ * @param rut es el rut del proveedor
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
+gboolean
+SaveTraspaso (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso) 
+{
+  gint traspaso_id;
+  gchar *q;
+
+  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %d, %d, %d, %d) ",
+                       total, origen, destino,vendedor);
+  traspaso_id = atoi (GetDataByOne (q));
+  g_free (q);
+
+  SaveProductsTraspaso (venta->header, traspaso_id, tipo_traspaso);
+
+  return TRUE;
+}
+
+/**
+ * Es llamada por la funcion on_enviar_button_clicked() y
+ * on_recibir_button_clicked() [compras.c]
+ *
+ * Esta funciom  registra los datos en la tabla traspaso y llama a la funcion SaveProductsTraspaso()
+ *
+ * @param total entero que contiene el precio total de los productos a traspasar
+ * @param origen id del destino del traspaso
+ * @param vendedor id del destino del traspaso
+ * @param destino id del destino del traspaso
+ * @param tipo_traspaso: 1 si es un traspaso de enviar 0  si es un trapaso de recibir
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
+
+gboolean
+SaveTraspasoCompras (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso) 
+{
+  gint traspaso_id;
+  gchar *q;
+
+  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %d, %d, %d, %d) ",
+                       total, origen, destino,vendedor);
+  traspaso_id = atoi (GetDataByOne (q));
+  g_free (q);
+
+  SaveProductsTraspaso (compra->header_compra, traspaso_id, tipo_traspaso);
+  return TRUE;
+}
+
+/**
+ * Es llamada por las funciones SaveTraspaso() y SaveTraspasoCompras()
+ *
+ * Esta funcion descuenta  o agrega del stock los productos traspasados y
+ * luego registra los productos traspasados, en la tabla devolucion_detalle
+ *
+ * @param products puntero que apunta a los valores del producto que se va vender
+ * @param id_traspaso es el id del traspaso  que se esta realizando
+ * @param tipo_traspaso: 1 si es un traspaso de enviar 0  si es un trapaso de recibir
+ * @return 1 si se realizo correctamente la operacion 0 si hay error
+ */
+
+gboolean
+SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_traspaso)
+{
+  PGresult *res;
+  Productos *header = products;
+  gdouble iva, otros = 0;
+  gint margen;
+  gchar *cantidad;
+  gint precio;
+  gchar *q;
+  gint pre;
+  
+  do
+    {
+      cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
+      if(tipo_traspaso == TRUE)
+        {
+          res = EjecutarSQL
+            (g_strdup_printf
+             ("UPDATE producto SET stock=%s WHERE barcode='%s'",
+              CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
+
+          /*      res = EjecutarSQL (g_strdup_printf
+                  ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
+                  cantidad, products->product->barcode));
+          */
+        }
+      else
+        {
+          res = EjecutarSQL
+            (g_strdup_printf
+             ("UPDATE producto SET stock=%s WHERE barcode='%s'",
+              CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) + products->product->cantidad)), products->product->barcode));
+        }
+      
+      precio = products->product->precio_compra;
+      
+      if(lround(precio) == -1)
+        {
+          q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
+          res = EjecutarSQL (q);
+          pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+             
+          q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
+                           id_traspaso, products->product->barcode, cantidad, pre);
+        }
+      else
+         q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
+                           id_traspaso, products->product->barcode, cantidad, precio);
+        
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      products = products->next;
+    }
+  while (products != header);
+
+  return TRUE;
+}
+
+/**
+ * Es llamada por las funciones  DatosEnviar() de  [ventas.c] y
+ * DatosEnviar(), DatosRecibir()  de [compras.c].
+ *
+ * Consulta por el ultimo id de traspaso y lo retorna
+ *
+ * @return  el resultado de la consulta id del ultimo traspaso
+ */
+
+gint
+InsertIdTraspaso ()
+{
+
+  PGresult *res;
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT MAX(id) FROM traspaso"));
+
+  return atoi (PQgetvalue (res, 0, 0));
+
+}
+
+
+/**
+ * Es llamada por las funciones on_enviar_button_clicked() de [ventas.c]
+ * y on_enviar_button_clicked(),on_recibir_button_clicked() de  [compras.c]. 
+ *
+ * Esta funcion hace una consulta por el nombre del negocio y le retorna el
+ * ide de este
+ *
+ * @return  el resultado de la consulta: el id del negocio
+ */
+gint
+ReturnBodegaID (gchar *destino)
+{
+
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT id FROM bodega WHERE nombre='%s'",destino);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  return atoi (PQgetvalue (res, 0, 0));
+}
+
+
+/**
+ * Es llamada por las funciones  DatosEnviar(), on_enviar_button_clicked()de
+ * [ventas.c] y  DatosEnviar(), DatosRecibir(),on_enviar_button_clicked(),
+ * on_recibir_button_clicked() de [compras.c]
+ *
+ * Esta funcion realiza una consulta por el nombre del negocio y lo retorna
+ *
+ * @return  el resultado de la consulta el nombre del negocio
+ */
+
+gchar *
+ReturnNegocio ()
+{
+  PGresult *res;
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT nombre FROM negocio"));
+  
+  return ((gchar *)(PQgetvalue (res, 0, 0)));
+}
+
+
+/**
+ * Es llamada por las funciones on_enviar_button_clicked() [ventas.c] y 
+ * DatosEnviar() [ventas.c].
+ *
+ * Esta funcion recibe el puntero del productos, luego apunta al barcode de
+ * cada uno, y a  traves de una consulta a la BD obtiene los precio de
+ * compras, para luego sumarlos y obtener el total.
+ *
+ * @param products puntero que apunta a los valores del producto que se va
+ * vender
+ * @return total suma de los precios de compra de los productos
+ */
+
+gint
+TotalPrecioCompra (Productos *products)
+{
+  Productos *header = products;
+  gint total=0;
+  gint pre,precio;
+  PGresult *res;
+  gchar *q;
+  do
+    {
+      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
+      res = EjecutarSQL (q);
+      pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+      total = total + pre;
+      products = products->next;
+    }
+  while (products != header);
+
+  return total;
+}
+
+
