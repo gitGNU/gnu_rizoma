@@ -296,13 +296,11 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (gtk_builder_get_object (builder, "textview1")));
   gtk_text_buffer_create_tag (buffer, "color_red", "foreground-gdk", &color, NULL);
 
- 
   gtk_text_buffer_create_tag (buffer, "size_medium", "scale", PANGO_SCALE_LARGE, NULL);
   gtk_text_buffer_create_tag (buffer, "style_italic", "style", PANGO_STYLE_ITALIC, NULL); 
 
 
-
-  dir = gtk_file_chooser_get_filename (GTK_WIDGET (builder_get (builder, "filechooserbutton1")));
+  dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER  (builder_get (builder, "filechooserbutton1")));
   fp = fopen (dir, "r");
 
   if (fp == NULL)
@@ -345,29 +343,21 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
           
           if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))))
             {
-            CompraAgregarALista (barcode, cant, precio, pcomp, margen,FALSE);
-            
-            string = g_strdup_printf (" El producto con barcode %s se ingreso correctamente \n", barcode);
-            
-            mark = gtk_text_buffer_get_insert(buffer);
-            gtk_text_buffer_get_iter_at_offset (buffer, &iter, mark);
-            gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
-                                                     ,"size_medium", "style_italic" ,NULL);
-            
-            //gtk_text_buffer_get_iter_at_offset (buffer, &iter, 0);
-            //gtk_text_buffer_insert_with_tags_by_name (buffer, &iter, "Hello", -1,
-            // "size_medium", "style_italic", "color_blue", NULL); 
-                          
+              CompraAgregarALista (barcode, cant, precio, pcomp, margen,FALSE);
+              string = g_strdup_printf (" El producto con barcode %s se ingreso correctamente \n", barcode);
+              mark = gtk_text_buffer_get_insert(buffer);
+              gtk_text_buffer_get_iter_at_offset (buffer, &iter, (gint) mark);
+              gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
+                                                       ,"size_medium", "style_italic" ,NULL);             
             }
           
           else
             {
               string = g_strdup_printf ("El producto %s no esta en la bd \n", barcode);
               mark = gtk_text_buffer_get_insert(buffer);
-              gtk_text_buffer_get_iter_at_offset (buffer, &iter, mark);
+              gtk_text_buffer_get_iter_at_offset (buffer, &iter,(gint) mark);
               gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
                                                        ,"size_medium", "style_italic" ,"color_red",NULL);
-     
               cont_products_no_BD++;
             }
 

@@ -3404,14 +3404,13 @@ on_btn_devolver_clicked (GtkWidget *widget, gpointer data)
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para vender");
       return;
     }
-
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_devolver"));
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_devolver")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
   clean_container (GTK_CONTAINER (window));
   gtk_widget_show_all (GTK_WIDGET (window));
 
-  return;
 }
+
 
 /**
  * Es llamada cuando se presiona enter(signal actived) en el "entry_devolver"
@@ -3537,31 +3536,6 @@ on_entry_srch_provider_activate (GtkEntry *entry)
  *
  */
 
-void
-on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
-{
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
-  GtkTreeModel *model = gtk_tree_view_get_model (tree);
-  GtkTreeIter iter;
-  gchar *str;
-  gchar **strs;
-
-
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
-    {
-      gtk_tree_model_get (model, &iter,
-                          1, &str,
-                          -1);
-
-      strs = g_strsplit (str, "-", 2);
-
-
-      FillProveedorData (*strs);
-
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
-    }
-}
-
 /**
  * Es llamada por la funcion "on_btn_ok_srch_provider_clicked" y recibe el
  * parametro gchar rut.
@@ -3594,6 +3568,33 @@ FillProveedorData (gchar *rut)
     gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_devolucion")));
 }
 
+void
+on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
+{
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeIter iter;
+  gchar *str;
+  gchar **strs;
+
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          1, &str,
+                          -1);
+
+      strs = g_strsplit (str, "-", 2);
+
+
+      FillProveedorData (*strs);
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
+    }
+}
+
+
+
 /**
  * Es llamada cuando el boton "btn_devolucion" es presionado (signal click).
  * 
@@ -3612,24 +3613,43 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
   
   gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
                                           (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
-  gint rut = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_proveedor_rut"))))));
-  
-  SaveDevolucion (monto,rut);
-  
-  gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
-  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+  gint rut = atoi (CutPoints (g_strdup  (gtk_label_get_text
+                                         (GTK_LABEL (gtk_builder_get_object (builder, "label_proveedor_rut"))))));
 
-  gtk_list_store_clear (venta->store);
+  if (g_str_equal(gtk_entry_get_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_proveedor"))), ""))    
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"No Ingreso un Proveedor"); 
+      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      return;
+    }
 
-  CleanEntryAndLabelData ();
+  if(!DataExist (g_strdup_printf ("SELECT rut FROM proveedor WHERE rut=%d",rut)))
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"El rut no existe");
+      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      return;
+    }
+    
+  else
+    {
+      SaveDevolucion (monto,rut);
 
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
+      gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
-  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+      gtk_list_store_clear (venta->store);
 
-  ListClean ();
+      CleanEntryAndLabelData ();
+
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
+
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+
+      ListClean ();
+    }
 
 }
 

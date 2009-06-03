@@ -1071,17 +1071,17 @@ fill_devolucion (GDate *date_begin, GDate *date_end)
   if (tuples == 0) return;
   
   /* visualiza los datos de la devolucion en el tree_view */
-  
-  gtk_list_store_append (store, &iter);
-  gtk_list_store_set (store, &iter,
-                      0, PQgetvalue (res, i, 0),
-                      1, PQgetvalue (res, i, 1),
-                      2, PQgetvalue (res, i, 2),
-                      3, PQgetvalue (res, i, 3),
-                      -1);
 
-  
-
+    for (i = 0; i < tuples; i++)
+      {
+        gtk_list_store_append (store, &iter);
+        gtk_list_store_set (store, &iter,
+                            0, PQgetvalue (res, i, 0),
+                            1, PQgetvalue (res, i, 1),
+                            2, PQgetvalue (res, i, 2),
+                            3, PQgetvalue (res, i, 3),
+                            -1);
+      }
 }
 
 /**

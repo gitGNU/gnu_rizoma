@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <interface>
+  <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="traspaso_recibir_win">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -2155,9 +2156,8 @@
                   <object class="GtkButton" id="sell_add_button">
                     <property name="label" context="yes">gtk-add</property>
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="receives_default">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
                     <signal name="clicked" handler="AgregarProducto"/>
                   </object>
@@ -2433,7 +2433,6 @@
               <object class="GtkButton" id="btn_devolver">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="has_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="use_underline">True</property>
                 <signal name="clicked" handler="on_btn_devolver_clicked"/>
@@ -3672,10 +3671,9 @@
                       <object class="GtkEntry" id="entry_proveedor">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="has_focus">True</property>
-                        <property name="is_focus">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                         <signal name="activate" handler="on_entry_provider_activate"/>
+                        <signal name="activate" handler="gtk_widget_grab_focus" object="btn_devolucion"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
