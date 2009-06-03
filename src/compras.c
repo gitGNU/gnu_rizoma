@@ -4220,6 +4220,8 @@ AddToProductsListTraspaso (void)
   gint precio = strtod (PUT(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object  (builder, "label_sell_price"))))), (char **)NULL);
   Producto *check;
 
+  
+  
   if (g_str_equal (barcode, ""))
     return;
 
@@ -4229,6 +4231,7 @@ AddToProductsListTraspaso (void)
 
   cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans"))))), NULL);
 
+  
   if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
       && strcmp (barcode, "") != 0)
     {
@@ -4259,12 +4262,14 @@ AddToProductsListTraspaso (void)
                               -1);
         }
 
+      
+      
       if(atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) == 0)
         {
           gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
           tipo_traspaso = 0;
         }
- 
+      
       gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_info"))," ");
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
                             g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
@@ -4276,13 +4281,13 @@ AddToProductsListTraspaso (void)
       CleanStatusProduct ();
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
+      
     }
   else
     {
-      CalcularPrecioFinal ();
-      AddToProductsList ();
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")), "El Producto debe tener precio mayor a 0");
     }
-
+  
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));

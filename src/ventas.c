@@ -3617,16 +3617,30 @@ FillProveedorData (gchar *rut)
 void
 on_btn_devolucion_clicked (GtkButton *button, gpointer data)
 {
-  gchar *proveedor= g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_proveedor"))));
-
   
-  if (strcmp (proveedor, "") != 0)
-    {
-      int monto = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                             (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
-      gint rut = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                            (GTK_LABEL (gtk_builder_get_object (builder, "label_proveedor_rut"))))));
+  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
+                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  gint rut = atoi (CutPoints (g_strdup  (gtk_label_get_text
+                                         (GTK_LABEL (gtk_builder_get_object (builder, "label_proveedor_rut"))))));
 
+  if (g_str_equal(gtk_entry_get_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_proveedor"))), ""))    
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"No Ingreso un Proveedor"); 
+      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      return;
+    }
+
+  if(!DataExist (g_strdup_printf ("SELECT rut FROM proveedor WHERE rut=%d",rut)))
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"El rut no existe");
+      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      return;
+    }
+    
+  else
+    {
       SaveDevolucion (monto,rut);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
@@ -3643,12 +3657,6 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
 
       ListClean ();
     }
-  else
-    {
-      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_proveedor")), "Debe seleccionar un proveedor.");
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
-      return;
-      }
 }
 
 /**
@@ -3781,6 +3789,7 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
       
       return;
     }
+  
 }
 
 /**
@@ -3805,70 +3814,6 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
                                           (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
 
-  gint rut = atoi (CutPoints (g_strdup  (gtk_label_get_text
-                                         (GTK_LABEL (gtk_builder_get_object (builder, "label_proveedor_rut"))))));
-
-  if (g_str_equal(gtk_entry_get_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_proveedor"))), ""))    
-    {
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
-      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"No Ingreso un Proveedor"); 
-      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
-      return;
-    }
-
-  if(!DataExist (g_strdup_printf ("SELECT rut FROM proveedor WHERE rut=%d",rut)))
-    {
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
-      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"El rut no existe");
-      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
-      return;
-    }
-    
-  else
-    {
-      SaveDevolucion (monto,rut);
-
-      gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-
-      gtk_list_store_clear (venta->store);
-
-      CleanEntryAndLabelData ();
-
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
-
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
-
-      ListClean ();
-    }
-
-}
-
-
-  /**
- * Es llamada cuando el boton "traspaso_button" es presionado (signal click).
- * 
- * Esta funcion visualiza la ventana "traspaso_enviar_win".
- *
- * @param widget the widget that emits the signal
- * @param data the user data
- *
- */
-void
-on_enviar_button_clicked (GtkButton *button, gpointer data)
-{
-  
-  gint * destino;
-  GtkTreeIter iter;
-  GtkWidget *combo;
-  GtkTreeModel *model;
-  gint active;
-  gint vendedor = user_data->user_id;
-  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
-
-  
   
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
@@ -3876,7 +3821,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   /* Verifica si se selecciono un destino del combobox*/
   if (active == -1)
     ErrorMSG (combo, "Debe Seleccionar un Destino");
-
+  
   else
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
@@ -3909,9 +3854,5 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       ListClean ();
 
     }
-
+  return;
 }
-
-
-
-
