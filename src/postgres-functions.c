@@ -41,6 +41,7 @@
 #include"factura_more.h"
 
 PGconn *connection;
+PGconn *connection2;
 
 gchar *
 CutComa (gchar *number)
@@ -183,6 +184,79 @@ EjecutarSQL (gchar *sentencia)
 
   return NULL;
 }
+
+PGresult *
+EjecutarSQL2 (gchar *sentencia)
+{
+  PGresult *res;
+  ConnStatusType status;
+  ExecStatusType status_res;
+
+  char *host = rizoma_get_value ("SERVER_HOST");
+  char *name = rizoma_get_value ("DB_NAME");
+  char *user = rizoma_get_value ("USER");
+  char *pass = rizoma_get_value ("PASSWORD");
+  char *port = rizoma_get_value ("PORT");
+
+  if (port == NULL)
+    port = g_strdup("5432");
+
+  char *sslmode = rizoma_get_value ("SSLMODE");
+  if (sslmode == NULL)
+    sslmode = g_strdup("require");
+
+  status = PQstatus( connection2 );
+
+  if( status == CONNECTION_OK )
+    {
+      res = PQexec (connection2, sentencia);
+      status_res = PQresultStatus(res);
+
+      if ((status_res != PGRES_COMMAND_OK) && (status_res != PGRES_TUPLES_OK))
+        g_printerr("SQL: %s\nErr: %s\nMsg: %s",
+                   sentencia,
+                   PQresStatus(status_res),
+                   PQresultErrorMessage(res));
+
+      if( res == NULL )
+        {
+          rizoma_errors_set (PQerrorMessage (connection2), (gchar *)G_STRFUNC, ERROR);
+        }
+      else
+        {
+          return res;
+        }
+    }
+  else
+    {
+      gchar *strconn = g_strdup_printf ("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+                                        host, port, name, user, pass,sslmode);
+
+      connection2 = PQconnectdb (strconn);
+      g_free( strconn );
+
+      status = PQstatus(connection2);
+
+      switch (status)
+        {
+        case CONNECTION_OK:
+          res = PQexec (connection2, sentencia);
+          if( res == NULL )
+            rizoma_errors_set (PQerrorMessage (connection2), G_STRFUNC, ERROR);
+          else
+            return res;
+          break;
+        case CONNECTION_BAD:
+          rizoma_errors_set (PQerrorMessage (connection2), G_STRFUNC, ERROR);
+          break;
+        default:
+          return NULL;
+        }
+    }
+
+  return NULL;
+}
+
 
 gboolean
 DataExist (gchar *sentencia)
@@ -370,14 +444,7 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
 {
   PGresult *res;
 
-  if (from_year == to_year && from_month == to_month && from_day == to_day)
-    res = EjecutarSQL (g_strdup_printf
-                       ("SELECT %s FROM venta WHERE "
-                        "date_part('year', fecha)=%d AND date_part('month', fecha)=%d AND "
-                        "date_part('day', fecha)=%d and id not in  (select id_sale from venta_anulada) ORDER BY fecha DESC",
-                        fields, from_year, from_month, from_day));
-  else
-    res = EjecutarSQL (g_strdup_printf
+  res = EjecutarSQL (g_strdup_printf
                        ("SELECT %s FROM venta WHERE "
                         "%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
                         "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and id not in  (select id_sale from venta_anulada) ORDER BY fecha DESC",
@@ -398,10 +465,13 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT SUM ((SELECT SUM (cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
-      "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND (SELECT forma_pago FROM documentos_emitidos "
-      "WHERE id=id_documento)=%d and venta.id not in ( select id_sale from venta_anulada)", from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
+     ("SELECT trunc(sum(vd.precio * vd.cantidad -descuento)),count(Distinct(v.id)) "
+      "FROM venta v,venta_detalle vd "
+      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+      "AND (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d "
+      "AND v.id NOT IN (select id_sale from venta_anulada)",
+      from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
 
   if (res == NULL)
     return 0;
@@ -440,10 +510,11 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf
-                     ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE "
-                      "id_venta=venta.id)-descuento), count (*) FROM venta WHERE "
-                      "fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-                      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and venta.id not in ( select id_sale from venta_anulada)",
+                     ("SELECT trunc(sum(vd.precio * vd.cantidad -descuento)),count(Distinct(v.id)) "
+                      "FROM venta v,venta_detalle vd "
+                      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                      "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+                      "AND  v.id NOT IN (select id_sale from venta_anulada)",
                       from_day, from_month, from_year, to_day+1, to_month, to_year));
 
   if (res == NULL)

@@ -22,6 +22,9 @@
  */
 
 #include <gtk/gtk.h>
+#include <unistd.h>
+#include <glib.h>
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +39,28 @@
 #include "printing.h"
 
 GtkBuilder *builder;
+PGresult *res_sells;
+gint contador, fin;
+GDate *date_begin;
+GDate *date_end;
+
+
+static gboolean funcion_progreso (gpointer data)
+{
+	gdouble fraccion;
+
+	fraccion = gtk_progress_bar_get_fraction((GtkProgressBar *) data);
+
+	fraccion+= 0.05;
+
+	if (fraccion > 1.0)
+		fraccion = 0.0;
+
+	gtk_progress_bar_set_fraction((GtkProgressBar*) data, fraccion);
+
+}
+
+
 
 /**
  * Es llamada cuando se presiona en el tree_view_sells (signal changed).
@@ -55,7 +80,8 @@ ChangeVenta (void)
   gchar *idventa;
   gint i, tuples;
   PGresult *res;
-
+  
+    
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       gtk_tree_model_get (model, &iter,
@@ -65,11 +91,11 @@ ChangeVenta (void)
       gtk_list_store_clear (GTK_LIST_STORE (store_detail));
 
       /* consulta que arroja el detalle de una venta*/
-      
-      res = EjecutarSQL
+  
+
+      res = EjecutarSQL2
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, (cantidad * venta_detalle.precio)::int AS "
-          "monto FROM venta_detalle, producto WHERE producto.barcode=venta_detalle.barcode and id_venta=%s", idventa));
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, (cantidad * venta_detalle.precio)::int AS monto FROM venta_detalle, producto WHERE producto.barcode=venta_detalle.barcode and id_venta=%s", idventa));
 
       tuples = PQntuples (res);
 
@@ -85,7 +111,7 @@ ChangeVenta (void)
                               3, PQvaluebycol (res, i, "monto"),
                               -1);
         }
-    }
+    }  
 }
 
 /**
@@ -850,6 +876,11 @@ main (int argc, char **argv)
       return -1;
     }
 
+
+    /* init threads */
+  g_thread_init(NULL);
+  gdk_threads_init();
+  
   gtk_init (&argc, &argv);
 
   builder = gtk_builder_new ();
@@ -894,7 +925,10 @@ main (int argc, char **argv)
 
   gtk_widget_show_all ((GtkWidget *)login_window);
 
+    /* enter the GTK main loop */
+  gdk_threads_enter();
   gtk_main();
+  gdk_threads_leave();
 
   return 0;
 }
@@ -947,6 +981,292 @@ check_passwd (GtkWidget *widget, gpointer data)
     }
 }
 
+void
+on_btn_primero_clicked()
+{
+  gint hasta, i;
+  gint sell_type;
+  GtkTreeIter iter;
+  gchar *pago = NULL;
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
+  hasta = 100;
+
+  gtk_list_store_clear (store);
+
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")),  g_strdup_printf ("%d",hasta));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), "1" );
+
+
+  for (i = 0 ; i < hasta; i++)
+    {
+      if (i < hasta )
+        {
+          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          switch (sell_type)
+            {
+            case CASH:
+              pago = "Contado";
+              break;
+            case CREDITO:
+              pago = "Credito";
+              break;
+            case CHEQUE:
+              pago = "Cheque";
+              break;
+            case TARJETA:
+              pago = "Tarjeta";
+              break;
+            default:
+              pago = "Indefinido";
+              break;
+            }
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQgetvalue (res_sells, i, 4),
+                              1, PQgetvalue (res_sells, i, 0),
+                              2, PQgetvalue (res_sells, i, 1),
+                              3, PQgetvalue (res_sells, i, 2),
+                              4, PQgetvalue (res_sells, i, 3),
+                              5, pago,
+                              -1);
+        }
+    }
+
+  contador = i;
+  
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), TRUE);
+  return;
+  
+
+}
+
+
+void
+on_btn_atras_clicked()
+{
+  gint hasta, i;
+  gint sell_type;
+  GtkTreeIter iter;
+  gchar *pago = NULL;
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
+  
+  if((contador - 100) == 100 || (contador - 100) == 0)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
+      
+      hasta = 100;
+    }
+
+  else
+    {
+      hasta = contador - 100;      
+    }
+    
+  if (hasta >= 0)
+    {
+  gtk_list_store_clear (store);
+
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")),  g_strdup_printf ("%d",hasta));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), g_strdup_printf ("%d",hasta - 100 + 1) );
+
+
+  for (i = hasta - 100 ; i < hasta; i++)
+    {
+      if (i < hasta )
+        {
+          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          switch (sell_type)
+            {
+            case CASH:
+              pago = "Contado";
+              break;
+            case CREDITO:
+              pago = "Credito";
+              break;
+            case CHEQUE:
+              pago = "Cheque";
+              break;
+            case TARJETA:
+              pago = "Tarjeta";
+              break;
+            default:
+              pago = "Indefinido";
+              break;
+            }
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQgetvalue (res_sells, i, 4),
+                              1, PQgetvalue (res_sells, i, 0),
+                              2, PQgetvalue (res_sells, i, 1),
+                              3, PQgetvalue (res_sells, i, 2),
+                              4, PQgetvalue (res_sells, i, 3),
+                              5, pago,
+                              -1);
+        }
+    }
+
+    contador = i;
+    }
+  
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), TRUE);
+  return;
+  
+
+}
+
+void
+on_btn_adelante_clicked()
+{
+  gint hasta, i;
+  gint sell_type;
+  GtkTreeIter iter;
+  gchar *pago = NULL;
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
+
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")),  g_strdup_printf ("%d",contador + 1));
+
+  
+  if((contador + 100) >= fin)
+    hasta = fin;
+  else
+    {
+      hasta = contador + 100;
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), TRUE);
+      
+    }
+    
+  if (hasta <= fin)
+    {
+      gtk_list_store_clear (store);
+      gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
+
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")), g_strdup_printf ("%d",hasta));
+      
+      for (i = contador ; i < hasta; i++)
+        {
+          if (i < hasta )
+            {
+              sell_type = atoi (PQgetvalue (res_sells, i, 5));
+              switch (sell_type)
+                {
+                case CASH:
+                  pago = "Contado";
+                  break;
+                case CREDITO:
+                  pago = "Credito";
+                  break;
+                case CHEQUE:
+                  pago = "Cheque";
+                  break;
+                case TARJETA:
+                  pago = "Tarjeta";
+                  break;
+                default:
+                  pago = "Indefinido";
+                  break;
+                }
+              gtk_list_store_append (store, &iter);
+              gtk_list_store_set (store, &iter,
+                                  0, PQgetvalue (res_sells, i, 4),
+                                  1, PQgetvalue (res_sells, i, 0),
+                                  2, PQgetvalue (res_sells, i, 1),
+                                  3, PQgetvalue (res_sells, i, 2),
+                                  4, PQgetvalue (res_sells, i, 3),
+                                  5, pago,
+                                  -1);
+            }
+        }
+
+      if(hasta == fin)
+        {
+          hasta = fin + 1;
+          gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), FALSE);
+          gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), FALSE);
+          gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), TRUE);
+          gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), TRUE);
+        }
+      
+      else
+        contador = i;
+    }
+
+  return;
+
+}
+
+void
+on_btn_ultimo_clicked()
+{
+  gint hasta, i;
+  gint sell_type;
+  GtkTreeIter iter;
+  gchar *pago = NULL;
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
+  
+  hasta = fin;
+  contador = fin - (fin % 100);
+ 
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")),  g_strdup_printf ("%d",contador + 1));
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), TRUE);
+      
+  gtk_list_store_clear (store);
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
+
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")), g_strdup_printf ("%d",fin));
+
+  for (i = contador ; i < hasta; i++)
+    {
+      if (i < hasta )
+        {
+          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          switch (sell_type)
+            {
+            case CASH:
+              pago = "Contado";
+              break;
+            case CREDITO:
+              pago = "Credito";
+              break;
+            case CHEQUE:
+              pago = "Cheque";
+              break;
+            case TARJETA:
+              pago = "Tarjeta";
+              break;
+            default:
+              pago = "Indefinido";
+              break;
+            }
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQgetvalue (res_sells, i, 4),
+                              1, PQgetvalue (res_sells, i, 0),
+                              2, PQgetvalue (res_sells, i, 1),
+                              3, PQgetvalue (res_sells, i, 2),
+                              4, PQgetvalue (res_sells, i, 3),
+                              5, pago,
+                              -1);
+        }
+    }
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), FALSE);
+
+  return;
+
+}
+
+
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
  * opcion 0 del switch" 
@@ -962,7 +1282,7 @@ check_passwd (GtkWidget *widget, gpointer data)
 
 
 void
-fill_sells_list (GDate *date_begin, GDate *date_end)
+fill_sells_list ()
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
 
@@ -970,64 +1290,76 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
   gint tuples, i;
   gint sell_type;
   GtkTreeIter iter;
-  PGresult *res;
 
+  //gdk_threads_enter();
   gtk_list_store_clear (store);
   gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail")))));
 
-  /* esta funcion  SearchTuplesByDate() llama a una consulta de ssl, que
+  /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
      retorna los datos de ventas en un intervalo de fechas*/ 
-  res = SearchTuplesByDate
+  res_sells = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-     "fecha", "id, maquina, vendedor, monto, date_part('day', fecha), date_part('month', fecha), "
-     "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), tipo_venta");
+     "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta");
 
+  tuples = PQntuples (res_sells);
 
-  tuples = PQntuples (res);
+  if (tuples > 100)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), TRUE);
+            gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE); 
+    }
 
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), "1");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")), "100");
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "fin_lbl")), g_strdup_printf ("%d",tuples));
+  
   if (tuples == 0)
     return;
 
   /* verifica que tipo de venta es*/
   for (i = 0; i < tuples; i++)
     {
-      sell_type = atoi (PQgetvalue (res, i, 9));
-
-      switch (sell_type)
+      if (i < 100 )
         {
-        case CASH:
-          pago = "Contado";
-          break;
-        case CREDITO:
-          pago = "Credito";
-          break;
-        case CHEQUE:
-          pago = "Cheque";
-          break;
-        case TARJETA:
-          pago = "Tarjeta";
-          break;
-        default:
-          pago = "Indefinido";
-          break;
+          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          switch (sell_type)
+            {
+            case CASH:
+              pago = "Contado";
+              break;
+            case CREDITO:
+              pago = "Credito";
+              break;
+            case CHEQUE:
+              pago = "Cheque";
+              break;
+            case TARJETA:
+              pago = "Tarjeta";
+              break;
+            default:
+              pago = "Indefinido";
+              break;
+            }
+          gtk_list_store_append (store, &iter);
+          gtk_list_store_set (store, &iter,
+                              0, PQgetvalue (res_sells, i, 4),
+                              1, PQgetvalue (res_sells, i, 0),
+                              2, PQgetvalue (res_sells, i, 1),
+                              3, PQgetvalue (res_sells, i, 2),
+                              4, PQgetvalue (res_sells, i, 3),
+                              5, pago,
+                              -1);
         }
-
-      gtk_list_store_append (store, &iter);
-      gtk_list_store_set (store, &iter,
-                          0,
-                          g_strdup_printf
-                          ("%.2d/%.2d/%s %.2d:%.2d", atoi (PQgetvalue (res, i, 4)),
-                           atoi (PQgetvalue (res, i, 5)), PQgetvalue (res, i, 6),
-                           atoi (PQgetvalue (res, i, 7)), atoi (PQgetvalue (res, i, 8))),
-                          1, PQgetvalue (res, i, 0),
-                          2, PQgetvalue (res, i, 1),
-                          3, PQgetvalue (res, i, 2),
-                          4, PQgetvalue (res, i, 3),
-                          5, pago,
-                          -1);
+      else
+        {
+          contador = 100;
+          fin = tuples;
+          return;
+        }
     }
-
 }
 
 /**
@@ -1043,7 +1375,7 @@ fill_sells_list (GDate *date_begin, GDate *date_end)
  */
 
 void
-fill_devolucion (GDate *date_begin, GDate *date_end)
+fill_devolucion ()
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion"))));
   gchar *query;
@@ -1098,7 +1430,7 @@ fill_devolucion (GDate *date_begin, GDate *date_end)
 
 
 void
-fill_totals_dev (GDate *date_begin, GDate *date_end)
+*fill_totals_dev ()
 {
   PGresult *res;
 
@@ -1149,7 +1481,7 @@ fill_totals_dev (GDate *date_begin, GDate *date_end)
  */
 
 void
-fill_totals (GDate *date_begin, GDate *date_end)
+*fill_totals () 
 {
   PGresult *res;
   gint total_cash_sell;
@@ -1160,17 +1492,30 @@ fill_totals (GDate *date_begin, GDate *date_end)
   gint total_credit;
   gint total_sell;
   gint total_ventas;
-  
+
+  GtkWidget * progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")),FALSE);
+    
   /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
+
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.1);
   total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
                                       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
                                       &total_cash);
+
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.35);
+
 
   res = EjecutarSQL
     (g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
                       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
                       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
 
+ 
+ 
+
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.60);
+  
   if (res != NULL)
     {
       total_cash_discount = atoi (PQvaluebycol (res, 0, "total_cash_discount"));
@@ -1182,9 +1527,15 @@ fill_totals (GDate *date_begin, GDate *date_end)
                                           g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
                                           &total_credit);
 
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.65);
+  
+
+
   total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
                              g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
                              &total_ventas);
+
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.85);
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_amount")),
                         g_strdup_printf ("<span>$%s</span>",
@@ -1218,6 +1569,7 @@ fill_totals (GDate *date_begin, GDate *date_end)
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_total_n")),
                         g_strdup_printf ("<span>%d</span>", total_ventas));
 
+   gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.95);
   if (total_ventas != 0)
     gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_average")),
                           g_strdup_printf ("<span>$%s</span>",
@@ -1237,6 +1589,11 @@ fill_totals (GDate *date_begin, GDate *date_end)
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_discount / total_discount))));
 
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0);
+  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Listo ..");
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")),TRUE);
+
+
 }
 
 /**
@@ -1252,13 +1609,12 @@ fill_totals (GDate *date_begin, GDate *date_end)
 
 
 void
-fill_products_rank (GDate *date_begin, GDate *date_end)
+fill_products_rank ()
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"))));
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
-  gint vendidos = 0, costo = 0, contrib = 0;
   gdouble margen = 0;
 
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -1274,10 +1630,7 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
 
   for (i = 0; i < tuples; i++)
     {
-      vendidos += atoi (PQvaluebycol (res, i, "sold_amount"));
-      costo += atoi (PQvaluebycol (res, i, "costo"));
-      contrib += atoi (PQvaluebycol (res, i, "contrib"));
-
+  
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "descripcion"),
@@ -1293,26 +1646,28 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
                           -1);
     }
 
+
+    res = EjecutarSQL
+      (g_strdup_printf ("SELECT trunc(sum(sold_amount)) as vendidos, sum(costo) as costo,sum(contrib) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 3)  as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
+                        g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+                        g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
+       );
+
+  if (res == NULL) return;
+  
   /* visualiza las sumas de los productos en sus respectivos labels */
   
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
-                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
-                                         (g_strdup_printf ("%d", vendidos))));
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PQvaluebycol (res, 0, "vendidos")));
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
-                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
-                                         (g_strdup_printf ("%d", costo))));
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PQvaluebycol (res, 0, "costo")));
+  
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_contrib")),
-                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PutPoints
-                                         (g_strdup_printf ("%d", contrib))));
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>", PQvaluebycol (res, 0, "contrib")));
 
-  margen = (((gdouble) contrib / costo) * 100);
-
-  if (margen > 0)
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
-                          g_strdup_printf ("<span size=\"x-large\">%.2f%%</span>", margen));
-  else
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
-                          g_strdup_printf ("<span size=\"x-large\">0%%</span>"));
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
+                        g_strdup_printf ("<span size=\"x-large\">$ %s %</span>", PQvaluebycol (res, 0, "margen")));
+ 
 }
 
 /**
@@ -1327,7 +1682,7 @@ fill_products_rank (GDate *date_begin, GDate *date_end)
  */
 
 void
-fill_cash_box_list (GDate *date_begin, GDate *date_end)
+fill_cash_box_list ()
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_cash_box_lists"))));
   GtkTreeIter iter;
@@ -1379,33 +1734,48 @@ on_btn_get_stat_clicked ()
   gint page_num = gtk_notebook_get_current_page (notebook);;
   const gchar *str_begin = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_begin")));
   const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
-  GDate *date_begin = g_date_new ();
-  GDate *date_end = g_date_new ();
-
+  date_begin = g_date_new ();
+  date_end = g_date_new ();
+  GError *error = NULL;
+  GtkWidget * progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+  
   if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
 
   g_date_set_parse (date_begin, str_begin);
   g_date_set_parse (date_end, str_end);
 
+  
+
   switch (page_num)
     {
     
     case 0:  /* Informe de ventas */
-
-      fill_sells_list (date_begin, date_end);
+      //gtk_progress_bar_update (GTK_PROGRESS_BAR(progreso),0.10);
+      //g_thread_create(fill_sells_list, NULL, FALSE, &error);
+      fill_sells_list();
+      //date_begin, date_end);
+      gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Cargando ..");
+      //gtk_progress_bar_update (GTK_PROGRESS_BAR(progreso),0.25);
+      //g_timeout_add(100, funcion_progreso, progreso);
       clean_container (GTK_CONTAINER (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
-      fill_totals (date_begin, date_end);
+
+      //gtk_progress_bar_update (GTK_PROGRESS_BAR(progreso),0.50);
+      g_thread_create(fill_totals, NULL, FALSE, &error);
+      //fill_totals();
+      //gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"");
+      //gtk_progress_bar_update (GTK_PROGRESS_BAR(progreso),1.0);
+           
+    
       break;
-      
     case 1:   /* Informe de ranking de ventas */
-      fill_products_rank (date_begin, date_end);
+      fill_products_rank ();
       break;
     case 2:   /* Informe de caja*/
-      fill_cash_box_list (date_begin, date_end);
+      fill_cash_box_list ();
       break;
     case 3:   /* Informe de devolucion */
-      fill_devolucion (date_begin, date_end);
-      fill_totals_dev (date_begin, date_end);
+      fill_devolucion ();
+      g_thread_create(fill_totals_dev, NULL, FALSE, &error);
       break;
     default:
       break;
