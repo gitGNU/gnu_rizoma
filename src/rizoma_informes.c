@@ -943,9 +943,9 @@ main (int argc, char **argv)
 
 
   /* init threads */
-  g_thread_init(NULL);
+  //g_thread_init(NULL);
   
-  gdk_threads_init();
+  //gdk_threads_init();
   
   gtk_init (&argc, &argv);
 
@@ -992,9 +992,9 @@ main (int argc, char **argv)
   gtk_widget_show_all ((GtkWidget *)login_window);
 
   /* enter the GTK main loop */
-  gdk_threads_enter();
+  //gdk_threads_enter();
   gtk_main();
-  gdk_threads_leave();
+  //gdk_threads_leave();
 
   return 0;
 }
@@ -1892,7 +1892,8 @@ on_btn_get_stat_clicked ()
           clean_container (GTK_CONTAINER (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
 
           /* llama a la funcion fill_totals() en un nuevo thread(hilo)*/
-          g_thread_create(fill_totals, NULL, FALSE, &error);    
+          //g_thread_create(fill_totals, NULL, FALSE, &error);
+          fill_totals();
           break;
         case 1:
           /* Informe de ranking de ventas */
@@ -1906,7 +1907,8 @@ on_btn_get_stat_clicked ()
           /* Informe de devolucion */
           fill_devolucion ();
           /* llama a la funcion fill_totals_dev() en un nuevo thread(hilo)*/
-          g_thread_create(fill_totals_dev, NULL, FALSE, &error);
+          fill_totals_dev();
+          //g_thread_create(fill_totals_dev, NULL, FALSE, &error);
           break;
         default:
           break;
