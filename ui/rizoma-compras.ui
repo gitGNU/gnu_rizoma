@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <interface>
+  <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="wnd_cant_traspaso">
     <property name="title" translatable="yes">POS Rizoma: Cantidad Traspaso</property>
@@ -40,7 +41,7 @@
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkButton" id="button_add_product_list_trans">
-                    <property name="label" translatable="yes">gtk-add</property>
+                    <property name="label">gtk-add</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -211,7 +212,7 @@
             <property name="spacing">3</property>
             <child>
               <object class="GtkButton" id="button18">
-                <property name="label" translatable="yes" context="yes">gtk-cancel</property>
+                <property name="label" context="yes">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -226,7 +227,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_ok_ingress_partial_invoice">
-                <property name="label" translatable="yes" context="yes">gtk-ok</property>
+                <property name="label" context="yes">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -382,7 +383,7 @@
             <property name="spacing">3</property>
             <child>
               <object class="GtkButton" id="button15">
-                <property name="label" translatable="yes" context="yes">gtk-cancel</property>
+                <property name="label" context="yes">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -397,7 +398,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_ok_ingress_partial_guide">
-                <property name="label" translatable="yes" context="yes">gtk-ok</property>
+                <property name="label" context="yes">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -519,7 +520,7 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="btn_adjust_cancel">
-                <property name="label" translatable="yes">gtk-cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -534,7 +535,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_adjust_ok">
-                <property name="label" translatable="yes">gtk-ok</property>
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -865,7 +866,7 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="btn_edit_prod_cancel">
-                <property name="label" translatable="yes">gtk-cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -880,7 +881,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_edit_prod_save">
-                <property name="label" translatable="yes">gtk-save</property>
+                <property name="label">gtk-save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1044,7 +1045,7 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button27">
-                <property name="label" translatable="yes">gtk-cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1059,7 +1060,7 @@
             </child>
             <child>
               <object class="GtkButton" id="button_ok_ingress">
-                <property name="label" translatable="yes">gtk-ok</property>
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1196,7 +1197,7 @@
             <property name="spacing">3</property>
             <child>
               <object class="GtkButton" id="button25">
-                <property name="label" translatable="yes" context="yes">gtk-cancel</property>
+                <property name="label" context="yes">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1211,7 +1212,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_ok_ingress_invoice">
-                <property name="label" translatable="yes" context="yes">gtk-ok</property>
+                <property name="label" context="yes">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -1501,7 +1502,7 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button4">
-                <property name="label" translatable="yes" context="yes">gtk-cancel</property>
+                <property name="label" context="yes">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1516,7 +1517,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_add_new_product">
-                <property name="label" translatable="yes" context="yes">gtk-add</property>
+                <property name="label" context="yes">gtk-add</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1586,7 +1587,7 @@
                 <property name="layout_style">edge</property>
                 <child>
                   <object class="GtkButton" id="button2">
-                    <property name="label" translatable="yes" context="yes">gtk-find</property>
+                    <property name="label" context="yes">gtk-find</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -1601,7 +1602,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="button3">
-                    <property name="label" translatable="yes" context="yes">gtk-add</property>
+                    <property name="label" context="yes">gtk-add</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -1653,7 +1654,7 @@
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <child>
               <object class="GtkButton" id="button23">
-                <property name="label" translatable="yes" context="yes">gtk-close</property>
+                <property name="label" context="yes">gtk-close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1803,7 +1804,7 @@
                         <property name="layout_style">end</property>
                         <child>
                           <object class="GtkButton" id="button_new_product">
-                            <property name="label" translatable="yes">gtk-add</property>
+                            <property name="label">gtk-add</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1818,7 +1819,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="edit_product_button">
-                            <property name="label" translatable="yes">gtk-edit</property>
+                            <property name="label">gtk-edit</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -2125,12 +2126,6 @@
                             <property name="column_spacing">5</property>
                             <property name="row_spacing">5</property>
                             <child>
-                              <object class="GtkComboBox" id="cmbPrecioCompra">
-                                <property name="visible">True</property>
-                                <signal name="changed" handler="gtk_widget_grab_focus" object="entry_buy_price"/>
-                              </object>
-                            </child>
-                            <child>
                               <object class="GtkHButtonBox" id="hbuttonbox3">
                                 <property name="visible">True</property>
                                 <property name="layout_style">center</property>
@@ -2232,6 +2227,29 @@
                             <child>
                               <placeholder/>
                             </child>
+                            <child>
+                              <object class="GtkHBox" id="hbox88">
+                                <property name="visible">True</property>
+                                <child>
+                                  <object class="GtkComboBox" id="cmbPrecioCompra">
+                                    <property name="no_show_all">True</property>
+                                    <signal name="changed" handler="gtk_widget_grab_focus" object="entry_buy_price"/>
+                                  </object>
+                                  <packing>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label1111">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Precio Neto</property>
+                                  </object>
+                                  <packing>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2272,7 +2290,7 @@
                                 <property name="spacing">5</property>
                                 <child>
                                   <object class="GtkButton" id="button_add_product_list">
-                                    <property name="label" translatable="yes">gtk-add</property>
+                                    <property name="label">gtk-add</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -2287,7 +2305,7 @@
                                 </child>
                                 <child>
                                   <object class="GtkButton" id="button_clear">
-                                    <property name="label" translatable="yes">gtk-clear</property>
+                                    <property name="label">gtk-clear</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
@@ -2354,7 +2372,7 @@
                         <property name="layout_style">start</property>
                         <child>
                           <object class="GtkButton" id="btn_remove_buy_product">
-                            <property name="label" translatable="yes">gtk-remove</property>
+                            <property name="label">gtk-remove</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -3332,7 +3350,7 @@
                                     <property name="spacing">5</property>
                                     <child>
                                       <object class="GtkButton" id="button11">
-                                        <property name="label" translatable="yes">gtk-clear</property>
+                                        <property name="label">gtk-clear</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -3347,7 +3365,7 @@
                                     </child>
                                     <child>
                                       <object class="GtkButton" id="btn_guide_invoice_ok">
-                                        <property name="label" translatable="yes">gtk-ok</property>
+                                        <property name="label">gtk-ok</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -3729,7 +3747,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="button5">
-                            <property name="label" translatable="yes">gtk-clear</property>
+                            <property name="label">gtk-clear</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -3802,7 +3820,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="find_product_button">
-                            <property name="label" translatable="yes">gtk-find</property>
+                            <property name="label">gtk-find</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -4574,7 +4592,7 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_infomerca_print">
-                        <property name="label" translatable="yes">gtk-print</property>
+                        <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -4602,7 +4620,7 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_infomerca_del">
-                        <property name="label" translatable="yes">gtk-delete</property>
+                        <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -4617,7 +4635,7 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_infomerca_save">
-                        <property name="label" translatable="yes">gtk-save</property>
+                        <property name="label">gtk-save</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -4681,7 +4699,7 @@
                         <property name="layout_style">start</property>
                         <child>
                           <object class="GtkButton" id="btn_prov_search">
-                            <property name="label" translatable="yes">gtk-find</property>
+                            <property name="label">gtk-find</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -4696,7 +4714,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_prov_ad">
-                            <property name="label" translatable="yes">gtk-add</property>
+                            <property name="label">gtk-add</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -4751,7 +4769,7 @@
                         <property name="layout_style">end</property>
                         <child>
                           <object class="GtkButton" id="btn_prov_print">
-                            <property name="label" translatable="yes">gtk-print</property>
+                            <property name="label">gtk-print</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -5074,7 +5092,7 @@
                         <property name="layout_style">end</property>
                         <child>
                           <object class="GtkButton" id="btn_prov_save">
-                            <property name="label" translatable="yes">gtk-save</property>
+                            <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -5089,7 +5107,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="button1">
-                            <property name="label" translatable="yes">gtk-clear</property>
+                            <property name="label">gtk-clear</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -5148,7 +5166,7 @@
             </child>
             <child>
               <object class="GtkButton" id="button14">
-                <property name="label" translatable="yes">gtk-quit</property>
+                <property name="label">gtk-quit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5298,7 +5316,7 @@
             <property name="spacing">3</property>
             <child>
               <object class="GtkButton" id="button13">
-                <property name="label" translatable="yes" context="yes">gtk-cancel</property>
+                <property name="label" context="yes">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5313,7 +5331,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_ok_ingress_guide">
-                <property name="label" translatable="yes" context="yes">gtk-ok</property>
+                <property name="label" context="yes">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -5362,7 +5380,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_find_srch_provider">
-                <property name="label" translatable="yes">gtk-find</property>
+                <property name="label">gtk-find</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5404,7 +5422,7 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button17">
-                <property name="label" translatable="yes">gtk-cancel</property>
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5419,7 +5437,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_ok_srch_provider">
-                <property name="label" translatable="yes">gtk-ok</property>
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
