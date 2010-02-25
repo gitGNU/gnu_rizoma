@@ -296,7 +296,7 @@ on_btn_create_pg_user_clicked (GtkAssistant *assistant)
     }
   else
     {
-      str_conn = g_strdup_printf ("host=localhost port=%s dbname=template1 user=%s password=%s sslmode=%s",
+      str_conn = g_strdup_printf ("host4=localhost port=%s dbname=template1 user=%s password=%s sslmode=%s",
                                   pg_port, pg_user, pg_pass, ssl);
 
       connection = PQconnectdb (str_conn);
@@ -389,6 +389,10 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
 
   if (status == CONNECTION_OK)
     {
+      sql_query = g_strdup_printf ("DROP DATABASE IF EXISTS %s;", db_name);
+      res = PQexec (connection, sql_query);
+      g_free (sql_query);
+
       sql_query = g_strdup_printf ("CREATE DATABASE %s;", db_name);
 
       res = PQexec (connection, sql_query);
