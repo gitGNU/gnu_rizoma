@@ -296,7 +296,7 @@ on_btn_create_pg_user_clicked (GtkAssistant *assistant)
     }
   else
     {
-      str_conn = g_strdup_printf ("host4=localhost port=%s dbname=template1 user=%s password=%s sslmode=%s",
+      str_conn = g_strdup_printf ("host=localhost port=%s dbname=template1 user=%s password=%s sslmode=%s",
                                   pg_port, pg_user, pg_pass, ssl);
 
       connection = PQconnectdb (str_conn);
