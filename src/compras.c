@@ -877,7 +877,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
     }
   else
     {

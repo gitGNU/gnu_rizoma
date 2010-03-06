@@ -920,6 +920,7 @@
     <property name="text">&#xBF;Realmente desea salir?</property>
     <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
     <signal name="response" handler="on_quit_message_response"/>
+    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox4">
         <property name="visible">True</property>
@@ -2225,9 +2226,6 @@
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
-                            </child>
-                            <child>
                               <object class="GtkHBox" id="hbox88">
                                 <property name="visible">True</property>
                                 <child>
@@ -2249,6 +2247,9 @@
                                   </packing>
                                 </child>
                               </object>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
