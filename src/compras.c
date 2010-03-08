@@ -1020,11 +1020,11 @@ CalcularPrecioFinal (void)
     Y+1    1,19
   */
 
-  if (ganancia == 0 && precio_final == 0 && ingresa != 0)
+  if (ganancia == 0 && precio_final == 0 && ingresa != 0 ||
+      ganancia == 0 && precio_final == 0 && ingresa == 0 ||
+      ganancia != 0 && precio_final == 0 && ingresa == 0  )
     {
-    }
-  else if (ganancia == 0 && precio_final == 0 && ingresa == 0)
-    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")),"Se requieren al menos 2 valores para efectuar el cálculo");
     }
   else if (ingresa == 0 && ganancia >= 0 && precio_final != 0)
     {
@@ -1090,7 +1090,7 @@ CalcularPrecioFinal (void)
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else
-    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), "Solamente 2 campos deben ser llenados");
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), "Solo 2 campos deben ser llenados");
 
 }
 
