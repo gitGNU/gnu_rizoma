@@ -390,6 +390,10 @@ on_btn_dump_data_clicked (GtkAssistant *assistant)
 
   if (status == CONNECTION_OK)
     {
+      sql_query = g_strdup_printf ("DROP DATABASE IF EXISTS %s;", db_name);
+      res = PQexec (connection, sql_query);
+      g_free (sql_query);
+
       sql_query = g_strdup_printf ("CREATE DATABASE %s;", db_name);
 
       res = PQexec (connection, sql_query);

@@ -1,3 +1,9 @@
+2010-02-25  Jonathan Gonzalez V.  <zeus@gnu.org>
+
+	* rizoma-config.c (on_btn_dump_data_clicked): Drop any database
+	that previously exists. This may be a risk but we must create a
+	new way to jump any error if exist when ti create the database.
+
 2008-10-08  Jonathan Gonzalez V.  <zeus@gnu.org>
 
 	* ventas.c (SearchAndFill): Added the selection of the first item

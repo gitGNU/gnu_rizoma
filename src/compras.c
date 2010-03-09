@@ -890,7 +890,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
     }
   else
     {
@@ -1008,14 +1008,15 @@ CalcularPrecioFinal (void)
   gdouble iva = GetIVA (barcode);
   gdouble otros = GetOtros (barcode);
 
-  /*Obtener valores cmbPrecioCompra*/
+  /*
+  Obtener valores cmbPrecioCompra
   GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_combo_box_get_model (combo);
   gtk_combo_box_get_active_iter (combo, &iter);
   gchar *opcion;
   gtk_tree_model_get (model, &iter, 0, &opcion, -1);
-
+*/
   if (iva != -1)
     iva = (gdouble)iva / 100 + 1;
   else
@@ -1032,17 +1033,17 @@ CalcularPrecioFinal (void)
     Y+1    1,19
   */
 
-  if (ganancia == 0 && precio_final == 0 && ingresa != 0)
+  if (ganancia == 0 && precio_final == 0 && ingresa != 0 ||
+      ganancia == 0 && precio_final == 0 && ingresa == 0 ||
+      ganancia != 0 && precio_final == 0 && ingresa == 0  )
     {
-    }
-  else if (ganancia == 0 && precio_final == 0 && ingresa == 0)
-    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")),"Se requieren al menos 2 valores para efectuar el cálculo");
     }
   else if (ingresa == 0 && ganancia >= 0 && precio_final != 0)
     {
-      if (otros == -1 && iva != -1 && g_str_equal(opcion,"Precio neto"))
+      if (otros == -1 && iva != -1 )//&& g_str_equal(opcion,"Precio neto"))
         precio = (gdouble) ((gdouble)(precio_final / iva) / (gdouble) (ganancia + 100)) * 100;
-      else if (iva != -1 && otros != -1 && g_str_equal(opcion,"Precio neto"))
+      else if (iva != -1 && otros != -1)// && g_str_equal(opcion,"Precio neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1051,7 +1052,7 @@ CalcularPrecioFinal (void)
           precio = (gdouble) precio / (gdouble)(ganancia / 100 + 1);
 
         }
-      else if (iva == -1 && otros == -1 || g_str_equal(opcion,"Precio bruto"))
+      else if (iva == -1 && otros == -1)// || g_str_equal(opcion,"Precio bruto"))
         {
           precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
         }
@@ -1060,9 +1061,9 @@ CalcularPrecioFinal (void)
     }
   else if (ganancia == 0 && ingresa != 0 && precio_final != 0)
     {
-      if (otros == -1 && iva != -1 && g_str_equal(opcion,"Precio neto"))
+      if (otros == -1 && iva != -1 )//&& g_str_equal(opcion,"Precio neto"))
         porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
-      else if (iva != -1 && otros != -1 && g_str_equal(opcion,"Precio neto"))
+      else if (iva != -1 && otros != -1 )//&& g_str_equal(opcion,"Precio neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1072,7 +1073,7 @@ CalcularPrecioFinal (void)
           porcentaje = (gdouble)(ganancia / ingresa) * 100;
 
         }
-      else if (iva == -1 && otros == -1 || g_str_equal(opcion,"Precio bruto"))
+      else if (iva == -1 && otros == -1 )//|| g_str_equal(opcion,"Precio bruto"))
         porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
 
 
@@ -1081,9 +1082,9 @@ CalcularPrecioFinal (void)
     }
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
     {
-      if (otros == -1 && iva != -1 && g_str_equal(opcion,"Precio neto"))
+      if (otros == -1 && iva != -1 )//&& g_str_equal(opcion,"Precio neto"))
         precio = (gdouble) ((gdouble)(ingresa * (gdouble)(ganancia + 100)) * iva) / 100;
-      else if (iva != -1 && otros != -1 && g_str_equal(opcion,"Precio neto"))
+      else if (iva != -1 && otros != -1)// && g_str_equal(opcion,"Precio neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1092,7 +1093,7 @@ CalcularPrecioFinal (void)
           precio = (gdouble)((gdouble)(precio * iva) +
                              (gdouble)(precio * otros) + (gdouble) precio);
         }
-      else if (iva == -1 && otros == -1 || g_str_equal(opcion,"Precio bruto"))
+      else if (iva == -1 && otros == -1)// || g_str_equal(opcion,"Precio bruto"))
         precio = (gdouble)(ingresa * (gdouble)(ganancia + 100)) / 100;
 
       if (ganancia == 0)
@@ -1102,7 +1103,7 @@ CalcularPrecioFinal (void)
                           g_strdup_printf ("%ld", lround (precio)));
     }
   else
-    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), "Solamente 2 campos deben ser llenados");
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), "Solo 2 campos deben ser llenados");
 
 }
 
