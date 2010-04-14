@@ -45,8 +45,8 @@ GtkBuilder *builder;
 /**
  * Es llamada por la funcion "on_btn_ejecutar_Inv" y recibe el parametro tipo
  * FILE, donde se carga el archivo
- * 
- * Esta funcion lee lineas del archivo y retorna una linea 
+ *
+ * Esta funcion lee lineas del archivo y retorna una linea
  *
  * @param FILE contiene los datos del archivo
  *
@@ -88,11 +88,11 @@ get_line (FILE *fd)
  *
  * Esta funcion carga los datos "rizoma-inventario.ui" y visualiza la ventana "wnd_inventario"
  */
- 
+
 void
 inventario_win ()
 {
-  
+
   GtkWidget *inventario_gui,*fcb;
   GError *error = NULL;
   GtkFileFilter *filter;
@@ -118,14 +118,14 @@ inventario_win ()
   fcb = GTK_WIDGET (gtk_builder_get_object (builder, "filechooserbutton1"));
 
   /* añade el filtro al filechooserbutton*/
-  gtk_file_chooser_set_filter(GTK_FILE_CHOOSER (fcb), 
+  gtk_file_chooser_set_filter(GTK_FILE_CHOOSER (fcb),
 			      filter);
 
   gtk_builder_connect_signals (builder, NULL);
   inventario_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_inventario"));
   gtk_widget_show_all (inventario_gui);
 
-  
+
 }
 
 /**
@@ -204,7 +204,7 @@ main (int argc, char **argv)
   GtkTreeIter iter;
   GtkCellRenderer *cell;
 
-  
+
   GKeyFile *key_file;
   gchar **profiles;
 
@@ -275,7 +275,7 @@ main (int argc, char **argv)
 
 void
 on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
-{  
+{
   GKeyFile *key_file;
   FILE *fp;
   char *line = NULL;
@@ -291,13 +291,14 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   GtkTextMark *mark;
   GtkTextIter iter;
   GdkColor color;
-
+  char *str;
+  int l;
   gdk_color_parse ("red", &color);
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (gtk_builder_get_object (builder, "textview1")));
   gtk_text_buffer_create_tag (buffer, "color_red", "foreground-gdk", &color, NULL);
 
   gtk_text_buffer_create_tag (buffer, "size_medium", "scale", PANGO_SCALE_LARGE, NULL);
-  gtk_text_buffer_create_tag (buffer, "style_italic", "style", PANGO_STYLE_ITALIC, NULL); 
+  gtk_text_buffer_create_tag (buffer, "style_italic", "style", PANGO_STYLE_ITALIC, NULL);
 
 
   dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER  (builder_get (builder, "filechooserbutton1")));
@@ -308,7 +309,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_error_file")));
       return;
     }
-  
+
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
   compra->products_list = NULL;
@@ -321,26 +322,47 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   if (key_file == NULL)
     {
       g_error ("Cannot open config file\n");
-      
+
     }
-  
+
   if (!DataExist ("SELECT rut FROM proveedor WHERE rut=99999999"))
     AddProveedorToDB ("99999999-9", "Inventario", "", "", "", "0", "", "","Inventario", "Inventario");
- 
+
   /* Carga los valores de los pruductos linea por linea del archivo */
+  l = 0;
   do
     {
       line = get_line (fp);
+
+      if(l == 0)
+        {
+          if ((str = strstr(line, ",")) != NULL)
+            str = ",";
+
+          else if ((str = strstr(line, ";")) != NULL)
+            str = ";";
+
+          else if ((str = strstr(line, " ")) != NULL)
+            str = " ";
+
+          else if ((str = strstr(line, "|")) != NULL)
+            str = "|";
+          else
+            str = "\t";
+          l++;
+        }
+
       if (line != NULL)
         {
-          barcode = strtok (line, ",");
-          
-          pcomp = g_ascii_strtod (strtok (NULL, ","), &pEnd);
-          
-          precio = atoi (strtok (NULL, ","));
 
-          cant = g_ascii_strtod (strtok (NULL, ","), &pEnd);
-          
+          barcode = strtok (line, str);
+
+          pcomp = g_ascii_strtod (strtok (NULL, str), &pEnd);
+
+          precio = atoi (strtok (NULL, str));
+
+          cant = g_ascii_strtod (strtok (NULL, str), &pEnd);
+
           if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))))
             {
               CompraAgregarALista (barcode, cant, precio, pcomp, margen,FALSE);
@@ -348,9 +370,9 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
               mark = gtk_text_buffer_get_insert(buffer);
               gtk_text_buffer_get_iter_at_offset (buffer, &iter, (gint) mark);
               gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
-                                                       ,"size_medium", "style_italic" ,NULL);             
+                                                       ,"size_medium", "style_italic" ,NULL);
             }
-          
+
           else
             {
               string = g_strdup_printf ("El producto %s no esta en la bd \n", barcode);
@@ -382,7 +404,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
           gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_OK")));
           return;
         }
-      
+
         /* Mensaje si se realiza parcialmente el inventario*/
       else
         {
@@ -390,6 +412,6 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
           gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_casiOK")));;
           return;
         }
-    }   
+    }
 }
 
