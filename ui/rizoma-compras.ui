@@ -2229,13 +2229,7 @@
                               <object class="GtkHBox" id="hbox88">
                                 <property name="visible">True</property>
                                 <child>
-                                  <object class="GtkComboBox" id="cmbPrecioCompra">
-                                    <property name="no_show_all">True</property>
-                                    <signal name="changed" handler="gtk_widget_grab_focus" object="entry_buy_price"/>
-                                  </object>
-                                  <packing>
-                                    <property name="position">0</property>
-                                  </packing>
+                                  <placeholder/>
                                 </child>
                                 <child>
                                   <object class="GtkLabel" id="label1111">

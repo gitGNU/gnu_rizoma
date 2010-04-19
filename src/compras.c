@@ -173,10 +173,10 @@ compras_win ()
   GError *error = NULL;
 
   /*ComboBox - PrecioCompra*/
-  GtkComboBox *combo;
+  /*GtkComboBox *combo;
   GtkTreeIter iter;
   GtkListStore *modelo;
-  GtkCellRenderer *cell2;
+  GtkCellRenderer *cell2;*/
 
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
@@ -790,21 +790,21 @@ compras_win ()
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   /*ComboBox - PrecioCompra*/
-  modelo = gtk_list_store_new (1, G_TYPE_STRING);
+  /*modelo = gtk_list_store_new (1, G_TYPE_STRING);
   combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
   cell2 = gtk_cell_renderer_text_new ();
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell2, TRUE);
-  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);*/
 
   /*Se agregan las opciones al combobox*/
-  gtk_list_store_append (modelo, &iter);
+  /*gtk_list_store_append (modelo, &iter);
   gtk_list_store_set (modelo, &iter, 0, "Precio neto", -1);  
 
   gtk_list_store_append (modelo, &iter);
   gtk_list_store_set (modelo, &iter, 0, "Precio bruto", -1);
 
   gtk_combo_box_set_model (combo, (GtkTreeModel *)modelo);
-  gtk_combo_box_set_active (combo, 0);
+  gtk_combo_box_set_active (combo, 0);*/
 
   /* End Pay Invoices */
 

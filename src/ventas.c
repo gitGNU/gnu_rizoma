@@ -85,6 +85,7 @@ gboolean closing_tipos = FALSE;
 
 gboolean block_discount = FALSE;
 
+gboolean press_f2 = FALSE;
 
 /**
  * Display the information of a product on the main sales window
@@ -1130,10 +1131,18 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 {
-  GtkWidget *button;
-  button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
-  gtk_widget_set_sensitive(button, TRUE);
-  gtk_widget_grab_focus (button);
+  if(press_f2 == FALSE)
+    {
+      GtkWidget *button;
+      button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
+      gtk_widget_set_sensitive(button, TRUE);
+      gtk_widget_grab_focus (button);
+    }
+  else
+    {
+      gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+      press_f2 == FALSE;
+    }
 }
 
 void
@@ -1335,6 +1344,14 @@ gint
 SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  if(barcode == NULL)
+    {
+      GtkWidget *widgetEntry; 
+      widgetEntry = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
+      barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widgetEntry)));
+    }
+
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
   gchar *q= NULL;
@@ -2880,6 +2897,28 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
   switch (event->keyval)
     {
+    case GDK_F2:
+      if (user_data->user_id == 1){
+
+	gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
+	if(venta_directa == 1)
+	  {
+	    press_f2 = TRUE;
+	    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+	  }
+
+	/* 
+	-- Cambio de modo, desactiva o activa VENTA_DIRECTA al presionar F2 --
+	SearchBarcodeProduct(NULL,NULL);
+	if(press_f2 == FALSE)
+	  press_f2 = TRUE; //Modo VENTA_DIRECTA se ignora
+	else
+	  press_f2 = FALSE;
+	--
+	*/
+      }
+      break;
+
     case GDK_F5:
       if (user_data->user_id == 1)
         nullify_sale_win ();
