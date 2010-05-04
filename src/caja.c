@@ -302,8 +302,9 @@ VentanaEgreso (gint monto)
   GtkWidget *aux_widget;
   GtkListStore *store;
   GtkTreeIter iter;
-  PGresult *res;
+  PGresult *res, *resId;
   gint tuples, i;
+  gint nulVenId; // El Id de "Nulidad de venta" 
 
   res = EjecutarSQL ("SELECT id, descrip FROM tipo_egreso");
   tuples = PQntuples (res);
@@ -328,15 +329,23 @@ VentanaEgreso (gint monto)
     }
   printf("chupalo");
   gtk_list_store_clear(store);
+  
+  /*Obtención del Id de 'nulidad de venta' */
+  resId = EjecutarSQL ("SELECT id FROM tipo_egreso WHERE descrip='Nulidad de Venta'");
+  nulVenId = (gint) strtod (PUT(PQvaluebycol(resId, 0, "id")), (char**) NULL);
+  printf("numero : %d", nulVenId);
 
+  /*Poblamiento del combobox*/
   for (i = 0; i < tuples; i++)
     {
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter,
-                         0, atoi(PQvaluebycol(res, i, "id")),
-                         1, PQvaluebycol(res, i, "descrip"),
-                         -1);
-
+      if ((gint) strtod(PUT(PQvaluebycol(res, i, "id")), (char**) NULL) != nulVenId) /*No queremos que el motivo "Nulidad de Venta" aparezca como opción*/ 
+	{
+	  gtk_list_store_append(store, &iter);
+	  gtk_list_store_set(store, &iter,
+			     0, atoi(PQvaluebycol(res, i, "id")),
+			     1, PQvaluebycol(res, i, "descrip"),
+			     -1);
+	}
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));

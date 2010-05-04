@@ -2243,8 +2243,14 @@ begin
 
         select monto into sale_amount from venta where id=sale_id;
         select id into id_tipo_egreso from tipo_egreso where descrip='Nulidad de Venta';
-
-        perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
+	
+	-- Si es la anulacion de una venta a credito no debe ser ingresado en la tabla venta_anulada
+	-- Debe  considerar esa venta como "pagada", de esa forma de "restituye" el credito del cliente (correspondiente a esa venta)
+	if (select id from venta where tipo_venta=1 AND id=sale_id) IS NOT NULL then   
+       	   	 UPDATE deuda SET pagada='t' WHERE id_venta=sale_id;
+	else
+		 perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);	
+	end if; 		 
 
         insert into venta_anulada(id_sale, vendedor)
                 values (sale_id, salesman_id);

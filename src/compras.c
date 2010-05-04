@@ -877,7 +877,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "marca")));
 
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_cont")),
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_cont")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "contenido")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")),

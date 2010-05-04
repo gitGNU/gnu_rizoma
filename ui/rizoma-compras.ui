@@ -2073,7 +2073,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="lbl_cont">
+                              <object class="GtkLabel" id="label_cont">
                                 <property name="visible">True</property>
                               </object>
                               <packing>
