@@ -34,41 +34,42 @@
 --     SQL Generator:     tedia2sql -- v1.2.12
 --     Generated at:      Sat Nov 10 12:10:10 2007
 --     Input Files:       modelo.dia
+--     42 TABLAS
 
-drop table if exists Abono cascade;
-drop table if exists Asistencia cascade;
+drop table if exists abono cascade;
+drop table if exists asistencia cascade;
 drop table if exists bodega cascade;
+drop table if exists caja cascade;
+drop table if exists canje cascade;
+drop table if exists cheques cascade;
+drop table if exists cliente cascade;
+drop table if exists compra cascade;
+drop table if exists compra_detalle cascade;
 drop table if exists deuda cascade;
-drop table if exists documentos_emitidos_detalle cascade;
-drop table if exists Documentos_emitidos cascade;
-drop table if exists Cheques cascade;
-drop table if exists factura_compra_detalle cascade;
-drop table if exists factura_compra cascade;
+--drop table if exists Devolucion cascade;
 drop table if exists devolucion cascade;
 drop table if exists devolucion_detalle cascade;
---drop table if exists Devolucion cascade;
-drop table if exists egreso cascade;
-drop table if exists Compra cascade;
-drop table if exists Cliente cascade;
 drop table if exists documentos_detalle cascade;
-drop table if exists Caja cascade;
-drop table if exists Canje cascade;
+drop table if exists documentos_emitidos cascade;
+drop table if exists documentos_emitidos_detalle cascade;
+drop table if exists egreso cascade;
+drop table if exists factura_compra cascade;
+drop table if exists factura_compra_detalle cascade;
 drop table if exists familias cascade;
 drop table if exists formas_pago cascade;
 drop table if exists guias_compra cascade;
 drop table if exists guias_compra_detalle cascade;
+drop table if exists impuesto cascade;
+drop table if exists ingreso cascade;
+drop table if exists log cascade;
+drop table if exists merma cascade;
+drop table if exists negocio cascade;
 drop table if exists numeros_documentos cascade;
 drop table if exists pagos cascade;
-drop table if exists negocio cascade;
-drop table if exists merma cascade;
-drop table if exists ingreso cascade;
-drop table if exists impuesto cascade;
 drop table if exists producto cascade;
 drop table if exists producto_recibido cascade;
-drop table if exists compra_detalle cascade;
-drop table if exists venta_detalle cascade;
 drop table if exists proveedor cascade;
-drop table if exists Tarjetas cascade;
+drop table if exists tarjetas cascade;
 drop table if exists tipo_egreso cascade;
 drop table if exists tipo_ingreso cascade;
 drop table if exists tipo_merma cascade;
@@ -76,7 +77,8 @@ drop table if exists traspaso cascade;
 drop table if exists traspaso_detalle cascade;
 drop table if exists users cascade;
 drop table if exists venta cascade;
-
+drop table if exists venta_anulada cascade;
+drop table if exists venta_detalle cascade;
 
 -- Generated SQL Schema
 -- --------------------------------------------------------------------
@@ -87,21 +89,21 @@ drop table if exists venta cascade;
 
 
 -- Abono
-create table Abono (
+create table abono (
   id                        serial not null,
   rut_cliente               int4,
   monto_abonado             int4,
   fecha_abono               timestamp,
-  constraint pk_Abono primary key (id)
+  constraint pk_abono primary key (id)
 ) ;
 
 -- Asistencia
-create table Asistencia (
+create table asistencia (
   id                        serial not null,
   id_user                   int2,
   entrada                   timestamp,
   salida                    timestamp,
-  constraint pk_Asistencia primary key (id)
+  constraint pk_asistencia primary key (id)
 ) ;
 
 --Bodega
@@ -113,8 +115,7 @@ create table bodega
   constraint pk_bodega primary key (id)
 );
 
-
--- deuda
+-- Deuda
 create table deuda (
   id                        serial not null,
   id_venta                  int4 not null,
@@ -122,31 +123,31 @@ create table deuda (
   vendedor                  int4,
   pagada                    bool default false,
   fecha_pagada              timestamp,
-  constraint pk_Deuda primary key (id)
+  constraint pk_deuda primary key (id)
 ) ;
 
 -- Documentos_emitidos
-create table Documentos_emitidos (
+create table documentos_emitidos (
   id                        serial not null,
   tipo_documento            int2,
   forma_pago                int2,
   num_documento             int4,
   fecha_emision             timestamp,
-  constraint pk_Documentos_emitidos primary key (id)
+  constraint pk_documentos_emitidos primary key (id)
 ) ;
 
--- documentos_emitidos_detalle
+-- Documentos_emitidos_detalle
 create table documentos_emitidos_detalle (
   id                        int4 not null,
   id_documento              int4 not null,
   barcode_product           int8 not null,
   precio                    int4,
   cantidad                  float8,
-  constraint pk_Documentos_emitidos_detalle primary key (id,id_documento)
+  constraint pk_documentos_emitidos_detalle primary key (id,id_documento)
 ) ;
 
 -- Cheques
-create table Cheques (
+create table cheques (
   id                        serial not null,
   id_venta                  int4 not null,
   serie                     varchar(10),
@@ -155,10 +156,10 @@ create table Cheques (
   plaza                     varchar(50),
   monto                     int4,
   fecha                     timestamp,
-  constraint pk_Cheques primary key (id)
+  constraint pk_cheques primary key (id)
 ) ;
 
--- factura_compra
+-- Factura_compra
 create table factura_compra (
   id                        serial not null,
   id_compra                 int4 not null,
@@ -172,24 +173,20 @@ create table factura_compra (
   monto                     int4,
   fecha_pago                timestamp,
   forma_pago                int4,
-  constraint pk_Factura_compra primary key (id)
+  constraint pk_factura_compra primary key (id)
 ) ;
 
--- devolucion
-
+-- Devolucion
 create table devolucion
 (
   id 			    serial not null,
   monto		 	    integer not null,
   fecha 		    timestamp without time zone ,
   proveedor	 	    integer not null,
-  constraint pk_Devolucion primary key (id)
+  constraint pk_devolucion primary key (id)
 );
 
--- devolucion_detalle
-
--- devolucion_detalle
-
+-- Devolucion_detalle
 create table devolucion_detalle (
   id                        int4 not null,
   id_devolucion             int4 not null,
@@ -197,9 +194,8 @@ create table devolucion_detalle (
   cantidad                  float8 not null,
   precio                    int4 not null,
   precio_compra		   				int4 not null,
-  constraint pk_Devolucion_detalle primary key (id,id_devolucion)
+  constraint pk_devolucion_detalle primary key (id,id_devolucion)
 ) ;
-
 
 -- Devolucion
 --create table Devolucion (
@@ -208,10 +204,10 @@ create table devolucion_detalle (
 --  cantidad                  float8,
 --  cantidad_recibida         float8 default 0.0,
 --  devuelto                  bool default false,
---  constraint pk_Devolucion primary key (id)
+--  constraint pk_devolucion primary key (id)
 --) ;
 
--- egreso
+-- Egreso
 create table egreso (
   id                        serial not null,
   id_caja                   int not null,
@@ -223,7 +219,7 @@ create table egreso (
 ) ;
 
 -- Compra
-create table Compra (
+create table compra (
   id                        serial not null,
   fecha                     timestamp,
   rut_proveedor             int4 not null,
@@ -231,11 +227,11 @@ create table Compra (
   forma_pago                int2,
   ingresada                 bool,
   anulada                   bool,
-  constraint pk_Compra primary key (id)
+  constraint pk_compra primary key (id)
 ) ;
 
 -- Cliente
-create table Cliente (
+create table cliente (
   rut                       int4 not null,
   dv                        varchar(1) not null,
   nombre                    varchar(60),
@@ -250,10 +246,10 @@ create table Cliente (
   abonado                   int4,
   credito                   int4,
   credito_enable            bool,
-  constraint pk_Cliente primary key (rut)
+  constraint pk_cliente primary key (rut)
 ) ;
 
--- documentos_detalle
+-- Documentos_detalle
 create table documentos_detalle (
   id                        serial not null primary key,
   numero                    int4,
@@ -269,7 +265,7 @@ create table documentos_detalle (
   otros                     int4
 ) ;
 
--- factura_detalle
+-- Factura_detalle
 create table factura_compra_detalle (
   id                        serial not null,
   id_factura_compra         int4 not null,
@@ -283,7 +279,7 @@ create table factura_compra_detalle (
 ) ;
 
 -- Caja
-create table Caja (
+create table caja (
   id                        serial not null,
   id_vendedor               int4 not null,
   fecha_inicio              timestamp,
@@ -293,33 +289,33 @@ create table Caja (
   termino                   int4,
   id_venta_termino          int4,
   perdida                   int4,
-  constraint pk_Caja primary key (id)
+  constraint pk_caja primary key (id)
 ) ;
 
 -- Canje
-create table Canje (
+create table canje (
   id                        serial not null,
   fecha                     timestamp,
   barcode                   int8 not null,
   cantidad                  float(8),
-  constraint pk_Canje primary key (id)
+  constraint pk_canje primary key (id)
 ) ;
 
--- familias
+-- Familias
 create table familias (
   id                        serial not null,
   nombre                    varchar(20)
 ) ;
 
--- formas_pago
+-- Formas_pago
 create table formas_pago (
   id                        serial not null,
   nombre                    varchar(50),
   days                      int2,
-  constraint pk_Formas_pago primary key (id)
+  constraint pk_formas_pago primary key (id)
 ) ;
 
--- guias_compra
+-- Guias_compra
 create table guias_compra (
   id                        serial not null,
   numero                    int4,
@@ -327,10 +323,10 @@ create table guias_compra (
   id_factura                int4,
   rut_proveedor             int4,
   fecha_emision             timestamp,
-  constraint pk_Guias_compra primary key (id)
+  constraint pk_guias_compra primary key (id)
 ) ;
 
--- guias_compra_detalle
+-- Guias_compra_detalle
 create table guias_compra_detalle (
   id                        serial not null,
   id_guias_compra           int4 not null,
@@ -343,14 +339,14 @@ create table guias_compra_detalle (
   constraint fk_guias_compra_detalle_guias_compra foreign key(id_guias_compra) references guias_compra(id)
 ) ;
 
--- numeros_documentos
+-- Numeros_documentos
 create table numeros_documentos (
   num_boleta                int4,
   num_factura               int4,
   num_guias                 int4
 ) ;
 
--- pagos
+-- Pagos
 create table pagos (
   id_fact                   int4,
   fecha                     timestamp,
@@ -358,7 +354,7 @@ create table pagos (
   descrip                   text
 ) ;
 
--- negocio
+-- Negocio
 create table negocio (
   razon_social              varchar(200),
   rut                       int4,
@@ -373,16 +369,16 @@ create table negocio (
   at                        varchar(100)
 ) ;
 
--- merma
+-- Merma
 create table merma (
   id                        serial not null,
   barcode                   int8,
   unidades                  float8,
   motivo                    int2,
-  constraint pk_Merma primary key (id)
+  constraint pk_merma primary key (id)
 ) ;
 
--- ingreso
+-- Ingreso
 create table ingreso (
   id                        serial not null,
   id_caja                   int not null,
@@ -390,19 +386,19 @@ create table ingreso (
   tipo                      int2 not null,
   fecha                     timestamp,
   usuario                   int4,
-  constraint pk_Ingreso primary key (id)
+  constraint pk_ingreso primary key (id)
 ) ;
 
--- impuesto
+-- Impuesto
 create table impuesto (
   id                        serial not null,
   descripcion               varchar(250),
   monto                     float8,
   removable                 boolean default 't',
-  constraint pk_Impuesto primary key (id)
+  constraint pk_impuesto primary key (id)
 ) ;
 
--- producto
+-- Producto
 create table producto (
   barcode                   int8 not null,	-- llave primaria
   codigo_corto              varchar(10),	-- crear ckeck point
@@ -428,11 +424,11 @@ create table producto (
   cantidad_mayor            int4,
   mayorista                 bool default false,
   estado                    bool default true,
-  constraint pk_Producto primary key (barcode),
+  constraint pk_producto primary key (barcode),
   CONSTRAINT unique_short_code UNIQUE (codigo_corto)
 ) ;
 
--- producto_recibido
+-- Producto_recibido
 create table producto_recibido (
   id_dcto                   int4,
   factura                   bool,
@@ -441,7 +437,7 @@ create table producto_recibido (
   cant_ingresada            int4
 ) ;
 
--- compra_detalle
+-- Compra_detalle
 -- antes products_buy_history
 create table compra_detalle (
   id                        serial not null,
@@ -457,10 +453,10 @@ create table compra_detalle (
   otros_impuestos           int4,
   anulado                   bool default false,
   canjeado                  float8 default 0.0,
-  constraint pk_Compra_detalle primary key (id,id_compra)
+  constraint pk_compra_detalle primary key (id,id_compra)
 ) ;
 
--- venta_detalle
+-- Venta_detalle
 -- antes era products_sell_history
 create table venta_detalle (
   id                        int4 not null,
@@ -471,10 +467,10 @@ create table venta_detalle (
   fifo                      int4 not null,
   iva                       int4,
   otros                     int4,
-  constraint pk_Venta_detalle primary key (id,id_venta)
+  constraint pk_venta_detalle primary key (id,id_venta)
 ) ;
 
--- proveedor
+-- Proveedor
 create table proveedor (
   rut                       int4 not null,
   dv                        varchar(1) not null,
@@ -487,42 +483,42 @@ create table proveedor (
   web                       varchar(300),
   contacto                  varchar(100),
   giro                      varchar(100),
-  constraint pk_Proveedor primary key (rut)
+  constraint pk_proveedor primary key (rut)
 ) ;
 
 -- Tarjetas
-create table Tarjetas (
+create table tarjetas (
   id                        serial not null,
   id_venta                  int4,
   insti                     varchar(50),
   numero                    varchar(20),
   fecha_venc                varchar(7),
-  constraint pk_Tarjetas primary key (id)
+  constraint pk_tarjetas primary key (id)
 ) ;
 
--- tipo_egreso
+-- Tipo_egreso
 create table tipo_egreso (
   id                        serial not null,
   descrip                   varchar(20),
   removable                 boolean default 't',
-  constraint pk_Tipo_egreso primary key (id)
+  constraint pk_tipo_egreso primary key (id)
 ) ;
 
--- tipo_ingreso
+-- Tipo_ingreso
 create table tipo_ingreso (
   id                        serial not null,
   descrip                   varchar(20),
-  constraint pk_Tipo_ingreso primary key (id)
+  constraint pk_tipo_ingreso primary key (id)
 ) ;
 
--- tipo_merma
+-- Tipo_merma
 create table tipo_merma (
   id                        serial not null,
   nombre                    varchar(20),
-  constraint pk_Tipo_merma primary key (id)
+  constraint pk_tipo_merma primary key (id)
 ) ;
 
--- traspasos
+-- Traspasos
 create table traspaso (
   id                        serial not null,
   monto                     int4,
@@ -530,22 +526,20 @@ create table traspaso (
   origen                    int4,
   destino	            int4,
   vendedor                  int4,
-  constraint pk_Traspaso primary key (id)
+  constraint pk_traspaso primary key (id)
 ) ;
 
--- traspaso_detalle
-
+-- Traspaso_detalle
 create table traspaso_detalle (
   id                        int4 not null,
   id_traspaso               int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    int4 not null,
-  constraint pk_Traspaso_detalle primary key (id,id_traspaso)
+  constraint pk_traspaso_detalle primary key (id,id_traspaso)
 ) ;
 
-
--- users
+-- Users
 create table users (
   id                        serial not null,
   rut                       int4 not null,
@@ -557,10 +551,10 @@ create table users (
   apell_m                   varchar(75),
   fecha_ingreso             timestamp,
   "level"                   int2,
-  constraint pk_Users primary key (id)
+  constraint pk_users primary key (id)
 ) ;
 
--- venta
+-- Venta
 create table venta (
   id                        serial not null,
   monto                     int4,
@@ -572,10 +566,10 @@ create table venta (
   descuento                 int2,
   id_documento              int4,
   canceled                  bool default false,
-  constraint pk_Venta primary key (id)
+  constraint pk_venta primary key (id)
 ) ;
 
--- venta_anulada
+-- Venta_anulada
 create table venta_anulada (
   id_sale                   int not null,
   fecha                     timestamp default now(),
@@ -583,7 +577,7 @@ create table venta_anulada (
   constraint pk_venta_anulada primary key (id_sale)
 ) ;
 
--- log
+-- Log
 create table log (
   id                   serial not null,
   fecha                timestamp,

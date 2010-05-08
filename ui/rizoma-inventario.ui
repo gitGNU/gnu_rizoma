@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <interface>
+  <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkMessageDialog" id="msg_casiOK">
     <property name="border_width">5</property>
@@ -164,7 +165,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_ejecutar_Inv">
-                <property name="label" translatable="yes">gtk-execute</property>
+                <property name="label">gtk-execute</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -213,7 +214,7 @@
             </child>
             <child>
               <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">gtk-quit</property>
+                <property name="label">gtk-quit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -274,4 +275,42 @@
     </child>
   </object>
   <object class="GtkListStore" id="liststore1"/>
+  <object class="GtkMessageDialog" id="msg_inconsistencia">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_inventario</property>
+    <property name="message_type">error</property>
+    <property name="buttons">ok</property>
+    <property name="text">Inconsistencia de datos</property>
+    <property name="secondary_text">Verifique la integridad de los datos del archivo de transacci&#xF3;n</property>
+    <signal name="response" handler="gtk_widget_hide" object="msg_inconsistencia"/>
+    <signal name="delete_event" handler="gtk_widget_hide" object="msg_inconsistencia"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox12">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area12">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

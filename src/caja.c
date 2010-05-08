@@ -327,18 +327,17 @@ VentanaEgreso (gint monto)
                                      "text", 1,
                                      NULL);
     }
-  printf("chupalo");
+
   gtk_list_store_clear(store);
   
   /*Obtención del Id de 'nulidad de venta' */
   resId = EjecutarSQL ("SELECT id FROM tipo_egreso WHERE descrip='Nulidad de Venta'");
-  nulVenId = (gint) strtod (PUT(PQvaluebycol(resId, 0, "id")), (char**) NULL);
-  printf("numero : %d", nulVenId);
+  nulVenId = atoi (PUT(PQvaluebycol(resId, 0, "id")));
 
   /*Poblamiento del combobox*/
   for (i = 0; i < tuples; i++)
     {
-      if ((gint) strtod(PUT(PQvaluebycol(res, i, "id")), (char**) NULL) != nulVenId) /*No queremos que el motivo "Nulidad de Venta" aparezca como opción*/ 
+      if (atoi (PUT(PQvaluebycol(res, i, "id"))) != nulVenId) /*No queremos que el motivo "Nulidad de Venta" aparezca como opción*/ 
 	{
 	  gtk_list_store_append(store, &iter);
 	  gtk_list_store_set(store, &iter,

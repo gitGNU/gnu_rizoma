@@ -280,12 +280,12 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   FILE *fp;
   char *line = NULL;
   char *barcode;
-  double cant = 100.0;
-  double pcomp = 0.0;
-  int precio = 1000;
+  double cant = 100.0; /*Unidades*/
+  double pcomp = 0.0; /*Costo*/
+  int precio = 1000; /*Precio venta*/
   int margen = 20;
   int cont_products_no_BD = 0,cont_products = 0;
-  char * pEnd;
+  char *pEnd;
   gchar *dir, *string, *stringfinal;
   GtkTextBuffer *buffer;
   GtkTextMark *mark;
@@ -293,6 +293,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   GdkColor color;
   char *str;
   int l;
+
   gdk_color_parse ("red", &color);
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (gtk_builder_get_object (builder, "textview1")));
   gtk_text_buffer_create_tag (buffer, "color_red", "foreground-gdk", &color, NULL);
@@ -322,7 +323,6 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   if (key_file == NULL)
     {
       g_error ("Cannot open config file\n");
-
     }
 
   if (!DataExist ("SELECT rut FROM proveedor WHERE rut=99999999"))
@@ -347,22 +347,41 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 
           else if ((str = strstr(line, "|")) != NULL)
             str = "|";
+
           else
             str = "\t";
+
           l++;
         }
 
       if (line != NULL)
-        {
+        {	  
+	  /*Obtención del texto*/
+	  gchar *pcompC, *precioC, *cantC;
 
-          barcode = strtok (line, str);
+	  barcode = strtok (line, str);
+	  pcompC = strtok (NULL, str); /*Texto costo producto*/
+	  precioC = strtok (NULL, str); /*Texto precio venta*/
+	  cantC = strtok (NULL, str); /*Texto cantidad (unidades)*/
+	  
+	  if (barcode == NULL || pcompC == NULL || precioC == NULL || cantC == NULL ||
+	      HaveCharacters(pcompC) || HaveCharacters(precioC) || HaveCharacters(cantC))
+	    {
+	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_inconsistencia")));
+	      return;
+	    }
 
-          pcomp = g_ascii_strtod (strtok (NULL, str), &pEnd);
-
-          precio = atoi (strtok (NULL, str));
-
-          cant = g_ascii_strtod (strtok (NULL, str), &pEnd);
-
+	  /*Casteo*/
+	  pcomp = g_ascii_strtod (pcompC, &pEnd);
+          precio = atoi (precioC);          
+          cant = g_ascii_strtod (cantC, &pEnd);	  
+	  
+	  if (pcomp == 0 || precio == 0 || cant == 0)
+	    {
+	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_inconsistencia")));
+	      return;
+	    }
+	  
           if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))))
             {
               CompraAgregarALista (barcode, cant, precio, pcomp, margen,FALSE);
@@ -382,9 +401,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
                                                        ,"size_medium", "style_italic" ,"color_red",NULL);
               cont_products_no_BD++;
             }
-
           cont_products++;
-
         }
     } while (line != NULL);
 
@@ -397,7 +414,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
     }
   else
     {
-        /* Mensaje si realiza correctamente el inventario */
+      /* Mensaje si realiza correctamente el inventario */
       if(cont_products_no_BD == 0)
         {
           AgregarCompra ("99999999", "", 1);
@@ -405,7 +422,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
           return;
         }
 
-        /* Mensaje si se realiza parcialmente el inventario*/
+      /* Mensaje si se realiza parcialmente el inventario*/
       else
         {
           AgregarCompra ("99999999", "", 1);
