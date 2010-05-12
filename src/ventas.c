@@ -85,7 +85,6 @@ gboolean closing_tipos = FALSE;
 
 gboolean block_discount = FALSE;
 
-gboolean press_f2 = FALSE;
 
 /**
  * Display the information of a product on the main sales window
@@ -1123,26 +1122,24 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 }
 
 /**
- *Al recibir un signal del entry, cambia el foco al boton "sell_add_button"
+ * Al recibir un signal de "cantidad_entry", cambia el foco dependiendo de la opción
+ * VENTA_DIRECTA especificada en el .rizoma
  *
- *@parametro entry tipo GtkEntry * que recive la señal
- *@parametro data tipo gpointer entrega el puntero para el procedimiento interno
+ * @parametro entry tipo GtkEntry * que recive la señal
+ * @parametro data tipo gpointer entrega el puntero para el procedimiento interno
  */
 void
 MoveFocus (GtkEntry *entry, gpointer data)
-{
-  if(press_f2 == FALSE)
+{ // Al presionar [ENTER] en el entry "Cantidad"
+  if(!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
     {
       GtkWidget *button;
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
       gtk_widget_set_sensitive(button, TRUE);
       gtk_widget_grab_focus (button);
     }
-  else
-    {
+  else // De lo contrario el foco regresa al entry "Código de barras"
       gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-      press_f2 == FALSE;
-    }
 }
 
 void
@@ -2897,26 +2894,9 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
   switch (event->keyval)
     {
-    case GDK_F2:
-      if (user_data->user_id == 1){
-
-	gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
-	if(venta_directa == 1)
-	  {
-	    press_f2 = TRUE;
-	    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-	  }
-
-	/* 
-	-- Cambio de modo, desactiva o activa VENTA_DIRECTA al presionar F2 --
-	SearchBarcodeProduct(NULL,NULL);
-	if(press_f2 == FALSE)
-	  press_f2 = TRUE; //Modo VENTA_DIRECTA se ignora
-	else
-	  press_f2 = FALSE;
-	--
-	*/
-      }
+    case GDK_F2:      
+      if (atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 1
+	  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
       break;
 
     case GDK_F5:

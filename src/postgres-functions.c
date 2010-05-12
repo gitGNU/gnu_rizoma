@@ -909,9 +909,10 @@ ChangeEnableCredit (gboolean status, gint rut)
 gboolean
 ClientDelete (gint rut)
 {
-  PGresult *res;
+  PGresult *res = NULL;
 
-  res = EjecutarSQL (g_strdup_printf ("DELETE FROM cliente WHERE rut=%d", rut));
+  if (DeudaTotalCliente (rut) == 0)
+    res = EjecutarSQL (g_strdup_printf ("DELETE FROM cliente WHERE rut=%d", rut));  
 
   if (res != NULL)
     return TRUE;
