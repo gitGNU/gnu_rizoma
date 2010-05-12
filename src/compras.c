@@ -1033,9 +1033,9 @@ CalcularPrecioFinal (void)
     Y+1    1,19
   */
 
-  if (ganancia == 0 && precio_final == 0 && ingresa != 0 ||
-      ganancia == 0 && precio_final == 0 && ingresa == 0 ||
-      ganancia != 0 && precio_final == 0 && ingresa == 0  )
+  if ((ganancia == 0 && precio_final == 0 && ingresa != 0) ||
+      (ganancia == 0 && precio_final == 0 && ingresa == 0) ||
+      (ganancia != 0 && precio_final == 0 && ingresa == 0)  )
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")),"Se requieren al menos 2 valores para efectuar el cálculo");
     }
@@ -3104,10 +3104,18 @@ on_button_calculate_clicked (GtkButton *button, gpointer data)
 void
 on_button_add_product_list_clicked (GtkButton *button, gpointer data)
 {
+  gint unidades = NULL;
+  unidades = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")))));
   if (calcular == 0)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")),
                 "No ha calculado el valor");
+      return;
+    }
+  else if (unidades == NULL || unidades < 0)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")),
+                "No se ha especificado una cantidad valida de unidades");
       return;
     }
   else
