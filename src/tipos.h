@@ -230,7 +230,7 @@ typedef struct _ventas
 
   /*
     Cheque Window
-   */
+  */
   gboolean cheque;
   GtkWidget *cheque_window;
   GtkWidget *cheque_rut;

@@ -749,6 +749,7 @@ SearchProductByCode (void)
           GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
           gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
+	  CleanSellLabels();
           AlertMSG (aux_widget, str);
           g_free (str);
 
@@ -1032,8 +1033,10 @@ EliminarProducto (GtkButton *button, gpointer data)
       gtk_list_store_remove (GTK_LIST_STORE (venta->store), &iter);
 
       CalcularVentas (venta->header);
-
     }
+  
+  select_back_deleted_row("sell_products_list", position);
+  
 }
 
 /**
@@ -1122,23 +1125,23 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 }
 
 /**
- * Al recibir un signal de "cantidad_entry", cambia el foco dependiendo de la opci�n
+ * Al recibir un signal de "cantidad_entry", cambia el foco dependiendo de la opción
  * VENTA_DIRECTA especificada en el .rizoma
  *
- * @parametro entry tipo GtkEntry * que recive la se�al
+ * @parametro entry tipo GtkEntry * que recive la señal
  * @parametro data tipo gpointer entrega el puntero para el procedimiento interno
  */
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 { // Al presionar [ENTER] en el entry "Cantidad"
-  if(!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al bot�n "A�adir"
+  if(!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
     {
       GtkWidget *button;
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
       gtk_widget_set_sensitive(button, TRUE);
       gtk_widget_grab_focus (button);
     }
-  else // De lo contrario el foco regresa al entry "C�digo de barras"
+  else // De lo contrario el foco regresa al entry "Código de barras"
       gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 }
 
@@ -1178,7 +1181,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
   GtkWindow *window;
   gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
 
-  /*Verifica si hay productos a�adidos en la TreeView para vender*/
+  /*Verifica si hay productos añadidos en la TreeView para vender*/
   
   if (venta->header == NULL)
     {
@@ -1641,7 +1644,6 @@ SearchAndFill (void)
 
   gtk_list_store_clear (store);
 
-
   if (resultados == 0)
     {
       gtk_list_store_append (store, &iter);
@@ -1695,7 +1697,6 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
       if (ventas == TRUE)
         {
-
           gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), product);
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
@@ -2680,6 +2681,32 @@ on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
 }
 
 /**
+ * Es llamada cuando se presiona el boton "btn_close_win" (signal clicked)
+ * de la ventana "tipo_venta_win_venta"
+ *
+ * Esta funcion recalcula el total de la venta seteando el resultado en el
+ * texto del label "label_total" de la ventana "wnd_sell".
+ *
+ * NOTA: Esto es realizado evitar la permanencia (gráfica) de la cifra de 
+ * venta total con descuento en caso de ser calculada y no realizar la venta
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+
+void
+on_btn_cancel_tipo_venta_win_venta (GtkButton *button, gpointer data)
+{
+  guint32 total;
+  //Seteamos el Sub-Total y el Total
+  total = llround (CalcularTotal (venta->header));
+  
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+			g_strdup_printf ("<span size=\"40000\">%s</span>",
+					 PutPoints (g_strdup_printf ("%u", total))));
+}
+
+/**
  * Callback conected to the btn_sale_invoice button.
  *
  * This function setup the window and the show it
@@ -3120,7 +3147,7 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
     {
       if (atoi(sale_id) == 0)
         {
-          AlertMSG(GTK_WIDGET(entry), "Debe ingresar un Nº de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacio");
+          AlertMSG(GTK_WIDGET(entry), "Debe ingresar un N° de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacío");
           return;
         }
       else
@@ -3790,7 +3817,7 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
 
   gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
 
-  /*Comprueba que hallan productos a�adidos en el treView para traspasar */
+  /*Comprueba que hallan productos añadidos en el treView para traspasar */
   
   if (venta->header == NULL)
     {
@@ -3799,8 +3826,7 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
     }
   
   else
-    {
-      
+    { 
       window = GTK_WINDOW (gtk_builder_get_object (builder, "traspaso_enviar_win"));
       clean_container (GTK_CONTAINER (window));
       gtk_widget_show_all (GTK_WIDGET (window));
@@ -3808,7 +3834,6 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
       
       return;
     }
-  
 }
 
 /**

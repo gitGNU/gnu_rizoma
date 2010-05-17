@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <interface>
+  <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="wnd_caja_close">
     <property name="border_width">5</property>
@@ -1444,6 +1445,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="tipo_venta_win_venta"/>
+                <signal name="clicked" handler="on_btn_cancel_tipo_venta_win_venta"/>
               </object>
               <packing>
                 <property name="expand">False</property>

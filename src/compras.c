@@ -3115,7 +3115,7 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
   else if (unidades == NULL || unidades < 0)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")),
-                "No se ha especificado una cantidad valida de unidades");
+                "No se ha especificado una cantidad válida de unidades");
       return;
     }
   else

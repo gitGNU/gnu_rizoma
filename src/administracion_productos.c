@@ -985,6 +985,7 @@ BuscarProductosParaListar (void)
   gchar *q;
   gchar *string;
   gint i, resultados;
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_find_products"));
   GtkTreeIter iter;
   GtkWidget *widget;
   GtkListStore *store;
@@ -1023,6 +1024,11 @@ BuscarProductosParaListar (void)
                               atoi (PQvaluebycol (res, i, "stock_min")) != 0) ? "Red" : "Black",
                           9, TRUE,
                           -1);
+    }
+  if (resultados > 0)
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (tree));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (tree), gtk_tree_path_new_from_string ("0"));
     }
 }
 
