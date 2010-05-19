@@ -1,1 +1,8 @@
-Por terminar
+Acronyms used in Rizoma
+
+For new code this conventions must be used, for variables or ids in
+the XML UI definition (glade)
+
+- Label -> lbl
+- Button -> btn
+- Window -> wnd
