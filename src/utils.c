@@ -476,3 +476,31 @@ log_register_access (User *info_user, gboolean login)
 
   return res != NULL ? TRUE : FALSE;
 }
+
+// TODO: Ver la posibilidad de unificar las funciones que son llamadas por botones para eliminar productos 
+// seleccionados, ver eliminarDeLista 
+
+/**
+ * Selecciona la fila anterior (de un treeview) a la eliminada
+ * de no haber un elemento anterior selecciona el último disponible
+ *
+ * @param Nombre del treeview
+ * @param Numero de la fila eliminada
+ */
+void select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
+{    
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object ( builder, g_strdup_printf("%s", treeViewName) ));
+
+  /*if (deletedRowPosition > 0 && (venta->header == deletedRowPosition))
+    {
+       gtk_tree_selection_select_path (gtk_tree_view_get_selection (tree),
+				      gtk_tree_path_new_from_string ( g_strdup_printf("%d", deletedRowPosition-1) ));    
+    }*/
+  if (deletedRowPosition >= 0)
+    {
+      // gtk_widget_grab_focus (GTK_WIDGET (tree));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (tree),
+				      gtk_tree_path_new_from_string ( g_strdup_printf("%d", deletedRowPosition) ));
+    }
+  // Si se elimina el último elemento de la lista que se seleccione el último disponible
+}

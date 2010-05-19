@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <interface>
+  <!-- interface-requires gtk+ 2.12 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="wnd_abonar">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Abono</property>
     <property name="modal">True</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_admin</property>
     <signal name="delete_event" handler="CloseAbonarWindow"/>
     <child>
@@ -80,6 +82,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -87,29 +90,30 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button6">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="CloseAbonarWindow"/>
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="button16">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="Abonar"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -127,7 +131,7 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Modificar Cliente</property>
     <property name="modal">True</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="window_position">center-on-parent</property>
     <signal name="delete_event" handler="CloseModificarWindow"/>
     <child>
       <object class="GtkVBox" id="vbox14">
@@ -319,6 +323,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -337,13 +342,13 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="btn_cancel_mod_client">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="CloseModificarWindow"/>
                 <accelerator key="Escape" signal="clicked"/>
+                <signal name="clicked" handler="CloseModificarWindow"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -353,17 +358,17 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_mod_client">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="ModificarClienteDB"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -381,7 +386,7 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Cambiar Contrase&#xF1;a</property>
     <property name="modal">True</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_admin</property>
     <signal name="delete_event" handler="CloseChangePasswdWin"/>
     <child>
@@ -468,6 +473,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -475,10 +481,10 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button15">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="CloseChangePasswdWin"/>
               </object>
@@ -490,17 +496,17 @@
             </child>
             <child>
               <object class="GtkButton" id="button1">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="ChangePasswd"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -517,13 +523,13 @@
   <object class="GtkMessageDialog" id="ask_delete_user">
     <property name="border_width">5</property>
     <property name="modal">True</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_admin</property>
     <property name="has_separator">False</property>
-    <property name="message_type">GTK_MESSAGE_QUESTION</property>
-    <property name="buttons">GTK_BUTTONS_YES_NO</property>
+    <property name="message_type">question</property>
+    <property name="buttons">yes-no</property>
     <property name="text">&#xBF;Desea eliminar al usuario?</property>
     <signal name="close" handler="gtk_widget_hide_on_delete" object="ask_delete_user"/>
     <signal name="response" handler="on_ask_delete_user_response"/>
@@ -534,7 +540,7 @@
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area3">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
+            <property name="layout_style">edge</property>
             <child>
               <placeholder/>
             </child>
@@ -544,7 +550,8 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </object>
@@ -553,12 +560,12 @@
   <object class="GtkMessageDialog" id="quit_message">
     <property name="border_width">5</property>
     <property name="modal">True</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
-    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_admin</property>
     <property name="has_separator">False</property>
-    <property name="message_type">GTK_MESSAGE_QUESTION</property>
+    <property name="message_type">question</property>
     <property name="text">&#xBF;Realmente desea salir?</property>
     <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete" object="quit_message"/>
@@ -569,43 +576,55 @@
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area2">
             <property name="visible">True</property>
-            <property name="layout_style">GTK_BUTTONBOX_EDGE</property>
+            <property name="layout_style">edge</property>
             <child>
               <object class="GtkButton" id="button14">
+                <property name="label">gtk-no</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-no</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="quit_message"/>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="button13">
+                <property name="label">gtk-yes</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-yes</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_quit_application"/>
               </object>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="0">button14</action-widget>
+      <action-widget response="0">button13</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkWindow" id="wnd_edit_tax">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Editar Impuesto</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_admin</property>
     <signal name="delete_event" handler="CloseEditTaxWin"/>
     <child>
@@ -655,19 +674,22 @@
               </object>
             </child>
           </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <object class="GtkHBox" id="hbox12">
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="button12">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="CloseEditTaxWin"/>
                 <accelerator key="Escape" signal="clicked"/>
+                <signal name="clicked" handler="CloseEditTaxWin"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -676,16 +698,16 @@
             </child>
             <child>
               <object class="GtkButton" id="button11">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="EditTask"/>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -701,7 +723,7 @@
   </object>
   <object class="GtkWindow" id="wnd_adduser">
     <property name="border_width">5</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ON_PARENT</property>
+    <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_admin</property>
     <signal name="delete_event" handler="CloseAddSellerWin"/>
     <child>
@@ -796,7 +818,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkHBox" id="hbox4">
+              <object class="GtkHBox" id="hbox40">
                 <property name="visible">True</property>
                 <property name="spacing">5</property>
                 <child>
@@ -804,6 +826,9 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkLabel" id="label14">
@@ -889,7 +914,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label8">
+              <object class="GtkLabel" id="label80">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Nombre de usuario:</property>
               </object>
@@ -900,7 +925,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label5">
+              <object class="GtkLabel" id="label50">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Rut:</property>
               </object>
@@ -912,39 +937,41 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="hbox3">
+          <object class="GtkHBox" id="hbox30">
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="btn_adduser_cacel">
+                <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-cancel</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="CloseAddSellerWin"/>
                 <accelerator key="Escape" signal="clicked"/>
+                <signal name="clicked" handler="CloseAddSellerWin"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkButton" id="btn_adduser_save">
+                <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-ok</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="AddSeller"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
+                <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -960,7 +987,7 @@
   </object>
   <object class="GtkWindow" id="wnd_admin">
     <property name="border_width">5</property>
-    <property name="window_position">GTK_WIN_POS_CENTER_ALWAYS</property>
+    <property name="window_position">center-always</property>
     <signal name="delete_event" handler="on_btn_quit_clicked"/>
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -979,16 +1006,18 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="border_width">10</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_users">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="headers_clickable">True</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox2">
@@ -999,47 +1028,69 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip" translatable="yes">Cambiar la contrase&#xF1;a del usuario seleccionado</property>
-                        <property name="label" translatable="yes">Contrase&#xF1;a</property>
                         <signal name="clicked" handler="ChangePasswdWin"/>
+                        <child>
+                          <object class="GtkHBox" id="hbox4">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkImage" id="image2">
+                                <property name="visible">True</property>
+                                <property name="stock">gtk-dialog-authentication</property>
+                              </object>
+                              <packing>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label8">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">_Contrase&#xF1;a</property>
+                                <property name="use_underline">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="button2">
+                        <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip" translatable="yes">Borrar el usuario seleccionado</property>
-                        <property name="label" translatable="yes">gtk-delete</property>
+                        <property name="tooltip_text" translatable="yes">Borrar el Usuario seleccionado</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="AskDelete"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="button5">
+                        <property name="label">gtk-add</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="AddSellerWin"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1074,6 +1125,9 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Nombre</property>
                       </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkEntry" id="entry_admin_addtax_name">
@@ -1105,10 +1159,10 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="button7">
+                        <property name="label">gtk-add</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="AddImpuesto"/>
                       </object>
@@ -1120,6 +1174,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -1129,16 +1184,18 @@
                       <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                        <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="treeview_taxes">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="headers_clickable">True</property>
                           </object>
                         </child>
                       </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkHBox" id="hbox7">
@@ -1146,33 +1203,34 @@
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkButton" id="button9">
+                            <property name="label">gtk-edit</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="label" translatable="yes">gtk-edit</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="EditTaskWin"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="pack_type">GTK_PACK_END</property>
+                            <property name="pack_type">end</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkButton" id="button8">
+                            <property name="label">gtk-delete</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="label" translatable="yes">gtk-delete</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="DelTask"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="pack_type">GTK_PACK_END</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                       </object>
@@ -1438,23 +1496,27 @@
                       </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox8">
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkButton" id="button10">
+                        <property name="label">gtk-save</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-save</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="SaveDatosNegocio"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                   </object>
@@ -1492,6 +1554,9 @@
                         <property name="label" translatable="yes">&lt;b&gt;Boleta&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkHBox" id="hbox9">
@@ -1504,6 +1569,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -1511,7 +1577,7 @@
                             <property name="width_request">50</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">Este es el &#xFA;ltimo n&#xFA;mero de boleta emitido</property>
+                            <property name="tooltip_text" translatable="yes">Este es el &#xFA;ltimo n&#xFA;mero de boleta emitido</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1520,10 +1586,11 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_admin_save_ticketnum">
+                            <property name="label">gtk-edit</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="label" translatable="yes">Modificar</property>
+                            <property name="use_stock">True</property>
                             <signal name="clicked" handler="ModificarNumber"/>
                           </object>
                           <packing>
@@ -1538,6 +1605,9 @@
                       </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkVBox" id="vbox10">
@@ -1548,6 +1618,9 @@
                         <property name="label" translatable="yes">&lt;b&gt;Factura&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkHBox" id="hbox10">
@@ -1560,6 +1633,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -1567,7 +1641,7 @@
                             <property name="width_request">50</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip" translatable="yes">Este es el &#xFA;ltimo n&#xFA;mero de factura emitido</property>
+                            <property name="tooltip_text" translatable="yes">Este es el &#xFA;ltimo n&#xFA;mero de factura emitido</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1576,10 +1650,11 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_admin_save_invoicenum">
+                            <property name="label">gtk-edit</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="label" translatable="yes">Modificar</property>
+                            <property name="use_stock">True</property>
                             <signal name="clicked" handler="ModificarNumberF"/>
                           </object>
                           <packing>
@@ -1607,6 +1682,9 @@
                         <property name="label" translatable="yes">&lt;b&gt;Configuraci&#xF3;n Local&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <object class="GtkTable" id="table4">
@@ -1790,17 +1868,18 @@
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkButton" id="btn_admin_save_config">
+                            <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="label" translatable="yes">gtk-save</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="guardar_parametros"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
-                            <property name="pack_type">GTK_PACK_END</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                       </object>
@@ -1844,14 +1923,15 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="button4">
+                        <property name="label">gtk-find</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-find</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="admin_search_client"/>
                       </object>
@@ -1864,19 +1944,19 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow3">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="hscrollbar_policy">never</property>
+                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_clients">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="headers_clickable">True</property>
                         <property name="rules_hint">True</property>
                       </object>
                     </child>
@@ -1894,72 +1974,95 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Abonar</property>
                         <signal name="clicked" handler="AbonarWindow"/>
+                        <child>
+                          <object class="GtkHBox" id="hbox3">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkImage" id="image1">
+                                <property name="visible">True</property>
+                                <property name="stock">gtk-go-up</property>
+                              </object>
+                              <packing>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label5">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Abona_r</property>
+                                <property name="use_underline">True</property>
+                              </object>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">4</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_admin_add_client">
+                        <property name="label">gtk-add</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-add</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="AddClient"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_admin_print">
+                        <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-print</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="on_btn_admin_print_clicked"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_admin_del_client">
+                        <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-delete</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="EliminarCliente"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkButton" id="btn_admin_edit_client">
+                        <property name="label">gtk-edit</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">gtk-edit</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="ModificarCliente"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="pack_type">GTK_PACK_END</property>
+                        <property name="pack_type">end</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1974,13 +2077,12 @@
                   <object class="GtkScrolledWindow" id="scrolledwindow4">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_sales">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="headers_clickable">True</property>
                         <property name="rules_hint">True</property>
                       </object>
                     </child>
@@ -1993,13 +2095,12 @@
                   <object class="GtkScrolledWindow" id="scrolledwindow5">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                    <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_sale_details">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="headers_clickable">True</property>
                         <property name="rules_hint">True</property>
                       </object>
                     </child>
@@ -2024,24 +2125,28 @@
               </packing>
             </child>
           </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
           <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
             <child>
               <object class="GtkButton" id="btn_quit">
+                <property name="label">gtk-quit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">gtk-quit</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_btn_quit_clicked"/>
                 <accelerator key="Q" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <signal name="clicked" handler="on_btn_quit_clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
+                <property name="pack_type">end</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </object>
@@ -2065,3 +2170,4 @@
     </child>
   </object>
 </interface>
+

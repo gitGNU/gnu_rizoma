@@ -472,9 +472,9 @@ query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
 		    otros, familia, perecibles, stock_min, margen_promedio,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista
-             FROM producto WHERE lower(descripcion) LIKE lower($S$
+             FROM producto WHERE estado = true and lower(descripcion) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR lower(marca) LIKE lower($S$
-	|| quote_literal(expresion) || $S$) order by descripcion, marca $S$;
+	|| quote_literal(expresion) || $S$) and estado = true order by descripcion, marca $S$;
 
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;
@@ -1490,6 +1490,7 @@ BEGIN
 	return;
 END; $$ language plpgsql;
 
+--registra el detalle de una venta
 create or replace function registrar_venta_detalle(
        in in_id_venta int,
        in in_barcode bigint,
@@ -1531,7 +1532,9 @@ begin
 end;$$ language plpgsql;
 
 
-
+-- busca productos en base un patron con el formate de LIKE
+-- Si variable de entrada con_stock > 0, Productos para la venta
+-- Si no, son para visualizar en mercaderia 
 create or replace function buscar_producto(IN expresion varchar(255),
 	IN columnas varchar[],
 	IN usar_like boolean,
@@ -1589,7 +1592,7 @@ begin
 	END IF;
 	END LOOP;
 
-        query := query || $S$) order by descripcion, marca$S$;
+        query := query || $S$) and estado=true order by descripcion, marca$S$;
 
 	FOR list IN EXECUTE query LOOP
 	barcode := list.barcode;
@@ -1663,6 +1666,8 @@ begin
 
 end; $$ language plpgsql;
 
+--retorna el detalle de una compra 
+--
 create or replace function get_detalle_compra(
 		IN id_compra integer,
 		OUT codigo_corto varchar(10),
@@ -1703,6 +1708,8 @@ begin
 END; $$ LANGUAGE plpgsql;
 
 
+-- retorna el iva de un producto
+--
 create or replace function get_iva(
 		IN barcode bigint,
 		OUT valor double precision)
@@ -1710,6 +1717,10 @@ returns double precision as $$
 begin
 
 		SELECT impuesto.monto INTO valor FROM producto, impuesto WHERE producto.barcode=barcode and producto.impuestos='true' AND impuesto.id=1;
+                       
+                if valor is null then
+                   valor=-1;
+                end if;
 
 end; $$ language plpgsql;
 
@@ -1835,7 +1846,7 @@ q := $S$ SELECT producto.descripcion as descripcion,
 	      producto.contenido as contenido,
 	      producto.unidad as unidad,
 	      SUM (venta_detalle.cantidad) as amount,
-	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))-(venta_detalle.iva+venta_detalle.otros)::integer) as sold_amount,
+	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer/*-(venta_detalle.iva+venta_detalle.otros)::integer*/) as sold_amount,
 	      SUM ((venta_detalle.cantidad*venta_detalle.fifo)::integer) as costo,
        	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
@@ -2056,6 +2067,12 @@ declare
 	monto_apertura bigint;
 	q varchar;
 	l record;
+        open_date timestamp without time zone;
+	close_date timestamp without time zone;
+	close_date_back timestamp without time zone;
+	cash_payed_money bigint;
+	monto1 bigint;
+	monto2 bigint;
 begin
 
 if id_caja = -1 then
@@ -2074,14 +2091,25 @@ end if;
 select id_venta_inicio, id_venta_termino into id_inicio, id_termino
        from caja where id = last_caja;
 
+
 if id_termino is null then
    select last_value into id_termino from venta_id_seq;
 end if;
 
-select sum(monto) into arqueo
-       from venta
-       where id > id_inicio and id <= id_termino
-       and tipo_documento = 0;
+if id_inicio = 1 then
+   select sum(monto) into arqueo
+          from venta
+          where id > 0 and id <= id_termino
+          and tipo_documento = 0
+          and tipo_venta = 0;
+else
+   select sum(monto) into arqueo
+          from venta
+          where id > id_inicio and id <= id_termino
+          and tipo_documento = 0
+          and tipo_venta = 0;
+end if;
+
 
 if arqueo is null then
    arqueo := 0;
@@ -2101,7 +2129,31 @@ for l in execute q loop
     ingresos := ingresos + l.monto;
 end loop;
 
-return (monto_apertura + arqueo + ingresos - egresos);
+select fecha_inicio into open_date
+       from caja where id=last_caja;
+
+close_date := now();
+
+select fecha_termino into close_date_back
+       from caja where id = last_caja - 1;
+
+select sum (monto_abonado) into monto1
+       from abono where fecha_abono > open_date and fecha_abono < close_date;
+
+if monto1 is null then
+   monto1 := 0;
+end if;
+
+select sum (monto_abonado) into monto2
+       from abono where fecha_abono > close_date_back and  fecha_abono < open_date;
+
+if monto2 is null then
+   monto2 := 0;
+end if;
+
+cash_payed_money := monto1 + monto2;
+
+return (monto_apertura + arqueo + cash_payed_money + ingresos - egresos);
 end; $$ language plpgsql;
 
 
@@ -2191,8 +2243,14 @@ begin
 
         select monto into sale_amount from venta where id=sale_id;
         select id into id_tipo_egreso from tipo_egreso where descrip='Nulidad de Venta';
-
-        perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
+	
+	-- Si es la anulacion de una venta a credito no debe ser ingresado en la tabla venta_anulada
+	-- Debe  considerar esa venta como "pagada", de esa forma de "restituye" el credito del cliente (correspondiente a esa venta)
+	if (select id from venta where tipo_venta=1 AND id=sale_id) IS NOT NULL then   
+       	   	 UPDATE deuda SET pagada='t' WHERE id_venta=sale_id;
+	else
+		 perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);	
+	end if; 		 
 
         insert into venta_anulada(id_sale, vendedor)
                 values (sale_id, salesman_id);
@@ -2217,7 +2275,8 @@ create or replace function cash_box_report (
         out cash_sells integer,
         out cash_outcome integer,
         out cash_income integer,
-        out cash_payed_money integer)
+        out cash_payed_money integer,
+	out cash_loss_money integer)
 returns setof record as $$
 declare
         query varchar;
@@ -2226,10 +2285,15 @@ declare
         sell_last_id integer;
         first_cash_box_id integer;
         last_cash_box_id integer;
+	open_date2 timestamp without time zone;
+	close_date_now timestamp without time zone;
+	close_date_back timestamp without time zone;
+	monto1 bigint;
+	monto2 bigint;
 begin
 
-        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino
-        into sell_first_id, open_date, cash_box_start, sell_last_id, close_date, cash_box_end
+        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino, perdida
+        into sell_first_id, open_date, cash_box_start, sell_last_id, close_date, cash_box_end, cash_loss_money
         from caja
         where id = cash_box_id;
 
@@ -2277,13 +2341,32 @@ begin
                 cash_income := 0;
         end if;
 
-        select sum (monto_abonado) into cash_payed_money
-        from abono
-        where fecha_abono >= open_date and fecha_abono <= close_date;
+        select last_value into last_cash_box_id from caja_id_seq;
 
-        if cash_payed_money is null then
-                cash_payed_money := 0;
+        select fecha_inicio into open_date2
+               from caja where id = last_cash_box_id;
+
+        close_date_now := now();
+
+        select fecha_termino into close_date_back
+               from caja where id = last_cash_box_id - 1;
+
+        select sum (monto_abonado) into monto1
+        from abono where fecha_abono > open_date and fecha_abono < close_date;
+
+        if monto1 is null then
+           monto1 := 0;
         end if;
+
+        select sum (monto_abonado) into monto2
+               from abono where fecha_abono > close_date_back and  fecha_abono < open_date;
+
+        if monto2 is null then
+           monto2 := 0;
+        end if;
+
+        cash_payed_money := monto1 + monto2;
+
 
 return next;
 return;
@@ -2399,7 +2482,119 @@ begin
                 and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
 
 
-
 return next;
 return;
 end; $$ language plpgsql;
+
+--Funcion incr_fecha
+--Esta funcion incrementa la fecha en un dia mas
+create or replace function incr_fecha(
+	in pfecha date
+	)
+returns date as $$
+begin
+	return pfecha + integer '1';
+end;
+ $$ language plpgsql;
+
+-- Registrar una devolucion
+create or replace function registrar_devolucion( 
+	IN monto integer,
+	IN proveedor integer,
+	OUT inserted_id integer)
+returns integer as $$
+BEGIN
+	EXECUTE $S$ INSERT INTO devolucion( id, monto, fecha, proveedor)
+	VALUES ( DEFAULT, $S$|| monto ||$S$, NOW(),$S$|| proveedor ||$S$ )$S$;
+
+	SELECT currval( 'devolucion_id_seq' ) INTO inserted_id;
+	return;
+END; $$ language plpgsql;
+
+
+--registra el detalle de una devolucion
+create or replace function registrar_devolucion_detalle(
+       in in_id_devolucion int,
+       in in_barcode bigint,
+       in in_cantidad double precision,
+       in in_precio int,
+       in in_precio_compra int )
+returns void as $$
+declare
+aux int;
+num_linea int;
+begin
+	aux := (select count(*) from devolucion_detalle where id_devolucion = in_id_devolucion);
+
+	if aux = 0 then
+	   num_linea := 0;
+	else
+	   num_linea := (select max(id) from devolucion_detalle where id_devolucion = in_id_devolucion);
+	   num_linea := num_linea + 1;
+	end if;
+	INSERT INTO devolucion_detalle (id,
+					id_devolucion,
+					barcode,
+					cantidad,
+					precio,
+					precio_compra)
+	       	    VALUES(num_linea,
+		    	   in_id_devolucion,
+			   in_barcode,
+			   in_cantidad,
+			   in_precio,
+			   in_precio_compra);
+
+end;$$ language plpgsql;
+
+create or replace function registrar_traspaso(
+  IN monto integer,
+  IN origen integer,
+  IN destino integer,
+  IN vendedor integer,
+  OUT inserted_id integer)
+  returns integer as $$
+
+BEGIN
+	EXECUTE $S$ INSERT INTO traspaso( id, monto, fecha, origen, destino, vendedor)
+	VALUES ( DEFAULT, $S$|| monto ||$S$, NOW(),$S$|| origen ||$S$,$S$|| destino ||$S$,$S$|| vendedor ||$S$) $S$;
+
+	SELECT currval( 'traspaso_id_seq' ) INTO inserted_id;
+
+	return;
+	END; $$ language plpgsql;
+
+create or replace function registrar_traspaso_detalle(
+       in in_id_traspaso int,
+       in in_barcode bigint,
+       in in_cantidad double precision,
+       in in_precio int)
+returns void as $$
+declare
+aux int;
+num_linea int;
+begin
+	aux := (select count(*) from traspaso_detalle where id_traspaso = in_id_traspaso);
+
+	if aux = 0 then
+	   num_linea := 0;
+	else
+	   num_linea := (select max(id) from traspaso_detalle where id_traspaso = in_id_traspaso);
+	   num_linea := num_linea + 1;
+	end if;
+	INSERT INTO traspaso_detalle(id,
+	       	    		  id_traspaso,
+				  barcode,
+				  cantidad,
+				  precio)
+	       	    VALUES(num_linea,
+		    	   in_id_traspaso,
+			   in_barcode,
+			   in_cantidad,
+			   in_precio);
+
+end;$$ language plpgsql;
+
+
+
+

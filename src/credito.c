@@ -108,11 +108,19 @@ search_client (GtkWidget *widget, gpointer data)
 
   if (store == NULL)
     {
-      store = gtk_list_store_new (4,
-                                  G_TYPE_STRING,
-                                  G_TYPE_STRING,
-                                  G_TYPE_STRING,
-                                  G_TYPE_BOOLEAN);
+      if(user_data->user_id == 1) // De ser admin adquiere la visibilidad de la columna credito
+	{
+	  store = gtk_list_store_new (4,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING,
+				      G_TYPE_BOOLEAN);
+	} else {
+	  store = gtk_list_store_new (3,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING);
+      }
 
       gtk_tree_view_set_model (GTK_TREE_VIEW(aux_widget),
                                GTK_TREE_MODEL(store));
@@ -139,11 +147,14 @@ search_client (GtkWidget *widget, gpointer data)
       gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
 
       //credito
-      renderer = gtk_cell_renderer_toggle_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Credito", renderer,
-                                                         "active", 3,
-                                                         NULL);
-      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+      if(user_data->user_id == 1)
+	{
+	  renderer = gtk_cell_renderer_toggle_new ();
+	  column = gtk_tree_view_column_new_with_attributes ("Credito", renderer,
+							     "active", 3,
+							     NULL);
+	  gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+	}
     }
 
   gtk_list_store_clear (store);
@@ -166,7 +177,7 @@ search_client (GtkWidget *widget, gpointer data)
         gtk_list_store_set (store, &iter,
                             0, PQgetvalue (res, i, 0),
                             1, PQgetvalue (res, i, 1),
-                            2, atoi (PQvaluebycol (res, i, "telefono")),
+                            2, PQvaluebycol (res, i, "telefono"),
                             -1);
     }
 
@@ -1126,7 +1137,7 @@ EliminarCliente (void)
           statusbar_push (GTK_STATUSBAR(widget), "El Client fue eliminado con exito", 3000);
         }
       else
-        ErrorMSG (GTK_WIDGET (treeview), "No se pudo elminar el cliente");
+        ErrorMSG (GTK_WIDGET (treeview), "No se pudo elminar el cliente, compruebe que no tenga saldo deudor");
     }
 }
 

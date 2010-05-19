@@ -85,6 +85,7 @@ gboolean closing_tipos = FALSE;
 
 gboolean block_discount = FALSE;
 
+
 /**
  * Display the information of a product on the main sales window
  *
@@ -573,7 +574,16 @@ ventas_win ()
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cash_box_close")));
     }
+    
 
+  if (rizoma_get_value_boolean ("TRASPASO"))
+    {
+  
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
+       
+    }
+
+  
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
 
   // check if the window must be set to fullscreen
@@ -713,6 +723,7 @@ ventas_win ()
           gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_opened")));
         }
     }
+
 }
 
 gboolean
@@ -738,6 +749,7 @@ SearchProductByCode (void)
           GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
           gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
+	  CleanSellLabels();
           AlertMSG (aux_widget, str);
           g_free (str);
 
@@ -942,6 +954,14 @@ AgregarProducto (GtkButton *button, gpointer data)
   return TRUE;
 }
 
+
+/*
+ * Es llamada por las funciones SearchBarcodeProduct y SearchProductByCode.
+ *
+ * Esta funcion limpia las etiquetas (label) de los datos del producto
+ *
+ */
+  
 void
 CleanSellLabels (void)
 {
@@ -952,6 +972,13 @@ CleanSellLabels (void)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
 }
+
+/*
+ * Es llamada por las funciones SearchBarcodeProduct y SearchProductByCode.
+ *
+ * Esta funcion limpia las etiquetas (label) de los datos del producto
+ *
+ */
 
 void
 CleanEntryAndLabelData (void)
@@ -972,6 +999,17 @@ CleanEntryAndLabelData (void)
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 }
 
+
+
+/**
+ * Es llamada cuando el boton "button_delete_productn" es presionado (signal click).
+ * 
+ * Esta funcion elimina el producto de la treeView y llamas a la funcion
+ * EliminarDeLIsta() y CalcularVentas()
+ *
+ * @param button the GtkButton that recieves the signal
+ * @param data the pointer passed to the callback
+ */
 void
 EliminarProducto (GtkButton *button, gpointer data)
 {
@@ -995,8 +1033,10 @@ EliminarProducto (GtkButton *button, gpointer data)
       gtk_list_store_remove (GTK_LIST_STORE (venta->store), &iter);
 
       CalcularVentas (venta->header);
-
     }
+  
+  select_back_deleted_row("sell_products_list", position);
+  
 }
 
 /**
@@ -1084,13 +1124,25 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   ListClean ();
 }
 
+/**
+ * Al recibir un signal de "cantidad_entry", cambia el foco dependiendo de la opción
+ * VENTA_DIRECTA especificada en el .rizoma
+ *
+ * @parametro entry tipo GtkEntry * que recive la señal
+ * @parametro data tipo gpointer entrega el puntero para el procedimiento interno
+ */
 void
 MoveFocus (GtkEntry *entry, gpointer data)
-{
-  GtkWidget *button;
-  button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
-  gtk_widget_set_sensitive(button, TRUE);
-  gtk_widget_grab_focus (button);
+{ // Al presionar [ENTER] en el entry "Cantidad"
+  if(!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
+    {
+      GtkWidget *button;
+      button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
+      gtk_widget_set_sensitive(button, TRUE);
+      gtk_widget_grab_focus (button);
+    }
+  else // De lo contrario el foco regresa al entry "Código de barras"
+      gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 }
 
 void
@@ -1129,6 +1181,8 @@ TipoVenta (GtkWidget *widget, gpointer data)
   GtkWindow *window;
   gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
 
+  /*Verifica si hay productos añadidos en la TreeView para vender*/
+  
   if (venta->header == NULL)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para vender");
@@ -1290,6 +1344,14 @@ gint
 SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  if(barcode == NULL)
+    {
+      GtkWidget *widgetEntry; 
+      widgetEntry = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
+      barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widgetEntry)));
+    }
+
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
   gchar *q= NULL;
@@ -1582,7 +1644,6 @@ SearchAndFill (void)
 
   gtk_list_store_clear (store);
 
-
   if (resultados == 0)
     {
       gtk_list_store_append (store, &iter);
@@ -1636,7 +1697,6 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
       if (ventas == TRUE)
         {
-
           gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), product);
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
@@ -2167,6 +2227,14 @@ ChangeSeller (GtkWidget *widget, gpointer data)
     }
 }
 
+/**
+ * Es llamada cuando el boton "btn_change_seller" es presionado (signal click).
+ * 
+ * Esta funcion visualiza la ventana "window_change_seller" y deja el foco en
+ * el "entry_id_vendedor"
+ *
+ */
+
 void
 WindowChangeSeller ()
 {
@@ -2174,7 +2242,17 @@ WindowChangeSeller ()
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "window_change_seller"));
   gtk_widget_show_all (GTK_WIDGET (window));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_id_vendedor")));
 }
+
+
+/**
+ * Funcion Principal
+ *
+ * Carga los valores de rizoma-login.ui y visualiza la ventana del
+ * login "login_window", ademas de cargar el archivo de configuracion "/.rizoma"
+ *
+ */
 
 int
 main (int argc, char **argv)
@@ -2536,6 +2614,15 @@ on_treeview_clients_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, Gtk
   on_btn_client_ok_clicked (NULL, NULL);
 }
 
+/**
+ * Es llamada cuando se presiona el boton "btn_cancel_sale_credit" (signal clicked)
+ *
+ * Esta funcion cierra la ventana "wnd_sale_invoice" y llama a la funcion
+ * "clean_credit_data" que limpia los datos de la venatan.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
 void
 on_btn_cancel_sale_credit_clicked (GtkButton *button, gpointer data)
 {
@@ -2570,6 +2657,16 @@ clean_credit_data ()
   return;
 }
 
+/**
+ * Es llamada cuando se presiona el boton "btn_cancel_invoice" (signal clicked)
+ *
+ * Esta funcion cierra la ventana "wnd_sale_invoice" y limpia la caja de
+ * texto "entry_invoice_rut".
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+
 void
 on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
 {
@@ -2581,6 +2678,32 @@ on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
   gtk_widget_hide(widget);
+}
+
+/**
+ * Es llamada cuando se presiona el boton "btn_close_win" (signal clicked)
+ * de la ventana "tipo_venta_win_venta"
+ *
+ * Esta funcion recalcula el total de la venta seteando el resultado en el
+ * texto del label "label_total" de la ventana "wnd_sell".
+ *
+ * NOTA: Esto es realizado evitar la permanencia (gráfica) de la cifra de 
+ * venta total con descuento en caso de ser calculada y no realizar la venta
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+
+void
+on_btn_cancel_tipo_venta_win_venta (GtkButton *button, gpointer data)
+{
+  guint32 total;
+  //Seteamos el Sub-Total y el Total
+  total = llround (CalcularTotal (venta->header));
+  
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+			g_strdup_printf ("<span size=\"40000\">%s</span>",
+					 PutPoints (g_strdup_printf ("%u", total))));
 }
 
 /**
@@ -2634,6 +2757,7 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
 
   gtk_widget_show_all(widget);
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_invoice_rut"))); 
 }
 
 /**
@@ -2797,6 +2921,11 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
   switch (event->keyval)
     {
+    case GDK_F2:      
+      if (atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 1
+	  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+      break;
+
     case GDK_F5:
       if (user_data->user_id == 1)
         nullify_sale_win ();
@@ -3018,7 +3147,7 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
     {
       if (atoi(sale_id) == 0)
         {
-          AlertMSG(GTK_WIDGET(entry), "Debe ingresar un Nº de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacio");
+          AlertMSG(GTK_WIDGET(entry), "Debe ingresar un N° de Venta mayor a 0\nSi no sabe el numero de venta deje el campo vacío");
           return;
         }
       else
@@ -3330,4 +3459,444 @@ on_dialog_cash_box_opened_response (GtkDialog *dialog, gint response_id, gpointe
     }
 
   gtk_widget_hide (GTK_WIDGET (dialog));
+}
+
+
+/**
+ * Es llamada cuando el boton "btn_devolver" es presionado (signal click).
+ * 
+ * Esta Funcion visualiza la ventana "wnd_devolver" (ventana para realizar
+ * una devolucion de productos al proveedor).
+ *
+ * @param widget the widget that emits the signal
+ * @param data the user data
+ *
+ */
+
+void
+on_btn_devolver_clicked (GtkWidget *widget, gpointer data)
+{
+  GtkWindow *window;
+
+  //reviza si no hay productos
+  if (venta->header == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para devolver");
+      return;
+    }
+  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_devolver"));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+  clean_container (GTK_CONTAINER (window));
+  gtk_widget_show_all (GTK_WIDGET (window));
+
+}
+
+
+/**
+ * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
+ * de la ventana "wnd_devolver).
+ * 
+ * Esta Funcion visualiza la ventana "wnd_srch_provider"(que es para buscar
+ * un proveedor) y ademas  carga el tree_view para luego visualizar la
+ * busqueda de proveedores encontrados.
+ *
+ * @param entry the entry that emits the signal
+ *
+ */
+void
+on_entry_srch_provider_activate (GtkEntry *entry)
+{
+  GtkListStore *store;
+  GtkTreeIter iter;
+  PGresult *res;
+  gint tuples, i;
+  gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
+  gchar *str_axu;
+  gchar *q;
+  /*
+    consulta a la BD, para obtener los rut's con su correspondiente digito
+    verificador y los nombres  de los  proveedores 
+   */
+  q = g_strdup_printf ("SELECT rut, dv, nombre "
+                       "FROM buscar_proveedor ('%%%s%%')", str_schr);
+  g_free (str_schr);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  tuples = PQntuples (res);
+
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_provider"))));
+
+  gtk_list_store_clear (store);
+
+  /*
+    visualiza en treeView los proveedores
+   */
+  for (i = 0; i < tuples; i++)
+    {
+      str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
+                            PQvaluebycol (res, i, "dv"), NULL);
+
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+                          0, PQvaluebycol (res, i, "nombre"),
+                          1, str_axu,
+                          -1);
+      g_free (str_axu);
+    }
+    gtk_widget_grab_focus (GTK_WIDGET (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_provider"))));
+    gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_provider"))), gtk_tree_path_new_from_string ("0"));
+}
+
+/**
+ * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
+ * de la ventana "wnd_devolver".
+ * 
+ * Esta Funcion visualiza la ventana "wnd_srch_provider"(que es para buscar
+ * un proveedor) y ademas  carga el tree_view para luego visualizar la
+ * busqueda de proveedores encontrados.
+ *
+ * @param entry the entry that emits the signal
+ * @param data the user data
+ *
+ */
+
+void
+on_entry_provider_activate (GtkEntry *entry, gpointer user_data)
+{
+  GtkWindow *window;
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));;
+  GtkListStore *store;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+  gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
+  gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
+
+
+  if (gtk_tree_view_get_model (tree) == NULL )
+    {
+      store = gtk_list_store_new (2,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING);
+
+      gtk_tree_view_set_model (GTK_TREE_VIEW (tree), GTK_TREE_MODEL (store));
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+                                                         "text", 0,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
+                                                         "text", 1,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+
+  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_provider"));
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_srch_provider")), str_schr);
+  on_entry_srch_provider_activate(entry);
+
+  gtk_widget_show_all (GTK_WIDGET (window));
+}
+
+
+/**
+ * Es llamada por la funcion on_btn_ok_srch_provider_clicked() y recibe el
+ * parametro gchar rut.
+ * 
+ * Esta funcion con el parametro de entrada rut realiza una consulta a la BD,
+ * para obtener el nombre del proveedor y luego visualiza (set text) los
+ * datos en los respctivas etiquetas (label)
+ *
+ * @param rut the rut of the proveedor
+ *
+ */
+void
+FillProveedorData (gchar *rut)
+{
+  PGresult *res;
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT nombre, rut FROM select_proveedor('%s')", rut));
+
+ 
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_proveedor")), PQvaluebycol (res, 0, "nombre"));
+
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_proveedor_rut")),
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
+
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_proveedor_nom")),
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                                             PQvaluebycol (res, 0, "nombre"))); 
+
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_devolucion")));
+}
+
+/**
+ * Es llamada cuando se selecciona un proveedor del TreeView a traves de un
+ * enter (signal row-actived) o presionando el boton de la ventana "wnd_devolver"
+ * (signal clicked).
+ * 
+ * Esta funcion extrae lo seleccionado en TreeView y lo carga en strs y se
+ * envia en la funcion FillProveedorData().
+ *
+ * @param TreeView the tree that emits the signal
+ *
+ */
+
+/**
+ * Es llamada cuando el boton "btn_devolucion" es presionado (signal click).
+ * 
+ * Esta funcion llama a la funcion SaveDevolucion()(que registra en la BD la
+ * devolucion(tablas devolucion y devolucion_detalle)) ademas de limpiar
+ * treeview de los productos vendidos, la etiqueta(label) total, y el numero
+ * de ventas.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+
+void
+on_btn_devolucion_clicked (GtkButton *button, gpointer data)
+{
+  
+  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
+                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  gint rut = atoi (CutPoints (g_strdup  (gtk_label_get_text
+                                         (GTK_LABEL (gtk_builder_get_object (builder, "label_proveedor_rut"))))));
+
+  if (g_str_equal(gtk_entry_get_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_proveedor"))), ""))    
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"No Ingreso un Proveedor"); 
+      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      return;
+    }
+
+  if(!DataExist (g_strdup_printf ("SELECT rut FROM proveedor WHERE rut=%d",rut)))
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"El rut no existe");
+      //gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
+      return;
+    }
+    
+  else
+    {
+      SaveDevolucion (monto,rut);
+
+      gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+      gtk_list_store_clear (venta->store);
+
+      CleanEntryAndLabelData ();
+
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
+
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+
+      ListClean ();
+    }
+}
+
+/**
+ * Es llamada por la funcion realizar_traspaso_Env()
+ * 
+ * Esta funcion carga las etiquetas (labels) de la ventana
+ * "traspaso_enviar_win", ademas del combobox de destino, con los respectivos valores
+ *
+ */
+
+void
+DatosEnviar (void)
+{
+
+  GtkWidget *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+  gint tuples,i;
+  PGresult *res;
+  gint venta_id;
+
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
+  gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total")),
+                      g_strdup_printf ("%d",TotalPrecioCompra(venta->header)));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_origen")),(gchar *)ReturnNegocio());  
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelID")),g_strdup_printf ("%d",InsertIdTraspaso()+1));
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor")),
+                                 g_strdup (gtk_label_get_text ( GTK_LABEL  (gtk_builder_get_object (builder,"label_seller_name")))));
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
+                                      "WHERE nombre!=(SELECT nombre FROM negocio)"));
+  tuples = PQntuples (res);
+  
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));  
+  modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+
+
+  if (modelo == NULL)
+    {
+      GtkCellRenderer *cell;
+      modelo = gtk_list_store_new (2,
+                                  G_TYPE_INT,
+                                  G_TYPE_STRING);
+      
+      gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
+                                     "text", 1,
+                                     NULL);
+    }
+
+  gtk_list_store_clear(modelo);
+
+  for (i=0 ; i < tuples ; i++)
+    {
+      gtk_list_store_append(modelo, &iter);
+      gtk_list_store_set(modelo, &iter,
+                         0, atoi(PQvaluebycol(res, i, "id")),
+                         1, PQvaluebycol(res, i, "nombre"),
+                         -1);
+    }
+  
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
+
+
+}
+
+void
+on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
+{
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeIter iter;
+  gchar *str;
+  gchar **strs;
+
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          1, &str,
+                          -1);
+
+      strs = g_strsplit (str, "-", 2);
+
+
+      FillProveedorData (*strs);
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
+    }
+}
+
+
+
+/**
+ * Es llamada cuando el boton "btn_traspaso_enviar" es presionado (signal click).
+ * 
+ * Esta funcion visualiza la ventana "traspaso_enviar_win" y ademas llama a
+ * la funcion DatosEnviar().
+ *
+ * @param widget the widget that emits the signal
+ * @param data the user data
+ *
+ */
+void
+realizar_traspaso_Env (GtkWidget *widget, gpointer data)
+{
+  GtkWindow *window;
+
+  gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
+
+  /*Comprueba que hallan productos añadidos en el treView para traspasar */
+  
+  if (venta->header == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para traspasar");
+      return;
+    }
+  
+  else
+    { 
+      window = GTK_WINDOW (gtk_builder_get_object (builder, "traspaso_enviar_win"));
+      clean_container (GTK_CONTAINER (window));
+      gtk_widget_show_all (GTK_WIDGET (window));
+      DatosEnviar();
+      
+      return;
+    }
+}
+
+/**
+ * Es llamada cuando el boton "traspaso_button" es presionado (signal click).
+ * 
+ * Esta funcion visualiza la ventana "traspaso_enviar_win".
+ *
+ * @param widget the widget that emits the signal
+ * @param data the user data
+ *
+ */
+void
+on_enviar_button_clicked (GtkButton *button, gpointer data)
+{
+  
+  gint * destino;
+  GtkTreeIter iter;
+  GtkWidget *combo;
+  GtkTreeModel *model;
+  gint active;
+  gint vendedor = user_data->user_id;
+  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
+                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+
+  
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  /* Verifica si se selecciono un destino del combobox*/
+  if (active == -1)
+    ErrorMSG (combo, "Debe Seleccionar un Destino");
+  
+  else
+    {
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
+
+      gtk_tree_model_get (model, &iter,
+                          0, &destino,
+                          -1);
+      SaveTraspaso (TotalPrecioCompra(venta->header),
+                    ReturnBodegaID(ReturnNegocio()),
+                    vendedor,
+                    destino,
+                    TRUE);
+     
+      gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
+
+      gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "traspaso_enviar_win")));
+      
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+      gtk_list_store_clear (venta->store);
+
+      CleanEntryAndLabelData ();
+
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
+
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+
+      ListClean ();
+
+    }
+  return;
 }

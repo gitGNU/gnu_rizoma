@@ -53,6 +53,16 @@ GtkWidget *total_caja;
 GtkWidget *combo_egreso;
 GtkWidget *combo_ingreso;
 
+
+/**
+ * Es llamada por la funcion EgresarDinero.
+ *
+ * Esta funcion retorna el valor de inicio de la caja
+ *
+ * @return caja: entero que contiene el resultado de la consulta a la caja
+ *
+ */
+
 gint
 ReturnSaldoCaja (void)
 {
@@ -69,6 +79,14 @@ ReturnSaldoCaja (void)
   return caja;
 }
 
+/**
+ * Es llamada por la funcion IngresarDinero.
+ *
+ * Esta funcion cierra la ventana "wnd_caja_ingreso" y limpia la caja de
+ * texto "entry_caja_in_amount"
+ *
+ */
+
 void
 CloseVentanaIngreso(void)
 {
@@ -80,6 +98,19 @@ CloseVentanaIngreso(void)
   wid = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_ingreso"));
   gtk_widget_hide(wid);
 }
+
+/**
+ * Es llamada cuando el boton "btn_ingresarDinero" es presionado (signal click).
+ *
+ * Esta funcion carga el valor desde la caja de texto "entry_caja_in_amount"
+ * en monto  y luego llama a la funcion Ingreso, que realiza el ingreso de
+ * dinero y su motivo, finalemente llama a la funcion CloseVentanaIngreso
+ * para cerrar la ventana.
+ *
+ * @param button the button
+ * @param user_data the user data
+ *
+ */
 
 void
 IngresarDinero (GtkWidget *widget, gpointer data)
@@ -119,6 +150,16 @@ IngresarDinero (GtkWidget *widget, gpointer data)
       return;
     }
 }
+
+/**
+ * Es llamada por la funcion "IniciarLaCaja".
+ *
+ * Esta funcion visualiza la ventana "wnd_caja_ingreso" y  carga en la lista
+ * desplegable(combobox) los motivos del ingreso de dinero a la caja, 
+ *
+ * @param monto: entero que contiene el monto de inicio de la caja
+ *
+ */
 
 void
 VentanaIngreso (gint monto)
@@ -170,6 +211,18 @@ VentanaIngreso (gint monto)
   gtk_widget_show_all(aux_widget);
 }
 
+/**
+ * Es llamada cuando el boton "btn_egresarDinero" es presionado (signal
+ * click).
+ *
+ * Esta funcion carga el monto que se egreso y luego a llama a la funcion
+ * Egreso que realiza el egreso y el motivo
+ *
+ * @param button the button
+ * @param user_data the user data
+ *
+ */
+
 void
 EgresarDinero (GtkWidget *widget, gpointer data)
 {
@@ -191,8 +244,11 @@ EgresarDinero (GtkWidget *widget, gpointer data)
     ErrorMSG (aux_widget, "No pueden haber egresos de $0");
   else if (active == -1)
     ErrorMSG (aux_widget, "Debe Seleccionar un tipo de egreso");
+  
+
   else if (monto > ReturnSaldoCaja ())
-    ErrorMSG (aux_widget, "No se puede retirar mas dinero del que ahi en caja");
+    ErrorMSG (aux_widget, "No se puede retirar mas dinero del que ahi en caja" );
+
   else
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (aux_widget));
@@ -209,6 +265,14 @@ EgresarDinero (GtkWidget *widget, gpointer data)
     }
 }
 
+/**
+ * Es llamada por la funcion EgresarDinero.
+ *
+ * Esta funcion cierra la ventana "wnd_caja_egreso" y limpia la caja de
+ * texto "entry_caja_out_amount"
+ *
+ */
+
 void
 CloseVentanaEgreso (void)
 {
@@ -222,6 +286,15 @@ CloseVentanaEgreso (void)
 }
 
 
+/**
+ * Es llamada por la funcion "IniciarLaCaja".
+ *
+ * Esta funcion visualiza la ventana "wnd_caja_egreso" y  carga en la lista
+ * desplegable(combobox) los motivos del ingreso de dinero a la caja, 
+ *
+ * @param monto: entero que contiene el monto de inicio de la caja
+ *
+ */
 void
 VentanaEgreso (gint monto)
 {
@@ -229,8 +302,9 @@ VentanaEgreso (gint monto)
   GtkWidget *aux_widget;
   GtkListStore *store;
   GtkTreeIter iter;
-  PGresult *res;
+  PGresult *res, *resId;
   gint tuples, i;
+  gint nulVenId; // El Id de "Nulidad de venta" 
 
   res = EjecutarSQL ("SELECT id, descrip FROM tipo_egreso");
   tuples = PQntuples (res);
@@ -255,15 +329,22 @@ VentanaEgreso (gint monto)
     }
 
   gtk_list_store_clear(store);
+  
+  /*Obtención del Id de 'nulidad de venta' */
+  resId = EjecutarSQL ("SELECT id FROM tipo_egreso WHERE descrip='Nulidad de Venta'");
+  nulVenId = atoi (PUT(PQvaluebycol(resId, 0, "id")));
 
+  /*Poblamiento del combobox*/
   for (i = 0; i < tuples; i++)
     {
-      gtk_list_store_append(store, &iter);
-      gtk_list_store_set(store, &iter,
-                         0, atoi(PQvaluebycol(res, i, "id")),
-                         1, PQvaluebycol(res, i, "descrip"),
-                         -1);
-
+      if (atoi (PUT(PQvaluebycol(res, i, "id"))) != nulVenId) /*No queremos que el motivo "Nulidad de Venta" aparezca como opción*/ 
+	{
+	  gtk_list_store_append(store, &iter);
+	  gtk_list_store_set(store, &iter,
+			     0, atoi(PQvaluebycol(res, i, "id")),
+			     1, PQvaluebycol(res, i, "descrip"),
+			     -1);
+	}
     }
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
@@ -273,6 +354,16 @@ VentanaEgreso (gint monto)
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_egreso"));
   gtk_widget_show_all(aux_widget);
 }
+
+/**
+ * Es llamada por las funciones "IniciarLaCaja" y "open_caja"
+ *
+ * Esta funcion insertar los valores iniciales de la caja
+ * (id_vendedor,fecha_inicio, inicio(monto))
+ *
+ * @return TRUE si se realizo correctamented, FALSE si fallo.
+ *
+ */
 
 gboolean
 InicializarCaja (gint monto)
@@ -291,6 +382,15 @@ InicializarCaja (gint monto)
     return FALSE;
 }
 
+/**
+ * Es llamada por la funcion "CerrarCajaWin"
+ *
+ * Esta funcion retorna el valor de inicio de la caja
+ *
+ * @return monto de la consulta, -1 si fallo
+ *
+ */
+
 gint
 ArqueoCaja (void)
 {
@@ -303,6 +403,17 @@ ArqueoCaja (void)
   else
     return -1;
 }
+
+/**
+ * Es llamada por la funcion "CerrarLaCaja"
+ *
+ * Esta funcion actualiza la caja para insertar los valores de cierre de la caja
+ * (fecha_termino, termino(monto))
+ *
+ * @param monto entero que contiene el dinero de cierre la caja
+ * @return TRUE si se realizo correctamented, FALSE si fallo.
+ *
+ */
 
 gboolean
 CerrarCaja (gint monto)
@@ -324,6 +435,17 @@ CerrarCaja (gint monto)
   else
     return FALSE;
 }
+
+/**
+ * Es llamada por la funcion "CerrarLaCaja"
+ *
+ * Esta funcion carga los valores a traves de consultas a la BD, de
+ * cash_sell(dinero en la caja), el dinero de cierre de la caja, Calculando
+ * la perdida y luego registrandola en la caja con update.
+ *
+ * @return TRUE si se realizo correctamented, FALSE si fallo.
+ *
+ */
 
 gint
 CalcularPerdida (void)
@@ -347,6 +469,8 @@ CalcularPerdida (void)
 }
 
 /**
+ * Esta funcion es llamda por "prepare_caja"
+ *
  * Retornamos TRUE si la caja fue cerrada anteriormente y debemos
  * inicilizarla otra vez de lo contrario FALSE lo cual significa que
  * la caja no se a cerrado
@@ -387,6 +511,7 @@ CloseCajaWin (void)
 }
 
 /**
+ * Esta funcion es llamada por "open_caja 
  * Raise the initialization caja dialog
  *
  * @param proposed_amount the amount that must be entered in the entry
@@ -405,6 +530,8 @@ InicializarCajaWin (gint proposed_amount)
 }
 
 /**
+ * Esta Funcion es llamda por "open_caja"
+ *
  * Callback connected to accept button of the initialize caja dialog
  *
  * @param widget the widget that emited the signal
@@ -435,7 +562,10 @@ IniciarLaCaja (GtkWidget *widget, gpointer data)
     VentanaEgreso (inicio - monto);
 }
 
+
 /**
+ * Es llamada por la funcion "on_btn_cash_box_close_clicked"
+ *
  * Raise the close caja dialog
  *
  */
@@ -496,6 +626,7 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
       res = CerrarCaja (monto_de_cierre);
     }
   else
+    {
     if (monto_de_cierre > monto_real_que_tiene)
       {
         Ingreso (monto_de_cierre - monto_real_que_tiene, 0, user_data->user_id);
@@ -505,6 +636,7 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
       {
         res = CerrarCaja(monto_de_cierre);
       }
+    }
 
   CalcularPerdida();
 
@@ -531,6 +663,8 @@ prepare_caja (void)
 }
 
 /**
+ * Es llamada por la funcion "prepare_caja"
+ *
  * initializes a new caja
  *
  * @param automatic_mode TRUE if does NOT must prompt a dialog
@@ -547,6 +681,8 @@ open_caja (gboolean automatic_mode)
 
 
 /**
+ * Es llamada por las funciones "open_caja" y "IniciarLaCaja"
+ *
  * Retrieves the last amount of money that has the current caja
  * (opened or closed)
  *
@@ -576,6 +712,9 @@ caja_get_last_amount (void)
 }
 
 /**
+ * Es llamada cuando se preiona enter en la caja de texto "entry_caja_close_have"
+ * (signal actived)
+ *
  * Uodates the entry of amount to close and the label of lost money in
  * the close 'caja' dialog.
  *
@@ -612,6 +751,15 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
     }
 }
 
+/**
+ * Es llamada cuando el boton "btn_cash_box_close" es presionado
+ * (signal clicked)
+ *
+ * Llama a la funcion "CerrarCajaWin"
+ *
+ * @param editable the entry that emits the signal
+ * @param data the user data
+ */
 void
 on_btn_cash_box_close_clicked (void)
 {

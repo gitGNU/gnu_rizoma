@@ -99,4 +99,6 @@ void on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointe
 
 void close_nullify_sale_dialog(void);
 
+void on_btn_devolver_click (GtkWidget *widget, gpointer data);
+    
 #endif

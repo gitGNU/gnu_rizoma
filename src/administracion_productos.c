@@ -896,6 +896,7 @@ EliminarProductoDB (GtkButton *button, gpointer data)
   GtkTreeSelection *selection;
   gchar *codigo;
   gint stock;
+  PGresult *res;
 
   treeview = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_find_products"));
   selection  = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
@@ -907,9 +908,12 @@ EliminarProductoDB (GtkButton *button, gpointer data)
 
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           1, &codigo,
-                          6, &stock,
+                          //6, &stock,
                           -1);
+      res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM producto WHERE barcode=%s", codigo));
 
+      stock = atoi(PQgetvalue (res, 0, 0));
+      
       if (stock == 0)
         {
           if (DeleteProduct (codigo))
@@ -981,6 +985,7 @@ BuscarProductosParaListar (void)
   gchar *q;
   gchar *string;
   gint i, resultados;
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_find_products"));
   GtkTreeIter iter;
   GtkWidget *widget;
   GtkListStore *store;
@@ -1019,6 +1024,11 @@ BuscarProductosParaListar (void)
                               atoi (PQvaluebycol (res, i, "stock_min")) != 0) ? "Red" : "Black",
                           9, TRUE,
                           -1);
+    }
+  if (resultados > 0)
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (tree));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (tree), gtk_tree_path_new_from_string ("0"));
     }
 }
 
@@ -1105,8 +1115,15 @@ ModificarProducto (GtkWidget *widget_barcode)
 
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
-  if (GetIVA (barcode) != -1)
+
+  
+  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
+
+  tuples = PQntuples (res);
+
+  if (GetIVA (barcode) != -1)     
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
+ 
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
