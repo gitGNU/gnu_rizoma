@@ -1885,6 +1885,15 @@ InversionAgregada (gchar *barcode)
   gdouble vendidos = strtod ((GetDataByOne (g_strdup_printf ("SELECT vendidos FROM producto WHERE barcode='%s'",
                                                              barcode))), (char **)NULL);
   gint suma = 0;
+  
+  res = EjecutarSQL (g_strdup_printf ("SELECT count(id) FROM compra_detalle WHERE barcode_product='%s'", barcode));
+
+  /*Evita Cuelgue al no recibir resultados (en PUT)*/
+  if (PQgetvalue (res, 0, 1) == 0)
+    {
+      printf("No hay compras ingresadas\n");
+      return 0;
+    }
 
   res = EjecutarSQL (g_strdup_printf ("SELECT precio, cantidad_ingresada, (precio * cantidad_ingresada)::integer FROM compra_detalle "
                                       "WHERE barcode_product='%s'", barcode));

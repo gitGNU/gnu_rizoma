@@ -761,11 +761,13 @@ FillFields(GtkTreeSelection *selection, gpointer data)
         mermaporc = 0;
 
       contrib_proyect = contri_unit * stock;
-
-      if (contrib_agreg != 0)
+      
+      /* // ici_total es un dato estadístico aún sin utilizar
+	if (contrib_agreg != 0)
         ici_total = (gdouble) contrib_agreg / InversionAgregada (barcode);
-      else
-        ici_total = 0;
+	else
+	ici_total = 0;
+      */
 
       valor_stock = fifo * stock;
 
