@@ -2043,7 +2043,7 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
   gchar *q;
 
   q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d)",
-                       barcode, CUT (g_strdup_printf ("%f", cantidad)), motivo);
+                       barcode, CUT (g_strdup_printf ("%f", stock - cantidad)), motivo);
   res = EjecutarSQL (q);
   g_free (q);
 
