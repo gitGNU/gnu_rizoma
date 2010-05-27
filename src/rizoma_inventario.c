@@ -101,15 +101,14 @@ inventario_win ()
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-inventario.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL) 
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
-  }
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
-  }
+
   /*filtro para seleccionar archivos*/
   filter = gtk_file_filter_new();
   gtk_file_filter_add_pattern (filter, "*.csv");
@@ -221,10 +220,13 @@ main (int argc, char **argv)
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
-  if (err) {
-    g_error ("ERROR: %s\n", err->message);
-    return -1;
-  }
+
+  if (err) 
+    {
+      g_error ("ERROR: %s\n", err->message);
+      return -1;
+    }
+
   gtk_builder_connect_signals (builder, NULL);
 
   profiles = g_key_file_get_groups (key_file, NULL);
@@ -334,7 +336,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
     {
       line = get_line (fp);
 
-      if(l == 0)
+      if (l == 0)
         {
           if ((str = strstr(line, ",")) != NULL)
             str = ",";
@@ -415,7 +417,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   else
     {
       /* Mensaje si realiza correctamente el inventario */
-      if(cont_products_no_BD == 0)
+      if (cont_products_no_BD == 0)
         {
           AgregarCompra ("99999999", "", 1);
           gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_OK")));

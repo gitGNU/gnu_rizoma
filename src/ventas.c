@@ -549,15 +549,14 @@ ventas_win ()
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-ventas.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
-  }
+  
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
-  }
 
   gtk_builder_connect_signals (builder, NULL);
 
@@ -578,9 +577,7 @@ ventas_win ()
 
   if (rizoma_get_value_boolean ("TRASPASO"))
     {
-  
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
-       
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));  
     }
 
   
@@ -765,40 +762,41 @@ SearchProductByCode (void)
 
       if (PQvaluebycol (res, 0, "precio") != 0)
         {
-          if( venta_directa == 1 ) {
-            if( VentaFraccion( PQvaluebycol( res, 0, "cantidad_mayor" ) ) ) {
-              gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-              gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE);
-            } else {
-              AgregarProducto( NULL, NULL );
-            }
-          } else {
-            gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-            gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE );
-          }
+          if (venta_directa == 1) 
+	    {
+	      if (VentaFraccion (PQvaluebycol (res, 0, "cantidad_mayor"))) 
+		{
+		  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+		  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE);
+		} 
+	      else 
+		{
+		  AgregarProducto( NULL, NULL );
+		}
+          } 
+	  else 
+	    {
+	      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+	      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE );
+	    }
         }
       else
         gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
       return TRUE;
-    }
+    } // if (res != NULL && PQntuples (res) != 0)
   else
     {
       if (strcmp (codigo, "") != 0)
         {
           AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), g_strdup_printf
                     ("No existe un producto con el código %s!!", codigo));
-
           CleanSellLabels ();
         }
-
       else
         {
-
           CleanSellLabels ();
-
         }
-
       return FALSE;
     }
 }
@@ -1134,7 +1132,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 { // Al presionar [ENTER] en el entry "Cantidad"
-  if(!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
+  if (!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
     {
       GtkWidget *button;
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
@@ -1345,7 +1343,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
-  if(barcode == NULL)
+  if (barcode == NULL)
     {
       GtkWidget *widgetEntry; 
       widgetEntry = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
@@ -1433,21 +1431,26 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
   if (atoi (PQvaluebycol (res, 0, "precio")) != 0)
     {
-      if( venta_directa == 1 ) {
-        if( VentaFraccion( PQvaluebycol( res, 0, "cantidad_mayor" ) ) ) {
-          gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-          gtk_widget_set_sensitive (add_button, TRUE);
-        } else {
-          AgregarProducto( NULL, NULL );
-        }
-      } else {
-        gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-        gtk_widget_set_sensitive( add_button, TRUE );
-      }
+      if (venta_directa == 1)
+	{
+	  if (VentaFraccion (PQvaluebycol (res, 0, "cantidad_mayor")))
+	    {
+	      gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+	      gtk_widget_set_sensitive (add_button, TRUE);
+	    } 
+	  else 
+	    {
+	      AgregarProducto( NULL, NULL );
+	    }
+	}
+      else 
+	{
+	  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+	  gtk_widget_set_sensitive( add_button, TRUE );
+	}
     }
   else
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-  /* } */
 
   return 0;
 }
@@ -2281,10 +2284,12 @@ main (int argc, char **argv)
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
-  if (err) {
-    g_error ("ERROR: %s\n", err->message);
-    return -1;
-  }
+
+  if (err) 
+    {
+      g_error ("ERROR: %s\n", err->message);
+      return -1;
+    }
 
   gtk_builder_connect_signals (builder, NULL);
 
@@ -3677,7 +3682,7 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if(!DataExist (g_strdup_printf ("SELECT rut FROM proveedor WHERE rut=%d",rut)))
+  if (!DataExist (g_strdup_printf ("SELECT rut FROM proveedor WHERE rut=%d",rut)))
     {
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_proveedor")));
       AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_devolver")),"El rut no existe");

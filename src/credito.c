@@ -108,7 +108,7 @@ search_client (GtkWidget *widget, gpointer data)
 
   if (store == NULL)
     {
-      if(user_data->user_id == 1) // De ser admin adquiere la visibilidad de la columna credito
+      if (user_data->user_id == 1) // De ser admin adquiere la visibilidad de la columna credito
 	{
 	  store = gtk_list_store_new (4,
 				      G_TYPE_STRING,
@@ -147,7 +147,7 @@ search_client (GtkWidget *widget, gpointer data)
       gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
 
       //credito
-      if(user_data->user_id == 1)
+      if (user_data->user_id == 1)
 	{
 	  renderer = gtk_cell_renderer_toggle_new ();
 	  column = gtk_tree_view_column_new_with_attributes ("Credito", renderer,

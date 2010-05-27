@@ -2271,6 +2271,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="width_chars">5</property>
+                                <property name="text" translatable="yes">1</property>
                                 <signal name="activate" handler="gtk_widget_grab_focus" object="button_add_product_list"/>
                               </object>
                               <packing>

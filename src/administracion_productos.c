@@ -843,7 +843,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
                             g_strdup_printf ("<b>$ %d</b>", compras_totales));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sold"));
-      if(g_str_equal (PQvaluebycol (res, 0, "contrib_agregada"), ""))
+      if (g_str_equal (PQvaluebycol (res, 0, "contrib_agregada"), ""))
         gtk_label_set_markup (GTK_LABEL (aux_widget), "");
       else
         gtk_label_set_markup (GTK_LABEL (aux_widget),

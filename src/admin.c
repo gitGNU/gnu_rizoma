@@ -77,10 +77,12 @@ main (int argc, char **argv)
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
-  if (err) {
-    g_error ("ERROR: %s\n", err->message);
-    return -1;
-  }
+
+  if (err) 
+    {
+      g_error ("ERROR: %s\n", err->message);
+      return -1;
+    }
 
   gtk_builder_connect_signals (builder, NULL);
 
@@ -189,17 +191,15 @@ admin_win()
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-admin.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
-  }
 
   error = NULL;
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s: %s\n", G_STRFUNC, error->message);
-  }
 
   gtk_builder_connect_signals (builder, NULL);
 

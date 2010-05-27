@@ -135,7 +135,7 @@ EjecutarSQL (gchar *sentencia)
 
   status = PQstatus( connection );
 
-  if( status == CONNECTION_OK )
+  if (status == CONNECTION_OK)
     {
       res = PQexec (connection, sentencia);
       status_res = PQresultStatus(res);
@@ -146,7 +146,7 @@ EjecutarSQL (gchar *sentencia)
                    PQresStatus(status_res),
                    PQresultErrorMessage(res));
 
-      if( res == NULL )
+      if (res == NULL)
         {
           rizoma_errors_set (PQerrorMessage (connection), (gchar *)G_STRFUNC, ERROR);
         }
@@ -169,7 +169,7 @@ EjecutarSQL (gchar *sentencia)
         {
         case CONNECTION_OK:
           res = PQexec (connection, sentencia);
-          if( res == NULL )
+          if (res == NULL)
             rizoma_errors_set (PQerrorMessage (connection), G_STRFUNC, ERROR);
           else
             return res;
@@ -207,7 +207,7 @@ EjecutarSQL2 (gchar *sentencia)
 
   status = PQstatus( connection2 );
 
-  if( status == CONNECTION_OK )
+  if (status == CONNECTION_OK)
     {
       res = PQexec (connection2, sentencia);
       status_res = PQresultStatus(res);
@@ -218,7 +218,7 @@ EjecutarSQL2 (gchar *sentencia)
                    PQresStatus(status_res),
                    PQresultErrorMessage(res));
 
-      if( res == NULL )
+      if (res == NULL)
         {
           rizoma_errors_set (PQerrorMessage (connection2), (gchar *)G_STRFUNC, ERROR);
         }
@@ -241,7 +241,7 @@ EjecutarSQL2 (gchar *sentencia)
         {
         case CONNECTION_OK:
           res = PQexec (connection2, sentencia);
-          if( res == NULL )
+          if (res == NULL)
             rizoma_errors_set (PQerrorMessage (connection2), G_STRFUNC, ERROR);
           else
             return res;
@@ -1316,7 +1316,7 @@ SaveProductsSell (Productos *products, gint id_venta)
         promedio, a traves de la funcion de postgres "informacion_producto"
         
        */
-      if(lround(precioPro) == -1)
+      if (lround(precioPro) == -1)
 	    {
 	      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
 	      res = EjecutarSQL (q);
@@ -2395,7 +2395,7 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
       precioCompra = products->product->precio_compra;
       precio = products->product->precio;
       
-      if(lround(precioCompra) == -1)
+      if (lround(precioCompra) == -1)
         {
           q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
           res = EjecutarSQL (q);
@@ -2500,7 +2500,7 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
-      if(tipo_traspaso == TRUE)
+      if (tipo_traspaso == TRUE)
         {
           res = EjecutarSQL
             (g_strdup_printf
@@ -2522,7 +2522,7 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
       
       precio = products->product->precio_compra;
       
-      if(lround(precio) == -1)
+      if (lround(precio) == -1)
         {
           q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
           res = EjecutarSQL (q);

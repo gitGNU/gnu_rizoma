@@ -302,15 +302,14 @@ reports_win (void)
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-informes.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s\n", error->message);
-  }
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-common.ui", &error);
 
-  if (error != NULL) {
+  if (error != NULL)
     g_printerr ("%s\n", error->message);
-  }
+
   gtk_builder_connect_signals (builder, NULL);
 
 
@@ -340,11 +339,6 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
-
-
-
-  
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("ID Venta", renderer,
@@ -397,7 +391,6 @@ reports_win (void)
    gtk_tree_view_column_set_sort_column_id (column, 5);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-
   libro->tree = treeview;
   libro->title = "Libro de Ventas";
   libro->name = "ventas";
@@ -407,7 +400,6 @@ reports_win (void)
   libro->cols[1].name = "Monto";
   libro->cols[1].num = 4;
   libro->cols[2].name = NULL;
-
 
   store = gtk_list_store_new (4,
                               G_TYPE_STRING,
@@ -952,10 +944,12 @@ main (int argc, char **argv)
   builder = gtk_builder_new ();
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
-  if (err) {
-    g_error ("ERROR: %s\n", err->message);
-    return -1;
-  }
+
+  if (err) 
+    {
+      g_error ("ERROR: %s\n", err->message);
+      return -1;
+    }
 
   gtk_builder_connect_signals (builder, NULL);
 
@@ -1135,7 +1129,7 @@ on_btn_atras_clicked()
   gchar *pago = NULL;
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
   
-  if((contador - 100) == 100 || (contador - 100) == 0)
+  if ((contador - 100) == 100 || (contador - 100) == 0)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
@@ -1222,7 +1216,7 @@ on_btn_adelante_clicked()
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")),  g_strdup_printf ("%d",contador + 1));
 
   
-  if((contador + 100) >= fin)
+  if ((contador + 100) >= fin)
     hasta = fin;
   else
     {
@@ -1274,7 +1268,7 @@ on_btn_adelante_clicked()
             }
         }
 
-      if(hasta == fin)
+      if (hasta == fin)
         {
           hasta = fin + 1;
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), FALSE);
