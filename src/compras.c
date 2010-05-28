@@ -1021,6 +1021,9 @@ CalcularPrecioFinal (void)
   else
     iva = -1;
 
+  if (otros == 0)
+    otros = -1;
+
   /*
     IVA = 1,19;
     Z = precio final
@@ -1620,7 +1623,6 @@ ShowProductHistory (void)
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object( builder, "entry_buy_barcode" ))));
   gint i, tuples, precio = 0;
 
-
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT (SELECT nombre FROM proveedor WHERE rut=t1.rut_proveedor) as proveedor, t2.precio, t2.cantidad, date_part('day', t1.fecha) as dia, "
@@ -1688,7 +1690,6 @@ InsertarCompras (void)
 
   res = EjecutarSQL( "SELECT * FROM get_compras()" );
 
-
   gtk_list_store_clear (store_pending_request);
   gtk_list_store_clear (store_pending_request_detail);
 
@@ -1743,7 +1744,6 @@ IngresoDetalle (GtkTreeSelection *selection, gpointer data)
                           0, &id,
                           -1);
 
-
       gtk_list_store_clear (store_pending_request_detail);
 
       res = EjecutarSQL ( g_strdup_printf( "SELECT * FROM get_detalle_compra( %d ) ", id ) );
@@ -1758,7 +1758,6 @@ IngresoDetalle (GtkTreeSelection *selection, gpointer data)
 
       for (i = 0; i < tuples; i++)
         {
-
           sol = strtod (PUT (PQvaluebycol(res, i, "cantidad")), (char **)NULL);
           ing = strtod (PUT (PQvaluebycol(res, i, "cantidad_ingresada")), (char **)NULL);
 
@@ -1928,8 +1927,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
   gchar *web = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->web_add)));
   gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
   gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
-
-             
+    
   if (strcmp (rut, "") == 0)
     {
       ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
@@ -2912,6 +2910,13 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
 
   n_documento = g_strdup (gtk_entry_get_text (entry_n));
   monto = g_strdup (gtk_entry_get_text (entry_amount));
+
+  if (entry_date == NULL)
+    {
+      gtk_widget_hide (wnd);
+      ErrorMSG (GTK_WIDGET (entry_date), "Hubo un fallo obteniendo los datos, contacte a su proveedor");
+      return;
+    }
 
   g_date_set_parse (date, gtk_entry_get_text (entry_date));
   if (!g_date_valid (date))
