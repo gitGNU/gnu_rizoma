@@ -179,9 +179,9 @@ compras_win (void)
 
   /*ComboBox - PrecioCompra*/
   /*GtkComboBox *combo;
-  GtkTreeIter iter;
-  GtkListStore *modelo;
-  GtkCellRenderer *cell2;*/
+    GtkTreeIter iter;
+    GtkListStore *modelo;
+    GtkCellRenderer *cell2;*/
 
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
@@ -971,6 +971,14 @@ Save (GtkWidget *widget, gpointer data)
   else
     otros = -1;
 
+  // TODO: Revisar el Otros, porque en la base de datos se guardan 0 
+  // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
+  if (HaveCharacters(contenido))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_edit_prod_content")),"Debe ingresar un valor numérico");
+      return;
+    }
+
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
                      iva, otros, barcode, familia, perecible, fraccion);
 
@@ -1030,9 +1038,9 @@ CalcularPrecioFinal (void)
     Y = margen;
     X = Ingresa;
 
-    Z      1
+    Z     1
     X = ----- * ----
-    Y+1    1,19
+         Y+1    1,19
   */
 
   if ((ganancia == 0 && precio_final == 0 && ingresa != 0) ||
@@ -1041,6 +1049,8 @@ CalcularPrecioFinal (void)
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")),"Se requieren al menos 2 valores para efectuar el cálculo");
     }
+
+  /* -- Initial price ("ingresa") is calculated here -- */
   else if (ingresa == 0 && ganancia >= 0 && precio_final != 0)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
@@ -1064,6 +1074,8 @@ CalcularPrecioFinal (void)
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")),
                           g_strdup_printf ("%ld", lround (precio)));
     }
+
+  /* -- Profit porcent ("ganancia") is calculated here -- */
   else if (ganancia == 0 && ingresa != 0 && precio_final != 0)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
@@ -1086,6 +1098,8 @@ CalcularPrecioFinal (void)
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")),
                           g_strdup_printf ("%ld", lround (porcentaje)));
     }
+
+  /* -- Final price ("precio_final") is calculated here -- */
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
@@ -1117,9 +1131,9 @@ CalcularPrecioFinal (void)
   if(calcular == 1)
     {
       //Inhabilitar la escritura en los entry de precio cuando el cálculo de ha realizado
-      gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
-      gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
-      gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
     }
 } // CalcularPrecioFinal (void)
 
@@ -2364,9 +2378,9 @@ CleanStatusProduct (void)
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
   
   //Habilitar la escritura cuando se limpie todo
-  gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
-  gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
-  gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
   
   calcular = 0;
 }
@@ -3181,9 +3195,9 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
   else
     {
       //Habilitar la escritura en los entry de precio cuando se ingresó el producto
-      gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
-      gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
-      gtk_entry_set_editable (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
 
       calcular = 0;
       AddToProductsList ();
@@ -4219,10 +4233,17 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripcion");
   else if (strcmp (marca, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_brand), "Debe Ingresar al Marca del producto");
-  else if (strcmp (contenido, "") == 0)
-    ErrorMSG (GTK_WIDGET (entry_cont), "Debe Ingresar el Contenido del producto");
   else if (strcmp (unidad, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_unit), "Debe Ingresar la Unidad del producto");
+  else if (strcmp (contenido, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cont), "Debe Ingresar el Contenido del producto");
+
+  else if (HaveCharacters(contenido))
+    {
+      ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
+      return;
+    }
+
   else
     {
       if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
@@ -4253,7 +4274,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
       SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
     }
-  return; // TODO: Es necesario este return?
+  return;
 } // void on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
 
