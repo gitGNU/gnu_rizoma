@@ -361,12 +361,15 @@ clean_container (GtkContainer *container)
     {
       if (!GTK_IS_TREE_VIEW (list->data) && GTK_IS_CONTAINER (list->data))
         {
-	  clean_container (GTK_CONTAINER (list->data));
+	  if (!validate_string ("Button", g_strdup (gtk_widget_get_name (list->data))))
+	    {
+	      clean_container (GTK_CONTAINER (list->data));
+	    }
         }
       else
         {
           widget = GTK_WIDGET (list->data);
-          widget_name = g_strdup (gtk_widget_get_name (widget));
+          widget_name = g_strdup (gtk_buildable_get_name (widget));
 	  if (!validate_string ("[0-9]+", widget_name) && !validate_string ("Gtk", widget_name))
             {
               if (GTK_IS_ENTRY (widget))

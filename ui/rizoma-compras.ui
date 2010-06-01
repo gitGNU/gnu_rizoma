@@ -1115,6 +1115,7 @@
               <object class="GtkEntry" id="entry_ingress_factura_n">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_ingress_factura_date"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -1129,6 +1130,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_ingress_factura_amount"/>
                   </object>
                   <packing>
                     <property name="position">0</property>

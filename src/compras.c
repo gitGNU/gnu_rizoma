@@ -2895,7 +2895,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
     {
       if (GTK_IS_ENTRY (list->data))
         {
-          widget_name = g_strdup (gtk_widget_get_name (GTK_WIDGET (list->data)));
+          widget_name = g_strdup (gtk_buildable_get_name (GTK_WIDGET (list->data)));
 
           if (validate_string ("n$", widget_name))
             {
@@ -2925,7 +2925,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
   n_documento = g_strdup (gtk_entry_get_text (entry_n));
   monto = g_strdup (gtk_entry_get_text (entry_amount));
 
-  if (entry_date == NULL)
+  if (entry_amount == NULL || entry_date == NULL || entry_n == NULL)
     {
       gtk_widget_hide (wnd);
       ErrorMSG (GTK_WIDGET (entry_date), "Hubo un fallo obteniendo los datos, contacte a su proveedor");
@@ -3589,6 +3589,7 @@ on_btn_ok_ingress_invoice_clicked (GtkWidget *widget, gpointer data)
   GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
 
   AskElabVenc (wnd, TRUE);
+  gtk_widget_set_sensitive (gtk_builder_get_object (builder, "btn_ok_ingress_invoice"), FALSE);
 }
 
 
