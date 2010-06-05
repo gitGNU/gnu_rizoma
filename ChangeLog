@@ -1,71 +1,3805 @@
-2008-09-15  Jonathan Gonzalez V.  <zeus@gnu.org>
+2010-06-01  Wilson Butros <wrbutros@rizoma.cl>
 
-	* Makefile.am: Removed un-necessary code that was doing a rsync
-	with savannah.
+  * src/compras.c, src/utils.c, ui/rizoma-compras.ui: New library version bug
+  solved (by Zeus) and other minor details added
 
-2008-09-10  Jonathan Gonzalez V.  <zeus@gnu.org>
+2010-05-31  Wilson Butros <wrbutros@rizoma.cl>
 
-	* configure.in: Removed the check of libgnomeprint.
+  * src/compras.c, src/utils.c: Some small fixes, comments and order
 
-2008-07-17  Jonathan Gonzalez V.  <zeus@gnu.org>
+2010-05-28  Wilson Butros <wrbutros@rizoma.cl>
 
-	* configure.in: Removed check of libgksu.
+  * src/compras.c: segmentation fault and 'otros_impuestos' bug fix temporarily
 
-2008-06-13  Jonathan Gonzalez V.  <zeus@gnu.org>
+2010-05-27  Wilson Butros <wrbutros@rizoma.cl>
 
-	* configure.in: Added the define DEBUG when --enable-debug option
-	it's set.
+  * src/admin.c, src/administracion_productos.c, src/boleta.c, src/compras.c,
+  src/credito.c, src/postgres-functions.c, src/proveedores.c,
+  src/rizoma-config.c, src/rizoma_errors.c, src/rizoma_informes.c,
+  src/rizoma_inventario.c, src/ventas.c, ui/rizoma-compras.ui: Order in code
+  and other fix
 
-2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+2010-05-20  Wilson Butros <wrbutros@rizoma.cl>
 
-	* src/ventas.c: fixed the label of the search window when there is
-	no results to show
+  * src/administracion_productos.c, src/postgres-functions.c: ici_total has
+  been commented and a minor fix
 
-	* ui/rizoma-ventas.glade: added a stock image to make it look
-	nicer
+  * db/rizoma.initvalues, src/postgres-functions.c: Merma fail solved
 
-2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+2010-05-18  Test <freyes@tty.cl>
 
-	* db/funciones.sql: applied the round() function to
-	contrib_agregada, because the out parameter was defined like int
+  * README: [README] added acronyms used
 
-	* prepareChangelog.py: given execute permissions
+2010-05-17  Wilson Butros <wrbutros@rizoma.cl>
 
-	* src/ventas.c: eliminated the call to PrintDocument function from
-	on_sell_button_clicked, because this functions seem to be called
-	only for facturas
+  * src/administracion_productos.c, src/compras.c, src/tipos.h, src/utils.c,
+  src/utils.h, src/ventas.c, ui/rizoma-ventas.ui: bugs #29421, #26019 solved,
+  and other minors corrections
 
-2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+2010-05-11  Wilson Butros <wrbutros@rizoma.cl>
 
-	* autogen.sh: added $@ to pass the parameters to the configure script
+  * src/compras.c: bug 29063, and other minor details were solved
 
-2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+  * src/credito.c, src/postgres-functions.c, src/ventas.c: bug 29084, bug
+  delete client with debt and other minor details were solved
 
-	* src/ventas.c: added comments to on_sell_button_clicked and
-	changed the signature
+2010-05-08  Wilson Butros <wrbutros@rizoma.cl>
 
-	* src/ventas.h: droped the function Vender and added
-	on_sell_button_clicked
+  * db/rizoma.structure, src/caja.c, src/rizoma_inventario.c,
+  ui/rizoma-inventario.ui: Validations in rizoma-inventario added and other
+  minor details
 
-2008-03-25  Felipe Reyes  <felipereyes@gmail.com>
+2010-05-03  Ingrid Butros <ingrid@ingrid-laptop.(none)>
 
-	* .gitignore: changed just to test the prepare changelog script
+  * db/funciones.sql, src/caja.c, src/compras.c, ui/rizoma-compras.ui: bug of
+  devolution from credit sell has been solved and other minor details too
 
-	* prepareChangelog.py: droped the use of git-status to know the
-	files that are waiting for the commit, now use git-diff-index --cached
+2010-04-18  Wilson Bustos Gutierrez <wrbutros@rizoma.cl>
 
-2006-05-24  Jonathan Gonzalez V.  <zeus@gnu.org>
+  * src/compras.c, src/ventas.c, ui/rizoma-compras.ui: Combobox bug in
+  rizoma-compras was solved. New functionallity in VENTA-DIRECTA mode was
+  added.
 
-	* configure.in: Changed the version to 0.0.1-12
+2010-04-14  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
 
-2006-05-07  Jonathan Gonzalez V.  <zeus@gnu.org>
+  * src/rizoma_inventario.c: add several delimiters in csv, rizoma-inventario
 
-	* configure.in: Change the version on to 0.1-10.
+2010-03-07  Wilson Bustos Guti�rrez <wrbutros@rizoma.cl>
 
-2006-03-14  Jonathan Gonzalez V.  <zeus@gnu.org>
+  * src/compras.c: calculation message of void field fixed
 
-	* configure.in: Changed the AM_CHECK_GTK macros by AM_PATH_GTK_2_0
-	wich is has a better way to do it.
+2010-03-06  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
 
-	* acinclude.m4: Deleted the AM_CHECK_GTK macros. We don't need it anymore.
+  * src/compras.c, ui/rizoma-compras.ui, ui/rizoma-ventas.ui: Fixed focus
+  entry_buy_price [rizoma-compras] and fixed bug Exit in
+  [rizoma-compras][rizoma-ventas]
 
+2010-03-02  jaime <jaime@tizona.rizoma.cl>
+
+  * src/rizoma-config.c: fix bug in the earthquake
+
+2010-02-25  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/rizoma-config.c: Added a drop database before create the
+  database using rizoma-config
+
+2009-12-08  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/compras.c, ui/rizoma-admin.ui, ui/rizoma-compras.ui,
+  ui/rizoma-informes.ui, ui/rizoma-ventas.ui: remove the funcionality  of
+  combobox 'precio bruto' and fix bugs minors
+
+2009-09-15  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/rizoma_informes.c: Remove gthread a report
+
+2009-07-05  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/rizoma_informes.c, ui/rizoma-informes.ui: Added
+  provider report
+
+2009-06-17  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/postgres-functions.c, src/rizoma_informes.c,
+  ui/rizoma-informes.ui: Reestrucuturacion and optimization of report of sales
+
+2009-06-05  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ui/rizoma-compras.ui, ui/rizoma-ventas.ui: fixed compras.ui and ventas.ui
+
+2009-06-04  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ui/rizoma-compras.ui, ui/rizoma-ventas.ui: Fixed compras.ui ventas.ui
+
+2009-06-03  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/compras.c, src/ventas.c, ui/rizoma-compras.ui, ui/rizoma-ventas.ui:
+  Fixed traspaso [compras.c] product price to 0
+
+2009-06-02  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/rizoma_informes.c, src/rizoma_inventario.c, src/ventas.c,
+  ui/rizoma-ventas.ui: Fixed devolucion report
+
+2009-05-31  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/rizoma_inventario.c, ui/rizoma-admin.ui,
+  ui/rizoma-compras.ui, ui/rizoma-inventario.ui, ui/rizoma-ventas.ui: Fixed
+  visualize products deleted, Fixed Inventario and other
+
+2009-05-30  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, db/rizoma.structure, src/administracion_productos.c,
+  src/compras.c, src/postgres-functions.c, src/proveedores.c: Fixed several
+  bugs: delete products and add provider
+
+2009-05-27  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: [src] Added devolucion report
+
+2009-05-24  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/rizoma_informes.c: Fix bugs Cash report, sells a
+  credit.
+
+2009-05-23  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/postgres-functions.c: Fix bugs [funciones.sql]
+  get_arqueo_caja() and bad date [postgres-functions.c]
+
+2009-05-22  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/caja.c, src/rizoma_informes.c: Re-Fix cash report
+
+2009-04-24  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/vale.c: fix menor
+
+2009-04-01  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/rizoma.initvalues: fix rizoma.initvalues
+
+  * db/rizoma.initvalues: mini fix
+
+  * db/funciones.sql, db/rizoma.initvalues, db/rizoma.structure, src/caja.c,
+  src/compras.c, src/datos_negocio.c, src/postgres-functions.c,
+  src/rizoma-config.c, src/ventas.c, ui/rizoma-admin.ui, ui/rizoma-compras.ui,
+  ui/rizoma-informes.ui, ui/rizoma-ventas.ui: Varias modificaciones, y Traspaso
+  implementado
+
+2009-03-24  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/caja.c, src/compras.c, src/rizoma_informes.c,
+  ui/rizoma-informes.ui, ui/rizoma-ventas.ui: bug #25801: [Rizoma-informes] fix
+  bugs cash
+
+2009-03-17  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ui/rizoma-inventario.ui: Add rizoma-inventario.ui
+
+  * src/rizoma_inventario.c, src/ventas.c, ui/Makefile.am,
+  ui/rizoma-informes.ui: task #9189: UI and funcionality Rizoma inventario
+
+2009-03-11  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ui/rizoma-compras.ui, ui/rizoma-ventas.ui: Fix Compras and Ventas
+
+2009-03-04  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, db/rizoma.structure, src/postgres-functions.c,
+  src/ventas.c, src/ventas.h, ui/rizoma-compras.ui, ui/rizoma-ventas.ui:
+  [rizoma-ventas] add functionality Devolucion
+
+2009-03-04  Wilson Bustos Gutierrez <wilybutros@gmail.com>
+
+  * src/compras.c, ui/rizoma-compras.ui: [compras.c] function
+  CalcularPrecioFinal, added comboBox
+
+2009-03-01  Wilson Bustos Gutierrez <wilybutros@gmail.com>
+
+  * src/ventas.c: [ventas.c] comment function MoveFocus
+
+2009-02-28  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/postgres-functions.c: fix [postgres-functions.c] funcion
+  SaveProductsSell
+
+2009-02-08  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/funciones.sql, src/postgres-functions.c, src/rizoma_informes.c:
+  [postgres-functions] fix sells_get_totals and add incr_fecha,
+  [rizoma_informe] fix fill_totals , [postgres-functions] fix SaveProductsSell
+
+2009-01-31  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ui/rizoma-compras.ui: [ui] entry_guide_invoice_provider editable
+
+2008-12-07  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/vale.c: [vale] modificacion del vale
+
+2008-12-06  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/admin.h: [admin] added comments to check_passwd()
+
+2008-12-02  Felipe Reyes <felipereyes@openfountain.cl>
+
+  * src/compras.c, ui/rizoma-compras.ui: [fix] #000009, by claudio rodriguez
+
+2008-11-01  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/compras.c, ui/rizoma-compras.ui: [Fix] Buf #10
+
+  * m4/pslib.m4: [m4] Change the error text message from libps to pslib
+
+2008-10-20  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * debian/changelog, ui/rizoma-compras.ui: [ui] Fixed bug that was moving
+  without reason the focus to entry_buy_gain
+
+2008-10-16  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/compras.c: [src] Added lbl_cont to the button_clear action
+
+  * src/compras.c: [src] Set focus to entry_buy_barcode when select "compras"
+  tab
+
+  * ui/rizoma-compras.ui: [ui] Leave the default focus on entry_buy_barcode
+
+2008-10-10  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * db/funciones.sql: [plpgsql] Produce an ordered output to all function
+  related with providers
+
+  * src/compras.c: [src] Buy search leave the focus and selection on first item
+  found
+
+2008-10-09  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma-config.c: [src] Added default value 0 to CAJA option
+
+2008-10-08  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/compras.c, ui/rizoma-compras.ui: [ui] Added mayor price to the list of
+  price on buy window
+
+  * src/ventas.c: [src] Fixed bug
+
+  * src/ventas.c: [src] Set the focus to the treeview when the search has
+  finished
+
+  * src/ChangeLog, src/ventas.c: [src] (SearchAndFill): Added the selection of
+  the first item when search.
+
+2008-09-30  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/ChangeLog, src/compras.c: [src] (InsertarCompras): The first request
+  will be selected as default.
+
+  * src/ChangeLog, src/administracion_productos.c: [src] (ModificarProducto):
+  Use the select_otros_impuestos () to get the list of other tasks and show
+  them on modified product window.
+
+  * src/ChangeLog, src/compras.c: [src] (SearchProductHistory): Added a field
+  to show the content of a product.
+
+  * ui/rizoma-compras.ui: [ui] Added a new field with the content of a product
+
+  * db/funciones.sql: [plpgsql] Fixed a typo
+
+2008-09-29  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/ChangeLog, src/ventas.c: [src]  (TipoVenta): With and without the
+  VENDEDOR option set it to 1 or 0 the we will emit a ticket.
+
+  * db/ChangeLog, db/funciones.sql: [plpgsql] (buscar_productos,
+  buscar_producto, select_product): Added an order by columns "descripcion" and
+  "marca".
+
+  * src/ChangeLog, src/compras.c: [src] (on_button_ok_ingress_clicked): Added
+  the current date as the default value for the invoice/guide ingress.
+
+  * src/ChangeLog, src/ventas.c: [src] (ventas_win): Added check if CAJA option
+  was set to zero we will not show the close cash box button and will not ask
+  to close it.
+
+  * ui/rizoma-compras.ui: [ui] Added F9 as the accelerator to recieve a new
+  product request
+
+  * db/ChangeLog, db/funciones.sql: [plpgsql] (cash_box_report): Some fixes and
+  speed up on functionaility.
+
+2008-09-28  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/compras.c: [ui] Changed column name from "Codigo Simple" to "Codigo".
+  Duplicated the default size of description column on search by name on buy
+  tab
+
+  * ui/rizoma-compras.ui: [ui] Fix to the buy tab suggested by Claudio
+
+2008-09-27  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma_informes.c: [fix] Fixed possible bug on calculate discount
+  avarage
+
+  * src/vale.c: [fix] Fixed bug on PrintVale() reported by Claudio
+
+2008-09-25  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: Changed the way how we ask
+  for a cash report
+
+  * db/funciones.sql: [plpsql] Modified function cash_box_report() to recieve a
+  cash box id as the input parameter
+
+2008-09-24  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma_informes.c: [src] Fixed bug #6
+
+  * ui/rizoma-informes.ui: [src] (fill_totals): Added new row to show the
+  discounts.
+
+  * src/postgres-functions.c: [src] Fixed bug that was showing total sells
+  including the discounts
+
+  * src/ChangeLog, src/rizoma_informes.c: [src] (fill_totals): Added new row to
+  show the discounts.
+
+  * src/credito.c: [src] Fixed compilation error
+
+  * db/funciones.sql: [plpsql] Added new function sells_get_totals()
+
+2008-09-23  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma_informes.c: [src] Bug #3 Fixed
+
+  * db/funciones.sql: [plpsql] Bug #1 Fixed
+
+2008-09-22  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma_informes.c: Bug #2 Fixed
+
+2008-09-17  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/ChangeLog, src/rizoma_informes.c, ui/rizoma-informes.ui: Added function
+  to missing print buttons on rizoma-informes
+
+  * src/proveedores.c: [c] Added 2008 to the copyright year list
+
+2008-09-16  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/ChangeLog, src/postgres-functions.c: [src] postgres-functions.c
+  (GetTotalCashSell, GetTotalSell) (GetTotalCreditSell): Fixed to not include
+  nullify sells.
+
+  * ui/Makefile.am: [m4] Added all the .ui files to EXTRA_DIST
+
+2008-09-15  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * debian/rules: Commented dh_strip on debian/rules until we learn how to make
+  a -dbg package
+
+  * debian/control: Fix on debian/control
+
+  * db/Makefile.am: Added missing files on db/Makefile.am on EXTRA_DIST
+
+  * debian/rules: Some fix on debian/rules
+
+  * configure.in: Back to git version on configure.in
+
+  * debian/README.Debian, debian/changelog, debian/compat, debian/control,
+  debian/copyright, debian/dirs, debian/docs, debian/menu, debian/postinst,
+  debian/rules: Added debian/ directory to create debian package
+
+  * configure.in: Changed version to 1.0
+
+  * ChangeLog, Makefile.am: [m4] Makefile.am: Removed un-necessary code that
+  was doing a rsync with savannah.
+
+2008-09-14  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * ui/rizoma-admin.ui, ui/rizoma-compras.ui, ui/rizoma-config.ui,
+  ui/rizoma-informes.ui, ui/rizoma-ventas.ui: [ui] Run fix script that drop
+  lots of warnings on ui files
+
+  * configure.in: Changed version of configure.in from 1.0-beta1-git to 1.0-git
+
+  * m4/postgresql.m4: [m4] Droped unnecessary link with crypt lib
+
+  * src/ChangeLog, src/encriptar.c: [src] encriptar.c: Clean up of commented
+  code.
+
+2008-09-13  jaime <jaime@tizona.cl>
+
+  * ui/rizoma-admin.ui, ui/rizoma-compras.ui, ui/rizoma-config.ui,
+  ui/rizoma-informes.ui, ui/rizoma-ventas.ui: Nuevas correciones ortográficas
+
+2008-09-10  jaime <jaime@tizona.cl>
+
+  * ui/rizoma-ventas.ui: correciones ortográficas
+
+2008-09-10  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * ChangeLog, configure.in: [src] configure.in: Removed the check of
+  libgnomeprint.
+
+  * src/ChangeLog, src/rizoma_inventario.c: [src] (main): Added some checks
+  related to what parms are passed using the command line. Set to "Inventario"
+  all the info of the first big buy.
+
+2008-09-03  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * db/funciones.sql: [plpsql] Added a check when current_fifo is null and set
+  it to zero
+
+2008-09-02  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * ui/rizoma-compras.ui, ui/rizoma-ventas.ui: [ui] Run fix script to solve
+  some button response-id problems. The common error produced by the latest
+  glade version
+
+  * src/ChangeLog, src/postgres-functions.c: [src] (FiFo): Fixed bug. Replaced
+  %d for a proper %s.
+
+2008-09-01  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * src/rizoma-config.c: [src] Changed default value for VENDEDOR from 0 to 1
+
+  * ui/rizoma-config.ui: [ui] Fixed some troubles on the interface related to
+  response-id on buttons
+
+  * ui/rizoma-config.ui: [ui] Removed unnecessary handlers from rizoma-config
+
+  * src/ChangeLog, src/credito.c: [src] Fixed bug reported by Victor
+
+2008-08-31  Jonathan Gonzalez V <zeus@lunareja.(none)>
+
+  * ui/rizoma-ventas.ui: [ui] Added gtk_widget_hide to all GtkWindow
+  delete-event on rizoma-ventas.ui
+
+  * ui/rizoma-compras.ui: [ui] Added gtk_widget_hide to all GtkWindow
+  delete-event
+
+2008-08-19  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/postgres-functions.c: [src] (SearchTuplesByDate): Added
+  a condition to avoid null sales.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql]  (ranking_ventas): Added the
+  condition to avoid all the sales that are null.
+
+2008-08-18  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/postgres-functions.c: [src] (FiFo): Changed to use the
+  plpgsql function calculate_fifo.
+
+  * db/ChangeLog: [plpsql] (calculate_fifo): Added function to calculate the
+  average cost.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] (calculate_fifo): Added function
+  to calculate the average cost.
+
+2008-08-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c: [src]  (on_btn_add_new_product_clicked):
+  Added the proper check looking for repeated short code and barcode.
+
+2008-08-12  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-informes.ui: [ui] Fixed some expand and fill so the window will
+  not look so ugly when it's maximazed
+
+  * db/funciones.sql: [plpsql] Added the substraction of tasks to the total
+  sold amount of a product on sale rank
+
+2008-08-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-common.ui: [ui] Replaced the about window now use GtkAboutDialog
+  instead of the GNOME option
+
+2008-08-07  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/rizoma-config.c: [src] (create_config): Changed the
+  default profile from DEFAULT to RIZOMA.
+
+  * src/ventas.c: [src] Added F10 as a handler for credit sale process
+
+  * ui/rizoma-ventas.ui: [ui] Replaced center on parent for always center on
+  wnd_sale_credit
+
+  * src/rizoma_informes.c: [src] Removed the $ before all the values except
+  sub-totals and total
+
+  * ui/rizoma-informes.ui: [ui] Removed an unnecessary item sales reports
+
+  * db/funciones.sql: [plpsql] Added a code to avoid any problem when the first
+  cash box open with the first sell
+
+  * src/ChangeLog, src/ventas.c: [src] (nullify_sale_win): Set to selection
+  none the tree view with the details of a sale.
+
+  * src/ChangeLog, src/rizoma_informes.c, ui/rizoma-informes.ui: Added payed
+  cash to the cash box report.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql (cash_box_report): Added payed cash
+  to the list of thing to show on cash report.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] (cash_box_report): Fixed bug that
+  wasn't considering all the sells when ask for the cash box report and the
+  cash box wasn't closed.
+
+  * src/ventas.c: [src] Added the user of credit window message
+
+  * ui/rizoma-ventas.ui: [ui] Added a message window to tell the user that the
+  client doesn't have credit to cover the sell
+
+  * ui/Makefile.am: [m4] Removed reference of rizoma.ui on ui/Makefile.am
+
+  * ui/rizoma-ventas.ui: [ui] Added a padding on �sell type window
+
+  * ui/rizoma-ventas.ui: [ui] Added destroy with parent propierty to credit
+  sell windows
+
+  * ui/rizoma.ui: Removed ui/rizoma.ui. We don't use it anymore
+
+  * src/postgres-functions.h: [src] Fixed compilation warning
+
+  * src/ChangeLog, src/rizoma_informes.c: [src] (reports_win): Removed the max
+  width to columns on tree_view_sell_rank tree view. Added the proper symbol at
+  the end of every column to show if they are money or percent numbers.
+
+  * src/rizoma_informes.c: [src] Added an space after every $ on sell rank
+
+  * ui/rizoma-ventas.ui: [ui] Added window title to credit sell window
+
+  * src/compras.c: [src] Repalced somes gtk_builder_get_object() by builder_get
+  () macros
+
+  * src/administracion_productos.c: [src] Added a space after the $ symbol.
+  Added 3 as the main decimal precision
+
+  * src/compras.c: [src] Added lines to control the decimal point that we show
+  on treeviews to make the buy request
+
+  * src/ChangeLog, src/administracion_productos.c: [src]  (admini_box): Changed
+  the column type stock from INT to DOUBLE.
+
+2008-08-06  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones.sql: [plpsql] Added some checks to the cash_box_report() if we
+  do not have a final cash id or sell id to check we presume the first plus one
+
+  * src/ventas.c: [src] Added the call to nullify_sale() so we really nullify a
+  sale
+
+  * src/ventas.c: [src] Fixed compilation error
+
+  * src/ChangeLog, src/ventas.c: [src] (on_selection_nullify_sales_change):
+  Removed condition that was asking for the id_detail on venta_anulada.
+
+  * db/rizoma.structure: [sql] Fixed the foreign key of venta_anulada, this
+  should point to venta instead of venta_detalle
+
+  * db/rizoma.structure: [sql] Fixed an error reported by JanF. Error creating
+  a foreign key on venta_anulada <-> venta_detalle
+
+  * src/ventas.c: [src] Deleted a g_print and fixed a propoer concatantion
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] (nullify_sale): Fixed to add the
+  proper stock to the product list.
+
+  * src/ChangeLog, src/ventas.c: [src] (on_btn_nullify_search_clicked):
+  Modified the query that gets the sales to nullify.
+  (on_btn_nullify_ok_clicked): Fixed some minor bugs.
+
+  * src/ChangeLog, src/manejo_productos.c: [src] (ListClean): Fixed to not pass
+  anything when venta->header is a null pointer.
+
+  * src/ChangeLog, src/ventas.c: [src] Modified on_btn_nullify_ok_clicked to
+  deal with the new nullify concept.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Added function get_sale_detail()
+  to get the detail of a specified sell, this aim to help the nullify process.
+
+  * src/postgres-functions.c: [src] Fixed a compile error
+
+  * src/ventas.c: [src] Deleted nullify_sale_datail function.
+
+  * src/ChangeLog, src/postgres-functions.c, src/postgres-functions.h: [src]
+  Modified to accept only one argument, the sale id.
+
+  * db/ChangeLog, db/rizoma.structure: [sql] Removed id_detail column since we
+  will not use it anymore.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Modified function to add an egress
+  when a sell is nullified. Now we mark all the sell as nullified and not just
+  a detail.
+
+  * db/rizoma.initvalues: [sql] Added new row to tipo_egreso as a default that
+  cannot be removed this is special for nullify sells
+
+  * db/rizoma.structure: [sql] Added new column to tipo_egreso table, this will
+  allow or deny the drop of a row.
+
+  * db/rizoma.initvalues, db/rizoma.structure: [sql] Added a new column to
+  impuesto table. Added new default values on initvalues
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Added trg_tasks_delete to handle a
+  trigger on impuesto table.
+
+2008-08-04  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/factura_more.c: [src] Fixed a few stuff related to invoice print.
+
+  * ui/rizoma-ventas.ui: [ui] Changed gravity from north west to center of the
+  main window sell
+
+  * ui/rizoma-compras.ui: [ui] Fixed some fill and expand related to TreeViews
+  on rizoma-compras.ui
+
+2008-07-30  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/factura_more.c: Added 2008 to the copyright year list
+
+  * m4/Makefile.am, src/Makefile.am: [m4] Deleted some reference to some
+  privious deleted files
+
+2008-07-29  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-common.ui: [ui] Added about dialog
+
+  * src/ChangeLog, src/rizoma_informes.c: [src] Replaced the use of a big query
+  for a plpsql function.
+
+  * ui/rizoma-informes.ui: [ui] Changed some labels and added others on cash
+  box tab
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Added function to return a cash
+  box report.
+
+  * src/ChangeLog, src/administracion_productos.c: [src]
+  (ModificarMargenVenta): Fixed to fit with the use of GtkBuilder. (Recepcion,
+  RecivirWindow, Devolucion, DevolucionWindow): Deleted functions. Deleted
+  unnecessary vars.
+
+  * src/utils.c: [src] We ensure that context_id isn't a NULL pointer
+
+2008-07-28  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/rizoma_informes.c: [src] used a ghcar * to store the sql query and then
+  pass it to EjecutarSQL()
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Fixed problem that produce an
+  error when try to calculate the total sold amount.
+
+  * src/caja.h: Added 2008 to the copyright year list
+
+  * src/ChangeLog, src/caja.c, src/caja.h: [src] caja.c (ArqueoCajaLastDay):
+  Deleted function. caja.h: Deleted GtkWidget *caja_button.
+
+  * src/ChangeLog, src/ventas.c: [src] Fixed bug reported by Victor that was
+  produced by trying to sell a product with stock  between 0 and 1
+
+2008-07-27  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/rizoma_informes.c: [src] Avoided the problem that was
+  showing a nan% when there wasn't a margin.
+
+  * src/ChangeLog, src/postgres-functions.c: [src] Replaced the long query for
+  the use of ranking_ventas() plpsql function.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Fixed to return a proper rank with
+  a proportional discount if the sell has a discount.
+
+2008-07-25  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: [src] All funciton related to strtod that use PUT or PutComa
+  to filter the content must use g_strtod() or strtod() which are locale safe
+  and not g_ascii_strtod which is locale independent
+
+  * src/ChangeLog, src/compras.c, src/manejo_productos.c,
+  src/manejo_productos.h: [src] Check the ChangeLog. Minor changes at
+  manejo_productos.c and some checks at compras.c
+
+  * src/ChangeLog, src/postgres-functions.c: [src] Deleted some commented code.
+
+  * src/ChangeLog, src/postgres-functions.c: [src] Deleted function
+  GetDayToSell.
+
+  * src/compras.c: [src] Added lround to all multiply that calculate the total
+  amount to pay for a buy on buy tab
+
+  * src/postgres-functions.c: [src] Added space to on both side of an equal
+  sign
+
+  * src/compras.c: [src] Added lround to all call of CalcularTotalCompra()
+
+  * src/ChangeLog, src/postgres-functions.c: [src] Any coma or point will be
+  replaced by the decimal point defined with the locale.
+
+  * src/compras.c: [src] Added PUT to the buy amount get from the user
+
+  * src/ChangeLog, src/manejo_productos.c: [src]  (CalcularTotalCompra):
+  Changed to gdouble the  type of variable total.
+
+  * src/compras.c: [src] Replaced the use of strtod by g_ascii_strtod
+
+  * src/utils.h: [src] Added declaration of log_register_access()
+
+  * src/utils.c: [src] Added config_file.h to the header includes to avoid any
+  function not declarated.
+
+  * src/ChangeLog, src/compras.c: [src] Used only the plpsql function
+  informacion_producto() to get the info to show on buy tab. This will speed up
+  the time that take show this information.
+
+  * src/utils.c: [sql] Fixed error on query at log_register_access()
+
+  * src/utils.c, src/ventas.c: [src] Fixed some compilation errors
+
+  * src/ChangeLog, src/ventas.c: [src] Added the use of log_register_access ()
+  to log the login/logout of a user.
+
+  * src/utils.c: [src] Added function to register a log in/out of a user into
+  the log table.
+
+  * db/rizoma.structure: [sql] Canged to english some column names of log table
+
+  * db/rizoma.structure: [sql] Added new table log
+
+2008-07-24  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/caja.c, src/ventas.c, ui/rizoma-ventas.ui: Added dialog to ask the user
+  if want to close the cash box, this will show the close cash box window if
+  the answer is yes
+
+  * src/caja.c, src/ventas.c: [src] Back prepare_caja() at the end of
+  ventas_gui().
+
+  * src/ChangeLog, src/caja.c: [src] Added one function to handle the
+  open/close cash box event
+
+  * ui/rizoma-ventas.ui: [ui] Removed buttons to open and close the cash box.
+  We will use only one button for this propose.
+
+  * src/ChangeLog, src/caja.c: [src] Added functions to open and close the cash
+  box using buttons from the main sell window.
+
+  * src/ventas.c: [src]  Deleted code that was asking to close the cash box if
+  the user was the admin
+
+  * src/ChangeLog, src/ventas.c: [src]  Removed call to prepare_caja() at the
+  end.
+
+  * src/ChangeLog, src/config_file.c, src/ventas.c: Added check of DEBUG inside
+  of funtions at config_file.c. Added check to know if we must show or not the
+  cash box buttons on sell main window
+
+  * src/ChangeLog, src/ventas.c: [src] Deleted commented code. Deleted
+  commented functions. TipoVenta() and FillDatosVenta().
+
+  * ui/rizoma-ventas.ui: [ui] Added buttons to open and close the cash box
+
+  * ui/rizoma-ventas.ui: [ui] Replaced HBoxButton for a HBox with many buttons
+  inside
+
+  * src/ventas.c, ui/rizoma-ventas.ui: Changed the name of the main sell window
+  from ventas_gui to wnd_sell
+
+  * src/ChangeLog, src/ventas.c: [src] Deleted some commented code
+
+  * src/ChangeLog, src/ventas.c: [src] Fixed some problem to calculate percent
+  from an amount of money.
+
+  * ui/rizoma-ventas.ui: [ui] Removed "response_id" on button object
+
+  * ui/rizoma-ventas.ui: [ui] Changed the next focus sequentially on top-bottom
+
+2008-07-23  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/ventas.c: [src] Set the focus to entry_discount_money on
+  TipoVenta() every time the window it's called.
+
+  * src/ChangeLog, src/utils.c: [src] Changes on display_calendar(), read
+  ChangeLog for details
+
+  * db/funciones.sql: [plpsql] Deleted inicializar_caja() and cerrar_caja(),
+  these function aren't used
+
+  * src/rizoma_informes.c: [src] Fixed typo
+
+  * src/ChangeLog, src/compras.c: [src] Added SearchPoroductHistory()
+  FillFields() at the end of Save() to reflect changes on the proper tab.
+
+  * src/ChangeLog, src/compras.c: [src] Deleted some commented code.
+
+  * src/ChangeLog, src/compras.c: [src] Added ShowProductHistory() at the end
+  of the function Save() so it will reflect the changes on buy window.
+
+  * src/compras.c: [src] Pass entry_buy_barcode instead of entry_buy_price to
+  SearchProductHistory(), this was producing an error that was putting the
+  barcode into the entry_buy_price
+
+  * src/ChangeLog, src/compras.c: [src] Added some checks before launch the buy
+  window. Added on_btn_remove_buy_product_clicked()
+
+  * ui/rizoma-compras.ui: [ui] Added handler to btn_remove_product_list
+
+2008-07-22  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/ventas.c: [src] Fixed some queries. Deleted a g_print.
+  Check ChangeLog entries
+
+  * db/funciones.sql: [plpsql] Fix order on values put into venta_anulada
+
+  * ui/rizoma-ventas.ui: [ui] Set height request to wnd_nullify_sale
+
+  * src/ChangeLog, src/ventas.c: [src] Deleted commented code. Use
+  clean_container() on tipo_venta_win_venta. Fixed Descuento() to deal better
+  with percent and money discount
+
+  * ui/rizoma-ventas.ui: [ui] Give better names to entries on type sell window
+
+  * src/ventas.c: [src] Removed the gtk_widget_grab_focus line, instead the ui
+  will be ensure that the user when press "enter" will go to the proper next
+  entry
+
+  * ui/rizoma-ventas.ui: [ui] Move "Descuento" handler from activate to changed
+  on GtkEntry of sell window�
+
+  * src/ventas.c: [src] Some indent
+
+2008-07-21  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-informes.ui: [ui] Added quit button at the bottom of the report
+  window
+
+  * src/compras.c: [src] Added SearchProductHistory() at the end of a
+  successful new product add
+
+  * src/compras.c: [src] Always select the first option for other tasks combo
+  box. Dropped task "Ninguno"
+
+  * db/funciones.sql: [plpsql] Not show the traditional task when get the other
+  tasks
+
+  * src/rizoma_informes.c: [src] Replaced the use of PQgetvalue by PQvaluebycol
+
+  * src/postgres-functions.c: [sql] Fixed query to return products sell rank
+
+  * ui/rizoma-admin.ui, ui/rizoma-common.ui, ui/rizoma-compras.ui,
+  ui/rizoma-config.ui, ui/rizoma-informes.ui, ui/rizoma-login.ui: [ui] Applied
+  fix that someone put on glade-devel list. This fix remove many of the warning
+  that gtk put on the screen
+
+2008-07-19  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/rizoma_informes.c: [src] Fixed bug reported by janf. It was related to
+  sell reports that wasn't adding the descount
+
+  * src/rizoma_inventario.c: [src] Replaced strtod with g_ascii_strtod. Deleted
+  commented function
+
+2008-07-18  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones.sql: [plpsql] Fixed get_invoice_detail() was presuming
+  intenger instead of varchar on "codigo_corto"
+
+  * src/ventas.c: [mem] Fixed memory leak
+
+  * ui/Makefile.am: [autotools] Added rizoma-informes.ui to the install file
+  list
+
+  * src/rizoma_informes.c, src/rizoma_inventario.c, src/vale.c: [src] Fixed
+  some warnings
+
+  * ui/rizoma-informes.ui: [ui] Set to non-editable all the date entries
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: Added money box stats
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: [src] Added sell rank
+
+  * src/postgres-functions.c: [sql] Fix query to use the new mdoel
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: [reports] Fixed some stupid
+  bugs. Now sell reports works
+
+  * src/utils.c, src/utils.h: [src] Moved all the functions that were at
+  tiempo.c to utils.c
+
+  * src/postgres-functions.c: [sql] Fixed some queries
+
+  * src/vale.c: [src] Removed include of tiempo.h
+
+  * src/printing.c: [src] Removed include of tiempo.h
+
+  * src/Makefile.am, src/tiempo.c, src/tiempo.h: [src] Removed tiempo.c|h
+
+  * db/funciones.sql: [fix] Fixed bug related to the buy price of a product,
+  this was crashing when the price was a decimal number
+
+2008-07-17  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * .gitignore: [git] Added src/rizoma-informes to .gitignore
+
+  * ui/rizoma-informes.ui: [reports] Added UI file to use with rizoma-informes
+
+  * ChangeLog, configure.in, m4/gksu.m4: [autotools] Removed check and ac
+  program related to gksu
+
+  * src/rizoma_informes.c: [reports] Added rizoma_informes.c and include it
+  into Makefile.am
+
+  * src/Makefile.am, src/rizoma_inventario.c: [reports] Added rizoma_informes.c
+  and include it into Makefile.am
+
+  * src/ChangeLog, src/rizoma-config.c: [config] Deleted include of libgksu.h
+
+2008-07-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/postgres-functions.c: [Fix] Fixed bug
+
+2008-07-15  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * .gitignore: [git] Added rizoma-inventario to .gitignore
+
+  * src/Makefile.am, src/rizoma_inventario.c: [fix] Added new program to make
+  the initial buy
+
+  * src/postgres-functions.c: [fix] Fixed bug that was presuming that the phone
+  number was a number
+
+  * db/migracion.sh: [sh] Fixed some bugs on migracion.sh
+
+  * db/rizoma.structure: [sql] Added indexes hash and b-tree to
+  venta_detalle.barcode and venta.fecha
+
+  * db/funciones.sql: [plpgsql] Optimized select_ventas_dia()
+
+  * src/compras.c: [src] Added some check to avoid any character or empty space
+  on amount or document number
+
+2008-07-14  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/administracion_productos.c: [src] Changed conditional to
+  let the user set the stock of a product on zero
+
+  * src/postgres-functions.c: [src] Changed the value used to calculate fifo
+  from "cantidad" to "cantidad_ingresada"
+
+  * db/funciones.sql: [plpsql] Changed to varchar the value returned by
+  get_detalle_compra on "codigo_corto"
+
+  * src/compras.c: [fix] Fixed a gtk warning when a provider was selected on
+  "Pagos" tab
+
+  * src/compras.c: [src] Added the code to calculate the total amount of
+  pending invoice for a provider
+
+  * ui/rizoma-compras.ui: [ui] Added label with total amount of invoice on
+  pending list for a provider
+
+2008-07-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones.sql: [plpsql] Fixed calc error on informacion_producto*()
+
+  * src/compras.c: [src] Added store to the cleanner of guide to invoice tab
+
+  * ui/rizoma-compras.ui: [ui] Added handler ClearFactData to clear button on
+  guide to invoice tab
+
+  * src/datos_negocio.c: [src] Some minor fix
+
+  * src/utils.c: [src] Changed g_new for g_new0 an dreturn the empty var when
+  the length of the passed rut it's 0
+
+  * src/ChangeLog, src/credito.c: [src] Added two columns to treeview_clients
+  and deleted functions ClientStatus() and CloseClientStatus()
+
+  * src/postgres-functions.c, src/postgres-functions.h: [src] Changed the
+  return type for ReturnClientCredit from gchar * to gint
+
+  * ui/rizoma-admin.ui: [ui] Removed the handler for row_activated from
+  treeview_clients
+
+  * ui/rizoma-admin.ui: [ui] Added the never scroll policy to scrollwindow that
+  contain the treeview with the client list
+
+  * ui/rizoma-admin.ui: [ui] Added "Always Center" to wnd_admin
+
+  * src/compras.c: [src] Addee the new suggested amount when user edit a
+  partial ingress
+
+  * src/credito.c: [src] Added GTK_CONTAINER() to cast the GObject returned by
+  builder_get
+
+  * src/errors.c: [src] Added some check for NULL widgets on ErrorMSG()
+
+  * src/credito.c: [src] Replaced a lot of gtk_entry_set_text just for a
+  clean_container
+
+  * src/ChangeLog, src/ventas.c: [src] Deleted and commented functions
+
+  * src/compras.c, ui/rizoma-compras.ui: [src] Fix some minor bugs related to
+  the search for products to buy. Added label_code to the cleanner
+
+  * db/funciones.sql: [plpsql] Modified select_ventas_dia() to deal with less
+  than 30 days if the product hasn't been sold for more than 1 day
+
+  * src/compras.c: [src] Added suggested amount to confirm buy windows (partial
+  and complete).
+
+2008-07-10  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ventas.c: [src] Move from CREDITO to CASH as the method of selling with
+  an invoice
+
+  * ui/rizoma-ventas.ui: [ui] Associated to action clicked the handler
+  ChangeSeller on window_change_seller
+
+  * src/compras.c: [src] Move call to clean_container() over FillPartialTree()
+
+  * ui/rizoma-compras.ui: [ui] Set "no" as the default option on create new
+  product
+
+  * src/postgres-functions.c: [fix] Fix bug that was putting a varchar withtout
+  using ''
+
+  * src/postgres-functions.c: [fix] Fix bug that was putting a varchar withtout
+  using ''
+
+  * ui/rizoma-compras.ui: [ui] Added CleanStatusProduct as the handler for
+  signal clicked on button_clear
+
+  * ui/rizoma-ventas.ui: [ui] The focus must go from "Cerrar con" to ok button
+
+  * src/credito.c, src/ventas.c, ui/rizoma-ventas.ui: When execute a credit
+  sell the client can be searched and if he doesn't exist we can add him
+  without troubles
+
+  * src/ChangeLog, src/utils.c: [src] Fixed bug that was deleting labels of any
+  widget inside a container even those inside a stock button or radio button.
+
+  * src/credito.c: Added 2008 on copyright years list
+
+  * src/manejo_productos.c: [src] Fixed sql query that didn't got the proper
+  task for a product when this was on the sale list
+
+  * db/rizoma.structure: [sql] Change from int4 to serial the column id on
+  venta_detalle table
+
+  * ui/rizoma-common.ui: [ui] Added always center for windows add client and
+  add provider
+
+  * ui/rizoma-ventas.ui: [ui] Added horizontal scroll never to search client
+  window
+
+2008-07-09  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: [fix] Fix.
+
+  * src/ChangeLog, src/compras.c: [src]  Added clean_container() to all the
+  windows called by this on_button_ok_ingress_clicked.
+
+  * src/ChangeLog, src/compras.c, src/compras.h: [src] Deleted some unused
+  functions
+
+  * src/compras.c, ui/rizoma-compras.ui: [src] Fixed some minor bugs. Nullify
+  buy and any product from a buy works now
+
+  * src/compras.c, src/compras.h, ui/rizoma-compras.ui: [src] Added the nullify
+  products on a buy functions
+
+  * src/ChangeLog, src/compras.c: [src] Added the nullify buy functions
+
+  * db/rizoma.structure: [sql] Deleted trash line
+
+  * db/rizoma.structure: [sql] Dropped unnecesary constraints
+
+  * ui/rizoma-ventas.ui: [ui] Added "IniciarLaCaja" as the handler on activate
+  action on entry_caja_init_amount
+
+  * src/rizoma-config.c: [src] Added PQfinish connection always that
+  on_btn_dump_data_clicked return by an error
+
+  * src/compras.c, src/postgres-functions.c, src/postgres-functions.h: [fix]
+  Fix bug that was trying to get a gchar instead of a gint from the tasks
+  combobox
+
+  * src/admin.c, src/administracion_productos.c, src/credito.c,
+  src/datos_negocio.c, src/encriptar.c, src/factura_more.c, src/impuestos.c,
+  src/parametros.c, src/postgres-functions.c, src/printing.c,
+  src/rizoma_errors.c, src/usuario.c: [indent] Re-Indente many files deleted
+  whitetraling spaces and tabs
+
+  * db/funciones.sql, src/ChangeLog, src/compras.c, src/compras.h,
+  ui/rizoma-compras.ui: [fix] Many bug fix requested by JanF
+
+  * src/compras.c: [src] Added a grab focus to entry_buy_barcode so the user
+  when open the window will have the focus on this entry
+
+2008-07-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [plpgsql] added nullify_sale() function  This function
+  nullify the sale adding it to the venta_anulada table and restores the
+  'cantidad' sold in the sale to the sotck of the product.
+
+  * src/postgres-functions.c: [nullify] added the salesman id for statistics
+  purpouse
+
+  * db/rizoma.structure: [DB] added the table venta_anulada, to update your
+  database ...  you can execute the following SQL sentences: create table
+  venta_anulada ( id_detail                 int not null, id_sale              
+      int not null, fecha                     timestamp default now(), vendedor
+                   int not null, constraint pk_venta_anulada primary key
+  (id_detail, id_sale) ) ;  alter table venta_anulada add constraint
+  fk_venta_anulada_users foreign key (vendedor) references users(id);  alter
+  table venta_anulada add constraint fk_venta_anulada_venta_detalle foreign key
+  (id_detail, id_sale) references venta_detalle(id, id_venta);
+
+2008-07-09  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ventas.c, ui/rizoma-compras.ui: [ventas] Fix call to an unknow function
+  on line 4111
+
+2008-07-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c, src/postgres-functions.h, src/ventas.c: [ventas]
+  added the necesary C functions to nullify a sale  Still is needed a plpgsql
+  function that contains the business rules
+
+2008-07-09  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c: [src] Move clean_container() at the begging
+  so we clean and then set the text.
+
+  * src/compras.c: [src] When a product doesn't and the user try to buy it we
+  add it
+
+2008-07-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: [ventas] added the callbacks to nullify the selected products
+
+2008-07-09  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/postgres-functions.c, src/rizoma-config.c: [src] Fix bug that didn't
+  let press apply at the end of the assistant
+
+2008-07-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c, src/ventas.h, ui/rizoma-ventas.ui: [ventas] added the
+  callbacks to close the nullify sale dialog
+
+2008-07-09  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/postgres-functions.c: [src] Fix possible bug
+
+2008-07-08  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/administracion_productos.c,
+  src/administracion_productos.h, src/compras.c, ui/rizoma-compras.ui: Added
+  handler to edit button on buy tab. Modified "ModificarProduct" to edit any
+  product just passin a GtkLabel or GtkEntry as the first argument
+
+  * db/funciones.sql: [plpslq] Fixed bug that produces a task with amount of
+  zero.
+
+  * configure.in: Added beta1-git to configure.in
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] We check even if days it's 0
+  because we need to avoid any division by zero.
+
+  * src/ChangeLog, src/compras.c: [src] To check if a provider exists we just
+  use "rut" without the verify digit
+
+  * db/rizoma.initvalues: [sql] Added task with id 0 to match some contraints
+  when a product doesn't have other tasks
+
+  * ui/rizoma-compras.ui: [ui] Move the gtk_widget_hide from action "activated"
+  to "clicked".
+
+  * src/ChangeLog, src/caja.c: [src] Make sure that we have something to get
+  from the last SQL excecuted.
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Added a check on is_caja_abierta()
+
+  * db/rizoma.structure: [sql] Deleted some unnecessary constraint that produce
+  some errors. Should they back?
+
+2008-07-07  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/caja.c: [src] Added 2008 to the copyright year list
+
+  * src/caja.c: [src] Re-Indent caja.c
+
+  * src/ChangeLog, src/rizoma-config.c: [src] Deleted the code that set to TRUE
+  the complete state of page four.
+
+  * ui/rizoma-config.ui: [ui] Removed POPUP property from wnd_ok_pg_user
+
+  * ui/rizoma-config.ui: [ui] Change some text on rizoma-config
+
+  * src/rizoma-config.c, ui/rizoma-config.ui: New config style it should be
+  ready!
+
+  * src/ventas.c: [fix] Get the discount amount using the proper widget
+
+2008-07-06  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/Makefile.am, src/rizoma-config.c, ui/rizoma-config.ui:
+  All the new config for a network-client works now. Needs to be finish the way
+  for local and network-server
+
+  * src/ventas.c: [fix] Fixed bug reported by JanF
+
+2008-07-04  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/proveedores.c: [src] Assigned the proper name to columns on
+  treeview_prov_search
+
+  * src/compras.c, src/utils.h, src/ventas.c: Minior changes
+
+  * src/rizoma-config.c, ui/rizoma-config.ui: [ui-conf] Return of the new
+  config style. We should improve more on this
+
+  * src/ChangeLog, src/utils.c, src/ventas.c: [src] Should be fixed the error
+  reported by JanF on rizoma-devel ml
+
+  * src/ChangeLog, src/utils.c: [src] Added parse_rut()
+
+  * src/ChangeLog, src/postgres-functions.c, src/ventas.c: Some indententation.
+  Deleted tabs. Added CASH to sell type
+
+2008-07-03  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.ui: [ui] added min width to an entry of nullify dialog
+
+  * src/ventas.c: [doc] added doxygen doc to nullify_sale_win
+
+  * src/ventas.c: [doc] added doxygen doc to on_btn_nullify_search_clicked
+
+  * src/ventas.c, src/ventas.h: [ventas] added the callback to display the
+  details of a sale  in the nullify dialog
+
+  * src/administracion_productos.c: [fix] delted commented code
+
+  * ui/rizoma-ventas.ui: [ui] tweaked a little the nullify sale dialog
+
+  * src/ventas.c: [fix] fixed typo
+
+2008-07-02  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-login.ui: [ui] added a border to rizoma-login
+
+  * src/ventas.c, ui/rizoma-ventas.ui: [ventas] the search engine to nullify
+  sales is working
+
+  * src/utils.c: [fix] just added a * to make it doxygen complaint the comment
+
+2008-07-02  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/ChangeLog, db/funciones.sql, src/ChangeLog, src/ventas.c: Added function
+  informacion_product_venta and replaced all the use of informacion_producto.
+  This speed up the sell process
+
+2008-07-02  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c, src/ventas.h: [ventas] now the nullify dialogs gets
+  configurated
+
+  * ui/rizoma-ventas.ui: [ui] added the nullify sale dialog
+
+2008-07-02  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/rizoma-config.c, ui/rizoma-config.ui: Rollback!
+
+2008-07-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.ui: [ui] moved the label_total according to the
+  recomendation of claudio
+
+2008-07-01  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-config.ui: [ui] Added names to the client interfaces
+
+  * db/ChangeLog, db/rizoma.structure: [sql] Deleted some trash lines. Added
+  drop if exists and cascade to the drop tables sentences.
+
+  * src/rizoma-config.c: Added page complete to pages two and three
+
+  * ui/rizoma-config.ui: [ui] Deleted empty steps
+
+2008-06-27  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/rizoma-config.c: Deleted unnecessary var
+
+  * src/ChangeLog, src/rizoma-config.c, ui/rizoma-config.ui: Added a new flow
+  to rizoma-config which will be used to decide what kind of configuration we
+  must use. The user can now configure a local machine which can be a server or
+  a client on the network
+
+2008-06-26  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/admin.c, src/usuario.h, ui/rizoma-admin.ui: [admin] added refresh of
+  sales man list on switch page
+
+  * src/ventas.c: [doc] added documentation to some function in sales
+
+  * src/ventas.c: [ventas] set YES like the default option in exit dialog
+
+  * ui/rizoma-ventas.ui: [ui] tweaked the separation between widgets
+
+  * ui/rizoma-ventas.ui: [ui] added separation between some widgets
+
+2008-06-25  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/admin.c, src/compras.c, src/config_file.c, src/ventas.c:
+  Added error messages when rizoma_open_config() returns NULL
+
+2008-06-24  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/rizoma-config.c: [config] added the host and port to psql calls  This
+  is because for some fucking reason psql doesn't use the ~/.pgpass file.
+
+2008-06-20  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.ui: [ui] changed some signals in caja init dialog
+
+  * src/caja.c: [caja] the open and close caja is working
+
+  * ui/rizoma-ventas.ui: [ui] added the classic ENTER behavoiur close caja  and
+  added the ESC accelerator to the cancel button in the same dialog
+
+  * src/usuario.c: [usuario] fixed the way that checks if the user is working
+
+  * db/funciones.sql: [plpgsql] get_arqueo_caja() includes the amount with caja
+  was opened
+
+  * src/caja.c: [doc] added to on_entry_caja_close_have_changed ()
+
+  * src/caja.c: [caja] fixed redundant if condition
+
+  * src/caja.c: [caja] fixed the changed callback of close caja entry
+
+2008-06-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/caja.c: [caja] some optimizations
+
+  * ui/rizoma-ventas.ui: [ui] added a callback for the entry
+
+  * src/caja.c: [caja] fixed returnsaldocaja and added changed callback  the
+  changed callback is for the entry of the close caja
+
+2008-06-19  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: [src] Deleted not used variable id_compra
+
+2008-06-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/rizoma.initvalues: [DB] added a new value by default for tipo_ingreso 
+  Exceso de caja
+
+2008-06-19  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: [ui] Many changes on UI of buy
+
+  * src/compras.c: [src] Deleted column "ID Compra" on guide -> invoice
+
+2008-06-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/caja.c: [caja] fixed the behave of the caja
+
+  * src/ventas.c: [ventas] fixed the way that check if is admin
+
+  * src/postgres-functions.c: [postgres-functions] fixed users_working()
+
+  * db/funciones.sql: [plpgsql] fixed get_arqueo_caja()
+
+2008-06-19  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones.sql: [plpgsql] Bug figx. Changed != NULL for IS NOT NULL
+
+  * db/funciones.sql: [plpgsql] Changed prod_vendidos = NULL for prod_vendidos
+  IS NULL
+
+2008-06-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/caja.c: [caja] CalcularPerdida() is fixed with new schema
+
+2008-06-18  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.h: [src] Deleted declaration of ToggleSelect()
+
+  * src/compras.c: [src] Use clean_container to cleanup the wnd_new_product
+  window
+
+  * src/ChangeLog, src/compras.c: [src] Deleted FillDetPagos(). Almost all
+  global vars deleted
+
+  * src/compras.c: [src] Deleted global vars
+
+  * src/ChangeLog, src/compras.c: [src] Deleted function ToggleSelect().
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.ui: [src-ui] Add products
+  works and use GtkBuilder
+
+  * ui/rizoma-compras.ui: [ui] Add handler to btn_add_new_product
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.ui: [src] Deleted AddNew it
+  was replaced by on_button_new_product_clicked()
+
+  * ui/rizoma-compras.ui: [ui] Add proper names to entries, combobox and
+  radiobuttons. Add handler to cancel and add buttons
+
+  * src/compras.c: [src] Partial ingress finished.
+
+  * src/ChangeLog, src/compras.c: [src] Fixed bug that duplicated columns.
+
+  * src/ChangeLog, src/compras.c, src/compras.h, ui/rizoma-compras.ui: Check
+  out the ChangeLog
+
+  * ui/rizoma-compras.ui: [ui] Added display_calendar to
+  btn_ingress_partial_(invoice|guide)
+
+  * src/ChangeLog, src/compras.c: [src] Added short-code to product
+  information. Deleted unnecessary code
+
+  * ui/rizoma-compras.ui: [ui] Added accelerator F9 to button "Confirmar
+  Compra"
+
+  * ui/rizoma-compras.ui: [ui] Added label to show the shor-code on buy tab
+
+  * src/compras.c: [src] Some fix to make a better work and fix on regexp
+
+  * src/ChangeLog, src/compras.c, src/compras.h: [src] CheckDocumentData() will
+  review all the entries on the passed window looking for the entries *_n,
+  *_amount and *_date to get the proper info
+
+  * src/utils.c, src/utils.h: [src-utils] Added some memory free's to
+  clean_container(). Added declaration of clean_container() to utils.h
+
+2008-06-17  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: [ui] Set proper names to entries on
+  ingress_partial_(guide|invoice)
+
+  * ui/rizoma-compras.ui: [ui] Set proper text to label from "Numero Guia" to
+  "Numero Factura"
+
+2008-06-17  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [plpgsql] fixed the get_arqueo_caja() now discount the
+  outs and adds the ins
+
+  * src/caja.c: just indentation
+
+  * src/caja.c: [caja] removed unused code  the code were related to the caja
+  tab that were present in the old interface.
+
+2008-06-17  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c: [src] Added function
+  on_btn_ok_ingress_partial_(invoice|guide)_clicked
+
+  * ui/rizoma-compras.ui: [ui] Added handler to buttons
+  btn_ok_ingress_partial_(guide|invoice)
+
+  * src/ChangeLog, src/compras.c, src/compras.h: [src] Deleted function
+  CambiarStock(). Added check of amount for the new stock.
+
+  * src/ChangeLog, src/compras.c, src/compras.h: [src] Added function
+  on_partial_cell_renderer_edited to tree_view_partial_invoice|guide
+
+  * ui/rizoma-compras.ui: [ui] Set a default height for
+  tree_view_partial_invoice|guide of 200
+
+2008-06-17  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [plpgsql] get_arque_caja() function is working
+
+  * db/funciones.sql: [fix] fixed the functions associated to the triggers of
+  caja
+
+  * src/caja.c: [caja] changed CerrarCaja to adjust the new schema
+
+  * db/funciones.sql: [plpgsql] added a trigger for update on caja  insert the
+  last id of the sale
+
+  * src/caja.c, src/postgres-functions.c: [fix] fixed missging varibles
+
+  * src/caja.c, src/caja.h, src/ventas.c, ui/rizoma-ventas.ui: [caja] another
+  step to finish the caja (still not working)
+
+  * src/postgres-functions.c: [postgres-functions] added users_working()
+  function  this function returns the number of users that are currently
+  working
+
+2008-06-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/volcar_funciones.sh: [sh] Revert from psql8.3 to psql
+
+  * src/ChangeLog, src/compras.c, src/compras.h: Added function to fill
+  treeview on partial ingress for guide on invoices.
+
+2008-06-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/volcar_funciones.sh, src/caja.c, src/caja.h, src/postgres-functions.c,
+  src/postgres-functions.h, src/ventas.c, src/ventas.h, ui/rizoma-ventas.ui:
+  [caja] still working on this
+
+2008-06-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: [src] Added gtk_list_store_clear to the store_invoice on
+  FillPagarFacturas
+
+  * src/compras.c: [src] Add atoi to id_invoice so we pass an integer to
+  PagarFactura()
+
+  * src/ChangeLog, src/compras.c: [src] Deleted function Pagar. Added function
+  on_btn_pay_invoice_clicked to pay an invoice
+
+  * ui/rizoma-compras.ui: [ui] Changed signal from activate to clicked on
+  "Pagos" tab
+
+  * src/ChangeLog, src/compras.c, src/compras.h: Deleted functions
+  AskPagarCaja, PagarDocumentoWin, ClosePagardocumentoWin, PagarToggle
+
+2008-06-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.ui: [ui] added some dialogs for the caja
+
+2008-06-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: [ui] Added name to button and the proper callback.
+  btn_invoice_pay
+
+2008-06-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/caja.c, src/caja.h, src/postgres-functions.c, src/postgres-functions.h,
+  src/ventas.c, ui/rizoma-ventas.ui: [caja] working in the caja, still is
+  explosive
+
+2008-06-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/postgres-functions.c, src/postgres-functions.h: [src]
+  Commented code that insert data into "pagos" table. Deleted previous
+  parameters and just use id_invoice to update an invoice.
+
+2008-06-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [plpgsql] added a trigger to caja
+
+  * db/rizoma.structure: [plpgsql] added id_venta_inicio, id_venta_termino to
+  caja table
+
+2008-06-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: [ui] Deleted all the unnecessary widgets on "Pagos"
+  tab
+
+  * db/ChangeLog, db/funciones.sql: [plpgsql] Bug fix
+
+  * src/ChangeLog, src/compras.c: [CalcularTotalesGuias] Changed to use the new
+  tables guias_compra_detalle and guias_compra
+
+  * db/funciones.sql: [plpgsql] Fix some bugs on get_guide_detaile().
+
+  * db/ChangeLog, db/funciones.sql: [plpgsql] Edited get_guide_detail to use
+  guias_compra_detalle table
+
+2008-06-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [plpgsql] added is_caja_abierta() function
+
+  * db/funciones.sql: [plpgsql] added insert_ingreso and insert_egreso
+  functions
+
+  * db/rizoma.structure: [DB] added id_caja to egreso and ingreso, and some PKy
+  FK
+
+2008-06-15  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones.sql: [plpsql] Fixed query to get the invoice detail
+
+  * src/compras.c: [src] Fix some compilation bugs. Added column id to
+  tree_view_invoice_list
+
+  * db/ChangeLog, db/funciones.sql: [plpsql] Added funciton get_invoice_detail
+
+  * src/ChangeLog, src/compras.c, src/compras.h: Added stores to
+  tree_view_invoice_list|detail. Changed FillProveedorData() to fill provider
+  data on "Pagos" tab.
+
+  * ui/rizoma-compras.ui: [ui] Change to TRUE the expand and fill propierty for
+  frame inside of "Pagos" tab
+
+  * ui/rizoma-compras.ui: [ui] Added handler to entry_invoice_provider and fix
+  the handler name of entry_guide_invoice on activate signal
+
+  * src/ChangeLog, src/compras.c, src/compras.h: Deleted ClearPagosData().
+  FillDatosProveedor() use GtkBuilder and fill the data of "Pagos" tabs
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: [ui] Added labels and entries to "Pagos" tab.
+
+  * src/ChangeLog, src/compras.c, src/postgres-functions.c,
+  src/postgres-functions.h: Finished the process that create an invoice using
+  one or more guides
+
+  * ui/rizoma-compras.ui: [ui] Added clicked action to btn_guide_invoice_ok
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/caja.c: [caja] InicializarCaja() works
+
+  * src/caja.c, src/caja.h, src/ventas.c, ui/rizoma-ventas.ui: [caja] raise the
+  windows (egreso e ingreso) and can be canceled
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: Deleted character
+
+  * src/ChangeLog, src/compras.c, src/compras.h: Deleted functions
+  InformeComrpas and InformeComprasShow
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [DB] fixed the sales by day
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones.sql: Added function guide_invoice to create an invoice using
+  one or more guides
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c, src/caja.c, ui/rizoma-ventas.ui: [caja] the
+  make ingres to caja is working
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/funciones_sugeridas.sql: Deleted funciones_sugeridas.sql
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/caja.c, src/caja.h, src/postgres-functions.c, src/postgres-functions.h,
+  src/ventas.c, ui/rizoma-ventas.ui: [caja] rewriting the caja functionality,
+  still incomplete  NOTE: added a keys handler for the main window of sales
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: Added fucntion control_decimal on tree_view_invoice_detail
+  to columns 3 and 4
+
+  * ui/rizoma-compras.ui: [ui] Add handler to check the amount of guides
+
+  * src/utils.c: [fix] Fixed the position of calendar on display_calendar
+
+  * src/administracion_productos.c, src/postgres-functions.c, src/ventas.c:
+  Deleted tabs and re-indent
+
+  * ui/rizoma-compras.ui: [ui] Added gtk_widget_grab_focus to the buy process,
+  the user can move just by hit enter on entries
+
+  * db/rizoma.structure: [ui] Added gtk_widget_grab_focus to the buy process,
+  the user can move just by hit enter on entries
+
+  * ui/rizoma-compras.ui: [ui] Added F12 as accelerator to quit button
+
+  * src/postgres-functions.c: [fix] Query to insert data into
+  factura_compra_detalle and guias_compra_detalle
+
+  * db/rizoma.structure: Changed id column from int4 to serial
+
+  * src/ChangeLog, src/compras.c, src/postgres-functions.c: Invoice and guide
+  use the new sql structure
+
+  * ui/rizoma-compras.ui: [ui] Adde fill anx expand to frame on buy tab
+
+  * src/Makefile.am, src/administracion_productos.c, src/comisiones.c,
+  src/comisiones.h, src/compras.c, src/control.c, src/control.h, src/credito.c,
+  src/dimentions.h, src/impuestos.c, src/proveedores.c, src/usuario.c,
+  src/ventas.c: Deleted files comisiones.c|h, dimentions.h and control.c|h
+
+  * src/ventas_stats.c, src/ventas_stats.h: Deleted files ventas_stats.c and
+  ventas_stats.h
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c: [fix] indentation
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/main.c, src/main.h: Deleted main.c and main.h aren't used anymore
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c: deleted commented code
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/administracion_productos.c, src/comisiones.c, src/compras.c,
+  src/credito.c, src/main.c, src/printing.c, src/ventas_stats.c: Deleted all
+  reference to main.h on all .c files
+
+2008-06-13  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/administracion_productos.c: [fix] show the ventas/dia
+  in mercaderias tab and 2 decimals in TVendido
+
+2008-06-13  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ChangeLog, configure.in: Added DEBUG macro when configure runs with
+  --enable-debug
+
+2008-06-12  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/proveedores.c, ui/rizoma-compras.ui: [fix] providers tree view change
+  the data on changed signal  also the treeview request a height of 150
+
+  * Makefile.am: [Makefile] added git based script for make dist
+
+  * src/credito.c: [credito] now the UI behaves in a consistent way the debt
+
+  * src/errors.c: [errors] ExitoMSG() now supports markup message in the pango
+  style  see Pango's text markup language in the gtk documentation
+
+  * src/postgres-functions.c: [postgres-functions.c] DeudaTotalCliente()
+  returns the real total debt  This means that now discount the amount in favor
+  that is stored in the system, with this the UI gets no confused.
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-compras.ui: [ui] added height request to the treeview of
+  'mercaderias' tab in compras
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: Deleted trash.
+
+  * src/ChangeLog, src/compras.c: Deleted some trash functions.
+
+  * src/ChangeLog, src/ventas.c: Initialize on NULL to GError
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [fix] informacion_producto() fill the mayorist values
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * configure.in: Changed version from 0.3 to 1.0-alpha1
+
+  * ui/rizoma-compras.ui: [ui] Added gtk_widget_hide to on clicked event on the
+  cancel button
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.ui: Added ui and code for
+  partial ingress invoice
+
+  * src/ChangeLog, src/tiempo.c, src/tiempo.h: Deleted trash from tiempo.c|h
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c, ui/rizoma-compras.ui: [mercaderia] now fill
+  the fields with a single click
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/ventas.c: Deleted lots of set_sensitive to main_window
+
+  * src/Makefile.am: Added 2008 to the years list
+
+  * src/tipos.h: Deleted some vars. Added 2008 to the years list
+
+  * src/caja.c, src/tiempo.c: Deleted tabs and re-indent
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-admin.ui: [ui] 'datos del negocio' tab jump from entry with enter
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.ui: Added tree_view and
+  window to deal with partial ingress using guide
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-compras.ui: [ui] with ENTER jump to the next entry in
+  wnd_mod_product
+
+  * ui/rizoma-common.ui: [ui] With ENTER jump the focus to the next entry in
+  add provider dialog
+
+  * src/compras.c: [fix] fixed the Save(), now uses local fraccion, iva,
+  perecible
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c: Deleted global vars.
+
+  * src/compras.c: Fixed compilation problem
+
+  * src/compras.c: Merged? :D
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c: [fix] fixed the wrong columns in mercaderia
+  tab
+
+  * db/rizoma.structure: [DB] added guias_compra_detalle and
+  factura_compra_detalle  and it's respective foreign key pointing to
+  guias_compra and factura_compra respectively
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/administracion_productos.c, src/compras.c,
+  src/compras.h, ui/rizoma-compras.ui: Deleted functions and commented code.
+  Added some names to de ui of rizoma-compras.
+
+2008-06-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/compras.c, src/postgres-functions.c, src/postgres-functions.h:
+  [mercaderia] is working the modification of products
+
+2008-06-11  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, src/compras.h: It show the proper detail for
+  a selected guide, should we show the detail of new invoice?
+
+  * db/ChangeLog, db/funciones.sql: Added function get_guide_detail
+
+2008-06-10  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, src/utils.c: Added the clean_container() when
+  switch to the "Ingreso Facturas" tab, this is to clean this tab
+
+  * ui/rizoma-compras.ui: [ui] Added the name vbox_guide_invoice to the vbox
+  inside of the "Ingreso Facturas" tab, this its to deal with it to clean it up
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.ui: Changed functions to
+  use the GtkBuilder interface
+
+  * src/utils.h: Added declaration of clean_container()
+
+  * db/rizoma.structure: Changed the type of column "barcode" on table
+  "documentos_detalle" from varchar(14) to bigint
+
+  * src/utils.c: Deleted extra characters
+
+  * src/ChangeLog, src/compras.c, src/utils.c: Read the changlog :P
+
+2008-06-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/credito.c: [credito] the search client functionality is clients tab is
+  working
+
+  * ui/Makefile.am: [Makefile] added print-menu.xml
+
+  * ui/rizoma-admin.ui: [admin] changed a label
+
+  * src/ventas.c, ui/rizoma-ventas.ui: [ventas] fixed a strange behavoiur in
+  the discount part of the sale
+
+  * src/credito.c: [credito] warns when the user tries to abonar to a client
+  with debt=0
+
+  * src/credito.c: [credito] the abonar functionality works, but there is bug
+  in CancelarDeudas()  The function cancelardeuda doesn't discount the proper
+  amount of the debt.
+
+  * src/credito.c, ui/rizoma-admin.ui: [credito] loads the dialog to abonar in
+  the clients tab
+
+  * src/credito.c: [doc] commented some functions with doxy
+
+  * src/credito.c, src/credito.h, ui/rizoma-admin.ui: [credito] now works the
+  printing functionality of the clients tab
+
+  * src/printing.c: [printing] simplified the LaunchApp() now doesnot use
+  fork()
+
+  * ui/print-menu.xml: [ui] added ui definition of the popup of the print
+  button in client tab
+
+  * src/compras.c: [compras] now uses rizoma_open_config()
+
+  * src/ventas.c: [ventas] now uses rizoma_open_config()
+
+2008-06-07  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/utils.c: Replaced do-while for while
+
+  * src/utils.c: Added clean_container. We need a better name but it's too late
+  to think on it
+
+2008-06-06  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/credito.c, ui/rizoma-admin.ui: [credito] rizoma-admin is saving the
+  modifications of the clients
+
+  * src/credito.c: [credito] CloseModificarWindow () is working with the new UI
+
+  * src/credito.c: [credito] ModificarCliente() is working with the new UI
+
+  * ui/rizoma-admin.ui: [ui] added the modificate client dialog for
+  rizoma-admin
+
+2008-06-06  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: [ui] Added handler for clicked action on
+  btn_invoice_guide button
+
+  * ui/rizoma-compras.ui: [ui] Many changes
+
+2008-06-06  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/credito.c: [credito] EliminarCliente is working with the new UI
+
+  * src/printing.c: [fix] LaunchApp() now release the process inmediatly 
+  Before were wating until the launched app (gnumeric) finish to then terminate
+  the forked process, now just release the process and terminate inmediatly
+
+  * src/credito.c: [fix] fixed the beahaviour of AddClient() function
+
+  * ui/rizoma-common.ui: [ui] common.ui/wnd_addclient changed the callbacks
+  from 'activate' to 'clicked'  Also were added a title to the wnd_addclient
+  window
+
+  * ui/rizoma-admin.ui: [UI] activated the hint rule in the treeview of clients
+  tab
+
+  * src/credito.c, src/credito.h: [credito] ChangeDetalle() is working with the
+  new UI
+
+  * src/credito.c: [credito] ToggleClientCredit() works with the new UI
+
+2008-06-05  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c, src/compras.h, ui/rizoma-compras.ui: Guide listed on first
+  treeview. Fill and cleanup of provider info done
+
+2008-06-05  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/credito.c: [fix] fixed a missing variable declaration
+
+  * src/admin.c: [admin] added a call to clientes_box() to setup the clients
+  tab
+
+  * src/credito.c, src/credito.h: [credito] the clients and the respective
+  debts
+
+  * src/postgres-functions.c: [deuda] changed the SQL query that inserts a new
+  deuda
+
+  * ui/rizoma-admin.ui: [ui] added 'Clientes' tab to rizoma-admin
+
+  * db/rizoma.structure: [DB] added PK to documentos_detalle and default FALSE
+  to deuda.pagada
+
+2008-06-05  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, src/compras.h, ui/rizoma-compras.ui: Dropped
+  unnecessary functions. Added function to deal with signals and do the real
+  work
+
+  * src/postgres-functions.c: Indented
+
+  * src/proveedores.c: Indented file
+
+2008-06-04  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: Added window to search a provider
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.ui: Changed names to
+  treeview on .ui file. Added columns and change con query to get guides
+
+  * ui/rizoma-compras.ui: Changed the interface that create an invoice from
+  guides
+
+2008-06-03  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.ui: Change to blank the default text of some labels
+
+2008-06-03  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [plpgsql] added the functino ranking_ventas()
+
+  * src/compras.c, ui/rizoma-compras.ui: [fix] fixed a focus behaviour
+
+  * ui/rizoma-compras.ui: [ui] made the ui smaller
+
+  * src/administracion_productos.c: [fix] fixed the sotck day label in
+  'mercaderias' tab
+
+  * src/postgres-functions.c: [doc] added doc to a SaveNewPasswd()
+
+  * ui/rizoma-admin.ui: [ui] added separation between the rows and cols of a
+  table
+
+  * src/usuario.c, ui/rizoma-admin.ui: [usuarios] the change password
+  functionality is working
+
+  * src/postgres-functions.c: [fix] now savenewpasswd() us the user_id (the pk)
+  instead of the username
+
+  * src/usuario.c, ui/rizoma-admin.ui: [usuarios] is loading the change
+  password dialog
+
+  * ui/rizoma-admin.ui: [ui] changed the password entry to not-visible
+
+2008-06-02  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/usuario.c, src/usuario.h: [usuario] now deletes users and add new
+  sellers
+
+  * src/postgres-functions.c: [fix] fixed the behaviour of AddNewSeller()
+  function  Now in the rut parameter recieves a string like "12345678-k" and
+  were fixed the sql query to insert a new seller
+
+  * ui/rizoma-admin.ui: [fix] fixed a callback connected to the wrong signal
+
+  * ui/rizoma-admin.ui: [ui] connected some signals
+
+  * src/usuario.c: [usuario] fix the behaviour of delete user functionality
+
+  * src/usuario.c, ui/rizoma-admin.ui: [usuario] added the delete user dialog
+  and it's respective code
+
+2008-06-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/admin.c, ui/rizoma-admin.ui: Added a quit message dialog and it's
+  respective logic
+
+  * src/impuestos.c: [fix] fixed the sql query that updates a tax
+
+2008-05-30  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/impuestos.c: [fix] fixed some things
+
+  * src/impuestos.c, src/impuestos.h: added the callback to close the edit tax
+  dialog
+
+  * src/impuestos.c: [impuestos] the load of the edit tax window is working
+
+  * ui/rizoma-admin.ui: [ui] connected a lost signal and added an accelerator
+
+  * ui/rizoma-admin.ui: [ui] added a new window to edit a tax
+
+  * src/impuestos.c: [fix] fiex compilation warning
+
+  * src/impuestos.c: [fix] displaying a message in the statusbar when the user
+  deletes a tax
+
+  * src/impuestos.c: [impuestos] now deletes taxes  Added a dialog to confirm
+  the operation of delete tax when the user tries to delete a tax that is being
+  used by some product
+
+  * src/impuestos.c: [impuestos] is working the add new tax
+
+  * ui/rizoma-admin.ui: [ui] changed the name of some widgets
+
+  * db/funciones.sql: [fix] when you insert a new tax to the name were added a
+  couple of '  This was because were using quote_literal() function
+
+  * src/datos_negocio.c: [datos_negocio] is saving the data
+
+  * src/parametros.c: [fix] removed some unused variables and some compile
+  warnings
+
+  * src/admin.c: [fix] fix the check of the .ui files were loaded correctly
+
+  * src/admin.c: [fix] rizoma-admin now uses rizoma_open_config() function
+
+  * src/config_file.c, src/config_file.h: now rizoma_open_config() function
+  checks for the RIZOMA_CONF envrionment variable  If this variable is found,
+  then that path is used for the configuration program, otherwise just falls to
+  the default $HOME/.rizoma, its pretty useful for debugging purpouse
+
+  * src/parametros.c: [parametros] is saving the information in the .rizoma
+
+  * src/utils.c: added a prototype of function gtk_entry_set_alert()  The idea
+  of this function is that to the given entry put a red border around widget,
+  but the 'red' color must be extracted from the color style of the gtk theme
+  and must not be hardcoded
+
+  * src/config_file.c, src/config_file.h: [fix] changed the signature of
+  rizoma_set_value() to use const gchar
+
+  * src/parametros.c: [parametros] is saving the new invoice number
+
+  * src/parametros.c, ui/rizoma-admin.ui: [parametros] now is saving the new
+  ticket number  The gtkentry displays a tooltip to inform what must be entered
+  in that entry
+
+2008-05-29  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/admin.c, src/control.c, src/parametros.c, src/parametros.h: the
+  preferences tab is loading the data
+
+  * ui/rizoma-admin.ui: [ui] renamed some widgets
+
+2008-05-28  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-admin.ui: [ui] added the widgets of preferences tab
+
+  * src/admin.c, src/datos_negocio.c, src/datos_negocio.h, ui/rizoma-admin.ui:
+  the information of the business are loaded
+
+  * src/admin.c, src/control.c, src/impuestos.c, ui/rizoma-admin.ui: the taxes
+  tab is filled
+
+  * src/impuestos.c, src/impuestos.h: changed Impuestos() to taxes_box()
+
+  * ui/Makefile.am: the make install process install rizoma-admin.ui and
+  rizoma-common.ui
+
+  * src/usuario.c, src/usuario.h: changed the signature of user_box() and now
+  works with the new UI
+
+  * src/admin.c, src/admin.h: added admin.c admin.h that is the start point of
+  rizoma-admin
+
+  * src/Makefile.am: configured rizoma-admin to compile
+
+  * ui/rizoma-admin.ui: [ui] removed the GtkFrame widget of the ui  That widget
+  is not generated in a proper way by glade, it generate a segfault of
+  gtkbuilder because the sintax of the xml is not the defined by GtkFrame as
+  GtkBuildable
+
+2008-05-27  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-admin.ui: [ui] added the UI of rizoma-admin  Still the widgets
+  need to be renamed and the .ui is not loaded by rizoma-admin
+
+2008-05-25  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: [fix] fixed a typo in informacion_producto() plpgsql
+  function
+
+  * db/funciones.sql: [db] dropped a redundant query
+
+  * db/funciones.sql: [db] deleted some 'raise notice' sentences used to debug
+
+  * db/funciones.sql: [db] added a helper function and fixe the zero division
+  bug  The bug was fixed assigning a 1 when there are no sales yet.
+
+2008-05-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/proveedores.c: ModificarProveedor function is working with the new UI
+
+  * ui/rizoma-common.ui: [fix] changed the of some widgets to avoid name
+  collision
+
+  * src/compras.c: [fix] now rizoma-compras is loading rizoma-common.ui
+
+  * src/proveedores.c: LlenarDatosProveedor is working with the new UI
+
+  * ui/rizoma-compras.ui: [ui] changed an entry for the rut for a label in
+  providers tab  Because the rut of a provider is it's primary key, so it can't
+  be changed.
+
+  * src/proveedores.c: [fix] changed the use from gtktreestore to a simple
+  gtkliststore
+
+  * src/proveedores.c, src/proveedores.h: The search of providers is working. 
+  The proveedores_box function changed the signature to remove the parameters
+  and now is just proveedores_box(void)
+
+  * src/compras.c: added a call to proveedores_box() to setup the providers tab
+
+  * src/proveedores.c: proveedores_box() was changed to work with the new UI
+
+  * ui/rizoma-compras.ui: [ui] the widgets of the providers tab now have names
+
+  * src/administracion_productos.c: [doc] Added some documentation
+
+2008-05-21  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c, src/administracion_productos.h,
+  ui/rizoma-compras.ui: Added CloseAjusteWin() and AjustarMercaderia() is
+  working
+
+  * src/administracion_productos.c, ui/rizoma-compras.ui: the AjusteWin()
+  function is displaying the information
+
+  * src/printing.c: [fix] indented some code and added a message validation
+
+  * src/printing.c: [fix] deleted trailing whitespace and reindented
+
+  * src/administracion_productos.c, src/administracion_productos.h,
+  src/compras.c, src/compras.h, ui/rizoma-compras.ui: [fix] fixed properties of
+  the UI, moved CloseProductDescription()  The function
+  CloseProductDescription() were living in compras.c, but this function is
+  related with the administracion_productos.c module, so it was moved to that
+  one.  This function close (hide) the details that were being edited in the
+  'mercaderias' tab.
+
+2008-05-20  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c, ui/rizoma-compras.ui: The dialog to
+  modificate a product is loading the data
+
+  * src/administracion_productos.c: using the status bar message to show a
+  succesful edition of products
+
+  * src/utils.c, src/utils.h: Added statusbar_push() to display messages in the
+  statusbar  There are two helper functions statusbar_push that display the
+  text message and statusbar_pop that removes the displayed message.  the
+  statusbar_pop is called using g_timeout_add() and never sould be used
+  manually.  Note: it seems that sometimes the message could turn crazy, so use
+  this functions with caution :P
+
+  * ui/rizoma-compras.ui: [ui] added a status bar
+
+  * ui/rizoma-compras.ui: [ui] added a new button to exit  The gtknotebook was
+  moved into a hbox and a new GTK_STOCK_EXIT button was added.
+
+  * src/administracion_productos.c: the function
+  GuardarmodificacionesProducto() is working
+
+2008-05-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c: [fix] added a validation
+
+  * src/postgres-functions.c: [fix] fixed the function DeleteProduct  the
+  function DeleteProduct now deletes using the primary key of the products
+  table
+
+  * src/administracion_productos.c: modified EliminarProductoDB() to work with
+  the new UI
+
+  * src/administracion_productos.c: FillFields is working like is expected
+
+  * src/administracion_productos.c: FillFields() function is ready
+
+  * src/administracion_productos.c, ui/rizoma-compras.ui: [ui] renamed some
+  widgets and connected some signals
+
+  * src/administracion_productos.c: the function BuscarProductosParaListar() is
+  ready  the function populates the treeview's model with the result of the
+  search.
+
+  * src/factura_more.c: [fix] fixed compilation warnings
+
+  * src/compras.c: added a call admini_box() in the compras_win() function 
+  This is to setup all the contents of the tab, maybe a nice a aproach to
+  reduce statup time of the main window is call this funcion only when for
+  first time that tab is visited, but that is a simple fix using a flag
+
+  * src/administracion_productos.c: [fix] fixed compilation troubles
+
+  * src/administracion_productos.c, src/administracion_productos.h: [ui]
+  admini_box() function modified to fit the gtkbuilder interface
+
+  * ui/rizoma-compras.ui: [ui] the widgets in 'mercaderia' tab now have propers
+  name
+
+  * src/ventas.c: [ui] the make invoice button is showed only if
+  PRINT_FACTURA=true  so, if the station will be enabled to print the invoice
+  you must setup the rizoma configurarition file with PRINT_FACTURA=true
+
+2008-05-18  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/factura_more.c: [doc] documented PrintDocument function
+
+  * src/factura_more.c: [invoice] using the get_ticket_number() function
+
+  * src/factura_more.c: [invoice] the invoice are generated, but the number of
+  invoices is still missing  The number of the invoices doesn't must be put by
+  the PrintFactura function, but the POS must know the current invoice number
+  for statistical and integrity issues
+
+  * src/ventas.c: [fix] changed the make invoice process to use the information
+  of clients  Previously were using the data in the providers (proveedores)
+  table and that's for the buy process not for the sales.
+
+  * src/credito.c: [client] changed the helper functions to add a new client 
+  To add a new client you can just call the function AddClient, this window
+  will raise a window and will handle the rest of the process
+
+  * src/postgres-functions.c: [fix] changed InsertClient function to adapt to
+  the new database schema
+
+  * ui/rizoma-common.ui: [ui] added a dialog to add new clients
+
+  * ui/rizoma-ventas.ui: [ui] added an accelerator to the cancel button of make
+  invoice dialog
+
+2008-05-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/factura_more.c, src/factura_more.h, src/postgres-functions.c,
+  src/postgres-functions.h, src/proveedores.c, src/ventas.c: working in the
+  make invoice process  still is buggy
+
+2008-05-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/utils.c: Fix a know bug related to the month that start from 0 to 11,
+  added after add locale support
+
+  * src/ChangeLog, src/compras.c, src/postgres-functions.c,
+  src/postgres-functions.h, src/utils.c, src/utils.h, ui/rizoma-compras.ui: Fix
+  some bugs. display_calendar() print the date according to current locale.
+  Dropped function to parse date. Ingress using guide working partially
+
+  * src/ChangeLog, src/compras.c, src/utils.c, src/utils.h,
+  ui/rizoma-compras.ui: Some fix to deal with date and prepare the step to
+  ingress with guide
+
+2008-05-14  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: fixed a bug related to the lower(integer) plpgsql
+  function  added a cast to the rut column in the buscar_proveedor plpgsql
+  function
+
+2008-05-12  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: fixed some bugs in the make invoice process
+
+2008-05-12  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c, ui/rizoma-compras.ui: Made some changes to support the
+  ingress using guide. Added some functions nothing big
+
+  * src/ChangeLog, src/compras.c, src/compras.h, src/postgres-functions.c,
+  src/postgres-functions.h, ui/rizoma-compras.ui: Some fix for functions. Clean
+  up of un-useful functions. Now we can ingress a buy with an invoice an
+  complate with just six steps
+
+  * src/ChangeLog, src/utils.c: Fix a minor bug on the display calendar
+  funciton and add a valid date check
+
+  * src/ChangeLog, src/compras.c: Set a new way to check the date of documents
+
+2008-05-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c, ui/rizoma-ventas.ui: added a handler and fixed the data that
+  puts into the GtkCompletion model
+
+  * src/proveedores.c: added an auxiliary variable to avoid a mem leak
+
+  * src/proveedores.c: deleted commented code
+
+  * src/proveedores.c, src/proveedores.h, src/ventas.c, ui/rizoma-common.ui:
+  the addproveedor window is raised when the user a provider that does not
+  exists
+
+  * src/config_file.c: deleted unused variable
+
+  * src/Makefile.am: added provedores.[ch] like dependency for rizoma-ventas
+
+  * src/proveedores.c, ui/rizoma-common.ui: changed close proveedor window to
+  fit the ui and connected the signals
+
+  * src/proveedores.c, ui/rizoma-common.ui: fixed AddProveedor to fit to the
+  new window  the entries were renamed to a apropiate name
+
+  * src/errors.c: deleted trailing whitespace and reindented
+
+  * ui/rizoma-common.ui: added a common ui to be used _like_ a ui components
+  library  this file must be binary agnostic, because can be used by any of the
+  rizoma files (ventas, compras, etc..)
+
+  * src/proveedores.c, src/ventas.c: add the raise of the add provider window. 
+  When you introduce a rut that does not exist (in the make invoice dialog)
+  this window must appear to let you create a new provider
+
+2008-05-07  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.ui: configured the invoice dialog to center on the father
+  and modal
+
+  * src/factura_more.c: the printing of the factura is done  all these new
+  parameters to setup the invoice and inform the program where must print the
+  data (the values were used just to test, and must be customized to every
+  invoice layout).  FACTURA_FILE_PREFIX=invoice PRINT_FACTURA=true FACTURA_SIZE
+  = 400;400; FACTURA_CLIENTE = 1;1; FACTURA_RUT = 1;15; FACTURA_ADDRESS = 1;30;
+  FACTURA_GIRO = 1;45; FACTURA_COMUNA = 1;60; FACTURA_PHONE = 1;75;
+  FACTURA_DETAIL = 1;200; FACTURA_CODIGO = 1;200; FACTURA_DESCRIPCION=40;200;
+  FACTURA_CANT=150;200; FACTURA_UNI=210;200; FACTURA_TOTAL=250;200;
+  FACTURA_SUBTOTAL=1;250; FACTURA_IVA=1;280; FACTURA_TOTAL_FINAL=1;320;
+  FONT_METRICS=/usr/lib/openoffice/share/psprint/fontmetric/ FONT=Courier
+
+  * src/factura_more.c, src/postgres-functions.c, src/ventas.c: finished the
+  invoice process for a client that already exists  the function PS_findfont is
+  not working, it complains about a .afm file that needs for some metrics, the
+  documentation nothing says about this error
+
+  * src/config_file.c, src/config_file.h: added some helper functions and
+  rizoma_set_double_list
+
+2008-05-06  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/config_file.c: added rizoma_open_config() function to avoid duplicated
+  code
+
+  * src/ventas.c, ui/rizoma-ventas.ui: added the callback
+  on_btn_make_invoice_clicked
+
+  * src/postgres-functions.c, src/ventas.c, src/ventas.h, ui/rizoma-ventas.ui:
+  added the invoice dialog and the population of the client data  still needs
+  to be implemented the invoice button in the dialog
+
+2008-05-06  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/utils.c, ui/rizoma-compras.ui: Add function
+  validate_string. Drop the key-press event on entry_buy_barcode
+
+  * ui/rizoma-compras.ui: Change to non-editable the GtkEntry to store the
+  invoice date
+
+  * src/ChangeLog, src/utils.c, src/utils.h, ui/rizoma-compras.ui: Change the
+  use of display_calendar on wnd_ingress_factura. Some order an cleanup on
+  display_calendar function
+
+2008-05-05  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, src/utils.c, src/utils.h,
+  ui/rizoma-compras.ui: Added display_calendar function
+
+2008-05-04  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c, ui/rizoma-compras.ui: Added the quit_message window to the
+  delete event on wnd_compras
+
+2008-05-04  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/factura_more.c: PrintFactura seems to be ready to be tested  the
+  function still needs to be called from the proper function
+
+  * src/Makefile.am: added factura_more to rizoma_compras_SOURCES
+
+2008-05-04  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/NOTICE.ui: Deleted all the .glade files because we will use Glade 3.5.2
+  with GtkBuilder support. Renamed NOTICE.glade.ui to NOTICE.ui now it just
+  covered all the .ui files, it will remain on the git repository for all
+  versions
+
+  * ui/NOTICE.ui, ui/NOTICE.ui-glade, ui/rizoma-compras.glade,
+  ui/rizoma-config.glade, ui/rizoma-login.glade, ui/rizoma-ventas.glade,
+  ui/rizoma.glade: Deleted all the .glade files because we will use Glade 3.5.2
+  with GtkBuilder support. Renamed NOTICE.glade.ui to NOTICE.ui now it just
+  covered all the .ui files, it will remain on the git repository for all
+  versions
+
+  * ui/rizoma-compras.ui: Added ingress "guia" window
+
+  * ui/rizoma-compras.glade, ui/rizoma-compras.ui: Created the window to select
+  how a buy will ingress.
+
+2008-05-03  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c, ui/rizoma-compras.glade, ui/rizoma-compras.ui: Add window to
+  select ingress option and window fill "factura" data
+
+2008-05-03  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/config_file.c, src/config_file.h: fixed the compilation warnings
+
+  * src/config_file.c, src/config_file.h: added the function
+  rizoma_get_double_list
+
+  * db/rizoma.structure: added the comuna to the table cliente
+
+  * src/factura_more.c, src/ventas.c: just indentation
+
+  * rizoma.doxygen: added the flag to generate an XML of the tags
+
+  * src/postgres-functions.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui:
+  changed a set of 'if' to a seitch-case  dropped the check button from the UI
+
+  * src/ventas.c: [doc] documented FillProductSell function
+
+2008-05-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c: added an auxiliary variable to avoid memory leak
+
+  * src/postgres-functions.c: added an auxiliary variable to avoid memory leak
+
+  * src/postgres-functions.c: added an auxiliary variable to avoid memory leak
+
+  * src/ventas.c: just indentation
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: the stock on
+  search window is aligned at the right  the stock column now shows round the
+  value to 3 decimal digits
+
+2008-04-30  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c, src/ventas.c: fixed the bug related to sale of
+  fractional quantities  always must be considered the quantity like a float
+  value, unless you previously checked if the product is sold by fraction
+
+2008-04-28  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.glade, ui/rizoma-compras.ui: Added some windows that will
+  be used, add_factura, add_guia, add_new_product
+
+2008-04-27  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: Fix the accept of pending requests
+
+  * src/compras.c, ui/rizoma-compras.glade, ui/rizoma-compras.ui: Finished
+  second step, now it shows the pending request detail
+
+  * src/compras.c, ui/rizoma-compras.glade, ui/rizoma-compras.ui: Use of
+  GtkBuilder to the first step( show pending requests and calculate totals) of
+  pending requests products
+
+2008-04-27  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: fixed the way that the discount variable is seted  now check
+  if the entry has some value, before assume that the contents of the entry
+  must be the value of the discount variable
+
+2008-04-27  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.glade,
+  ui/rizoma-compras.ui: Added all the neccesary to start the buy process using
+  gtk-builder, needs work on the second part and add/edit products. should it
+  be the same window?
+
+2008-04-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * TODO: added 'document the functions' to the TODO file
+
+2008-04-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: modified some callbacks of the
+  credit dialogs
+
+  * src/credito.c, src/credito.h: added the fill_credit_data function  this
+  function helps to populate the data into the credit dialog
+
+  * src/ventas.c, src/ventas.h: fixed the way that display the stock  added
+  some functions that help to the implementation of the sales to credit
+
+  * db/funciones.sql, src/ventas.c: modified informacion_producto and added to
+  ventas.c on_btn_credit_sale_clicked  changed the query variable from the
+  lenth of 500 to an undefined length  added a callback to the button that sale
+  to credit
+
+2008-04-12  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/rizoma.structure: added a unique restriction for the short code of a
+  product
+
+2008-04-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: delete trailing whitespace
+
+  * db/funciones.sql: some indentation and a comment
+
+  * db/funciones.sql: added stock_day as output parameter
+
+  * src/credito.c, src/credito.h: added the search_client function to use the
+  builder  also changed the signature of LimiteCredito from char* to const
+  char*
+
+  * src/postgres-functions.c, src/postgres-functions.h: changed the signature
+  of RutExist from char* to const char*
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: modified the ventas gui
+
+2008-04-10  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/Makefile.am: added rizoma-compras.ui to the install procedure of make
+
+  * src/ventas.c: if the user pays with 0 the credit dialog appears
+
+2008-04-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * rizoma.doxygen: added call and caller graphs to doxygen
+
+2008-04-05  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, src/compras.h, src/ventas.c,
+  ui/rizoma-compras.glade, ui/rizoma-compras.ui: Added some functionality to
+  the search of products on buy window. Check error when load .ui files to
+  ventas_win and compras_win
+
+2008-04-05  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: droped the use of
+  GnomeDateEdit and replaced with a bunch of entries  GnomeDateEdit currently
+  doesn't implement the gtkbuildable interface, so cause that gtkbuilder get
+  confused
+
+2008-04-02  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/credito.c: modified search_client() to use the gtkbuilder interface to
+  show the search results
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: added the wnd_client_search
+  window
+
+  * src/credito.c: deleted trailing whitespace
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: added the interface for the
+  credit and check sales
+
+  * rizoma.doxygen: changed some flags to the doxygen configuration
+
+2008-03-31  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/config_file.c, src/config_file.h, src/ventas.c: added the function
+  rizoma_get_value_boolean that returns a gboolean
+
+  * src/ventas.c: deleted commented code
+
+  * src/ventas.c: added a comment
+
+  * src/ventas.c: deleted commented code
+
+  * src/datos_negocio.c: changed PQgetvalue by PQvaluebycol
+
+2008-03-29  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/config_file.c, src/config_file.h: added the function
+  rizoma_get_value_int to obtain an int value from .rizoma
+
+  * src/ventas.c: added the description to the FillProductSell
+
+2008-03-29  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c: Fix a missing var
+
+  * src/ChangeLog, src/compras.c, src/ventas.c, ui/rizoma-compras.glade,
+  ui/rizoma-compras.ui: Use of .ui file on search
+
+  * db/funciones.sql: cast data tyype
+
+  * db/ChangeLog, db/funciones.sql: Read the ChangeLog :D
+
+2008-03-29  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: deleted the commented code
+
+  * src/ventas.c: when you introduce a barcode that has not stock a message is
+  displayed
+
+  * src/errors.c, src/ventas.c: when you introduce a short code that has stock
+  0 display a warning message
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed the label
+  'product_label' like the boss said
+
+2008-03-26  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * rizoma.doxygen: Deleted trailing whitespaces on .doxygen file
+
+2008-03-26  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: added a check
+
+  * src/ventas.c, src/ventas.h: deleted the function SearchProductByName
+  because were not used
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed the focus
+  behaviour of the tipo_venta_win_venta window  note: this window _must_ be
+  renamed :P
+
+  * src/ventas.c: fixed the search window  now it is posible to search products
+  in the search window
+
+2008-03-26  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-compras.glade: Added some buttons, order labels and add some
+  functions to signals
+
+2008-03-25  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: deleted a few lines of commented code
+
+  * ChangeLog, src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed
+  the label od the search window
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: changed the signal for the
+  button from activate to clicked
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed the
+  behaviour of the focus in the tipo_venta_win_venta window
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: changed the signal Vender to
+  on_sell_button_clicked
+
+  * src/ventas.c: fix compilation error
+
+  * ChangeLog, db/funciones.sql, src/ventas.c: changed the function
+  informacion_producto from plpgsql and other fixes
+
+  * ChangeLog, autogen.sh: added  when calling the configure script
+
+  * ChangeLog, src/ventas.c, src/ventas.h: added some a comments and changed
+  the signature of on_sell_button_clicked
+
+  * .gitignore, prepareChangelog.py: added a helper script to prepara the
+  changelog file
+
+  * .gitignore: just added a commentary
+
+2008-03-24  Felipe Reyes <felipereyes@gmail.com>
+
+  * rizoma.doxygen: some tweaks to the config if doxygen
+
+2008-03-23  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ChangeLog, src/compras.c, src/compras.h: Add code to the function
+  on_buy_barcode_entry_activate
+
+  * ui/rizoma-compras.glade, ui/rizoma-compras.ui: Added name to some buttons
+  an entries
+
+  * src/ChangeLog, src/compras.c, ui/rizoma-compras.glade,
+  ui/rizoma-compras.ui: Added functions for actions. There's nothing working
+  yet
+
+  * .gitignore, src/ChangeLog, src/Makefile.am, src/compras.c, src/compras.h,
+  src/config_file.c, src/config_file.h, src/manejo_productos.c, src/ventas.c,
+  ui/rizoma-compras.glade, ui/rizoma-compras.ui: Commented all the old code.
+  Added the use of GtkBuilder to build the gui. Created the new binary file
+  rizoma-compras.
+
+2008-03-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * .gitignore, rizoma.doxygen: Added doxygen configuration file and an entry
+  to gitignore  The entry in gitignore is to avoid the addition by accident of
+  the docs generated by doxygen
+
+2008-03-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: rewritten the callback associated to the sale button  In the
+  window tipo_venta_win_venta, now the callback Vender is named
+  on_sell_button_clicked and only handles sales using ticket (vale), ticket
+  (boleta) and always with cash
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: added a stock image to delete
+  producto button
+
+2008-03-22  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/administracion_productos.c, src/administracion_productos.h,
+  src/boleta.c, src/boleta.h, src/caja.c, src/caja.h, src/comisiones.c,
+  src/comisiones.h, src/compras.c, src/compras.h, src/config_file.c,
+  src/config_file.h, src/control.c, src/control.h, src/credito.c,
+  src/credito.h, src/datos.h, src/datos_negocio.c, src/datos_negocio.h,
+  src/dimentions.h, src/encriptar.c, src/encriptar.h, src/errors.c,
+  src/errors.h, src/factura_more.c, src/factura_more.h, src/impuestos.c,
+  src/impuestos.h, src/main.c, src/main.h, src/manejo_productos.c,
+  src/manejo_productos.h, src/parametros.c, src/parametros.h,
+  src/postgres-functions.c, src/postgres-functions.h, src/printing.c,
+  src/printing.h, src/proveedores.c, src/proveedores.h, src/rizoma-config.c,
+  src/rizoma_errors.c, src/rizoma_errors.h, src/tiempo.c, src/tiempo.h,
+  src/tipos.h, src/usuario.c, src/usuario.h, src/utils.c, src/utils.h,
+  src/vale.c, src/vale.h, src/ventas.c, src/ventas.h, src/ventas_stats.c,
+  src/ventas_stats.h: Change the word ident to indent on headers files. Fix the
+  sell process for a seller
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Adde window to show the print
+  button to a seller
+
+  * db/funciones.sql: Delete of unnecessary comments
+
+2008-03-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed some bugs
+  related to GtkBuilder
+
+  * src/ventas.c: fixed an introduced bug :D
+
+  * src/ventas.c: fixed some compilation warnings and errors
+
+  * src/ventas.c: changed from strcmp to g_str_equal
+
+  * src/ventas.c: added a aux variable to avoid the confusion of nested
+  functions
+
+  * src/ventas.c: changed from gtk_widget_set_focus to gtk_widget_grab_focus
+  and other stuffs
+
+  * src/ventas.c: deleted a unnecessary comparison
+
+  * src/ventas.c: added a warning message when try to sale a negative quantity
+
+2008-03-22  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/boleta.c: Drop \t and re-indent
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Fix the problem
+  that cancel button didn't close the "tipo_venta" window. Deleted commented
+  code. Fixed problem with ticket
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Fix problem of hbox button
+  with width request = 1
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Add border to the main box
+
+  * src/ventas.c: Fix silly bug
+
+2008-03-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c, src/rizoma-config.c, src/ventas.c,
+  ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed the conflicts
+
+2008-03-22  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Change of
+  product_entry to product_label. Fix bug produced when discount entry is empty
+
+  * src/main.c: Deleted a big commented region
+
+2008-03-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/volcar_funciones.sh: droped the use of $HOME/.pgpass
+
+2008-03-22  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Replace all the hbox added on
+  the main vbox by a table, this is only for the product description and
+  add/clear buttons
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Add quit button.
+  Change to label the entries product_entry and codigo_corto. Added accelerator
+  to quit button F12
+
+  * src/rizoma-config.c: Add the keys FULLSCREEN and LOGO to default profile
+
+  * db/funciones.sql: Fix sintax error on informacion_producto
+
+  * db/volcar_funciones.sh: Fix problem at the moment of remove the file at
+  /tmp
+
+  * db/funciones.sql, src/administracion_productos.c,
+  src/administracion_productos.h, src/boleta.c, src/boleta.h, src/caja.c,
+  src/caja.h, src/comisiones.c, src/comisiones.h, src/compras.c, src/compras.h,
+  src/config_file.c, src/config_file.h, src/control.c, src/control.h,
+  src/credito.c, src/credito.h, src/datos.h, src/datos_negocio.c,
+  src/datos_negocio.h, src/dimentions.h, src/encriptar.c, src/encriptar.h,
+  src/errors.c, src/errors.h, src/factura_more.c, src/factura_more.h,
+  src/impuestos.c, src/impuestos.h, src/main.c, src/main.h,
+  src/manejo_productos.c, src/manejo_productos.h, src/parametros.c,
+  src/parametros.h, src/postgres-functions.c, src/postgres-functions.h,
+  src/printing.c, src/printing.h, src/proveedores.c, src/proveedores.h,
+  src/rizoma-config.c, src/rizoma_errors.c, src/rizoma_errors.h, src/tiempo.c,
+  src/tiempo.h, src/tipos.h, src/usuario.c, src/usuario.h, src/utils.c,
+  src/utils.h, src/vale.c, src/vale.h, src/ventas.c, src/ventas.h,
+  src/ventas_stats.c, src/ventas_stats.h, ui/rizoma-ventas.glade,
+  ui/rizoma-ventas.ui: Fix problem with merge 9d672988... that cause a lose of
+  importants peace of code
+
+2008-03-21  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/volcar_funciones.sh: Fix problems to drop pre-exists functions, now
+  create a file run it into the db and then delete it
+
+2008-03-20  Felipe Reyes <felipereyes@gmail.com>
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: changed to not fill propery a
+  hbox
+
+  * src/postgres-functions.c: documented a function and changed some querys to
+  use the pg functions
+
+  * db/funciones.sql, src/postgres-functions.c, src/ventas.c,
+  ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: fixed the sale process  when you
+  select to sale (vender) now display and obtain in a proper way the id of the
+  saler.  added the plpgsql registrar_venta_detalle to make it work in
+  corcordance with the new schema.
+
+  * src/ventas.c: deleted commented code
+
+  * src/ventas.c: added the FULLSCREEN option to .rizoma  this option if is
+  seted to YES will put the ventas_gui window in fullscreen mode, to make it
+  look pretty sweet in the shops
+
+  * src/administracion_productos.c, src/boleta.c, src/caja.c, src/comisiones.c,
+  src/compras.c, src/config_file.c, src/control.c, src/credito.c,
+  src/datos_negocio.c, src/encriptar.c, src/factura_more.c, src/impuestos.c,
+  src/main.c, src/manejo_productos.c, src/parametros.c,
+  src/postgres-functions.c, src/printing.c, src/proveedores.c,
+  src/rizoma-config.c, src/rizoma_errors.c, src/tiempo.c, src/usuario.c,
+  src/utils.c, src/vale.c, src/ventas.c, src/ventas_stats.c: added
+  c-indentation-style: gnu to the C files
+
+  * src/main.c, src/ventas.c, src/ventas.h, ui/rizoma-ventas.glade,
+  ui/rizoma-ventas.ui: fixed the delete window event  added to rizoma-ventas a
+  quit_message dialog (stolen from rizoma.glade)
+
+  * src/ventas.c: fixed the move focus when the activate signal is emited in
+  the cantidad entry
+
+  * src/ventas.c: fixed the fill product information feature
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: added the
+  'ventas_buscar' toplevel window  this window displays the results of a search
+
+2008-03-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c, src/administracion_productos.h,
+  src/boleta.c, src/boleta.h, src/caja.c, src/caja.h, src/comisiones.c,
+  src/comisiones.h, src/compras.c, src/compras.h, src/config_file.c,
+  src/config_file.h, src/control.c, src/control.h, src/credito.c,
+  src/credito.h, src/datos.h, src/datos_negocio.c, src/datos_negocio.h,
+  src/dimentions.h, src/encriptar.c, src/encriptar.h, src/errors.c,
+  src/errors.h, src/factura_more.c, src/factura_more.h, src/impuestos.c,
+  src/impuestos.h, src/main.c, src/main.h, src/manejo_productos.c,
+  src/manejo_productos.h, src/parametros.c, src/parametros.h,
+  src/postgres-functions.c, src/postgres-functions.h, src/printing.c,
+  src/printing.h, src/proveedores.c, src/proveedores.h, src/rizoma-config.c,
+  src/rizoma_errors.c, src/rizoma_errors.h, src/tiempo.c, src/tiempo.h,
+  src/tipos.h, src/usuario.c, src/usuario.h, src/utils.c, src/utils.h,
+  src/vale.c, src/vale.h, src/ventas.c, src/ventas.h, src/ventas_stats.c,
+  src/ventas_stats.h: shutting down the indent-tabs-mode
+
+  * src/administracion_productos.h, src/boleta.h, src/caja.h, src/comisiones.h,
+  src/compras.h, src/config_file.h, src/control.h, src/credito.h, src/datos.h,
+  src/datos_negocio.h, src/dimentions.h, src/encriptar.h, src/errors.h,
+  src/factura_more.h, src/impuestos.h, src/main.h, src/manejo_productos.h,
+  src/parametros.h, src/postgres-functions.h, src/printing.h,
+  src/proveedores.h, src/rizoma_errors.h, src/tiempo.h, src/tipos.h,
+  src/usuario.h, src/utils.h, src/vale.h, src/ventas.h, src/ventas_stats.h:
+  added a format header to the .h files to use the style guidelines defined 
+  Mode: C; tab-width: 4; indent-tabs-mode: f; c-basic-offset: 4
+
+  * src/administracion_productos.c, src/boleta.c, src/caja.c, src/comisiones.c,
+  src/compras.c, src/config_file.c, src/control.c, src/credito.c,
+  src/datos_negocio.c, src/encriptar.c, src/errors.c, src/factura_more.c,
+  src/impuestos.c, src/main.c, src/manejo_productos.c, src/parametros.c,
+  src/postgres-functions.c, src/printing.c, src/proveedores.c,
+  src/rizoma-config.c, src/rizoma_errors.c, src/tiempo.c, src/usuario.c,
+  src/utils.c, src/vale.c, src/ventas.c, src/ventas_stats.c: added a format
+  header to the files to use the style guidelines defined  Mode: C; tab-width:
+  4; indent-tabs-mode: f; c-basic-offset: 4
+
+2008-03-18  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * db/volcar_funciones.sh: Fix the call to psql when need to drop the
+  functions
+
+2008-03-16  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/postgres-functions.h: Fix indentatin problems
+
+  * src/compras.c, src/impuestos.c, src/manejo_productos.c,
+  src/postgres-functions.c, src/postgres-functions.h, src/proveedores.c,
+  src/rizoma_errors.c, src/rizoma_errors.h, src/utils.h: Fix all compilation
+  errors
+
+  * .gitignore: Delete src/rizoma from the .gitignore files. We don't need it
+  anymore
+
+2008-03-12  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/ventas.c: changed 'ventas_buscar_entry' by 'barcode_entry'  because
+  that widget name does not exist in the rizoma-ventas.ui and produce the
+  search segfault
+
+  * src/usuario.c: fix some compile errors
+
+2008-03-10  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/usuario.c: changed some PQgetvalue with PQvaluebycol and some
+  indentation
+
+  * db/funciones.sql: changed the I/O parameters of the plpgsql function
+  select_asistencia
+
+  * src/usuario.c: deleted trailing whitespace
+
+2008-03-08  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/compras.c, src/compras.h, src/proveedores.c: Fix some warnings. Drop
+  all the tabs and re-indent compras.c and proveedores.c
+
+  * src/Makefile.am, src/caja.c, src/compras.c, src/datos.h, src/main.c,
+  src/utils.c, src/utils.h, src/ventas_stats.c: Drop the use of
+  ventas_stats.c|h
+
+2008-03-06  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * AUTHORS: Add a missing > to the AUTHORS file
+
+2008-03-04  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/ventas.c: Fix all the problems since the sell start until we select a
+  new seller on the window. Now we can sell without problems
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Change the signal for the
+  CloseWindowChangeSeller (activate -> clicked) on cancel button
+
+  * db/funciones.sql: Assign datos.barcode to barcode out var
+
+  * src/ventas.c: Add window change seller to use the glade interface
+
+  * src/postgres-functions.c: Fix the query to insert a new sell detail to
+  "venta_detalle" table. Fix the query to get the net price
+
+  * ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Add names to entrys and
+  labels. Fix some errors on windows invocations. Add modal propierty to
+  windows
+
+  * db/rizoma.structure: Change to serial the id column of the "venta_detalle"
+  table
+
+2008-03-03  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * .gitignore, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Added name to
+  labels and entrys to rizoma-ventas.ui. Added rizoma-admin to .gitignore
+
+2008-03-03  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c, src/proveedores.c: fixed the view details of a
+  provider
+
+2008-03-02  Felipe Reyes <felipereyes@gmail.com>
+
+  * .gitignore: modified gitignore to avoid the inclusion of cscope cache files
+
+  * src/administracion_productos.c: fixed the search product function
+  (BuscarProductosParaListar)  the were modifying the model in a bad way,
+  assign the barcode to the short code column, and the short code to the
+  barcode column
+
+  * db/funciones.sql, src/administracion_productos.c: fixed the visualizations
+  of the product's details  the plpgsql function was modified, the IO
+  parameters and also some of the indentation  deleted a lot of code duplicated
+  (probably consequence of a bad merge)
+
+  * db/funciones.sql: changed I/O parameters of buscar_producto plpgsql
+  function  the output columns were missing in the definition of the funcion,
+  you must delete the old function before load this new one into your database
+
+  * src/administracion_productos.c, src/postgres-functions.c: fixed the combo
+  box of providers and the GetDayToSell function
+
+  * src/administracion_productos.c: fixed the view details of the products in
+  the 'mercaderia' tab
+
+2008-03-01  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * .gitignore: Add rizoma-ventas to .gitignore
+
+  * .gitignore, db/funciones.sql, src/administracion_productos.c,
+  src/config_file.c, src/datos_negocio.c, src/datos_negocio.h,
+  src/factura_more.c, src/postgres-functions.c, src/printing.c, src/vale.c,
+  src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Add some files to
+  .gitignore. Add `total_vendido` to informacion_producto function. Some
+  indent. Drop all warnings except those on postgres-functions.c. Fix a bug
+  with the use of entrys.
+
+  * db/volcar_funciones.sh: Add the file volcar_funciones.sh to dump al pgpsql
+  functions to a defined db
+
+2008-03-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/proveedores.c: fixed the providers list and search system
+
+  * src/proveedores.c: reindented file and deleted trailing white spaces
+
+  * src/postgres-functions.c, src/ventas.c: fixed add proveedor function
+
+  * src/postgres-functions.c: reparada la compilacion
+
+2008-03-01  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/factura_more.c, src/postgres-functions.c, src/vale.c, src/ventas.c:
+  Drop \t from files and re-ident according to gnu style. Drop a few
+  compilation errors related to the function lround|llround
+
+2008-02-27  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c: added some debugging printing errors over stderr
+  when detects some error  this is useful when the sql sentence was constructed
+  in a bad way
+
+2008-02-25  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/Makefile.am, src/main.c, src/ventas.c, src/ventas.h,
+  ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Compilation without errors. Use
+  of GtkBuilder to show the window TipoVenta
+
+2008-02-25  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: removido un acento
+
+2008-02-25  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/Makefile.am, src/caja.c, src/compras.c, src/compras.h, src/utils.c,
+  src/utils.h, src/ventas.c, src/ventas_stats.c, src/ventas_stats.h: Clean on
+  src/Makefile.am to support compile rizoma-ventas
+
+2008-02-25  Felipe Reyes <felipereyes@gmail.com>
+
+  * .gitignore: added a description for gitweb and added *.[ao] to gitignore
+
+  * .gitignore, .svnignore: usando .gitignore para prevenir el agregado de
+  archivos que no corresponden
+
+2008-02-25  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/Makefile.am, src/credito.c, src/datos.h, src/main.c, src/main.h,
+  src/ventas.c: Added the first changes to use separate binary files to sell
+  and admin
+
+  * src/utils.c, src/utils.h: Added the first changes to use separate binary
+  files to sell and admin
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui: Sell process
+  working
+
+  * src/postgres-functions.c: fix some compilation problems with
+  postgres-functions.c
+
+2008-02-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c: cambios en los nombres de tablas
+
+  * src/postgres-functions.c: cambios en los nombres de tablas
+
+  * src/postgres-functions.c: cambios en los nombres de las tablas y agregadas
+  variables auxiliares
+
+  * src/postgres-functions.c: corregidas algunas cosas de indentacion y cosas
+  pequenas
+
+  * src/postgres-functions.c: cambiado nombre de tabla del viejo esquema al
+  nuevo
+
+  * src/postgres-functions.c: reparadas varias cosas en CancelarDeudas
+
+  * src/postgres-functions.c: cambio de string literal por la macro G_STRFUNC
+
+2008-02-23  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, debian/README.Debian, debian/changelog, debian/compat,
+  debian/control, debian/copyright, debian/dirs, debian/menu.ex, debian/rules,
+  src/ventas.c: Eliminacion de la carpeta debian
+
+2008-02-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c: agregada la definicion de la variable gchar *q
+  para reparar el error
+
+  * src/postgres-functions.c: cambiado el nombre de tabla al nuevo esquema,
+  agregada una variable para poder liberar la memoria reservada por
+  g_strdup_printf
+
+  * src/postgres-functions.c: cambiado un string literal para el nombre de la
+  funcion por la macro de glib G_STRFUNC
+
+  * src/postgres-functions.c: cambiadas algunos nombres de tablas del viejo
+  esquema al nuevo esquema, ademas algunas variables agregadas para reducir los
+  memory leaks
+
+  * src/postgres-functions.c: reindentado el archivo
+
+  * src/postgres-functions.c: actualizado el nombre de una tabla que era
+  llamada (compras -> compra)
+
+  * src/postgres-functions.c: reparado un bug que no permitia que se ingresaran
+  las compras al recibir un pedido en la base de datos
+
+  * src/compras.c: borrado codigo comentado
+
+2008-02-23  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/main.c, src/main.h, ui/Makefile.am, ui/rizoma.glade, ui/rizoma.ui:
+  Arregla problema de signal delete (la x) en main_window
+
+  * src/main.c, src/ventas.c: Agrega el singals connect perdido
+
+  * src/ventas.c, ui/rizoma-ventas.glade, ui/rizoma-ventas.ui, ui/rizoma.glade,
+  ui/rizoma.ui: crea archivo rizoma-ventas.glade/ui. usa un .ui solo para
+  mostrar ventas. Paso para crear rizoma-ventas
+
+2008-02-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/main.c: gtk_timeout_add -> g_timeout_add
+
+  * src/main.c: reemplazada gtk_timeout_add por g_timeout_add (debido a que
+  esta deprecated)
+
+  * src/main.c: borrada una linea duplicada
+
+2008-02-23  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * configure.in, db/funciones.sql, src/caja.c, src/tipos.h, src/ventas.c,
+  ui/rizoma.glade, ui/rizoma.ui: Sorry felipe! :D. Varios cambios en la
+  interfaz de venta para usar gtkbuilder
+
+2008-02-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c: fix un bug en el dato que se le entrega a
+  la funcion de postgres que retorna la informacion de un producto (en la
+  pestana de Mercaderia)
+
+  * db/funciones.sql: fixed funcion select_merma, se caia cuando se trabata de
+  obtener de las unidades de merma de un producto que no la tenia, ahora revisa
+  si existe merma (en caso de no tenerla retorna 0) y luego retorna las
+  unidades de merma del producto
+
+  * src/main.c: archivo reindentado
+
+2008-02-20  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/main.c: Solucionado el problema de los atajos de teclas
+
+  * : Eliminacion de archivo basura
+
+  * src/main.c: Agrega message dialog en glade para el quit. Agrega funcion
+  main_key_handler para manejar las presiones de teclas generales
+
+  * src/main.c, src/main.h, src/rizoma-config.c, ui/rizoma.glade, ui/rizoma.ui:
+  Agrega message dialog en glade para el quit. Agrega funcion main_key_handler
+  para manejar las presiones de teclas generales
+
+  * AUTHORS, Makefile.am, pixmaps/Makefile.am, pixmaps/tux.xpm,
+  src/config_file.c, src/datos.h, src/main.c, src/tiempo.c, ui/Makefile.am,
+  ui/rizoma.glade, ui/rizoma.ui: Edicion del archivo AUTHOS. Se eliminan los
+  pixmaps y se deja al usuario elegir una imagen. Se usa gtkbuilder para la
+  pantalla principal. Falta resolver el tema de los accel
+
+2008-02-20  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: mejoras en el flujo de trabajo de las compras 
+  get_compras(barcode) ahora funciona como debe insertar_detalle_compra ahora
+  funciona se agrega la funcion get_fifo(barcode)  se hacen varias
+  modificaciones para que funcione el ingreso de compras
+
+2008-02-19  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * acinclude.m4, m4/gnome-print.m4, src/compras.c, src/config_file.c,
+  src/config_file.h, src/main.c, src/rizoma_errors.c, src/rizoma_errors.h,
+  src/tipos.h, ui/rizoma-login.glade, ui/rizoma-login.ui: Mueve el archivo
+  aclocal.m4 a m4/gnome-print.m4. Agrega soporte para seleccionar perfil
+
+  * ui/rizoma-login.glade, ui/rizoma-login.ui: cambios
+
+  * ui/rizoma-login.glade, ui/rizoma-login.ui: Agrega combobox para seleccionar
+  el perfil de coneccion
+
+  * m4/gksu.m4, m4/pslib.m4, src/postgres-functions.c, src/rizoma-config.c,
+  src/vale.c: Algunos cambios visuales en los m4 y limpieza de espacios blancos
+
+  * pixmaps/tux.xpm: Correccion en los comentarios del xpm
+
+2008-02-18  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * configure.in: Nos aventuramos y cambiamos a la version 0.3
+
+  * db/Makefile.am: Eliminacion de archivos borrados desde Makefile.am
+
+  * db/NOTICE.dia, ui/NOTICE.ui-glade: Agrega NOTICE.* files
+
+  * src/Makefile.am, src/fake_buy.c: Mueve el archivoe fake_buy a rizoma-utils
+
+  * src/main.h, src/tiempo.h: Correccion de algunos license notice
+
+  * db/funciones_sugeridas.sql, db/migracion.sh, db/rizoma.initvalues,
+  db/rizoma.structure, m4/Makefile.am, m4/gksu.m4, m4/gtk-2.0.m4.LICENSE,
+  m4/postgresql.m4, m4/pslib.m4, pixmaps/tux.xpm, src/boleta.c, src/main.h:
+  Agrega algunos copyright and license notice missing
+
+  * db/csvproductostosql.sh, db/install_db.sh, db/rizoma.update,
+  db/rizoma.update.1, db/rizoma.update.2, db/rizoma.update.3, db/update_db.sh:
+  Eliminacion de archivos inutiles
+
+  * src/main.c: Eliminacion de widget innecesario
+
+2008-02-16  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/main.c: Fix de ventana de login que no se cerraba
+
+  * src/main.c: minior fix XD
+
+  * ui/Makefile.am, ui/rizoma-login.ui, ui/rizoma-login.xml: Agrega el archivo
+  de rizoma-login al path the instalacion
+
+  * ui/rizoma-login.glade, ui/rizoma-login.xml: Agrega los xml para la ventana
+  de login
+
+  * src/Makefile.am, src/main.c, src/main.h, src/postgres-functions.c,
+  src/rizoma-config.c, src/tipos.h: Cambio de la pantalla login a GtkBuilder
+  .xml
+
+  * m4/gksu.m4: Agrega el .m4 para verificacion de gksu
+
+2008-02-13  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * AUTHORS, autogen.sh, configure.in, db/funciones.sql, src/Makefile.am,
+  src/administracion_productos.c, src/administracion_productos.h, src/boleta.c,
+  src/boleta.h, src/caja.c, src/caja.h, src/comisiones.c, src/comisiones.h,
+  src/compras.c, src/compras.h, src/config_file.c, src/config_file.h,
+  src/control.c, src/control.h, src/credito.c, src/credito.h, src/datos.h,
+  src/datos_negocio.c, src/datos_negocio.h, src/dimentions.h, src/encriptar.c,
+  src/encriptar.h, src/errors.c, src/errors.h, src/factura_more.c,
+  src/factura_more.h, src/impuestos.c, src/impuestos.h, src/main.c, src/main.h,
+  src/manejo_productos.c, src/manejo_productos.h, src/parametros.c,
+  src/parametros.h, src/postgres-functions.c, src/postgres-functions.h,
+  src/printing.c, src/printing.h, src/proveedores.c, src/proveedores.h,
+  src/rizoma-config.c, src/rizoma_errors.c, src/rizoma_errors.h, src/tiempo.c,
+  src/tiempo.h, src/tipos.h, src/usuario.c, src/usuario.h, src/vale.c,
+  src/vale.h, src/ventas.c, src/ventas.h, src/ventas_stats.c,
+  src/ventas_stats.h, ui/rizoma-config.glade, ui/rizoma-config.ui: Finalizacion
+  de la herramienta de configuracion rizoma-config. Cambio en el mail del
+  copyright license mas se agregan los (C) perdidos, en pos de migrar a
+  Savannah
+
+2008-02-12  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * autogen.sh: Cambio en la direccion de la FSF
+
+  * COPYING: Actualizacion del archivo COPYING con la licencia gpl
+
+  * ui/Makefile, ui/Makefile.in: Eliminacion del archivo Makefile y Makefile.in
+  agregados pro accidente
+
+  * src/Makefile.am, src/administracion_productos.c,
+  src/administracion_productos.h, src/boleta.c, src/boleta.h, src/caja.c,
+  src/caja.h, src/comisiones.c, src/comisiones.h, src/compras.c, src/compras.h,
+  src/config_file.c, src/config_file.h, src/control.c, src/control.h,
+  src/credito.c, src/credito.h, src/datos.h, src/datos_negocio.c,
+  src/datos_negocio.h, src/dimentions.h, src/encriptar.c, src/encriptar.h,
+  src/errors.c, src/errors.h, src/factura_more.c, src/factura_more.h,
+  src/impuestos.c, src/impuestos.h, src/main.c, src/main.h,
+  src/manejo_productos.c, src/manejo_productos.h, src/parametros.c,
+  src/parametros.h, src/postgres-functions.c, src/postgres-functions.h,
+  src/printing.c, src/printing.h, src/proveedores.c, src/proveedores.h,
+  src/rizoma-config.c, src/rizoma_errors.c, src/rizoma_errors.h, src/tiempo.c,
+  src/tiempo.h, src/tipos.h, src/usuario.c, src/usuario.h, src/vale.c,
+  src/vale.h, src/ventas.c, src/ventas.h, src/ventas_stats.c,
+  src/ventas_stats.h, ui/Makefile.am, ui/rizoma-config.glade,
+  ui/rizoma-config.ui: Cambios varios y reparacion de la direccion de la FSF
+
+  * db/Makefile.am, db/funciones.sql: Agrega funciones.sql a la lista de
+  archivos a ser instalados. Limpieza de trailing whitespace
+
+  * Makefile.am, configure.in, src/Makefile.am, src/fake_buy.c,
+  src/rizoma-config.c, ui/Makefile, ui/Makefile.am, ui/Makefile.in,
+  ui/rizoma-config.glade, ui/rizoma-config.ui: Agrega cambios para usar
+  GtkBuilder y GUIs construidas usando glade
+
+2008-02-11  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * m4/gnomeui.m4: Cambios para comenzar a usar un parser xml para la interfaz
+
+2008-02-09  Felipe Reyes <felipereyes@gmail.com>
+
+  * .svnignore: actualizado el svnignore
+
+  * .svnignore: agregado svnignore para evitar que se agreguen archivos de
+  compilacion y similares
+
+  * src/postgres-functions.c: solamente una correccion para liberar la memoria
+  reservada por g_strdup_printf
+
+  * src/ventas.c: agregados comentarios, indentacion de codigo
+
+  * src/ventas.c: cambio de PQgetvalue por PQvaluebycol, y codigo comentado
+  removido
+
+  * src/ventas.c: removido codigo comentado y agregado el signo de pregunta a
+  un mensaje
+
+  * src/ventas.c: se remueve codigo comentado y se arregla la funciion
+  FindCancelSell
+
+  * src/ventas.c: removidas algunas variables que no eran usadas
+
+2008-01-27  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/credito.c: Reparada la manera en que se llena la
+  ListStore en la que se despliegan los cliente
+
+2008-01-26  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/ventas.c: se agrega la funcion plgpgsql
+  cancelar_venta(id_de_venta) y hace uso de ella en el dialogo para cancelar
+  ventas  la funcion cancelar_venta restituye el stock a la tabla producto, aun
+  no hace nada respecto al dinero
+
+  * src/compras.c, src/postgres-functions.c: ahora la funcion SaveModifications
+  funciona
+
+  * src/main.c, src/ventas.c, src/ventas.h: reparado el problema que tenia la
+  opcion de ventas al cambiar el foco
+
+  * src/main.c: fixed bug en la utilizacion de g_strconcat
+
+2008-01-26  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/fake_buy.c: elimina la verificacion del archivo .config
+
+2008-01-26  Felipe Reyes <felipereyes@gmail.com>
+
+  * aclocal.m4, src/fake_buy.c, src/rizoma-config.c, src/tipos.h: eliminadas
+  las referencias a rizoma_read_conf y confuse.h
+
+2008-01-26  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * autogen.sh: Agrega soporte para automake y acelocal 1.10
+
+2008-01-26  Felipe Reyes <felipereyes@gmail.com>
+
+  * aclocal.m4, db/funciones.sql, src/Makefile.am, src/config_file.c,
+  src/config_file.h, src/factura_more.c, src/fake_buy.c, src/main.c,
+  src/parametros.c, src/postgres-functions.c, src/printing.c,
+  src/rizoma-config.c, src/tipos.h, src/vale.c, src/ventas.c: merged el branch
+  use-confuse con trunk  ahora los archivos .rizoma deben tener al inicio del
+  archivo la linea [DEFAULT]
+
+2008-01-26  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, src/compras.c, src/fake_buy.c, src/postgres-functions.c:
+  Commit
+
+2007-12-31  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: se agrega lo necesario para que se actualicen las
+  secuencias despues de hacer una migracion
+
+2007-12-29  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/ventas_stats.c: se agrega la funcion plpgsql
+  select_stats_ventas(rut) y se hace uso de ella en ventas_stats.c
+
+2007-12-29  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, src/compras.c, src/postgres-functions.c,
+  src/postgres-functions.h: Agrega la funcion insertar prodocto para ser uso de
+  ella en las compras
+
+2007-12-26  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * aclocal.m4, configure.in, db/funciones.sql, db/rizoma.structure,
+  m4/pslib.m4, src/Makefile.am, src/boleta.c, src/postgres-functions.c,
+  src/rizoma-config.c, src/rizoma_errors.c: Cambios varios
+
+2007-12-05  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql: Agrega funcion para insertar compras(modifica la
+  propuesta). Agrega funcion para obtener el id de la forma de pago segun los
+  dias, esta crea la forma de pago de no existir una para esa cantidad de dias
+
+2007-12-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/manejo_productos.c: CompraCreateNew usa el nuevo esquema de la base de
+  datos
+
+  * src/manejo_productos.c: la funcion CreateNew (crea rellena un struct de
+  producto con los datos de la base de datos) utiliza el nuevo esquema, y se
+  borra la funcion que estaba comentada completamente ReturnAllProductsCode
+
+2007-12-01  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, src/administracion_productos.c, src/compras.c,
+  src/impuestos.c, src/postgres-functions.c: Uso de la funcion de
+  buscar_producto en mercaderia
+
+2007-12-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/impuestos.c: esta listo el archivo, ajustado al nuevo esquema
+
+  * src/compras.c: se borro la funcion PagarDocuemnto
+
+  * src/compras.c, src/postgres-functions.c: InformeComprasShow hace uso de
+  INNER JOIN en vez de select anidados, pero aun falta terminar la funcion
+
+2007-12-01  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql: Agrega la funcion buscar producto para solo usar esta
+  cuando se desee buscar un producto
+
+2007-12-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: se borro la funcion obtener_proveedor, ya que para eso se
+  debe utilizar select_proveedor
+
+  * src/compras.c: se borro la funcion IngresarProductoSeleccionado
+
+  * src/compras.c: se arreglan los UPDATE para ajustarlos al nuevo esquema
+
+  * src/compras.c: se hace uso de la funcion select_proveedor
+
+  * db/funciones.sql, src/compras.c: se agrega la funcion plpgsql
+  select_proveedor(IN prov_rut int4) que retorna todos los datos de un
+  proveedor en base al rut, se hace uso de ella
+
+2007-12-01  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, src/postgres-functions.c: Agrega la funcion
+  registrar_venta
+
+2007-12-01  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/compras.c: usa funcion plpgsql
+
+  * src/compras.c: SearchName usa funcion plpgsql buscar_productos
+
+  * src/compras.c: uso de funciones de la base y un poco de limpieza en el
+  codigo
+
+  * src/administracion_productos.c, src/compras.c: se hace uso de funciones de
+  la base de datos y un poco de indentacion
+
+  * src/compras.c: solamente indentacion
+
+2007-12-01  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/ventas.c: Indentacion
+
+  * src/ventas.c: Mejoras en la busqueda de productos por codigo corto
+
+2007-11-27  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/compras.c, src/manejo_productos.c, src/postgres-functions.c: algunos
+  cambios para hacer funcionar las compras con el nuevo modelo, falta trabajo
+  es bastante codigo
+
+  * src/manejo_productos.c, src/ventas.c: Arregla el proceso de venta para usar
+  el nuevo modelo
+
+2007-11-24  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/postgres-functions.c: Arreglo de funciones del stock valorizado e
+  inversion
+
+  * db/funciones.sql, src/administracion_productos.c, src/postgres-functions.c:
+  Agrega funcione select_merma a funciones.sql. Modificacion de SQL en
+  setmodificaciones para usar la tabla producto y no productos
+
+  * src/administracion_productos.c: Uso de PQvaluebycol
+
+  * db/funciones.sql, db/funciones_sugeridas.sql: Agrega
+  funciones_sugeridas.sql con una lista de funciones posibles a llegar a usar.
+  Deja solo con funciones compilabes el archivo funciones.sql
+
+2007-11-24  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/compras.c: se agrega la funcion plpgsql
+  codigo_corto_to_barcode(in varchar(10)) y en compras.c se hace uso de ella
+
+  * db/funciones.sql, src/compras.c: reparacion de la funcion
+  select_factura_compra_by_num_facura que tenia parametrode I/O repetidos
+
+2007-11-24  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/postgres-functions.h: Agrega macro PQvaluebycol para obtener los
+  valores segun el nombre de columna
+
+2007-11-24  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql: se agrega a select_factura_compra_by_num_factura
+
+  * db/funciones.sql, src/administracion_productos.c, src/compras.c: en
+  administracion_productos.c solamente reindentacion de codigo, en
+  funciones.sql se agrega select_factura_compra_by_num_factura (IN factura_num
+  int4), select_proveedor(IN prov_rut int4), en compras.c se hace uso de la
+  funcion plpgsql select_proveedor (...)
+
+2007-11-23  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, src/administracion_productos.c: Eliminacion de espacios
+  blancos archivo funciones.sql. Habilita la lista de productos en la pestalla
+  de Mercaderias, falta solucionar el problema al seleccionar productos
+
+2007-11-23  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/administracion_productos.c, src/impuestos.c: se indento un poco
+  administracion_productos.c y en impuestos.c se hace uso de la funcion plpgsql
+   insert_impuesto(...)
+
+2007-11-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: TODO: agregar las lineas que actualizan las secuencias
+  despues de terminar el copy
+
+  * db/funciones.sql: se indento informacion_productos, se agrego
+  select_otros_impuestos, select_impuesto
+
+  * src/boleta.c, src/main.c: indentado main.c y arreglado error al llamar a la
+  funcion plpgsql obtener_num_boleta() dentro de boleta.c
+
+  * db/funciones.sql, src/administracion_productos.c: se hace uso de la
+  funcionplpgsql select_producto en administracion_productos.c, se ordenan
+  algunas lineas y errores que impedian que compilara
+
+  * db/funciones.sql: se agrega la funcion plpgsql select_producto(IN
+  prod_barcode int8, OUT ...)
+
+  * db/funciones.sql: se arregla select_producto() para user parametros OUT
+
+  * src/administracion_productos.c: se modifica administracion_productos.c para
+  que haga uso de la funcion plpgsql buscar_productos
+
+  * db/funciones.sql: se agrega la funcion plpgsql buscar_productos
+
+  * db/funciones.sql: se agrega comentario
+
+  * db/funciones.sql, src/administracion_productos.c: se agrega la funcion
+  select_proveedor_for_product(IN prod_barcode int8, OUT nombre varchar(100) y
+  se modifica administracion_productos.c para hacer uso de ella. se agrega un
+  poco de indentacion y se agregan g_free  luego de usar g_strdup_printf
+
+2007-11-22  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql: Correccion de nombre en funcion. estadistica_producto  ->
+  informacion_producto
+
+2007-11-22  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: reparación de bug en el recorte del rut_proveedor en
+  tabla compra
+
+  * db/funciones.sql: solamente se idento los parámetros de la funcio plpgsql
+  estadisticas_producto
+
+2007-11-22  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql, src/administracion_productos.c: Agrega la funcion
+  informacion_producto y modifica en .c
+
+2007-11-17  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, db/migracion.sh, db/rizoma.structure,
+  src/administracion_productos.c: El script de migracion ahora funciona
+  completamente, para entender su funcionamiento leer el comentario al inicio
+  del script. administracion_productos.c en proceso de ser migrado a uso total
+  de funciones
+
+2007-11-16  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/boleta.c: boleta.c usa solamente funciones postgres:
+  obtener_num_boleta(), obtener_num_factura(), obtener_num_guias(),
+  update_num_boleta(int4), update_num_factura(int4), update_num_guias(int4)
+
+2007-11-11  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/funciones.sql, src/usuario.c: el listado de usuarios en control usa
+  funciones plpgsql, select_asistencia(int4) y delete_user(int4) estan listas
+
+  * db/funciones.sql: funcion select_usuario() funcionando
+
+2007-11-10  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/administracion_productos.c: Cambios en nombre de tablas
+  products_sell_history a ventas_detalle
+
+  * src/administracion_productos.c, src/caja.c, src/compras.c, src/credito.c,
+  src/factura_more.c, src/fake_buy.c, src/manejo_productos.c,
+  src/postgres-functions.c, src/proveedores.c, src/ventas.c,
+  src/ventas_stats.c: Cambios en los nombres de tablas para el nuevo modelo
+
+  * db/migracion.sh: Agrega eliminacion de barcodes repetidos
+
+2007-11-10  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: script de migracion funcionando
+
+2007-11-10  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/migracion.sh: fix pequeño
+
+2007-11-10  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: aun en proceso de arreglar los tabs
+
+  * db/migracion.sh: modificacion completa del script para que no use INSERT y
+  que haga uso de COPY
+
+2007-11-10  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * db/funciones.sql: Algunas corecciones de sintaxis en las funciones
+
+  * src/caja.c: Eliminacion de espacios en blancos
+
+  * src/administracion_productos.c: Eliminacion de espacios en blanco que estan
+  de mas
+
+  * db/rizoma.initvalues, db/rizoma.structure: Cambios en la estructura, se
+  agrega el nuevo modelo con los cambios en la BD usando el archivo modelo.dia.
+  Correccion en los insert con los valores iniciales
+
+  * src/rizoma-config.c: Arreglos en el rizoma-config para soportar el nuevo
+  modelo de la tabla users. PRECACUION PRECAUCION no funciona con el modelo
+  antiguo
+
+2007-10-28  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: Se reparo el bug asociado a los datos NULL, el script
+  está terminado Falta probarlo de manera intensiva para ver si funciona con
+  'todas' las bases de datos
+
+  * db/migracion.sh, db/modelo.dia: se termino de hacer el script de migracion,
+  pero aun tiene detalles cuando hay datos NULL en las columnas
+
+  * db/migracion.sh: se parametriza el script de migracion
+
+2007-10-27  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/migracion.sh: se agrega script para hacer migraciones de la base de
+  datos de 7.4 al nuevo modelo en 8.x
+
+  * db/modelo.dia: se cambia apellido_paterno a apell_p y apellido_materno a
+  apell_m, todo en la tabla cliente
+
+  * db/modelo.dia: se resuelven discrepancias de datos del barcode
+
+  * db/modelo.dia: se resuelve discrepancia de dato entre canje.barcode y
+  producto.bacode
+
+  * db/modelo.dia: repara algunas relaciones que apuntaban a columnas que
+  habian cambiado su nombre
+
+  * db/modelo.dia: se termina de modificar la estructura de la base de datos
+
+2007-10-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * src/postgres-functions.c: saque el contador de conexiones para limpiar el
+  codigo (el contador lo habia puesto en mi copia local, no lo debi haber
+  metido a trunk)
+
+  * db/modelo.dia, src/postgres-functions.c: se agrega relacion entre pagos y
+  las facturas de compra
+
+2007-10-19  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * src/compras.c, src/manejo_productos.c: Cambios para soportar mejor numeros
+  grandes en las compras pruebas realizadas con montos de 21 millones
+
+  * src/compras.c: Eliminacino de espacios blancos
+
+  * src/postgres-functions.c: Cambios en la forma de conectarse, espero esta
+  vez no necesite conectarse cada vez aque necesita ejecutar una setencia
+
+2007-10-19  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/modelo.dia: se agregan llaves primarias, sa cambia el rut de proveedores
+  a rut int4, se definen llaves primarias
+
+2007-10-18  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/modelo.dia: cambiado los rut de varchar(10) a int4 y el digito
+  verificador se mueve a dv varchar(1)
+
+2007-10-17  Felipe Reyes <felipereyes@gmail.com>
+
+  * db/modelo.dia: se pone un mensaje que hace referencia a la edición de
+  tedia2sql
+
+  * db/modelo.dia: agregado el modelo de la base de datos
+
+  * m4/postgresql.m4: Se fuerza el chequeo de pgsql >= 8.1
+
+  * db/funciones.sql: Se ha terminado de poner en funciones.sql los query sql
+  que estan presentes en el codigo C. Aun es necesario armar de manera logica y
+  sintacticamente correcta, pero se necesita esperar que gabriel haga las
+  correcciones al modelo de la BD
+
+2007-10-16  Jonathan Gonzalez V <jonathan@rizoma.cl>
+
+  * AUTHORS, COPYING, ChangeLog, INSTALL, Makefile.am, NEWS, README, TODO,
+  acinclude.m4, aclocal.m4, autogen.sh, configure.in, depcomp, install-sh,
+  missing: Segundo paso en la creacion del trunk
+
+  * db/ChangeLog, db/Makefile.am, db/csvproductostosql.sh, db/funciones.sql,
+  db/install_db.sh, db/rizoma.initvalues, db/rizoma.structure,
+  db/rizoma.update, db/rizoma.update.1, db/rizoma.update.2, db/rizoma.update.3,
+  db/update_db.sh, debian/README.Debian, debian/changelog, debian/compat,
+  debian/control, debian/copyright, debian/dirs, debian/menu.ex, debian/rules,
+  m4/Makefile.am, m4/gnomeui.m4, m4/gtk-2.0.m4, m4/postgresql.m4,
+  pixmaps/Makefile.am, pixmaps/tux.xpm, src/ChangeLog, src/Makefile.am,
+  src/administracion_productos.c, src/administracion_productos.h, src/boleta.c,
+  src/boleta.h, src/caja.c, src/caja.h, src/comisiones.c, src/comisiones.h,
+  src/compras.c, src/compras.h, src/config_file.c, src/config_file.h,
+  src/control.c, src/control.h, src/credito.c, src/credito.h, src/datos.h,
+  src/datos_negocio.c, src/datos_negocio.h, src/dimentions.h, src/encriptar.c,
+  src/encriptar.h, src/errors.c, src/errors.h, src/factura_more.c,
+  src/factura_more.h, src/fake_buy.c, src/impuestos.c, src/impuestos.h,
+  src/main.c, src/main.h, src/manejo_productos.c, src/manejo_productos.h,
+  src/parametros.c, src/parametros.h, src/postgres-functions.c,
+  src/postgres-functions.h, src/printing.c, src/printing.h, src/proveedores.c,
+  src/proveedores.h, src/rizoma-config.c, src/rizoma_errors.c,
+  src/rizoma_errors.h, src/tiempo.c, src/tiempo.h, src/tipos.h, src/usuario.c,
+  src/usuario.h, src/vale.c, src/vale.h, src/ventas.c, src/ventas.h,
+  src/ventas_stats.c, src/ventas_stats.h: Creacion de trunk
