@@ -212,7 +212,7 @@ compras_win (void)
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso")));            
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso")));
     }
 
   // check if the window must be set to fullscreen
@@ -295,10 +295,10 @@ compras_win (void)
       compra->products_compra = compra->header_compra;
       do
 	{
-	  compra->current = compra->products_compra->product;      
+	  compra->current = compra->products_compra->product;
 	  AddToTree ();
 	  compra->products_compra = compra->products_compra->next;
-	} while (compra->products_compra != compra->header_compra);    
+	} while (compra->products_compra != compra->header_compra);
     }
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"));
@@ -794,7 +794,7 @@ compras_win (void)
 
   /*Se agregan las opciones al combobox*/
   /*gtk_list_store_append (modelo, &iter);
-  gtk_list_store_set (modelo, &iter, 0, "Precio neto", -1);  
+  gtk_list_store_set (modelo, &iter, 0, "Precio neto", -1);
 
   gtk_list_store_append (modelo, &iter);
   gtk_list_store_set (modelo, &iter, 0, "Precio bruto", -1);
@@ -971,7 +971,7 @@ Save (GtkWidget *widget, gpointer data)
   else
     otros = -1;
 
-  // TODO: Revisar el Otros, porque en la base de datos se guardan 0 
+  // TODO: Revisar el Otros, porque en la base de datos se guardan 0
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
   if (HaveCharacters(contenido))
     {
@@ -998,7 +998,7 @@ Save (GtkWidget *widget, gpointer data)
  * Es llamada por las funciones "AddToProductsList()" y "on_button_calculate_clicked()"
  *
  * Esta funcion se encarga de calcular la cifra restante entre: porcentaje de ganancia,
- * el precio de compra, tomando en cuenta si es bruto o neto y calculando sus impuestos 
+ * el precio de compra, tomando en cuenta si es bruto o neto y calculando sus impuestos
  * en el caso correspondiente y el precio final.
  *
  */
@@ -1151,7 +1151,7 @@ AddToProductsList (void)
   if (g_str_equal (barcode, ""))
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")),
-		"Debe seleccionar una mercadería");      
+		"Debe seleccionar una mercadería");
       return;
     }
 
@@ -1487,7 +1487,7 @@ SearchName (void)
                           -1);
     }
 
-  if (resultado != 0) 
+  if (resultado != 0)
     {
       gtk_tree_selection_select_path (gtk_tree_view_get_selection (treeview), gtk_tree_path_new_from_string ("0"));
       gtk_widget_grab_focus (GTK_WIDGET (treeview));
@@ -1842,12 +1842,12 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 
   if (products != NULL)
     {
-      do 
-	{	  
+      do
+	{
 	  IngresarProducto (products->product, id);
-	  
+
 	  IngresarDetalleDocumento (products->product, id, doc, invoice);
-	  
+
 	  products = products->next;
 	} while (products != compra->header);
     }
@@ -1860,7 +1860,7 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 
 /**
  * Es llamada por la funcion "AddProveedor()".
- * 
+ *
  * Esta funcion agrega al proveedor a la lista (tree view) de la busqueda de proveedores.
  *
  */
@@ -1871,7 +1871,7 @@ FillProveedores (void)
   gint tuples, i;
 
   GtkTreeIter iter;
-  
+
   /*consulta de sql que llama a la funcion select_proveedor() que retorna
     los proveedores */
   res = EjecutarSQL ("SELECT rut, nombre FROM select_proveedor() "
@@ -1898,7 +1898,7 @@ FillProveedores (void)
 
 /**
  * Es llamada por la funcion "AddProveedor()".
- * 
+ *
  * Esta funcion cierra la ventana de "AddProveedorWindow()".
  *
  * @param button the button
@@ -1918,7 +1918,7 @@ CloseAddProveedorWindow (GtkWidget *button, gpointer data)
 
 /**
  * Es llamada cuando el boton aceptar de "AddProveedorWindow()" es presionado (signal click).
- * 
+ *
  * Esta funcion verifica que todos los campos de proveedor sean correctamente
  * rellenados y luego llama a la funcion "AddProveedorToDB()" que registra al
  * proveedor en la base de datos.
@@ -1941,7 +1941,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
   gchar *web = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->web_add)));
   gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
   gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
-    
+
   if (strcmp (rut, "") == 0)
     {
       ErrorMSG (compra->rut_add, "Debe Escribir el rut completo");
@@ -1990,7 +1990,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
       ErrorMSG (compra->rut_ver, "El rut no es valido!");
       return;
     }
-  
+
   if (atoi(telefono) == 0)
     {
       ErrorMSG (compra->telefono_add, "Debe ingresar sólo números en el campo telefono");
@@ -2017,7 +2017,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
 
 /**
  * Es llamada por la funcion "AddProveedor()".
- * 
+ *
  * Esta funcion visualiza la ventana para agregar un proveedor y agrega dos señales
  *
  * @param widget the widget that emited the signal
@@ -2376,12 +2376,12 @@ CleanStatusProduct (void)
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), "");
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
-  
+
   //Habilitar la escritura cuando se limpie todo
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
-  
+
   calcular = 0;
 }
 
@@ -2556,7 +2556,7 @@ FillDetGuias (GtkTreeSelection *selection, gpointer data)
                           -1);
 
       res =
-	EjecutarSQL 
+	EjecutarSQL
 	(g_strdup_printf ("SELECT t1.codigo, t1.descripcion,  t2.cantidad, t2.precio, t2.cantidad * t2.precio AS "
 			  "total, t2.barcode, t2.id_compra, t1.marca, t1.contenido, t1.unidad FROM producto AS "
 			  "t1, documentos_detalle AS t2 WHERE t2.id_compra=(SELECT id_compra FROM guias_compra "
@@ -2705,21 +2705,21 @@ CalcularTotales (void)
   gdouble total_neto = 0, total_iva = 0, total_otros = 0, total = 0;
   gdouble iva, otros;
 
-  do 
+  do
     {
       iva = GetIVA (products->product->barcode);
       otros = GetOtros (products->product->barcode);
-      
+
       if (products->product->canjear != TRUE)
 	total = (gdouble)products->product->precio_compra * products->product->cantidad;
       else
 	total = (gdouble)products->product->precio_compra * (products->product->cantidad - products->product->cuanto);
-      
+
       total_neto += total;
 
       if (iva != -1)
 	total_iva += lround (total * (gdouble) iva / 100);
-      
+
       if (otros != -1)
 	total_otros += lround (total * (gdouble) otros / 100);
 
@@ -2990,7 +2990,7 @@ main (int argc, char **argv)
 
   gtk_builder_add_from_file (builder, DATADIR"/ui/rizoma-login.ui", &err);
 
-  if (err) 
+  if (err)
     {
       g_error ("ERROR: %s\n", err->message);
       return -1;
@@ -3126,7 +3126,7 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 
 /**
  * Es llamada cuando el boton "button_calculate" es presionado (signal click).
- * 
+ *
  * Esta funcion verifica si se han ingresado valores a los entry
  * "entry_buy_price", "entry_buy_gain", "entry_sell_price", si es así llama a la funcion CalcularPrecioFinal.
  *
@@ -3140,13 +3140,13 @@ on_button_calculate_clicked (GtkButton *button, gpointer data)
   gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
   gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object( builder, "entry_buy_barcode" ))));
-  
+
   if (!strcmp (barcode, "") || barcode == NULL)
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")),
 		"Debe seleccionar una mercadería");
     }
-  else if (ingresa == 0 && ganancia == 0 && precio_final == 0) 
+  else if (ingresa == 0 && ganancia == 0 && precio_final == 0)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")),
                 "Ingrese los valores a calcular");
@@ -3161,7 +3161,7 @@ on_button_calculate_clicked (GtkButton *button, gpointer data)
 
 /**
  * Es llamada cuando el boton "button_add_product_list" es presionado (signal click).
- * 
+ *
  * Esta funcion llama a la funcion  AddToProductsList.
  *
  * @param button the button
@@ -3269,7 +3269,7 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
 
 
 void
-on_button_buy_clicked (GtkButton *button, gpointer data) 
+on_button_buy_clicked (GtkButton *button, gpointer data)
 {
   if (compra->header_compra != NULL)
     BuyWindow ();
@@ -3277,7 +3277,7 @@ on_button_buy_clicked (GtkButton *button, gpointer data)
 
 
 void
-on_button_ok_ingress_clicked (GtkButton *button, gpointer data) 
+on_button_ok_ingress_clicked (GtkButton *button, gpointer data)
 {
   GtkWindow *wnd_ingress = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_buy"));
   gboolean complete = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder, "radiobutton_ingress_complete")));
@@ -3543,11 +3543,11 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data)
 
   g_date_set_time_t (date, time (NULL));
 
-  if (g_date_strftime (str_date, sizeof (str_date), "%x", date) == 0) 
+  if (g_date_strftime (str_date, sizeof (str_date), "%x", date) == 0)
     strcpy (str_date, "---");
-  
+
   gtk_entry_set_text (entry, str_date);
-} // void on_button_ok_ingress_clicked (GtkButton *button, gpointer data) 
+} // void on_button_ok_ingress_clicked (GtkButton *button, gpointer data)
 
 
 void
@@ -4281,7 +4281,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
 /**
  * Es llamada cuando el boton "btn_get_request" es presionado (signal click).
- * 
+ *
  * Esta funcion llama a a funcion "AskIngreso()".
  *
  */
@@ -4294,7 +4294,7 @@ on_btn_get_request_clicked (void)
 
 /**
  * Es llamada cuando el boton "btn_remove_buy_product" es presionado (signal click).
- * 
+ *
  * Esta funcion elimina el producto seleccionado del treeView y ademas llama
  * a la funcion "DropBuyProduct()".
  *
@@ -4306,7 +4306,7 @@ on_btn_remove_buy_product_clicked (void)
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list"))));
   GtkTreeIter iter;
   gchar *short_code;
-
+  gint position;
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
@@ -4314,7 +4314,7 @@ on_btn_remove_buy_product_clicked (void)
                           -1);
 
       DropBuyProduct (short_code);
-
+      position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
@@ -4322,14 +4322,16 @@ on_btn_remove_buy_product_clicked (void)
                                              PutPoints (g_strdup_printf ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
       tipo_traspaso = 1;
     }
+
+  select_back_deleted_row("tree_view_products_buy_list", position);
 }
 
 
 /**
  * Es llamada cuando el boton "button_add_product_list_trans" es presionado (signal click).
- * 
+ *
  * Esta funcion agrega el prudcto a la lista (list) de productos y lo agrega
- * al treeView 
+ * al treeView
  *
  */
 void
@@ -4339,7 +4341,7 @@ AddToProductsListTraspaso (void)
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble cantidad;
   gdouble precio_compra = strtod (PUT(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object  (builder, "label_fifo"))))), (char **)NULL);
-  gint margen = 1; 
+  gint margen = 1;
   gint precio = strtod (PUT(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object  (builder, "label_sell_price"))))), (char **)NULL);
   Producto *check;
 
@@ -4352,7 +4354,7 @@ AddToProductsListTraspaso (void)
 
   cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans"))))), NULL);
 
-  
+
   if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
       && strcmp (barcode, "") != 0)
     {
@@ -4382,13 +4384,13 @@ AddToProductsListTraspaso (void)
                               4, PutPoints (g_strdup_printf ("%li", lround ((gdouble)check->cantidad * check->precio_compra))),
                               -1);
         }
-      
+
       if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) == 0)
         {
           gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
           tipo_traspaso = 0;
         }
-      
+
       gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_info"))," ");
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
                             g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
@@ -4400,13 +4402,13 @@ AddToProductsListTraspaso (void)
       CleanStatusProduct ();
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-      
+
     }
   else
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")), "El Producto debe tener precio mayor a 0");
     }
-  
+
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
@@ -4425,7 +4427,7 @@ AddToProductsListTraspaso (void)
 
 /**
  * Es llamada cuando el boton "btn_traspaso" es presionado (signal click).
- * 
+ *
  * Esta funcion visualiza la ventana "wnd_cant_traspaso" y carga los
  * respectivos datos de esta, ademas desaparecer la opcion de comprar(entrys,labels,buttons)
  *
@@ -4452,7 +4454,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
         {
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_info")),
                                 g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                                 "Solo podra recibir un traspaso"));          
+                                                 "Solo podra recibir un traspaso"));
         }
 
       if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) == 0
@@ -4468,7 +4470,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
           gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_info")),
                               " ");
         }
-            
+
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
@@ -4482,7 +4484,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_buy")));
-     
+
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans")), "1");
 
@@ -4501,7 +4503,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
 
 /**
  * Es llamada por la funcion "realizar_traspaso_Env()".
- * 
+ *
  * Esta funcion carga las etiquetas (labels) de la ventana
  * "traspaso_enviar_win", ademas del combobox de destino, con los respectivos valores
  *
@@ -4521,16 +4523,16 @@ DatosEnviar (void)
   gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total")),
                       g_strdup_printf ("%d",total));
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_origen")),(gchar *)ReturnNegocio());  
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_origen")),(gchar *)ReturnNegocio());
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelID")),g_strdup_printf ("%d",InsertIdTraspaso()+1));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor")),"admin");
-  
+
 
   res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
                                       "WHERE nombre!=(SELECT nombre FROM negocio)"));
   tuples = PQntuples (res);
-  
-  combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));  
+
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
 
 
@@ -4540,7 +4542,7 @@ DatosEnviar (void)
       modelo = gtk_list_store_new (2,
                                   G_TYPE_INT,
                                   G_TYPE_STRING);
-      
+
       gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
 
       cell = gtk_cell_renderer_text_new();
@@ -4565,14 +4567,14 @@ DatosEnviar (void)
 
 /**
  * Es llamada por la funcion "realizar_traspaso_Rec()".
- * 
+ *
  * Esta funcion carga las etiquetas (labels) de la ventana
  * "traspaso_recibir_win", ademas del combobox de origen, con los respectivos valores
  *
  */
 void
 DatosRecibir (void)
-{ 
+{
   GtkWidget *combo;
   GtkTreeIter iter;
   GtkListStore *modelo;
@@ -4584,15 +4586,15 @@ DatosRecibir (void)
   gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total1")),
                       g_strdup_printf ("%d",total));
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_destino")),(gchar *)ReturnNegocio()); 
+  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_destino")),(gchar *)ReturnNegocio());
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelID1")),g_strdup_printf ("%d",InsertIdTraspaso()+1));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor1")),"admin");
 
   res =   res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
                                       "WHERE nombre!=(SELECT nombre FROM negocio)"));
   tuples = PQntuples (res);
-  
-  combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));  
+
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));
   modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
 
 
@@ -4602,7 +4604,7 @@ DatosRecibir (void)
       modelo = gtk_list_store_new (2,
                                   G_TYPE_INT,
                                   G_TYPE_STRING);
-      
+
       gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
 
       cell = gtk_cell_renderer_text_new();
@@ -4627,7 +4629,7 @@ DatosRecibir (void)
 
 /**
  * Es llamada cuando el boton "btn_traspaso_enviar" es presionado (signal click).
- * 
+ *
  * Esta funcion visualiza la ventana "traspaso_enviar_win" y ademas llama a
  * la funcion "DatosEnviar()".
  *
@@ -4645,14 +4647,14 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para traspasar");
       return;
     }
-  
+
   else
     {
-      window = GTK_WINDOW (gtk_builder_get_object (builder, "traspaso_enviar_win"));     
+      window = GTK_WINDOW (gtk_builder_get_object (builder, "traspaso_enviar_win"));
       clean_container (GTK_CONTAINER (window));
       gtk_widget_show_all (GTK_WIDGET (window));
       DatosEnviar();
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "comboboxDestino")));     
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "comboboxDestino")));
       return;
     }
 }
@@ -4660,7 +4662,7 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
 
 /**
  * Es llamada cuando el boton "btn_traspaso_recibir" es presionado (signal click).
- * 
+ *
  * Esta funcion visualiza la ventana "traspaso_recibir_win" y ademas llama a
  * la funcion "DatosRecibir()".
  *
@@ -4678,14 +4680,14 @@ realizar_traspaso_Rec (GtkWidget *widget, gpointer data)
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para traspasar");
       return;
     }
-  
+
   else
     {
       window = GTK_WINDOW (gtk_builder_get_object (builder, "traspaso_recibir_win"));
       clean_container (GTK_CONTAINER (window));
       gtk_widget_show_all (GTK_WIDGET (window));
       DatosRecibir();
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "comboboxOrigen")));      
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "comboboxOrigen")));
       return;
     }
 }
@@ -4693,7 +4695,7 @@ realizar_traspaso_Rec (GtkWidget *widget, gpointer data)
 
 /**
  * Es llamada cuando el boton "traspaso_button" es presionado (signal click).
- * 
+ *
  * Esta funcion visualiza la ventana "traspaso_enviar_win" y ademas vuelve a
  * visualizar la opcion "comprar"
  *
@@ -4712,7 +4714,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   gint vendedor = 1; //user_data->user_id;
   gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
                                           (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
-  
+
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
 
@@ -4724,41 +4726,41 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
       gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
-      
+
       gtk_tree_model_get (model, &iter,
 			  0, &destino,
 			  -1);
-   
+
       SaveTraspasoCompras (monto,
 			   ReturnBodegaID(ReturnNegocio()),
 			   vendedor,
 			   destino,
 			   TRUE);
-      
+
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
-      
+
       gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "traspaso_enviar_win")));
-      
+
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-      
+
       ClearAllCompraData ();
-      
+
       CleanStatusProduct ();
-      
+
       compra->header_compra = NULL;
       compra->products_compra = NULL;
-      
+
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "");
-      
+
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-      
+
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
-      
+
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
@@ -4768,7 +4770,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 
 /**
  * Es llamada cuando el boton "traspaso_button1" es presionado (signal click).
- * 
+ *
  * Esta funcion visualiza la ventana "traspaso_recibir_win"  y ademas vuelve a
  * visualizar la opcion "comprar"
  *
@@ -4787,7 +4789,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
   gint vendedor = 1; //user_data->user_id;
   gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
                                           (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
-  
+
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
 
@@ -4799,7 +4801,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
       gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
-      
+
       gtk_tree_model_get (model, &iter,
 			  0, &origen,
 			  -1);
@@ -4809,35 +4811,35 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 			   vendedor,
 			   ReturnBodegaID(ReturnNegocio()),
 			   FALSE);
-      
+
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
-      
+
       gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "traspaso_recibir_win")));
-      
+
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-            
+
       ClearAllCompraData ();
-      
+
       CleanStatusProduct ();
-      
+
       compra->header_compra = NULL;
       compra->products_compra = NULL;
-    
+
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "");
-    
+
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-    
+
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
-      
+
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
-      
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));    
+
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
     } // else => if (active == -1)
 } // void on_recibir_button_clicked (GtkButton *button, gpointer data)
