@@ -2,6 +2,7 @@
 ## prepareChangelog.git.py
 ## Login : <freyes@yoda>
 ## Started on  Tue Mar 25 15:05:46 2008 Felipe Reyes
+## Edited on Sat Jun 05 17:30:22 Carlos Contreras Bolton <ccontreras.bolton@gmail.com> 
 ##
 ## Copyright (C) 2008 Felipe Reyes <freyes@emacs.cl>
 ##
@@ -22,9 +23,6 @@
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##
-
-# Copyright 2008 Marcus D. Hanwell <marcus@cryos.org>
-# Distributed under the terms of the GNU General Public License v2 or later
 
 import string, re, os
 
