@@ -810,6 +810,20 @@ compras_win (void)
   //setup the providers tab
   proveedores_box();
 
+  //Default disable entry and buttons
+  //TODO: Ver como simplificar el set_sensitive
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "edit_product_button")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_buy")), FALSE);
+
+  //Focus Control  
+  //TODO: Solucionar el foco de las pestañas (El foco debe cambiarse a los entrys principales)
+  gtk_widget_set_can_focus (GTK_NOTEBOOK (builder_get (builder, "buy_notebook")), TRUE);
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
 
   gtk_widget_show_all (compras_gui);
@@ -886,6 +900,16 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
+
+      //Enable entry sensitive
+      //TODO: Buscar la forma de simplificar los sensitive
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_new_product")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "edit_product_button")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), TRUE);
 
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
     } // if (g_str_equal( GetDataByOne (q), "t"))
@@ -1131,9 +1155,13 @@ CalcularPrecioFinal (void)
   if(calcular == 1)
     {
       //Inhabilitar la escritura en los entry de precio cuando el cálculo de ha realizado
+      //TODO: Ver como simplificar los sensitive
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), TRUE);
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), TRUE);
     }
 } // CalcularPrecioFinal (void)
 
@@ -1198,6 +1226,9 @@ AddToProductsList (void)
       gtk_list_store_clear (store_history);
 
       CleanStatusProduct ();
+      
+      //TODO: Se setea el sensitive cada vez que se agrega un producto a la lista, se debe evaluar
+      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_buy")), TRUE);
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
     }
@@ -2375,12 +2406,19 @@ CleanStatusProduct (void)
 
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), "");
 
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+  //Habilitar la escritura en el campo del código de barra cuando se limpie todo
+  //TODO: Ver como simplificar el set_sensitive
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), TRUE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_new_product")), TRUE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "edit_product_button")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
 
-  //Habilitar la escritura cuando se limpie todo
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
 
   calcular = 0;
 }
@@ -3139,16 +3177,10 @@ on_button_calculate_clicked (GtkButton *button, gpointer data)
   gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
   gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
   gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object( builder, "entry_buy_barcode" ))));
 
-  if (!strcmp (barcode, "") || barcode == NULL)
+  if (ingresa == 0 && ganancia == 0 && precio_final == 0)
     {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")),
-		"Debe seleccionar una mercadería");
-    }
-  else if (ingresa == 0 && ganancia == 0 && precio_final == 0)
-    {
-      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")),
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")),
                 "Ingrese los valores a calcular");
       return;
     }
@@ -3172,21 +3204,8 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
 {
   gint unidades = NULL;
   unidades = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")))));
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
 
-  if (!strcmp (barcode, "") || barcode == NULL)
-    {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")),
-		"Debe seleccionar una mercadería");
-      return;
-    }
-  else if (calcular == 0)
-    {
-      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")),
-                "Debe calcular el valor del producto con anterioridad");
-      return;
-    }
-  else if (unidades == NULL || unidades < 0)
+  if (unidades == NULL || unidades < 0)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount")),
                 "No se ha especificado una cantidad válida de unidades");
@@ -3194,11 +3213,6 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
     }
   else
     {
-      //Habilitar la escritura en los entry de precio cuando se ingresó el producto
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
-
       calcular = 0;
       AddToProductsList ();
     }
