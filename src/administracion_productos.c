@@ -882,6 +882,82 @@ FillFields(GtkTreeSelection *selection, gpointer data)
     }
 }
 
+
+/**
+ * A callback from "entry_infomerca_percentmargin" (Margen %) and
+ * "entry_informerca_price" (Precio Venta) when "changed event"
+ * be triggered.
+ *
+ * Estimated "margen %" (porcentaje de ganancia), "Precio Venta",
+ * "Contrib. Unit." and "Contrib. Proyect." from first 2. 
+ * 
+ * @param editable, the object which received the signal
+ * @param data, the user data
+ */
+void calculateOnFly (GtkEditable *editable, gpointer user_data)
+{
+  gchar *modificado = (gchar *) user_data;
+
+  gchar *txt_margen       = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")));
+  gchar *txt_precio_final = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")));
+  
+  /*TODO: MASCARA ANTI CARACTERES - 
+    Comprueba si hay texto antes del parseo, de no haber nada setea un 0
+    se puede cambiar cuando los entry solo permitan el ingreso de números*/
+
+  if (HaveCharacters (txt_margen) || HaveCharacters (txt_precio_final))
+    return;
+
+  if (g_str_equal (txt_margen, ""))
+    gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), "0");
+
+  if (g_str_equal (txt_precio_final, ""))
+    gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), "0");
+
+  if (strlen (txt_margen) == 2 && g_str_equal (g_strdup_printf ("%c",txt_margen[0]), "0"))
+    gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), g_strdup_printf ("%c",txt_margen[1]));
+
+  gint margen         = atoi (txt_margen);
+  gint precio_final   = atoi (txt_precio_final);
+  gint costo_promedio = atoi (invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost"))), 2));
+  gdouble stock       = strtod (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_stock"))), (char **)NULL);
+  
+  if(precio_final == 0 || costo_promedio == 0)
+    return;
+  
+  if (margen == 0)
+    {
+      GtkWidget *aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contrib_unit"));
+      gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ 0</b>"));
+
+      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contribproyectada"));
+      gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ 0</b>"));
+
+      return;
+    }
+
+  GtkWidget *aux_widget;
+  
+  gint contri_unit     = lround ((gdouble)costo_promedio * (gdouble)margen / 100);
+  gint contrib_proyect = contri_unit * stock;
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contrib_unit"));
+  gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ %d</b>", contri_unit));
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contribproyectada"));
+  gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ %d</b>", contrib_proyect));
+
+  if (g_str_equal (modificado, "margen"))
+    {
+      /*Modificar el precio_final*/
+    }
+  else if (g_str_equal (modificado, "precio_final"))
+    {
+      /*Modificar el margen*/
+    }
+}
+
+
 /**
  * This function is a callback connected to the delete product button
  * present in the 'mercaderia' tab.

@@ -4382,7 +4382,7 @@
                     <child>
                       <object class="GtkLabel" id="label101">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Contrib Unit.</property>
+                        <property name="label" translatable="yes">Contrib. Unit.</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -4440,7 +4440,7 @@
                     <child>
                       <object class="GtkLabel" id="label109">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Contrib Agreg.</property>
+                        <property name="label" translatable="yes">Contrib. Agreg.</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -4452,7 +4452,7 @@
                     <child>
                       <object class="GtkLabel" id="label110">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Contrib. Proyect,</property>
+                        <property name="label" translatable="yes">Contrib. Proyect.</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -4554,6 +4554,7 @@
                         <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <signal name="changed" handler="calculateOnFly" object="&quot;margen&quot;"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>

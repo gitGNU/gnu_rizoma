@@ -585,7 +585,7 @@ ventas_win ()
 
   // check if the window must be set to fullscreen
   if (rizoma_get_value_boolean("FULLSCREEN"))
-    gtk_window_fullscreen(GTK_WINDOW(ventas_gui));
+    gtk_window_maximize(GTK_WINDOW(ventas_gui));
 
   gtk_widget_show_all (ventas_gui);
 

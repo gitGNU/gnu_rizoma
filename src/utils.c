@@ -492,7 +492,8 @@ log_register_access (User *info_user, gboolean login)
  * botones para eliminar productos seleccionados, ver eliminarDeLista
  *
  */
-void select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
+void 
+select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
 {
   GtkTreeView *tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, treeViewName));
 
@@ -503,4 +504,20 @@ void select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
     gtk_tree_selection_select_path (gtk_tree_view_get_selection(tree),
 				      gtk_tree_path_new_from_string(g_strdup_printf("%d", deletedRowPosition)));
   /* Si se elimina el último elemento de la lista que se seleccione el último disponible */
+}
+
+/**
+ * return a gchar* from index number (from string)
+ * to end, also could be understand as invested g_strndup.
+ *
+ * @param texto, text to cut
+ * @param index, initiation number index to cut.
+ */
+gchar *
+invested_strndup (gchar *texto, gint index)
+{
+  gchar *texto_local = g_strdup (texto);
+  index = strlen (texto_local) - index;
+  texto_local = g_strreverse (g_strndup (g_strreverse (texto_local), index));
+  return texto_local;
 }
