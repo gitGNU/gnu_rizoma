@@ -62,6 +62,6 @@ gboolean log_register_access (User *info_user, gboolean login);
 
 void select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition);
 
-gchar * invested_strndup (gchar *texto, gint index);
+gchar * invested_strndup (const gchar *texto, gint index);
 
 #endif

@@ -514,7 +514,7 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
  * @param index, initiation number index to cut.
  */
 gchar *
-invested_strndup (gchar *texto, gint index)
+invested_strndup (const gchar *texto, gint index)
 {
   gchar *texto_local = g_strdup (texto);
   index = strlen (texto_local) - index;

@@ -4060,7 +4060,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="lbl_informerca_totalbuy">
+                      <object class="GtkLabel" id="lbl_informerca_invstock">
                         <property name="visible">True</property>
                       </object>
                       <packing>
@@ -4069,23 +4069,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="lbl_informerca_mermauni">
+                      <object class="GtkLabel" id="lbl_informerca_mermapercent">
                         <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">5</property>
                         <property name="right_attach">6</property>
-                        <property name="top_attach">5</property>
-                        <property name="bottom_attach">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="lbl_informerca_invstock">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">4</property>
-                        <property name="right_attach">5</property>
                         <property name="top_attach">5</property>
                         <property name="bottom_attach">6</property>
                       </packing>
@@ -4133,7 +4122,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="lbl_informerca_sold">
+                      <object class="GtkLabel" id="lbl_informerca_imp_adic_unit">
                         <property name="visible">True</property>
                       </object>
                       <packing>
@@ -4144,18 +4133,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="lbl_informerca_type">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="lbl_informerca_extratax">
+                      <object class="GtkLabel" id="lbl_informerca_iva_unit">
                         <property name="visible">True</property>
                       </object>
                       <packing>
@@ -4263,16 +4241,6 @@
                         <property name="label" translatable="yes">Impuesto Adicional</property>
                       </object>
                       <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label91">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Tipo</property>
-                      </object>
-                      <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
                         <property name="top_attach">2</property>
@@ -4282,7 +4250,7 @@
                     <child>
                       <object class="GtkLabel" id="label92">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">T. Vendido</property>
+                        <property name="label" translatable="yes">Imp. Adic. Unit. ($)</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -4406,7 +4374,7 @@
                     <child>
                       <object class="GtkLabel" id="label103">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Inversion Stock</property>
+                        <property name="label" translatable="yes">Merma Unid.</property>
                       </object>
                       <packing>
                         <property name="left_attach">4</property>
@@ -4418,7 +4386,7 @@
                     <child>
                       <object class="GtkLabel" id="label104">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Merma Unid.</property>
+                        <property name="label" translatable="yes">Merma (%)</property>
                       </object>
                       <packing>
                         <property name="left_attach">5</property>
@@ -4430,7 +4398,7 @@
                     <child>
                       <object class="GtkLabel" id="label106">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Compras Totales</property>
+                        <property name="label" translatable="yes">Inversion Stock</property>
                       </object>
                       <packing>
                         <property name="top_attach">6</property>
@@ -4541,6 +4509,7 @@
                         <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <signal name="activate" handler="CalculateTempValues"/>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -4555,10 +4524,43 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <signal name="changed" handler="calculateOnFly" object="&quot;margen&quot;"/>
+                        <signal name="activate" handler="CalculateTempValues"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="right_attach">2</property>
+                        <property name="top_attach">5</property>
+                        <property name="bottom_attach">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label91">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">IVA Unit. ($)</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_informerca_extratax">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_informerca_mermauni">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">4</property>
+                        <property name="right_attach">5</property>
                         <property name="top_attach">5</property>
                         <property name="bottom_attach">6</property>
                       </packing>

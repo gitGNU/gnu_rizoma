@@ -1053,6 +1053,7 @@ CalcularPrecioFinal (void)
   else
     iva = -1;
 
+  // TODO: Revisión (Conseción de la variable)
   if (otros == 0)
     otros = -1;
 
