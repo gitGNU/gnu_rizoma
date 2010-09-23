@@ -46,6 +46,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
   int n_copy = atoi (vale_copy);
   int i, precio;
   gdouble siva = 0.0, civa = 0.0;
+  gboolean imprimir_vale = FALSE;
 
   fp = fopen (vale_file, "w+");
   fprintf (fp, "\t CONTROL INTERNO \n");
@@ -65,10 +66,33 @@ PrintVale (Productos *header, gint venta_id, gint total)
         else
           precio = products->product->precio;
 
-        fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
-                 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
+	gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+	if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
+	  {
+	    if (g_str_has_suffix(products->product->producto,"@"))
+	      {
+		imprimir_vale = TRUE;
+		fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
+			 g_strndup (products->product->producto, 30),
+			 products->product->marca,
+			 products->product->cantidad,
+			 precio,
+			 lround ((double)(products->product->cantidad * precio)));
 
-        civa += (double)(products->product->cantidad * precio);
+		civa += (double)(products->product->cantidad * precio);
+	      }
+	  }
+	else
+	  {
+	    fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
+		     g_strndup (products->product->producto, 30),
+		     products->product->marca,
+		     products->product->cantidad,
+		     precio,
+		     lround ((double)(products->product->cantidad * precio)));
+
+	    civa += (double)(products->product->cantidad * precio);
+	  }
       }
 
     products = products->next;
@@ -87,27 +111,57 @@ PrintVale (Productos *header, gint venta_id, gint total)
         else
           precio = products->product->precio;
 
-        fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n", g_strndup (products->product->producto, 30), products->product->marca,
-                 products->product->cantidad, precio, lround ((double)(products->product->cantidad * precio)));
+	gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+	if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
+	  {
+	    if (g_str_has_suffix(products->product->producto,"@"))
+	      {
+		imprimir_vale = TRUE;
+		fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
+			 g_strndup (products->product->producto, 30),
+			 products->product->marca,
+			 products->product->cantidad,
+			 precio,
+			 lround ((double)(products->product->cantidad * precio)));
 
-        siva+= (double)(products->product->cantidad * precio);
+		siva+= (double)(products->product->cantidad * precio);
+	      }
+	  }
+	else
+	  {
+	    fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
+		     g_strndup (products->product->producto, 30),
+		     products->product->marca,
+		     products->product->cantidad,
+		     precio,
+		     lround ((double)(products->product->cantidad * precio)));
+
+	    siva+= (double)(products->product->cantidad * precio);
+	  }
       }
 
     products = products->next;
 
   } while (products != header);
 
-  fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
-  fprintf (fp, "Sub Total afecto:      \t\t%s$ %ld %s\n", size2, lround(civa), size1);
-  fprintf (fp, "\n\n");
-  fprintf (fp, "Total Venta: \t\t\t%s$ %d %s\n", size2, total, size1);
-  fprintf (fp, "\n\n\n\n\n");
-  fprintf (fp, "%s", cut); /* We cut the paper :) */
-  fclose (fp);
+  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+  if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale)
+    {
+      fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
+      fprintf (fp, "Sub Total afecto:      \t\t%s$ %u %s\n", size2, lround(civa), size1);
+      fprintf (fp, "\n\n");
+      fprintf (fp, "Total Venta: \t\t\t%s$ %d %s\n", size2, total, size1);
+      fprintf (fp, "\n\n\n\n\n");
+      fprintf (fp, "%s", cut); /* We cut the paper :) */
+      fclose (fp);
+    }
 
-
-  for (i = 0; i < n_copy; i++)
-    system (g_strdup_printf ("%s %s", print_command, vale_file));
+  if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale)
+    {
+      for (i = 0; i < n_copy; i++) {
+	system(g_strdup_printf ("%s %s", print_command, vale_file));
+         }
+    }
 
   system (g_strdup_printf ("rm %s", vale_file));
 }
