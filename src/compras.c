@@ -1006,11 +1006,11 @@ Save (GtkWidget *widget, gpointer data)
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
                      iva, otros, barcode, familia, perecible, fraccion);
 
-  if (tab == 1)
+  if (tab == 0)
     {
       SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
     }
-  else if (tab == 4)
+  else if (tab == 3)
     {
       FillFields (NULL, NULL);
     }
