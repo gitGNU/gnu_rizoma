@@ -1,3 +1,38 @@
+2010-09-26  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c: Bug fixed, updates the information after modify product's
+  attributes
+
+2010-09-22  Jonathan Gonzalez V <zeus@gnu.org>
+
+  * src/vale.c: Added selected ticket per product
+
+2010-07-31  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/compras.c, src/utils.c, src/utils.h,
+  ui/rizoma-compras.ui: merchandise information in compras GUI was updated, and
+  other minor fixes
+
+2010-06-18  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/utils.c, src/utils.h, src/ventas.c,
+  ui/rizoma-compras.ui: calculate on fly added in rizoma-compras > mercaderia
+  and other minor fixes too
+
+2010-06-05  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c: improved usability in rizoma-compras
+
+2010-06-05  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/compras.c, src/utils.c, src/ventas.c: Fixed to select the last row the
+  treeviews de Compras and Ventas, when you delete.
+
+  * AUTHORS, prepareChangelog.py, rizoma.doxygen: Edit AUTHORS and
+  rizoma.doxygen
+
+  * ChangeLog, prepareChangelog.py: Fixed prepareChangelog and update ChangeLog
+
 2010-06-01  Wilson Butros <wrbutros@rizoma.cl>
 
   * src/compras.c, src/utils.c, ui/rizoma-compras.ui: New library version bug

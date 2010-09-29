@@ -153,25 +153,33 @@ check_passwd (GtkWidget *widget, gpointer data)
   switch (AcceptPassword (passwd, user))
     {
     case TRUE:
-
       user_data = (User *) g_malloc (sizeof (User));
-
       user_data->user_id = ReturnUserId (user);
       user_data->level = ReturnUserLevel (user);
       user_data->user = user;
-
-      gtk_widget_destroy (GTK_WIDGET(gtk_builder_get_object (builder,"login_window")));
-      g_object_unref ((gpointer) builder);
-      builder = NULL;
-
-      admin_win();
-
+      
+      if(user_data->level == 0)
+	{
+	  gtk_widget_destroy (GTK_WIDGET(gtk_builder_get_object (builder,"login_window")));
+	  g_object_unref ((gpointer) builder);
+	  builder = NULL;
+	  admin_win();
+	}
+      else
+	{
+	  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
+	  gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
+	  rizoma_errors_set ("El usuario no tiene Permiso a Rizoma Admin", "AcceptPassword ()", ALERT);
+	  rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
+	}
       break;
+      
     case FALSE:
       gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
       gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
       rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
       break;
+      
     default:
       break;
     }
