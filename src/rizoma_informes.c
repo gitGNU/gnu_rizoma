@@ -1354,6 +1354,114 @@ on_btn_ultimo_clicked()
 
 }
 
+/**
+ * Es llamada cuando se presiona el boton "btn_ultimo" (signal clicked).
+ *
+ * Esta funcion inserta las 100 ultimas ventas en el tree_view_sells.
+ *
+ */
+void
+on_togglebtn_clicked()
+{
+  gchar *str_tb = gtk_label_get_text (GTK_LABEL (builder_get (builder, "labelTB")));
+
+  if(strcmp(str_tb, "Activado") == 0)
+    {
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Desactivado");
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), FALSE);
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "     a     ");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "     de     ");
+      fill_sells_list(); 
+    }
+  else
+    {
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Activado");
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), TRUE);
+      
+      GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
+												 "tree_view_sells"))));
+      gchar *pago = NULL;
+      gint tuples, i;
+      gint sell_type;
+      GtkTreeIter iter;
+
+      gtk_list_store_clear (store);
+      gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
+												 "tree_view_sell_detail")))));
+
+      /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
+	 retorna los datos de ventas en un intervalo de fechas*/ 
+      res_sells = SearchTuplesByDate
+	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+	 g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta");
+
+      tuples = PQntuples (res_sells);
+
+      /* si las tuplas son mayores a 100, se activan los botones de adelante y
+	 ultimo, y se inactivan los de atras y primero*/
+
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "fin_lbl")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "");
+      if (tuples == 0)
+	return;
+
+      /* verifica que tipo de venta es*/
+      for (i = 0; i < tuples; i++)
+	{
+	  /* if (i < 100 ) */
+	  /*   { */
+	  sell_type = atoi (PQgetvalue (res_sells, i, 5));
+	  switch (sell_type)
+	    {
+	    case CASH:
+	      pago = "Contado";
+	      break;
+	    case CREDITO:
+	      pago = "Credito";
+	      break;
+	    case CHEQUE:
+	      pago = "Cheque";
+	      break;
+	    case TARJETA:
+	      pago = "Tarjeta";
+	      break;
+	    default:
+	      pago = "Indefinido";
+	      break;
+	    }
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, PQgetvalue (res_sells, i, 4),
+			      1, PQgetvalue (res_sells, i, 0),
+			      2, PQgetvalue (res_sells, i, 1),
+			      3, PQgetvalue (res_sells, i, 2),
+			      4, PQgetvalue (res_sells, i, 3),
+			      5, pago,
+			      -1);
+	}
+      /* else */
+      /*   { */
+      /*     contador = 100; */
+      /*     fin = tuples; */
+      /*     return; */
+      /*   } */
+    }
+
+
+return;
+
+}
+
+
+
 
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
@@ -1370,7 +1478,8 @@ on_btn_ultimo_clicked()
 void
 fill_sells_list ()
 {
-  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"))));
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
+											     "tree_view_sells"))));
 
   gchar *pago = NULL;
   gint tuples, i;
@@ -1395,8 +1504,9 @@ fill_sells_list ()
     {
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), TRUE);
-            gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE); 
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "togglebutton")), TRUE);
     }
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), "1");
@@ -1680,7 +1790,6 @@ void
   gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Listo ..");
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")),TRUE);
 
-
 }
 
 /**
@@ -1753,9 +1862,8 @@ fill_products_rank ()
                                          PutPoints (PQvaluebycol (res, 0, "contrib"))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
-                        g_strdup_printf ("<span size=\"x-large\"> %s %</span>",
-                                         PQvaluebycol (res, 0, "margen")));
- 
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
+                                         PQvaluebycol (res, 0, "margen"))); 
 }
 
 /**
@@ -1868,7 +1976,6 @@ on_btn_get_stat_clicked ()
       const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
       date_begin = g_date_new ();
       date_end = g_date_new ();
-      GError *error = NULL;
       GtkWidget * progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   
       if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;

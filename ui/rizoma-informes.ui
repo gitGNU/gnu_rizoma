@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <interface>
+  <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="wnd_reports">
     <property name="title" translatable="yes">Rizoma POS Comercio: Infomes</property>
@@ -11,7 +12,6 @@
         <child>
           <object class="GtkVBox" id="vbox6">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <object class="GtkHBox" id="hbox1">
                 <property name="visible">True</property>
@@ -94,7 +94,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="btn_get_stat">
-                    <property name="label" translatable="yes">gtk-execute</property>
+                    <property name="label">gtk-execute</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -141,7 +141,7 @@
                             <property name="visible">True</property>
                             <child>
                               <object class="GtkButton" id="btn_primero">
-                                <property name="label" translatable="yes">gtk-goto-first</property>
+                                <property name="label">gtk-goto-first</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -157,7 +157,7 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="btn_atras">
-                                <property name="label" translatable="yes">gtk-go-back</property>
+                                <property name="label">gtk-go-back</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -173,7 +173,7 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="btn_adelante">
-                                <property name="label" translatable="yes">gtk-go-forward</property>
+                                <property name="label">gtk-go-forward</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -189,7 +189,7 @@
                             </child>
                             <child>
                               <object class="GtkButton" id="btn_ultimo">
-                                <property name="label" translatable="yes">gtk-goto-last</property>
+                                <property name="label">gtk-goto-last</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -201,6 +201,48 @@
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
                                 <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkToggleButton" id="togglebutton">
+                                <property name="width_request">120</property>
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="tooltip_text" translatable="yes">Si se activa podra visualizar todas las ventas en la pantalla,
+ideal para exportar a una plantilla.
+Si se desactiva podra visualizar las ventas cada 100 ventas</property>
+                                <property name="double_buffered">False</property>
+                                <signal name="toggled" handler="on_togglebtn_clicked"/>
+                                <child>
+                                  <object class="GtkHBox" id="hbox15">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <object class="GtkImage" id="image10">
+                                        <property name="visible">True</property>
+                                        <property name="stock">gtk-justify-fill</property>
+                                      </object>
+                                      <packing>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="labelTB">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="label" translatable="yes">Desactivado</property>
+                                      </object>
+                                      <packing>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>
@@ -592,8 +634,9 @@
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkButton" id="btn_print_sells">
-                            <property name="label" translatable="yes">gtk-print</property>
+                            <property name="label">gtk-print</property>
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
@@ -678,7 +721,7 @@
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkButton" id="btn_print_rank">
-                        <property name="label" translatable="yes">gtk-print</property>
+                        <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -1164,7 +1207,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow5">
                         <property name="visible">True</property>
@@ -1275,7 +1317,7 @@
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkButton" id="btn_print_devolucion">
-                            <property name="label" translatable="yes">gtk-print</property>
+                            <property name="label">gtk-print</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1323,7 +1365,6 @@
             <child>
               <object class="GtkVBox" id="vbox7">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow7">
                     <property name="visible">True</property>
@@ -1369,7 +1410,7 @@
             </child>
             <child>
               <object class="GtkButton" id="button1">
-                <property name="label" translatable="yes">gtk-quit</property>
+                <property name="label">gtk-quit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1393,5 +1434,8 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="stock">gtk-missing-image</property>
+  </object>
 </interface>
-

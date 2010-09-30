@@ -1,3 +1,8 @@
+2010-09-29  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ChangeLog, src/admin.c: Bug fixed, user(no admin, level 1) login in
+  rizoma-admin
+
 2010-09-26  Wilson Butros <wrbutros@rizoma.cl>
 
   * src/compras.c: Bug fixed, updates the information after modify product's
