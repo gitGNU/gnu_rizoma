@@ -35,7 +35,7 @@ fi
 
 if autoconf --version > /dev/null 2>&1; then
 
-    if autoconf --version | grep '2.[570]' > /dev/null>&1; then
+    if autoconf --version | grep '2.[5670]' > /dev/null>&1; then
 	echo "autoconf   ... yes"
     else
 	echo "autoconf   ... no"
