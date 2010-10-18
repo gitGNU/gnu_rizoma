@@ -18,7 +18,7 @@
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-if [ "$1" == "--help" ]; then
+if [ "$1" = "--help" ]; then
     echo "Usage: autogen.sh [options]"
     echo "Options:"
     echo "--help         : Display this help message"
@@ -27,7 +27,7 @@ if [ "$1" == "--help" ]; then
     exit;
 fi
 
-if [ "$1" == "--with-errors" ]; then
+if [ "$1" = "--with-errors" ]; then
     ERROR="YES"
 else
     ERROR="NO"
@@ -94,13 +94,13 @@ aclocal -I m4/
 echo "Creating config.h.in"
 autoheader
 echo "Adding missing standards files to package"
-if [ "$ERROR" == "YES" ]; then
+if [ "$ERROR" = "YES" ]; then
     automake --add-missing --copy
 else
     automake --add-missing --copy > /dev/null 2>&1;
 fi
 echo "Creating configure file"
-if [ "$ERROR" == "YES" ]; then
+if [ "$ERROR" = "YES" ]; then
     autoconf
 else
     autoconf > /dev/null 2>&1;
