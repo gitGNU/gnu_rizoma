@@ -439,7 +439,7 @@ reports_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-   gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();

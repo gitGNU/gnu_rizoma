@@ -741,7 +741,20 @@ SearchProductByCode (void)
 
       stock = g_strtod (PUT (PQvaluebycol (res, 0, "stock")), NULL);
 
-      if (stock <= 0)
+
+      // TODO: Crear una busqueda de productos que tengan estado t para barcode y codigo corto (para todo el programa)
+      if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
+	{
+	  GtkWidget *aux_widget;
+          aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+          gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", codigo);
+	  CleanSellLabels();
+          AlertMSG (aux_widget, str);
+          g_free (str);
+
+          return FALSE;
+	}
+      else if (stock <= 0)
         {
           GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
@@ -1380,6 +1393,18 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
   if (res == NULL)
     return -1;
+
+  if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
+    {
+      GtkWidget *aux_widget;
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", barcode);
+      CleanSellLabels();
+      AlertMSG (aux_widget, str);
+      g_free (str);
+      
+      return -1;
+    }
 
   if (PQntuples (res) == 0)
     {
@@ -3181,7 +3206,7 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
       if (atoi(barcode) == 0)
         {
           AlertMSG(GTK_WIDGET(entry), "No puede ingresar un codigo de barras 0, o con caracteres\n"
-                   "Si no sabe el codigo de barras deje el campo vacio");
+                   "Si no sabe el código de barras deje el campo vacio");
           return;
         }
       else

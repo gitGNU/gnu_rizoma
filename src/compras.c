@@ -834,27 +834,50 @@ void
 SearchProductHistory (GtkEntry *entry, gchar *barcode)
 {
   gdouble day_to_sell;
-
   PGresult *res;
-
-  gchar *q = g_strdup_printf ("select barcode "
-                              "from codigo_corto_to_barcode('%s')",
-                              barcode);
+  gchar *q;
+  gchar *codigo;
+  
+  codigo = barcode;
+  q = g_strdup_printf ("select barcode "
+		       "from codigo_corto_to_barcode('%s')",
+		       barcode);
   res = EjecutarSQL(q);
-
+  
+  /*Si entra aqui significa que se ingresó un codigo corto, y se pasa a codigo de barra*/
   if (PQntuples (res) == 1)
     {
       barcode = g_strdup (PQvaluebycol( res, 0, "barcode"));
       PQclear (res);
       gtk_entry_set_text (GTK_ENTRY (entry),barcode);
     }
-
-  g_free(q);
-
+    
+  g_free(q);  
   q = g_strdup_printf ("SELECT existe_producto(%s)", barcode);
 
   if (g_str_equal( GetDataByOne (q), "t"))
     {
+      g_free(q);
+      q = g_strdup_printf ("SELECT estado FROM producto where barcode = '%s'", barcode);
+      res = EjecutarSQL(q);
+
+      /*Para asegurarse de que el producto no haya sido inhabilitado (borrado) por el administrador*/
+      if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
+	{
+	  GtkWidget *aux_widget;
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "compras_gui"));
+	  gchar *str = g_strdup_printf("El código %s no está disponible, fué invalidado por el administrador", codigo);
+	  AlertMSG (aux_widget, str);
+
+	  //Limipia todo antes de irse
+	  gtk_entry_set_text (GTK_LABEL (gtk_builder_get_object (builder, "entry_buy_barcode")), "");
+	  g_free (str);
+	  g_free (q);
+	  g_free (codigo);
+	  PQclear (res);
+	  return;
+	}
+
       ShowProductHistory ();
 
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", barcode);

@@ -2188,7 +2188,8 @@ CREATE OR REPLACE FUNCTION informacion_producto_venta( IN codigo_barras bigint,
 		OUT precio_mayor integer,
 		OUT cantidad_mayor integer,
 		OUT mayorista boolean,
-		OUT stock_day double precision)
+		OUT stock_day double precision,
+		OUT estado boolean)
 RETURNS SETOF record AS $$
 declare
 	days double precision;
@@ -2221,6 +2222,7 @@ FOR datos IN EXECUTE query LOOP
     mayorista := datos.mayorista;
     precio_mayor := datos.precio_mayor;
     cantidad_mayor := datos.cantidad_mayor;
+    estado := datos.estado;
     RETURN NEXT;
 END LOOP;
 
