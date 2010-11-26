@@ -228,7 +228,7 @@ GuardarModificacionesProducto (void)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
   mayorista = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
-
+  
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_pricemayorist"));
   precio_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
@@ -245,7 +245,7 @@ GuardarModificacionesProducto (void)
     {
       SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
                                  cantidad_mayorista);
-
+      
       GtkWidget *treeview;
       GtkTreeSelection *selec;
       GtkListStore *store;
@@ -276,6 +276,9 @@ GuardarModificacionesProducto (void)
         }
       //FillFields (NULL, NULL);
     }
+  
+  //Deshabilita el botón guardar
+  //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), FALSE);
 }
 
 
@@ -718,7 +721,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
   gint contri_unit;
   gint contrib_agreg;
   gint contrib_proyect;
-  gint margen, fifo, valor_stock;
+  gint margen, costo_promedio, valor_stock;
   gint cantidad_mayorista, precio_mayorista;
   gchar *q;
   GtkListStore *store;
@@ -744,19 +747,19 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       /*-- INFORMACION PRODUCTO [VALORES] --*/
       iva                = GetIVA (barcode);
       otros              = GetOtros (barcode);
-      fifo               = atoi (PQvaluebycol (res, 0, "costo_promedio"));
+      costo_promedio     = atoi (PQvaluebycol (res, 0, "costo_promedio"));
       merma              = (double)atoi (PQvaluebycol (res, 0, "unidades_merma"));
       stock              = g_ascii_strtod (PQvaluebycol ( res, 0, "stock"), NULL);
       margen             = atoi (PQvaluebycol (res, 0, "margen_promedio"));
       precio             = atoi (PQvaluebycol (res, 0, "precio"));
       vendidos           = atoi (PQvaluebycol (res, 0, "vendidos"));
-      valor_stock        = fifo * stock;
+      valor_stock        = costo_promedio * stock;
       contrib_agreg      = atoi (PQvaluebycol (res, 0, "contrib_agregada"));
       precio_mayorista   = atoi (PQvaluebycol (res, 0, "precio_mayor"));
       cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));
 
       //compras_totales  = GetTotalBuys (barcode); OBSOLETO
-      //valor_stock      = fifo * stock; OBSOLETO
+      //valor_stock      = costo_promedio * stock; OBSOLETO
 
       if (merma != 0)
         mermaporc = (gdouble)(merma / (stock + vendidos + merma)) *  100;
@@ -771,38 +774,31 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       if (otros == 0)
 	otros = -1;
       
+      contri_unit = lround ((gdouble)costo_promedio * (gdouble)margen / 100);
+
       /*Calcula la contribucion unitaria y los impuestos*/
       if (otros == -1 && iva != -1)
-	{
-	  contri_unit = ( ((gdouble)fifo * iva) * (gdouble)margen / 100 );
-	  contri_unit = lround (contri_unit);
-
+	{	  
 	  //costo      = (gdouble) ((gdouble)(precio / iva) / (gdouble) (margen + 100)) * 100;
 	  //costo      = lround (costo);
 	  
-	  iva_unit   = lround (fifo * (iva - 1));
+	  iva_unit   = lround ((costo_promedio + contri_unit) * (iva - 1));
 	  otros_unit = 0;
 	}
       else if (iva != -1 && otros != -1)
         {
           iva   = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
-	  
-	  contri_unit = ( ((gdouble)fifo * (iva + otros + 1)) * (gdouble)margen / 100 );
-	  contri_unit = lround (contri_unit);
 
           //costo = (gdouble) precio / (gdouble)(iva + otros + 1);
           //costo = (gdouble) costo / ((gdouble) margen / 100 + 1);
 	  //costo = lround (costo);
 	  
-	  iva_unit   = lround (fifo * iva);
-	  otros_unit = lround (fifo * otros);
+	  iva_unit   = lround ((costo_promedio + contri_unit ) * iva);
+	  otros_unit = lround ((costo_promedio + contri_unit) * otros);
         }
       else if (iva == -1 && otros == -1)
 	{
-	  contri_unit = ( (gdouble)fifo * (gdouble)margen / 100 );
-	  contri_unit = lround (contri_unit);
-	  
 	  //costo = (gdouble) (precio / (gdouble) (margen + 100)) * 100;
 	  //costo = lround (costo);
 	  
@@ -867,7 +863,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_avg_cost"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$ %d</b>", fifo));
+                            g_strdup_printf ("<b>$ %d</b>", costo_promedio));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -1029,7 +1025,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
       margen = atoi (txt_margen);
     }
 
-  contri_unit = lround ((gdouble)(costo_promedio + (costo_promedio * iva) + (costo_promedio * otros)) * (gdouble)margen / 100);
+  contri_unit = lround ((gdouble)costo_promedio * (gdouble)margen / 100);
   contrib_proyect = contri_unit * stock;
 
   GtkWidget *aux_widget;
@@ -1039,6 +1035,9 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contribproyectada"));
   gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ %d</b>", contrib_proyect));
+
+  //Habilita el botón guardar
+  //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), TRUE);
 }
 
 

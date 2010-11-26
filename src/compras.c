@@ -820,6 +820,11 @@ compras_win (void)
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_buy")), FALSE);
+  //Compras - Mescadería
+  //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), FALSE);
+  //Compras - Mercadería - Editar Producto
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_edit_prod_shortcode")), FALSE);
+  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_edit_prod_barcode")), FALSE);
 
   //Focus Control  
   //TODO: Solucionar el foco de las pestañas (El foco debe cambiarse a los entrys principales)

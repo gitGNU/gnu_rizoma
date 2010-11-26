@@ -937,6 +937,15 @@ DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, gint preci
     return FALSE;
 }
 
+
+/**
+ * Called by "Save" function in compras.c
+ * Update the product's modifications 
+ *
+ * @param Product attributes
+ *
+ * TODO: Sería más eficiente si recibiera algún tipo de array "diccionario" de distintos tipos
+ */
 void
 SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unidad,
                    gchar *contenido, gchar *precio, gboolean iva, gint otros, gchar *barcode,
@@ -945,12 +954,65 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   PGresult *res;
   gchar *q;
 
+  q = g_strdup_printf ("SELECT costo_promedio FROM producto WHERE barcode ='%s'", barcode);
+  res = EjecutarSQL(q);
+  g_free(q);
+
+  // Recalcular el porcentaje de ganancia a partir del precio final del producto
+  // TODO: Unificar este cálculo, pues se realiza una y otra vez en distintas partes
+  gdouble porcentaje;
+  gint costo_promedio = atoi (PQvaluebycol (res, 0, "costo_promedio"));
+  gint precio_local = atoi (g_strdup (precio));
+
+  // Impuestos
+  gdouble iva_local;
+  gdouble otros_local;
+
+  /*Tiene IVA y Otros es la opcion "Sin Impuestos"*/ 
+  if (iva == TRUE && (otros == 0 || otros == -1))
+    {
+      // Obtención IVA
+      q = g_strdup_printf ("SELECT monto FROM impuesto WHERE id = 1");
+      res = EjecutarSQL(q);
+      iva_local = (gdouble) atoi (PQvaluebycol (res, 0, "monto"));
+
+      // Calculo
+      iva_local = (iva_local / 100) + 1;      
+      porcentaje = (gdouble) ((precio_local / (gdouble)(iva_local * costo_promedio)) -1) * 100;
+      g_free(q);
+    }
+
+  /*Tiene IVA y Otros es una opcion distinta a "Sin Impuestos"*/
+  else if (iva == TRUE && (otros != 0 || otros != -1))
+    {
+      // Obtención Impuestos
+      q = g_strdup_printf ("SELECT monto FROM impuesto WHERE id = 1 OR id = %d", otros);
+      res = EjecutarSQL(q);
+      iva_local = (gdouble) atoi (PQvaluebycol (res, 0, "monto"));
+      otros_local = (gdouble) atoi (PQvaluebycol (res, 1, "monto"));      
+      g_free(q);
+
+      // Calculo
+      iva_local = (gdouble) (iva_local / 100);
+      otros_local = (gdouble) (otros_local / 100);
+      
+      porcentaje = (gdouble) precio_local / (gdouble)(iva_local + otros_local + 1);
+      porcentaje = (gdouble) porcentaje - costo_promedio;
+      porcentaje = lround ((gdouble)(porcentaje / costo_promedio) * 100);
+    }
+  
+  /*No tiene IVA y Otros es la opcion "Sin Impuestos"*/
+  else if (iva == FALSE && (otros == 0 || otros == -1))
+    {      
+      porcentaje = (gdouble) ((precio_local / costo_promedio) - 1) * 100;
+    }
+
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
                        "marca='%s', unidad='%s', contenido='%s', precio=%d, "
                        "impuestos='%d', otros=%d, "
-                       "perecibles='%d', fraccion='%d' WHERE barcode='%s'",
+                       "perecibles='%d', fraccion='%d', margen_promedio=%g WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
-                       iva, otros, (gint)perecible, (gint)fraccion, barcode);
+                       iva, otros, (gint)perecible, (gint)fraccion, porcentaje,  barcode);
   res = EjecutarSQL(q);
   g_free(q);
 }
@@ -2630,14 +2692,14 @@ TotalPrecioCompra (Productos *products)
 {
   Productos *header = products;
   gint total=0;
-  gint pre,precio;
+  gint pre;
   PGresult *res;
   gchar *q;
   do
     {
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+      pre = atoi(PQvaluebycol(res, 0, "costo_promedio"));
       total = total + pre;
       products = products->next;
     }
