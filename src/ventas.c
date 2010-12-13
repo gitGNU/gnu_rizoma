@@ -1191,6 +1191,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
 {
   GtkWindow *window;
   gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
+  gboolean sencillo_directo = rizoma_get_value_boolean ("SENCILLO_DIRECTO");
 
   /*Verifica si hay productos añadidos en la TreeView para vender*/
 
@@ -1212,7 +1213,10 @@ TipoVenta (GtkWidget *widget, gpointer data)
       tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "tipo_venta_win_venta"));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_discount_money")));
+      if (sencillo_directo == TRUE)
+	gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "sencillo_entry")));
+      else
+	gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_discount_money")));
 
       clean_container (GTK_CONTAINER (window));
       gtk_widget_show_all (GTK_WIDGET (window));
