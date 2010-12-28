@@ -375,6 +375,7 @@ create table merma (
   barcode                   int8,
   unidades                  float8,
   motivo                    int2,
+  fecha 		    timestamp without time zone,
   constraint pk_merma primary key (id)
 ) ;
 

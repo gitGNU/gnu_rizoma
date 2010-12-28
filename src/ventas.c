@@ -731,7 +731,7 @@ SearchProductByCode (void)
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT *  FROM informacion_producto_venta (0, '%s')", codigo));
+  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM informacion_producto_venta (0, '%s')", codigo));
 
   if (res != NULL && PQntuples (res) != 0)
     {
@@ -1191,7 +1191,6 @@ TipoVenta (GtkWidget *widget, gpointer data)
 {
   GtkWindow *window;
   gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
-  gboolean sencillo_directo = rizoma_get_value_boolean ("SENCILLO_DIRECTO");
 
   /*Verifica si hay productos añadidos en la TreeView para vender*/
 
@@ -1213,10 +1212,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
       tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "tipo_venta_win_venta"));
 
-      if (sencillo_directo == TRUE)
-	gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "sencillo_entry")));
-      else
-	gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_discount_money")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_discount_money")));
 
       clean_container (GTK_CONTAINER (window));
       gtk_widget_show_all (GTK_WIDGET (window));
@@ -1395,14 +1391,24 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   res = EjecutarSQL(q);
   g_free(q);
 
-  // TODO: Crear validaciones unificadas que permitan manejar con más claridad el control de los datos que se ingresan
   if (res == NULL)
     return -1;
 
-  // Si la respuesta es de 0 filas (si no hay coincidencias en la búsqueda)
+  if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
+    {
+      GtkWidget *aux_widget;
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", barcode);
+      CleanSellLabels();
+      AlertMSG (aux_widget, str);
+      g_free (str);
+      
+      return -1;
+    }
+
   if (PQntuples (res) == 0)
     {
-      if (strcmp (barcode, "") != 0) // Si se ingresó algún código, significa que no existe el producto
+      if (strcmp (barcode, "") != 0)
         {
           AlertMSG (widget, g_strdup_printf
                     ("No existe un producto con el código de barras %s!!", barcode));
@@ -1411,7 +1417,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
             CleanSellLabels ();
         }
       else
-        if (GetCurrentStock (barcode) == 0) // TODO: Verificar utilidad de los else
+        if (GetCurrentStock (barcode) == 0)
           {
             AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
 
@@ -1423,19 +1429,6 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
             if (ventas != FALSE)
               CleanSellLabels ();
           }
-      return -1;
-    }
-
-  // Si el estado es F significa que el producto fue eliminado
-  if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
-    {
-      GtkWidget *aux_widget;
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-      gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", barcode);
-      CleanSellLabels();
-      AlertMSG (aux_widget, str);
-      g_free (str);
-      
       return -1;
     }
 

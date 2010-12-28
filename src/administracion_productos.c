@@ -988,7 +988,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   else
     otros = 0;
   
-  if (precio_final == 0 || costo_promedio == 0 || margen == 0)
+  if ((precio_final == 0 && margen == 0) || costo_promedio == 0)
     return;
   
   gint contri_unit;     // = lround ((gdouble)costo_promedio * (gdouble)margen / 100);
