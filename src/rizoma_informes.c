@@ -905,16 +905,16 @@ reports_win (void)
 
 
   store = gtk_list_store_new (10,
-                              G_TYPE_STRING,
-			      G_TYPE_STRING,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE,
-			      G_TYPE_DOUBLE,
-			      G_TYPE_DOUBLE,
-			      G_TYPE_DOUBLE,
-			      G_TYPE_DOUBLE,
+                              G_TYPE_STRING, // 0, Descripcion Mercadería 
+			      G_TYPE_STRING, // 1, Marca
+                              G_TYPE_DOUBLE, // 2, Stock Inicial
+                              G_TYPE_DOUBLE, // 3, Compras
+                              G_TYPE_DOUBLE, // 4, Ventas
+                              G_TYPE_DOUBLE, // 5, Devoluciones
+			      G_TYPE_DOUBLE, // 6, Mermas
+			      G_TYPE_DOUBLE, // 7, Stock teorico
+			      G_TYPE_DOUBLE, // 8, Stock Físico
+			      G_TYPE_DOUBLE, // 9, Diferencia
                               -1);
   
  
@@ -1036,6 +1036,26 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 9);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
+
+
+  print->tree = treeview;
+  print->title = "Informe Cuadratura";
+  print->date_string = NULL;
+  print->cols[0].name = "Descripcion";
+  print->cols[1].name = "Marca";
+  print->cols[2].name = "Stock Inicial";
+  print->cols[3].name = "Compras";
+  print->cols[4].name = "Ventas";
+  print->cols[5].name = "Devoluciones";
+  print->cols[6].name = "Mermas";
+  print->cols[7].name = "Stock Teórico";
+  print->cols[8].name = "Stock Físico";
+  print->cols[9].name = "Diferencia";
+  print->cols[10].name = NULL;
+
+  //g_signal_connect (builder_get (builder, "btn_print_cuadratura"), "clicked",
+  //                  G_CALLBACK (PrintTree), (gpointer)print);
+
 
   /*
     End Cuadratura
