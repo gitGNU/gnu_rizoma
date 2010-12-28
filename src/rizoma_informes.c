@@ -1053,8 +1053,8 @@ reports_win (void)
   print->cols[9].name = "Diferencia";
   print->cols[10].name = NULL;
 
-  //g_signal_connect (builder_get (builder, "btn_print_cuadratura"), "clicked",
-  //                  G_CALLBACK (PrintTree), (gpointer)print);
+  g_signal_connect (builder_get (builder, "btn_print_cuadratura"), "clicked",
+                    G_CALLBACK (PrintTree), (gpointer)print);
 
 
   /*
