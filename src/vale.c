@@ -51,7 +51,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
   fp = fopen (vale_file, "w+");
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "%s", start);
-  fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(), CurrentTime());
+  fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
   fprintf (fp, "Numero de venta: %d\n", venta_id);
   fprintf (fp, "Vendedor: %s\n", user_data->user);
   fprintf (fp, "==========================================\n\n");

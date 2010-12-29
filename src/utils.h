@@ -54,7 +54,7 @@ void clean_container (GtkContainer *container);
 
 gchar ** parse_rut (gchar *rut);
 
-gchar * CurrentDate (void);
+gchar * CurrentDate (int tipo);
 
 gchar * CurrentTime (void);
 

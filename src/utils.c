@@ -426,7 +426,7 @@ parse_rut (gchar *rut)
 }
 
 gchar *
-CurrentDate (void)
+CurrentDate (int tipo)
 {
   time_t t;
   struct tm *fecha;
@@ -434,8 +434,10 @@ CurrentDate (void)
   time (&t);
 
   fecha = localtime (&t);
-
-  return g_strdup_printf ("%.2d-%.2d-%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year));
+  if(tipo == 0)
+    return g_strdup_printf ("%.2d-%.2d-%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year));
+  else
+    return g_strdup_printf ("%.2d/%.2d/%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year-2000));
 }
 
 gchar *
@@ -492,7 +494,7 @@ log_register_access (User *info_user, gboolean login)
  * botones para eliminar productos seleccionados, ver eliminarDeLista
  *
  */
-void 
+void
 select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
 {
   GtkTreeView *tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, treeViewName));

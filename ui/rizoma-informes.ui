@@ -125,7 +125,7 @@
           <object class="GtkNotebook" id="ntbk_reports">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <signal name="change_current_page" handler="on_tree_view_cuadratura_grab_focus"/>
+            <signal name="switch_page" handler="on_tree_view_cuadratura_grab_focus"/>
             <child>
               <object class="GtkHBox" id="hbox4">
                 <property name="visible">True</property>
