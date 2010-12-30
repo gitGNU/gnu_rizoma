@@ -39,7 +39,7 @@
 int
 LaunchApp (const gchar *file)
 {
-  system (g_strdup_printf ("LANG=C gnumeric \"%s\" &", file));
+  system (g_strdup_printf ("LANG=es_CL.UTF-8 gnumeric \"%s\" &", file));
   return 0;
 }
 
