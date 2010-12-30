@@ -3469,9 +3469,14 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
                                 g_strdup_printf ("<span size=\"40000\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%u", total))));
         }
-
-      close_nullify_sale_dialog ();
     }
+  else if (rizoma_get_value_boolean("CAJA") == 0) // Si entra en este else if significa que nunca se ha habilitado caja.
+    {
+      // TODO: la ventana aparece atrás, se debe lograr que se sobreponga a la ventana wnd_sell
+      // Si es que no hay datos en caja, y CAJA = 0 en el .rizoma, entonces tiene que aparecer una ventana que diga:
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell")),"Para realizar una devolución es necesario habilitar e iniciar caja con anterioridad, asegúrese de habilitar caja en el .rizoma y vuelva a ejecutar rizoma-ventas");      
+    }
+  close_nullify_sale_dialog ();
 }
 
 void

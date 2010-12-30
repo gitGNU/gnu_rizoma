@@ -2308,8 +2308,11 @@ begin
                 close_date := now();
         end if;
 
-        -- To avoid problems with the first sell
-        if sell_first_id = 1 then
+	-- ACLARACION: Si el id de apertura y cierre son iguales significa que no hubo venta	
+	-- La que la siguiente operación debería realizarse solo si hay venta en la primera apertura de caja
+        
+	-- To avoid problems with the first sell
+        if sell_first_id = 1 AND sell_first_id != sell_last_id then
                 sell_first_id := 0;
         end if;
 

@@ -2049,11 +2049,17 @@ fill_cash_box_list ()
   gint i, tuples;
 
   /* consultas que retorna los datos de caja en un intervalo de fechas  */
-  query = g_strdup_printf ("select id, fecha_inicio, inicio, fecha_termino, termino, perdida from caja where fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                               "and (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') or fecha_termino is null) order by id"
-                               , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin)
-                               , g_date_get_day (date_end) + 1, g_date_get_month (date_end), g_date_get_year (date_end));
-
+  query = g_strdup_printf ("SELECT id, fecha_inicio, inicio, fecha_termino, termino, perdida "
+			   "FROM caja "
+			   "WHERE fecha_inicio < '%.4d-%.2d-%.2d 23:59:59' "
+			   "AND fecha_termino BETWEEN '%.4d-%.2d-%.2d' AND  '%.4d-%.2d-%.2d 23:59:59' "
+			   "OR (fecha_inicio BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' AND fecha_termino IS NULL) "
+			   "ORDER BY id"
+			   , g_date_get_year (date_end),   g_date_get_month (date_end),   g_date_get_day (date_end)
+			   , g_date_get_year (date_begin),   g_date_get_month (date_begin),   g_date_get_day (date_begin)
+			   , g_date_get_year (date_end),   g_date_get_month (date_end),   g_date_get_day (date_end)
+			   , g_date_get_year (date_begin),   g_date_get_month (date_begin),   g_date_get_day (date_begin)
+			   , g_date_get_year (date_end),   g_date_get_month (date_end),   g_date_get_day (date_end));
 
   res = EjecutarSQL (query);
   g_free (query);
