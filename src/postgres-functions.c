@@ -342,7 +342,7 @@ InsertNewDocument (gint document_type, gint sell_type)
  * @param boleta entero que contien el id de la boleta
  * @param tipo_documento cadena que contiene tipo de documento
  * @param cheque_date cadena que contiene los cheque_date
- * @param cheques boolean que dice si (1) es o no(0) cheque 
+ * @param cheques boolean que dice si (1) es o no(0) cheque
  * @param cancele boolean que dice si (1) la venta es o no (0) cancelada
  * @return 1 si se realizo correctamente la operacion 0 si hay error
  */
@@ -912,7 +912,7 @@ ClientDelete (gint rut)
   PGresult *res = NULL;
 
   if (DeudaTotalCliente (rut) == 0)
-    res = EjecutarSQL (g_strdup_printf ("DELETE FROM cliente WHERE rut=%d", rut));  
+    res = EjecutarSQL (g_strdup_printf ("DELETE FROM cliente WHERE rut=%d", rut));
 
   if (res != NULL)
     return TRUE;
@@ -940,7 +940,7 @@ DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, gint preci
 
 /**
  * Called by "Save" function in compras.c
- * Update the product's modifications 
+ * Update the product's modifications
  *
  * @param Product attributes
  *
@@ -968,7 +968,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   gdouble iva_local;
   gdouble otros_local;
 
-  /*Tiene IVA y Otros es la opcion "Sin Impuestos"*/ 
+  /*Tiene IVA y Otros es la opcion "Sin Impuestos"*/
   if (iva == TRUE && (otros == 0 || otros == -1))
     {
       // Obtención IVA
@@ -977,7 +977,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
       iva_local = (gdouble) atoi (PQvaluebycol (res, 0, "monto"));
 
       // Calculo
-      iva_local = (iva_local / 100) + 1;      
+      iva_local = (iva_local / 100) + 1;
       porcentaje = (gdouble) ((precio_local / (gdouble)(iva_local * costo_promedio)) -1) * 100;
       g_free(q);
     }
@@ -989,30 +989,30 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
       q = g_strdup_printf ("SELECT monto FROM impuesto WHERE id = 1 OR id = %d", otros);
       res = EjecutarSQL(q);
       iva_local = (gdouble) atoi (PQvaluebycol (res, 0, "monto"));
-      otros_local = (gdouble) atoi (PQvaluebycol (res, 1, "monto"));      
+      otros_local = (gdouble) atoi (PQvaluebycol (res, 1, "monto"));
       g_free(q);
 
       // Calculo
       iva_local = (gdouble) (iva_local / 100);
       otros_local = (gdouble) (otros_local / 100);
-      
+
       porcentaje = (gdouble) precio_local / (gdouble)(iva_local + otros_local + 1);
       porcentaje = (gdouble) porcentaje - costo_promedio;
       porcentaje = lround ((gdouble)(porcentaje / costo_promedio) * 100);
     }
-  
+
   /*No tiene IVA y Otros es la opcion "Sin Impuestos"*/
   else if (iva == FALSE && (otros == 0 || otros == -1))
-    {      
+    {
       porcentaje = (gdouble) ((precio_local / costo_promedio) - 1) * 100;
     }
 
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
                        "marca='%s', unidad='%s', contenido='%s', precio=%d, "
                        "impuestos='%d', otros=%d, "
-                       "perecibles='%d', fraccion='%d', margen_promedio=%g WHERE barcode='%s'",
+                       "perecibles='%d', fraccion='%d', margen_promedio=%ld WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
-                       iva, otros, (gint)perecible, (gint)fraccion, porcentaje,  barcode);
+                       iva, otros, (gint)perecible, (gint)fraccion, lround(porcentaje), barcode);
   res = EjecutarSQL(q);
   g_free(q);
 }
@@ -1376,7 +1376,7 @@ SaveProductsSell (Productos *products, gint id_venta)
       /*
         Si el costo promedio es -1, vuelve a preguntar el valor de costo
         promedio, a traves de la funcion de postgres "informacion_producto"
-        
+
        */
       if (lround(precioPro) == -1)
 	    {
@@ -1387,7 +1387,7 @@ SaveProductsSell (Productos *products, gint id_venta)
 		  products->product->cantidad) * (gdouble)products->product->iva / 100;
 	    }
       /*
-        
+
        */
       else
 	    {
@@ -1947,7 +1947,7 @@ InversionAgregada (gchar *barcode)
   gdouble vendidos = strtod ((GetDataByOne (g_strdup_printf ("SELECT vendidos FROM producto WHERE barcode='%s'",
                                                              barcode))), (char **)NULL);
   gint suma = 0;
-  
+
   res = EjecutarSQL (g_strdup_printf ("SELECT count(id) FROM compra_detalle WHERE barcode_product='%s'", barcode));
 
   /*Evita Cuelgue al no recibir resultados (en PUT)*/
@@ -2409,11 +2409,11 @@ nullify_sale (gint sale_id)
  */
 
 gboolean
-SaveDevolucion (gint total, gint rut) 
+SaveDevolucion (gint total, gint rut)
 {
   gint devolucion_id;
   gchar *q;
-  
+
   q = g_strdup_printf( "SELECT inserted_id FROM registrar_devolucion( %d, %d) ", total, rut);
   devolucion_id = atoi (GetDataByOne (q));
   g_free (q);
@@ -2452,24 +2452,24 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
       /*      res = EjecutarSQL (g_strdup_printf
               ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
               cantidad, products->product->barcode));
-      */          
-      
+      */
+
       precioCompra = products->product->precio_compra;
       precio = products->product->precio;
-      
+
       if (lround(precioCompra) == -1)
         {
           q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
           res = EjecutarSQL (q);
           pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
-             
+
           q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %d)",
                                id_devolucion, products->product->barcode, cantidad,precio, pre);
         }
       else
          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %d)",
                               id_devolucion, products->product->barcode, cantidad, precio,precioCompra);
-        
+
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -2491,7 +2491,7 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
  * @return 1 si se realizo correctamente la operacion 0 si hay error
  */
 gboolean
-SaveTraspaso (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso) 
+SaveTraspaso (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
 {
   gint traspaso_id;
   gchar *q;
@@ -2521,7 +2521,7 @@ SaveTraspaso (gint total, gint origen, gint vendedor, gint destino, gboolean tip
  */
 
 gboolean
-SaveTraspasoCompras (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso) 
+SaveTraspasoCompras (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
 {
   gint traspaso_id;
   gchar *q;
@@ -2558,7 +2558,7 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
   gint precio;
   gchar *q;
   gint pre;
-  
+
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
@@ -2581,22 +2581,22 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
              ("UPDATE producto SET stock=%s WHERE barcode='%s'",
               CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) + products->product->cantidad)), products->product->barcode));
         }
-      
+
       precio = products->product->precio_compra;
-      
+
       if (lround(precio) == -1)
         {
           q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
           res = EjecutarSQL (q);
           pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
-             
+
           q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
                            id_traspaso, products->product->barcode, cantidad, pre);
         }
       else
          q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
                            id_traspaso, products->product->barcode, cantidad, precio);
-        
+
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -2631,7 +2631,7 @@ InsertIdTraspaso ()
 
 /**
  * Es llamada por las funciones on_enviar_button_clicked() de [ventas.c]
- * y on_enviar_button_clicked(),on_recibir_button_clicked() de  [compras.c]. 
+ * y on_enviar_button_clicked(),on_recibir_button_clicked() de  [compras.c].
  *
  * Esta funcion hace una consulta por el nombre del negocio y le retorna el
  * ide de este
@@ -2669,13 +2669,13 @@ ReturnNegocio ()
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf ("SELECT nombre FROM negocio"));
-  
+
   return ((gchar *)(PQgetvalue (res, 0, 0)));
 }
 
 
 /**
- * Es llamada por las funciones on_enviar_button_clicked() [ventas.c] y 
+ * Es llamada por las funciones on_enviar_button_clicked() [ventas.c] y
  * DatosEnviar() [ventas.c].
  *
  * Esta funcion recibe el puntero del productos, luego apunta al barcode de
