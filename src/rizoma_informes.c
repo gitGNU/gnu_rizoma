@@ -148,6 +148,44 @@ ChangeDevolucion (void)
 }
 
 /**
+ * Es llamada cuando se edita "stock físico" en el tree_view_cuadratura (signal edited).
+ *
+ * Esta funcion actualiza el campo "Diferencia" a partir de la resta entre "stock teórico"
+ * y "stock_físico" (stock_teorico - stock_fisico)
+ *
+ */
+
+void
+on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *stock_fisico, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  gdouble stock_fisicoNum = strtod (PUT (stock_fisico), (char **)NULL);
+  gdouble stock_teorico;
+  gchar *diferencia;
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
+
+  gtk_tree_model_get (model, &iter,
+                      7, &stock_teorico,
+                      -1);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      8, stock_fisicoNum,
+		      -1);
+
+  gdouble diferenciaNum = stock_teorico - stock_fisicoNum;
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      9, diferenciaNum,
+		      -1);
+
+}
+
+
+/**
  * Es llamada cuando se presiona en el tree_view_cash_box_lists (signal changed).
  *
  * Esta funcion visualiza los datos de caja de cada apertura y cierre (montos
@@ -1015,6 +1053,11 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (renderer,
+		"editable", TRUE,
+		NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited",
+		    G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
   column = gtk_tree_view_column_new_with_attributes ("Stock físico", renderer,
 						     "text", 8,
 						     NULL);
@@ -2175,7 +2218,7 @@ fill_cuadratura ()
                           5, g_strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(gchar **)NULL),
 			  6, g_strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(gchar **)NULL),
 			  7, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
-			  //8, 0,
+			  8, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
 			  //9, 0,
 			  -1);
 
