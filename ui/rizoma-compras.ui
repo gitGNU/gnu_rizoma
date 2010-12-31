@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires gtk+ 2.12 -->
+  <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="wnd_cant_traspaso">
     <property name="title" translatable="yes">POS Rizoma: Cantidad Traspaso</property>
@@ -1303,18 +1303,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_new_product_unit">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="entry_new_product_cont">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1495,6 +1483,18 @@
                 <property name="visible">True</property>
                 <property name="label" translatable="yes" context="yes">Código Simple</property>
               </object>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="cmb_box_new_product_unit">
+                <property name="visible">True</property>
+                <signal name="changed" handler="on_cmb_box_new_product_unit_changed"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -5848,6 +5848,73 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="wnd_new_unit">
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="transient_for">wnd_new_product</property>
+    <child>
+      <object class="GtkVBox" id="vbox25">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkHBox" id="hbox33">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="label140">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Nueva Unidad</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_unidad">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox34">
+            <property name="visible">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_unidad">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="Save_new_unit"/>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
             <property name="position">1</property>
           </packing>
         </child>
