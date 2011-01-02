@@ -43,3 +43,9 @@ INSERT INTO numeros_documentos VALUES (0,0,0);
 INSERT INTO bodega VALUES (DEFAULT, 'Local 1', 'Local');
 INSERT INTO bodega VALUES (DEFAULT, 'Local 2', 'Local');
 INSERT INTO negocio VALUES ('', 9999999, '9', 'Local 1', '', '', '', '', '', '', '');
+
+INSERT INTO unidad_producto VALUES (DEFAULT, 'LT');
+INSERT INTO unidad_producto VALUES (DEFAULT, 'CC');
+INSERT INTO unidad_producto VALUES (DEFAULT, 'GR');
+INSERT INTO unidad_producto VALUES (DEFAULT, 'KG');
+INSERT INTO unidad_producto VALUES (DEFAULT, 'UN');

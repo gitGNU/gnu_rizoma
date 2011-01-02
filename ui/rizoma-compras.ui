@@ -1241,7 +1241,7 @@
   <object class="GtkWindow" id="wnd_new_product">
     <property name="title" translatable="yes" context="yes">POS Rizoma: Nuevo Producto</property>
     <property name="modal">True</property>
-    <property name="window_position">center-always</property>
+    <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_compras</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
     <child>
@@ -1485,9 +1485,32 @@
               </object>
             </child>
             <child>
-              <object class="GtkComboBox" id="cmb_box_new_product_unit">
+              <object class="GtkHBox" id="hbox1101">
                 <property name="visible">True</property>
-                <signal name="changed" handler="on_cmb_box_new_product_unit_changed"/>
+                <child>
+                  <object class="GtkComboBox" id="cmb_box_new_product_unit">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_new_unidad">
+                    <property name="label">gtk-add</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Agregar una nueva Unidad</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="gtk_widget_show_all" object="wnd_new_unit"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -1521,7 +1544,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_add_new_product">
-                <property name="label" context="yes">gtk-add</property>
+                <property name="label" context="yes">gtk-save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5855,9 +5878,11 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_new_unit">
+    <property name="title" translatable="yes">POS Rizoma:  Agregar nueva Unidad</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_new_product</property>
+    <signal name="delete_event" handler="gtk_widget_hide" object="wnd_new_unit"/>
     <child>
       <object class="GtkVBox" id="vbox25">
         <property name="visible">True</property>
@@ -5880,6 +5905,7 @@
               <object class="GtkEntry" id="entry_unidad">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="invisible_char">•</property>
               </object>
               <packing>
