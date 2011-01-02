@@ -1241,7 +1241,7 @@
   <object class="GtkWindow" id="wnd_new_product">
     <property name="title" translatable="yes" context="yes">POS Rizoma: Nuevo Producto</property>
     <property name="modal">True</property>
-    <property name="window_position">center-on-parent</property>
+    <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
     <child>
@@ -5880,7 +5880,7 @@
   <object class="GtkWindow" id="wnd_new_unit">
     <property name="title" translatable="yes">POS Rizoma:  Agregar nueva Unidad</property>
     <property name="modal">True</property>
-    <property name="window_position">center-on-parent</property>
+    <property name="window_position">center-always</property>
     <property name="transient_for">wnd_new_product</property>
     <signal name="delete_event" handler="gtk_widget_hide" object="wnd_new_unit"/>
     <child>
