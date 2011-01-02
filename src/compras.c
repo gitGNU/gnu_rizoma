@@ -3379,54 +3379,70 @@ Save_new_unit(void)
   GtkTreeModel *model;
   gboolean valid;
   gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad"))));
-  gchar *q = g_strdup_printf("INSERT INTO unidad_producto VALUES (DEFAULT, '%s')", unidad);
 
+
+  gchar *q = g_strdup_printf("SELECT * FROM unidad_producto where descripcion = upper('%s')", unidad);
   res2 = EjecutarSQL(q);
-  combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
-
-  res2 = EjecutarSQL ("SELECT * FROM unidad_producto");
   tuples = PQntuples (res2);
 
-  /* metodo parcial para limpiar un combo box  */
-  /* TODO: debe haber un metodo mas eficiente */
-  i=0;
-  do
+  if(tuples > 0)
     {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "btn_new_unidad")),
+		"La unidad que ingreso ya existe.");
+    }
+  else
+    {
+      q = g_strdup_printf("INSERT INTO unidad_producto VALUES (DEFAULT, upper('%s'))", unidad);
+
+      res2 = EjecutarSQL(q);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
+
+      res2 = EjecutarSQL ("SELECT * FROM unidad_producto");
+      tuples = PQntuples (res2);
+
+      /* metodo parcial para limpiar un combo box  */
+      /* TODO: debe haber un metodo mas eficiente */
+      i=0;
+      do
+	{
+	  model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+
+	  if(valid=gtk_tree_model_get_iter_first (model, &iter) == 1 && i<tuples-1)
+	    {
+	      store = GTK_LIST_STORE(gtk_combo_box_get_model(combo));
+
+	      gtk_list_store_remove(store, &iter);
+	      i++;
+	    }
+	  else
+	    valid = 0;
+	}
+      while(valid == 1);
+
+      /* Ahora repoblar el combo box */
+      res2 = EjecutarSQL ("SELECT * FROM unidad_producto");
+      tuples = PQntuples (res2);
+
+      if(res2 != NULL)
+	{
+	  for (i=0 ; i < tuples ; i++)
+	    {
+	      gtk_list_store_append(model, &iter);
+	      gtk_list_store_set(model, &iter,
+				 0, atoi(PQvaluebycol(res2, i, "id")),
+				 1, PQvaluebycol(res2, i, "descripcion"),
+				 -1);
+	    }
+	}
+
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
 
-      if(valid=gtk_tree_model_get_iter_first (model, &iter) == 1 && i<tuples-1)
-	{
-	  store = GTK_LIST_STORE(gtk_combo_box_get_model(combo));
-
-	  gtk_list_store_remove(store, &iter);
-	  i++;
-	}
-      else
-	valid = 0;
+      gtk_combo_box_set_active (combo, tuples-1);
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
+      gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
     }
-  while(valid == 1);
-
-  /* Ahora repoblar el combo box */
-  res2 = EjecutarSQL ("SELECT * FROM unidad_producto");
-  tuples = PQntuples (res2);
-
-  if(res2 != NULL)
-    {
-      for (i=0 ; i < tuples ; i++)
-	{
-	  gtk_list_store_append(model, &iter);
-	  gtk_list_store_set(model, &iter,
-			     0, atoi(PQvaluebycol(res2, i, "id")),
-			     1, PQvaluebycol(res2, i, "descripcion"),
-			     -1);
-	}
-    }
-
-  model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
-
-  gtk_combo_box_set_active (combo, tuples-1);
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
 }
 
 void
