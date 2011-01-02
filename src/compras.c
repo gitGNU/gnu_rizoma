@@ -3351,55 +3351,12 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
 	      			 1, PQvaluebycol(res2, i, "descripcion"),
 	      			 -1);
 	    }
-	  gtk_list_store_append(modelo, &iter);
-	  gtk_list_store_set(modelo, &iter,
-			     0, tuples,
-			     1, "Otros",
-			     -1);
 	}
     }
 
   gtk_combo_box_set_active (combo, 0);
   gtk_combo_box_set_active (cmb_unit, 0);
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
-}
-
-/**
- * Esta funcion es llamada cuando se escoge la opcion "otros" en el ComboBox,
- * signal "changed"
- *
- * Esta funcion visualiza la ventana "wnd_new_unit" y carga los
- * respectivos datos de esta los entry's, botones, y combo box.
- *
- * @param button the button
- * @param user_data the user data
- */
-void
-on_cmb_box_new_product_unit_changed (GtkComboBox *widget, gpointer user_data)
-{
-  gint *unidad;
-  GtkTreeIter iter;
-  GtkWidget *combo;
-  GtkTreeModel *model;
-  gint active, tuples;
-  GtkCellRenderer *cell;
-  PGresult *res, *res2;
-
-  combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
-  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
-
-  model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
-  gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
-
-  gtk_tree_model_get (model, &iter,
-		      0, &unidad,
-		      -1);
-
-  res2 = EjecutarSQL ("SELECT * FROM unidad_producto");
-  tuples = PQntuples (res2);
-  if(unidad == tuples)
-    gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_new_unit")));
-
 }
 
 /**
@@ -3467,8 +3424,9 @@ Save_new_unit(void)
 
   model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
 
-  gtk_combo_box_set_active (combo, tuples);
+  gtk_combo_box_set_active (combo, tuples-1);
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
 }
 
 void
