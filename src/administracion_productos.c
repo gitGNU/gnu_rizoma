@@ -151,7 +151,8 @@ gboolean deleting;
                              g_strdup_printf ("%.3f", GetCurrentStock (barcode)));
 
        res = EjecutarSQL ("SELECT id, nombre FROM select_tipo_merma() "
-                          "AS (id int4, nombre varchar(20))");
+                          "AS (id int4, nombre varchar(25)) "
+			  "WHERE nombre NOT LIKE 'Diferencia cuadratura'");
 
        tuples = PQntuples (res);
 

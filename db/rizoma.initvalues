@@ -37,6 +37,7 @@ INSERT INTO tipo_merma VALUES (DEFAULT, 'Hurto');
 INSERT INTO tipo_merma VALUES (DEFAULT, 'Vencimiento');
 INSERT INTO tipo_merma VALUES (DEFAULT, 'Destruccion o Falla');
 INSERT INTO tipo_merma VALUES (DEFAULT, 'Diferencia conteo');
+INSERT INTO tipo_merma VALUES (DEFAULT, 'Diferencia cuadratura');
 
 INSERT INTO numeros_documentos VALUES (0,0,0);
 

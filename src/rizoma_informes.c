@@ -329,6 +329,7 @@ reports_win (void)
   GError *error = NULL;
 
   Print *print = (Print *) malloc (sizeof (Print));
+  Print *cuadratura = (Print *) malloc (sizeof (Print));
 
   Print *libro = (Print *) malloc (sizeof (Print));
   Print *libro2 = (Print *) malloc (sizeof (Print));
@@ -1081,23 +1082,23 @@ reports_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
 
 
-  print->tree = treeview;
-  print->title = "Informe Cuadratura";
-  print->date_string = NULL;
-  print->cols[0].name = "Descripcion";
-  print->cols[1].name = "Marca";
-  print->cols[2].name = "Stock Inicial";
-  print->cols[3].name = "Compras";
-  print->cols[4].name = "Ventas";
-  print->cols[5].name = "Devoluciones";
-  print->cols[6].name = "Mermas";
-  print->cols[7].name = "Stock Teórico";
-  print->cols[8].name = "Stock Físico";
-  print->cols[9].name = "Diferencia";
-  print->cols[10].name = NULL;
+  cuadratura->tree = treeview;
+  cuadratura->title = "Informe Cuadratura";
+  cuadratura->date_string = NULL;
+  cuadratura->cols[0].name = "Descripcion";
+  cuadratura->cols[1].name = "Marca";
+  cuadratura->cols[2].name = "Stock Inicial";
+  cuadratura->cols[3].name = "Compras";
+  cuadratura->cols[4].name = "Ventas";
+  cuadratura->cols[5].name = "Devoluciones";
+  cuadratura->cols[6].name = "Mermas";
+  cuadratura->cols[7].name = "Stock Teórico";
+  cuadratura->cols[8].name = "Stock Físico";
+  cuadratura->cols[9].name = "Diferencia";
+  cuadratura->cols[10].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_cuadratura"), "clicked",
-                    G_CALLBACK (PrintTree), (gpointer)print);
+                    G_CALLBACK (PrintTree), (gpointer)cuadratura);
 
 
   /*
