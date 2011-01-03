@@ -2181,16 +2181,19 @@ fill_cuadratura ()
 
   gtk_list_store_clear (store);
 
-  sql = g_strdup_printf ( "SELECT to_char(fecha, 'DD MM YYYY') AS fecha FROM compra ORDER BY fecha ASC" );
-
-  char * fecha;
-  fecha = g_strdup_printf ("%.2d %.2d %.4d", g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin));
+  // Obteniendo la fecha en la que se efectuó la primera compra
+  sql = g_strdup_printf ( "SELECT to_char(fecha, 'YYYYMMDD') AS fecha FROM compra ORDER BY fecha ASC" );
   res = EjecutarSQL (sql);
   g_free (sql);
   tuples = PQntuples (res);
 
+  // Obteniendo fechas
+  char *fecha = g_strdup_printf ("%.4d%.2d%.2d", g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin));
+  gint fechaEntregada = atoi (fecha);
+  gint fechaPrimeraCompra = atoi (PQvaluebycol (res, 0, "fecha"));
+
   // Si la fecha de la primera compra es igual a la fecha seleccionada
-  if (strcmp (PQvaluebycol (res, 0, "fecha"), fecha) == 0)
+  if (fechaEntregada <= fechaPrimeraCompra)
     sql = g_strdup_printf ( "SELECT descripcion, marca, stock_inicial, compras_periodo, ventas_periodo, devoluciones_periodo, mermas_periodo, stock_teorico "
 			    "FROM producto_en_periodo('%.4d-%.2d-%.2d', TRUE)",
 			    g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin) );
