@@ -194,17 +194,36 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
 void
 on_btn_save_cuadratura_clicked()
 {
-  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"));
-  GtkTreeModel *model = gtk_tree_view_get_model (tree);
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
-  GtkListStore *store_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail"))));
-  GtkTreeIter iter;
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_cuadratura"));
+  GtkTreeModel *model = gtk_tree_view_get_model (treeview);
+  GtkTreeIter iterTeo, iterFis;
+  double stock_teorico;
+  double stock_fisico;
+  double merma;
+  int column_teorico = 8; /* stock teorico */
+  int column_fisico = 9; /* stock fisico */
+  int row, N_rows = 5;
 
-  gdouble diferencia;
+  /* @TODO: queda definir el tamaño de las filas y guardar la merma */
+  for(row=0; row<N_rows; row++)
+    {
+      GtkTreePath *path = gtk_tree_path_new_from_indices(row, -1); /* se obtiene el path de la fila*/
 
-  /*gtk_tree_model_get (model, &iter,
-                      10, &diferencia,
-                      -1);*/
+      gtk_tree_model_get_iter(model, &iterTeo, path); /* obtengo iterator de la columna stock teorico */
+      gtk_tree_model_get(model, &iterTeo, column_teorico, &stock_teorico, -1);
+
+      gtk_tree_model_get_iter(model, &iterFis, path); /* obtengo iterator de la columna stock fisico */
+      gtk_tree_model_get(model, &iterFis, column_fisico, &stock_fisico, -1);
+
+      printf("%f %f\n", stock_teorico, stock_fisico);
+
+      if((merma = stock_teorico - stock_fisico) != 0.0)
+	{
+	  printf("Guardar\n");
+	}
+
+    }
+
 }
 
 
