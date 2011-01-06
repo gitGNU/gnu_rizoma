@@ -178,9 +178,15 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
 
   gdouble diferenciaNum = stock_teorico - stock_fisicoNum;
 
-  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-		      10, diferenciaNum,
-		      -1);
+  if (diferenciaNum != 0)
+    {
+      gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+			  10, diferenciaNum,
+			  -1);
+      
+      // Se habilita el botón guardar
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), TRUE);
+    }
 }
 
 /**
@@ -196,34 +202,45 @@ on_btn_save_cuadratura_clicked()
 {
   GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_cuadratura"));
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
-  GtkTreeIter iterTeo, iterFis;
-  double stock_teorico;
-  double stock_fisico;
-  double merma;
-  int column_teorico = 8; /* stock teorico */
-  int column_fisico = 9; /* stock fisico */
-  int row, N_rows = 5;
+  GtkTreeIter iter;
+  gdouble stock_teorico;
+  gdouble stock_fisico;
+  gchar *codigo_corto;
+  gboolean valid;
 
-  /* @TODO: queda definir el tamaño de las filas y guardar la merma */
-  for(row=0; row<N_rows; row++)
+  // Obtengo la primera fila para empezar a iterar --
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
     {
-      GtkTreePath *path = gtk_tree_path_new_from_indices(row, -1); /* se obtiene el path de la fila*/
+      // Obtengo los valores del treeview --
+      gtk_tree_model_get (model, &iter,
+			  0, &codigo_corto,
+                          8, &stock_teorico,
+                          9, &stock_fisico,
+                          -1);
 
-      gtk_tree_model_get_iter(model, &iterTeo, path); /* obtengo iterator de la columna stock teorico */
-      gtk_tree_model_get(model, &iterTeo, column_teorico, &stock_teorico, -1);
-
-      gtk_tree_model_get_iter(model, &iterFis, path); /* obtengo iterator de la columna stock fisico */
-      gtk_tree_model_get(model, &iterFis, column_fisico, &stock_fisico, -1);
-
-      printf("%f %f\n", stock_teorico, stock_fisico);
-
-      if((merma = stock_teorico - stock_fisico) != 0.0)
-	{
-	  printf("Guardar\n");
+      printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
+      
+      // Se guarda la merma con motivo "Diferencia Cuadratura", si ésta es distinta de 0 --
+      if((stock_teorico - stock_fisico) != 0)
+	{	 
+	  // Se obtiene el barcode a partir del código corto 
+	   gchar *barcode;
+	  barcode = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto='%s'",
+								codigo_corto))
+				  , 0, "barcode");
+	  
+	  // 5 = "Diferencia Cuadratura" en la tabla tipo_merma
+	  AjusteStock (stock_fisico, 5, barcode);
+	  printf ("Guardar\n");
 	}
 
+      // Itero a la siguiente fila --
+      valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si iteró a la siguiente */
     }
-
+  
+  // Se deshabilita el botón guardar
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
 }
 
 
@@ -1161,8 +1178,9 @@ reports_win (void)
   /*
     End Cuadratura
    */
-
-
+  
+  // El botón guardar inicia "deshabilitado"
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
 }
 
