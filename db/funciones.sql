@@ -2621,65 +2621,79 @@ q text;
 l record;
 begin
 
-q := $S$ SELECT cd.barcode_product, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
-       FROM compra c
+q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, p.cantidad_ingresada, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion
+     	 	FROM producto
+		LEFT JOIN ( 
+       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
+       		            FROM compra c
 
-       INNER JOIN compra_detalle cd
-       ON c.id = cd.id_compra
+		     	    INNER JOIN compra_detalle cd
+       		     	    ON c.id = cd.id_compra
 
-       INNER JOIN producto p
-       ON cd.barcode_product = p.barcode 
+       		     	    INNER JOIN producto p
+       		     	    ON cd.barcode_product = p.barcode 
 
-       -- Las Ventas hechas hasta la fecha determinada
-       LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
-       	     	  	  FROM venta v
-			  INNER JOIN venta_detalle vd 
-			  ON v.id = vd.id_venta
+       		     	    -- Las Ventas hechas hasta la fecha determinada
+       		     	    LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	  	                      FROM venta v
+			  	 	      INNER JOIN venta_detalle vd 
+			  	 	      ON v.id = vd.id_venta
 
-			  WHERE v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			  GROUP BY barcode) AS ventas
-       ON p.barcode = ventas.barcode
+			  	 	      WHERE v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			  	 	      GROUP BY barcode) AS ventas
+       		            ON p.barcode = ventas.barcode
 
-       -- Las anulaciones de venta hechas hasta la fecha determinada
-       LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
-       	     	  	  FROM venta v
-			  INNER JOIN venta_detalle vd 
-			  ON v.id = vd.id_venta
+       	                    -- Las anulaciones de venta hechas hasta la fecha determinada
+       		     	    LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	  	                      FROM venta v
+			  	 	      INNER JOIN venta_detalle vd 
+			  	 	      ON v.id = vd.id_venta
 
-			  INNER JOIN venta_anulada va
-			  ON va.id_sale = v.id
+			  	 	      INNER JOIN venta_anulada va
+			    	 	      ON va.id_sale = v.id
 
-			  WHERE va.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			  GROUP BY barcode) AS ventas_anuladas
-       ON p.barcode = ventas_anuladas.barcode
+			         	      WHERE va.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			         	      GROUP BY barcode) AS ventas_anuladas
+       		            ON p.barcode = ventas_anuladas.barcode
        
-       -- Las Mermas sufridas hasta la fecha determinada
-       LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
-       	     	  	 FROM merma m
+			    -- Las Mermas sufridas hasta la fecha determinada
+       			    LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
+       	     	  	                      FROM merma m
 
-			 WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			 GROUP BY barcode) AS merma
-       ON p.barcode = merma.barcode
+			         	      WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			         	      GROUP BY barcode) AS merma
+       			    ON p.barcode = merma.barcode
 
-       -- Las devoluciones hechas hasta la fecha determinada
-       LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
-       	     	  	 FROM devolucion d
-			 INNER JOIN devolucion_detalle dd
-			 ON d.id = dd.id_devolucion
+                            -- Las devoluciones hechas hasta la fecha determinada
+       			    LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
+       	     	  	                      FROM devolucion d
+			 	 	      INNER JOIN devolucion_detalle dd
+			 	 	      ON d.id = dd.id_devolucion
 
-			 WHERE d.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			 GROUP BY barcode) AS devolucion
-       ON p.barcode = devolucion.barcode
+			         	      WHERE d.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			         	      GROUP BY barcode) AS devolucion
+                            ON p.barcode = devolucion.barcode
 
 
-       WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-       AND c.ingresada = 'TRUE'
-       AND p.estado = 'TRUE'
-       GROUP BY cd.barcode_product, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
-       ORDER BY barcode_product $S$;
+                     	    WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+                     	    AND c.ingresada = 'TRUE'
+                     	    AND p.estado = 'TRUE'
+                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
+                     	    ORDER BY barcode) AS p
+         ON producto.barcode = p.barcode
+
+         INNER JOIN compra_detalle cd
+	 ON cd.barcode_product = producto.barcode
+
+	 INNER JOIN compra c
+	 ON c.id = cd.id_compra
+
+	 WHERE c.ingresada = 'TRUE'
+	 AND producto.estado = 'TRUE'
+	 ORDER BY producto.barcode ASC $S$;
 
 for l in execute q loop
-    barcode := l.barcode_product;
+    barcode := l.barcode;
     codigo_corto := l.codigo_corto;
     marca := l.marca;
     descripcion := l.descripcion ||' '|| l.contenido ||' '|| l.unidad;
@@ -2692,7 +2706,6 @@ for l in execute q loop
     return next;
 end loop;
 
-
 return;
 end; $$ language plpgsql;
 
@@ -2700,7 +2713,6 @@ end; $$ language plpgsql;
 -- Entrega la información del producto desde la fecha otorgada hasta ahora
 create or replace function producto_en_periodo(
        in fecha_inicio date,
-       in primer_dia boolean,
        out barcode varchar,
        out codigo_corto varchar,
        out descripcion varchar,
@@ -2715,113 +2727,112 @@ create or replace function producto_en_periodo(
 RETURNS setof record AS $$
 DECLARE
 q text;
+q2 text;
+q3 text;
 l record;
+z record;
 BEGIN
 
-IF primer_dia = FALSE THEN
-   q := $S$ SELECT stock1.barcode AS barcode,
-       	 	   stock1.codigo_corto AS codigo_corto,
-       	 	   stock1.marca AS marca,
-       	 	   stock1.descripcion AS descripcion,
-       	 	
-		   -- Los mismos datos de distintas fechas --
-       	 	   -- stock inicial
-       	 	   stock1.cantidad_fecha AS stock1_cantidad_fecha,
-       	 	   stock2.cantidad_fecha AS stock2_cantidad_fecha,
-       	 	   -- compras_periodo
-       	 	   stock1.cantidad_ingresada AS stock1_cantidad_ingresada,
-       	 	   stock2.cantidad_ingresada AS stock2_cantidad_ingresada,
-       	 	   -- ventas_periodo
-       	 	   stock1.cantidad_vendida AS stock1_cantidad_vendida,
-       	 	   stock2.cantidad_vendida AS stock2_cantidad_vendida,
-       	 	   -- devoluciones_periodo
-       	 	   stock1.cantidad_devoluciones AS stock1_cantidad_devoluciones,
-       	 	   stock2.cantidad_devoluciones AS stock2_cantidad_devoluciones,
-       	 	   -- mermas_periodo
-       	 	   stock1.cantidad_merma AS stock1_cantidad_merma,
-       	 	   stock2.cantidad_merma AS stock2_cantidad_merma,
+q := $S$ SELECT stock1.barcode AS barcode,
+	        stock1.codigo_corto AS codigo_corto,
+       	 	stock1.marca AS marca,
+       	 	stock1.descripcion AS descripcion,
+		stock1.cantidad_ingresada AS cantidad_ingresada,       	 	
 
-       	 	   -- El stock actual --
-       	 	   -- stock_teorico
-       	 	   stock2.cantidad_fecha
+		-- Los mismos datos de distintas fechas --
+       	 	-- stock inicial
+       	 	stock1.cantidad_fecha AS stock1_cantidad_fecha,
+       	 	stock2.cantidad_fecha AS stock2_cantidad_fecha,
+       	 	-- compras_periodo
+       	 	stock1.cantidad_ingresada AS stock1_cantidad_ingresada,
+       	 	stock2.cantidad_ingresada AS stock2_cantidad_ingresada,
+       	 	-- ventas_periodo
+       	 	stock1.cantidad_vendida AS stock1_cantidad_vendida,
+       	 	stock2.cantidad_vendida AS stock2_cantidad_vendida,
+       	 	-- devoluciones_periodo
+       	 	stock1.cantidad_devoluciones AS stock1_cantidad_devoluciones,
+       	 	stock2.cantidad_devoluciones AS stock2_cantidad_devoluciones,
+       	 	-- mermas_periodo
+       	 	stock1.cantidad_merma AS stock1_cantidad_merma,
+       	 	stock2.cantidad_merma AS stock2_cantidad_merma,
+
+       	 	-- El stock actual --
+       	 	-- stock_teorico
+       	 	stock2.cantidad_fecha
        
-	   FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$ ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date + 1) || $S$ ) stock2
-       	   ON stock1.barcode = stock2.barcode $S$;
+	 FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$ ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date + 1) || $S$ ) stock2
+       	 ON stock1.barcode = stock2.barcode $S$;
 
-   FOR l IN EXECUTE q loop
-      barcode := l.barcode;
-      codigo_corto := l.codigo_corto;
-      marca := l.marca;
-      descripcion := l.descripcion;
-      stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
-      compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
-      ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
-      devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
-      mermas_periodo := l.stock2_cantidad_merma - l.stock1_cantidad_merma;
-      stock_teorico := l.stock2_cantidad_fecha;
-      RETURN NEXT;
-   END loop;
-ELSE
-   q := $S$ SELECT cd.barcode_product AS barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, COALESCE(cantidad_vendida,0) AS ventas, COALESCE(unidades_merma,0) AS mermas, COALESCE(cantidad_anulada,0) AS anuladas, COALESCE(cantidad_devolucion,0) AS devolucion
-       FROM compra c
+q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(cantidad_vendida,0) AS ventas_n, COALESCE(unidades_merma,0) AS mermas_n, COALESCE(cantidad_anulada,0) AS anuladas_n, COALESCE(cantidad_devolucion,0) AS devolucion_n
+         FROM compra c
 
-       INNER JOIN compra_detalle cd
-       ON c.id = cd.id_compra
+         INNER JOIN compra_detalle cd
+         ON c.id = cd.id_compra
 
-       INNER JOIN producto p
-       ON cd.barcode_product = p.barcode 
+         INNER JOIN producto p
+         ON cd.barcode_product = p.barcode 
 
-       -- Las Ventas hechas hasta la fecha determinada
-       LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+         -- Las Ventas hechas hasta la fecha determinada
+         LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode_v -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
        	     	  	  FROM venta v
 			  INNER JOIN venta_detalle vd 
 			  ON v.id = vd.id_venta
-			  GROUP BY barcode) AS ventas
-       ON p.barcode = ventas.barcode
+			  GROUP BY barcode_v) AS ventas_n
+         ON p.barcode = ventas_n.barcode_v
 
-       -- Las anulaciones de venta hechas hasta la fecha determinada
-       LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+         -- Las anulaciones de venta hechas hasta la fecha determinada
+         LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode_a 
        	     	  	  FROM venta v
 			  INNER JOIN venta_detalle vd 
 			  ON v.id = vd.id_venta
 			  INNER JOIN venta_anulada va
 			  ON va.id_sale = v.id
-			  GROUP BY barcode) AS ventas_anuladas
-       ON p.barcode = ventas_anuladas.barcode
+			  GROUP BY barcode_a) AS ventas_anuladas_n
+         ON p.barcode = ventas_anuladas_n.barcode_a
        
-       -- Las Mermas sufridas hasta la fecha determinada
-       LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
-       	     	  	 FROM merma m
-			 GROUP BY barcode) AS merma
-       ON p.barcode = merma.barcode
+         -- Las Mermas sufridas hasta la fecha determinada
+         LEFT JOIN (SELECT merma.barcode AS barcode_m, SUM(merma.unidades) AS unidades_merma
+       	     	  	 FROM merma
+			 GROUP BY barcode_m) AS merma_n
+         ON p.barcode = merma_n.barcode_m
 
-       -- Las devoluciones hechas hasta la fecha determinada
-       LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
+         -- Las devoluciones hechas hasta la fecha determinada
+         LEFT JOIN (SELECT dd.barcode AS barcode_d, SUM(dd.cantidad) AS cantidad_devolucion
        	     	  	 FROM devolucion d
 			 INNER JOIN devolucion_detalle dd
 			 ON d.id = dd.id_devolucion
-			 GROUP BY barcode) AS devolucion
-       ON p.barcode = devolucion.barcode
+			 GROUP BY barcode_d) AS devolucion_n
+         ON p.barcode = devolucion_n.barcode_d
 
-       WHERE c.ingresada = 'TRUE'
-       AND p.estado = 'TRUE'
-       GROUP BY cd.barcode_product, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
-       ORDER BY barcode_product $S$;
+         WHERE c.ingresada = 'TRUE'
+         AND p.estado = 'TRUE'
+         AND p.barcode =$S$;
 
-   FOR l IN EXECUTE q loop
-      barcode := l.barcode;
-      codigo_corto := l.codigo_corto;
-      marca := l.marca;
-      descripcion := l.descripcion ||' '|| l.contenido ||' '|| l.unidad;
-      stock_inicial := l.cantidad_ingresada - l.cantidad_ingresada; -- El primer día se inicia con 0 de cantidad inicial
-      compras_periodo := l.cantidad_ingresada;
-      ventas_periodo := l.ventas;
-      devoluciones_periodo := l.devolucion;
-      mermas_periodo := l.mermas;
-      stock_teorico := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.ventas,0) - COALESCE(l.mermas,0) + COALESCE(l.anuladas,0) - COALESCE(l.devolucion,0);
-      RETURN NEXT;
-   END loop;
-end if;
+FOR l IN EXECUTE q loop
+    barcode := l.barcode;
+    codigo_corto := l.codigo_corto;
+    marca := l.marca;
+    descripcion := l.descripcion;
+    IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aún, por lo que se mostrará toda su información sin limite de fecha    
+       q3 := q2|| l.barcode || $S$ GROUP BY ventas_n, mermas_n, anuladas_n, devolucion_n$S$;
+       FOR z IN EXECUTE q3 loop
+          stock_inicial := 0;
+          compras_periodo := z.cantidad_ingresada_n;
+          ventas_periodo := z.ventas_n;
+          devoluciones_periodo := z.devolucion_n;
+          mermas_periodo := z.mermas_n;
+          stock_teorico := z.cantidad_ingresada_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n;
+       END loop;
+    ELSE
+       stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
+       compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
+       ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
+       devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
+       mermas_periodo := l.stock2_cantidad_merma - l.stock1_cantidad_merma;
+       stock_teorico := l.stock2_cantidad_fecha;
+    END IF;
+    RETURN NEXT;
+END loop;
 
 return;
 end; $$ language plpgsql;

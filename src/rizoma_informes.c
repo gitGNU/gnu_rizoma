@@ -2268,15 +2268,9 @@ fill_cuadratura ()
   gint fechaEntregada = atoi (fecha);
   gint fechaPrimeraCompra = atoi (PQvaluebycol (res, 0, "fecha"));
 
-  // Si la fecha de la primera compra es igual a la fecha seleccionada
-  if (fechaEntregada <= fechaPrimeraCompra)
-    sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, stock_inicial, compras_periodo, ventas_periodo, devoluciones_periodo, mermas_periodo, stock_teorico "
-			    "FROM producto_en_periodo('%.4d-%.2d-%.2d', TRUE)",
-			    g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin) );
-  else
-    sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, stock_inicial, compras_periodo, ventas_periodo, devoluciones_periodo, mermas_periodo, stock_teorico "
-			    "FROM producto_en_periodo('%.4d-%.2d-%.2d', FALSE)",
-			    g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin) );
+  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, stock_inicial, compras_periodo, ventas_periodo, devoluciones_periodo, mermas_periodo, stock_teorico "
+			  "FROM producto_en_periodo('%.4d-%.2d-%.2d')",
+			  g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin) );
 
   res = EjecutarSQL (sql);
   tuples = PQntuples (res);
