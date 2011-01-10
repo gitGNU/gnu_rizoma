@@ -2113,10 +2113,15 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
   gdouble stock = GetCurrentStock (barcode);
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d, now())",
-                       barcode, CUT (g_strdup_printf ("%f", stock - cantidad)), motivo);
-  res = EjecutarSQL (q);
-  g_free (q);
+  if ((stock - cantidad) != 0)
+    {
+      q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d, now())",
+			   barcode, CUT (g_strdup_printf ("%f", stock - cantidad)), motivo);
+      res = EjecutarSQL (q);
+      g_free (q);
+    }
+  else
+    g_printerr ("No se ha registrado la merma, puesto que es de cero");
 
   if (cantidad == 0)
     {

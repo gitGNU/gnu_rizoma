@@ -2720,6 +2720,7 @@ create or replace function producto_en_periodo(
        out stock_inicial double precision,
        out compras_periodo double precision,
        out ventas_periodo double precision,
+       out anulaciones_periodo double precision,       
        out devoluciones_periodo double precision,
        out mermas_periodo double precision,
        out stock_teorico double precision
@@ -2749,6 +2750,9 @@ q := $S$ SELECT stock1.barcode AS barcode,
        	 	-- ventas_periodo
        	 	stock1.cantidad_vendida AS stock1_cantidad_vendida,
        	 	stock2.cantidad_vendida AS stock2_cantidad_vendida,
+		-- anulaciones_periodo
+       	 	stock1.cantidad_anulada AS stock1_cantidad_anulada,
+       	 	stock2.cantidad_anulada AS stock2_cantidad_anulada,
        	 	-- devoluciones_periodo
        	 	stock1.cantidad_devoluciones AS stock1_cantidad_devoluciones,
        	 	stock2.cantidad_devoluciones AS stock2_cantidad_devoluciones,
@@ -2819,6 +2823,7 @@ FOR l IN EXECUTE q loop
           stock_inicial := 0;
           compras_periodo := z.cantidad_ingresada_n;
           ventas_periodo := z.ventas_n;
+	  anulaciones_periodo := z.anuladas_n;
           devoluciones_periodo := z.devolucion_n;
           mermas_periodo := z.mermas_n;
           stock_teorico := z.cantidad_ingresada_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n;
@@ -2827,6 +2832,7 @@ FOR l IN EXECUTE q loop
        stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
        compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
        ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
+       anulaciones_periodo := l.stock2_cantidad_anulada - l.stock1_cantidad_anulada;
        devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
        mermas_periodo := l.stock2_cantidad_merma - l.stock1_cantidad_merma;
        stock_teorico := l.stock2_cantidad_fecha;
