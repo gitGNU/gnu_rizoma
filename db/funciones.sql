@@ -2613,6 +2613,8 @@ create or replace function producto_en_fecha(
        out cantidad_anulada double precision,
        out cantidad_merma double precision,
        out cantidad_devoluciones double precision,
+       out cantidad_envio double precision,
+       out cantidad_recibida double precision,
        out cantidad_fecha double precision
        )
 returns setof record as $$
@@ -2621,10 +2623,10 @@ q text;
 l record;
 begin
 
-q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, p.cantidad_ingresada, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion
+q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, p.cantidad_ingresada, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion, cantidad_envio, cantidad_recibida
      	 	FROM producto
 		LEFT JOIN ( 
-       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
+       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
        		            FROM compra c
 
 		     	    INNER JOIN compra_detalle cd
@@ -2674,11 +2676,32 @@ q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca
 			         	      GROUP BY barcode) AS devolucion
                             ON p.barcode = devolucion.barcode
 
+			    -- Los traspasos enviados hasta la fecha determinada
+       			    LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_envio
+       	     	  	                      FROM traspaso t
+			 	 	      INNER JOIN traspaso_detalle td
+			 	 	      ON t.id = td.id_traspaso
+
+			         	      WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+					      AND t.origen = 1
+			         	      GROUP BY barcode) AS traspaso_envio
+                            ON p.barcode = traspaso_envio.barcode
+
+			    -- Los traspasos enviados hasta la fecha determinada
+       			    LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_recibida
+       	     	  	                      FROM traspaso t
+			 	 	      INNER JOIN traspaso_detalle td
+			 	 	      ON t.id = td.id_traspaso
+
+			         	      WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+					      AND t.origen != 1
+			         	      GROUP BY barcode) AS traspaso_recibido
+                            ON p.barcode = traspaso_recibido.barcode
 
                      	    WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
                      	    AND c.ingresada = 'TRUE'
                      	    AND p.estado = 'TRUE'
-                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion
+                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
                      	    ORDER BY barcode) AS p
          ON producto.barcode = p.barcode
 
@@ -2702,7 +2725,9 @@ for l in execute q loop
     cantidad_merma := COALESCE(l.unidades_merma,0);
     cantidad_anulada := COALESCE(l.cantidad_anulada,0);
     cantidad_devoluciones := COALESCE(l.cantidad_devolucion,0);
-    cantidad_fecha := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0);
+    cantidad_envio := COALESCE(l.cantidad_envio,0);
+    cantidad_recibida := COALESCE(l.cantidad_recibida,0);
+    cantidad_fecha := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0) - COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_recibida,0);
     return next;
 end loop;
 
@@ -2723,6 +2748,8 @@ create or replace function producto_en_periodo(
        out anulaciones_periodo double precision,       
        out devoluciones_periodo double precision,
        out mermas_periodo double precision,
+       out enviados_periodo double precision,
+       out recibidos_periodo double precision,
        out stock_teorico double precision
        )
 RETURNS setof record AS $$
@@ -2759,6 +2786,12 @@ q := $S$ SELECT stock1.barcode AS barcode,
        	 	-- mermas_periodo
        	 	stock1.cantidad_merma AS stock1_cantidad_merma,
        	 	stock2.cantidad_merma AS stock2_cantidad_merma,
+       	 	-- envios_periodo
+       	 	stock1.cantidad_envio AS stock1_cantidad_envio,
+       	 	stock2.cantidad_envio AS stock2_cantidad_envio,
+		-- recibidos_periodo
+       	 	stock1.cantidad_recibida AS stock1_cantidad_recibida,
+       	 	stock2.cantidad_recibida AS stock2_cantidad_recibida,
 
        	 	-- El stock actual --
        	 	-- stock_teorico
@@ -2767,7 +2800,7 @@ q := $S$ SELECT stock1.barcode AS barcode,
 	 FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$ ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date + 1) || $S$ ) stock2
        	 ON stock1.barcode = stock2.barcode $S$;
 
-q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(cantidad_vendida,0) AS ventas_n, COALESCE(unidades_merma,0) AS mermas_n, COALESCE(cantidad_anulada,0) AS anuladas_n, COALESCE(cantidad_devolucion,0) AS devolucion_n
+q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(cantidad_vendida,0) AS ventas_n, COALESCE(unidades_merma,0) AS mermas_n, COALESCE(cantidad_anulada,0) AS anuladas_n, COALESCE(cantidad_devolucion,0) AS devolucion_n, COALESCE(cantidad_envio,0) AS envios_n, COALESCE(cantidad_recibida,0) AS recibida_n
          FROM compra c
 
          INNER JOIN compra_detalle cd
@@ -2808,6 +2841,24 @@ q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(can
 			 GROUP BY barcode_d) AS devolucion_n
          ON p.barcode = devolucion_n.barcode_d
 
+	 -- Los traspasos enviados hasta la fecha determinada
+     	 LEFT JOIN (SELECT td.barcode AS barcode_td, SUM(td.cantidad) AS cantidad_envio
+      	                 FROM traspaso t
+			 INNER JOIN traspaso_detalle td
+			 ON t.id = td.id_traspaso
+		         AND t.origen = 1
+			 GROUP BY barcode) AS traspaso_envio_n
+         ON p.barcode = traspaso_envio_n.barcode_td
+
+	 -- Los traspasos enviados hasta la fecha determinada
+       	 LEFT JOIN (SELECT td.barcode AS barcode_td2, SUM(td.cantidad) AS cantidad_recibida
+       	                 FROM traspaso t
+	 	         INNER JOIN traspaso_detalle td
+			 ON t.id = td.id_traspaso
+		         AND t.origen != 1
+			 GROUP BY barcode) AS traspaso_recibido_n
+         ON p.barcode = traspaso_recibido_n.barcode_td2
+
          WHERE c.ingresada = 'TRUE'
          AND p.estado = 'TRUE'
          AND p.barcode =$S$;
@@ -2818,7 +2869,7 @@ FOR l IN EXECUTE q loop
     marca := l.marca;
     descripcion := l.descripcion;
     IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aún, por lo que se mostrará toda su información sin limite de fecha    
-       q3 := q2|| l.barcode || $S$ GROUP BY ventas_n, mermas_n, anuladas_n, devolucion_n$S$;
+       q3 := q2|| l.barcode || $S$ GROUP BY ventas_n, mermas_n, anuladas_n, devolucion_n, envios_n, recibida_n$S$;
        FOR z IN EXECUTE q3 loop
           stock_inicial := 0;
           compras_periodo := z.cantidad_ingresada_n;
@@ -2826,7 +2877,9 @@ FOR l IN EXECUTE q loop
 	  anulaciones_periodo := z.anuladas_n;
           devoluciones_periodo := z.devolucion_n;
           mermas_periodo := z.mermas_n;
-          stock_teorico := z.cantidad_ingresada_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n;
+	  enviados_periodo := z.envios_n;
+	  recibidos_periodo := z.recibida_n;
+          stock_teorico := z.cantidad_ingresada_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n - z.envios_n + z.recibida_n;
        END loop;
     ELSE
        stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
@@ -2835,6 +2888,8 @@ FOR l IN EXECUTE q loop
        anulaciones_periodo := l.stock2_cantidad_anulada - l.stock1_cantidad_anulada;
        devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
        mermas_periodo := l.stock2_cantidad_merma - l.stock1_cantidad_merma;
+       enviados_periodo := l.stock2_cantidad_envio - l.stock1_cantidad_envio;
+       recibidos_periodo := l.stock2_cantidad_recibida - l.stock1_cantidad_recibida;
        stock_teorico := l.stock2_cantidad_fecha;
     END IF;
     RETURN NEXT;
