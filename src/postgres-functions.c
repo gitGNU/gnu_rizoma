@@ -84,6 +84,53 @@ PutComa (gchar *number)
   return num;
 }
 
+
+/**
+ * Elimina el separador '.' o ',' siempre y cuando no represente un
+ * decimal.
+ *
+ * @param number : cifra numérica como string
+ */
+gchar *
+DropDelimiter (gchar *number)
+{
+  struct lconv *locale  = localeconv ();
+  gchar *no_decimal_point = locale->decimal_point;
+
+  if (no_decimal_point[0] == '.')
+    no_decimal_point = g_strdup(",");
+  else
+    no_decimal_point = g_strdup(".");
+
+  gchar *num = g_strdup (number);
+  gint len = (int)strlen (num);
+  gint sublen, points=0;
+
+  while (len != -1)
+    {
+      if (num[len] == no_decimal_point[0])
+        {
+	  points = points++;
+	  sublen = len;
+	  while (sublen != 0)
+	    {
+	      num[sublen] = num[sublen-1];
+	      sublen--;
+	    }
+        }
+      len--;
+    }
+  
+  while (points != 0)
+    {
+      num [points-1] = ' ';
+      points--;
+    }
+  g_strstrip(num);
+  return num;
+}
+
+
 gchar *
 SpecialChar (gchar *string)
 {

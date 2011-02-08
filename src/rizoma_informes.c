@@ -1604,9 +1604,6 @@ reports_win (void)
   g_signal_connect (builder_get (builder, "btn_print_recibido"), "clicked",
                     G_CALLBACK (PrintTwoTree), (gpointer)libroRecibidos);
 
-  // El botón guardar inicia "deshabilitado"
-  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_print_recibido")), FALSE);
-
   /*
     END Informe Traspasos
    */
@@ -2907,7 +2904,14 @@ on_tree_view_cuadratura_grab_focus (GtkNotebook *notebook, GtkNotebookPage *page
     }
   else if(page_num == 6)
     {
+      // Se calculan los traspasos y se muestran
       calcular_traspasos();
+
+      // Se inicia mostrando el botón para imprimir el informe de los envios
+      // y oculta el de los recibidos
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_recibido")));
+
     }
 }
 
@@ -2917,12 +2921,12 @@ on_tree_view_traspasos_grab_focus (GtkNotebook *notebook, GtkNotebookPage *page,
   /*Si se selecciona la "pagina 5" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
   if(page_num == 0)
     {
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_print_recibido")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_print_enviado")), TRUE);
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_recibido")));
     }
   else if(page_num == 1)
     {
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_print_recibido")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_print_enviado")), FALSE);
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_recibido")));
     }
 }

@@ -27,6 +27,8 @@
 
 #define SPE(string) SpecialChar (string)
 
+#define DD(string) DropDelimiter (string)
+
 #define PQvaluebycol( res, fila, col ) PQgetvalue( res, fila, PQfnumber( res, col ) )
 
 gchar * CutComa (gchar *number);
