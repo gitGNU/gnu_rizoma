@@ -777,7 +777,7 @@ SearchProductByCode (void)
         {
           if (venta_directa == 1)
 	    {
-	      if (VentaFraccion (PQvaluebycol (res, 0, "cantidad_mayor")))
+	      if (VentaFraccion (PQvaluebycol (res, 0, "barcode")))
 		{
 		  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
 		  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE);
@@ -1145,7 +1145,9 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 void
 MoveFocus (GtkEntry *entry, gpointer data)
 { // Al presionar [ENTER] en el entry "Cantidad"
-  if (!atoi(rizoma_get_value("VENTA_DIRECTA"))) // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
+  if (atoi(rizoma_get_value("VENTA_DIRECTA")) == FALSE || // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
+      (atoi(rizoma_get_value("VENTA_DIRECTA")) == TRUE && // O Si VENTA_DIRECTA = 1 Y Es una venta fracción
+       (VentaFraccion (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"))))) )) 
     {
       GtkWidget *button;
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
@@ -1153,7 +1155,7 @@ MoveFocus (GtkEntry *entry, gpointer data)
       gtk_widget_grab_focus (button);
     }
   else // De lo contrario el foco regresa al entry "Código de barras"
-      gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 }
 
 void
@@ -1465,7 +1467,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
     {
       if (venta_directa == 1)
 	{
-	  if (VentaFraccion (PQvaluebycol (res, 0, "cantidad_mayor")))
+	  if (VentaFraccion (PQvaluebycol (res, 0, "barcode")))
 	    {
 	      gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
 	      gtk_widget_set_sensitive (add_button, TRUE);
@@ -1491,11 +1493,14 @@ void
 CloseBuscarWindow (GtkWidget *widget, gpointer data)
 {
   gboolean add = (gboolean) data;
-  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
+  gboolean fraccion = VentaFraccion (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"))));
+  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));  
 
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_buscar")));
 
-  if (add == TRUE && venta_directa == 0)
+  if (add == TRUE && venta_directa == 0) 
+    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+  else if (add == TRUE && (venta_directa == 1 && fraccion == TRUE))
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
   else
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
