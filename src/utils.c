@@ -508,6 +508,7 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
   /* Si se elimina el último elemento de la lista que se seleccione el último disponible */
 }
 
+
 /**
  * return a gchar* from index number (from string)
  * to end, also could be understand as invested g_strndup.
@@ -515,6 +516,7 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
  * @param texto, text to cut
  * @param index, initiation number index to cut.
  */
+
 gchar *
 invested_strndup (const gchar *texto, gint index)
 {
@@ -522,4 +524,43 @@ invested_strndup (const gchar *texto, gint index)
   index = strlen (texto_local) - index;
   texto_local = g_strreverse (g_strndup (g_strreverse (texto_local), index));
   return texto_local;
+}
+
+
+/**
+ * Returns the treeview length that you specified
+ *
+ * @param GtkTreeView treeview: The treeview point
+ * @return gint length: the treeview length
+ */
+
+gint 
+get_treeview_length (GtkTreeView *treeview)
+{
+  GtkTreeModel *model = gtk_tree_view_get_model (treeview);
+  GtkTreeIter iter;
+  gboolean valid;
+  gint length = 0;
+
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      length++;
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+  return length;
+}
+
+
+/**
+ * This function reorder a string array
+ * filling the void index with forward strings
+ *
+ * @param gchar **array: a non-continuous string array
+ */
+
+gchar
+**reorder_string_array(gchar **array)
+{
+  
 }

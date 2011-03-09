@@ -120,6 +120,7 @@
             </child>
           </object>
           <packing>
+            <property name="expand">False</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -127,7 +128,7 @@
           <object class="GtkNotebook" id="ntbk_reports">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <signal name="switch_page" handler="on_tree_view_cuadratura_grab_focus"/>
+            <signal name="switch_page" handler="on_ntbk_reports_switch_page"/>
             <child>
               <object class="GtkHBox" id="hbox4">
                 <property name="visible">True</property>
@@ -681,6 +682,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
                         <property name="position">4</property>
                       </packing>
                     </child>
@@ -1420,7 +1422,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkTreeView" id="tree_view_cuadratura">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="row_activated" handler="view_onRowActivated"/>
                       </object>
                     </child>
                   </object>
@@ -1651,6 +1652,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -1689,11 +1691,13 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>

@@ -1013,7 +1013,7 @@ CleanEntryAndLabelData (void)
 
 
 /**
- * Es llamada cuando el boton "button_delete_productn" es presionado (signal click).
+ * Es llamada cuando el boton "button_delete_product" es presionado (signal click).
  *
  * Esta funcion elimina el producto de la treeView y llamas a la funcion
  * EliminarDeLIsta() y CalcularVentas()
@@ -1753,7 +1753,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 void
 Descuento (GtkWidget *widget, gpointer data)
 {
-  const gchar *widget_name = gtk_widget_get_name (widget);
+  const gchar *widget_name = gtk_buildable_get_name (widget);
 
   gint amount = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
   gint total;

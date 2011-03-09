@@ -492,6 +492,7 @@ create table proveedor (
   web                       varchar(300),
   contacto                  varchar(100),
   giro                      varchar(100),
+  lapso_reposicion          int4 default 3,
   constraint pk_proveedor primary key (rut)
 ) ;
 

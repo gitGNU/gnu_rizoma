@@ -2677,7 +2677,6 @@ InsertIdTraspaso ()
   res = EjecutarSQL (g_strdup_printf ("SELECT MAX(id) FROM traspaso"));
 
   return atoi (PQgetvalue (res, 0, 0));
-
 }
 
 
@@ -2761,3 +2760,32 @@ TotalPrecioCompra (Productos *products)
 }
 
 
+/**
+ * Es llamada por AskProductProvider de [compras.c].
+ *
+ * @return PGresult: La respuesta a a la consulta 
+ * (todos los productos comprados a X proveedor)
+ */
+
+PGresult *getProductsByProvider (gchar *rut)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf("SELECT DISTINCT p.*, "
+		      "(select_ventas_dia(p.barcode)::float) AS ventas_dia, "
+		      "(stock::float / select_ventas_dia(p.barcode)::float) AS stock_day "
+		      "FROM producto p "
+		      "INNER JOIN compra_detalle cd "
+		      "ON p.barcode = cd.barcode_product "
+		      "INNER JOIN compra c "
+		      "ON c.id = cd.id_compra "
+		      "INNER JOIN proveedor pr "
+		      "ON pr.rut = c.rut_proveedor "
+		      "WHERE pr.rut = '%s' "
+		      "AND estado = true;", rut);
+  
+  res = EjecutarSQL (q);
+  g_free (q);
+  return res;
+}

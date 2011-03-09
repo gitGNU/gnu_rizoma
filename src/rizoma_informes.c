@@ -180,7 +180,7 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      13, diferenciaNum,
-		      -1);      
+		      -1);
 
   if (diferenciaNum != 0)
     {      
@@ -2832,7 +2832,7 @@ on_btn_get_stat_clicked ()
           /* Informe de devolucion */
           fill_devolucion ();
           /* llama a la funcion fill_totals_dev() en un nuevo thread(hilo)*/
-          fill_totals_dev();
+          fill_totals_dev ();
           //g_thread_create(fill_totals_dev, NULL, FALSE, &error);
           break;
 	case 5:
@@ -2841,7 +2841,8 @@ on_btn_get_stat_clicked ()
 	  break;
 	case 6:
 	  /*Informe Traspasos*/
-	  fill_traspaso();
+	  fill_traspaso ();
+	  calcular_traspasos ();
 	  break;
 
         default:
@@ -2850,6 +2851,14 @@ on_btn_get_stat_clicked ()
     }
 }
 
+
+/**
+ * Is called by "on_ntbk_reports_switch_page" and "on_btn_get_stat_clicked"
+ *
+ * This function show transfer information (recibed and sent)
+ * on "ntbk_traspasos".
+ *
+ */
 
 void
 calcular_traspasos (void)
@@ -2865,10 +2874,15 @@ calcular_traspasos (void)
   res = EjecutarSQL (sql);
   g_free (sql);
 
-  if (res == NULL) return;
+  gchar *enviado, *recibido;
 
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")),
-                        g_strdup_printf ("<b>%s</b>",  PQvaluebycol (res, 0, "enviados")));
+  if (res == NULL)
+    return;
+
+  enviado = PQvaluebycol (res, 0, "enviados");
+  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? "%s", enviado : " No hay productos enviados");
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
 
   // Total Recibidos
   sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
@@ -2878,15 +2892,26 @@ calcular_traspasos (void)
   res = EjecutarSQL (sql);
   g_free (sql);
 
-  if (res == NULL) return;
-
+  if (res == NULL)
+    return;
+  
+  recibido = PQvaluebycol (res, 0, "recibidos");
+  
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
-                        g_strdup_printf ("<b>%s</b>",  PQvaluebycol (res, 0, "recibidos")));
+                        g_strdup_printf ((!g_str_equal("",recibido)) ? "%s", recibido : " No hay productos recibidos"));
     
 }
 
+
+/**
+ * Is triggered by "switch-page" event on "ntbk_reports"
+ *
+ * This function aims update the pages information when
+ * to switch between them.
+ *
+ */
 void
-on_tree_view_cuadratura_grab_focus (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
+on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
   /*Si se selecciona la "pagina 5" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
   if(page_num == 5 &&
