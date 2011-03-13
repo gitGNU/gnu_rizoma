@@ -76,20 +76,8 @@ CreateNew (gchar *barcode, gdouble cantidad)
 void
 FreeProduct (Productos *productos)
 {
-  /*
-    Producto *producto = productos->product;
-
-    free (producto->codigo);
-
-    g_free (producto->producto);
-    g_free (producto->marca);
-    g_free (producto->unidad);
-    g_free (producto->barcode);
-    g_free (producto);
-
     g_free (productos->product);
     g_free (productos);
-  */
 }
 
 gint
@@ -446,6 +434,7 @@ DropBuyProduct (gchar *codigo)
     {
       compra->header_compra = find->next;
       end->next = compra->header_compra;
+      compra->header_compra->back = NULL;
 
       FreeProduct (find);
     }
