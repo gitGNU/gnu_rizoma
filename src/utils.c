@@ -550,17 +550,3 @@ get_treeview_length (GtkTreeView *treeview)
     }
   return length;
 }
-
-
-/**
- * This function reorder a string array
- * filling the void index with forward strings
- *
- * @param gchar **array: a non-continuous string array
- */
-
-gchar
-**reorder_string_array(gchar **array)
-{
-  
-}

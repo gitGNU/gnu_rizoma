@@ -55,7 +55,15 @@ GtkWidget *entry_plazo;
 gint tipo_traspaso = 1;
 gint calcular = 0;
 
+// Representa el numero de filas que se han 
+// borrado en el filtro de busqueda
+gint numFilasBorradas = 0;
+
 gchar *rut_proveedor_global;
+
+/* Contienen las filas del treeview que son borradas */
+GArray *rutBorrado = NULL, *nombreBorrado = NULL, 
+  *descripcionBorrada = NULL, *lapRepBorrado = NULL;
 
 void
 toggle_cell (GtkCellRendererToggle *cellrenderertoggle,
@@ -1700,6 +1708,8 @@ Comprar (GtkWidget *widget, gpointer data)
   
   //Se vuelve a habilitar el boton de compra sugerida
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), TRUE);
+  
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
 }
 
 
@@ -4521,11 +4531,16 @@ on_btn_get_request_clicked (void)
 void
 on_btn_remove_buy_product_clicked (void)
 {
+  GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"));
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list")));
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list"))));
   GtkTreeIter iter;
   gchar *short_code;
   gint position;
+
+  if (get_treeview_length(treeview) == 0)
+    return;
+
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
@@ -4543,6 +4558,13 @@ on_btn_remove_buy_product_clicked (void)
     }
 
   select_back_deleted_row("tree_view_products_buy_list", position);
+
+  if (get_treeview_length(treeview) == 0)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_suggest_buy")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
+      rut_proveedor_global = NULL;
+    }
 }
 
 
@@ -5104,12 +5126,14 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
   gtk_tree_model_get_iter (store, &iter, path);
   gtk_tree_model_get (store, &iter,
                       0, &enable,
+		      10, &sugerido,
                       -1);
 
   // Se cambia la seleccion del checkButton
   enable = !(enable);
   gtk_list_store_set (GTK_LIST_STORE(store), &iter,
                       0, enable,
+		      10, (sugerido == 0) ? 1 : sugerido,
                       -1);
   
   // Se calcula el subtotal de todas las filas que fueron seleccionadas
@@ -5544,59 +5568,73 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
 }
 
 
+/**
+ * Callback connected to the entry_filter_providers when is edited
+ * (changed signal)
+ *
+ * This function filters the content (on tree_view_providers) according 
+ * to parameters obtained from the entry "entry_filter_providers".
+ *
+ * @param GtkEditable *editable
+ * @param gpointer user_data
+ */
+
 void
 on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
 {
   GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_providers"));
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
-  GtkListStore *store;
   GtkTreeIter iter;
+  GtkTreePath *path;
   GtkWidget *aux_widget;
   gboolean valid;
   gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteración
-  gint registro = 0; // Representa el numero de filas guardadas
+  gint i; // Para la iteración del for
 
   gchar *rut, *nombre, *descripcion; // Datos que se obtienen del treeview
-  gchar **rutA, **nombreA, **descripcionA; // Respaldo de las filas eliminadas
-  gchar *patron, *texto;
+  gdouble lapRep; // Dato que se obtiene del treeview (lapso de reposición)
+  gchar *patron, *textoFila, *textoFilaEliminada;
 
-  rutA = (gchar **)g_malloc(sizeof(gchar*));
-  nombreA = (gchar **)g_malloc(sizeof(gchar*));
-  descripcionA = (gchar **)g_malloc(sizeof(gchar*));
+  /* Contienen las filas del treeview que son borradas */
+  if (rutBorrado == NULL || nombreBorrado == NULL || 
+      descripcionBorrada == NULL || lapRepBorrado == NULL )
+    {
+      rutBorrado = g_array_new (FALSE, FALSE, sizeof (gchar*));
+      nombreBorrado = g_array_new (FALSE, FALSE, sizeof (gchar*));
+      lapRepBorrado = g_array_new (FALSE, FALSE, sizeof (gdouble));
+      descripcionBorrada = g_array_new (FALSE, FALSE, sizeof (gchar*));
+    }
 
+  /* Obtención del patron */
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_filter_providers"));
   patron = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))); //El texto obtenido será el patron de filtrado
 
-  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   valid = gtk_tree_model_get_iter_first (model, &iter);
   while (valid)
     {
       // Obtengo los valores del treeview --
       gtk_tree_model_get (model, &iter,
 			  0, &rut,
-                          1, &nombre, // ver si agregar 2 (lapso reposicion gdouble)
+                          1, &nombre,
+			  2, &lapRep,
                           3, &descripcion,
                           -1);
       
-      texto = g_strdup_printf ("%s%s%s", rut, nombre, descripcion);
-      printf ("%s\n", texto);
+      textoFila = g_strdup_printf ("%s %s %f %s", rut, nombre, lapRep, descripcion);
+      //printf ("%s\n", textoFila);
 
-      if (!g_regex_match_simple (patron, texto, G_REGEX_CASELESS, 0))
+      if (!g_regex_match_simple (patron, textoFila, G_REGEX_CASELESS, 0))
 	{
-	  /* Se reserva mermoria para los registros */
-	  rutA[registro] = (char*)malloc(sizeof(char));
-	  nombreA[registro] = (char*)malloc(sizeof(char));
-	  descripcionA[registro] = (char*)malloc(sizeof(char));
-
-	  /* Respaldo de las columas de la fila que se eliminará */
-	  rutA[registro] = rut;
-	  nombreA[registro] = nombre;
-	  descripcionA[registro] = descripcion;
+	  /* Se almacenan los datos de las filas eliminadas */
+	  g_array_append_val (rutBorrado, rut);
+	  g_array_append_val (nombreBorrado, nombre);
+	  g_array_append_val (lapRepBorrado, lapRep);
+	  g_array_append_val (descripcionBorrada, descripcion);
 	  
-	  registro++;
+	  numFilasBorradas++;
 	  
 	  /* Se elimina la linea correspondiente y se "itera" si éste es la última */
-	  gtk_list_store_remove (store, &iter);
+	  gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 	  if (fila_actual == get_treeview_length (treeview))
 	    valid = gtk_tree_model_iter_next (model, &iter);
 	}
@@ -5606,6 +5644,36 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
 	  fila_actual++;
 	}
     }
+
+  /* Para comprobar si el patron coincide con las filas eliminadas */  
+  for (i = 0; i < numFilasBorradas; i++)
+    {
+      textoFilaEliminada = g_strdup_printf("%s %s %f %s",
+					   g_array_index (rutBorrado, gchar*, i),
+					   g_array_index (nombreBorrado, gchar*, i),
+					   g_array_index (lapRepBorrado, gdouble, i),
+					   g_array_index (descripcionBorrada, gchar*, i));
+	      
+      if (g_regex_match_simple (patron, textoFilaEliminada, G_REGEX_CASELESS, 0))
+	{
+	  /* Se reincorpora la fila borrada al treeview */
+	  gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+	  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+			      0, g_array_index (rutBorrado, gchar*, i),
+			      1, g_array_index (nombreBorrado, gchar*, i),
+			      2, g_array_index (lapRepBorrado, gdouble, i),
+			      3, g_array_index (descripcionBorrada, gchar*, i),
+			      -1);
+	  
+	  /* Se quita la fila reincorporada al treeview de los datos eliminados */
+	  rutBorrado = g_array_remove_index (rutBorrado, i);
+	  nombreBorrado = g_array_remove_index (nombreBorrado, i);
+	  lapRepBorrado = g_array_remove_index (lapRepBorrado, i);
+	  descripcionBorrada = g_array_remove_index (descripcionBorrada, i);
+	  numFilasBorradas--;
+	  i--;
+	}
+    }  
 }
 
 
@@ -5615,6 +5683,7 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
  * 
  * @param: void
  */
+
 void
 calcularPorcentajeGanancia (void)
 {
@@ -5683,7 +5752,7 @@ addSugestedBuy (void)
 
   /*Variables consulta*/
   PGresult *res;
-  gchar *q;
+  gchar *q = NULL;
 
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   valid = gtk_tree_model_get_iter_first (model, &iter);
@@ -5721,10 +5790,47 @@ addSugestedBuy (void)
 	  //printf (" barcode = %s\n marca = %s\n descripcion = %s\n", barcode, marca, descripcion);
 	}      
       valid = gtk_tree_model_iter_next (model, &iter);
-    }
-  g_free (q);
+    }    
   
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), FALSE);
-  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy")));
+  // Si se seleccionó un producto
+  if (q != NULL)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), FALSE);
+      gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy")));
+    }
+  else
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "tree_view_providers")),"Debe elegir a lo menos un producto a comprar");
+    }
+
+  /* Se librea la consulta */
+  g_free (q);
+  /* Se libera la memeria del GArray*/
+  g_array_free (rutBorrado, TRUE); rutBorrado = NULL;
+  g_array_free (nombreBorrado, TRUE); nombreBorrado = NULL;
+  g_array_free (lapRepBorrado, TRUE); lapRepBorrado = NULL;
+  g_array_free (descripcionBorrada, TRUE); descripcionBorrada = NULL;
+
 }
 
+
+/**
+ * Is called by "btn_suggest_buy" (signal click).
+ *
+ * this function hide the "wnd_suggest_buy" windows and
+ * free GArray struct of memory.
+ * 
+ * @param: GtkButton *button: button from signal is triggered
+ * @param: gpointer user_data: user data
+ */
+
+void 
+hide_wnd_suggest_buy (GtkButton *button, gpointer user_data)
+{
+  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy")));
+
+  g_array_free (rutBorrado, TRUE); rutBorrado = NULL;
+  g_array_free (nombreBorrado, TRUE); nombreBorrado = NULL;
+  g_array_free (lapRepBorrado, TRUE); lapRepBorrado = NULL;
+  g_array_free (descripcionBorrada, TRUE); descripcionBorrada = NULL;
+}

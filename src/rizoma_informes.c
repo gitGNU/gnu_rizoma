@@ -1394,14 +1394,15 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descricion", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Descripcion", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 510);
+  gtk_tree_view_column_set_resizable (column, TRUE);
   
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,

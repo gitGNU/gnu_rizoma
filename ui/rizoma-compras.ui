@@ -6126,7 +6126,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="gtk_widget_hide" object="wnd_suggest_buy"/>
+                <signal name="clicked" handler="hide_wnd_suggest_buy" object="wnd_suggest_buy"/>
               </object>
               <packing>
                 <property name="expand">False</property>
