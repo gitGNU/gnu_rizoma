@@ -267,7 +267,7 @@ CompraListClean (void)
 
     tofree = alter->next;
 
-    g_free (alter);
+    /* g_free (alter); */
 
     alter = tofree;
 
