@@ -73,6 +73,11 @@ CreateNew (gchar *barcode, gdouble cantidad)
   return new;
 }
 
+/**
+ *
+ * Libera la memoria de un producto eliminado desde la lista de productos.
+ *
+ */
 void
 FreeProduct (Productos *productos)
 {
@@ -411,6 +416,13 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
   return TRUE;
 }
 
+
+/**
+ *
+ * Esta funcion elimina el producto seleccionado, de  la lista de productos a
+ * comprar.
+ *
+ */
 void
 DropBuyProduct (gchar *codigo)
 {

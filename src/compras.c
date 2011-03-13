@@ -822,10 +822,10 @@ compras_win (void)
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "edit_product_button")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_buy")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
   //Compras - Mescadería
   //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), FALSE);
   //Compras - Mercadería - Editar Producto
@@ -835,7 +835,7 @@ compras_win (void)
   //Focus Control
   //TODO: Solucionar el foco de las pestañas (El foco debe cambiarse a los entrys principales)
   gtk_widget_set_can_focus (GTK_NOTEBOOK (builder_get (builder, "buy_notebook")), TRUE);
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+  gtk_widget_grab_focus (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")));
 
   gtk_widget_show_all (compras_gui);
 } // compras_win (void)
@@ -937,13 +937,13 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 
       //Enable entry sensitive
       //TODO: Buscar la forma de simplificar los sensitive
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_new_product")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "edit_product_button")), TRUE);
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
 
       // Se habilita el botón de traspaso
       if (rizoma_get_value_boolean ("TRASPASO"))
@@ -1198,9 +1198,9 @@ CalcularPrecioFinal (void)
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), TRUE);
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), TRUE);
     }
 } // CalcularPrecioFinal (void)
 
@@ -1267,7 +1267,7 @@ AddToProductsList (void)
       CleanStatusProduct ();
 
       //TODO: Se setea el sensitive cada vez que se agrega un producto a la lista, se debe evaluar
-      gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_buy")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
     }
@@ -1697,7 +1697,7 @@ Comprar (GtkWidget *widget, gpointer data)
   //Se libera la variable global
   g_free (rut_proveedor_global);
   rut_proveedor_global = NULL;
-  
+
   //Se vuelve a habilitar el boton de compra sugerida
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), TRUE);
 }
@@ -1975,7 +1975,7 @@ FillProveedores (void)
                           0, PQvaluebycol(res, i, "rut"),
                           1, PQvaluebycol(res, i, "nombre"),
                           -1);
-    }  
+    }
 }
 
 
@@ -2436,7 +2436,7 @@ CleanStatusProduct (void)
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
   //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-  
+
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_buy")));
@@ -2469,10 +2469,10 @@ CleanStatusProduct (void)
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_new_product")), TRUE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "edit_product_button")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_calculate")), FALSE);
-  gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
 
   if (rizoma_get_value_boolean ("TRASPASO"))
     gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), FALSE);
@@ -5070,7 +5070,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
-      
+
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
@@ -5111,7 +5111,7 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
   gtk_list_store_set (GTK_LIST_STORE(store), &iter,
                       0, enable,
                       -1);
-  
+
   // Se calcula el subtotal de todas las filas que fueron seleccionadas
   valid = gtk_tree_model_get_iter_first (store, &iter);
   while (valid)
@@ -5127,7 +5127,7 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
       // Itero a la siguiente fila --
       valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si iteró a la siguiente */
     }
-  
+
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
 			g_strdup_printf ("<b>%u</b>", llround(subTotal)));
 
@@ -5143,7 +5143,7 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
  * TODO: Crear una función que permita modificar actualice el valor modificado de cualquier treeview
  */
 
-void 
+void
 on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar *sugeridoT, gpointer data)
 {
   GtkTreeModel *model = GTK_TREE_MODEL (data);
@@ -5168,7 +5168,7 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
   PGresult *res;
 
   // Se obtiene el barcode a partir del codigo_corto
-  barcode = PQvaluebycol (EjecutarSQL 
+  barcode = PQvaluebycol (EjecutarSQL
 			  (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", barcode)),
 			  0, "barcode");
 
@@ -5183,12 +5183,12 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
 
   if (sugerido < 0) // Sugerido no puede ser negativo
     sugerido = 0;
-    
+
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      10, (fraccion == TRUE) ? sugerido : lround(sugerido),
 		      -1);
 
-  // Recaclula subtotal  
+  // Recaclula subtotal
   if (enable == TRUE)
     {
       gchar *subTotalActualT = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected"))));
@@ -5200,11 +5200,11 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
 
       // Agrego al subtotal la catidad sugerida actual (la que se acaba de editar)
       subTotal = subTotal + (precio * ((sugerido > 0) ? sugerido : 1));
-      
+
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
 			    g_strdup_printf ("<b>%u</b>", llround(subTotal)));
     }
-  
+
 }
 
 
@@ -5237,11 +5237,11 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
 				  G_TYPE_DOUBLE, //Lapso Reposición
 				  G_TYPE_STRING, //Descripción
 				  -1);
-  
+
       treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_providers"));
       gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
       selection = gtk_tree_view_get_selection (treeview);
-  
+
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
 							 "text", 0,
@@ -5301,8 +5301,8 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
 				  G_TYPE_DOUBLE,  //Dias/Stock
 				  G_TYPE_DOUBLE,  //Sugerido
 				  -1);
-  
- 
+
+
       treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_products_providers"));
       gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
       selection = gtk_tree_view_get_selection (treeview);
@@ -5393,7 +5393,7 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_sort_column_id (column, 7);
       gtk_tree_view_column_set_resizable (column, FALSE);
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
-  
+
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
 							 "text", 8,
@@ -5499,12 +5499,12 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
   gint i, tuples;
 
   res = getProductsByProvider (rut);
-  
+
   // servirá para elegir el proveedor al confirmar la compra
   rut_proveedor_global = g_strdup_printf (rut);
 
   tuples = PQntuples (res);
-  
+
   if (res == NULL) return;
 
   gdouble dias_stock, ventas_dia, sugerido;
@@ -5515,7 +5515,7 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
   gtk_list_store_clear (store);
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
 			g_strdup_printf ("<b>0</b>"));
-  
+
   for (i = 0; i < tuples; i++)
     {
       sugerido = 0;
@@ -5577,7 +5577,7 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
                           1, &nombre, // ver si agregar 2 (lapso reposicion gdouble)
                           3, &descripcion,
                           -1);
-      
+
       texto = g_strdup_printf ("%s%s%s", rut, nombre, descripcion);
       printf ("%s\n", texto);
 
@@ -5592,9 +5592,9 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
 	  rutA[registro] = rut;
 	  nombreA[registro] = nombre;
 	  descripcionA[registro] = descripcion;
-	  
+
 	  registro++;
-	  
+
 	  /* Se elimina la linea correspondiente y se "itera" si éste es la última */
 	  gtk_list_store_remove (store, &iter);
 	  if (fila_actual == get_treeview_length (treeview))
@@ -5610,9 +5610,9 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
 
 
 /**
- * Función temporal para facilitar la legibilidad de 
+ * Función temporal para facilitar la legibilidad de
  * "addSugestedBuy(void)"
- * 
+ *
  * @param: void
  */
 void
@@ -5627,26 +5627,26 @@ calcularPorcentajeGanancia (void)
 
   gdouble iva = GetIVA (barcode);
   gdouble otros = GetOtros (barcode);
-	  
+
   /*------ Se calcula el porcentaje de ganancia ------*/
   if (iva != -1)
     iva = (gdouble)iva / 100 + 1;
   else
     iva = -1;
-	  
+
   // TODO: Revisión (Conseción de la variable)
   if (otros == 0)
     otros = -1;
-	  
+
   /* -- Profit porcent ("ganancia") is calculated here -- */
   if (otros == -1 && iva != -1 )
     porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
-	  
+
   else if (iva != -1 && otros != -1 )
     {
       iva = (gdouble) iva - 1;
       otros = (gdouble) otros / 100;
-	      
+
       precio = (gdouble) precio_final / (gdouble)(iva + otros + 1);
       ganancia = (gdouble) precio - ingresa;
       porcentaje = (gdouble)(ganancia / ingresa) * 100;
@@ -5661,11 +5661,11 @@ calcularPorcentajeGanancia (void)
 
 /**
  * this function to add the selected products to "tree_view_products_buy_list"
- * 
+ *
  * @param: void
  */
 
-void 
+void
 addSugestedBuy (void)
 {
   /*Variables del treeview*/
@@ -5674,7 +5674,7 @@ addSugestedBuy (void)
   GtkListStore *store;
   GtkTreeIter iter;
   gboolean valid;
-  
+
   /*Variables de informacion*/
   gboolean enabled;
   gchar *codigo_corto, *marca, *descripcion; //Se obtienen desde el treeview
@@ -5705,10 +5705,10 @@ addSugestedBuy (void)
 	  res = EjecutarSQL (q);
 	  barcode = PQvaluebycol (res, 0, "barcode");
 	  precio = PQvaluebycol (res, 0, "precio");
-	  
+
 	  if (cantidad == 0)
 	    cantidad = 1;
-	  
+
 	  //Set Buy's Entries
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), g_strdup_printf ("%f",costo));
@@ -5717,13 +5717,13 @@ addSugestedBuy (void)
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), g_strdup_printf ("%f",cantidad));
 
 	  AddToProductsList(); // Agrega los productos a la lista de compra
-	  
+
 	  //printf (" barcode = %s\n marca = %s\n descripcion = %s\n", barcode, marca, descripcion);
-	}      
+	}
       valid = gtk_tree_model_iter_next (model, &iter);
     }
   g_free (q);
-  
+
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), FALSE);
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy")));
 }
