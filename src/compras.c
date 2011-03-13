@@ -5729,13 +5729,23 @@ calcularPorcentajeGanancia (void)
 
 
 /**
- * this function to add the selected products to "tree_view_products_buy_list"
+ * 
  *
  * @param: void
  */
 
+/**
+ * Is called by "btn_buy_selected" (signal click).
+ *
+ * this function add the selected products to
+ * "tree_view_products_buy_list"
+ * 
+ * @param: GtkButton *button: button from signal is triggered
+ * @param: gpointer user_data: user data
+ */
+
 void
-addSugestedBuy (void)
+addSugestedBuy (GtkButton *button, gpointer user_data)
 {
   /*Variables del treeview*/
   GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_products_providers"));
@@ -5815,7 +5825,7 @@ addSugestedBuy (void)
 
 
 /**
- * Is called by "btn_suggest_buy" (signal click).
+ * Is called by "btn_close_suggest_buy" (signal click).
  *
  * this function hide the "wnd_suggest_buy" windows and
  * free GArray struct of memory.
