@@ -47,6 +47,10 @@ PrintVale (Productos *header, gint venta_id, gint total)
   int i, precio;
   gdouble siva = 0.0, civa = 0.0;
   gboolean imprimir_vale = FALSE;
+  gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+
+  if (impresora == FALSE)
+    return;
 
   fp = fopen (vale_file, "w+");
   fprintf (fp, "\t CONTROL INTERNO \n");
@@ -56,12 +60,12 @@ PrintVale (Productos *header, gint venta_id, gint total)
   fprintf (fp, "Vendedor: %s\n", user_data->user);
   fprintf (fp, "==========================================\n\n");
   fprintf (fp, "Gracias por su compra \n");
-  do {
 
+  do {
     if (products->product->iva != 0)
       {
-        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && products->product->cantidad >= products->product->cantidad_mayorista &&
-            products->product->mayorista == TRUE)
+        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
+	    products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)
           precio = products->product->precio_mayor;
         else
           precio = products->product->precio;
@@ -102,11 +106,10 @@ PrintVale (Productos *header, gint venta_id, gint total)
   fprintf (fp, "\n\n");
 
   do {
-
     if (products->product->iva == 0)
       {
-        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && products->product->cantidad >= products->product->cantidad_mayorista &&
-            products->product->mayorista == TRUE)
+        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
+	    products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)
           precio = products->product->precio_mayor;
         else
           precio = products->product->precio;
@@ -145,7 +148,8 @@ PrintVale (Productos *header, gint venta_id, gint total)
   } while (products != header);
 
   gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
-  if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale)
+  //impresora = rizoma_get_value_boolean ("IMPRESORA");
+  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale) || impresora == TRUE)
     {
       fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
       fprintf (fp, "Sub Total afecto:      \t\t%s$ %u %s\n", size2, lround(civa), size1);
@@ -156,12 +160,9 @@ PrintVale (Productos *header, gint venta_id, gint total)
       fclose (fp);
     }
 
-  if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale)
-    {
-      for (i = 0; i < n_copy; i++) {
-	system(g_strdup_printf ("%s %s", print_command, vale_file));
-         }
-    }
+  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale) || impresora == TRUE)
+    for (i = 0; i < n_copy; i++) 
+      system(g_strdup_printf ("%s %s", print_command, vale_file));
 
   system (g_strdup_printf ("rm %s", vale_file));
 }
