@@ -46,7 +46,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
   int n_copy = atoi (vale_copy);
   int i, precio;
   gdouble siva = 0.0, civa = 0.0;
-  gboolean imprimir_vale = FALSE;
+  gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
 
   if (impresora == FALSE)
@@ -75,16 +75,16 @@ PrintVale (Productos *header, gint venta_id, gint total)
 	  {
 	    if (g_str_has_suffix(products->product->producto,"@"))
 	      {
-		imprimir_vale = TRUE;
+		hay_selectivo = TRUE;
+	    
 		fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
 			 g_strndup (products->product->producto, 30),
 			 products->product->marca,
 			 products->product->cantidad,
 			 precio,
 			 lround ((double)(products->product->cantidad * precio)));
-
-		civa += (double)(products->product->cantidad * precio);
 	      }
+	    civa += (double)(products->product->cantidad * precio);
 	  }
 	else
 	  {
@@ -119,16 +119,16 @@ PrintVale (Productos *header, gint venta_id, gint total)
 	  {
 	    if (g_str_has_suffix(products->product->producto,"@"))
 	      {
-		imprimir_vale = TRUE;
+		hay_selectivo = TRUE;
+		
 		fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
 			 g_strndup (products->product->producto, 30),
 			 products->product->marca,
 			 products->product->cantidad,
 			 precio,
 			 lround ((double)(products->product->cantidad * precio)));
-
-		siva+= (double)(products->product->cantidad * precio);
 	      }
+	    siva += (double)(products->product->cantidad * precio);
 	  }
 	else
 	  {
@@ -139,7 +139,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
 		     precio,
 		     lround ((double)(products->product->cantidad * precio)));
 
-	    siva+= (double)(products->product->cantidad * precio);
+	    siva += (double)(products->product->cantidad * precio);
 	  }
       }
 
@@ -149,7 +149,7 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
   gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
   //impresora = rizoma_get_value_boolean ("IMPRESORA");
-  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale) || impresora == TRUE)
+  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
     {
       fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
       fprintf (fp, "Sub Total afecto:      \t\t%s$ %u %s\n", size2, lround(civa), size1);
@@ -160,7 +160,8 @@ PrintVale (Productos *header, gint venta_id, gint total)
       fclose (fp);
     }
 
-  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && imprimir_vale) || impresora == TRUE)
+  if (((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo) || 
+      (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")))
     for (i = 0; i < n_copy; i++) 
       system(g_strdup_printf ("%s %s", print_command, vale_file));
 
