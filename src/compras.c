@@ -5527,10 +5527,16 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
   // servirá para elegir el proveedor al confirmar la compra
   rut_proveedor_global = g_strdup_printf (rut);
 
-  tuples = PQntuples (res);
-
   if (res == NULL) return;
 
+  tuples = PQntuples (res);
+
+  if (tuples <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "tree_view_providers")),
+		"No existen mercaderías asociadas a este proveedor");
+    }
+  
   gdouble dias_stock, ventas_dia, sugerido;
   gboolean fraccion;
 
@@ -5585,7 +5591,6 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
   GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_providers"));
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
   GtkTreeIter iter;
-  GtkTreePath *path;
   GtkWidget *aux_widget;
   gboolean valid;
   gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteración
@@ -5729,12 +5734,6 @@ calcularPorcentajeGanancia (void)
 
 
 /**
- * 
- *
- * @param: void
- */
-
-/**
  * Is called by "btn_buy_selected" (signal click).
  *
  * this function add the selected products to
@@ -5843,4 +5842,8 @@ hide_wnd_suggest_buy (GtkButton *button, gpointer user_data)
   g_array_free (nombreBorrado, TRUE); nombreBorrado = NULL;
   g_array_free (lapRepBorrado, TRUE); lapRepBorrado = NULL;
   g_array_free (descripcionBorrada, TRUE); descripcionBorrada = NULL;
+
+  //Se libera la variable global
+  g_free (rut_proveedor_global);
+  rut_proveedor_global = NULL;
 }

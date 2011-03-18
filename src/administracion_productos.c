@@ -578,7 +578,7 @@ admini_box ()
   /* gtk_widget_show (button); */
 
   /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (RecivirWindow), NULL); */
+  /*                   G_CALLBACK (RecibirWindow), NULL); */
 }
 
 void

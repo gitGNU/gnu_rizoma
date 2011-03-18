@@ -2313,7 +2313,7 @@ Devolver (gchar *barcode, gchar *cantidad)
 }
 
 gboolean
-Recivir (gchar *barcode, gchar *cantidad)
+Recibir (gchar *barcode, gchar *cantidad)
 {
   PGresult *res;
   gchar *q;
@@ -2750,7 +2750,7 @@ TotalPrecioCompra (Productos *products)
     {
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      pre = atoi(PQvaluebycol(res, 0, "costo_promedio"));
+      pre = atoi(PQvaluebycol(res, 0, "costo_promedio")) * products->product->cantidad;
       total = total + pre;
       products = products->next;
     }
