@@ -121,6 +121,14 @@ IngresarDinero (GtkWidget *widget, gpointer data)
   gint monto;
   gint motivo;
 
+  
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
+    abierta al momento de vender*/
+  
+  if (rizoma_get_value_boolean ("CAJA"))
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+      open_caja (TRUE);
+
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_in_motiv"));
   model = gtk_combo_box_get_model(GTK_COMBO_BOX(aux_widget));
   if (!(gtk_combo_box_get_active_iter(GTK_COMBO_BOX(aux_widget), &iter)))
@@ -233,6 +241,14 @@ EgresarDinero (GtkWidget *widget, gpointer data)
 
   GtkTreeModel *model;
   GtkTreeIter iter;
+  
+  
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
+    abierta al momento de vender*/
+  
+  if (rizoma_get_value_boolean ("CAJA"))
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+      open_caja (TRUE);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
   monto = atoi (gtk_entry_get_text (GTK_ENTRY (aux_widget)));

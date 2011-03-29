@@ -1203,6 +1203,16 @@ TipoVenta (GtkWidget *widget, gpointer data)
       return;
     }
 
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
+    abierta al momento de vender*/
+
+  //TODO: Unificar esta comprobación en las funciones primarias 
+  //      encargadas de hacer cualquier movimiento de caja
+
+  if (rizoma_get_value_boolean ("CAJA"))
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+      open_caja (TRUE);
+
   if (g_str_equal (tipo_vendedor, "1"))
     {
       tipo_documento = VENTA;
@@ -3014,6 +3024,14 @@ nullify_sale_win (void)
 
   GtkListStore *store_sales;
   GtkListStore *store_details;
+
+  
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
+    abierta al momento de vender*/
+  
+  if (rizoma_get_value_boolean ("CAJA"))
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+      open_caja (TRUE);
 
   treeview_sales = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale"));
   store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_sales));

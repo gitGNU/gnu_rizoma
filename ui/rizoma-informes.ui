@@ -9,9 +9,11 @@
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <object class="GtkVBox" id="vbox6">
             <property name="visible">True</property>
+            <property name="orientation">vertical</property>
             <child>
               <object class="GtkHBox" id="hbox1">
                 <property name="visible">True</property>
@@ -130,6 +132,7 @@
                 <child>
                   <object class="GtkVBox" id="vbox2">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkHBox" id="hbox13">
                         <property name="visible">True</property>
@@ -698,6 +701,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow3">
                     <property name="height_request">430</property>
@@ -876,6 +880,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox5">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow4">
                     <property name="visible">True</property>
@@ -1140,7 +1145,16 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="label38">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Ventas anuladas</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="right_attach">3</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
                     </child>
                     <child>
                       <placeholder/>
@@ -1149,7 +1163,15 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <placeholder/>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkLabel" id="lbl_mbox_nullify_sell">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">3</property>
+                        <property name="right_attach">4</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -1207,6 +1229,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <child>
                   <object class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow5">
                         <property name="visible">True</property>
@@ -1365,6 +1388,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox7">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow7">
                     <property name="visible">True</property>

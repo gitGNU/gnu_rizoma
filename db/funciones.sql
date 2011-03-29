@@ -2251,8 +2251,8 @@ begin
 	if (select id from venta where tipo_venta=1 AND id=sale_id) IS NOT NULL then   
        	   	 UPDATE deuda SET pagada='t' WHERE id_venta=sale_id;
 	else
-		 perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);	
-	end if; 		 
+		 perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
+	end if;
 
         insert into venta_anulada(id_sale, vendedor)
                 values (sale_id, salesman_id);
@@ -2276,6 +2276,7 @@ create or replace function cash_box_report (
         out cash_box_end integer,
         out cash_sells integer,
         out cash_outcome integer,
+	out nullify_sell integer,
         out cash_income integer,
         out cash_payed_money integer,
 	out cash_loss_money integer)
@@ -2294,7 +2295,7 @@ declare
 	monto2 bigint;
 begin
 
-        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino, perdida
+        select id_venta_inicio, fecha_inicio, inicio, id_venta_termino, fecha_termino, termino, COALESCE(perdida,0)
         into sell_first_id, open_date, cash_box_start, sell_last_id, close_date, cash_box_end, cash_loss_money
         from caja
         where id = cash_box_id;
@@ -2328,11 +2329,25 @@ begin
         end if;
 
         select sum (monto) into cash_outcome
-        from egreso
-        where id_caja = cash_box_id;
+        from egreso e 
+	inner join tipo_egreso te
+	on e.tipo = te.id
+        where e.id_caja = cash_box_id
+	and te.descrip != 'Nulidad de Venta';
 
         if cash_outcome is null then
                 cash_outcome := 0;
+        end if;
+
+	select sum (monto) into nullify_sell
+        from egreso e 
+	inner join tipo_egreso te
+	on e.tipo = te.id
+        where e.id_caja = cash_box_id
+	and te.descrip = 'Nulidad de Venta';
+
+        if nullify_sell is null then
+                nullify_sell := 0;
         end if;
 
         select sum (monto) into cash_income
