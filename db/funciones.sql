@@ -2287,6 +2287,7 @@ declare
         dat record;
         sell_first_id integer;
         sell_last_id integer;
+	perdida_egreso integer;
         first_cash_box_id integer;
         last_cash_box_id integer;
 	open_date2 timestamp without time zone;
@@ -2362,6 +2363,17 @@ begin
                 current_expenses := 0;
         end if;
 
+	select sum (monto) into perdida_egreso
+        from egreso e 
+	inner join tipo_egreso te
+	on e.tipo = te.id
+        where e.id_caja = cash_box_id
+	and te.descrip = 'Perdida';
+
+        if perdida_egreso is null then
+                perdida_egreso := 0;
+        end if;
+
         select sum (monto) into cash_income
         from ingreso
         where id_caja = cash_box_id;
@@ -2395,7 +2407,7 @@ begin
         end if;
 
         cash_payed_money := monto1 + monto2;
-
+	cash_loss_money := cash_loss_money + perdida_egreso;
 
 return next;
 return;
