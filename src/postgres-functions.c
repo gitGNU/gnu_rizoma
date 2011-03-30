@@ -39,6 +39,7 @@
 #include"rizoma_errors.h"
 #include"utils.h"
 #include"factura_more.h"
+#include"caja.h"
 
 PGconn *connection;
 PGconn *connection2;
@@ -2385,6 +2386,13 @@ nullify_sale (gint sale_id)
 {
   PGresult *res;
   gchar *q;
+
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
+    abierta al momento de vender*/
+  
+  if (rizoma_get_value_boolean ("CAJA"))
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+      open_caja (TRUE);
 
   q = g_strdup_printf("select * from nullify_sale(%d, %d)", user_data->user_id, sale_id);
 

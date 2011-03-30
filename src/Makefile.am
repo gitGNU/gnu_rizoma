@@ -37,6 +37,7 @@ rizoma_errors.c rizoma_errors.h \
 utils.c utils.h \
 vale.c vale.h \
 factura_more.c factura_more.h \
+caja.c caja.h \
 printing.c printing.h
 
 rizoma_ventas_SOURCES = ventas.c ventas.h tipos.h \
@@ -73,6 +74,7 @@ printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
 utils.c utils.h \
+caja.c caja.h \
 factura_more.c factura_more.h
 
 rizoma_config_SOURCES = rizoma-config.c
@@ -93,6 +95,7 @@ printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
 utils.c utils.h \
+caja.c caja.h \
 factura_more.c factura_more.h
 
 rizoma_informes_SOURCES = rizoma_informes.c \
@@ -111,6 +114,7 @@ printing.c printing.h \
 boleta.c boleta.h \
 vale.c vale.h \
 utils.c utils.h \
+caja.c caja.h \
 factura_more.c factura_more.h
 
 rizoma_admin_LDADD = $(GTK_LIBS) $(PSLIB_LIBS)

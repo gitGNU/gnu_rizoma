@@ -2277,6 +2277,7 @@ create or replace function cash_box_report (
         out cash_sells integer,
         out cash_outcome integer,
 	out nullify_sell integer,
+	out current_expenses integer,
         out cash_income integer,
         out cash_payed_money integer,
 	out cash_loss_money integer)
@@ -2333,7 +2334,7 @@ begin
 	inner join tipo_egreso te
 	on e.tipo = te.id
         where e.id_caja = cash_box_id
-	and te.descrip != 'Nulidad de Venta';
+	and te.descrip = 'Retiro';
 
         if cash_outcome is null then
                 cash_outcome := 0;
@@ -2348,6 +2349,17 @@ begin
 
         if nullify_sell is null then
                 nullify_sell := 0;
+        end if;
+
+	select sum (monto) into current_expenses
+        from egreso e 
+	inner join tipo_egreso te
+	on e.tipo = te.id
+        where e.id_caja = cash_box_id
+	and te.descrip = 'Gastos Corrientes';
+
+        if current_expenses is null then
+                current_expenses := 0;
         end if;
 
         select sum (monto) into cash_income

@@ -37,6 +37,7 @@
 #include"boleta.h"
 #include"config_file.h"
 #include"manejo_productos.h"
+#include"caja.h"
 
 GtkWidget *modificar_window;
 
@@ -901,6 +902,16 @@ Abonar (void)
   gint abonar;
   gint rut;
 
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
+    abierta al momento de vender*/
+
+  //TODO: Unificar esta comprobación en las funciones primarias 
+  //      encargadas de hacer cualquier movimiento de caja
+
+  if (rizoma_get_value_boolean ("CAJA"))
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+      open_caja (TRUE);
+
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
   abonar = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
 
@@ -1200,7 +1211,7 @@ EliminarCliente (void)
    else if (strcmp (fono, "") == 0)
      AlertMSG (widget, "El campo telefonico no puede estar vacio");
    else if (strcmp (giro, "") == 0)
-     AlertMSG (widget, "El campo giro no puede estar vaci�");
+     AlertMSG (widget, "El campo giro no puede estar vació");
    else if (credito == 0)
      AlertMSG (widget, "El campo credito no puede estar vacio");
    else

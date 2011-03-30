@@ -233,6 +233,9 @@ fill_caja_data (void)
 	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_nullify_sell")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "nullify_sell"))));
 
+	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_current_expenses")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "current_expenses"))));
+
           /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
           /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
           /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 6)))); */
@@ -249,6 +252,7 @@ fill_caja_data (void)
                                    atoi (PQvaluebycol (res, 0, "cash_outcome"))
                                    + atoi (PQvaluebycol (res, 0, "cash_loss_money"))
 				   + atoi (PQvaluebycol (res, 0, "nullify_sell"))
+				   + atoi (PQvaluebycol (res, 0, "current_expenses"))
                                    ))));
 
           gtk_label_set_markup
@@ -264,6 +268,7 @@ fill_caja_data (void)
                                 - atoi (PQvaluebycol (res, 0, "cash_loss_money"))
                                 - atoi (PQvaluebycol (res, 0, "cash_outcome"))
 				- atoi (PQvaluebycol (res, 0, "nullify_sell"))
+				- atoi (PQvaluebycol (res, 0, "current_expenses"))
 				))));
          
         }
