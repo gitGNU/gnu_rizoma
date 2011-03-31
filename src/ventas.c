@@ -1425,7 +1425,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
       else
         if (GetCurrentStock (barcode) == 0) // TODO: Verificar utilidad de los else
           {
-            AlertMSG (widget, "No ahi mercadería en Stock.\nDebe ingresar mercadería");
+            AlertMSG (widget, "No hay mercadería en Stock.\nDebe ingresar mercadería");
 
             if (ventas != FALSE)
               CleanSellLabels ();

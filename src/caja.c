@@ -263,7 +263,7 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   
 
   else if (monto > ReturnSaldoCaja ())
-    ErrorMSG (aux_widget, "No se puede retirar mas dinero del que ahi en caja" );
+    ErrorMSG (aux_widget, "No se puede retirar más dinero del que hay en caja" );
 
   else
     {
