@@ -1071,10 +1071,13 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   gint ticket = 0;
   gboolean canceled;
 
-  if (tipo_documento != VENTA && tipo_documento != FACTURA)
+  // && rizoma_get_value_int ("VENDEDOR") != 1) se agrega en todos estos if mientras no se complete la
+  // la funcionalidad de pre-venta
+
+  if ((tipo_documento != VENTA && tipo_documento != FACTURA) && rizoma_get_value_int ("VENDEDOR") != 1)
     paga_con = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "sencillo_entry")))));
 
-  if (tipo_documento != VENTA && paga_con <= 0)
+  if ((tipo_documento != VENTA && paga_con <= 0) && rizoma_get_value_int ("VENDEDOR") != 1)
     {
       GtkWidget *aux;
       aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_type"));
@@ -1083,13 +1086,13 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (tipo_documento != VENTA && paga_con < monto)
+  if ((tipo_documento != VENTA && paga_con < monto) && rizoma_get_value_int ("VENDEDOR") != 1)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "sencillo_entry")), "No esta pagando con el dinero suficiente");
       return;
     }
 
-  if (tipo_documento != VENTA)
+  if ((tipo_documento != VENTA) && rizoma_get_value_int ("VENDEDOR") != 1)
     discount = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_discount_money"))));
 
   if (strlen (discount) == 0 )
@@ -1112,10 +1115,12 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
 
   //  DiscountStock (venta->header);
 
-  if (tipo_documento == VENTA)
-    canceled = FALSE;
-  else
-    canceled = TRUE;
+
+  //TODO: Se descomenta cuando se termine la funcionalidad de pre-venta
+  /* if (tipo_documento == VENTA) */
+  /*   canceled = FALSE; */
+  /* else */
+  canceled = TRUE;
 
   SaveSell (monto, maquina, vendedor, CASH, rut, discount, ticket, tipo_documento,
             cheque_date, cheques, canceled);
@@ -1215,7 +1220,8 @@ TipoVenta (GtkWidget *widget, gpointer data)
 
   if (g_str_equal (tipo_vendedor, "1"))
     {
-      tipo_documento = VENTA;
+      //tipo_documento = VENTA;
+      tipo_documento = SIMPLE;
       window = GTK_WINDOW (gtk_builder_get_object (builder, "vendedor_venta"));
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "button_imprimir")));
       gtk_widget_show_all (GTK_WIDGET (window));
@@ -2546,12 +2552,13 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (tipo_vendedor == 1)
-    tipo_documento = VENTA;
-  else
-    tipo_documento = SIMPLE;
+  /* if (tipo_vendedor == 1) */
+  /*   tipo_documento = VENTA; */
+  /* else */
+  tipo_documento = SIMPLE;
 
-  if (tipo_documento != VENTA)
+  //if (tipo_documento != VENTA)
+  if (tipo_vendedor != 1)
     {
       GtkWidget *wid;
       wid = GTK_WIDGET (gtk_builder_get_object (builder,"entry_discount_percent"));
@@ -2565,25 +2572,27 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
 
   switch (tipo_documento)
     {
-    case SIMPLE:
+    case SIMPLE: case VENTA:
       if (monto >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
       break;
-    case VENTA:
-      ticket = -1;
-      break;
+    /* case VENTA: */
+    /*   ticket = -1; */
+    /*   break; */
     default:
       g_printerr("The document type could not be matched on %s", G_STRFUNC);
       ticket = -1;
       break;
     }
 
-  if (tipo_documento == VENTA)
-    canceled = FALSE;
-  else
-    canceled = TRUE;
+  // TODO: Queda temporalmente comentado hasta que de implemente completamente
+  // la funcionalidad de pre-venta
+  /* if (tipo_documento == VENTA) */
+  /*   canceled = FALSE; */
+  /* else */ 
+  canceled = TRUE;
 
   SaveSell (monto, maquina, vendedor, CREDITO, str_rut, discount, ticket, tipo_documento,
             NULL, FALSE, canceled);

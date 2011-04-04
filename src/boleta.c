@@ -35,7 +35,7 @@ get_ticket_number (gint document_type)
 
   switch (document_type)
     {
-    case SIMPLE:
+    case SIMPLE: case VENTA: // case VENTA estará aqui hasta que se complete la funcionalidad pre-venta
       res = EjecutarSQL ("SELECT num_boleta FROM obtener_num_boleta() "
                          "as (num_boleta int4)");
       break;
