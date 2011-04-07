@@ -582,7 +582,8 @@ DeudaTotalCliente (gint rut)
   gint deuda;
 
   res = EjecutarSQL (g_strdup_printf ("SELECT SUM (monto) as monto FROM venta WHERE id IN "
-                                      "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f')",
+                                      "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') "
+				      "AND id NOT IN (SELECT id_sale FROM venta_anulada)",
                                       rut));
 
   deuda = atoi (PQgetvalue (res, 0, 0));
@@ -600,7 +601,7 @@ SearchDeudasCliente (gint rut)
   q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
                        "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
                        "date_part ('second', fecha) FROM venta WHERE id IN (SELECT id_venta FROM deuda WHERE "
-                       "rut_cliente=%d AND pagada='f')", rut);
+                       "rut_cliente=%d AND pagada='f') AND id NOT IN (SELECT id_sale FROM venta_anulada)", rut);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -632,7 +633,9 @@ CancelarDeudas (gint abonar, gint rut)
   g_free (q);
 
   q = g_strdup_printf ("SELECT * FROM venta WHERE id IN "
-                       "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') ORDER BY fecha asc", rut);
+                       "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') "
+		       "AND id NOT IN (SELECT id_sale FROM venta_anulada) "
+		       "ORDER BY fecha asc", rut);
   res = EjecutarSQL (q);
   g_free (q);
 

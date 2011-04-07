@@ -720,6 +720,15 @@ DatosDeudor (GtkTreeSelection *treeselection,
 
       /* deuda = DeudaTotalCliente (rut); */
 
+      // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sales"));
+      store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+      gtk_list_store_clear (store);
+
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sale_details"));
+      store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+      gtk_list_store_clear (store);
+
       /* abono = GetResto (rut); */
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_sales"));
       store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
@@ -948,6 +957,15 @@ Abonar (void)
 
           ExitoMSG(widget, msg);
           FillClientStore(GTK_LIST_STORE(store));
+	  
+	  // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
+	  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sales"));
+	  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+	  gtk_list_store_clear (store);
+
+	  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sale_details"));
+	  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+	  gtk_list_store_clear (store);
         }
       else
         ErrorMSG(widget, "No se pudo abonar el monto a la deuda");
@@ -1362,9 +1380,18 @@ admin_search_client(void)
   g_free (q);
 
   tuples = PQntuples (res);
+
+  // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sales"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+  gtk_list_store_clear (store);
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sale_details"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+  gtk_list_store_clear (store);
+
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
-
   gtk_list_store_clear (store);
 
   for (i = 0; i < tuples; i++)

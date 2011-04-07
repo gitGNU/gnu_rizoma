@@ -2515,6 +2515,13 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gchar *discount;
   gboolean canceled;
 
+  if (g_str_equal (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_credit_rut"))), "") ||
+      gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_credit_rut"))) == NULL)
+    {
+      search_client (GTK_WIDGET (builder_get (builder, "entry_credit_rut")), NULL);
+      return;
+    }
+
   str_splited = parse_rut (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_credit_rut")))));
 
   rut = atoi(str_splited[0]);
@@ -2620,6 +2627,12 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
 void
 on_btn_credit_clicked (GtkButton *button, gpointer data)
 {
+  if (venta->header == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para vender");
+      return;
+    }
+
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_sale_credit")));
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_sale_type")));
