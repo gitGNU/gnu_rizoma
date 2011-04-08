@@ -3050,7 +3050,7 @@ nullify_sale_win (void)
   // Comprueba que caja esté habilitada
   if (rizoma_get_value_boolean ("CAJA") == 0)
     {      
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sell"));
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
       AlertMSG (widget, "Debe habilitar caja para realizar anulaciones de venta");
       return;
     }
