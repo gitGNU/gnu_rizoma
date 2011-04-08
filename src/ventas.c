@@ -3047,6 +3047,14 @@ nullify_sale_win (void)
   GtkListStore *store_sales;
   GtkListStore *store_details;
 
+  // Comprueba que caja esté habilitada
+  if (rizoma_get_value_boolean ("CAJA") == 0)
+    {      
+      widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sell"));
+      AlertMSG (widget, "Debe habilitar caja para realizar anulaciones de venta");
+      return;
+    }
+
   treeview_sales = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale"));
   store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_sales));
 
