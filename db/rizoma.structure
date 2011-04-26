@@ -376,6 +376,7 @@ create table merma (
   barcode                   int8,
   unidades                  float8,
   motivo                    int2,
+  fecha 		    timestamp without time zone,
   constraint pk_merma primary key (id)
 ) ;
 
@@ -491,6 +492,7 @@ create table proveedor (
   web                       varchar(300),
   contacto                  varchar(100),
   giro                      varchar(100),
+  lapso_reposicion          int4 default 3,
   constraint pk_proveedor primary key (rut)
 ) ;
 
@@ -522,7 +524,7 @@ create table tipo_ingreso (
 -- Tipo_merma
 create table tipo_merma (
   id                        serial not null,
-  nombre                    varchar(20),
+  nombre                    varchar(25),
   constraint pk_tipo_merma primary key (id)
 ) ;
 

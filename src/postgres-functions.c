@@ -85,6 +85,53 @@ PutComa (gchar *number)
   return num;
 }
 
+
+/**
+ * Elimina el separador '.' o ',' siempre y cuando no represente un
+ * decimal.
+ *
+ * @param number : cifra numérica como string
+ */
+gchar *
+DropDelimiter (gchar *number)
+{
+  struct lconv *locale  = localeconv ();
+  gchar *no_decimal_point = locale->decimal_point;
+
+  if (no_decimal_point[0] == '.')
+    no_decimal_point = g_strdup(",");
+  else
+    no_decimal_point = g_strdup(".");
+
+  gchar *num = g_strdup (number);
+  gint len = (int)strlen (num);
+  gint sublen, points=0;
+
+  while (len != -1)
+    {
+      if (num[len] == no_decimal_point[0])
+        {
+	  points = points++;
+	  sublen = len;
+	  while (sublen != 0)
+	    {
+	      num[sublen] = num[sublen-1];
+	      sublen--;
+	    }
+        }
+      len--;
+    }
+  
+  while (points != 0)
+    {
+      num [points-1] = ' ';
+      points--;
+    }
+  g_strstrip(num);
+  return num;
+}
+
+
 gchar *
 SpecialChar (gchar *string)
 {
@@ -2117,10 +2164,15 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
   gdouble stock = GetCurrentStock (barcode);
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d)",
-                       barcode, CUT (g_strdup_printf ("%f", stock - cantidad)), motivo);
-  res = EjecutarSQL (q);
-  g_free (q);
+  if ((stock - cantidad) != 0)
+    {
+      q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d, now())",
+			   barcode, CUT (g_strdup_printf ("%f", stock - cantidad)), motivo);
+      res = EjecutarSQL (q);
+      g_free (q);
+    }
+  else
+    g_printerr ("No se ha registrado la merma, puesto que es de cero");
 
   if (cantidad == 0)
     {
@@ -2265,7 +2317,7 @@ Devolver (gchar *barcode, gchar *cantidad)
 }
 
 gboolean
-Recivir (gchar *barcode, gchar *cantidad)
+Recibir (gchar *barcode, gchar *cantidad)
 {
   PGresult *res;
   gchar *q;
@@ -2636,7 +2688,6 @@ InsertIdTraspaso ()
   res = EjecutarSQL (g_strdup_printf ("SELECT MAX(id) FROM traspaso"));
 
   return atoi (PQgetvalue (res, 0, 0));
-
 }
 
 
@@ -2710,7 +2761,7 @@ TotalPrecioCompra (Productos *products)
     {
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      pre = atoi(PQvaluebycol(res, 0, "costo_promedio"));
+      pre = atoi(PQvaluebycol(res, 0, "costo_promedio")) * products->product->cantidad;
       total = total + pre;
       products = products->next;
     }
@@ -2720,3 +2771,32 @@ TotalPrecioCompra (Productos *products)
 }
 
 
+/**
+ * Es llamada por AskProductProvider de [compras.c].
+ *
+ * @return PGresult: La respuesta a a la consulta 
+ * (todos los productos comprados a X proveedor)
+ */
+
+PGresult *getProductsByProvider (gchar *rut)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf("SELECT DISTINCT p.*, "
+		      "(select_ventas_dia(p.barcode)::float) AS ventas_dia, "
+		      "(stock::float / select_ventas_dia(p.barcode)::float) AS stock_day "
+		      "FROM producto p "
+		      "INNER JOIN compra_detalle cd "
+		      "ON p.barcode = cd.barcode_product "
+		      "INNER JOIN compra c "
+		      "ON c.id = cd.id_compra "
+		      "INNER JOIN proveedor pr "
+		      "ON pr.rut = c.rut_proveedor "
+		      "WHERE pr.rut = '%s' "
+		      "AND estado = true;", rut);
+  
+  res = EjecutarSQL (q);
+  g_free (q);
+  return res;
+}

@@ -27,6 +27,8 @@
 
 #define SPE(string) SpecialChar (string)
 
+#define DD(string) DropDelimiter (string)
+
 #define PQvaluebycol( res, fila, col ) PQgetvalue( res, fila, PQfnumber( res, col ) )
 
 gchar * CutComa (gchar *number);
@@ -233,7 +235,7 @@ gint CanjearProduct (gchar *barcode, gdouble cantidad);
 
 gboolean Devolver (gchar *barcode, gchar *cantidad);
 
-gboolean Recivir (gchar *barcode, gchar *cantidad);
+gboolean Recibir (gchar *barcode, gchar *cantidad);
 
 gint SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *comuna,
                                  gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,

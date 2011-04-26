@@ -151,7 +151,8 @@ gboolean deleting;
                              g_strdup_printf ("%.3f", GetCurrentStock (barcode)));
 
        res = EjecutarSQL ("SELECT id, nombre FROM select_tipo_merma() "
-                          "AS (id int4, nombre varchar(20))");
+                          "AS (id int4, nombre varchar(25)) "
+			  "WHERE nombre NOT LIKE 'Diferencia cuadratura'");
 
        tuples = PQntuples (res);
 
@@ -471,9 +472,9 @@ admini_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 150);
-  gtk_tree_view_column_set_max_width (column, 150);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 300);
+  gtk_tree_view_column_set_max_width (column, 450);
+  gtk_tree_view_column_set_resizable (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
@@ -483,9 +484,9 @@ admini_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_min_width (column, 96);
-  gtk_tree_view_column_set_max_width (column, 96);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 200);
+  gtk_tree_view_column_set_max_width (column, 300);
+  gtk_tree_view_column_set_resizable (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
@@ -509,7 +510,7 @@ admini_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_min_width (column, 38);
   gtk_tree_view_column_set_max_width (column, 38);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -522,8 +523,10 @@ admini_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
@@ -538,7 +541,10 @@ admini_box ()
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 7);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
+
 
   //this signal is connected in this way because glade/gtkbuilde does
   //not respect the signature of the user_data when is seted with the glade
@@ -572,7 +578,7 @@ admini_box ()
   /* gtk_widget_show (button); */
 
   /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*                   G_CALLBACK (RecivirWindow), NULL); */
+  /*                   G_CALLBACK (RecibirWindow), NULL); */
 }
 
 void
@@ -988,7 +994,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   else
     otros = 0;
 
-  if (precio_final == 0 || costo_promedio == 0 || margen == 0)
+  if ((precio_final == 0 && margen == 0) || costo_promedio == 0)
     return;
 
   gint contri_unit;     // = lround ((gdouble)costo_promedio * (gdouble)margen / 100);

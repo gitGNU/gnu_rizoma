@@ -73,23 +73,16 @@ CreateNew (gchar *barcode, gdouble cantidad)
   return new;
 }
 
+/**
+ *
+ * Libera la memoria de un producto eliminado desde la lista de productos.
+ *
+ */
 void
 FreeProduct (Productos *productos)
 {
-  /*
-    Producto *producto = productos->product;
-
-    free (producto->codigo);
-
-    g_free (producto->producto);
-    g_free (producto->marca);
-    g_free (producto->unidad);
-    g_free (producto->barcode);
-    g_free (producto);
-
     g_free (productos->product);
     g_free (productos);
-  */
 }
 
 gint
@@ -274,7 +267,7 @@ CompraListClean (void)
 
     tofree = alter->next;
 
-    g_free (alter);
+    /* g_free (alter); */
 
     alter = tofree;
 
@@ -423,6 +416,13 @@ CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdoubl
   return TRUE;
 }
 
+
+/**
+ *
+ * Esta funcion elimina el producto seleccionado, de  la lista de productos a
+ * comprar.
+ *
+ */
 void
 DropBuyProduct (gchar *codigo)
 {
@@ -446,6 +446,7 @@ DropBuyProduct (gchar *codigo)
     {
       compra->header_compra = find->next;
       end->next = compra->header_compra;
+      compra->header_compra->back = NULL;
 
       FreeProduct (find);
     }

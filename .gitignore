@@ -31,6 +31,7 @@ src/.deps
 src/Makefile
 src/rizoma-config
 *.out
+*.orig
 src/rizoma-ventas
 src/rizoma-admin
 src/rizoma-compras

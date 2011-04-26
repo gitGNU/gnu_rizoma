@@ -39,7 +39,7 @@
 int
 LaunchApp (const gchar *file)
 {
-  system (g_strdup_printf ("LANG=C gnumeric \"%s\" &", file));
+  system (g_strdup_printf ("LANG=es_CL.UTF-8 gnumeric \"%s\" &", file));
   return 0;
 }
 
@@ -76,7 +76,7 @@ PrintTree (GtkWidget *widget, gpointer data)
 
   /* Si es NULL */
   if (print->date_string == NULL)
-    print->date_string = CurrentDate (); /* Asumimos la fecha actual */
+    print->date_string = CurrentDate(0); /* Asumimos la fecha actual */
 
   file = g_strdup_printf ("%s/informe-%s.csv", temp_directory, print->date_string);
 
@@ -228,7 +228,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
 
   /* Si es NULL */
   if (print->date_string == NULL)
-    print->date_string = CurrentDate (); /* Asumismo la fecha actual */
+    print->date_string = CurrentDate(0); /* Asumismo la fecha actual */
 
   file = g_strdup_printf ("%s/informe-%s-%s.csv", temp_directory,
                           print->name, print->date_string);

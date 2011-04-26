@@ -54,7 +54,7 @@ void clean_container (GtkContainer *container);
 
 gchar ** parse_rut (gchar *rut);
 
-gchar * CurrentDate (void);
+gchar * CurrentDate (int tipo);
 
 gchar * CurrentTime (void);
 
@@ -63,5 +63,7 @@ gboolean log_register_access (User *info_user, gboolean login);
 void select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition);
 
 gchar * invested_strndup (const gchar *texto, gint index);
+
+gint get_treeview_length (GtkTreeView *treeview);
 
 #endif

@@ -426,7 +426,7 @@ parse_rut (gchar *rut)
 }
 
 gchar *
-CurrentDate (void)
+CurrentDate (int tipo)
 {
   time_t t;
   struct tm *fecha;
@@ -434,8 +434,10 @@ CurrentDate (void)
   time (&t);
 
   fecha = localtime (&t);
-
-  return g_strdup_printf ("%.2d-%.2d-%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year));
+  if(tipo == 0)
+    return g_strdup_printf ("%.2d-%.2d-%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year));
+  else
+    return g_strdup_printf ("%.2d/%.2d/%.2d", fecha->tm_mday, fecha->tm_mon+1, YEAR (fecha->tm_year-2000));
 }
 
 gchar *
@@ -492,7 +494,7 @@ log_register_access (User *info_user, gboolean login)
  * botones para eliminar productos seleccionados, ver eliminarDeLista
  *
  */
-void 
+void
 select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
 {
   GtkTreeView *tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, treeViewName));
@@ -506,6 +508,7 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
   /* Si se elimina el último elemento de la lista que se seleccione el último disponible */
 }
 
+
 /**
  * return a gchar* from index number (from string)
  * to end, also could be understand as invested g_strndup.
@@ -513,6 +516,7 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
  * @param texto, text to cut
  * @param index, initiation number index to cut.
  */
+
 gchar *
 invested_strndup (const gchar *texto, gint index)
 {
@@ -520,4 +524,29 @@ invested_strndup (const gchar *texto, gint index)
   index = strlen (texto_local) - index;
   texto_local = g_strreverse (g_strndup (g_strreverse (texto_local), index));
   return texto_local;
+}
+
+
+/**
+ * Returns the treeview length that you specified
+ *
+ * @param GtkTreeView treeview: The treeview point
+ * @return gint length: the treeview length
+ */
+
+gint 
+get_treeview_length (GtkTreeView *treeview)
+{
+  GtkTreeModel *model = gtk_tree_view_get_model (treeview);
+  GtkTreeIter iter;
+  gboolean valid;
+  gint length = 0;
+
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      length++;
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+  return length;
 }
