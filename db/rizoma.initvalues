@@ -27,10 +27,12 @@ INSERT INTO impuesto VALUES (DEFAULT, 'Vinos y Cervezas', 15, 't');
 
 INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Sencillo');
 INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Exceso de caja');
+INSERT INTO tipo_ingreso VALUES (DEFAULT, 'Deposito envases');
 
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Retiro', 't');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Perdida', 't');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Gastos Corrientes', 't');
+INSERT INTO tipo_egreso VALUES (DEFAULT, 'Devolucion envases', 't');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Nulidad de Venta', 'f');
 
 INSERT INTO tipo_merma VALUES (DEFAULT, 'Hurto');

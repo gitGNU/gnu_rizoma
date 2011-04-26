@@ -2282,7 +2282,10 @@ create or replace function cash_box_report (
 	out current_expenses integer,
         out cash_income integer,
         out cash_payed_money integer,
-	out cash_loss_money integer)
+	out cash_loss_money integer,
+	out bottle_return integer,
+	out bottle_deposit integer
+	)
 returns setof record as $$
 declare
         query varchar;
@@ -2379,12 +2382,36 @@ begin
                 perdida_egreso := 0;
         end if;
 
+	select sum (monto) into bottle_return
+        from egreso e 
+	inner join tipo_egreso te
+	on e.tipo = te.id
+        where e.id_caja = cash_box_id
+	and te.descrip = 'Devolucion envases';
+
+        if bottle_return is null then
+                bottle_return := 0;
+        end if;
+
         select sum (monto) into cash_income
-        from ingreso
-        where id_caja = cash_box_id;
+        from ingreso, tipo_ingreso
+        where id_caja = cash_box_id
+	and tipo = tipo_ingreso.id
+	and tipo_ingreso.descrip != 'Deposito envases';
 
         if cash_income is null then
                 cash_income := 0;
+        end if;
+
+	select sum (monto) into bottle_deposit
+        from ingreso i 
+	inner join tipo_ingreso ti
+	on i.tipo = ti.id
+        where i.id_caja = cash_box_id
+	and ti.descrip = 'Deposito envases';
+
+        if bottle_deposit is null then
+                bottle_deposit := 0;
         end if;
 
         select last_value into last_cash_box_id from caja_id_seq;
