@@ -211,6 +211,9 @@ fill_caja_data (void)
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_other")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_income"))));
 
+	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_bottle_deposit")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "bottle_deposit"))));
+
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_ingr_total")),
                                 g_strdup_printf
                                 ("<b>$ %s</b>", PutPoints
@@ -218,6 +221,7 @@ fill_caja_data (void)
                                                    + atoi (PQvaluebycol (res, 0, "cash_income"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_box_start"))
+						   + atoi (PQvaluebycol (res, 0, "bottle_deposit"))
                                                    ))));
 
           /* if (strcmp (PQvaluebycol (res, 0, 8), "") != 0) */
@@ -236,6 +240,9 @@ fill_caja_data (void)
 	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_current_expenses")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "current_expenses"))));
 
+	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_bottle_return")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "bottle_return"))));
+
           /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
           /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
           /*                         g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, 6)))); */
@@ -253,6 +260,7 @@ fill_caja_data (void)
                                    + atoi (PQvaluebycol (res, 0, "cash_loss_money"))
 				   + atoi (PQvaluebycol (res, 0, "nullify_sell"))
 				   + atoi (PQvaluebycol (res, 0, "current_expenses"))
+				   + atoi (PQvaluebycol (res, 0, "bottle_return"))
                                    ))));
 
           gtk_label_set_markup
@@ -265,10 +273,12 @@ fill_caja_data (void)
                                 + atoi (PQvaluebycol (res, 0, "cash_sells"))
                                 + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
                                 + atoi (PQvaluebycol (res, 0, "cash_income"))
+				+ atoi (PQvaluebycol (res, 0, "bottle_deposit"))
                                 - atoi (PQvaluebycol (res, 0, "cash_loss_money"))
                                 - atoi (PQvaluebycol (res, 0, "cash_outcome"))
 				- atoi (PQvaluebycol (res, 0, "nullify_sell"))
 				- atoi (PQvaluebycol (res, 0, "current_expenses"))
+				- atoi (PQvaluebycol (res, 0, "bottle_return"))
 				))));
          
         }
