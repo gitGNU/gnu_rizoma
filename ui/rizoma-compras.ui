@@ -1834,7 +1834,7 @@
                                 <child>
                                   <object class="GtkLabel" id="label27">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">_A&#xF1;adir a Traspaso</property>
+                                    <property name="label" translatable="yes">_Añadir a Traspaso</property>
                                     <property name="use_underline">True</property>
                                   </object>
                                   <packing>

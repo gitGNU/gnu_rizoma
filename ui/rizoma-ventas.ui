@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
@@ -71,7 +71,7 @@
             <child>
               <object class="GtkLabel" id="label60">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">P&#xE9;rdida:</property>
+                <property name="label" translatable="yes">Pérdida:</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -810,7 +810,7 @@
             <child>
               <object class="GtkLabel" id="label33">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Direcci&#xF3;n:</property>
+                <property name="label" translatable="yes" context="yes">Dirección:</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -957,7 +957,7 @@
         <property name="spacing">5</property>
         <child>
           <object class="GtkButton" id="btn_credit">
-            <property name="label" translatable="yes" context="yes">Cr&#xE9;dito</property>
+            <property name="label" translatable="yes" context="yes">Crédito</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -2760,7 +2760,7 @@
                 <child>
                   <object class="GtkLabel" id="label53">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">N&#xBA; de Venta:</property>
+                    <property name="label" translatable="yes">N° de Venta:</property>
                   </object>
                 </child>
                 <child>
@@ -2997,11 +2997,10 @@
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_sell</property>
-    <property name="has_separator">False</property>
     <property name="message_type">warning</property>
     <property name="buttons">yes-no</property>
     <property name="text">La caja  no ha sido cerrada</property>
-    <property name="secondary_text">&#xBF;Desea cerrar la caja ahora? La aplicaci&#xF3;n ser&#xE1; cerrada una vez que la caja sea cerrada</property>
+    <property name="secondary_text">¿Desea cerrar la caja ahora? La aplicación será cerrada una vez que la caja sea cerrada</property>
     <signal name="response" handler="on_dialog_cash_box_opened_response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox3">
@@ -3033,10 +3032,9 @@
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_sale_credit</property>
-    <property name="has_separator">False</property>
     <property name="message_type">error</property>
     <property name="buttons">close</property>
-    <property name="text">El cliente sobrepasa su limite de cr&#xE9;dito</property>
+    <property name="text">El cliente sobrepasa su limite de crédito</property>
     <signal name="response" handler="gtk_widget_hide" object="msg_credit_out"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox5">
@@ -3558,10 +3556,10 @@
     <property name="transient_for">wnd_sell</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text">&#xBF;Realmente desea salir?</property>
-    <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
-    <signal name="response" handler="exit_response"/>
+    <property name="text">¿Realmente desea salir?</property>
+    <property name="secondary_text">Se perderá toda información no guardada</property>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
+    <signal name="response" handler="exit_response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>

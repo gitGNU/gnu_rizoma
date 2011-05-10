@@ -58,7 +58,7 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->contenido = atoi (PQvaluebycol (res, 0, "contenido"));
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
   new->product->precio = atoi (PQvaluebycol (res, 0, "precio"));
-  new->product->fifo = atoi (PQvaluebycol (res, 0, "costo_promedio"));
+  new->product->fifo = atoi (PQvaluebycol (res, 0, "costo_promedio")); //TODO: Corregir nomenclatura. No es fifo
   new->product->precio_compra = GetNeto (barcode);
   new->product->iva = atoi (PQvaluebycol (res, 0, "impuesto_normal"));
   new->product->otros = atoi (PQvaluebycol (res, 0, "impuesto_otro"));
@@ -314,7 +314,7 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   new->product->otros = GetOtros (barcode);
   new->product->precio = precio_final;
   new->product->precio_neto = (double)precio_compra * ((double)(margen / 100) + 1);
-  new->product->precio_compra = precio_compra;
+  new->product->precio_compra = precio_compra; //TODO: ver si elegir esto o fifo
   new->product->ingresar = TRUE;
   new->product->perecible = strcmp (PQvaluebycol (res, 0, "perecibles"), "t") ? FALSE : TRUE;
   new->product->canjeable = strcmp (PQvaluebycol (res, 0, "canje"), "t") ? FALSE : TRUE;

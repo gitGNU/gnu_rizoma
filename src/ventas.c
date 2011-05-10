@@ -220,7 +220,7 @@ CanjearProductoWin (GtkWidget *widget, gpointer data)
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
 
-  label = gtk_label_new ("Código de Barras: ");
+  label = gtk_label_new ("CÃ³digo de Barras: ");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
 
@@ -422,7 +422,7 @@ DatosCheque (void)
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
 
-  label = gtk_label_new ("Número: ");
+  label = gtk_label_new ("NÃºmero: ");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
 
@@ -747,7 +747,7 @@ SearchProductByCode (void)
 	{
 	  GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-          gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", codigo);
+          gchar *str = g_strdup_printf("El cÃ³digo %s fuÃ© invalidado por el administrador", codigo);
 	  CleanSellLabels();
           AlertMSG (aux_widget, str);
           g_free (str);
@@ -803,7 +803,7 @@ SearchProductByCode (void)
       if (strcmp (codigo, "") != 0)
         {
           AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), g_strdup_printf
-                    ("No existe un producto con el código %s!!", codigo));
+                    ("No existe un producto con el cÃ³digo %s!!", codigo));
           CleanSellLabels ();
         }
       else
@@ -2761,7 +2761,7 @@ on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
  * Esta funcion recalcula el total de la venta seteando el resultado en el
  * texto del label "label_total" de la ventana "wnd_sell".
  *
- * NOTA: Esto es realizado evitar la permanencia (gráfica) de la cifra de
+ * NOTA: Esto es realizado evitar la permanencia (grÃ¡fica) de la cifra de
  * venta total con descuento en caso de ser calculada y no realizar la venta
  *
  * @param button the button
@@ -2992,7 +2992,6 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
                               GdkEventKey *event,
                               gpointer     data)
 {
-
   switch (event->keyval)
     {
     case GDK_F2:
@@ -3047,7 +3046,7 @@ nullify_sale_win (void)
   GtkListStore *store_sales;
   GtkListStore *store_details;
 
-  // Comprueba que caja esté habilitada
+  // Comprueba que caja está habilitada
   if (rizoma_get_value_boolean ("CAJA") == 0)
     {      
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
@@ -3258,7 +3257,7 @@ on_btn_nullify_search_clicked (GtkButton *button, gpointer data)
       if (atoi(barcode) == 0)
         {
           AlertMSG(GTK_WIDGET(entry), "No puede ingresar un codigo de barras 0, o con caracteres\n"
-                   "Si no sabe el código de barras deje el campo vacio");
+                   "Si no sabe el código de barras deje el campo vacío");
           return;
         }
       else
@@ -3337,7 +3336,6 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
   GtkTreeView *treeview_sales;
   GtkTreeView *treeview_details;
   GtkTreeIter iter;
-
 
   PGresult *res;
   gint i;
@@ -3526,7 +3524,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
     {
       // TODO: la ventana aparece atrás, se debe lograr que se sobreponga a la ventana wnd_sell
       // Si es que no hay datos en caja, y CAJA = 0 en el .rizoma, entonces tiene que aparecer una ventana que diga:
-      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell")),"Para realizar una devolución es necesario habilitar e iniciar caja con anterioridad, asegúrese de habilitar caja en el .rizoma y vuelva a ejecutar rizoma-ventas");      
+      AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell")),"Para realizar una devolución es necesario habilitar e iniciar caja con anterioridad, asegúrese de habilitar caja en el .rizoma y vuelva a ejecutar rizoma-ventas");
     }
   close_nullify_sale_dialog ();
 }
@@ -3803,7 +3801,6 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
 void
 DatosEnviar (void)
 {
-
   GtkWidget *combo;
   GtkTreeIter iter;
   GtkListStore *modelo;
@@ -3856,8 +3853,6 @@ DatosEnviar (void)
     }
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
-
-
 }
 
 void
@@ -3911,7 +3906,6 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para traspasar");
       return;
     }
-
   else
     {
       window = GTK_WINDOW (gtk_builder_get_object (builder, "traspaso_enviar_win"));
@@ -3935,7 +3929,6 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
 void
 on_enviar_button_clicked (GtkButton *button, gpointer data)
 {
-
   gint * destino;
   GtkTreeIter iter;
   GtkWidget *combo;

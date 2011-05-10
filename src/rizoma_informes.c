@@ -74,8 +74,6 @@ ChangeVenta (void)
       gtk_list_store_clear (GTK_LIST_STORE (store_detail));
 
       /* consulta que arroja el detalle de una venta*/
-
-
       res = EjecutarSQL2
         (g_strdup_printf
          ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, (cantidad * venta_detalle.precio)::int AS monto FROM venta_detalle, producto WHERE producto.barcode=venta_detalle.barcode and id_venta=%s", idventa));
@@ -150,8 +148,8 @@ ChangeDevolucion (void)
 /**
  * Es llamada cuando se edita "stock físico" en el tree_view_cuadratura (signal edited).
  *
- * Esta funcion actualiza el campo "Diferencia" a partir de la resta entre "stock teórico"
- * y "stock_físico" (stock_teorico - stock_fisico)
+ * Esta funcion actualiza el campo "Diferencia" a partir de la resta entre "stock teorico"
+ * y "stock físico" (stock_teorico - stock_fisico)
  *
  */
 
@@ -236,7 +234,7 @@ on_btn_save_cuadratura_clicked()
 	}
 
       // Itero a la siguiente fila --
-      valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si iteró a la siguiente */
+      valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si itera a la siguiente */
     }
   
   // Se deshabilita el botón guardar
@@ -383,11 +381,11 @@ fill_caja_data (void)
 
 
 /**
- * Es llamada cuando se presiona en el "tree_view_enviados_detalle" 
+ * Es llamada cuando se presiona en el "tree_view_enviados" 
  * o "tree_view_recibidos" (signal changed).
  *
  * Obtiene el id seleccionado y depliega la informacion correspondiente
- * a éste en el  "tree_view_enviados_detalle" o "tree_view_recibidos" 
+ * en el  "tree_view_enviados_detalle" o "tree_view_recibidos_detalle"
  * según corresponda.
  *
  */
@@ -458,7 +456,6 @@ fill_traspaso_detalle ()
  *
  *
  */
-
 
 void
 reports_win (void)
@@ -1071,7 +1068,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Contribución $", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ContribuciÃ³n $", renderer,
 						     "text", 4,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1287,7 +1284,7 @@ reports_win (void)
   cuadratura->title = "Informe Cuadratura";
   cuadratura->date_string = NULL;
   cuadratura->cols[0].name = "Codigo Corto";
-  cuadratura->cols[1].name = "Descripcion";
+  cuadratura->cols[1].name = "Descripción";
   cuadratura->cols[2].name = "Marca";
   cuadratura->cols[3].name = "Stock Inicial";
   cuadratura->cols[4].name = "Compras";
@@ -1566,7 +1563,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descricion", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1611,7 +1608,7 @@ reports_win (void)
   libroRecibidos->son->tree = treeview;
   libroRecibidos->son->cols[0].name = "Codigo Corto";
   libroRecibidos->son->cols[0].num = 0;
-  libroRecibidos->son->cols[1].name = "Descripcion";
+  libroRecibidos->son->cols[1].name = "Descripción";
   libroRecibidos->son->cols[1].num = 1;
   libroRecibidos->son->cols[2].name = "Unidades";
   libroRecibidos->son->cols[2].num = 2;
@@ -1844,7 +1841,7 @@ on_btn_primero_clicked()
  * Es llamada cuando se presiona el boton "btn_atras" (signal clicked).
  *
  * Esta funcion inserta 100 ventas anteriores a las ventas que se estan
- * visualizando en el tree_view_sells..
+ * visualizando en el tree_view_sells.
  *
  */
 
@@ -2189,8 +2186,6 @@ return;
 }
 
 
-
-
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
  * opcion 0 del switch"
@@ -2200,8 +2195,6 @@ return;
  * traves de el tree_view correspondiente.
  *
  */
-
-
 
 void
 fill_sells_list ()
@@ -2337,6 +2330,7 @@ fill_devolucion ()
       }
 }
 
+
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
  * opcion 3 del switch.
@@ -2346,7 +2340,6 @@ fill_devolucion ()
  * visualiza  a traves los labels  correspondientes.
  *
  */
-
 
 void
 *fill_totals_dev ()
@@ -2518,6 +2511,7 @@ void
 
 }
 
+
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
  * opcion 1 del switch.
@@ -2526,7 +2520,6 @@ void
  * pero rankiados y luego los visualiza en el tree_view correspondiente.
  *
  */
-
 
 void
 fill_products_rank ()
@@ -2680,7 +2673,7 @@ fill_provider ()
 /**
  * Es llamado por on_btn_get_stat_clicked (void)
  *
- * Obtiene la información de cuadratura y la depliega en en treeview "tree_view_cuadratura"
+ * Obtiene la informaciÃ³n de cuadratura y la depliega en en treeview "tree_view_cuadratura"
  *
  */
 
@@ -2799,7 +2792,6 @@ fill_traspaso ()
 void
 on_btn_get_stat_clicked ()
 {
-
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_reports"));
   gint page_num = gtk_notebook_get_current_page (notebook);
   if (page_num == 4)

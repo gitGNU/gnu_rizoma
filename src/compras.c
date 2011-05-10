@@ -540,7 +540,7 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Nº Guia", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("NÂº Guia", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -925,7 +925,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
                                              PutPoints (PQvaluebycol (res, 0, "precio")), PutPoints (PQvaluebycol (res, 0, "precio_mayor"))));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "descripcion")));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "descripción")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "marca")));
@@ -1056,7 +1056,7 @@ Save (GtkWidget *widget, gpointer data)
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
   if (HaveCharacters(contenido))
     {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_edit_prod_content")),"Debe ingresar un valor numérico");
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_edit_prod_content")),"Debe ingresar un valor numÃ©rico");
       return;
     }
 
@@ -1110,7 +1110,7 @@ CalcularPrecioFinal (void)
   else
     iva = -1;
 
-  // TODO: Revisión (Conseción de la variable)
+  // TODO: Revisión (Concenso de la variable)
   if (otros == 0)
     otros = -1;
 
@@ -1184,7 +1184,7 @@ CalcularPrecioFinal (void)
   /* -- Final price ("precio_final") is calculated here -- */
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
     {
-      calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
+      calcular = 1; // FLAG - Permite saber que se ha realizado un cÃ¡lculo.
 
       if (otros == -1 && iva != -1 )
         precio = (gdouble) ((gdouble)(ingresa * (gdouble)(ganancia + 100)) * iva) / 100;
@@ -1629,7 +1629,7 @@ SearchByName (void)
       gtk_tree_view_column_set_resizable (column, FALSE);
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Descripcion del Producto", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Descripción del Producto", renderer,
                                                          "text", 2,
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
@@ -2062,7 +2062,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
     }
   else if (g_str_equal (rut_ver, ""))
     {
-      ErrorMSG (compra->rut_ver, "Debe ingresar el digito verificador del rut");
+      ErrorMSG (compra->rut_ver, "Debe ingresar el dígito verificador del rut");
       return;
     }
   else if (g_str_equal (nombre, ""))
@@ -2100,7 +2100,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
 
   if (atoi(telefono) == 0)
     {
-      ErrorMSG (compra->telefono_add, "Debe ingresar sólo números en el campo telefono");
+      ErrorMSG (compra->telefono_add, "Debe ingresar solo números en el campo telefono");
       return;
     }
 
@@ -4464,7 +4464,7 @@ on_entry_ingress_partial_guide_amount_activate (GtkWidget *btn_ok)
 }
 
 /**
- * Esta funcion es llamada cuando el boton "btn_add_new_productt" es
+ * Esta funcion es llamada cuando el boton "btn_add_new_product" es
  * presionado (signal click).
  *
  * Esta funcion obtiene todos los datos del producto que se llenaron en la
@@ -4503,7 +4503,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
   else if (strcmp (description, "") == 0)
-    ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripcion");
+    ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_brand), "Debe Ingresar al Marca del producto");
   else if (strcmp (contenido, "") == 0)
@@ -4810,7 +4810,6 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
 void
 DatosEnviar (void)
 {
-
   GtkWidget *combo;
   GtkTreeIter iter;
   GtkListStore *modelo;
@@ -5057,7 +5056,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
       //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -5137,7 +5136,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
       //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -5203,7 +5202,7 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
 	subTotal = subTotal + (precio * ((sugerido > 0) ? sugerido : 1));
 
       // Itero a la siguiente fila --
-      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si iteró a la siguiente */
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
     }
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
@@ -5273,7 +5272,7 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
       gdouble subTotalActual = strtod (PUT (subTotalActualT), (char **)NULL);
 
       // Se limpia subtotal restandole costo de la cantidad anterior
-      // así se obtiene el subTotal sin contar este producto
+      // asÃ­ se obtiene el subTotal sin contar este producto
       subTotal = subTotalActual - (precio * ((sugeridoAntes > 0) ? sugeridoAntes : 1));
 
       // Agrego al subtotal la catidad sugerida actual (la que se acaba de editar)
@@ -5647,8 +5646,8 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
   GtkTreeIter iter;
   GtkWidget *aux_widget;
   gboolean valid;
-  gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteración
-  gint i; // Para la iteración del for
+  gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteraciÃ³n
+  gint i; // Para la iteraciÃ³n del for
 
   gchar *rut, *nombre, *descripcion; // Datos que se obtienen del treeview
   gdouble lapRep; // Dato que se obtiene del treeview (lapso de reposición)
@@ -5666,7 +5665,7 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
 
   /* Obtención del patron */
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_filter_providers"));
-  patron = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))); //El texto obtenido será el patron de filtrado
+  patron = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))); //El texto obtenido será el patrón de filtrado
 
   valid = gtk_tree_model_get_iter_first (model, &iter);
   while (valid)
@@ -5692,7 +5691,7 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
 	  
 	  numFilasBorradas++;
 	  
-	  /* Se elimina la linea correspondiente y se "itera" si éste es la última */
+	  /* Se elimina la linea correspondiente y se "itera" si Ã©ste es la Ãºltima */
 	  gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 	  if (fila_actual == get_treeview_length (treeview))
 	    valid = gtk_tree_model_iter_next (model, &iter);
@@ -5762,7 +5761,7 @@ calcularPorcentajeGanancia (void)
   else
     iva = -1;
 
-  // TODO: Revisión (Conseción de la variable)
+  // TODO: Revisión (Concenso de la variable)
   if (otros == 0)
     otros = -1;
 
@@ -5855,7 +5854,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
       valid = gtk_tree_model_iter_next (model, &iter);
     }    
   
-  // Si se seleccionó un producto
+  // Si se selecciona un producto
   if (q != NULL)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), FALSE);

@@ -278,7 +278,7 @@ GuardarModificacionesProducto (void)
       //FillFields (NULL, NULL);
     }
 
-  //Deshabilita el botón guardar
+  //Deshabilita el botÃ³n guardar
   //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), FALSE);
 }
 
@@ -411,7 +411,7 @@ admini_box ()
                               G_TYPE_STRING,  //3 brand
                               G_TYPE_INT,     //4 cantidad
                               G_TYPE_STRING,  //5 unit
-                              G_TYPE_DOUBLE,     //6 stock
+                              G_TYPE_DOUBLE,  //6 stock
                               G_TYPE_INT,     //7 price
                               G_TYPE_STRING,  //8
                               G_TYPE_BOOLEAN);//9
@@ -814,7 +814,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       contrib_proyect = contri_unit * stock;
 
-      /*OBSOLETO: ici_total es un dato estadístico aún sin utilizar --->
+      /*OBSOLETO: ici_total es un dato estadÃ­stico aÃºn sin utilizar --->
 	if (contrib_agreg != 0)
         ici_total = (gdouble) contrib_agreg / InversionAgregada (barcode);
 	else
@@ -971,7 +971,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   if (g_str_equal (txt_precio_final, ""))
     gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), "0");
 
-  /*DESCARTADO: En el evento "CHANGE" mostraba el siguiente número borrando el primero si era 0 --->
+  /*DESCARTADO: En el evento "CHANGE" mostraba el siguiente nÃºmero borrando el primero si era 0 --->
     if (strlen (txt_margen) == 2 && g_str_equal (g_strdup_printf ("%c",txt_margen[0]), "0"))
     gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")),
     g_strdup_printf ("%c",txt_margen[1]));*/

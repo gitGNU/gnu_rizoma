@@ -2442,11 +2442,11 @@ nullify_sale (gint sale_id)
   PGresult *res;
   gchar *q;
 
-  /*De estar habilitada caja, se asegura que ésta se encuentre 
+  /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
     abierta al momento de vender*/
   
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+    if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
       open_caja (TRUE);
 
   q = g_strdup_printf("select * from nullify_sale(%d, %d)", user_data->user_id, sale_id);
@@ -2645,20 +2645,20 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
               CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) + products->product->cantidad)), products->product->barcode));
         }
 
-      precio = products->product->precio_compra;
+      //precio = products->product->precio_compra; //TODO: Venta guarda el costo promedio en fifo y compra en precio_compra, se debe corregir eso.
 
-      if (lround(precio) == -1)
-        {
-          q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
-          res = EjecutarSQL (q);
-          pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
-
-          q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
+      //if (lround(precio) == -1)
+      //{
+      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
+      res = EjecutarSQL (q);
+      pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+      
+      q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
                            id_traspaso, products->product->barcode, cantidad, pre);
-        }
-      else
-         q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
-                           id_traspaso, products->product->barcode, cantidad, precio);
+      //}
+      //else
+      //   q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
+      //                     id_traspaso, products->product->barcode, cantidad, precio);
 
       res = EjecutarSQL (q);
       g_free (q);
