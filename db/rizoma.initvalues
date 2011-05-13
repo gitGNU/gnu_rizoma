@@ -43,8 +43,8 @@ INSERT INTO tipo_merma VALUES (DEFAULT, 'Diferencia cuadratura');
 
 INSERT INTO numeros_documentos VALUES (0,0,0);
 
-INSERT INTO bodega VALUES (DEFAULT, 'Local 1', 'Local');
-INSERT INTO bodega VALUES (DEFAULT, 'Local 2', 'Local');
+INSERT INTO bodega VALUES (DEFAULT, 'LOCAL 1', 'Local');
+INSERT INTO bodega VALUES (DEFAULT, 'LOCAL 2', 'Local');
 INSERT INTO negocio VALUES ('', 9999999, '9', 'Local 1', '', '', '', '', '', '', '');
 
 INSERT INTO unidad_producto VALUES (DEFAULT, 'LT');
