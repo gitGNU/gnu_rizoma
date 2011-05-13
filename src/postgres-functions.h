@@ -239,7 +239,7 @@ gboolean Recibir (gchar *barcode, gchar *cantidad);
 
 gint SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *comuna,
                                  gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,
-                                 gchar *email, gchar *giro);
+                                 gchar *email, gchar *giro, gchar *lap_rep);
 
 gboolean provider_exist (const gchar *rut);
 

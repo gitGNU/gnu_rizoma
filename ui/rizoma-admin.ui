@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <interface>
   <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
@@ -12,6 +12,7 @@
     <child>
       <object class="GtkVBox" id="vbox15">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table7">
             <property name="visible">True</property>
@@ -136,6 +137,7 @@
     <child>
       <object class="GtkVBox" id="vbox14">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table2">
             <property name="visible">True</property>
@@ -392,6 +394,7 @@
     <child>
       <object class="GtkVBox" id="vbox13">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table6">
@@ -527,7 +530,6 @@
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_admin</property>
-    <property name="has_separator">False</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
     <property name="text">&#xBF;Desea eliminar al usuario?</property>
@@ -564,7 +566,6 @@
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_admin</property>
-    <property name="has_separator">False</property>
     <property name="message_type">question</property>
     <property name="text">&#xBF;Realmente desea salir?</property>
     <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
@@ -630,6 +631,7 @@
     <child>
       <object class="GtkVBox" id="vbox12">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table5">
             <property name="visible">True</property>
@@ -729,6 +731,7 @@
     <child>
       <object class="GtkVBox" id="vbox4">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table1">
@@ -992,6 +995,7 @@
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkNotebook" id="notebook1">
@@ -1001,6 +1005,7 @@
             <child>
               <object class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
@@ -1115,6 +1120,7 @@
             <child>
               <object class="GtkVBox" id="vbox5">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <property name="spacing">15</property>
                 <child>
                   <object class="GtkHBox" id="hbox6">
@@ -1180,6 +1186,7 @@
                 <child>
                   <object class="GtkVBox" id="vbox6">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
@@ -1263,6 +1270,7 @@
             <child>
               <object class="GtkVBox" id="vbox7">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkTable" id="table3">
                     <property name="visible">True</property>
@@ -1290,7 +1298,7 @@
                     <child>
                       <object class="GtkLabel" id="lbl_admin_addr">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Direccion:</property>
+                        <property name="label" translatable="yes">Direcci&#xF3;n:</property>
                       </object>
                       <packing>
                         <property name="top_attach">3</property>
@@ -1544,10 +1552,12 @@
             <child>
               <object class="GtkVBox" id="vbox8">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <property name="spacing">15</property>
                 <child>
                   <object class="GtkVBox" id="vbox9">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label6">
                         <property name="visible">True</property>
@@ -1612,6 +1622,7 @@
                 <child>
                   <object class="GtkVBox" id="vbox10">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label16">
                         <property name="visible">True</property>
@@ -1676,6 +1687,7 @@
                 <child>
                   <object class="GtkVBox" id="vbox11">
                     <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label21">
                         <property name="visible">True</property>
@@ -1910,6 +1922,7 @@
             <child>
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
+                <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkHBox" id="hbox5">
@@ -2124,6 +2137,134 @@
                 <property name="tab_fill">False</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkVBox" id="vbox4_admin_store">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkHBox" id="hbox12_admin_store">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkEntry" id="entry_srch_stores">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                        <signal name="activate" handler="on_btn_srch_stores_clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btn_srch_stores">
+                        <property name="label">gtk-find</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="on_btn_srch_stores_clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btn_add_stores">
+                        <property name="label">gtk-add</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="on_btn_add_stores_clicked" object="wnd_new_store"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btn_delete_store">
+                        <property name="label">gtk-remove</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="ask_delete_store"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkTreeView" id="treeview_stores">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox13_admin_store">
+                    <property name="visible">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btn_save_stores">
+                        <property name="label">gtk-save</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="on_btn_save_stores_clicked"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">5</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label9_admin_store">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Locales</property>
+              </object>
+              <packing>
+                <property name="position">5</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="position">0</property>
@@ -2169,5 +2310,137 @@
       </object>
     </child>
   </object>
+  <object class="GtkWindow" id="wnd_new_store">
+    <property name="title" translatable="yes">Agregar un local</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <child>
+      <object class="GtkVBox" id="vbox2_new_store">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkHBox" id="hbox3_new_store">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="lbl_name_store1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Nombre:</property>
+              </object>
+              <packing>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_name_new_store">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">&#x25CF;</property>
+              </object>
+              <packing>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox2_new_store">
+            <property name="visible">True</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox1_new_store">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkButton" id="btn_cancel_new_store">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_new_store"/>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_new_store">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <property name="image_position">right</property>
+                <signal name="clicked" handler="on_btn_save_new_store_clicked"/>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="ask_delete_store">
+    <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="message_type">question</property>
+    <property name="buttons">yes-no</property>
+    <property name="text" translatable="yes">&#xBF;Realmente deseas eliminar ese local?</property>
+    <signal name="response" handler="on_ask_delete_store_response"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox7_delete_store">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area7">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>
-

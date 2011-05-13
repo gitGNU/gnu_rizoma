@@ -28,4 +28,6 @@ void datos_box ();
 
 int get_datos (void);
 
+void stores_box ();
+
 #endif

@@ -648,7 +648,8 @@ SearchDeudasCliente (gint rut)
   q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
                        "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
                        "date_part ('second', fecha) FROM venta WHERE id IN (SELECT id_venta FROM deuda WHERE "
-                       "rut_cliente=%d AND pagada='f') AND id NOT IN (SELECT id_sale FROM venta_anulada)", rut);
+                       "rut_cliente=%d AND pagada='f') AND id NOT IN (SELECT id_sale FROM venta_anulada) "
+		       "ORDER BY id DESC", rut);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -2342,18 +2343,23 @@ Recibir (gchar *barcode, gchar *cantidad)
 gint
 SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *comuna,
                             gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,
-                            gchar *email, gchar *giro)
+                            gchar *email, gchar *giro, gchar *lap_rep)
 {
   PGresult *res;
   gchar *q;
   gchar **aux;
+  gint lrep; // Lapso de reposicion
 
+  lrep = atoi (lap_rep);
   aux = g_strsplit(rut, "-", 0);
 
+  if (lrep == 0)
+    return -1;
+
   q = g_strdup_printf ("UPDATE proveedor SET nombre='%s', direccion='%s', ciudad='%s', "
-                       "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s'"
-                       " WHERE rut=%s", razon, direccion, ciudad,
-                       comuna, fono, email, web, contacto, giro, aux[0]);
+                       "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s', lapso_reposicion=%d "
+                       "WHERE rut=%s", razon, direccion, ciudad,
+                       comuna, fono, email, web, contacto, giro, lrep, aux[0]);
   res = EjecutarSQL (q);
   g_free (q);
   g_strfreev(aux);

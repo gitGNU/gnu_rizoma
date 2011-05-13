@@ -45,7 +45,7 @@ ModificarNumber (GtkWidget *widget, gpointer data)
   else
     {
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio de la boleta con exito.", 3000);
+      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio de la boleta con éxito.", 3000);
     }
 }
 
@@ -63,7 +63,7 @@ ModificarNumberF (GtkWidget *widget, gpointer data)
   else
     {
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-      statusbar_push (GTK_STATUSBAR(aux_widget), "Se modifico el folio de la factura con exito.", 3000);
+      statusbar_push (GTK_STATUSBAR(aux_widget), "Se modifico el folio de la factura con éxito.", 3000);
     }
 }
 
@@ -121,7 +121,7 @@ guardar_parametros (GtkWidget *widget, gpointer user_data)
       return;
     }
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
-  statusbar_push (GTK_STATUSBAR(aux_widget), "Se modificaron los parametros con exito.", 3000);
+  statusbar_push (GTK_STATUSBAR(aux_widget), "Se modificaron los parametros con éxito.", 3000);
 }
 
 void
@@ -129,7 +129,6 @@ preferences_box ()
 {
   GtkWidget *widget;
   gint current_number;
-
 
   // Boleta/ticket
   current_number = get_ticket_number (SIMPLE) - 1;

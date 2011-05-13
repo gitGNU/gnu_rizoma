@@ -4827,7 +4827,7 @@ DatosEnviar (void)
 
 
   res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
-                                      "WHERE nombre!=(SELECT nombre FROM negocio)"));
+                                      "WHERE nombre!=(SELECT nombre FROM negocio) AND estado = true"));
   tuples = PQntuples (res);
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
@@ -4889,7 +4889,7 @@ DatosRecibir (void)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor1")),"admin");
 
   res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
-					      "WHERE nombre!=(SELECT nombre FROM negocio)"));
+					      "WHERE nombre!=(SELECT nombre FROM negocio) AND estado = true"));
   tuples = PQntuples (res);
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));

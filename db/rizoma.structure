@@ -113,6 +113,7 @@ create table bodega
   id serial not null,
   nombre character varying(50),
   tipo character varying(50),
+  estado boolean default 't',
   constraint pk_bodega primary key (id)
 );
 

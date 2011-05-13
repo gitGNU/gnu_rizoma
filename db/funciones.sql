@@ -1253,13 +1253,14 @@ create or replace function buscar_proveedor(
        out email varchar(300),
        out web varchar(300),
        out contacto varchar(100),
-       out giro varchar(100))
+       out giro varchar(100),
+       out lapso_reposicion integer)
 returns setof record as $$
 declare
 	q text;
 	l record;
 begin
-q := 'SELECT rut,dv,nombre,direccion,ciudad,comuna,telefono,email,web,contacto,giro
+q := 'SELECT rut,dv,nombre,direccion,ciudad,comuna,telefono,email,web,contacto,giro,lapso_reposicion
      	     FROM proveedor WHERE lower(nombre) LIKE lower('
 	     || quote_literal($1) || ') '
 	     || 'OR lower(rut::varchar) LIKE lower(' || quote_literal($1) || ') ORDER BY nombre';
@@ -1276,6 +1277,7 @@ for l in execute q loop
     web = l.web;
     contacto = l.contacto;
     giro = l.giro;
+    lapso_reposicion = l.lapso_reposicion;
     return next;
 end loop;
 return;
@@ -1293,14 +1295,15 @@ create or replace function select_proveedor ( OUT rut int4,
 					      OUT email varchar(300),
 					      OUT web varchar(300),
 					      OUT contacto varchar(100),
-					      OUT giro varchar(100))
+					      OUT giro varchar(100),
+					      OUT lapso_reposicion integer)
 returns setof record as $$
 declare
 	l record;
 	q varchar(255);
 begin
 q := 'SELECT rut, dv, nombre, direccion, ciudad, comuna, telefono,
-     email, web, contacto, giro FROM proveedor ORDER BY nombre';
+     email, web, contacto, giro, lapso_reposicion FROM proveedor ORDER BY nombre';
 
 for l in execute q loop
     rut := l.rut;
@@ -1314,6 +1317,7 @@ for l in execute q loop
     web := l.web;
     contacto := l.contacto;
     giro := l.giro;
+    lapso_reposicion := l.lapso_reposicion;
     return next;
 end loop;
 return;
@@ -1333,14 +1337,15 @@ create or replace function select_proveedor (IN prov_rut int4,
 					    OUT email varchar(300),
 					    OUT web varchar(300),
 					    OUT contacto varchar(100),
-					    OUT giro varchar(100))
+					    OUT giro varchar(100),
+					    OUT lapso_reposicion integer)
 returns setof record as $$
 declare
 	list record;
 	query text;
 begin
 query := 'SELECT rut,dv,nombre, direccion, ciudad, comuna, telefono, email,
-      	 	 web, contacto, giro FROM proveedor WHERE rut=' || prov_rut;
+      	 	 web, contacto, giro, lapso_reposicion FROM proveedor WHERE rut=' || prov_rut;
 
 for list in execute query loop
     rut       := list.rut;
@@ -1354,6 +1359,7 @@ for list in execute query loop
     web	      := list.web;
     contacto  := list.contacto;
     giro      := list.giro;
+    lapso_reposicion := list.lapso_reposicion;
     return next;
 end loop;
 

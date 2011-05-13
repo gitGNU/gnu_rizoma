@@ -1068,7 +1068,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ContribuciÃ³n $", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Contribución $", renderer,
 						     "text", 4,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -2673,7 +2673,7 @@ fill_provider ()
 /**
  * Es llamado por on_btn_get_stat_clicked (void)
  *
- * Obtiene la informaciÃ³n de cuadratura y la depliega en en treeview "tree_view_cuadratura"
+ * Obtiene la información de cuadratura y la depliega en en treeview "tree_view_cuadratura"
  *
  */
 

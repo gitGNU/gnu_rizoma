@@ -65,7 +65,7 @@ refresh_labels (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_razon"));
   gtk_label_set_markup (GTK_LABEL (widget),
                         razon_social_value !=NULL ?
-                        "*Razón Social:":
+                        "*RazÃ³n Social:":
                         "<span color=\"red\">*Razón Social:</span>");
 
   //rut
@@ -320,4 +320,314 @@ void
 datos_box ()
 {
   refresh_labels();
+}
+
+/**
+ * Is called by btn_save_stores (clicked signal)
+ *
+ * Save the modified store names
+ */
+void
+on_btn_save_stores_clicked()
+{
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_stores"));
+  GtkTreeModel *model = gtk_tree_view_get_model (treeview);
+  GtkTreeIter iter;
+  gboolean valid;
+  gchar *id, *name, *q;
+  PGresult *res;
+
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      // getting the treeview values  --
+      gtk_tree_model_get (model, &iter,
+			  0, &id,
+			  1, &name,
+                          -1);
+      
+      q = g_strdup_printf ("UPDATE bodega SET nombre=upper('%s') WHERE id=%s", name, id);
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      // Iterates to the next row --
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+  
+// Disabling save stores button --
+gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_stores")), FALSE);
+}
+
+/**
+ * Is called when "nombre" cell has been edited (signal edited).
+ * 
+ * Update "nombre" cell with the new text
+ *
+ */
+void 
+on_name_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_name, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  gchar *current_name;
+  GtkWidget *aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_stores"));
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
+
+  gtk_tree_model_get (model, &iter,
+                      1, &current_name,
+                      -1);
+
+  new_name = g_strstrip (new_name);
+  if (g_str_equal(new_name, ""))
+    {
+      ErrorMSG(aux_widget, "Debe ingresar un nombre");
+      return;
+    }
+  
+  if (g_str_equal(new_name, current_name))
+    return;
+
+  gchar *q;
+  PGresult *res;
+  q = g_strdup_printf ("SELECT nombre FROM bodega WHERE nombre=upper('%s') AND estado = true", new_name);
+  res = EjecutarSQL (q);
+  g_free (q);
+  
+  gint tuples = PQntuples (res);
+  if (tuples > 0)
+    {      
+      ErrorMSG(aux_widget, g_strdup_printf ("El nombre %s ya se encuantra asignado, use un nombre distinto", new_name));
+      return;
+    }
+
+  if (!(g_str_equal (new_name, current_name)))
+    {
+      gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+			  1, new_name,
+			  -1);
+
+      // The save button is enabled
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_stores")), TRUE);
+    }
+}
+
+
+/**
+ * Contruye el "treeview_stores" de la pestaña "Locales"
+ * en rizoma-admin
+ */
+void
+stores_box ()
+{
+  GtkListStore *store;
+  GtkTreeView *treeview;
+  GtkTreeViewColumn *column;
+  GtkCellRenderer *renderer;
+  GtkTreeSelection *selection;
+
+  store = gtk_list_store_new (2,
+                              G_TYPE_STRING,  //ID
+			      G_TYPE_STRING); //Nombre local
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_stores"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (renderer,
+		"editable", TRUE,
+		NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited",
+		    G_CALLBACK (on_name_cell_renderer_edited), (gpointer)store);
+  column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 0);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_stores")), FALSE);
+}
+
+/**
+ * Callback connected to the search button (btn_srch_stores)
+ * and entry search stores (entry_srch_stores)
+ *
+ * @param button the button that emits the signal
+ * @param user_data the user data
+ */
+void
+on_btn_srch_stores_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_stores"))));
+  GtkTreeIter iter;
+  gint i, tuples;
+  PGresult *res;
+  char *sql, *store_name;
+  GtkWidget *aux_widget;
+
+  gtk_list_store_clear (store);
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_srch_stores"));
+  store_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  if ( g_str_equal(store_name, "") )
+    sql = g_strdup_printf ("SELECT id, nombre FROM bodega where estado = true "
+			   "AND nombre!=(SELECT nombre FROM negocio)");
+  else
+    sql = g_strdup_printf ("SELECT id, nombre FROM bodega where nombre LIKE upper('%s%%') "
+			   "AND estado = true "
+			   "AND nombre!=(SELECT nombre FROM negocio)", store_name);
+
+  res = EjecutarSQL (sql);
+  tuples = PQntuples (res);
+  g_free (sql);
+
+  if (res == NULL) return;
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, PQvaluebycol (res, i, "id"),
+			  1, PQvaluebycol (res, i, "nombre"),
+			  -1);
+    }
+}
+
+
+/**
+ * Callback connected to the save button (btn_save_new_store)
+ *
+ * @param button the button that emits the signal
+ * @param user_data the user data
+ */
+void
+on_btn_save_new_store_clicked (GtkButton *button, gpointer user_data)
+{
+  gchar *q, *store_name;
+  GtkWidget *aux_widget;
+  PGresult *res;
+  
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_name_new_store"));
+  store_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+  
+  store_name = g_strstrip (store_name);
+  if (g_str_equal(store_name, ""))
+    {
+      ErrorMSG(aux_widget, "Debe ingresar un nombre");
+      gtk_entry_set_text (GTK_ENTRY (aux_widget), "");
+      return;
+    }
+
+  q = g_strdup_printf ("SELECT nombre FROM bodega WHERE nombre=upper('%s') AND estado = true", store_name);
+  res = EjecutarSQL (q);
+  g_free (q);
+  
+  gint tuples = PQntuples (res);
+  if (tuples > 0)
+    {      
+      ErrorMSG(aux_widget, g_strdup_printf("El nombre %s esta asignado, use un nombre distinto", store_name));
+      return;
+    }
+
+  q = g_strdup_printf ("INSERT INTO bodega (nombre) values(upper('%s'))", store_name);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_new_store"));
+  gtk_widget_hide (aux_widget);
+}
+
+/**
+ * Callback connected to the add button (btn_add_stores)
+ *
+ * @param button the button that emits the signal
+ * @param user_data the user data
+ */
+void
+on_btn_add_stores_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkWindow *window;
+
+  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_new_store"));
+  clean_container (GTK_CONTAINER (window));
+  gtk_widget_show (window);
+}
+
+
+/**
+ * Callback connected to the delete store button in rizoma-admin
+ */
+void
+ask_delete_store (void)
+{
+  GtkWidget *window;
+  GtkWidget *tree;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+
+  tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_stores"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      window = GTK_WIDGET(gtk_builder_get_object(builder, "ask_delete_store"));
+      gtk_widget_show_all(window);
+    }
+  else
+    AlertMSG (tree, "Debe seleccionar un local de la lista");
+}
+
+/**
+ * Callback to delete store
+ */
+void
+on_ask_delete_store_response (GtkDialog *dialog,
+			      gint       response_id,
+			      gpointer   user_data)
+{
+  if (response_id == GTK_RESPONSE_YES)
+    {
+      GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "treeview_stores"));
+      GtkTreeModel *model = gtk_tree_view_get_model (tree);
+      GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+      GtkTreeIter iter;
+
+      gchar *q, *id_bodega;
+      PGresult *res;
+
+      if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+	{
+	  gtk_tree_model_get (model, &iter,
+			      0, &id_bodega,
+			      -1);
+
+	  q = g_strdup_printf ("UPDATE bodega SET estado = false WHERE id = %s", id_bodega);
+	  res = EjecutarSQL (q);
+	  g_free (q);
+	}
+      
+      on_btn_srch_stores_clicked(NULL,NULL);
+    }
+  gtk_widget_hide(GTK_WIDGET(dialog));
 }

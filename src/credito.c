@@ -410,7 +410,7 @@ clientes_box ()
                                        G_TYPE_STRING,
                                        G_TYPE_STRING,
                                        G_TYPE_STRING,
-                                       G_TYPE_INT,
+                                       G_TYPE_DOUBLE,
                                        G_TYPE_STRING,
                                        G_TYPE_STRING);
 
@@ -457,6 +457,7 @@ clientes_box ()
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
@@ -813,10 +814,10 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
                               0, PQgetvalue (res, i, 0),
                               1, PQgetvalue (res, i, 1),
                               2, PQgetvalue (res, i, 2),
-                              3, atoi (PQgetvalue (res, i, 3)),
+                              3, g_strtod (PUT(PQgetvalue (res, i, 3)),(gchar **)NULL),
                               4, PQgetvalue (res, i, 4),
-                              5, PutPoints (g_strdup_printf ("%d", atoi (PQgetvalue (res, i, 3)) *
-                                                             atoi (PQgetvalue (res, i, 4)))),
+                              5, PutPoints (g_strdup_printf("%ld", lround(g_strtod (PQgetvalue (res, i, 3), (gchar **)NULL) * 
+									  g_strtod (PQgetvalue (res, i, 4), (gchar **)NULL)))) ,
                               -1);
         }
     }

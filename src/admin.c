@@ -185,6 +185,7 @@ check_passwd (GtkWidget *widget, gpointer data)
     }
 }
 
+
 /**
  * Setup the main window of the administration application (rizoma-admin).
  *
@@ -223,6 +224,7 @@ admin_win()
   datos_box(); //business info
   preferences_box(); //preferences tab
   clientes_box(); //clients tab
+  stores_box (); //stores tab
   gtk_widget_show_all (admin_gui);
 }
 

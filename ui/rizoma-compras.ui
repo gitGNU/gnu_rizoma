@@ -1834,7 +1834,7 @@
                                 <child>
                                   <object class="GtkLabel" id="label27">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">_Añadir a Traspaso</property>
+                                    <property name="label" translatable="yes">_A&#xF1;adir a Traspaso</property>
                                     <property name="use_underline">True</property>
                                   </object>
                                   <packing>
@@ -5152,10 +5152,33 @@
                               <placeholder/>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkLabel" id="lbl_lapso_rep_vendedor">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Lapso Reposici&#xF3;n</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                                <property name="x_options"></property>
+                                <property name="y_options"></property>
+                              </packing>
                             </child>
                             <child>
-                              <placeholder/>
+                              <object class="GtkEntry" id="entry_lap_rep">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="invisible_char">&#x25CF;</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
+                                <property name="top_attach">5</property>
+                                <property name="bottom_attach">6</property>
+                                <property name="x_options">GTK_EXPAND</property>
+                                <property name="y_options"></property>
+                              </packing>
                             </child>
                           </object>
                         </child>

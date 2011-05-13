@@ -422,7 +422,7 @@ DatosCheque (void)
   gtk_box_pack_start (GTK_BOX (vbox2), hbox, FALSE, FALSE, 3);
   gtk_widget_show (hbox);
 
-  label = gtk_label_new ("NÃºmero: ");
+  label = gtk_label_new ("Número: ");
   gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
   gtk_widget_show (label);
 
@@ -747,7 +747,7 @@ SearchProductByCode (void)
 	{
 	  GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-          gchar *str = g_strdup_printf("El cÃ³digo %s fuÃ© invalidado por el administrador", codigo);
+          gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", codigo);
 	  CleanSellLabels();
           AlertMSG (aux_widget, str);
           g_free (str);
@@ -803,7 +803,7 @@ SearchProductByCode (void)
       if (strcmp (codigo, "") != 0)
         {
           AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), g_strdup_printf
-                    ("No existe un producto con el cÃ³digo %s!!", codigo));
+                    ("No existe un producto con el código %s!!", codigo));
           CleanSellLabels ();
         }
       else
@@ -3818,7 +3818,7 @@ DatosEnviar (void)
                                  g_strdup (gtk_label_get_text ( GTK_LABEL  (gtk_builder_get_object (builder,"label_seller_name")))));
 
   res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
-                                      "WHERE nombre!=(SELECT nombre FROM negocio)"));
+                                      "WHERE nombre!=(SELECT nombre FROM negocio) AND estado=true"));
   tuples = PQntuples (res);
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));

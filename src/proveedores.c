@@ -94,7 +94,7 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
 
   /*consulta de sql que llama a la funcion que retorna a el o los
     proveedores, dependiendo de los datos de entrada*/
-  q = g_strdup_printf ("SELECT rut, dv, nombre, giro, contacto "
+  q = g_strdup_printf ("SELECT rut, dv, nombre, giro, contacto, lapso_reposicion "
                        "FROM buscar_proveedor('%%%s%%')",
                        string);
   res = EjecutarSQL (q);
@@ -242,6 +242,9 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
   gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "giro"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_lap_rep"));
+  gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "lapso_reposicion"));
 }
 
 /**
@@ -383,7 +386,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
 
   if (atoi(telefono_c) == 0)
     {
-      ErrorMSG (wnd, "Debe ingresar sólo números en el campo telefono");
+      ErrorMSG (wnd, "Debe ingresar sÃ³lo nÃºmeros en el campo telefono");
       return;
     }
 
@@ -474,6 +477,7 @@ ModificarProveedor (void)
   gchar *contacto_c;
   gchar *email_c;
   gchar *giro_c;
+  gchar *lap_rep_c;
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
   rut_c = g_strdup(gtk_label_get_text (GTK_LABEL (widget)));
@@ -505,10 +509,16 @@ ModificarProveedor (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_giro"));
   giro_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
 
-  SetModificacionesProveedor (rut_c, razon_c, direccion_c, comuna_c, ciudad_c, fono_c,
-                              web_c, contacto_c, email_c, giro_c);
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_lap_rep"));
+  lap_rep_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  gint respuesta = SetModificacionesProveedor (rut_c, razon_c, direccion_c, comuna_c, ciudad_c, fono_c,
+					       web_c, contacto_c, email_c, giro_c, lap_rep_c);
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-  statusbar_push (GTK_STATUSBAR(widget), "El proveedor ha sido actualizado exitosamente", 3000);
+  if (respuesta == 0)
+    statusbar_push (GTK_STATUSBAR(widget), "El proveedor ha sido actualizado exitosamente", 3000);
+  else if (respuesta == -1)
+    statusbar_push (GTK_STATUSBAR(widget), "Error: Lapso Reposición debe ser un valor numérico y mayor a cero", 3000);
 }
 
 /**
