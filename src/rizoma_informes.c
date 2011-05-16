@@ -182,7 +182,7 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
 
   if (diferenciaNum != 0)
     {      
-      // Se habilita el botón guardar
+      // Se habilita el botÃ³n guardar
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), TRUE);
     }
 }
@@ -219,10 +219,10 @@ on_btn_save_cuadratura_clicked()
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
       
-      // Se guarda la merma con motivo "Diferencia Cuadratura", si ésta es distinta de 0 --
+      // Se guarda la merma con motivo "Diferencia Cuadratura", si Ã©sta es distinta de 0 --
       if((stock_teorico - stock_fisico) != 0)
 	{	 
-	  // Se obtiene el barcode a partir del código corto 
+	  // Se obtiene el barcode a partir del cÃ³digo corto 
 	   gchar *barcode;
 	  barcode = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto='%s'",
 								codigo_corto))
@@ -237,7 +237,7 @@ on_btn_save_cuadratura_clicked()
       valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si itera a la siguiente */
     }
   
-  // Se deshabilita el botón guardar
+  // Se deshabilita el botÃ³n guardar
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
 }
 
@@ -386,7 +386,7 @@ fill_caja_data (void)
  *
  * Obtiene el id seleccionado y depliega la informacion correspondiente
  * en el  "tree_view_enviados_detalle" o "tree_view_recibidos_detalle"
- * según corresponda.
+ * segÃºn corresponda.
  *
  */
 
@@ -399,7 +399,7 @@ fill_traspaso_detalle ()
   PGresult *res;
   char *sql;
 
-  // Obtiene la página de traspasos desde la cual se esta llamando a esta funcion
+  // Obtiene la pÃ¡gina de traspasos desde la cual se esta llamando a esta funcion
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_traspasos"));
   gint page_num = gtk_notebook_get_current_page (notebook);
   
@@ -890,7 +890,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID Devolución", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ID DevoluciÃ³n", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1091,7 +1091,7 @@ reports_win (void)
 
   store = gtk_list_store_new (14,
 			      G_TYPE_STRING, // 0, Codigo Corto
-                              G_TYPE_STRING, // 1, Descripcion Mercadería
+                              G_TYPE_STRING, // 1, Descripción Mercadería
 			      G_TYPE_STRING, // 2, Marca
                               G_TYPE_DOUBLE, // 3, Stock Inicial
                               G_TYPE_DOUBLE, // 4, Compras
@@ -1294,8 +1294,8 @@ reports_win (void)
   cuadratura->cols[8].name = "Mermas";
   cuadratura->cols[9].name = "Envios";
   cuadratura->cols[10].name = "Recibidos";
-  cuadratura->cols[11].name = "Stock Teórico";
-  cuadratura->cols[12].name = "Stock Físico";
+  cuadratura->cols[11].name = "Stock TeÃ³rico";
+  cuadratura->cols[12].name = "Stock FÃ­sico";
   cuadratura->cols[13].name = "Diferencia";
   cuadratura->cols[14].name = NULL;
 
@@ -1303,7 +1303,7 @@ reports_win (void)
                     G_CALLBACK (PrintTree), (gpointer)cuadratura);
 
 
-  // El botón guardar inicia "deshabilitado"
+  // El botÃ³n guardar inicia "deshabilitado"
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
   
   /*
@@ -1410,7 +1410,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descripcion", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1456,7 +1456,7 @@ reports_win (void)
   libroEnviados->son->tree = treeview;
   libroEnviados->son->cols[0].name = "Codigo Corto";
   libroEnviados->son->cols[0].num = 0;
-  libroEnviados->son->cols[1].name = "Descripcion";
+  libroEnviados->son->cols[1].name = "Descripción";
   libroEnviados->son->cols[1].num = 1;
   libroEnviados->son->cols[2].name = "Unidades";
   libroEnviados->son->cols[2].num = 2;
@@ -2729,17 +2729,23 @@ fill_cuadratura ()
  */
 
 void
-fill_traspaso ()
+fill_traspaso (gchar *local)
 {
   GtkListStore *store;
   GtkTreeIter iter;
   gint i, tuples;
   PGresult *res;
-  char *sql;
+  gchar *sql;
+  gchar *local_consulta;
 
   // Obtiene la página de traspasos desde la cual se esta llamando a esta funcion
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_traspasos"));
   gint page_num = gtk_notebook_get_current_page (notebook);
+
+  if (local == NULL || g_str_equal (local, "TODOS"))
+    local_consulta = g_strdup_printf("");
+  else
+    local_consulta = g_strdup_printf("AND b.nombre = '%s'", local);
 
   // Se obtienen y se limpian los stores correspondientes
   store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, (page_num == 0) ? "tree_view_enviado": "tree_view_recibido"))));
@@ -2747,19 +2753,27 @@ fill_traspaso ()
   gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, (page_num == 0) ? "tree_view_enviado_detalle": "tree_view_recibido_detalle")))));
 
   if(page_num == 0)
-    sql = g_strdup_printf ( "SELECT fecha, id, destino, monto "
-			    "FROM traspaso "
+    sql = g_strdup_printf ( "SELECT fecha, t.id, b.nombre AS destino, monto "
+			    "FROM traspaso t "
+			    "INNER JOIN bodega b "
+			    "ON t.destino = b.id "
 			    "WHERE destino != 1 "
+			    "%s "
 			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
 			    "ORDER BY fecha ASC"
+			    , local_consulta
 			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
 			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
   else
-    sql = g_strdup_printf ( "SELECT fecha, id, origen, monto "
-			    "FROM traspaso "			    
+    sql = g_strdup_printf ( "SELECT fecha, t.id, b.nombre AS origen, monto "
+			    "FROM traspaso t "
+			    "INNER JOIN bodega b "
+			    "ON t.origen = b.id "
 			    "WHERE origen != 1 "
+			    "%s "
 			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
 			    "ORDER BY fecha ASC"
+			    , local_consulta
 			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
 			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
 
@@ -2846,7 +2860,7 @@ on_btn_get_stat_clicked ()
 	  break;
 	case 6:
 	  /*Informe Traspasos*/
-	  fill_traspaso ();
+	  fill_traspaso (NULL);
 	  calcular_traspasos ();
 	  break;
 
@@ -2871,11 +2885,19 @@ calcular_traspasos (void)
   PGresult *res;
   char *sql;
   
-  // Total Enviados
-  sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
-			  "FROM traspaso "
-			  "WHERE origen = 1" );
-
+  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
+    // Total Enviados
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
+			    "FROM traspaso "
+			    "WHERE origen = 1" );
+  else
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
+			    "FROM traspaso "
+			    "WHERE origen = 1 " 
+			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
+			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+  
   res = EjecutarSQL (sql);
   g_free (sql);
 
@@ -2889,10 +2911,19 @@ calcular_traspasos (void)
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
 
-  // Total Recibidos
-  sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
-			  "FROM traspaso "
-			  "WHERE origen != 1" );
+
+  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
+    // Total Recibidos
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
+			    "FROM traspaso "
+			    "WHERE origen != 1" );
+  else
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
+			    "FROM traspaso "
+			    "WHERE origen != 1 " 
+			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
+			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));    
 
   res = EjecutarSQL (sql);
   g_free (sql);
@@ -2941,6 +2972,53 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       // y oculta el de los recibidos
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_recibido")));
+      
+      GtkWidget *combo;
+      GtkTreeIter iter;
+      GtkListStore *modelo;
+      gint tuples,i;
+      PGresult *res;
+      
+      res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
+					  "WHERE nombre!=(SELECT nombre FROM negocio) AND estado=true"));
+      tuples = PQntuples (res);
+
+      combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_stores"));
+      modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+
+
+      if (modelo == NULL)
+	{
+	  GtkCellRenderer *cell;
+	  modelo = gtk_list_store_new (2,
+				       G_TYPE_INT,
+				       G_TYPE_STRING);
+
+	  gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
+
+	  cell = gtk_cell_renderer_text_new();
+	  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+	  gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
+					 "text", 1,
+					 NULL);
+	}
+
+      gtk_list_store_clear(modelo);
+
+      for (i=0 ; i < tuples ; i++)
+	{
+	  gtk_list_store_append(modelo, &iter);
+	  gtk_list_store_set(modelo, &iter,
+			     0, atoi(PQvaluebycol(res, i, "id")),
+			     1, PQvaluebycol(res, i, "nombre"),
+			     -1);
+	}
+
+      gtk_list_store_append(modelo, &iter);
+      gtk_list_store_set(modelo, &iter,
+			 0, 0,
+			 1, "TODOS",
+			 -1);
 
     }
 }
@@ -2959,4 +3037,112 @@ on_tree_view_traspasos_grab_focus (GtkNotebook *notebook, GtkNotebookPage *page,
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_recibido")));
     }
+}
+
+void
+on_btn_filter_stores_clicked ()
+{
+  gchar *store;
+  GtkTreeIter iter;
+  GtkWidget *combo;
+  GtkTreeModel *model;
+  gint active;
+
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_stores"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  /* Verifica si se selecciono un destino del combobox*/
+  if (active == -1)
+    {
+      ErrorMSG (combo, "Debe Seleccionar un local");
+      store = NULL;
+    }
+  else
+    {
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
+
+      gtk_tree_model_get (model, &iter,
+                          1, &store,
+                          -1);
+    }
+  fill_traspaso (store);
+
+  /*Totales enviados y recibidos*/
+  PGresult *res;
+  char *sql, *local_consulta;
+  
+  if ((store == NULL || g_str_equal (store, "TODOS")) || active == -1)
+    local_consulta = g_strdup_printf("");
+  else
+    local_consulta = g_strdup_printf("AND b.nombre = '%s'", store);
+
+
+  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
+    // Total Enviados
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
+			    "FROM traspaso t "
+			    "INNER JOIN bodega b "
+			    "ON t.origen = b.id "
+			    "%s "
+			    "WHERE origen = 1" 
+			    , local_consulta);
+  else
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
+			    "FROM traspaso t "
+			    "INNER JOIN bodega b "
+			    "ON t.destino = b.id "
+			    "%s "
+			    "WHERE origen = 1 "
+			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    , local_consulta
+			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
+			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+  
+  res = EjecutarSQL (sql);
+  g_free (sql);
+
+  gchar *enviado, *recibido;
+
+  if (res == NULL)
+    return;
+
+  enviado = PQvaluebycol (res, 0, "enviados");
+  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? "%s", enviado : " No hay productos enviados");
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
+
+
+  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
+    // Total Recibidos
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
+			    "FROM traspaso t "
+			    "INNER JOIN bodega b "
+			    "ON t.origen = b.id "
+			    "%s "
+			    "WHERE origen != 1" 
+			    , local_consulta);
+  else
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
+			    "FROM traspaso t "
+			    "INNER JOIN bodega b "
+			    "ON t.origen = b.id "
+			    "%s "
+			    "WHERE origen != 1 " 
+			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    , local_consulta
+			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
+			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));    
+
+  res = EjecutarSQL (sql);
+  g_free (sql);
+
+  if (res == NULL)
+    return;
+  
+  recibido = PQvaluebycol (res, 0, "recibidos");
+  
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
+                        g_strdup_printf ((!g_str_equal("",recibido)) ? "%s", recibido : " No hay productos recibidos"));
+ 
 }

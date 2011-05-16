@@ -1056,7 +1056,7 @@ Save (GtkWidget *widget, gpointer data)
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
   if (HaveCharacters(contenido))
     {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_edit_prod_content")),"Debe ingresar un valor numÃ©rico");
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_edit_prod_content")),"Debe ingresar un valor numérico");
       return;
     }
 

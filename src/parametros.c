@@ -41,11 +41,11 @@ ModificarNumber (GtkWidget *widget, gpointer data)
   new_number = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))));
 
   if ((set_ticket_number (new_number, SIMPLE)) == FALSE)
-    ErrorMSG (widget, "Ocurrió un error mientras se intento modificar el número.");
+    ErrorMSG (widget, "OcurriÃ³ un error mientras se intento modificar el número.");
   else
     {
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
-      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio de la boleta con éxito.", 3000);
+      statusbar_push(GTK_STATUSBAR(aux_widget), "Se modifico el folio de la boleta con Ã©xito.", 3000);
     }
 }
 
@@ -121,7 +121,7 @@ guardar_parametros (GtkWidget *widget, gpointer user_data)
       return;
     }
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
-  statusbar_push (GTK_STATUSBAR(aux_widget), "Se modificaron los parametros con éxito.", 3000);
+  statusbar_push (GTK_STATUSBAR(aux_widget), "Se modificaron los parametros con Ã©xito.", 3000);
 }
 
 void
