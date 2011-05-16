@@ -290,7 +290,6 @@ clientes_box ()
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, TRUE);
 
-
   client_list->tree = GTK_TREE_VIEW (tree);
   client_list->title = "Lista de clientes";
   client_list->date_string = NULL;
@@ -300,10 +299,13 @@ clientes_box ()
   client_list->cols[1].num = 1;
   client_list->cols[2].name = "Telefono";
   client_list->cols[2].num = 2;
-  client_list->cols[3].name = "Credito";
+  client_list->cols[3].name = "Cupo";
   client_list->cols[3].num = 3;
-  client_list->cols[4].name = NULL;
-
+  client_list->cols[4].name = "Deuda";
+  client_list->cols[4].num = 4;
+  client_list->cols[5].name = "Saldo";
+  client_list->cols[5].num = 5;
+  client_list->cols[6].name = NULL;
 
   if (user_data->user_id != 1)
     {
@@ -578,25 +580,25 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
   credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_limit_credit")))));
 
   if (strcmp (nombre, "") == 0)
-    AlertMSG (wnd, "El Campo Nombre no puede estar vacio");
+    AlertMSG (wnd, "El Campo Nombre no puede estar vacío");
   else if (strcmp (paterno, "") == 0)
-    AlertMSG (wnd, "El Apellido Paterno no puede estar vacio");
+    AlertMSG (wnd, "El Apellido Paterno no puede estar vacío");
   else if (strcmp (materno, "") == 0)
-    AlertMSG (wnd, "El Apellido Materno no puede estar vacio");
+    AlertMSG (wnd, "El Apellido Materno no puede estar vacío");
   else if (strcmp (rut, "") == 0)
-    AlertMSG (wnd, "El Campo rut no debe estar vacio");
+    AlertMSG (wnd, "El Campo rut no debe estar vacío");
   else if (strcmp (ver, "") == 0)
-    AlertMSG (wnd, "El Campo verificador del ru no puede estar vacio");
+    AlertMSG (wnd, "El Campo verificador del rut no puede estar vacío");
   else if (strcmp (direccion, "") == 0)
-    AlertMSG (wnd, "La direccion no puede estar vacia");
+    AlertMSG (wnd, "La dirección no puede estar vacía");
   else if (strcmp (fono, "") == 0)
-    AlertMSG (wnd, "El campo telefonico no puede estar vacio");
+    AlertMSG (wnd, "El campo telefónico no puede estar vacío");
   else if (strcmp (giro, "") == 0)
-    AlertMSG (wnd, "El campo giro no puede estar vacio");
+    AlertMSG (wnd, "El campo giro no puede estar vacío");
   else if (RutExist (rut) == TRUE)
     AlertMSG (wnd, "Ya existe alguien con el mismo rut");
   else if (credito == 0)
-    AlertMSG (wnd, "El campo credito no puede estar vacio");
+    AlertMSG (wnd, "El campo credito no puede estar vacío");
   else
     {
       if (VerificarRut (rut, ver) == TRUE)
@@ -919,7 +921,7 @@ Abonar (void)
   //      encargadas de hacer cualquier movimiento de caja
 
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+    if (check_caja()) // Se abre la caja en caso de que está cerrada
       open_caja (TRUE);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_admin_abonar_amount"));
@@ -1230,7 +1232,7 @@ EliminarCliente (void)
    else if (strcmp (fono, "") == 0)
      AlertMSG (widget, "El campo telefonico no puede estar vacio");
    else if (strcmp (giro, "") == 0)
-     AlertMSG (widget, "El campo giro no puede estar vació");
+     AlertMSG (widget, "El campo giro no puede estar vaciÃ³");
    else if (credito == 0)
      AlertMSG (widget, "El campo credito no puede estar vacio");
    else
