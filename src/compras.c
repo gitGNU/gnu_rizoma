@@ -925,7 +925,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
                                              PutPoints (PQvaluebycol (res, 0, "precio")), PutPoints (PQvaluebycol (res, 0, "precio_mayor"))));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "descripción")));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "descripcion")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "marca")));
