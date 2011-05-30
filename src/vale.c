@@ -167,3 +167,20 @@ PrintVale (Productos *header, gint venta_id, gint total)
 
   system (g_strdup_printf ("rm %s", vale_file));
 }
+
+
+/**
+ * Esta función abre la gaveta
+ */
+void
+abrirGaveta(void)
+{
+  // Abriendo la caja
+  char *vale_dir = rizoma_get_value ("VALE_DIR");
+  gchar *abrirGaveta = g_strdup_printf ("%s/abrirGaveta.sh", vale_dir);
+  FILE *ac;
+  ac = fopen (abrirGaveta, "w+");
+  fprintf (ac, "echo \"300,3,8,1\" > %s", rizoma_get_value ("GAVETA_DEV"));
+  fclose (ac);
+  system (g_strdup_printf ("sh %s/abrirGaveta.sh", vale_dir));
+}

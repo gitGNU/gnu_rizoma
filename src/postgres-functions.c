@@ -422,8 +422,24 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   SaveProductsSell (venta->header, venta_id);
 
+  // Imprimir vale
   if (vale_dir != NULL && !g_str_equal(vale_dir, ""))
     PrintVale (venta->header, venta_id, total);
+
+  // Abrir Gaveta
+  switch (tipo_venta)
+    {
+    case CHEQUE:
+      abrirGaveta ();
+      break;
+    case TARJETA:
+      break;
+    case CREDITO:
+      break;
+    case CASH:
+      abrirGaveta ();
+      break;
+    }
 
   switch (tipo_venta)
     {

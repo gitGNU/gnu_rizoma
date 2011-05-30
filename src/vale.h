@@ -25,5 +25,6 @@
 #define VALE_H
 
 int PrintVale (Productos *header, gint venta_id, gint total);
+void abrirGaveta (void);
 
 #endif
