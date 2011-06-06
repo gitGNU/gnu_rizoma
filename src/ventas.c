@@ -3463,6 +3463,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 
   GtkTreeIter iter;
   gint sale_id;
+  gint monto;
 
   PGresult *res;
   gchar *q;
@@ -3474,7 +3475,16 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 
   gtk_tree_model_get (model, &iter,
                       0, &sale_id,
+		      3, &monto,
                       -1);
+
+  /*Se comprueba que el monto de la venta sea menor al dinero en caja*/
+  if (monto > ArqueoCaja())
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "treeview_nullify_sale")), 
+		"No existe monto suficiente en caja para anular esta venta");
+      return;
+    }
 
   if (nullify_sale (sale_id) == 0)
     {

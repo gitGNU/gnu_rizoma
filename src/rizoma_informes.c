@@ -890,7 +890,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID DevoluciÃ³n", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ID Devolución", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);

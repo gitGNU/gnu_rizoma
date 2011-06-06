@@ -122,11 +122,11 @@ IngresarDinero (GtkWidget *widget, gpointer data)
   gint motivo;
 
   
-  /*De estar habilitada caja, se asegura que ésta se encuentre 
+  /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
     abierta al momento de vender*/
   
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+    if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
       open_caja (TRUE);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_in_motiv"));
@@ -243,11 +243,11 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
   
   
-  /*De estar habilitada caja, se asegura que ésta se encuentre 
+  /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
     abierta al momento de vender*/
   
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que esté cerrada
+    if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
       open_caja (TRUE);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
@@ -263,7 +263,7 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   
 
   else if (monto > ReturnSaldoCaja ())
-    ErrorMSG (aux_widget, "No se puede retirar m�s dinero del que hay en caja" );
+    ErrorMSG (aux_widget, "No se puede retirar más dinero del que hay en caja" );
 
   else
     {
@@ -346,7 +346,7 @@ VentanaEgreso (gint monto)
 
   gtk_list_store_clear(store);
   
-  /*Obtención del Id de 'nulidad de venta' */
+  /*ObtenciÃ³n del Id de 'nulidad de venta' */
   resId = EjecutarSQL ("SELECT id FROM tipo_egreso WHERE descrip='Nulidad de Venta'");
   nulVenId = atoi (PUT(PQvaluebycol(resId, 0, "id")));
 
