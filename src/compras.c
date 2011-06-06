@@ -5179,14 +5179,14 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
   gtk_tree_model_get_iter (store, &iter, path);
   gtk_tree_model_get (store, &iter,
                       0, &enable,
-		      10, &sugerido,
+		      8, &sugerido,
                       -1);
 
   // Se cambia la seleccion del checkButton
   enable = !(enable);
   gtk_list_store_set (GTK_LIST_STORE(store), &iter,
                       0, enable,
-		      10, (sugerido == 0) ? 1 : sugerido,
+		      8, (sugerido == 0) ? 1 : sugerido,
                       -1);
 
   // Se calcula el subtotal de todas las filas que fueron seleccionadas
@@ -5195,8 +5195,8 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
     {
       gtk_tree_model_get (store, &iter,
 			  0, &enable,
-			  6, &precio,
-			  10, &sugerido,
+			  3, &precio,
+			  8, &sugerido,
 			  -1);
       if (enable == TRUE)
 	subTotal = subTotal + (precio * ((sugerido > 0) ? sugerido : 1));
@@ -5213,11 +5213,109 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
 
 
 /**
+ * Es llamada cuando se edita "Costo" en el tree_view_products_providers (signal edited).
+ *
+ * Esta funcion actualiza el campo "Costo" por el valor indicado por el usuario.
+ *
+ */
+void
+on_buy_price_edited (GtkCellRendererText *cell, gchar *path_string, gchar *costoT, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  gdouble costo = strtod (PUT (costoT), (char **)NULL);
+  gdouble costoAnterior;
+  gdouble subTotal, precio, cantidad;
+  gboolean fraccion, enable;
+  gchar *barcode;
+
+  // Se inicializan en 0
+  subTotal = precio = cantidad = 0;
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
+
+  gtk_tree_model_get (model, &iter,
+		      0, &enable,
+		      1, &barcode, // Se obtiene el codigo_corto desde el treeview
+		      3, &costoAnterior, // Costo antes de la modificacion
+		      4, &precio,
+		      8, &cantidad,
+		      -1);
+
+  if (costo < 0) // costo no puede ser negativo
+    costo = 0;
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      3, costo,
+		      -1);
+
+  // Recaclula subtotal
+  if (enable == TRUE)
+    {
+      gchar *subTotalActualT = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected"))));
+      gdouble subTotalActual = strtod (PUT (subTotalActualT), (char **)NULL);
+
+      // Se limpia subtotal restandole costo de la cantidad anterior
+      // así se obtiene el subTotal sin contar este producto
+      subTotal = subTotalActual - (costoAnterior * ((cantidad > 0) ? cantidad : 1));
+
+      // Agrego al subtotal la cantidad al costo actual (la que se acaba de editar)
+      subTotal = subTotal + (costo * ((cantidad > 0) ? cantidad : 1));
+
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
+			    g_strdup_printf ("<b>%u</b>", llround(subTotal)));
+    }
+}
+
+/**
+ * Es llamada cuando se edita "Precio" en el tree_view_products_providers (signal edited).
+ *
+ * Esta funcion actualiza el campo "precio" por el valor indicado por el usuario.
+ *
+ */
+void
+on_sell_price_edited (GtkCellRendererText *cell, gchar *path_string, gchar *precioT, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  gdouble precio = strtod (PUT (precioT), (char **)NULL);
+  gdouble precioAntes;
+  gdouble subTotal, costo, cantidad;
+  gboolean fraccion, enable;
+  gchar *barcode;
+
+  // Se inicializan en 0
+  subTotal = costo = cantidad = 0;
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
+
+  gtk_tree_model_get (model, &iter,
+		      0, &enable,
+		      1, &barcode, // Se obtiene el codigo_corto desde el treeview
+		      3, &costo,
+		      4, &precioAntes, // precio antes de la modificacion
+		      8, &cantidad,
+		      -1);
+
+  if (precio < 0) // precio no puede ser negativo
+    precio = 0;
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      4, precio,
+		      -1);
+}
+
+
+/**
  * Es llamada cuando se edita "sugerido" en el tree_view_products_providers (signal edited).
  *
  * Esta funcion actualiza el campo "sugerido" por el valor indicado por el usuario.
  *
- * TODO: Crear una función que permita modificar actualice el valor modificado de cualquier treeview
+ * TODO: Crear una función que actualice el valor modificado de cualquier treeview
  */
 
 void
@@ -5238,8 +5336,8 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
   gtk_tree_model_get (model, &iter,
 		      0, &enable,
 		      1, &barcode, // Se obtiene el codigo_corto desde el treeview
-		      6, &precio,
-		      10, &sugeridoAntes, // Sugerido antes de la modificacion
+		      3, &precio,
+		      8, &sugeridoAntes, // Sugerido antes de la modificacion
 		      -1);
 
   PGresult *res;
@@ -5262,7 +5360,7 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
     sugerido = 0;
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-		      10, (fraccion == TRUE) ? sugerido : lround(sugerido),
+		      8, (fraccion == TRUE) ? sugerido : lround(sugerido),
 		      -1);
 
   // Recaclula subtotal
@@ -5272,10 +5370,10 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
       gdouble subTotalActual = strtod (PUT (subTotalActualT), (char **)NULL);
 
       // Se limpia subtotal restandole costo de la cantidad anterior
-      // asÃ­ se obtiene el subTotal sin contar este producto
+      // así se obtiene el subTotal sin contar este producto
       subTotal = subTotalActual - (precio * ((sugeridoAntes > 0) ? sugeridoAntes : 1));
 
-      // Agrego al subtotal la catidad sugerida actual (la que se acaba de editar)
+      // Agrego al subtotal la cantidad sugerida actual (la que se acaba de editar)
       subTotal = subTotal + (precio * ((sugerido > 0) ? sugerido : 1));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
@@ -5359,26 +5457,21 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 3);
       gtk_tree_view_column_set_resizable (column, FALSE);
-
       // END TreeView Providers
 
 
       // TreeView Products Providers (merchandises of each providers)
-
-      store = gtk_list_store_new (11,
+      store = gtk_list_store_new (9,
 				  G_TYPE_BOOLEAN, //Elegir (Para comprar)
 				  G_TYPE_STRING,  //Código
 				  G_TYPE_STRING,  //Descripción
-				  G_TYPE_STRING,  //Marca
-				  G_TYPE_STRING,  //Contenido
-				  G_TYPE_STRING,  //Unidad
 				  G_TYPE_DOUBLE,  //Costo_promedio
+				  G_TYPE_DOUBLE,  //Precio
 				  G_TYPE_DOUBLE,  //Vta/Dia
 				  G_TYPE_DOUBLE,  //Stock
 				  G_TYPE_DOUBLE,  //Dias/Stock
 				  G_TYPE_DOUBLE,  //Sugerido
 				  -1);
-
 
       treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_products_providers"));
       gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
@@ -5420,37 +5513,45 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_resizable (column, FALSE);
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+      g_object_set (renderer, "editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_buy_price_edited), (gpointer)store);
+      column = gtk_tree_view_column_new_with_attributes ("Costo", renderer,
 							 "text", 3,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 3);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Cont.", renderer,
+      g_object_set (renderer, "editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_sell_price_edited), (gpointer)store);
+      column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
 							 "text", 4,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 4);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Vta/Dia", renderer,
 							 "text", 5,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 5);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Costo", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
 							 "text", 6,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
@@ -5460,8 +5561,9 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_resizable (column, FALSE);
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
+
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Vta/Dia", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Dias/Stock", renderer,
 							 "text", 7,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
@@ -5472,7 +5574,9 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
+      g_object_set (renderer, "editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_suggested_amount_edited), (gpointer)store);
+      column = gtk_tree_view_column_new_with_attributes ("Sugerido", renderer,
 							 "text", 8,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
@@ -5481,31 +5585,6 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_sort_column_id (column, 8);
       gtk_tree_view_column_set_resizable (column, FALSE);
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
-
-
-      renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Dias/Stock", renderer,
-							 "text", 9,
-							 NULL);
-      gtk_tree_view_append_column (treeview, column);
-      gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-      gtk_tree_view_column_set_sort_column_id (column, 9);
-      gtk_tree_view_column_set_resizable (column, FALSE);
-      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
-
-      renderer = gtk_cell_renderer_text_new ();
-      g_object_set (renderer, "editable", TRUE, NULL);
-      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_suggested_amount_edited), (gpointer)store);
-      column = gtk_tree_view_column_new_with_attributes ("Sugerido", renderer,
-							 "text", 10,
-							 NULL);
-      gtk_tree_view_append_column (treeview, column);
-      gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-      gtk_tree_view_column_set_sort_column_id (column, 10);
-      gtk_tree_view_column_set_resizable (column, FALSE);
-      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)10, NULL);
       // END TreeView Products Providers
     }
 
@@ -5613,15 +5692,17 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
       gtk_list_store_set (store, &iter,
 			  //0, Toggle Button (Elegir)
                           1, PQvaluebycol (res, i, "codigo_corto"),
-			  2, PQvaluebycol (res, i, "descripcion"),
-			  3, PQvaluebycol (res, i, "marca"),
-                          4, PQvaluebycol (res, i, "contenido"),
-			  5, PQvaluebycol (res, i, "unidad"),
-			  6, strtod (PUT(PQvaluebycol (res, i, "costo_promedio")), (char **)NULL),
-			  7, ventas_dia,
-                          8, strtod (PUT(PQvaluebycol (res, i, "stock")), (char **)NULL),
-			  9, dias_stock,
-			  10, (fraccion == TRUE) ? sugerido : lround (sugerido),
+			  2, g_strdup_printf ("%s %s %s %s", 
+					      PQvaluebycol (res, i, "descripcion"),
+					      PQvaluebycol (res, i, "marca"),
+					      PQvaluebycol (res, i, "contenido"),
+					      PQvaluebycol (res, i, "unidad")),
+			  3, strtod (PUT(PQvaluebycol (res, i, "precio_compra")), (char **)NULL),
+			  4, strtod (PUT(PQvaluebycol (res, i, "precio")), (char **)NULL),
+			  5, ventas_dia,
+                          6, strtod (PUT(PQvaluebycol (res, i, "stock")), (char **)NULL),
+			  7, dias_stock,
+			  8, (fraccion == TRUE) ? sugerido : lround (sugerido),
 			  -1);
     }
 }
@@ -5646,8 +5727,8 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
   GtkTreeIter iter;
   GtkWidget *aux_widget;
   gboolean valid;
-  gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteraciÃ³n
-  gint i; // Para la iteraciÃ³n del for
+  gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteración
+  gint i; // Para la iteración del for
 
   gchar *rut, *nombre, *descripcion; // Datos que se obtienen del treeview
   gdouble lapRep; // Dato que se obtiene del treeview (lapso de reposición)
@@ -5808,7 +5889,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 
   /*Variables de informacion*/
   gboolean enabled;
-  gchar *codigo_corto, *marca, *descripcion; //Se obtienen desde el treeview
+  gchar *codigo_corto; //Se obtienen desde el treeview
   gdouble costo, cantidad; //Se obtienen desde el treeview
   gchar *barcode, *precio; //Se obtienen a través de una consulta sql
 
@@ -5824,10 +5905,8 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
       gtk_tree_model_get (model, &iter,
 			  0, &enabled,
 			  1, &codigo_corto,
-                          2, &marca,
-                          3, &descripcion,
-			  6, &costo,
-			  10, &cantidad,
+			  3, &costo,
+			  7, &cantidad,
                           -1);
 
       if (enabled == TRUE)
@@ -5848,8 +5927,6 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), g_strdup_printf ("%f",cantidad));
 
 	  AddToProductsList(); // Agrega los productos a la lista de compra
-
-	  //printf (" barcode = %s\n marca = %s\n descripcion = %s\n", barcode, marca, descripcion);
 	}
       valid = gtk_tree_model_iter_next (model, &iter);
     }    

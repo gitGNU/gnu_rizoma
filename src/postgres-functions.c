@@ -2807,7 +2807,11 @@ PGresult *getProductsByProvider (gchar *rut)
 
   q = g_strdup_printf("SELECT DISTINCT p.*, "
 		      "(select_ventas_dia(p.barcode)::float) AS ventas_dia, "
-		      "(stock::float / select_ventas_dia(p.barcode)::float) AS stock_day "
+		      "(stock::float / select_ventas_dia(p.barcode)::float) AS stock_day, "
+		      "(select precio "
+	                      "from compra_detalle "
+	                      "where id_compra = (select max (id_compra) from compra_detalle where barcode_product= p.barcode) "
+	                      "and barcode_product = p.barcode) AS precio_compra "
 		      "FROM producto p "
 		      "INNER JOIN compra_detalle cd "
 		      "ON p.barcode = cd.barcode_product "
