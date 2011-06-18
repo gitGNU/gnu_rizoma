@@ -2596,7 +2596,19 @@ FillPagarFacturas (gchar *rut_proveedor)
 
   if (rut_proveedor == NULL) return;
 
-  q = g_strdup_printf ("SELECT t1.id, t1.num_factura, t1.monto, date_part ('day', t1.fecha) as dia, date_part('month', t1.fecha) as mes, date_part('year', t1.fecha) as ano, t1.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, t2.nombre, t1.id, t1.rut_proveedor FROM factura_compra AS t1, formas_pago as t2 WHERE t1.rut_proveedor='%s' AND t1.pagada='f' and t2.id = t1.forma_pago ORDER BY pay_year, pay_month, pay_day ASC", rut_proveedor);
+  q = g_strdup_printf ("SELECT fc.id, fc.num_factura, fc.monto, "
+		       "date_part ('day', fc.fecha) as dia, date_part('month', fc.fecha) as mes, date_part('year', fc.fecha) as ano, "
+		       "fc.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, "
+		       "fp.nombre, fc.id, fc.rut_proveedor "
+		       "FROM formas_pago fp "
+		       "INNER JOIN factura_compra fc "
+		       "ON fp.id = fc.forma_pago "
+		       "INNER JOIN compra c "
+		       "ON fc.id_compra = c.id "
+		       "WHERE fc.rut_proveedor='%s' "
+		       "AND fc.pagada='f' "
+		       "AND c.anulada_pi = false "
+		       "ORDER BY pay_year, pay_month, pay_day ASC", rut_proveedor);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -3985,9 +3997,16 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
 
       strs = g_strsplit (str, "-", 2);
 
-      guide = tab == 2 ? TRUE : FALSE;
-
-      FillProveedorData (*strs, guide);
+      if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder, "wnd_nullify_buy"))))
+	{
+	  gtk_entry_set_text (GTK_WIDGET (builder_get (builder, "entry_nullify_buy_provider")), *strs);
+	  on_btn_nullify_buy_search_clicked (NULL, NULL);
+	}
+      else
+	{
+	  guide = tab == 2 ? TRUE : FALSE;
+	  FillProveedorData (*strs, guide);
+	}
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
     }
@@ -5359,12 +5378,10 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 3);
       gtk_tree_view_column_set_resizable (column, FALSE);
-
       // END TreeView Providers
 
 
       // TreeView Products Providers (merchandises of each providers)
-
       store = gtk_list_store_new (11,
 				  G_TYPE_BOOLEAN, //Elegir (Para comprar)
 				  G_TYPE_STRING,  //Código
@@ -5646,8 +5663,8 @@ on_entry_filter_providers_changed (GtkEditable *editable, gpointer user_data)
   GtkTreeIter iter;
   GtkWidget *aux_widget;
   gboolean valid;
-  gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteraciÃ³n
-  gint i; // Para la iteraciÃ³n del for
+  gint fila_actual = 0; // Representa el numero de fila en el que se encuetra la iteración
+  gint i; // Para la iteración del for
 
   gchar *rut, *nombre, *descripcion; // Datos que se obtienen del treeview
   gdouble lapRep; // Dato que se obtiene del treeview (lapso de reposición)
@@ -5910,4 +5927,582 @@ hide_wnd_suggest_buy (GtkButton *button, gpointer user_data)
       g_free (rut_proveedor_global);
       rut_proveedor_global = NULL;
     }
+}
+
+
+/**
+ * Callback when "change" event on 'treeview_nullify_buy_invoice' is triggered.
+ *
+ * This function shows (on the 'treeview_nullify_buy_invoice_details') 
+ * the information correspondig to the row selected
+ * on the 'treeview_nullify_buy_invoice'. 
+ */
+void
+on_selection_nullify_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
+{
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  gtk_list_store_clear (store);
+
+  GtkTreeModel *model = gtk_tree_view_get_model (gtk_tree_selection_get_tree_view (selection));
+  GtkTreeIter iter;
+
+  gint i, tuples;
+  gchar *q;
+  PGresult *res;
+
+  gint id_compra, id_factura_compra;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+			  5, &id_compra,
+			  6, &id_factura_compra,
+			  -1);
+
+      q = g_strdup_printf ("SELECT fcd.barcode, fcd.cantidad, fcd.precio, (fcd.cantidad * fcd.precio) AS subtotal, "
+			   "(SELECT p.descripcion FROM producto p WHERE p.barcode = fcd.barcode) AS descripcion "
+			   "FROM factura_compra_detalle fcd "
+			   "INNER JOIN factura_compra fc "
+			   "ON fc.id = fcd.id_factura_compra "
+			   "WHERE fc.id = %d", id_factura_compra);
+      
+      res = EjecutarSQL (q);
+      g_free (q);
+      tuples = PQntuples (res);
+      
+      for (i = 0; i < tuples; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, atoi (g_strdup (PQvaluebycol (res, i, "barcode"))),
+			      1, PQvaluebycol (res, i, "descripcion"),
+			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
+			      3, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      4, atoi (g_strdup (PQvaluebycol (res, i, "subtotal"))),
+			      5, id_compra,
+			      6, id_factura_compra,
+			      -1);
+	}
+      
+      PQclear (res);
+    }
+}
+
+/**
+ * Callback when "change" event on 'treeview_nullify_buy' is triggered.
+ *
+ * This function shows (on the 'treeview_nullify_buy_invoice') 
+ * the information correspondig to the row selected
+ * on the 'treeview_nullify_buy'. 
+ */
+void 
+on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
+{  
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice"));
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  gtk_list_store_clear (store);
+
+  GtkTreeModel *model = gtk_tree_view_get_model (gtk_tree_selection_get_tree_view (selection));
+  GtkTreeIter iter;
+
+  gint i, tuples;
+  gchar *q;
+  PGresult *res;
+
+  gint id_compra;
+  gchar *nombre_proveedor, *rut_proveedor;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &id_compra,
+			  3, &nombre_proveedor,
+			  4, &rut_proveedor,
+			  -1);
+
+      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_name")), nombre_proveedor);
+      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_rut")), rut_proveedor);
+
+      q = g_strdup_printf ("SELECT fc.id, fc.num_factura, fc.pagada, fc.id_compra, "
+			   "date_part ('year', fc.fecha) AS f_year, "
+			   "date_part ('month', fc.fecha) AS f_month, "
+			   "date_part ('day', fc.fecha) AS f_day, "
+
+			   "date_part ('year', fc.fecha_pago) AS fp_year, "
+			   "date_part ('month', fc.fecha_pago) AS fp_month, "
+			   "date_part ('day', fc.fecha_pago) AS fp_day, "
+
+			   "(SELECT SUM (cantidad * precio) "
+		                   "FROM factura_compra_detalle fcd "
+		                   "INNER JOIN factura_compra fc "
+		                   "ON fcd.id_factura_compra = fc.id) AS monto "
+			   "FROM factura_compra fc "
+			   "WHERE fc.id_compra = %d", id_compra);
+      
+      res = EjecutarSQL (q);
+      g_free (q);
+      tuples = PQntuples (res);
+      
+      for (i = 0; i < tuples; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, atoi (g_strdup (PQvaluebycol (res, i, "num_factura"))),
+			      1, g_strdup_printf ("%s/%s/%s",
+						  PQvaluebycol (res, i, "f_day"),
+						  PQvaluebycol (res, i, "f_month"),
+						  PQvaluebycol (res, i, "f_year")),
+			      2, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "pagada"), "t")) ? "Si" : "No"),
+			      3, g_strdup_printf ("%s/%s/%s",
+						  PQvaluebycol (res, i, "fp_day"),
+						  PQvaluebycol (res, i, "fp_month"),
+						  PQvaluebycol (res, i, "fp_year")),
+			      4, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
+			      5, id_compra,
+			      6, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
+			      -1);
+	}
+      
+      PQclear (res);
+    }
+}
+
+/**
+ * Is called by "btn_nullify_buy_ok" (signal click).
+ *
+ * this function nullify the buy selected
+ * 
+ * @param: GtkButton *button: button from signal is triggered
+ * @param: gpointer user_data: user data
+ */
+void
+on_btn_nullify_buy_ok_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy"));
+  GtkTreeSelection *selection  = gtk_tree_view_get_selection (treeview);
+  GtkTreeModel *model = gtk_tree_view_get_model (gtk_tree_selection_get_tree_view (selection));
+  GtkTreeIter iter;  
+
+  gint id_compra;
+
+  gchar *q;
+  PGresult *res;
+  gint tuples, i;
+
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy")), 
+		"Debe seleccionar la compra que desea anular");
+      return;
+    }
+
+  gtk_tree_model_get (model, &iter,
+		      0, &id_compra,
+		      -1);
+
+  q = g_strdup_printf ("SELECT * FROM nullify_buy (%d, %d)", id_compra, atoi (rizoma_get_value ("MAQUINA")));
+  res = EjecutarSQL (q);
+  g_free (q);
+  tuples = PQntuples (res);
+  
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), PQvaluebycol (res, i, "barcode"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PQvaluebycol (res, i, "costo"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, i, "precio"));
+      calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
+      
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), PQvaluebycol (res, i, "cantidad_anulada"));
+      
+      AddToProductsList(); // Agrega los productos a la lista de compra
+    }
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_nullify_buy")));
+}
+
+/**
+ * This function loads the nullify buy dialog.
+ *
+ * Here must stay all the configuration of the dialog that is needed
+ * when the dialog will be showed to the user.
+ */
+void
+nullify_buy_win(void)
+{
+  GtkWidget *widget;
+
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+
+  GtkTreeView *treeview_buy;
+  GtkTreeSelection *selection_buy;
+  GtkTreeView *treeview_invoice;
+  GtkTreeSelection *selection_invoice;
+  GtkTreeView *treeview_details;
+
+  GtkListStore *store_buy;
+  GtkListStore *store_invoice;
+  GtkListStore *store_details;
+
+  // TreeView Compras
+  treeview_buy = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_buy"));
+  store_buy = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_buy));
+  if (store_buy == NULL)
+    {
+      store_buy = gtk_list_store_new (5,
+				      G_TYPE_INT,     //Id
+				      G_TYPE_STRING,  //Date
+				      G_TYPE_INT,     //Total amount
+				      G_TYPE_STRING,  //Nombre proveedor
+				      G_TYPE_STRING); //Rut proveedor
+
+      gtk_tree_view_set_model(treeview_buy, GTK_TREE_MODEL(store_buy));
+
+      selection_buy = gtk_tree_view_get_selection (treeview_buy);
+      gtk_tree_selection_set_mode (selection_buy, GTK_SELECTION_SINGLE);
+      g_signal_connect (G_OBJECT (selection_buy), "changed",
+			G_CALLBACK (on_selection_nullify_buy_change), NULL);
+
+      //ID
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("ID", renderer,
+                                                        "text", 0,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_buy, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 0);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //date
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Fecha", renderer,
+                                                        "text", 1,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_buy, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 1);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      
+      //Total amount
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+                                                        "text", 2,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_buy, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 2);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+
+  // TreeView Facturas
+  treeview_invoice = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_buy_invoice"));
+  store_invoice = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_invoice));
+  if (store_invoice == NULL)
+    {
+      store_invoice = gtk_list_store_new (7,
+					  G_TYPE_INT,    // N° Factura
+					  G_TYPE_STRING, // Fecha Ingreso
+					  G_TYPE_STRING, // Pagada
+					  G_TYPE_STRING, // Fecha Pago
+					  G_TYPE_INT,    // Monto Total
+					  G_TYPE_INT,    // ID Compra
+					  G_TYPE_INT);   // ID Factura Compra
+
+      gtk_tree_view_set_model(treeview_invoice, GTK_TREE_MODEL(store_invoice));
+
+      selection_invoice = gtk_tree_view_get_selection (treeview_invoice);
+      gtk_tree_selection_set_mode (selection_invoice, GTK_SELECTION_SINGLE);
+      g_signal_connect (G_OBJECT(selection_invoice), "changed",
+      G_CALLBACK (on_selection_nullify_buy_invoice_change), NULL);
+
+      //ID
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("N° Factura", renderer,
+                                                        "text", 0,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_invoice, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 0);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Fecha Ingreso
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Fecha Ing.", renderer,
+                                                        "text", 1,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_invoice, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 1);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Pagado
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Pagada", renderer,
+                                                        "text", 2,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_invoice, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 2);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Fecha Pago
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Fecha Pago", renderer,
+                                                        "text", 3,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_invoice, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 3);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Monto Total
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+                                                        "text", 4,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_invoice, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 4);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+
+  //TreeView Detalle Factura
+  treeview_details = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_buy_invoice_details"));
+  store_details = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_details));
+  if (store_details == NULL)
+    {
+      store_details = gtk_list_store_new (7,
+                                          G_TYPE_INT,    //barcode
+                                          G_TYPE_STRING, //description
+                                          G_TYPE_DOUBLE, //cantity
+                                          G_TYPE_INT,    //price
+                                          G_TYPE_INT,    //subtotal
+                                          G_TYPE_INT,    //Id_compra
+                                          G_TYPE_INT);   //id_factura_compra
+
+      gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
+      gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_NONE);
+
+      //barcode
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Cod. Barras", renderer,
+                                                        "text", 0,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 0);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //description
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Descripcion", renderer,
+                                                        "text", 1,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 1);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //cantity
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Cantidad", renderer,
+                                                        "text", 2,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 2);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
+
+      //price
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
+                                                        "text", 3,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 3);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //subtotal
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Subtotal", renderer,
+                                                        "text", 4,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 4);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_buy"));
+  clean_container (GTK_CONTAINER (widget));
+  gtk_widget_show_all (widget);
+}
+
+
+/**
+ * Is called by "btn_nullify_buy_search" (signal click).
+ *
+ * this function shows the products that meet the search criteria
+ * on treeview "treeview_nullify_buy"
+ * 
+ * @param: GtkButton *button: button from signal is triggered
+ * @param: gpointer user_data: user data
+ */
+void
+on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
+{
+  /*Treeview*/
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeIter iter;
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_nullify_buy"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  gtk_list_store_clear (store);
+
+  /*Fecha*/
+  GDate *date_aux;
+  date_aux = g_date_new();
+
+  /*Obteniendo datos de los entry*/
+  gchar *id_compra = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_id"))));
+  gchar *num_factura = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_invoice"))));
+  gchar *proveedor = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_provider"))));
+  gchar *str_date = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_date"))));
+  
+  if (!g_str_equal (str_date, ""))
+    {
+      g_date_set_parse (date_aux, str_date);
+      str_date = g_strdup_printf("%d-%d-%d",
+				 g_date_get_year(date_aux),
+				 g_date_get_month(date_aux),
+				 g_date_get_day(date_aux));
+    }
+  
+  gchar *q, *q2;
+  PGresult *res;
+  gint tuples, i;
+
+  q = g_strdup_printf ("SELECT c.id, "
+		       "date_part ('year', c.fecha) AS year, "
+		       "date_part ('month', c.fecha) AS month, "
+		       "date_part ('day', c.fecha) AS day, "
+		       "date_part ('hour', c.fecha) AS hour, "
+		       "date_part ('minute', c.fecha) AS minute, "
+		       "c.rut_proveedor, "
+		       "(SELECT nombre FROM proveedor WHERE rut = c.rut_proveedor) AS nombre_proveedor, "
+		       "(SELECT SUM (cantidad * precio) "
+		            "FROM factura_compra_detalle fcd "
+		            "INNER JOIN factura_compra fc "
+		            "ON fcd.id_factura_compra = fc.id "
+		            "AND fc.id_compra = c.id) AS monto "
+		       "FROM compra c INNER JOIN factura_compra fc "
+		       "ON c.id = fc.id_compra "
+		       "WHERE c.ingresada = 't' "
+		       "AND c.anulada = 'f' "
+		       "AND c.anulada_pi = 'f'");
+
+  /*Comprobando datos*/
+  if (!g_str_equal(id_compra, ""))
+    q = g_strdup_printf (" %s AND c.id = %s", q, id_compra);
+
+  else if (!g_str_equal(num_factura, ""))
+    q = g_strdup_printf (" %s AND fc.num_factura = %s", q, num_factura);
+
+  else if (!g_str_equal(proveedor, ""))
+    {
+      q2 = g_strdup_printf ("SELECT rut, dv, nombre "
+			    "FROM buscar_proveedor ('%%%s%%')", proveedor);
+      res = EjecutarSQL (q2);
+      g_free (q2);
+      tuples = PQntuples (res);
+
+      if (tuples > 1)
+	{
+	  on_entry_guide_invoice_provider_activate (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_provider")), NULL);
+	  return;
+	}
+
+      else if (tuples == 1)
+	q = g_strdup_printf (" %s AND fc.rut_proveedor = %s", q, PQvaluebycol(res,0,"rut"));
+      else if (tuples == 0)
+	AlertMSG (GTK_WIDGET (builder_get (builder, "entry_nullify_buy_provider")), 
+		  "No existen proveedores con el nombre o rut que ha especificado");
+    }
+
+  if (g_date_valid (date_aux))
+    q = g_strdup_printf (" %s AND c.fecha BETWEEN '%s' AND '%s 23:59:59'", q, str_date, str_date);
+
+  // Se ejecuta la consulta construida
+  res = EjecutarSQL (q);
+  g_free (q);  
+  tuples = PQntuples (res);
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
+			  1, g_strdup_printf ("%s/%s/%s %s:%s",
+					      PQvaluebycol (res, i, "day"),
+					      PQvaluebycol (res, i, "month"),
+					      PQvaluebycol (res, i, "year"),
+					      PQvaluebycol (res, i, "hour"),
+					      PQvaluebycol (res, i, "minute")),
+			  2, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
+			  3, PQvaluebycol (res, i, "nombre_proveedor"),
+			  4, PQvaluebycol (res, i, "rut_proveedor"),
+			  -1);
+    }
+
+  PQclear (res);
+}
+
+/**
+ * Callback connected the key-press-event in the main window.
+ *
+ * This function must be simple, because can lead to a performance
+ * issues. It currently only handles the global keys that are
+ * associated to nothing.
+ *
+ * @param widget the widget that emits the signal
+ * @param event the event
+ * @param data the user data
+ *
+ * @return TRUE on key captured, FALSE to let the key pass.
+ */
+gboolean 
+on_compras_gui_key_press_event(GtkWidget   *widget,
+			       GdkEventKey *event,
+			       gpointer     data)
+{
+  switch (event->keyval)
+    {
+    case GDK_F5:
+      if (user_data->user_id == 1)
+	nullify_buy_win ();
+      break;
+
+    default:
+      return FALSE;
+    }
+
+  return TRUE;
 }

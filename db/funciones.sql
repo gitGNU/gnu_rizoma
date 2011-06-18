@@ -2809,7 +2809,7 @@ return;
 end; $$ language plpgsql;
 
 
--- Entrega la información del producto desde la fecha otorgada hasta ahora
+-- Entrega la informacion del producto desde la fecha otorgada hasta ahora
 create or replace function producto_en_periodo(
        in fecha_inicio date,
        out barcode varchar,
@@ -2971,3 +2971,101 @@ END loop;
 
 return;
 end; $$ language plpgsql;
+
+
+-- Anula una compra y devuelve el resultado
+create or replace function nullify_buy(
+       IN id_compra_in integer,
+       IN maquina integer,
+       OUT barcode varchar,
+       OUT cantidad double precision,
+       OUT cantidad_anulada double precision,
+       OUT nuevo_stock double precision,
+       OUT costo integer,
+       OUT precio integer
+       )
+RETURNS setof record AS $$
+DECLARE
+id_compra_anulada integer;
+rut_proveedor_compra integer;
+query text;
+l record;
+BEGIN
+
+-- Se obtiene el rut del proveedor correspondiente a la compra
+SELECT rut_proveedor INTO rut_proveedor_compra FROM compra WHERE id = id_compra_in;
+
+-- Se inserta los datos de la compra en la tabla compra_anulada
+EXECUTE $S$ INSERT INTO compra_anulada (id_compra, fecha_anulacion, rut_proveedor, maquina)
+	    VALUES ($S$|| id_compra_in ||$S$, NOW(), $S$|| rut_proveedor_compra ||$S$,$S$|| maquina ||$S$ ) $S$;
+
+-- Se obtiene el id de la compra_anulada
+SELECT id INTO id_compra_anulada FROM compra_anulada WHERE id_compra = id_compra_in;
+
+-- Se ingresa nota de credito de ser necesario
+EXECUTE 'INSERT INTO nota_credito (fecha, num_factura, fecha_factura, rut_proveedor)
+	 SELECT NOW(), num_factura, fecha, rut_proveedor 
+	 FROM factura_compra
+	 WHERE pagada = true
+	 AND id_compra = '|| id_compra_in;
+
+-- Se ingresa el detalle de nota de credito de ser necesario
+EXECUTE 'INSERT INTO nota_credito_detalle (id_nota_credito, barcode, costo, precio, cantidad)
+	 SELECT 
+	 	(SELECT id FROM nota_credito nc WHERE nc.num_factura = fc.num_factura) AS id_nota_credito,
+	 	fcd.barcode, fcd.precio AS costo, 
+	 	(SELECT precio FROM producto WHERE barcode = fcd.barcode) AS precio, 
+	 fcd.cantidad 
+	 FROM factura_compra_detalle fcd
+	 INNER JOIN factura_compra fc
+	 ON fc.id = fcd.id_factura_compra
+	 WHERE fc.pagada = true
+	 AND fc.id_compra = '|| id_compra_in;
+
+-- Obtengo todos los productos correspondiente a la compra
+query := 'SELECT fc.id, barcode, precio AS costo, 
+          (SELECT precio FROM producto WHERE barcode = barcode) AS precio,
+	  (SELECT stock FROM producto WHERE barcode = barcode) AS stock_actual,
+	  (SELECT pagada FROM factura_compra WHERE id = fc.id) AS pagada,
+          SUM (cantidad) AS cantidad
+      	  FROM factura_compra_detalle fcd
+	  INNER JOIN factura_compra fc
+	  ON fcd.id_factura_compra = fc.id
+	  WHERE fc.id_compra = ' || id_compra_in ||
+	 'GROUP BY barcode, costo, precio, fc.id';
+
+FOR l IN EXECUTE query loop
+    --Registrando datos a retornar
+    barcode := l.barcode;
+    costo := l.costo;
+    precio := l.precio;
+
+    --La cantidad a anular no puede ser mayor al stock actual
+    IF l.stock_actual < l.cantidad THEN
+        cantidad_anulada := l.stock_actual;
+	nuevo_stock := 0;
+    ELSE
+	cantidad_anulada := l.cantidad;
+	nuevo_stock := l.stock_actual - l.cantidad;
+    END IF;
+
+    --Reajustar stock producto
+    UPDATE producto SET stock = nuevo_stock WHERE barcode = barcode;
+
+    --Colocar los productos en la tabla compra_anulada_detalle
+    EXECUTE 'INSERT INTO compra_anulada_detalle (id_compra_anulada, barcode, costo, precio, cantidad, cantidad_anulada)
+             VALUES ('||id_compra_anulada||','||barcode||','||costo||','||precio||','||l.cantidad||','||cantidad_anulada||')';
+
+    --Reajustar la cantidad del producto en nota_credito_detalle
+    -- en caso de que no se haya podido anular la cantidad completa (stock < cantidad)
+    
+    --Recalcular costo_promedio
+
+    RETURN NEXT;
+END loop;
+
+--Actualizar anulada_pi en compra
+UPDATE compra SET anulada_pi = 't' WHERE id = id_compra_in;
+
+RETURN;
+END; $$ language plpgsql;

@@ -219,10 +219,10 @@ on_btn_save_cuadratura_clicked()
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
       
-      // Se guarda la merma con motivo "Diferencia Cuadratura", si Ã©sta es distinta de 0 --
+      // Se guarda la merma con motivo "Diferencia Cuadratura", si ésta es distinta de 0 --
       if((stock_teorico - stock_fisico) != 0)
 	{	 
-	  // Se obtiene el barcode a partir del cÃ³digo corto 
+	  // Se obtiene el barcode a partir del código corto 
 	   gchar *barcode;
 	  barcode = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto='%s'",
 								codigo_corto))
@@ -237,7 +237,7 @@ on_btn_save_cuadratura_clicked()
       valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si itera a la siguiente */
     }
   
-  // Se deshabilita el botÃ³n guardar
+  // Se deshabilita el botón guardar
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
 }
 
@@ -890,7 +890,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID DevoluciÃ³n", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ID Devolución", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1294,8 +1294,8 @@ reports_win (void)
   cuadratura->cols[8].name = "Mermas";
   cuadratura->cols[9].name = "Envios";
   cuadratura->cols[10].name = "Recibidos";
-  cuadratura->cols[11].name = "Stock TeÃ³rico";
-  cuadratura->cols[12].name = "Stock FÃ­sico";
+  cuadratura->cols[11].name = "Stock Teórico";
+  cuadratura->cols[12].name = "Stock Físico";
   cuadratura->cols[13].name = "Diferencia";
   cuadratura->cols[14].name = NULL;
 

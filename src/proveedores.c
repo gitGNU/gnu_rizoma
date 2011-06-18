@@ -211,7 +211,7 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
   if ((res == NULL) || (PQntuples (res) == 0))
     return;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_razon"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
   gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "nombre"));
 
   q = g_strconcat(PQvaluebycol (res, 0, "rut"), "-", PQvaluebycol(res, 0, "dv"), NULL);
