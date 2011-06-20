@@ -1118,7 +1118,7 @@ AgregarCompra (gchar *rut, gchar *nota, gint dias_pago)
   gchar *q;
 
   q = g_strdup_printf("SELECT * FROM insertar_compra( '%s', '%s', '%d' )",
-                      rut, nota, dias_pago == 0 ? dias_pago - 1 : dias_pago);
+                      rut, nota, dias_pago); // dias_pago == 0 ? dias_pago - 1 : dias_pago);
   id_compra = atoi(GetDataByOne(q));
 
   g_free(q);
@@ -1660,7 +1660,7 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, g
       res = EjecutarSQL (q);
       g_free (q);
 
-      q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE id_compra=%d", id_compra);
+      q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(SELECT days FROM formas_pago WHERE id=forma_pago) WHERE id_compra=%d", id_compra);
       res = EjecutarSQL (q);
       g_free (q);
     }
@@ -1672,7 +1672,7 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, g
       res = EjecutarSQL (q);
       g_free (q);
 
-      q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(forma_pago) WHERE num_factura=%d", n_doc);
+      q = g_strdup_printf ("UPDATE factura_compra SET fecha_pago=DATE(fecha)+(SELECT days FROM formas_pago WHERE id=forma_pago) WHERE num_factura=%d", n_doc);
       res = EjecutarSQL (q);
       g_free (q);
     }

@@ -4286,6 +4286,7 @@ on_btn_pay_invoice_clicked (void)
   GtkTreeIter iter;
   gchar *id_invoice;
   gchar *rut_provider = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_invoice_rut"))));
+  gint position;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
@@ -4293,6 +4294,8 @@ on_btn_pay_invoice_clicked (void)
                           0, &id_invoice,
                           -1);
 
+      position = atoi (gtk_tree_model_get_string_from_iter(model, &iter));
+      
       if (PagarFactura (atoi (id_invoice)) == FALSE)
         {
           ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_invoice_provider")), "No se ingreso correctamente");
@@ -4300,6 +4303,7 @@ on_btn_pay_invoice_clicked (void)
       else
         {
           FillPagarFacturas (rut_provider);
+	  select_back_deleted_row("tree_view_invoice_list", position);
         }
     }
 }

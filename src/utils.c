@@ -485,7 +485,7 @@ log_register_access (User *info_user, gboolean login)
 
 /**
  * Selecciona la fila anterior (de un treeview) a la eliminada
- * de no haber un elemento anterior selecciona el último disponible
+ * de no haber un elemento anterior selecciona el Ãºltimo disponible
  *
  * @param Nombre del treeview
  * @param Numero de la fila eliminada
