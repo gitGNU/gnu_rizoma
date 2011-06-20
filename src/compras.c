@@ -5906,7 +5906,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 			  0, &enabled,
 			  1, &codigo_corto,
 			  3, &costo,
-			  7, &cantidad,
+			  8, &cantidad,
                           -1);
 
       if (enabled == TRUE)
