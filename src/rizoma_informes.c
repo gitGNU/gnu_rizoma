@@ -2093,7 +2093,7 @@ on_togglebtn_clicked()
   if(strcmp(str_tb, "Activado") == 0)
     {
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Desactivado");
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), FALSE);
+      //gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), FALSE);
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "     a     ");
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "     de     ");
       fill_sells_list();
@@ -2105,7 +2105,7 @@ on_togglebtn_clicked()
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), TRUE);
+      //gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), TRUE);
 
       GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
 												 "tree_view_sells"))));
@@ -2217,6 +2217,9 @@ fill_sells_list ()
 
   tuples = PQntuples (res_sells);
 
+  if (tuples > 0)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), TRUE);
+
   /* si las tuplas son mayores a 100, se activan los botones de adelante y
      ultimo, y se inactivan los de atras y primero*/
   if (tuples > 100)
@@ -2233,7 +2236,10 @@ fill_sells_list ()
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "fin_lbl")), g_strdup_printf ("%d",tuples));
 
   if (tuples == 0)
-    return;
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), FALSE);
+      return;
+    }
 
   /* verifica que tipo de venta es*/
   for (i = 0; i < tuples; i++)
