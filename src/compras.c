@@ -844,6 +844,11 @@ compras_win (void)
   //TODO: Solucionar el foco de las pestañas (El foco debe cambiarse a los entrys principales)
   gtk_widget_set_can_focus (GTK_NOTEBOOK (builder_get (builder, "buy_notebook")), TRUE);
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+  
+  //Se oculta la pestaña "Ingreso Facturas" hasta que se termine la funcionalidad
+  gtk_notebook_remove_page (GTK_NOTEBOOK (builder_get (builder, "buy_notebook")), 2);
+  //Se oculta la opción para ingresar guias
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radiobutton8")), FALSE);
 
   gtk_widget_show_all (compras_gui);
 } // compras_win (void)
@@ -4004,8 +4009,8 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
 	}
       else
 	{
-	  guide = tab == 2 ? TRUE : FALSE;
-	  FillProveedorData (*strs, guide);
+	  //guide = tab == 2 ? TRUE : FALSE; //Ex page 2 "Ingreso Factura" is disabled
+	  FillProveedorData (*strs, FALSE);
 	}
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
