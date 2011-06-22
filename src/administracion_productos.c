@@ -405,7 +405,7 @@ admini_box ()
                                          PutPoints (ContriTotalStock ())));
   //products list
   store = gtk_list_store_new (10,
-                              G_TYPE_STRING,  //0 shortcode
+                              G_TYPE_INT,  //0 shortcode
                               G_TYPE_STRING,  //1 barcode
                               G_TYPE_STRING,  //2 description
                               G_TYPE_STRING,  //3 brand
@@ -1179,7 +1179,7 @@ BuscarProductosParaListar (void)
     {
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-                          0, PQvaluebycol (res, i, "codigo_corto"),
+                          0, atoi (PQvaluebycol (res, i, "codigo_corto")),
                           1, PQvaluebycol (res, i, "barcode"),
                           2, PQvaluebycol (res, i, "descripcion"),
                           3, PQvaluebycol (res, i, "marca"),
