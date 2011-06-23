@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
@@ -11,7 +11,6 @@
     <child>
       <object class="GtkVBox" id="vbox24">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox31">
             <property name="visible">True</property>
@@ -88,7 +87,6 @@
     <child>
       <object class="GtkVBox" id="vbox7">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table20">
             <property name="visible">True</property>
@@ -172,7 +170,7 @@
             <child>
               <object class="GtkLabel" id="label127">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -182,7 +180,7 @@
             <child>
               <object class="GtkLabel" id="label128">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">N&#xFA;mero Factura</property>
+                <property name="label" translatable="yes" context="yes">Número Factura</property>
               </object>
             </child>
           </object>
@@ -260,7 +258,6 @@
     <child>
       <object class="GtkVBox" id="vbox5">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table18">
             <property name="visible">True</property>
@@ -344,7 +341,7 @@
             <child>
               <object class="GtkLabel" id="label43">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -354,7 +351,7 @@
             <child>
               <object class="GtkLabel" id="label111">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Numero Gu&#xED;a</property>
+                <property name="label" translatable="yes" context="yes">Numero Guía</property>
               </object>
             </child>
           </object>
@@ -426,7 +423,7 @@
   <object class="GtkWindow" id="wnd_adjust_product">
     <property name="width_request">220</property>
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Ajuste de Mercader&#xED;a</property>
+    <property name="title" translatable="yes">Ajuste de Mercadería</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_compras</property>
@@ -434,7 +431,6 @@
     <child>
       <object class="GtkVBox" id="vbox20">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table19">
@@ -566,7 +562,7 @@
   </object>
   <object class="GtkWindow" id="wnd_mod_product">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Descripci&#xF3;n Producto</property>
+    <property name="title" translatable="yes">Descripción Producto</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_compras</property>
@@ -574,7 +570,6 @@
     <child>
       <object class="GtkVBox" id="vbox19">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkLabel" id="label14">
@@ -822,7 +817,7 @@
             <child>
               <object class="GtkLabel" id="label30">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Descripci&#xF3;n</property>
+                <property name="label" translatable="yes">Descripción</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -833,7 +828,7 @@
             <child>
               <object class="GtkLabel" id="label16">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">C&#xF3;digo de Barras</property>
+                <property name="label" translatable="yes">Código de Barras</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -844,7 +839,7 @@
             <child>
               <object class="GtkLabel" id="label15">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">C&#xF3;digo Corto</property>
+                <property name="label" translatable="yes">Código Corto</property>
               </object>
               <packing>
                 <property name="x_options">GTK_FILL</property>
@@ -946,10 +941,10 @@
     <property name="transient_for">wnd_compras</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text">&#xBF;Realmente desea salir?</property>
-    <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
-    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
+    <property name="text">¿Realmente desea salir?</property>
+    <property name="secondary_text">Se perderá toda información no guardada</property>
     <signal name="response" handler="on_quit_message_response"/>
+    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox4">
         <property name="visible">True</property>
@@ -979,7 +974,6 @@
     <child>
       <object class="GtkVBox" id="vbox17">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table11">
@@ -990,7 +984,7 @@
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkRadioButton" id="radiobutton8">
-                <property name="label" translatable="yes" context="yes">Gu&#xED;a</property>
+                <property name="label" translatable="yes" context="yes">Guía</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -1121,7 +1115,6 @@
     <child>
       <object class="GtkVBox" id="vbox16">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table10">
             <property name="visible">True</property>
@@ -1207,7 +1200,7 @@
             <child>
               <object class="GtkLabel" id="label64">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -1217,7 +1210,7 @@
             <child>
               <object class="GtkLabel" id="label63">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">N&#xFA;mero Factura</property>
+                <property name="label" translatable="yes" context="yes">Número Factura</property>
               </object>
             </child>
           </object>
@@ -1277,7 +1270,6 @@
     <child>
       <object class="GtkVBox" id="vbox15">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table3">
             <property name="visible">True</property>
@@ -1452,7 +1444,7 @@
             <child>
               <object class="GtkLabel" id="label60">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Venta Fracci&#xF3;n</property>
+                <property name="label" translatable="yes" context="yes">Venta Fracción</property>
               </object>
               <packing>
                 <property name="top_attach">6</property>
@@ -1492,7 +1484,7 @@
             <child>
               <object class="GtkLabel" id="label38">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Descripci&#xF3;n</property>
+                <property name="label" translatable="yes" context="yes">Descripción</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -1502,7 +1494,7 @@
             <child>
               <object class="GtkLabel" id="label37">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">C&#xF3;digo de Barras</property>
+                <property name="label" translatable="yes" context="yes">Código de Barras</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -1512,7 +1504,7 @@
             <child>
               <object class="GtkLabel" id="label36">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
+                <property name="label" translatable="yes" context="yes">Código Simple</property>
               </object>
             </child>
             <child>
@@ -1613,7 +1605,6 @@
       <object class="GtkVBox" id="vbox14">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox19">
             <property name="visible">True</property>
@@ -1767,7 +1758,6 @@
       <object class="GtkVBox" id="vbox_main">
         <property name="visible">True</property>
         <property name="border_width">5</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkNotebook" id="buy_notebook">
@@ -1777,7 +1767,6 @@
             <child>
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkHBox" id="hbox23">
                     <property name="visible">True</property>
@@ -1785,7 +1774,7 @@
                     <child>
                       <object class="GtkLabel" id="label19">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">C&#xF3;digo de Barras</property>
+                        <property name="label" translatable="yes">Código de Barras</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1834,7 +1823,7 @@
                                 <child>
                                   <object class="GtkLabel" id="label27">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">_A&#xF1;adir a Traspaso</property>
+                                    <property name="label" translatable="yes">_Añadir a Traspaso</property>
                                     <property name="use_underline">True</property>
                                   </object>
                                   <packing>
@@ -1946,7 +1935,7 @@
                             <child>
                               <object class="GtkLabel" id="label71">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">C&#xF3;digo</property>
+                                <property name="label" translatable="yes">Código</property>
                               </object>
                               <packing>
                                 <property name="left_attach">4</property>
@@ -2058,7 +2047,7 @@
                             <child>
                               <object class="GtkLabel" id="label25">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Precio Compra</property>
+                                <property name="label" translatable="yes">Costo Promedio</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -2189,7 +2178,6 @@
                     <child>
                       <object class="GtkVBox" id="vbox3">
                         <property name="visible">True</property>
-                        <property name="orientation">vertical</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkTable" id="table5">
@@ -2555,7 +2543,6 @@
             <child>
               <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow3">
@@ -2797,7 +2784,6 @@
             <child>
               <object class="GtkVBox" id="vbox_guide_invoice">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkFrame" id="frame3">
                     <property name="visible">True</property>
@@ -2969,7 +2955,7 @@
                             <child>
                               <object class="GtkLabel" id="label45">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Direcci&#xF3;n</property>
+                                <property name="label" translatable="yes">Dirección</property>
                               </object>
                               <packing>
                                 <property name="top_attach">1</property>
@@ -2993,7 +2979,7 @@
                             <child>
                               <object class="GtkLabel" id="label47">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">N&#xBA; Factura</property>
+                                <property name="label" translatable="yes">Nº Factura</property>
                               </object>
                               <packing>
                                 <property name="top_attach">3</property>
@@ -3180,7 +3166,6 @@
                             <child>
                               <object class="GtkVBox" id="vbox1">
                                 <property name="visible">True</property>
-                                <property name="orientation">vertical</property>
                                 <property name="homogeneous">True</property>
                                 <child>
                                   <object class="GtkHBox" id="hbox16">
@@ -3299,7 +3284,6 @@
                             <child>
                               <object class="GtkVBox" id="vbox6">
                                 <property name="visible">True</property>
-                                <property name="orientation">vertical</property>
                                 <child>
                                   <object class="GtkFrame" id="frame8">
                                     <property name="visible">True</property>
@@ -3492,7 +3476,6 @@
             <child>
               <object class="GtkVBox" id="vbox">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkFrame" id="frame9">
                     <property name="visible">True</property>
@@ -3600,7 +3583,7 @@
                             <child>
                               <object class="GtkLabel" id="label69">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Direcci&#xF3;n</property>
+                                <property name="label" translatable="yes">Dirección</property>
                               </object>
                               <packing>
                                 <property name="top_attach">1</property>
@@ -3730,7 +3713,6 @@
                         <child>
                           <object class="GtkVBox" id="vbox8">
                             <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkScrolledWindow" id="scrolledwindow8">
@@ -3871,7 +3853,6 @@
             <child>
               <object class="GtkVBox" id="vbox9">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkHBox" id="hbox2">
@@ -3946,7 +3927,7 @@
                         <child>
                           <object class="GtkLabel" id="label81">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Contribuci&#xF3;n Proyectada</property>
+                            <property name="label" translatable="yes">Contribución Proyectada</property>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>
@@ -4009,7 +3990,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox10">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow10">
                         <property name="visible">True</property>
@@ -4079,7 +4059,7 @@
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkRadioButton" id="radio_mayorist_yes">
-                            <property name="label" translatable="yes">S&#xED;</property>
+                            <property name="label" translatable="yes">Sí</property>
                             <property name="width_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -4286,7 +4266,7 @@
                     <child>
                       <object class="GtkLabel" id="label87">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">C&#xF3;digo de Barras</property>
+                        <property name="label" translatable="yes">Código de Barras</property>
                       </object>
                       <packing>
                         <property name="x_options"></property>
@@ -4296,7 +4276,7 @@
                     <child>
                       <object class="GtkLabel" id="label88">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">C&#xF3;digo Corto</property>
+                        <property name="label" translatable="yes">Código Corto</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -4306,7 +4286,7 @@
                     <child>
                       <object class="GtkLabel" id="label89">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Descripci&#xF3;n</property>
+                        <property name="label" translatable="yes">Descripción</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -4382,7 +4362,7 @@
                     <child>
                       <object class="GtkLabel" id="label97">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Ventas/D&#xED;a</property>
+                        <property name="label" translatable="yes">Ventas/Día</property>
                       </object>
                       <packing>
                         <property name="left_attach">4</property>
@@ -4741,7 +4721,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label11">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">_Mercader&#xED;a</property>
+                <property name="label" translatable="yes">_Mercadería</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">find_product_entry</property>
               </object>
@@ -4753,7 +4733,6 @@
             <child>
               <object class="GtkVBox" id="vbox11">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkHBox" id="hbox5">
@@ -4823,7 +4802,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox13">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow11">
@@ -4876,7 +4854,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox12">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkFrame" id="frame11">
@@ -5105,7 +5082,7 @@
                             <child>
                               <object class="GtkLabel" id="label118">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Direcci&#xF3;n</property>
+                                <property name="label" translatable="yes">Dirección</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -5117,7 +5094,7 @@
                             <child>
                               <object class="GtkLabel" id="label117">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Raz&#xF3;n Social</property>
+                                <property name="label" translatable="yes">Razón Social</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -5146,15 +5123,9 @@
                               </packing>
                             </child>
                             <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
                               <object class="GtkLabel" id="lbl_lapso_rep_vendedor">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Lapso Reposici&#xF3;n</property>
+                                <property name="label" translatable="yes">Lapso Reposición</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -5169,7 +5140,7 @@
                               <object class="GtkEntry" id="entry_lap_rep">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
+                                <property name="invisible_char">●</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -5179,6 +5150,12 @@
                                 <property name="x_options">GTK_EXPAND</property>
                                 <property name="y_options"></property>
                               </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </object>
                         </child>
@@ -5306,14 +5283,13 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_ingress_guide">
-    <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Gu&#xED;a</property>
+    <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Guía</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
     <child>
       <object class="GtkVBox" id="vbox18">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table15">
             <property name="visible">True</property>
@@ -5397,7 +5373,7 @@
             <child>
               <object class="GtkLabel" id="label12">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -5407,7 +5383,7 @@
             <child>
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">N&#xFA;mero Gu&#xED;a</property>
+                <property name="label" translatable="yes" context="yes">Número Guía</property>
               </object>
             </child>
           </object>
@@ -5469,7 +5445,6 @@
     <child>
       <object class="GtkVBox" id="vbox21">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox17">
             <property name="visible">True</property>
@@ -5579,7 +5554,6 @@
       <object class="GtkVBox" id="vbox22">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkFrame" id="frame6">
@@ -5776,7 +5750,6 @@
       <object class="GtkVBox" id="vbox23">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkFrame" id="frame5">
@@ -5970,7 +5943,6 @@
     <child>
       <object class="GtkVBox" id="vbox25">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox33">
             <property name="visible">True</property>
@@ -5991,7 +5963,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
-                <property name="invisible_char">&#x2022;</property>
+                <property name="invisible_char">•</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -6053,7 +6025,6 @@
     <child>
       <object class="GtkVBox" id="vbox_suggest_buy">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox_suggest_buy">
             <property name="visible">True</property>
@@ -6071,7 +6042,7 @@
               <object class="GtkEntry" id="entry_filter_providers">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
+                <property name="invisible_char">●</property>
                 <signal name="changed" handler="on_entry_filter_providers_changed"/>
               </object>
               <packing>

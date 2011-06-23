@@ -236,12 +236,14 @@ compras_win (void)
     gtk_window_fullscreen (GTK_WINDOW (compras_gui));
 
   /* History TreeView */
-  store = gtk_list_store_new (5,
+  store = gtk_list_store_new (7,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_DOUBLE,
-                              G_TYPE_INT);
+                              G_TYPE_INT,    //Precio sin impuestos
+			      G_TYPE_INT,    //Precio con impuestos
+			      G_TYPE_INT);   //Total con impuestos
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -284,8 +286,26 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("P.Unit S/Imp", renderer,
                                                      "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("P.Unit C/Imp", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+                                                     "text", 6,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1737,13 +1757,21 @@ ShowProductHistory (void)
 
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object( builder, "entry_buy_barcode" ))));
   gint i, tuples, precio = 0;
+  gdouble cantidad = 0;
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT (SELECT nombre FROM proveedor WHERE rut=t1.rut_proveedor) as proveedor, t2.precio, t2.cantidad, date_part('day', t1.fecha) as dia, "
-      "date_part('month', t1.fecha) as mes, date_part('year', t1.fecha) as ano, t1.id, t2.iva, t2.otros_impuestos "
-      "FROM compra AS t1, compra_detalle AS t2, producto "
-      "WHERE producto.barcode='%s' AND t2.barcode_product=producto.barcode AND t1.id=t2.id_compra AND t2.anulado='f' ORDER BY t1.fecha DESC", barcode));
+     ("SELECT (SELECT nombre FROM proveedor WHERE rut=c.rut_proveedor) AS proveedor, "
+      "(SELECT precio FROM producto WHERE barcode = %s) AS precio_venta, "
+      "date_part('day', c.fecha) AS dia, date_part('month', c.fecha) AS mes, date_part('year', c.fecha) AS ano, "
+      "c.id, cd.iva, cd.otros_impuestos, cd.precio, cd.cantidad "
+      "FROM compra c INNER JOIN compra_detalle cd "
+      "ON c.id = cd.id_compra "
+      "INNER JOIN producto p "
+      "ON cd.barcode_product = p.barcode "
+      "WHERE p.barcode='%s' "
+      "AND cd.anulado='f' "
+      "ORDER BY c.fecha DESC", barcode, barcode));
 
   tuples = PQntuples (res);
 
@@ -1764,15 +1792,28 @@ ShowProductHistory (void)
                                              strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL)));
         }
 
+      cantidad = strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL);
+
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, g_strdup_printf ("%.2d/%.2d/%s", atoi (PQvaluebycol (res, i, "dia")),
                                               atoi (PQvaluebycol (res, i, "mes")), PQvaluebycol (res, i, "ano")),
                           1, PQvaluebycol (res, i, "id"),
                           2, PQvaluebycol (res, i, "proveedor"),
-                          3, strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
-                          4, precio,
+                          3, cantidad,
+                          4, atoi (PQvaluebycol (res, i, "precio")),
+			  5, precio,
+			  6, lround (cantidad * (gdouble)precio),
                           -1);
+
+    }
+
+  // Coloca el último precio de compra y el precio de venta del producto en los
+  // entry correspondientes.
+  if (tuples > 0)
+    {
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PQvaluebycol (res, 0, "precio"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, 0, "precio_venta"));
     }
 }
 
