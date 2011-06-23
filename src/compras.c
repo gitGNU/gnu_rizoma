@@ -1596,7 +1596,7 @@ SearchName (void)
                           -1);
     }
 
-  if (resultado != 0)
+  if (resultado > 0)
     {
       gtk_tree_selection_select_path (gtk_tree_view_get_selection (treeview), gtk_tree_path_new_from_string ("0"));
       gtk_widget_grab_focus (GTK_WIDGET (treeview));
@@ -1698,6 +1698,7 @@ SearchByName (void)
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_buscador"));
   gtk_widget_show_all (GTK_WIDGET (window));
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buscar")));
 
   if ( ! g_str_equal (string, ""))
     {

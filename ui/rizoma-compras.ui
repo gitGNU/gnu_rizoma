@@ -1598,7 +1598,6 @@
     <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="destroy_with_parent">True</property>
-    <property name="type_hint">utility</property>
     <property name="transient_for">wnd_compras</property>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child>
@@ -1713,6 +1712,7 @@
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_buscador"/>
+                <signal name="clicked" handler="clean_container" object="wnd_buscador"/>
               </object>
               <packing>
                 <property name="position">0</property>
