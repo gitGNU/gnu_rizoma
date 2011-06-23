@@ -5553,9 +5553,9 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_alignment (column, 0.5);
       g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 2);
-      gtk_tree_view_column_set_min_width (column, 3000);
-      gtk_tree_view_column_set_max_width (column, 300);
-      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_min_width (column, 300);
+      gtk_tree_view_column_set_max_width (column, 380);
+      gtk_tree_view_column_set_resizable (column, TRUE);
 
       renderer = gtk_cell_renderer_text_new ();
       g_object_set (renderer, "editable", TRUE, NULL);
