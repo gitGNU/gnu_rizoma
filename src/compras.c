@@ -5651,26 +5651,28 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       // END TreeView Products Providers      
 
       sugerido->son->tree = treeview;
-      sugerido->son->cols[0].name = "Codigo Corto";
-      sugerido->son->cols[0].num = 1;
-      sugerido->son->cols[1].name = "Descripción";
-      sugerido->son->cols[1].num = 2;
-      sugerido->son->cols[2].name = "Costo Promedio";
-      sugerido->son->cols[2].num = 3;
-      sugerido->son->cols[3].name = "Precio";
-      sugerido->son->cols[3].num = 4;
-      sugerido->son->cols[4].name = "Venta/Dia";
-      sugerido->son->cols[4].num = 5;
-      sugerido->son->cols[5].name = "Stock";
-      sugerido->son->cols[5].num = 6;
-      sugerido->son->cols[6].name = "Dias/Stock";
-      sugerido->son->cols[6].num = 7;
-      sugerido->son->cols[7].name = "Cantidad";
-      sugerido->son->cols[7].num = 8;
-      sugerido->son->cols[8].name = NULL;
+      sugerido->son->cols[0].name = "Selection";
+      sugerido->son->cols[0].num = 0;
+      sugerido->son->cols[1].name = "Codigo Corto";
+      sugerido->son->cols[1].num = 1;
+      sugerido->son->cols[2].name = "Descripción";
+      sugerido->son->cols[2].num = 2;
+      sugerido->son->cols[3].name = "Costo Promedio";
+      sugerido->son->cols[3].num = 3;
+      sugerido->son->cols[4].name = "Precio";
+      sugerido->son->cols[4].num = 4;
+      sugerido->son->cols[5].name = "Venta/Dia";
+      sugerido->son->cols[5].num = 5;
+      sugerido->son->cols[6].name = "Stock";
+      sugerido->son->cols[6].num = 6;
+      sugerido->son->cols[7].name = "Dias/Stock";
+      sugerido->son->cols[7].num = 7;
+      sugerido->son->cols[8].name = "Cantidad";
+      sugerido->son->cols[8].num = 8;
+      sugerido->son->cols[9].name = NULL;
 
       g_signal_connect (builder_get (builder, "btn_print_suggest_buy"), "clicked",
-			G_CALLBACK (PrintTwoTree), (gpointer)sugerido);
+			G_CALLBACK (SelectivePrintTwoTree), (gpointer)sugerido);
 
     }
 

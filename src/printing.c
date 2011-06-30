@@ -299,7 +299,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
       //Se agrega la cabecera de las columnas del treeview hijo
       fprintf (fp, ",");
       for (j = 0; j < son_cols; j++)
-      	fprintf (fp, "\"%s\",", print->son->cols[i].name);
+      	fprintf (fp, "\"%s\",", print->son->cols[j].name);
       fprintf (fp, ",,,,\n");
 
       //Se insertan los datos del treeview hijo
@@ -351,6 +351,195 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
 
       fprintf (fp, "\n\n");
     } while ((gtk_tree_model_iter_next (model_father, &iter_father)) != FALSE);
+
+  fclose (fp);
+
+  LaunchApp (file);
+}
+
+
+/*
+  This function will print the selcted rows from the two tree view, 
+  one will contain the father and the other will contain the son
+*/
+void
+SelectivePrintTwoTree (GtkWidget *widget, gpointer data)
+{
+  Print *print = (Print *) data;
+  GtkTreeModel *model_father = gtk_tree_view_get_model (print->tree);
+  GtkTreeModel *model_son = gtk_tree_view_get_model (print->son->tree);
+  GtkTreeIter iter_father, iter_son;
+  GType column_type;
+  gint i, j;
+  gint boolean_column_num;
+  gboolean boolean_column = FALSE;
+  gint father_cols = 0, son_cols = 0;
+  gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
+  gchar *file;
+  FILE *fp;
+
+  if (gtk_tree_model_get_iter_first (model_father, &iter_father) == FALSE)
+    return;
+
+  while (print->cols[father_cols].name != NULL)
+    father_cols++;
+
+  while (print->son->cols[son_cols].name != NULL)
+    son_cols++;
+
+  /* Si es NULL */
+  if (print->date_string == NULL)
+    print->date_string = CurrentDate(0); /* Asumismos la fecha actual */
+
+  file = g_strdup_printf ("%s/informe-%s-%s.csv", temp_directory,
+                          print->name, print->date_string);
+
+  fp = fopen (file, "w");
+
+  if (fp == NULL)
+    {
+      perror (g_strdup_printf ("Opening %s", file));
+      return;
+    }
+  else
+    printf ("Working on %s\n", file);
+
+  fprintf (fp, "%s\n%s\n\n", print->title, print->date_string);
+
+  //Se agrega la cabecera de las columnas del treeview padre
+  for (i = 0; i < father_cols; i++)
+    fprintf (fp, "\"%s\",", print->cols[i].name);
+  fprintf (fp, ",,,,\n");
+
+  for (i = 0; i < father_cols; i++)
+    {
+      column_type = gtk_tree_model_get_column_type (model_father, print->cols[i].num);
+
+      switch (column_type)
+	{
+	case G_TYPE_STRING:
+	  {
+	    gchar *value_char;
+	    gtk_tree_model_get (model_father, &iter_father,
+				print->cols[i].num, &value_char,
+				-1);
+	    fprintf (fp, "%s,", CutPoints (value_char));
+	  }
+	  break;
+
+	case G_TYPE_INT:
+	  {
+	    gint value_int;
+	    gtk_tree_model_get (model_father, &iter_father,
+				print->cols[i].num, &value_int,
+				-1);
+	    fprintf (fp, "%d,", value_int);
+	  }
+	  break;
+
+	case G_TYPE_DOUBLE:
+	  {
+	    gdouble value_double;
+	    gtk_tree_model_get (model_father, &iter_father,
+				print->cols[i].num, &value_double,
+				-1);
+	    fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
+	  }
+	  break;
+	}
+    }
+
+  fprintf (fp, "\n\n");
+
+  gtk_tree_selection_select_iter (gtk_tree_view_get_selection (print->tree), &iter_father);
+  //gtk_tree_view_row_activated (print->tree, gtk_tree_model_get_path (model_father, &iter_father), 
+  //                                                    gtk_tree_view_get_column (print->tree, 0));
+
+  gtk_tree_model_get_iter_first (model_son, &iter_son);
+
+  //Se agrega la cabecera de las columnas del treeview hijo
+  fprintf (fp, ",");
+      
+  for (i = 0; i < son_cols; i++)
+    {
+      column_type = gtk_tree_model_get_column_type (model_son, print->son->cols[i].num);
+      if (column_type == G_TYPE_BOOLEAN)
+	{
+	  boolean_column_num = i;
+	  boolean_column = TRUE;
+	}
+      else
+	fprintf (fp, "\"%s\",", print->son->cols[i].name);
+    }
+      
+  fprintf (fp, ",,,,\n");
+  
+  if (boolean_column == FALSE)
+    return;
+              
+  gboolean enabled;
+  gint largo = get_treeview_length (print->son->tree);
+
+  if (largo == 0)
+    return;
+  
+  //Se insertan los datos del treeview hijo
+  for (i=0; i<largo; i++)
+    {
+      gtk_tree_model_get (model_son, &iter_son,
+			  boolean_column_num, &enabled,
+			  -1);
+
+      if (enabled == TRUE)
+	{	  
+	  fprintf (fp, ",");
+
+	  for (j = 0; j < son_cols; j++)
+	    {
+	      column_type = gtk_tree_model_get_column_type (model_son, print->son->cols[j].num);
+
+	      switch (column_type)
+		{
+		case G_TYPE_STRING:
+		  {
+		    gchar *value_char = NULL;
+		    gtk_tree_model_get (model_son, &iter_son,
+					print->son->cols[j].num, &value_char,
+					-1);
+		    fprintf (fp, "\"%s\",", value_char);
+		  }
+		  break;
+		  
+		case G_TYPE_INT:
+		  {
+		    gint value_int;
+		    gtk_tree_model_get (model_son, &iter_son,
+					print->son->cols[j].num, &value_int,
+					-1);
+		    fprintf (fp, "%d,", value_int);
+		  }
+		  break;
+
+		case G_TYPE_DOUBLE:
+		  {
+		    gdouble value_double;
+		    gtk_tree_model_get (model_son, &iter_son,
+					print->son->cols[j].num, &value_double,
+					-1);
+		    fprintf (fp, "\"%s\",", PUT (g_strdup_printf ("%.2f", value_double)));
+		  }
+		  break;
+
+		} // END SWITCH
+	    } // END FOR
+
+	  fprintf (fp, "\n");
+
+	} // END IF
+      gtk_tree_model_iter_next (model_son, &iter_son);
+    } // END FOR
+
+  fprintf (fp, "\n\n");
 
   fclose (fp);
 
