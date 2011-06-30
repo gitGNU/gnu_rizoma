@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
@@ -12,7 +12,6 @@
     <child>
       <object class="GtkVBox" id="vbox15">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table7">
             <property name="visible">True</property>
@@ -77,7 +76,7 @@
             <child>
               <object class="GtkLabel" id="label34">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">C&#xF3;digo:</property>
+                <property name="label" translatable="yes">Código:</property>
               </object>
             </child>
           </object>
@@ -137,7 +136,6 @@
     <child>
       <object class="GtkVBox" id="vbox14">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table2">
             <property name="visible">True</property>
@@ -216,7 +214,7 @@
             <child>
               <object class="GtkLabel" id="label236">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">*Tel&#xE9;fono:</property>
+                <property name="label" translatable="yes">*Teléfono:</property>
               </object>
               <packing>
                 <property name="top_attach">5</property>
@@ -285,7 +283,7 @@
             <child>
               <object class="GtkLabel" id="label239">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">*Direcci&#xF3;n:</property>
+                <property name="label" translatable="yes">*Dirección:</property>
               </object>
               <packing>
                 <property name="top_attach">4</property>
@@ -386,7 +384,7 @@
   </object>
   <object class="GtkWindow" id="wnd_changepasswd">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Cambiar Contrase&#xF1;a</property>
+    <property name="title" translatable="yes">Cambiar Contraseña</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_admin</property>
@@ -394,7 +392,6 @@
     <child>
       <object class="GtkVBox" id="vbox13">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table6">
@@ -444,7 +441,7 @@
             <child>
               <object class="GtkLabel" id="label33">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Repetir Contrase&#xF1;a:</property>
+                <property name="label" translatable="yes">Repetir Contraseña:</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -455,7 +452,7 @@
             <child>
               <object class="GtkLabel" id="label32">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Contrase&#xF1;a:</property>
+                <property name="label" translatable="yes">Contraseña:</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -532,7 +529,7 @@
     <property name="transient_for">wnd_admin</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text">&#xBF;Desea eliminar al usuario?</property>
+    <property name="text">¿Desea eliminar al usuario?</property>
     <signal name="close" handler="gtk_widget_hide_on_delete" object="ask_delete_user"/>
     <signal name="response" handler="on_ask_delete_user_response"/>
     <child internal-child="vbox">
@@ -567,8 +564,8 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_admin</property>
     <property name="message_type">question</property>
-    <property name="text">&#xBF;Realmente desea salir?</property>
-    <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
+    <property name="text">¿Realmente desea salir?</property>
+    <property name="secondary_text">Se perderá toda información no guardada</property>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete" object="quit_message"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox2">
@@ -631,7 +628,6 @@
     <child>
       <object class="GtkVBox" id="vbox12">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table5">
             <property name="visible">True</property>
@@ -731,7 +727,6 @@
     <child>
       <object class="GtkVBox" id="vbox4">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table1">
@@ -864,7 +859,7 @@
             <child>
               <object class="GtkLabel" id="label13">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Repetir Contrase&#xF1;a:</property>
+                <property name="label" translatable="yes">Repetir Contraseña:</property>
               </object>
               <packing>
                 <property name="top_attach">6</property>
@@ -875,7 +870,7 @@
             <child>
               <object class="GtkLabel" id="label12">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Contrase&#xF1;a:</property>
+                <property name="label" translatable="yes">Contraseña:</property>
               </object>
               <packing>
                 <property name="top_attach">5</property>
@@ -995,7 +990,6 @@
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkNotebook" id="notebook1">
@@ -1005,7 +999,6 @@
             <child>
               <object class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
@@ -1049,7 +1042,7 @@
                             <child>
                               <object class="GtkLabel" id="label8">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">_Contrase&#xF1;a</property>
+                                <property name="label" translatable="yes">_Contraseña</property>
                                 <property name="use_underline">True</property>
                               </object>
                               <packing>
@@ -1120,7 +1113,6 @@
             <child>
               <object class="GtkVBox" id="vbox5">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <property name="spacing">15</property>
                 <child>
                   <object class="GtkHBox" id="hbox6">
@@ -1186,7 +1178,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox6">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
@@ -1270,7 +1261,6 @@
             <child>
               <object class="GtkVBox" id="vbox7">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkTable" id="table3">
                     <property name="visible">True</property>
@@ -1288,7 +1278,7 @@
                     <child>
                       <object class="GtkLabel" id="lbl_admin_razon">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">*Raz&#xF3;n Social:</property>
+                        <property name="label" translatable="yes">*Razón Social:</property>
                       </object>
                       <packing>
                         <property name="top_attach">1</property>
@@ -1298,7 +1288,7 @@
                     <child>
                       <object class="GtkLabel" id="lbl_admin_addr">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Direcci&#xF3;n:</property>
+                        <property name="label" translatable="yes">Dirección:</property>
                       </object>
                       <packing>
                         <property name="top_attach">3</property>
@@ -1552,12 +1542,10 @@
             <child>
               <object class="GtkVBox" id="vbox8">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <property name="spacing">15</property>
                 <child>
                   <object class="GtkVBox" id="vbox9">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label6">
                         <property name="visible">True</property>
@@ -1587,7 +1575,7 @@
                             <property name="width_request">50</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip_text" translatable="yes">Este es el &#xFA;ltimo n&#xFA;mero de boleta emitido</property>
+                            <property name="tooltip_text" translatable="yes">Este es el último número de boleta emitido</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1596,7 +1584,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_admin_save_ticketnum">
-                            <property name="label">gtk-edit</property>
+                            <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1622,7 +1610,6 @@
                 <child>
                   <object class="GtkVBox" id="vbox10">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label16">
                         <property name="visible">True</property>
@@ -1652,7 +1639,7 @@
                             <property name="width_request">50</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="tooltip_text" translatable="yes">Este es el &#xFA;ltimo n&#xFA;mero de factura emitido</property>
+                            <property name="tooltip_text" translatable="yes">Este es el último número de factura emitido</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1661,7 +1648,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_admin_save_invoicenum">
-                            <property name="label">gtk-edit</property>
+                            <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1687,11 +1674,10 @@
                 <child>
                   <object class="GtkVBox" id="vbox11">
                     <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel" id="label21">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Configuraci&#xF3;n Local&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Configuración Local&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -1797,7 +1783,7 @@
                         <child>
                           <object class="GtkLabel" id="label28">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Comando de impresi&#xF3;n:</property>
+                            <property name="label" translatable="yes">Comando de impresión:</property>
                           </object>
                           <packing>
                             <property name="top_attach">6</property>
@@ -1841,7 +1827,7 @@
                         <child>
                           <object class="GtkLabel" id="label24">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Contrase&#xF1;a:</property>
+                            <property name="label" translatable="yes">Contraseña:</property>
                           </object>
                           <packing>
                             <property name="top_attach">2</property>
@@ -1922,7 +1908,6 @@
             <child>
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkHBox" id="hbox5">
@@ -2020,13 +2005,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="btn_admin_add_client">
-                        <property name="label">gtk-add</property>
+                      <object class="GtkButton" id="btn_admin_print">
+                        <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="AddClient"/>
+                        <signal name="clicked" handler="on_btn_admin_print_clicked"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2035,13 +2020,13 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="btn_admin_print">
-                        <property name="label">gtk-print</property>
+                      <object class="GtkButton" id="btn_admin_add_client">
+                        <property name="label">gtk-add</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="on_btn_admin_print_clicked"/>
+                        <signal name="clicked" handler="AddClient"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2140,7 +2125,6 @@
             <child>
               <object class="GtkVBox" id="vbox4_admin_store">
                 <property name="visible">True</property>
-                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkHBox" id="hbox12_admin_store">
                     <property name="visible">True</property>
@@ -2148,7 +2132,7 @@
                       <object class="GtkEntry" id="entry_srch_stores">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
                         <signal name="activate" handler="on_btn_srch_stores_clicked"/>
                       </object>
                       <packing>
@@ -2317,7 +2301,6 @@
     <child>
       <object class="GtkVBox" id="vbox2_new_store">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox3_new_store">
             <property name="visible">True</property>
@@ -2335,7 +2318,7 @@
               <object class="GtkEntry" id="entry_name_new_store">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
+                <property name="invisible_char">●</property>
               </object>
               <packing>
                 <property name="fill">False</property>
@@ -2416,12 +2399,11 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text" translatable="yes">&#xBF;Realmente deseas eliminar ese local?</property>
+    <property name="text" translatable="yes">¿Realmente deseas eliminar ese local?</property>
     <signal name="response" handler="on_ask_delete_store_response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox7_delete_store">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area7">

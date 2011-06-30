@@ -844,10 +844,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   else if (cantidad > stock)
     {
       aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
-      AlertMSG (aux_widget, "No puede vender mas productos de los que tiene en stock");
-
-      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
-      gtk_widget_grab_focus (aux_widget);
+      AlertMSG (aux_widget, "No puede vender más productos de los que tiene en stock");
 
       return FALSE;
     }
@@ -858,10 +855,7 @@ AgregarProducto (GtkButton *button, gpointer data)
         {
           aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
           AlertMSG (aux_widget,
-                    "Este producto no se puede vender por fracción de producto");
-
-          aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
-          gtk_widget_grab_focus (aux_widget);
+                    "Este producto no se puede vender por fracción de unidad");
 
           return FALSE;
         }
@@ -921,7 +915,7 @@ AgregarProducto (GtkButton *button, gpointer data)
           if ((venta->product_check->product->cantidad + cantidad) > stock)
             {
               AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")),
-                        "No puede vender mas productos de los que tiene en stock");
+                        "No puede vender más productos de los que tiene en stock");
 
               return FALSE;
             }
@@ -1463,8 +1457,9 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
       //the product has not stock, so display a message
       //and abort the operation
       GtkWidget *aux_widget;
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sell"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
       gchar *str = g_strdup_printf("El producto %s no tiene stock", barcode);
+      CleanSellLabels();
       AlertMSG (aux_widget, str);
       g_free (str);
 

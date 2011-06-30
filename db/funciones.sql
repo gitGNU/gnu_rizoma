@@ -1503,8 +1503,8 @@ create or replace function registrar_venta_detalle(
        in in_cantidad double precision,
        in in_precio int,
        in in_fifo int,
-       in in_iva int,
-       in in_otros int)
+       in in_iva double precision,
+       in in_otros double precision)
 returns void as $$
 declare
 aux int;

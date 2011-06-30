@@ -5448,6 +5448,9 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
   GtkCellRenderer *renderer;
   GtkTreeSelection *selection;
 
+  Print *sugerido = (Print *) malloc (sizeof (Print));
+  sugerido->son = (Print *) malloc (sizeof (Print));
+
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_providers"));
   if (gtk_tree_view_get_model (treeview) == NULL )
     {
@@ -5504,6 +5507,20 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_sort_column_id (column, 3);
       gtk_tree_view_column_set_resizable (column, FALSE);
       // END TreeView Providers
+
+      sugerido->tree = treeview;
+      sugerido->title = "Sugerido de compras";
+      sugerido->name = "Sugerido";
+      sugerido->date_string = NULL;
+      sugerido->cols[0].name = "Rut";
+      sugerido->cols[0].num = 0;
+      sugerido->cols[1].name = "Nombre";
+      sugerido->cols[1].num = 1;
+      sugerido->cols[2].name = "Lapso Rep.";
+      sugerido->cols[2].num = 2;
+      sugerido->cols[3].name = "Giro";
+      sugerido->cols[3].num = 3;
+      sugerido->cols[4].name = NULL;
 
 
       // TreeView Products Providers (merchandises of each providers)
@@ -5631,7 +5648,30 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_sort_column_id (column, 8);
       gtk_tree_view_column_set_resizable (column, FALSE);
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
-      // END TreeView Products Providers
+      // END TreeView Products Providers      
+
+      sugerido->son->tree = treeview;
+      sugerido->son->cols[0].name = "Codigo Corto";
+      sugerido->son->cols[0].num = 1;
+      sugerido->son->cols[1].name = "Descripción";
+      sugerido->son->cols[1].num = 2;
+      sugerido->son->cols[2].name = "Costo Promedio";
+      sugerido->son->cols[2].num = 3;
+      sugerido->son->cols[3].name = "Precio";
+      sugerido->son->cols[3].num = 4;
+      sugerido->son->cols[4].name = "Venta/Dia";
+      sugerido->son->cols[4].num = 5;
+      sugerido->son->cols[5].name = "Stock";
+      sugerido->son->cols[5].num = 6;
+      sugerido->son->cols[6].name = "Dias/Stock";
+      sugerido->son->cols[6].num = 7;
+      sugerido->son->cols[7].name = "Cantidad";
+      sugerido->son->cols[7].num = 8;
+      sugerido->son->cols[8].name = NULL;
+
+      g_signal_connect (builder_get (builder, "btn_print_suggest_buy"), "clicked",
+			G_CALLBACK (PrintTwoTree), (gpointer)sugerido);
+
     }
 
   window = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy"));

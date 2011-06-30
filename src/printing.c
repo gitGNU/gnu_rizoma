@@ -228,7 +228,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
 
   /* Si es NULL */
   if (print->date_string == NULL)
-    print->date_string = CurrentDate(0); /* Asumismo la fecha actual */
+    print->date_string = CurrentDate(0); /* Asumismos la fecha actual */
 
   file = g_strdup_printf ("%s/informe-%s-%s.csv", temp_directory,
                           print->name, print->date_string);
@@ -245,19 +245,16 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
 
   fprintf (fp, "%s\n%s\n\n", print->title, print->date_string);
 
-  for (i = 0; i < father_cols; i++)
+  do    
     {
-      fprintf (fp, "\"%s\",", print->cols[i].name);
-    }
+      //Se agrega la cabecera de las columnas del treeview padre
+      for (i = 0; i < father_cols; i++)
+	fprintf (fp, "\"%s\",", print->cols[i].name);
+      fprintf (fp, ",,,,\n");
 
-  fprintf (fp, ",,,,\n");
-
-  do
-    {
       for (i = 0; i < father_cols; i++)
         {
           column_type = gtk_tree_model_get_column_type (model_father, print->cols[i].num);
-
 
           switch (column_type)
             {
@@ -291,12 +288,21 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
             }
         }
 
-      fprintf (fp, "\n");
+      fprintf (fp, "\n\n");
 
       gtk_tree_selection_select_iter (gtk_tree_view_get_selection (print->tree), &iter_father);
+      gtk_tree_view_row_activated (print->tree, gtk_tree_model_get_path (model_father, &iter_father), 
+				   gtk_tree_view_get_column (print->tree, 0));
 
       gtk_tree_model_get_iter_first (model_son, &iter_son);
 
+      //Se agrega la cabecera de las columnas del treeview hijo
+      fprintf (fp, ",");
+      for (j = 0; j < son_cols; j++)
+      	fprintf (fp, "\"%s\",", print->son->cols[i].name);
+      fprintf (fp, ",,,,\n");
+
+      //Se insertan los datos del treeview hijo
       do
         {
           fprintf (fp, ",");
@@ -343,6 +349,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
           fprintf (fp, "\n");
         } while ((gtk_tree_model_iter_next (model_son, &iter_son)) != FALSE);
 
+      fprintf (fp, "\n\n");
     } while ((gtk_tree_model_iter_next (model_father, &iter_father)) != FALSE);
 
   fclose (fp);

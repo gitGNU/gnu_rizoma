@@ -475,8 +475,8 @@ create table venta_detalle (
   cantidad                  float8,
   precio                    int4 not null,
   fifo                      int4 not null,
-  iva                       int4,
-  otros                     int4,
+  iva                       float8,
+  otros                     float8,
   constraint pk_venta_detalle primary key (id,id_venta)
 ) ;
 

@@ -13,7 +13,6 @@
     <child>
       <object class="GtkVBox" id="vbox13">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkLabel" id="label58">
@@ -189,7 +188,6 @@
     <child>
       <object class="GtkVBox" id="vbox12">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkLabel" id="label52">
@@ -269,7 +267,6 @@
     <child>
       <object class="GtkVBox" id="vbox8">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkHBox" id="hbox27">
@@ -393,7 +390,6 @@
     <child>
       <object class="GtkVBox" id="vbox7">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkFrame" id="frame4">
@@ -466,7 +462,7 @@
                     <child>
                       <object class="GtkLabel" id="label36">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes" context="yes">Direcci&#xF3;n:</property>
+                        <property name="label" translatable="yes" context="yes">Dirección:</property>
                       </object>
                       <packing>
                         <property name="top_attach">2</property>
@@ -524,7 +520,7 @@
                     <child>
                       <object class="GtkLabel" id="label40">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes" context="yes">N&#xFA;mero:</property>
+                        <property name="label" translatable="yes" context="yes">Número:</property>
                       </object>
                       <packing>
                         <property name="top_attach">1</property>
@@ -783,7 +779,6 @@
     <child>
       <object class="GtkVBox" id="vbox6">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table7">
             <property name="visible">True</property>
@@ -953,7 +948,6 @@
     <child>
       <object class="GtkVBox" id="vbox5">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkButton" id="btn_credit">
@@ -1037,7 +1031,7 @@
   <object class="GtkWindow" id="ventas_buscar">
     <property name="height_request">400</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="title" translatable="yes" context="yes">Rizoma: Buscar de Productos</property>
+    <property name="title" translatable="yes" context="yes">Rizoma: Buscar Mercadería</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
@@ -1047,7 +1041,6 @@
       <object class="GtkVBox" id="vbox4">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox8">
             <property name="visible">True</property>
@@ -1205,7 +1198,6 @@
       <object class="GtkVBox" id="vbox3">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox7">
             <property name="visible">True</property>
@@ -1295,7 +1287,6 @@
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkFrame" id="frame1">
@@ -1386,7 +1377,6 @@
                   <object class="GtkVBox" id="vbox2">
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="orientation">vertical</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkHBox" id="hbox102">
@@ -1526,7 +1516,6 @@
     <child>
       <object class="GtkVBox" id="ventas_box">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkLabel" id="label101">
             <property name="visible">True</property>
@@ -1787,7 +1776,7 @@
                   <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
+                    <property name="label" translatable="yes" context="yes">Código Simple</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1820,7 +1809,7 @@
                 <child>
                   <object class="GtkLabel" id="label14">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes" context="yes">C&#xF3;digo de barras</property>
+                    <property name="label" translatable="yes" context="yes">Código de barras</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1876,7 +1865,7 @@
                 <child>
                   <object class="GtkLabel" id="label19">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;big&gt;Boleta N&#xBA;&lt;/big&gt;&lt;/b&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;big&gt;Boleta Nº&lt;/big&gt;&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -2355,7 +2344,6 @@
     <child>
       <object class="GtkVBox" id="vbox9">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkTable" id="table4">
             <property name="visible">True</property>
@@ -2514,7 +2502,6 @@
     <child>
       <object class="GtkVBox" id="vbox10">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table6">
@@ -2629,7 +2616,6 @@
     <child>
       <object class="GtkVBox" id="vbox11">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkTable" id="table9">
@@ -2744,7 +2730,6 @@
     <child>
       <object class="GtkVBox" id="vbox14">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkVBox" id="vbox16">
@@ -2905,7 +2890,6 @@
         <child>
           <object class="GtkVBox" id="vbox15">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
               <object class="GtkScrolledWindow" id="scrolledwindow4">
@@ -3073,7 +3057,6 @@
       <object class="GtkVBox" id="vbox17">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkFrame" id="frame5">
@@ -3269,7 +3252,6 @@
     <child>
       <object class="GtkVBox" id="vbox21">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox31">
             <property name="visible">True</property>
@@ -3381,7 +3363,6 @@
       <object class="GtkVBox" id="vbox19">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkFrame" id="frame7">
@@ -3558,8 +3539,8 @@
     <property name="buttons">yes-no</property>
     <property name="text">¿Realmente desea salir?</property>
     <property name="secondary_text">Se perderá toda información no guardada</property>
-    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <signal name="response" handler="exit_response"/>
+    <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>

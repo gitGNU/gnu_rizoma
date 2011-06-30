@@ -1408,6 +1408,7 @@ SaveProductsSell (Productos *products, gint id_venta)
   PGresult *res;
   Productos *header = products;
   gdouble iva,precioPro, otros = 0;
+  gchar *iva_unit, *otros_unit;
   gint margen;
   gchar *cantidad;
   gint precio;
@@ -1484,14 +1485,23 @@ SaveProductsSell (Productos *products, gint id_venta)
         precio = products->product->precio_mayor;
       else
         precio = products->product->precio;
+      
 
-      /*
-        Registra los productos con sus respectivos datos(barcode,cantidad,
-        precio,fifo,iva,otros) en la tabla venta_detalle
-       */
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %d, %ld, %ld)",
+      /* Se obtiene el iva y otros impuestos con . en vez de ,
+	 y de esa forma poder ingresarlos en la consulta SQL */
+
+      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
+      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+
+      /* Registra los productos con sus respectivos datos(barcode,cantidad,
+	 precio,fifo,iva,otros) en la tabla venta_detalle */
+      
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %d, %s, %s)",
                            id_venta, products->product->barcode, cantidad, precio,
-                           products->product->fifo, lround (iva), lround (otros));
+                           products->product->fifo, iva_unit, otros_unit);
+
+      g_printf ("la consulta es %s", q);
+      
       res = EjecutarSQL (q);
       g_free (q);
 

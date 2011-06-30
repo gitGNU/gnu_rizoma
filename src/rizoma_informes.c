@@ -182,7 +182,7 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
 
   if (diferenciaNum != 0)
     {      
-      // Se habilita el botÃ³n guardar
+      // Se habilita el botón guardar
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), TRUE);
     }
 }
@@ -237,7 +237,7 @@ on_btn_save_cuadratura_clicked()
       valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si itera a la siguiente */
     }
   
-  // Se deshabilita el botÃ³n guardar
+  // Se deshabilita el botón guardar
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
 }
 
@@ -1294,8 +1294,8 @@ reports_win (void)
   cuadratura->cols[8].name = "Mermas";
   cuadratura->cols[9].name = "Envios";
   cuadratura->cols[10].name = "Recibidos";
-  cuadratura->cols[11].name = "Stock TeÃ³rico";
-  cuadratura->cols[12].name = "Stock FÃ­sico";
+  cuadratura->cols[11].name = "Stock Teórico";
+  cuadratura->cols[12].name = "Stock Físico";
   cuadratura->cols[13].name = "Diferencia";
   cuadratura->cols[14].name = NULL;
 
@@ -1303,7 +1303,7 @@ reports_win (void)
                     G_CALLBACK (PrintTree), (gpointer)cuadratura);
 
 
-  // El botÃ³n guardar inicia "deshabilitado"
+  // El botón guardar inicia "deshabilitado"
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
   
   /*
