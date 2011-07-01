@@ -203,6 +203,7 @@ on_btn_save_cuadratura_clicked()
   GtkTreeIter iter;
   gdouble stock_teorico;
   gdouble stock_fisico;
+  gdouble diferencia;
   gchar *codigo_corto;
   gboolean valid;
 
@@ -215,6 +216,7 @@ on_btn_save_cuadratura_clicked()
 			  0, &codigo_corto,
                           11, &stock_teorico,
                           12, &stock_fisico,
+			  13, &diferencia,
                           -1);
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
@@ -229,7 +231,8 @@ on_btn_save_cuadratura_clicked()
 				  , 0, "barcode");
 	  
 	  // 5 = "Diferencia Cuadratura" en la tabla tipo_merma
-	  AjusteStock (stock_fisico, 5, barcode);
+	  //AjusteStock (stock_fisico, 5, barcode);
+	  AjusteStockCuadratura (stock_fisico, 5, barcode, diferencia);
 	  printf ("Guardar\n");
 	}
 
