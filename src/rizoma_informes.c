@@ -170,6 +170,20 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
                       11, &stock_teorico,
                       -1);
 
+  if (stock_fisicoNum > stock_teorico)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_cuadratura")), 
+		"Las unidades que exedan el stock teórico deben ser\n"
+		"ajustadas mediante un procedimiento de compra");
+      return;
+    }
+  if (stock_fisicoNum < 0)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_cuadratura")), 
+		"El stock físico debe ser un valor positivo");
+      return;
+    }
+
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      12, stock_fisicoNum,
 		      -1);

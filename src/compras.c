@@ -5254,6 +5254,17 @@ ToggleProductSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_sum_selected")),
 			g_strdup_printf ("<b>%u</b>", llround(subTotal)));
 
+  if (subTotal > 0)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_buy_selected")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_suggest_buy")), TRUE);
+    }
+  else
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_buy_selected")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_suggest_buy")), FALSE);
+    }
+
   gtk_tree_path_free (path);
 }
 
@@ -5386,8 +5397,21 @@ on_suggested_amount_edited (GtkCellRendererText *cell, gchar *path_string, gchar
 		      8, &sugeridoAntes, // Sugerido antes de la modificacion
 		      -1);
 
-  PGresult *res;
 
+  if (enable == FALSE)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_products_providers")), 
+		"Debe seleccionar producto a editar");
+      return;
+    }
+  else if (sugerido < 1)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_products_providers")), 
+		"Debe ingresar una cantidad mayor a cero");
+      return;
+    }
+  
+  PGresult *res;
   // Se obtiene el barcode a partir del codigo_corto
   barcode = PQvaluebycol (EjecutarSQL
 			  (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", barcode)),
@@ -5547,7 +5571,7 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_append_column (treeview, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
       g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-      gtk_tree_view_column_set_sort_column_id (column, 0);
+      //gtk_tree_view_column_set_sort_column_id (column, 0);
       gtk_tree_view_column_set_resizable (column, FALSE);
 
       g_signal_connect (G_OBJECT (renderer), "toggled",
@@ -5678,8 +5702,11 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
 
   window = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy"));
   clean_container (GTK_CONTAINER (window));
-  gtk_widget_show_all (GTK_WIDGET (window));
+  
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_buy_selected")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_suggest_buy")), FALSE);
 
+  gtk_widget_show_all (GTK_WIDGET (window));
 
   // Rellenando TreeView
   GtkTreeIter iter;
@@ -5702,7 +5729,7 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
 			  2, strtod (PUT (PQvaluebycol (res, i, "lapso_reposicion")), (char **)NULL),
 			  3, PQvaluebycol (res, i, "giro"),
 			  -1);
-    }
+    }  
 }
 
 
