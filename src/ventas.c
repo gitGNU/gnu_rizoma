@@ -3708,17 +3708,16 @@ FillProveedorData (gchar *rut)
 
   res = EjecutarSQL (g_strdup_printf ("SELECT nombre, rut FROM select_proveedor('%s')", rut));
 
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_proveedor")), PQvaluebycol (res, 0, "nombre"));
 
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_proveedor")), PQvaluebycol (res, 0, "nombre"));
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_proveedor_rut")),
+			g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
 
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_proveedor_rut")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_proveedor_nom")),
+			g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+					 PQvaluebycol (res, 0, "nombre")));
 
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_proveedor_nom")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PQvaluebycol (res, 0, "nombre")));
-
-    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_devolucion")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_devolucion")));
 }
 
 /**
@@ -3872,7 +3871,6 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
                           -1);
 
       strs = g_strsplit (str, "-", 2);
-
 
       FillProveedorData (*strs);
 

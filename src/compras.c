@@ -3934,10 +3934,10 @@ on_entry_srch_provider_activate (GtkEntry *entry)
 
 
 void
-on_entry_guide_invoice_provider_activate (GtkEntry *entry, gpointer user_data)
+wnd_search_provider (GtkEntry *entry, gpointer user_data)
 {
   GtkWindow *window;
-  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_provider"));
   GtkListStore *store;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
@@ -3973,6 +3973,13 @@ on_entry_guide_invoice_provider_activate (GtkEntry *entry, gpointer user_data)
   on_entry_srch_provider_activate(entry);
 
   gtk_widget_show_all (GTK_WIDGET (window));
+}
+
+
+void
+on_entry_guide_invoice_provider_activate (GtkEntry *entry, gpointer data)
+{
+  wnd_search_provider (entry, data);
 }
 
 
@@ -4252,7 +4259,7 @@ on_entry_invoice_provider_activate (GtkEntry *entry, gpointer data)
 {
 
   //on_entry_srch_provider_activate(entry);
-  on_entry_guide_invoice_provider_activate (entry, data);
+  wnd_search_provider (entry, data);
 }
 
 
@@ -6428,10 +6435,10 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
   if (!g_str_equal(id_compra, ""))
     q = g_strdup_printf (" %s AND c.id = %s", q, id_compra);
 
-  else if (!g_str_equal(num_factura, ""))
+  if (!g_str_equal(num_factura, ""))
     q = g_strdup_printf (" %s AND fc.num_factura = %s", q, num_factura);
 
-  else if (!g_str_equal(proveedor, ""))
+  if (!g_str_equal(proveedor, ""))
     {
       q2 = g_strdup_printf ("SELECT rut, dv, nombre "
 			    "FROM buscar_proveedor ('%%%s%%')", proveedor);
@@ -6441,7 +6448,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 
       if (tuples > 1)
 	{
-	  on_entry_guide_invoice_provider_activate (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_provider")), NULL);
+	  wnd_search_provider (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_provider")), NULL);
 	  return;
 	}
 
