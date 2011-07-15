@@ -540,7 +540,7 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("NÂº Guia", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Nº Guia", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -5987,11 +5987,11 @@ on_selection_nullify_buy_invoice_change (GtkTreeSelection *selection, gpointer d
 	{
 	  gtk_list_store_append (store, &iter);
 	  gtk_list_store_set (store, &iter,
-			      0, atoi (g_strdup (PQvaluebycol (res, i, "barcode"))),
+			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
 			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
-			      3, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
-			      4, atoi (g_strdup (PQvaluebycol (res, i, "subtotal"))),
+			      3, PutPoints (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "subtotal"))),
 			      5, id_compra,
 			      6, id_factura_compra,
 			      -1);
@@ -6070,7 +6070,7 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
+			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),
 			      5, id_compra,
 			      6, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
@@ -6166,7 +6166,7 @@ nullify_buy_win(void)
       store_buy = gtk_list_store_new (5,
 				      G_TYPE_INT,     //Id
 				      G_TYPE_STRING,  //Date
-				      G_TYPE_INT,     //Total amount
+				      G_TYPE_STRING,  //Total amount
 				      G_TYPE_STRING,  //Nombre proveedor
 				      G_TYPE_STRING); //Rut proveedor
 
@@ -6221,7 +6221,7 @@ nullify_buy_win(void)
 					  G_TYPE_STRING, // Fecha Ingreso
 					  G_TYPE_STRING, // Pagada
 					  G_TYPE_STRING, // Fecha Pago
-					  G_TYPE_INT,    // Monto Total
+					  G_TYPE_STRING, // Monto Total
 					  G_TYPE_INT,    // ID Compra
 					  G_TYPE_INT);   // ID Factura Compra
 
@@ -6294,11 +6294,11 @@ nullify_buy_win(void)
   if (store_details == NULL)
     {
       store_details = gtk_list_store_new (7,
-                                          G_TYPE_INT,    //barcode
+                                          G_TYPE_STRING, //barcode
                                           G_TYPE_STRING, //description
                                           G_TYPE_DOUBLE, //cantity
-                                          G_TYPE_INT,    //price
-                                          G_TYPE_INT,    //subtotal
+                                          G_TYPE_STRING, //price
+                                          G_TYPE_STRING, //subtotal
                                           G_TYPE_INT,    //Id_compra
                                           G_TYPE_INT);   //id_factura_compra
 
@@ -6385,9 +6385,14 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
   GtkListStore *store;
   GtkTreeIter iter;
 
+  /*Limpiando Treeview*/
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_nullify_buy"));
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   gtk_list_store_clear (store);
+
+  /*Limpiando Labels*/
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_name")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_rut")), "");
 
   /*Fecha*/
   GDate *date_aux;
@@ -6478,7 +6483,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 					      PQvaluebycol (res, i, "year"),
 					      PQvaluebycol (res, i, "hour"),
 					      PQvaluebycol (res, i, "minute")),
-			  2, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
+			  2, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),
 			  3, PQvaluebycol (res, i, "nombre_proveedor"),
 			  4, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);

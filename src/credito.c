@@ -1290,7 +1290,6 @@ void
 on_print_client_list_clicked()
 {
   PrintTree(NULL, (gpointer) client_list);
-
 }
 
 /**
@@ -1300,7 +1299,7 @@ on_print_client_list_clicked()
 void
 on_print_sales_of_client_clicked()
 {
-  PrintTree(NULL, (gpointer) client_detail);
+  PrintTwoTree(NULL, (gpointer) client_detail);
 }
 
 

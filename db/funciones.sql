@@ -198,7 +198,7 @@ begin
 		END IF;
 END; $$ language plpgsql;
 
--- revisa si existe un producto con el mismo código
+-- revisa si existe un producto con el mismo cÃ³digo
 -- administracion_productos.c:1354
 create or replace function existe_producto(prod_codigo_corto varchar(10))
 returns boolean as $$
@@ -750,7 +750,7 @@ query := 'select barcode from producto where codigo_corto = '
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;
     IF contador > 0 THEN
-       RAISE NOTICE 'Retornando más de un barcode para el codigo corto: %',
+       RAISE NOTICE 'Retornando mÃ¡s de un barcode para el codigo corto: %',
        	     	    prod_codigo_corto;
     END IF;
     contador := contador + 1;
@@ -781,7 +781,7 @@ RETURN;
 
 END; ' language plpgsql;
 
--- retorna TRUE cuando el codigo corto está libre
+-- retorna TRUE cuando el codigo corto estÃ¡ libre
 -- compras.c:3725
 create or replace function codigo_corto_libre(varchar(10))
 returns boolean as '
@@ -1385,7 +1385,7 @@ end loop;
 return;
 end; $$ language plpgsql;
 
--- retorna la última linea de asistencia
+-- retorna la Ãºltima linea de asistencia
 -- usuario.c:75
 create or replace function select_asistencia(
        in in_id_user int,
@@ -2323,7 +2323,7 @@ begin
         end if;
 
 	-- ACLARACION: Si el id de apertura y cierre son iguales significa que no hubo venta	
-	-- La que la siguiente operación debería realizarse solo si hay venta en la primera apertura de caja
+	-- La que la siguiente operaciÃ³n deberÃ­a realizarse solo si hay venta en la primera apertura de caja
         
 	-- To avoid problems with the first sell
         if sell_first_id = 1 AND sell_first_id != sell_last_id then
@@ -2942,7 +2942,7 @@ FOR l IN EXECUTE q loop
     codigo_corto := l.codigo_corto;
     marca := l.marca;
     descripcion := l.descripcion;
-    IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aún, por lo que se mostrará toda su información sin limite de fecha    
+    IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aÃºn, por lo que se mostrarÃ¡ toda su informaciÃ³n sin limite de fecha    
        q3 := q2|| l.barcode || $S$ GROUP BY ventas_n, mermas_n, anuladas_n, devolucion_n, envios_n, recibida_n$S$;
        FOR z IN EXECUTE q3 loop
           stock_inicial := 0;
@@ -2956,7 +2956,7 @@ FOR l IN EXECUTE q loop
           stock_teorico := z.cantidad_ingresada_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n - z.envios_n + z.recibida_n;
        END loop;
     ELSE
-       stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
+       stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el dÃ­a seleccionado (ESTE SE MANTIENE)
        compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
        ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
        anulaciones_periodo := l.stock2_cantidad_anulada - l.stock1_cantidad_anulada;

@@ -485,19 +485,52 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   return TRUE;
 }
 
+
+/**
+ * This function returns a PGresult with the sells
+ * If anuladas parameter is NULL return all sells,
+ * if TRUE, return nullified sales only and
+ * if FALSE, return sales not nullified only 
+ *
+ * @param: gint begin year
+ * @param: gint begin month
+ * @param: gint begin day
+ * @param: gint end year
+ * @param: gint end month
+ * @param: gint end day
+ * @param: gchar date colum
+ * @param: gchar fields
+ * @param: gchar grupo, "Anuladas", "Ingresadas", "TODAS"
+ *
+ */
+
 PGresult *
 SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
                     gint to_year, gint to_month, gint to_day,
-                    gchar *date_column, gchar *fields)
+                    gchar *date_column, gchar *fields, gchar *grupo)
 {
   PGresult *res;
+  gchar *q;
 
-  res = EjecutarSQL (g_strdup_printf
-                       ("SELECT %s FROM venta WHERE "
-                        "%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-                        "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and id not in  (select id_sale from venta_anulada) ORDER BY fecha DESC",
-                        fields, date_column, from_day, from_month, from_year,
-                        date_column, to_day+1, to_month, to_year));
+  q = g_strdup_printf ("SELECT %s FROM venta WHERE "
+		       "%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
+		       "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
+		       fields, date_column, from_day, from_month, from_year,
+		       date_column, to_day+1, to_month, to_year);
+
+
+  if (g_str_equal (grupo, "TODAS")) 
+    printf ("Todas las ventas\n");
+
+  else if (g_str_equal (grupo, "Anuladas")) 
+    q = g_strdup_printf ("%s AND id IN (SELECT id_sale FROM venta_anulada)", q);
+
+  else if (g_str_equal (grupo, "Ingresadas"))  
+    q = g_strdup_printf ("%s AND id NOT IN (SELECT id_sale FROM venta_anulada)", q);
+
+  q = g_strdup_printf ("%s ORDER BY fecha DESC", q);
+
+  res = EjecutarSQL (q);
 
   if (res != NULL)
     return res;
@@ -2341,7 +2374,7 @@ Recibir (gchar *barcode, gchar *cantidad)
 }
 
 gint
-SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *comuna,
+SetModificacionesProveedor (gchar *rut, gchar *nombre, gchar *direccion, gchar *comuna,
                             gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,
                             gchar *email, gchar *giro, gchar *lap_rep)
 {
@@ -2358,7 +2391,7 @@ SetModificacionesProveedor (gchar *rut, gchar *razon, gchar *direccion, gchar *c
 
   q = g_strdup_printf ("UPDATE proveedor SET nombre='%s', direccion='%s', ciudad='%s', "
                        "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s', lapso_reposicion=%d "
-                       "WHERE rut=%s", razon, direccion, ciudad,
+                       "WHERE rut=%s", nombre, direccion, ciudad,
                        comuna, fono, email, web, contacto, giro, lrep, aux[0]);
   res = EjecutarSQL (q);
   g_free (q);
