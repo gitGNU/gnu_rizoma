@@ -641,12 +641,13 @@ reports_win (void)
 
 
   /* Sells */
-  store = gtk_list_store_new (6,
+  store = gtk_list_store_new (7,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
+			      G_TYPE_STRING,
                               G_TYPE_STRING);
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"));
@@ -716,6 +717,16 @@ reports_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Estado", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   libro->tree = treeview;
@@ -1231,21 +1242,22 @@ reports_win (void)
    */
 
 
-  store = gtk_list_store_new (14,
+  store = gtk_list_store_new (15,
 			      G_TYPE_STRING, // 0, Codigo Corto
                               G_TYPE_STRING, // 1, Descripción Mercadería
 			      G_TYPE_STRING, // 2, Marca
                               G_TYPE_DOUBLE, // 3, Stock Inicial
                               G_TYPE_DOUBLE, // 4, Compras
-                              G_TYPE_DOUBLE, // 5, Ventas
-			      G_TYPE_DOUBLE, // 6, Anulaciones
-                              G_TYPE_DOUBLE, // 7, Devoluciones
-			      G_TYPE_DOUBLE, // 8, Mermas
-			      G_TYPE_DOUBLE, // 9, Enviados
-			      G_TYPE_DOUBLE, // 10, Recibidos
-			      G_TYPE_DOUBLE, // 11, Stock teorico
-			      G_TYPE_DOUBLE, // 12, Stock Físico
-			      G_TYPE_DOUBLE, // 13, Diferencia
+			      G_TYPE_DOUBLE, // 5, Anulaciones de Compras
+                              G_TYPE_DOUBLE, // 6, Ventas
+			      G_TYPE_DOUBLE, // 7, Anulaciones de Ventas
+                              G_TYPE_DOUBLE, // 8, Devoluciones
+			      G_TYPE_DOUBLE, // 9, Mermas
+			      G_TYPE_DOUBLE, // 10, Enviados
+			      G_TYPE_DOUBLE, // 11, Recibidos
+			      G_TYPE_DOUBLE, // 12, Stock teorico
+			      G_TYPE_DOUBLE, // 13, Stock Físico
+			      G_TYPE_DOUBLE, // 14, Diferencia
                               -1);
 
 
@@ -1311,7 +1323,7 @@ reports_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Ventas", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Compras Anul.", renderer,
 						     "text", 5,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1322,7 +1334,7 @@ reports_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Anulaciones", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Ventas", renderer,
 						     "text", 6,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1332,9 +1344,8 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
-
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Devoluciones", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Ventas Anul.", renderer,
 						     "text", 7,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1346,7 +1357,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Mermas", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Devoluciones", renderer,
 						     "text", 8,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1356,8 +1367,9 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
 
+
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Enviados", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Mermas", renderer,
 						     "text", 9,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1367,9 +1379,8 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
 
-
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Recibidos", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Enviados", renderer,
 						     "text", 10,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1381,7 +1392,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Stock teórico", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Recibidos", renderer,
 						     "text", 11,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1393,12 +1404,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  g_object_set (renderer,
-		"editable", TRUE,
-		NULL);
-  g_signal_connect (G_OBJECT (renderer), "edited",
-		    G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
-  column = gtk_tree_view_column_new_with_attributes ("Stock físico", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Stock teórico", renderer,
 						     "text", 12,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1410,16 +1416,33 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Diferencia", renderer,
+  g_object_set (renderer,
+		"editable", TRUE,
+		NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited",
+		    G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+  column = gtk_tree_view_column_new_with_attributes ("Stock físico", renderer,
 						     "text", 13,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 13);
-  gtk_tree_view_column_set_min_width (column, 90);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)13, NULL);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Diferencia", renderer,
+						     "text", 14,
+						     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 14);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)14, NULL);
 
 
   cuadratura->tree = treeview;
@@ -1430,16 +1453,17 @@ reports_win (void)
   cuadratura->cols[2].name = "Marca";
   cuadratura->cols[3].name = "Stock Inicial";
   cuadratura->cols[4].name = "Compras";
-  cuadratura->cols[5].name = "Ventas";
-  cuadratura->cols[6].name = "Anulaciones";
-  cuadratura->cols[7].name = "Devoluciones";
-  cuadratura->cols[8].name = "Mermas";
-  cuadratura->cols[9].name = "Envios";
-  cuadratura->cols[10].name = "Recibidos";
-  cuadratura->cols[11].name = "Stock Teórico";
-  cuadratura->cols[12].name = "Stock Físico";
-  cuadratura->cols[13].name = "Diferencia";
-  cuadratura->cols[14].name = NULL;
+  cuadratura->cols[5].name = "Compras Anuladas";
+  cuadratura->cols[6].name = "Ventas";
+  cuadratura->cols[7].name = "Ventas Anuladas";
+  cuadratura->cols[8].name = "Devoluciones";
+  cuadratura->cols[9].name = "Mermas";
+  cuadratura->cols[10].name = "Envios";
+  cuadratura->cols[11].name = "Recibidos";
+  cuadratura->cols[12].name = "Stock Teórico";
+  cuadratura->cols[13].name = "Stock Físico";
+  cuadratura->cols[14].name = "Diferencia";
+  cuadratura->cols[15].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_cuadratura"), "clicked",
                     G_CALLBACK (PrintTree), (gpointer)cuadratura);
@@ -1772,9 +1796,10 @@ reports_win (void)
    */
 
   //Compras
-  store = gtk_list_store_new (5,
+  store = gtk_list_store_new (6,
 			      G_TYPE_INT,     //Id
 			      G_TYPE_STRING,  //Date
+			      G_TYPE_STRING,  //Status
 			      G_TYPE_STRING,  //Total amount
 			      G_TYPE_STRING,  //Nombre proveedor
 			      G_TYPE_STRING); //Rut proveedor
@@ -1798,7 +1823,7 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  //date
+  //Date
   renderer = gtk_cell_renderer_text_new();
   column = gtk_tree_view_column_new_with_attributes("Fecha", renderer,
 						    "text", 1,
@@ -1808,16 +1833,27 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
-      
-  //Total amount
+
+  //Status
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Estado", renderer,
 						    "text", 2,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+      
+  //Total amount
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+						    "text", 3,
+						    NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   
@@ -2176,6 +2212,9 @@ on_btn_primero_clicked()
                               3, PQgetvalue (res_sells, i, 2),
                               4, PQgetvalue (res_sells, i, 3),
                               5, pago,
+			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+								     PQgetvalue (res_sells, i, 0))) ?
+						 "Anulada":"Vigente"),
                               -1);
         }
     }
@@ -2258,6 +2297,9 @@ on_btn_atras_clicked()
 				  3, PQgetvalue (res_sells, i, 2),
 				  4, PQgetvalue (res_sells, i, 3),
 				  5, pago,
+				  6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+									 PQgetvalue (res_sells, i, 0))) ?
+						     "Anulada":"Vigente"),
 				  -1);
 	    }
 	}
@@ -2339,6 +2381,9 @@ on_btn_adelante_clicked()
                                   3, PQgetvalue (res_sells, i, 2),
                                   4, PQgetvalue (res_sells, i, 3),
                                   5, pago,
+				  6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+									 PQgetvalue (res_sells, i, 0))) ?
+						     "Anulada":"Vigente"),
                                   -1);
             }
         }
@@ -2418,6 +2463,9 @@ on_btn_ultimo_clicked()
                               3, PQgetvalue (res_sells, i, 2),
                               4, PQgetvalue (res_sells, i, 3),
                               5, pago,
+			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+								     PQgetvalue (res_sells, i, 0))) ?
+						 "Anulada":"Vigente"),
                               -1);
         }
     }
@@ -2498,7 +2546,8 @@ on_togglebtn_clicked()
       res_sells = SearchTuplesByDate
 	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
 	 g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta",
+	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+	          " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
 	 store_combo);
 
       tuples = PQntuples (res_sells);
@@ -2546,6 +2595,9 @@ on_togglebtn_clicked()
 			      3, PQgetvalue (res_sells, i, 2),
 			      4, PQgetvalue (res_sells, i, 3),
 			      5, pago,
+			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+								     PQgetvalue (res_sells, i, 0))) ?
+						 "Anulada":"Vigente"),
 			      -1);
 	}
       /* else */
@@ -2614,7 +2666,8 @@ fill_sells_list ()
   res_sells = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-     "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta",
+     "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+              " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
      store_combo);
 
   tuples = PQntuples (res_sells);
@@ -2675,6 +2728,9 @@ fill_sells_list ()
                               3, PQgetvalue (res_sells, i, 2),
                               4, PQgetvalue (res_sells, i, 3),
                               5, pago,
+			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+								     PQgetvalue (res_sells, i, 0))) ?
+						 "Anulada":"Vigente"),
                               -1);
         }
       else
@@ -2830,9 +2886,6 @@ void
     (g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
                       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
                       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
-
-
-
 
   gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.60);
 
@@ -3098,7 +3151,7 @@ fill_cuadratura ()
 
   gtk_list_store_clear (store);
 
-  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, stock_inicial, compras_periodo, ventas_periodo, anulaciones_periodo, devoluciones_periodo, mermas_periodo, enviados_periodo, recibidos_periodo, stock_teorico "
+  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, stock_inicial, compras_periodo, anulaciones_c_periodo, ventas_periodo, anulaciones_periodo, devoluciones_periodo, mermas_periodo, enviados_periodo, recibidos_periodo, stock_teorico "
 			  "FROM producto_en_periodo('%.4d-%.2d-%.2d')",
 			  g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin) );
 
@@ -3117,15 +3170,16 @@ fill_cuadratura ()
 			  2, PQvaluebycol (res, i, "marca"),
 			  3, g_strtod(PUT(PQvaluebycol (res, i, "stock_inicial")),(gchar **)NULL),
 			  4, g_strtod(PUT(PQvaluebycol (res, i, "compras_periodo")),(gchar **)NULL),
-                          5, g_strtod(PUT(PQvaluebycol (res, i, "ventas_periodo")),(gchar **)NULL),
-			  6, g_strtod(PUT(PQvaluebycol (res, i, "anulaciones_periodo")),(gchar **)NULL),
-                          7, g_strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(gchar **)NULL),
-			  8, g_strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(gchar **)NULL),
-			  9, g_strtod(PUT(PQvaluebycol (res, i, "enviados_periodo")),(gchar **)NULL),
-			  10, g_strtod(PUT(PQvaluebycol (res, i, "recibidos_periodo")),(gchar **)NULL),
-			  11, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
+			  5, g_strtod(PUT(PQvaluebycol (res, i, "anulaciones_c_periodo")),(gchar **)NULL),
+                          6, g_strtod(PUT(PQvaluebycol (res, i, "ventas_periodo")),(gchar **)NULL),
+			  7, g_strtod(PUT(PQvaluebycol (res, i, "anulaciones_periodo")),(gchar **)NULL),
+                          8, g_strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(gchar **)NULL),
+			  9, g_strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(gchar **)NULL),
+			  10, g_strtod(PUT(PQvaluebycol (res, i, "enviados_periodo")),(gchar **)NULL),
+			  11, g_strtod(PUT(PQvaluebycol (res, i, "recibidos_periodo")),(gchar **)NULL),
 			  12, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
-			  //13, 0,
+			  13, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
+			  //14, 0,
 			  -1);
     }
 }
@@ -3392,7 +3446,7 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 		       "date_part ('day', c.fecha) AS day, "
 		       "date_part ('hour', c.fecha) AS hour, "
 		       "date_part ('minute', c.fecha) AS minute, "
-		       "c.rut_proveedor, "
+		       "c.rut_proveedor, c.anulada_pi, "
 		       "(SELECT nombre FROM proveedor WHERE rut = c.rut_proveedor) AS nombre_proveedor, "
 		       "(SELECT SUM (cantidad * precio) "
 		            "FROM factura_compra_detalle fcd "
@@ -3462,9 +3516,11 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 					      PQvaluebycol (res, i, "year"),
 					      PQvaluebycol (res, i, "hour"),
 					      PQvaluebycol (res, i, "minute")),
-			  2, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),
-			  3, PQvaluebycol (res, i, "nombre_proveedor"),
-			  4, PQvaluebycol (res, i, "rut_proveedor"),
+			  2, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "anulada_pi"), "t")) ? 
+					      "Anulada" : "Vigente"),
+			  3, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),			  
+			  4, PQvaluebycol (res, i, "nombre_proveedor"),
+			  5, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);
     }
 
