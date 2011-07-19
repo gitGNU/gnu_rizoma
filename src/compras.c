@@ -6047,8 +6047,8 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
 
 			   "(SELECT SUM (cantidad * precio) "
 		                   "FROM factura_compra_detalle fcd "
-		                   "INNER JOIN factura_compra fc "
-		                   "ON fcd.id_factura_compra = fc.id) AS monto "
+		                   "WHERE fcd.id_factura_compra = fc.id) AS monto "
+
 			   "FROM factura_compra fc "
 			   "WHERE fc.id_compra = %d", id_compra);
       

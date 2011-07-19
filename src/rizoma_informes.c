@@ -477,12 +477,24 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
 			  6, &id_factura_compra,
 			  -1);
 
-      q = g_strdup_printf ("SELECT fcd.barcode, fcd.cantidad, fcd.precio, (fcd.cantidad * fcd.precio) AS subtotal, "
-			   "(SELECT p.descripcion FROM producto p WHERE p.barcode = fcd.barcode) AS descripcion "
-			   "FROM factura_compra_detalle fcd "
-			   "INNER JOIN factura_compra fc "
-			   "ON fc.id = fcd.id_factura_compra "
-			   "WHERE fc.id = %d", id_factura_compra);
+      q = g_strdup_printf ("SELECT anulada_pi FROM compra WHERE id = %d", id_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      if (g_str_equal (PQvaluebycol (res, 0, "anulada_pi"), "t"))
+	q = g_strdup_printf ("SELECT cad.barcode, cad.cantidad_anulada AS cantidad, cad.costo, (cad.cantidad_anulada * cad.costo) AS subtotal, "
+			     "(SELECT p.descripcion FROM producto p WHERE p.barcode = cad.barcode) AS descripcion "
+			     "FROM compra_anulada_detalle cad "
+			     "INNER JOIN compra_anulada ca "
+			     "ON ca.id = cad.id_compra_anulada "
+			     "WHERE ca.id_compra = %d", id_compra);
+      else
+	q = g_strdup_printf ("SELECT fcd.barcode, fcd.cantidad, fcd.precio AS costo, (fcd.cantidad * fcd.precio) AS subtotal, "
+			     "(SELECT p.descripcion FROM producto p WHERE p.barcode = fcd.barcode) AS descripcion "
+			     "FROM factura_compra_detalle fcd "
+			     "INNER JOIN factura_compra fc "
+			     "ON fc.id = fcd.id_factura_compra "
+			     "WHERE fc.id = %d", id_factura_compra);
       
       res = EjecutarSQL (q);
       g_free (q);
@@ -495,7 +507,7 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
 			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
-			      3, PutPoints (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      3, PutPoints (g_strdup (PQvaluebycol (res, i, "costo"))),
 			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "subtotal"))),
 			      5, id_compra,
 			      6, id_factura_compra,
@@ -555,8 +567,16 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 
 			   "(SELECT SUM (cantidad * precio) "
 		                   "FROM factura_compra_detalle fcd "
-		                   "INNER JOIN factura_compra fc "
-		                   "ON fcd.id_factura_compra = fc.id) AS monto "
+		                   "WHERE fcd.id_factura_compra = fc.id) AS monto, "
+
+			   "(SELECT SUM (cantidad_anulada * costo) "
+		                   "FROM compra_anulada_detalle cad "
+			           "INNER JOIN compra_anulada ca ON "
+			           "cad.id_compra_anulada = ca.id "
+		                   "WHERE ca.id_compra = fc.id_compra) AS monto_anulado, "
+
+			   "(SELECT anulada_pi FROM compra WHERE id = fc.id_compra) AS anulada "
+
 			   "FROM factura_compra fc "
 			   "WHERE fc.id_compra = %d", id_compra);
       
@@ -578,7 +598,9 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),
+			      4, PutPoints ( (g_str_equal (PQvaluebycol (res, i, "anulada"),"t")) ?
+					      PQvaluebycol (res, i, "monto_anulado") : 
+					      PQvaluebycol (res, i, "monto") ),
 			      5, id_compra,
 			      6, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
@@ -3452,7 +3474,12 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 		            "FROM factura_compra_detalle fcd "
 		            "INNER JOIN factura_compra fc "
 		            "ON fcd.id_factura_compra = fc.id "
-		            "AND fc.id_compra = c.id) AS monto "
+		            "AND fc.id_compra = c.id) AS monto, "
+		       "(SELECT SUM (cantidad_anulada * costo) "
+		            "FROM compra_anulada_detalle cad "
+		            "INNER JOIN compra_anulada ca "
+		            "ON cad.id_compra_anulada = ca.id "
+		            "AND ca.id_compra = c.id) AS monto_anulado "
 		       "FROM compra c INNER JOIN factura_compra fc "
 		       "ON c.id = fc.id_compra "
 		       "WHERE c.ingresada = 't' "
@@ -3518,7 +3545,8 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 					      PQvaluebycol (res, i, "minute")),
 			  2, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "anulada_pi"), "t")) ? 
 					      "Anulada" : "Vigente"),
-			  3, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),			  
+			  3, PutPoints ( (g_str_equal(PQvaluebycol(res, i, "anulada_pi"),"t")) ? 
+					 PQvaluebycol (res, i, "monto_anulado") : PQvaluebycol (res, i, "monto") ),
 			  4, PQvaluebycol (res, i, "nombre_proveedor"),
 			  5, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);
