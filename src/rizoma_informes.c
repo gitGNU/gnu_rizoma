@@ -547,8 +547,8 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
     {
       gtk_tree_model_get (model, &iter,
 			  0, &id_compra,
-			  3, &nombre_proveedor,
-			  4, &rut_proveedor,
+			  4, &nombre_proveedor,
+			  5, &rut_proveedor,
 			  -1);
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_buy_provider_name")), 
@@ -3767,6 +3767,12 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 
       gtk_list_store_clear(modelo);
 
+      gtk_list_store_append(modelo, &iter);
+      gtk_list_store_set(modelo, &iter,
+			 0, 0,
+			 1, "TODOS",
+			 -1);
+
       for (i=0 ; i < tuples ; i++)
 	{
 	  gtk_list_store_append(modelo, &iter);
@@ -3775,13 +3781,8 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 			     1, PQvaluebycol(res, i, "nombre"),
 			     -1);
 	}
-
-      gtk_list_store_append(modelo, &iter);
-      gtk_list_store_set(modelo, &iter,
-			 0, 0,
-			 1, "TODOS",
-			 -1);
-
+      
+      gtk_combo_box_set_active (combo, 0);
     }
 }
 
@@ -3941,19 +3942,20 @@ fill_filter_nullify_cmbbox (gchar *combobox_name)
   gtk_list_store_append(modelo, &iter);
   gtk_list_store_set(modelo, &iter,
 		     0, 0,
-		     1, "Ingresadas",
+		     1, "TODAS",
 		     -1);
 
   gtk_list_store_append(modelo, &iter);
   gtk_list_store_set(modelo, &iter,
 		     0, 1,
-		     1, "Anuladas",
+		     1, "Ingresadas",
 		     -1);
 
   gtk_list_store_append(modelo, &iter);
   gtk_list_store_set(modelo, &iter,
 		     0, 2,
-		     1, "TODAS",
+		     1, "Anuladas",
 		     -1);
 
+  gtk_combo_box_set_active (combo, 0);
 }
