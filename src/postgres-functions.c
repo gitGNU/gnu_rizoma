@@ -525,7 +525,7 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
   else if (g_str_equal (grupo, "Anuladas")) 
     q = g_strdup_printf ("%s AND id IN (SELECT id_sale FROM venta_anulada)", q);
 
-  else if (g_str_equal (grupo, "Ingresadas"))  
+  else if (g_str_equal (grupo, "Vigentes"))  
     q = g_strdup_printf ("%s AND id NOT IN (SELECT id_sale FROM venta_anulada)", q);
 
   q = g_strdup_printf ("%s ORDER BY fecha DESC", q);

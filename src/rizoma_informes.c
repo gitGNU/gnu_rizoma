@@ -3487,7 +3487,7 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 
   if (g_str_equal(store_combo, "Anuladas"))
     q = g_strdup_printf (" %s AND c.anulada_pi = 't'", q);
-  else if (g_str_equal(store_combo, "Ingresadas"))
+  else if (g_str_equal(store_combo, "Vigentes"))
     q = g_strdup_printf (" %s AND c.anulada_pi = 'f'", q);
 
   /*Comprobando datos*/
@@ -3528,9 +3528,9 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 
   if ( (tuples == 0 && g_str_equal(proveedor, "")) &&
        (g_str_equal(id_compra, "") && g_str_equal(num_factura, "")) )
-    AlertMSG (widget, "No se encontraron compras en el intervalo fechas seleccionadas");
+    AlertMSG (widget, "No se encontraron resultados en el intervalo fechas seleccionadas");
   else if (tuples == 0)
-    AlertMSG (widget, "No se encontraron compras que cumplan con los criterios especificados");
+    AlertMSG (widget, "No se encontraron resultados que cumplan con los criterios especificados");
 
   for (i = 0; i < tuples; i++)
     {
@@ -3589,10 +3589,7 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
       // Todos los demas informes
       switch (page_num)
         {
-	case 0:
-	  fill_purchases_list (widget, NULL);
-	  break;
-        case 1:
+        case 0:
           /* Informe de ventas */
           fill_sells_list();
           gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Cargando ..");
@@ -3602,10 +3599,13 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
           //g_thread_create(fill_totals, NULL, FALSE, &error);
           fill_totals();
           break;
-        case 2:
+        case 1:
           /* Informe de ranking de ventas */
           fill_products_rank ();
           break;
+	case 2:
+	  fill_purchases_list (widget, NULL);
+	  break;
         case 3:
           /* Informe de caja*/
           fill_cash_box_list ();
@@ -3948,7 +3948,7 @@ fill_filter_nullify_cmbbox (gchar *combobox_name)
   gtk_list_store_append(modelo, &iter);
   gtk_list_store_set(modelo, &iter,
 		     0, 1,
-		     1, "Ingresadas",
+		     1, "Vigentes",
 		     -1);
 
   gtk_list_store_append(modelo, &iter);

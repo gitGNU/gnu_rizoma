@@ -1749,6 +1749,7 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_compras">
+    <property name="width_request">800</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
     <property name="border_width">3</property>
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
@@ -3491,6 +3492,8 @@
                             <property name="visible">True</property>
                             <property name="n_rows">3</property>
                             <property name="n_columns">6</property>
+                            <property name="column_spacing">30</property>
+                            <property name="row_spacing">3</property>
                             <child>
                               <object class="GtkLabel" id="label_invoice_fono">
                                 <property name="visible">True</property>
