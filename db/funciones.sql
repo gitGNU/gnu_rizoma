@@ -2554,10 +2554,10 @@ declare
        q text;
        l record;
 begin
-        select SUM (descuento) into total_cash_discount from venta where fecha >= starts and fecha < ends and descuento!=0
+        select SUM (descuento) into total_cash_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
                 and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
 
-        select count(*) into total_discount from venta where fecha >= starts and fecha < ends and descuento!=0
+        select count(*) into total_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
                 and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
 
 

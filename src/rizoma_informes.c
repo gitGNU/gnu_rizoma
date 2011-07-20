@@ -2441,13 +2441,12 @@ void
 
   /* Consulta que retorna el numero de ventas con descuento y la suma total
      con descuento en un intervalo de tiempo */
-  res = EjecutarSQL
-    (g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
-                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
+  char *q;
+  q = g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+		       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end));
 
-
-
+  res = EjecutarSQL (q);
 
   gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.60);
 
