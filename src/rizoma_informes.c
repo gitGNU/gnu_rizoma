@@ -146,10 +146,10 @@ ChangeDevolucion (void)
 }
 
 /**
- * Es llamada cuando se edita "stock físico" en el tree_view_cuadratura (signal edited).
+ * Es llamada cuando se edita "stock fÃ­sico" en el tree_view_cuadratura (signal edited).
  *
  * Esta funcion actualiza el campo "Diferencia" a partir de la resta entre "stock teorico"
- * y "stock físico" (stock_teorico - stock_fisico)
+ * y "stock fÃ­sico" (stock_teorico - stock_fisico)
  *
  */
 
@@ -173,14 +173,14 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
   if (stock_fisicoNum > stock_teorico)
     {
       AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_cuadratura")), 
-		"Las unidades que exedan el stock teórico deben ser\n"
+		"Las unidades que exedan el stock teÃ³rico deben ser\n"
 		"ajustadas mediante un procedimiento de compra");
       return;
     }
   if (stock_fisicoNum < 0)
     {
       AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_cuadratura")), 
-		"El stock físico debe ser un valor positivo");
+		"El stock fÃ­sico debe ser un valor positivo");
       return;
     }
 
@@ -196,13 +196,13 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
 
   if (diferenciaNum != 0)
     {      
-      // Se habilita el botón guardar
+      // Se habilita el botÃ³n guardar
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), TRUE);
     }
 }
 
 /**
- * Es llamado cuando se presiona el botón "Guardar" en la pestaña cuadratura (signal clicked).
+ * Es llamado cuando se presiona el botÃ³n "Guardar" en la pestaÃ±a cuadratura (signal clicked).
  *
  * Esta funcion guarda el campo "Diferencia" en la tabla merma con "Diferencia cuadratura"
  * como motivo.
@@ -235,10 +235,10 @@ on_btn_save_cuadratura_clicked()
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
       
-      // Se guarda la merma con motivo "Diferencia Cuadratura", si ésta es distinta de 0 --
+      // Se guarda la merma con motivo "Diferencia Cuadratura", si Ã©sta es distinta de 0 --
       if((stock_teorico - stock_fisico) != 0)
 	{	 
-	  // Se obtiene el barcode a partir del código corto 
+	  // Se obtiene el barcode a partir del cÃ³digo corto 
 	   gchar *barcode;
 	  barcode = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto='%s'",
 								codigo_corto))
@@ -254,7 +254,7 @@ on_btn_save_cuadratura_clicked()
       valid = gtk_tree_model_iter_next (model, &iter); /* Me da TRUE si itera a la siguiente */
     }
   
-  // Se deshabilita el botón guardar
+  // Se deshabilita el botÃ³n guardar
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
 }
 
@@ -403,7 +403,7 @@ fill_caja_data (void)
  *
  * Obtiene el id seleccionado y depliega la informacion correspondiente
  * en el  "tree_view_enviados_detalle" o "tree_view_recibidos_detalle"
- * segÃºn corresponda.
+ * segÃƒÂºn corresponda.
  *
  */
 
@@ -416,7 +416,7 @@ fill_traspaso_detalle ()
   PGresult *res;
   char *sql;
 
-  // Obtiene la página de traspasos desde la cual se esta llamando a esta funcion
+  // Obtiene la pÃ¡gina de traspasos desde la cual se esta llamando a esta funcion
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_traspasos"));
   gint page_num = gtk_notebook_get_current_page (notebook);
   
@@ -433,7 +433,7 @@ fill_traspaso_detalle ()
                           1, &id,
                           -1);
       
-      // Crea y limpia el store correspondiente, dependiendo de la página desde la que se nos llama
+      // Crea y limpia el store correspondiente, dependiendo de la pÃ¡gina desde la que se nos llama
       store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, (page_num == 0) ? "tree_view_enviado_detalle": "tree_view_recibido_detalle"))));
       gtk_list_store_clear (store);
 
@@ -1082,7 +1082,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID Devolución", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ID DevoluciÃ³n", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1260,7 +1260,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Contribución $", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ContribuciÃ³n $", renderer,
 						     "text", 4,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1283,7 +1283,7 @@ reports_win (void)
 
   store = gtk_list_store_new (15,
 			      G_TYPE_STRING, // 0, Codigo Corto
-                              G_TYPE_STRING, // 1, Descripción Mercadería
+                              G_TYPE_STRING, // 1, DescripciÃ³n MercaderÃ­a
 			      G_TYPE_STRING, // 2, Marca
                               G_TYPE_DOUBLE, // 3, Stock Inicial
                               G_TYPE_DOUBLE, // 4, Compras
@@ -1295,7 +1295,7 @@ reports_win (void)
 			      G_TYPE_DOUBLE, // 10, Enviados
 			      G_TYPE_DOUBLE, // 11, Recibidos
 			      G_TYPE_DOUBLE, // 12, Stock teorico
-			      G_TYPE_DOUBLE, // 13, Stock Físico
+			      G_TYPE_DOUBLE, // 13, Stock FÃ­sico
 			      G_TYPE_DOUBLE, // 14, Diferencia
                               -1);
 
@@ -1317,7 +1317,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descripción Mercadería", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("DescripciÃ³n MercaderÃ­a", renderer,
 						     "text", 1,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1443,7 +1443,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Stock teórico", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Stock teÃ³rico", renderer,
 						     "text", 12,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1460,7 +1460,7 @@ reports_win (void)
 		NULL);
   g_signal_connect (G_OBJECT (renderer), "edited",
 		    G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
-  column = gtk_tree_view_column_new_with_attributes ("Stock físico", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Stock fÃ­sico", renderer,
 						     "text", 13,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1488,7 +1488,7 @@ reports_win (void)
   cuadratura->title = "Informe Cuadratura";
   cuadratura->date_string = NULL;
   cuadratura->cols[0].name = "Codigo Corto";
-  cuadratura->cols[1].name = "Descripción";
+  cuadratura->cols[1].name = "DescripciÃ³n";
   cuadratura->cols[2].name = "Marca";
   cuadratura->cols[3].name = "Stock Inicial";
   cuadratura->cols[4].name = "Compras";
@@ -1499,8 +1499,8 @@ reports_win (void)
   cuadratura->cols[9].name = "Mermas";
   cuadratura->cols[10].name = "Envios";
   cuadratura->cols[11].name = "Recibidos";
-  cuadratura->cols[12].name = "Stock Teórico";
-  cuadratura->cols[13].name = "Stock Físico";
+  cuadratura->cols[12].name = "Stock TeÃ³rico";
+  cuadratura->cols[13].name = "Stock FÃ­sico";
   cuadratura->cols[14].name = "Diferencia";
   cuadratura->cols[15].name = NULL;
 
@@ -1508,7 +1508,7 @@ reports_win (void)
                     G_CALLBACK (PrintTree), (gpointer)cuadratura);
 
 
-  // El botón guardar inicia "deshabilitado"
+  // El botÃ³n guardar inicia "deshabilitado"
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
   
   /*
@@ -1615,7 +1615,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("DescripciÃ³n", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1661,7 +1661,7 @@ reports_win (void)
   libroEnviados->son->tree = treeview;
   libroEnviados->son->cols[0].name = "Codigo Corto";
   libroEnviados->son->cols[0].num = 0;
-  libroEnviados->son->cols[1].name = "Descripción";
+  libroEnviados->son->cols[1].name = "DescripciÃ³n";
   libroEnviados->son->cols[1].num = 1;
   libroEnviados->son->cols[2].name = "Unidades";
   libroEnviados->son->cols[2].num = 2;
@@ -1768,7 +1768,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("DescripciÃ³n", renderer,
                                                      "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1813,7 +1813,7 @@ reports_win (void)
   libroRecibidos->son->tree = treeview;
   libroRecibidos->son->cols[0].name = "Codigo Corto";
   libroRecibidos->son->cols[0].num = 0;
-  libroRecibidos->son->cols[1].name = "Descripción";
+  libroRecibidos->son->cols[1].name = "DescripciÃ³n";
   libroRecibidos->son->cols[1].num = 1;
   libroRecibidos->son->cols[2].name = "Unidades";
   libroRecibidos->son->cols[2].num = 2;
@@ -1910,7 +1910,7 @@ reports_win (void)
   
   //Facturas
   store = gtk_list_store_new (8,
-			      G_TYPE_INT,    // N° Factura
+			      G_TYPE_INT,    // NÂ° Factura
 			      G_TYPE_STRING, // Fecha Ingreso
 			      G_TYPE_STRING, // Pagada
 			      G_TYPE_STRING, // Fecha Pago
@@ -1929,7 +1929,7 @@ reports_win (void)
 
   //ID
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("N° Factura", renderer,
+  column = gtk_tree_view_column_new_with_attributes("NÂ° Factura", renderer,
 						    "text", 0,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -2610,7 +2610,7 @@ on_togglebtn_clicked()
       combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_sell_report"));
       active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
 
-      /* Verifica si hay alguna opción seleccionada*/
+      /* Verifica si hay alguna opciÃ³n seleccionada*/
       if (active == -1)
 	store_combo = "TODAS";
       else
@@ -2731,7 +2731,7 @@ fill_sells_list ()
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_sell_report"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
 
-  /* Verifica si hay alguna opción seleccionada*/
+  /* Verifica si hay alguna opciÃ³n seleccionada*/
   if (active == -1)
     store_combo = "TODAS";
   else
@@ -3224,7 +3224,7 @@ fill_provider ()
 /**
  * Es llamado por on_btn_get_stat_clicked ()
  *
- * Obtiene la información de cuadratura y la depliega en en treeview "tree_view_cuadratura"
+ * Obtiene la informaciÃ³n de cuadratura y la depliega en en treeview "tree_view_cuadratura"
  *
  */
 
@@ -3275,8 +3275,8 @@ fill_cuadratura ()
 /**
  * Es llamado por on_btn_get_stat_clicked ()
  *
- * Obtiene la información de traspasos y la depliega en en treeview "
- * tree_view_enviados" o "tree_view_recibidos" según corresponda.
+ * Obtiene la informaciÃ³n de traspasos y la depliega en en treeview "
+ * tree_view_enviados" o "tree_view_recibidos" segÃºn corresponda.
  *
  */
 
@@ -3290,7 +3290,7 @@ fill_traspaso (gchar *local)
   gchar *sql;
   gchar *local_consulta;
 
-  // Obtiene la página de traspasos desde la cual se esta llamando a esta funcion
+  // Obtiene la pÃ¡gina de traspasos desde la cual se esta llamando a esta funcion
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_traspasos"));
   gint page_num = gtk_notebook_get_current_page (notebook);
 
@@ -3509,7 +3509,7 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_buy_report"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
 
-  /* Verifica si hay alguna opción seleccionada*/
+  /* Verifica si hay alguna opciÃ³n seleccionada*/
   if (active == -1)
     store_combo = "TODAS";
   else
@@ -3779,7 +3779,7 @@ calcular_traspasos (void)
 void
 on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
-  /*Si se selecciona la "pagina 5" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
+  /*Si se selecciona la "pagina 5" (la pestaÃ±a cuadratura) y el entry de la fecha de termino esta habilitado*/
   if(page_num == 6 &&
      gtk_widget_get_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end"))) == TRUE)
     {
@@ -3798,7 +3798,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       // Se calculan los traspasos y se muestran
       calcular_traspasos();
 
-      // Se inicia mostrando el botón para imprimir el informe de los envios
+      // Se inicia mostrando el botÃ³n para imprimir el informe de los envios
       // y oculta el de los recibidos
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_recibido")));
@@ -3856,7 +3856,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 void
 on_tree_view_traspasos_grab_focus (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
-  /*Si se selecciona la "pagina 6" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
+  /*Si se selecciona la "pagina 6" (la pestaÃ±a cuadratura) y el entry de la fecha de termino esta habilitado*/
   if(page_num == 0)
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_enviado")));
