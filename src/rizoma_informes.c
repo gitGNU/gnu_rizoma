@@ -473,28 +473,25 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       gtk_tree_model_get (model, &iter,
-			  5, &id_compra,
-			  6, &id_factura_compra,
+			  7, &id_factura_compra,
 			  -1);
 
-      q = g_strdup_printf ("SELECT anulada_pi FROM compra WHERE id = %d", id_compra);
-      res = EjecutarSQL (q);
-      g_free (q);
-
-      if (g_str_equal (PQvaluebycol (res, 0, "anulada_pi"), "t"))
-	q = g_strdup_printf ("SELECT cad.barcode, cad.cantidad_anulada AS cantidad, cad.costo, (cad.cantidad_anulada * cad.costo) AS subtotal, "
-			     "(SELECT p.descripcion FROM producto p WHERE p.barcode = cad.barcode) AS descripcion "
-			     "FROM compra_anulada_detalle cad "
-			     "INNER JOIN compra_anulada ca "
-			     "ON ca.id = cad.id_compra_anulada "
-			     "WHERE ca.id_compra = %d", id_compra);
-      else
-	q = g_strdup_printf ("SELECT fcd.barcode, fcd.cantidad, fcd.precio AS costo, (fcd.cantidad * fcd.precio) AS subtotal, "
-			     "(SELECT p.descripcion FROM producto p WHERE p.barcode = fcd.barcode) AS descripcion "
-			     "FROM factura_compra_detalle fcd "
-			     "INNER JOIN factura_compra fc "
-			     "ON fc.id = fcd.id_factura_compra "
-			     "WHERE fc.id = %d", id_factura_compra);
+      q = g_strdup_printf ("SELECT fc.id_compra, fcd.barcode, fcd.cantidad AS cantidad_comprada, fcd.precio AS costo, (fcd.cantidad * fcd.precio) AS monto_compra, "
+			   "(SELECT (cad.cantidad_anulada * cad.costo) "
+			   "        FROM compra_anulada_detalle cad "
+			   "        INNER JOIN compra_anulada ca "
+			   "        ON ca.id = cad.id_compra_anulada "
+			   "        WHERE ca.id_compra = fc.id_compra) AS monto_anulado, "
+			   "(SELECT cad.cantidad_anulada "
+			   "        FROM compra_anulada_detalle cad "
+			   "        INNER JOIN compra_anulada ca "
+			   "        ON ca.id = cad.id_compra_anulada "
+			   "        WHERE ca.id_compra = fc.id_compra) AS cantidad_anulada, "
+			   "(SELECT p.descripcion FROM producto p WHERE p.barcode = fcd.barcode) AS descripcion "
+			   "FROM factura_compra_detalle fcd "
+			   "INNER JOIN factura_compra fc "
+			   "ON fc.id = fcd.id_factura_compra "
+			   "WHERE fc.id = %d", id_factura_compra);
       
       res = EjecutarSQL (q);
       g_free (q);
@@ -506,11 +503,14 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
 	  gtk_list_store_set (store, &iter,
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
-			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
-			      3, PutPoints (g_strdup (PQvaluebycol (res, i, "costo"))),
-			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "subtotal"))),
-			      5, id_compra,
-			      6, id_factura_compra,
+			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad_comprada")), (char **)NULL),
+			      3, strtod (g_strdup (PQvaluebycol (res, i, "cantidad_anulada")), (char **)NULL),
+			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "costo"))),
+			      5, PutPoints (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
+			      6, PutPoints ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
+					    "0" : PQvaluebycol (res, i, "monto_anulado")),
+			      7, id_compra,
+			      8, id_factura_compra,
 			      -1);
 	}
       
@@ -547,8 +547,8 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
     {
       gtk_tree_model_get (model, &iter,
 			  0, &id_compra,
-			  4, &nombre_proveedor,
-			  5, &rut_proveedor,
+			  5, &nombre_proveedor,
+			  6, &rut_proveedor,
 			  -1);
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_buy_provider_name")), 
@@ -567,7 +567,7 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 
 			   "(SELECT SUM (cantidad * precio) "
 		                   "FROM factura_compra_detalle fcd "
-		                   "WHERE fcd.id_factura_compra = fc.id) AS monto, "
+		                   "WHERE fcd.id_factura_compra = fc.id) AS monto_compra, "
 
 			   "(SELECT SUM (cantidad_anulada * costo) "
 		                   "FROM compra_anulada_detalle cad "
@@ -598,11 +598,11 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, PutPoints ( (g_str_equal (PQvaluebycol (res, i, "anulada"),"t")) ?
-					      PQvaluebycol (res, i, "monto_anulado") : 
-					      PQvaluebycol (res, i, "monto") ),
-			      5, id_compra,
-			      6, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
+			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
+			      5, PutPoints ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
+					    "0" : PQvaluebycol (res, i, "monto_anulado")),
+			      6, id_compra,
+			      7, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
 	}
       
@@ -1818,11 +1818,12 @@ reports_win (void)
    */
 
   //Compras
-  store = gtk_list_store_new (6,
+  store = gtk_list_store_new (7,
 			      G_TYPE_INT,     //Id
 			      G_TYPE_STRING,  //Date
 			      G_TYPE_STRING,  //Status
-			      G_TYPE_STRING,  //Total amount
+			      G_TYPE_STRING,  //Buy amount
+			      G_TYPE_STRING,  //Nullify amount
 			      G_TYPE_STRING,  //Nombre proveedor
 			      G_TYPE_STRING); //Rut proveedor
 
@@ -1867,9 +1868,9 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_resizable (column, FALSE);
       
-  //Total amount
+  //Buy amount
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Monto Compra", renderer,
 						    "text", 3,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1878,14 +1879,26 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  //Nullify amount
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Monto Anulado", renderer,
+						    "text", 4,
+						    NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
   
   //Facturas
-  store = gtk_list_store_new (7,
+  store = gtk_list_store_new (8,
 			      G_TYPE_INT,    // N° Factura
 			      G_TYPE_STRING, // Fecha Ingreso
 			      G_TYPE_STRING, // Pagada
 			      G_TYPE_STRING, // Fecha Pago
-			      G_TYPE_STRING, // Monto Total
+			      G_TYPE_STRING, // Buy amount
+			      G_TYPE_STRING, // Nullify amount
 			      G_TYPE_INT,    // ID Compra
 			      G_TYPE_INT);   // ID Factura Compra
 
@@ -1941,9 +1954,9 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  //Monto Total
+  //Buy amount
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Monto Compra", renderer,
 						    "text", 4,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1952,14 +1965,27 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  //Nullify amount
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Monto Anulado", renderer,
+						    "text", 5,
+						    NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
 
   //Detalle Factura
-  store = gtk_list_store_new (7,
+  store = gtk_list_store_new (9,
 			      G_TYPE_STRING, //barcode
 			      G_TYPE_STRING, //description
-			      G_TYPE_DOUBLE, //cantity
+			      G_TYPE_DOUBLE, //cantity purchased
+			      G_TYPE_DOUBLE, //cantity nullified
 			      G_TYPE_STRING, //price
-			      G_TYPE_STRING, //subtotal
+			      G_TYPE_STRING, //Buy amount
+			      G_TYPE_STRING, //Nullify amount
 			      G_TYPE_INT,    //Id_compra
 			      G_TYPE_INT);   //id_factura_compra
 
@@ -1989,9 +2015,9 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  //cantity
+  //Cantity purchased
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Cantidad", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Cant. comprada", renderer,
 						    "text", 2,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -2001,9 +2027,9 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
-  //price
+  //Cantity Nullified
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Cant. anulada", renderer,
 						    "text", 3,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -2011,16 +2037,39 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
-  //subtotal
+  //price
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Subtotal", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
 						    "text", 4,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  //Buy amount
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Monto Compra", renderer,
+						    "text", 5,
+						    NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  //Nullify amount
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Monto Anulado", renderer,
+						    "text", 6,
+						    NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   /*
@@ -3474,7 +3523,7 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 		            "FROM factura_compra_detalle fcd "
 		            "INNER JOIN factura_compra fc "
 		            "ON fcd.id_factura_compra = fc.id "
-		            "AND fc.id_compra = c.id) AS monto, "
+		            "AND fc.id_compra = c.id) AS monto_compra, "
 		       "(SELECT SUM (cantidad_anulada * costo) "
 		            "FROM compra_anulada_detalle cad "
 		            "INNER JOIN compra_anulada ca "
@@ -3545,10 +3594,11 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 					      PQvaluebycol (res, i, "minute")),
 			  2, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "anulada_pi"), "t")) ? 
 					      "Anulada" : "Vigente"),
-			  3, PutPoints ( (g_str_equal(PQvaluebycol(res, i, "anulada_pi"),"t")) ? 
-					 PQvaluebycol (res, i, "monto_anulado") : PQvaluebycol (res, i, "monto") ),
-			  4, PQvaluebycol (res, i, "nombre_proveedor"),
-			  5, PQvaluebycol (res, i, "rut_proveedor"),
+			  3, PutPoints (PQvaluebycol (res, i, "monto_compra")),
+			  4, PutPoints ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
+					"0" : PQvaluebycol (res, i, "monto_anulado")),
+			  5, PQvaluebycol (res, i, "nombre_proveedor"),
+			  6, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);
     }
 
