@@ -198,7 +198,7 @@ begin
 		END IF;
 END; $$ language plpgsql;
 
--- revisa si existe un producto con el mismo código
+-- revisa si existe un producto con el mismo cÃ³digo
 -- administracion_productos.c:1354
 create or replace function existe_producto(prod_codigo_corto varchar(10))
 returns boolean as $$
@@ -750,7 +750,7 @@ query := 'select barcode from producto where codigo_corto = '
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;
     IF contador > 0 THEN
-       RAISE NOTICE 'Retornando más de un barcode para el codigo corto: %',
+       RAISE NOTICE 'Retornando mÃ¡s de un barcode para el codigo corto: %',
        	     	    prod_codigo_corto;
     END IF;
     contador := contador + 1;
@@ -781,7 +781,7 @@ RETURN;
 
 END; ' language plpgsql;
 
--- retorna TRUE cuando el codigo corto está libre
+-- retorna TRUE cuando el codigo corto estÃ¡ libre
 -- compras.c:3725
 create or replace function codigo_corto_libre(varchar(10))
 returns boolean as '
@@ -1385,7 +1385,7 @@ end loop;
 return;
 end; $$ language plpgsql;
 
--- retorna la última linea de asistencia
+-- retorna la Ãºltima linea de asistencia
 -- usuario.c:75
 create or replace function select_asistencia(
        in in_id_user int,
@@ -2323,7 +2323,7 @@ begin
         end if;
 
 	-- ACLARACION: Si el id de apertura y cierre son iguales significa que no hubo venta	
-	-- La que la siguiente operación debería realizarse solo si hay venta en la primera apertura de caja
+	-- La que la siguiente operaciÃ³n deberÃ­a realizarse solo si hay venta en la primera apertura de caja
         
 	-- To avoid problems with the first sell
         if sell_first_id = 1 AND sell_first_id != sell_last_id then
@@ -2683,6 +2683,7 @@ create or replace function producto_en_fecha(
        out descripcion varchar,
        out marca varchar,
        out cantidad_ingresada double precision,
+       out cantidad_c_anuladas double precision,
        out cantidad_vendida double precision,
        out cantidad_anulada double precision,
        out cantidad_merma double precision,
@@ -2697,10 +2698,10 @@ q text;
 l record;
 begin
 
-q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, p.cantidad_ingresada, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion, cantidad_envio, cantidad_recibida
+q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, p.cantidad_ingresada, p.cantidad_c_anuladas, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion, cantidad_envio, cantidad_recibida
      	 	FROM producto
 		LEFT JOIN ( 
-       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
        		            FROM compra c
 
 		     	    INNER JOIN compra_detalle cd
@@ -2708,6 +2709,16 @@ q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca
 
        		     	    INNER JOIN producto p
        		     	    ON cd.barcode_product = p.barcode 
+			    
+			    -- Las anulaciones de compras hechas hasta la fecha determinada
+			    LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode
+			    	       FROM compra_anulada ca
+				       INNER JOIN compra_anulada_detalle cad
+				       ON ca.id = cad.id_compra_anulada
+
+				       WHERE ca.fecha_anulacion < $S$ || quote_literal(fecha_inicio) || $S$
+				       GROUP BY barcode) AS compras_anuladas
+       		            ON p.barcode = compras_anuladas.barcode
 
        		     	    -- Las Ventas hechas hasta la fecha determinada
        		     	    LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
@@ -2775,7 +2786,7 @@ q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca
                      	    WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
                      	    AND c.ingresada = 'TRUE'
                      	    AND p.estado = 'TRUE'
-                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
                      	    ORDER BY barcode) AS p
          ON producto.barcode = p.barcode
 
@@ -2795,13 +2806,14 @@ for l in execute q loop
     marca := l.marca;
     descripcion := l.descripcion ||' '|| l.contenido ||' '|| l.unidad;
     cantidad_ingresada := l.cantidad_ingresada;
+    cantidad_c_anuladas := COALESCE(l.cantidad_c_anuladas,0);
     cantidad_vendida := COALESCE(l.cantidad_vendida,0);
     cantidad_merma := COALESCE(l.unidades_merma,0);
     cantidad_anulada := COALESCE(l.cantidad_anulada,0);
     cantidad_devoluciones := COALESCE(l.cantidad_devolucion,0);
     cantidad_envio := COALESCE(l.cantidad_envio,0);
     cantidad_recibida := COALESCE(l.cantidad_recibida,0);
-    cantidad_fecha := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0) - COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_recibida,0);
+    cantidad_fecha := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_c_anuladas,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0) - COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_recibida,0);
     return next;
 end loop;
 
@@ -2809,7 +2821,7 @@ return;
 end; $$ language plpgsql;
 
 
--- Entrega la información del producto desde la fecha otorgada hasta ahora
+-- Entrega la informacion del producto desde la fecha otorgada hasta ahora
 create or replace function producto_en_periodo(
        in fecha_inicio date,
        out barcode varchar,
@@ -2818,6 +2830,7 @@ create or replace function producto_en_periodo(
        out marca varchar,
        out stock_inicial double precision,
        out compras_periodo double precision,
+       out anulaciones_c_periodo double precision,
        out ventas_periodo double precision,
        out anulaciones_periodo double precision,       
        out devoluciones_periodo double precision,
@@ -2848,6 +2861,9 @@ q := $S$ SELECT stock1.barcode AS barcode,
        	 	-- compras_periodo
        	 	stock1.cantidad_ingresada AS stock1_cantidad_ingresada,
        	 	stock2.cantidad_ingresada AS stock2_cantidad_ingresada,
+		-- anulaciones_c_periodo
+		stock1.cantidad_c_anuladas AS stock1_cantidad_c_anuladas,
+       	 	stock2.cantidad_c_anuladas AS stock2_cantidad_c_anuladas,
        	 	-- ventas_periodo
        	 	stock1.cantidad_vendida AS stock1_cantidad_vendida,
        	 	stock2.cantidad_vendida AS stock2_cantidad_vendida,
@@ -2874,7 +2890,7 @@ q := $S$ SELECT stock1.barcode AS barcode,
 	 FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$ ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date + 1) || $S$ ) stock2
        	 ON stock1.barcode = stock2.barcode $S$;
 
-q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(cantidad_vendida,0) AS ventas_n, COALESCE(unidades_merma,0) AS mermas_n, COALESCE(cantidad_anulada,0) AS anuladas_n, COALESCE(cantidad_devolucion,0) AS devolucion_n, COALESCE(cantidad_envio,0) AS envios_n, COALESCE(cantidad_recibida,0) AS recibida_n
+q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(cantidad_c_anuladas,0) AS cantidad_c_anuladas_n, COALESCE(cantidad_vendida,0) AS ventas_n, COALESCE(unidades_merma,0) AS mermas_n, COALESCE(cantidad_anulada,0) AS anuladas_n, COALESCE(cantidad_devolucion,0) AS devolucion_n, COALESCE(cantidad_envio,0) AS envios_n, COALESCE(cantidad_recibida,0) AS recibida_n
          FROM compra c
 
          INNER JOIN compra_detalle cd
@@ -2882,6 +2898,14 @@ q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(can
 
          INNER JOIN producto p
          ON cd.barcode_product = p.barcode 
+	 
+	 -- Las anulaciones de compras hechas hasta la fecha determinada
+    	 LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode_ca
+	      	   	   FROM compra_anulada ca
+			   INNER JOIN compra_anulada_detalle cad
+			   ON ca.id = cad.id_compra_anulada
+			   GROUP BY barcode) AS compras_anuladas_n
+	 ON p.barcode = compras_anuladas_n.barcode_ca
 
          -- Las Ventas hechas hasta la fecha determinada
          LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode_v -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
@@ -2943,21 +2967,23 @@ FOR l IN EXECUTE q loop
     marca := l.marca;
     descripcion := l.descripcion;
     IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aún, por lo que se mostrará toda su información sin limite de fecha    
-       q3 := q2|| l.barcode || $S$ GROUP BY ventas_n, mermas_n, anuladas_n, devolucion_n, envios_n, recibida_n$S$;
+       q3 := q2|| l.barcode || $S$ GROUP BY cantidad_c_anuladas_n, ventas_n, mermas_n, anuladas_n, devolucion_n, envios_n, recibida_n$S$;
        FOR z IN EXECUTE q3 loop
           stock_inicial := 0;
           compras_periodo := z.cantidad_ingresada_n;
+	  anulaciones_c_periodo := z.cantidad_c_anuladas_n;
           ventas_periodo := z.ventas_n;
 	  anulaciones_periodo := z.anuladas_n;
           devoluciones_periodo := z.devolucion_n;
           mermas_periodo := z.mermas_n;
 	  enviados_periodo := z.envios_n;
 	  recibidos_periodo := z.recibida_n;
-          stock_teorico := z.cantidad_ingresada_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n - z.envios_n + z.recibida_n;
+          stock_teorico := z.cantidad_ingresada_n - z.cantidad_c_anuladas_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n - z.envios_n + z.recibida_n;
        END loop;
     ELSE
        stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
        compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
+       anulaciones_c_periodo := l.stock2_cantidad_c_anuladas - l.stock1_cantidad_c_anuladas;
        ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
        anulaciones_periodo := l.stock2_cantidad_anulada - l.stock1_cantidad_anulada;
        devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
@@ -2971,3 +2997,101 @@ END loop;
 
 return;
 end; $$ language plpgsql;
+
+
+-- Anula una compra y devuelve el resultado
+create or replace function nullify_buy(
+       IN id_compra_in integer,
+       IN maquina integer,
+       OUT barcode varchar,
+       OUT cantidad double precision,
+       OUT cantidad_anulada double precision,
+       OUT nuevo_stock double precision,
+       OUT costo integer,
+       OUT precio integer
+       )
+RETURNS setof record AS $$
+DECLARE
+id_compra_anulada integer;
+rut_proveedor_compra integer;
+query text;
+l record;
+BEGIN
+
+-- Se obtiene el rut del proveedor correspondiente a la compra
+SELECT rut_proveedor INTO rut_proveedor_compra FROM compra WHERE id = id_compra_in;
+
+-- Se inserta los datos de la compra en la tabla compra_anulada
+EXECUTE $S$ INSERT INTO compra_anulada (id_compra, fecha_anulacion, rut_proveedor, maquina)
+	    VALUES ($S$|| id_compra_in ||$S$, NOW(), $S$|| rut_proveedor_compra ||$S$,$S$|| maquina ||$S$ ) $S$;
+
+-- Se obtiene el id de la compra_anulada
+SELECT id INTO id_compra_anulada FROM compra_anulada WHERE id_compra = id_compra_in;
+
+-- Se ingresa nota de credito de ser necesario
+EXECUTE 'INSERT INTO nota_credito (fecha, num_factura, fecha_factura, rut_proveedor)
+	 SELECT NOW(), num_factura, fecha, rut_proveedor 
+	 FROM factura_compra
+	 WHERE pagada = true
+	 AND id_compra = '|| id_compra_in;
+
+-- Se ingresa el detalle de nota de credito de ser necesario
+EXECUTE 'INSERT INTO nota_credito_detalle (id_nota_credito, barcode, costo, precio, cantidad)
+	 SELECT 
+	 	(SELECT id FROM nota_credito nc WHERE nc.num_factura = fc.num_factura) AS id_nota_credito,
+	 	fcd.barcode, fcd.precio AS costo, 
+	 	(SELECT precio FROM producto WHERE barcode = fcd.barcode) AS precio, 
+	 fcd.cantidad 
+	 FROM factura_compra_detalle fcd
+	 INNER JOIN factura_compra fc
+	 ON fc.id = fcd.id_factura_compra
+	 WHERE fc.pagada = true
+	 AND fc.id_compra = '|| id_compra_in;
+
+-- Obtengo todos los productos correspondiente a la compra
+query := 'SELECT fc.id, barcode, precio AS costo, 
+          (SELECT precio FROM producto WHERE barcode = barcode) AS precio,
+	  (SELECT stock FROM producto WHERE barcode = barcode) AS stock_actual,
+	  (SELECT pagada FROM factura_compra WHERE id = fc.id) AS pagada,
+          SUM (cantidad) AS cantidad
+      	  FROM factura_compra_detalle fcd
+	  INNER JOIN factura_compra fc
+	  ON fcd.id_factura_compra = fc.id
+	  WHERE fc.id_compra = ' || id_compra_in ||
+	 'GROUP BY barcode, costo, precio, fc.id';
+
+FOR l IN EXECUTE query loop
+    --Registrando datos a retornar
+    barcode := l.barcode;
+    costo := l.costo;
+    precio := l.precio;
+
+    --La cantidad a anular no puede ser mayor al stock actual
+    IF l.stock_actual < l.cantidad THEN
+        cantidad_anulada := l.stock_actual;
+	nuevo_stock := 0;
+    ELSE
+	cantidad_anulada := l.cantidad;
+	nuevo_stock := l.stock_actual - l.cantidad;
+    END IF;
+
+    --Reajustar stock producto
+    UPDATE producto SET stock = nuevo_stock WHERE barcode = barcode;
+
+    --Colocar los productos en la tabla compra_anulada_detalle
+    EXECUTE 'INSERT INTO compra_anulada_detalle (id_compra_anulada, barcode, costo, precio, cantidad, cantidad_anulada)
+             VALUES ('||id_compra_anulada||','||barcode||','||costo||','||precio||','||l.cantidad||','||cantidad_anulada||')';
+
+    --Reajustar la cantidad del producto en nota_credito_detalle
+    -- en caso de que no se haya podido anular la cantidad completa (stock < cantidad)
+    
+    --Recalcular costo_promedio
+
+    RETURN NEXT;
+END loop;
+
+--Actualizar anulada_pi en compra
+UPDATE compra SET anulada_pi = 't' WHERE id = id_compra_in;
+
+RETURN;
+END; $$ language plpgsql;

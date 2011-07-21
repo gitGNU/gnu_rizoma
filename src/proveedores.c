@@ -211,7 +211,7 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
   if ((res == NULL) || (PQntuples (res) == 0))
     return;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_razon"));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
   gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "nombre"));
 
   q = g_strconcat(PQvaluebycol (res, 0, "rut"), "-", PQvaluebycol(res, 0, "dv"), NULL);
@@ -468,7 +468,7 @@ ModificarProveedor (void)
 {
   GtkWidget *widget;
   gchar *rut_c;
-  gchar *razon_c;
+  gchar *nombre_c;
   gchar *direccion_c;
   gchar *comuna_c;
   gchar *ciudad_c;
@@ -482,8 +482,8 @@ ModificarProveedor (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
   rut_c = g_strdup(gtk_label_get_text (GTK_LABEL (widget)));
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_razon"));
-  razon_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
+  nombre_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
   direccion_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
@@ -512,7 +512,7 @@ ModificarProveedor (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_lap_rep"));
   lap_rep_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
 
-  gint respuesta = SetModificacionesProveedor (rut_c, razon_c, direccion_c, comuna_c, ciudad_c, fono_c,
+  gint respuesta = SetModificacionesProveedor (rut_c, nombre_c, direccion_c, comuna_c, ciudad_c, fono_c,
 					       web_c, contacto_c, email_c, giro_c, lap_rep_c);
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "statusbar"));
   if (respuesta == 0)

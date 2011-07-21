@@ -45,6 +45,10 @@ drop table if exists cheques cascade;
 drop table if exists cliente cascade;
 drop table if exists compra cascade;
 drop table if exists compra_detalle cascade;
+drop table if exists compra_anulda cascade;
+drop table if exists compra_anulada_detalle cascade;
+drop table if exists nota_credito cascade;
+drop table if exists nota_credito_detalle cascade;
 drop table if exists deuda cascade;
 --drop table if exists Devolucion cascade;
 drop table if exists devolucion cascade;
@@ -229,8 +233,48 @@ create table compra (
   forma_pago                int2,
   ingresada                 bool,
   anulada                   bool,
+  anulada_pi                boolean default 'f',  --anulada post-ingreso
   constraint pk_compra primary key (id)
 ) ;
+
+-- Compra Anulada
+create table compra_anulada (
+  id                        serial not null primary key,
+  id_compra		    int4 not null,
+  fecha_anulacion	    timestamp,
+  rut_proveedor             int4 not null,
+  maquina              	    int4
+);
+
+-- Compra Anulada Detalle
+create table compra_anulada_detalle (
+  id   	     		    serial not null primary key,
+  id_compra_anulada 	    int4 not null,
+  barcode 		    int8 not null,
+  costo   		    int4,
+  precio  		    int4,
+  cantidad 		    float8,
+  cantidad_anulada 	    float8
+);
+
+-- Nota Credito
+create table nota_credito (
+ id   		    	    serial not null primary key,
+ num_factura                int4,
+ fecha 		    	    timestamp,
+ fecha_factura	    	    timestamp,
+ rut_proveedor       	    int4 not null
+);
+
+-- Nota Credito Detalle
+create table nota_credito_detalle (
+ id                         serial not null primary key,
+ id_nota_credito     	    int4 not null,
+ barcode 	    	    int8 not null,
+ costo 		    	    int4,
+ precio 		    int4,
+ cantidad 	    	    float8
+);
 
 -- Cliente
 create table cliente (
@@ -724,6 +768,12 @@ alter table compra_detalle add constraint fk_detallecompra_compra
 alter table guias_compra add constraint fk_guias_compra_compra
   foreign key (id_compra)
   references Compra (id) ;
+alter table compra_anulada_detalle add constraint fk_compra_anulada_detalle_compra_anulada
+  foreign key (id_compra_anulada)
+  references compra_anulada (id)  ;
+alter table nota_credito_detalle add constraint fk_nota_credito_detalle_nota_credito
+  foreign key (id_nota_credito)
+  references nota_credito (id)  ;
 alter table egreso add constraint fk_egreso_caja
   foreign key (id_caja)
   references caja(id);
