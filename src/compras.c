@@ -3362,17 +3362,16 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
 }
 
 /**
- * Esta funcion es llamada cuando el boton "button_new_product" es presionado
- * (signal click).
+ * Es llamada por la función "on_button_new_product_clicked"
+ * cuando ROPA=0 en el .rizoma.
  *
- * Esta funcion visualiza la ventana "wnd_new_product" y carga los
- * respectivos datos de esta los entry's, botones, y  combo box'
+ * Visualiza la ventana "wnd_new_product" y carga los
+ * respectivos datos de ésta: los entry's, botones, y combo box'
  *
- * @param button the button
- * @param user_data the user data
+ * @param void
  */
 void
-on_button_new_product_clicked (GtkButton *button, gpointer data)
+create_new_product (void)
 {
   PGresult *res, *res2;
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
@@ -3470,6 +3469,41 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
   gtk_combo_box_set_active (combo, 0);
   gtk_combo_box_set_active (cmb_unit, 0);
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
+}
+
+
+/**
+ * Es llamada por la función "on_button_new_product_clicked"
+ * cuando ROPA=1 en el .rizoma.
+ *
+ * Visualiza la ventana "wnd_new_clothing" y carga los
+ * respectivos datos de ésta: los entry's, botones, y combo box'
+ *
+ * @param void
+ */
+void
+create_new_clothing (void)
+{
+  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_clothing")));
+}
+
+/**
+ * Esta funcion es llamada cuando el boton "button_new_product" es presionado
+ * (signal click).
+ *
+ * visualiza la ventana "wnd_new_product" o "wnd_new_clothing" 
+ * dependindo de la opción "ROPA" en el .rizoma.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_button_new_product_clicked (GtkButton *button, gpointer data)
+{
+  if (g_str_equal(rizoma_get_value ("ROPA"),"0"))
+    create_new_product ();
+  else
+    create_new_clothing ();
 }
 
 /**
@@ -4577,21 +4611,22 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
+  else if (strlen (codigo) > 16)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 16 caracteres");
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
+  else if (HaveCharacters(barcode))
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
+  else if (strlen (barcode) > 18)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
   else if (strcmp (description, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_brand), "Debe Ingresar al Marca del producto");
   else if (strcmp (contenido, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_cont), "Debe Ingresar el Contenido del producto");
-
   else if (HaveCharacters(contenido))
-    {
-      ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
-      return;
-    }
-
+    ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
       if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))

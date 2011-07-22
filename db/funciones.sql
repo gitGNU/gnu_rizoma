@@ -198,9 +198,9 @@ begin
 		END IF;
 END; $$ language plpgsql;
 
--- revisa si existe un producto con el mismo cÃ³digo
+-- revisa si existe un producto con el mismo código
 -- administracion_productos.c:1354
-create or replace function existe_producto(prod_codigo_corto varchar(10))
+create or replace function existe_producto(prod_codigo_corto varchar(16))
 returns boolean as $$
 declare
 	list record;
@@ -246,7 +246,7 @@ END; $$ language plpgsql;
 -- administracion_productos.c:1376
 -- NO RETORNA merma_unid
 create or replace function select_producto( OUT barcode int8,
-					    OUT codigo_corto varchar(10),
+					    OUT codigo_corto varchar(16),
 					    OUT marca varchar(35),
 					    OUT descripcion varchar(50),
 					    OUT contenido varchar(10),
@@ -314,8 +314,8 @@ END; $$ language plpgsql;
 -- Informacion de los productos para la ventana de Mercaderia
 -- administracion_productos.c:1508
 CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
-		IN in_codigo_corto varchar(10),
-		OUT codigo_corto varchar(10),
+		IN in_codigo_corto varchar(16),
+		OUT codigo_corto varchar(16),
                 OUT barcode bigint,
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
@@ -440,7 +440,7 @@ END; $$ language plpgsql;
 -- compras.c:4057
 create or replace function buscar_productos(IN expresion varchar(255),
        	  	  	   		    OUT barcode int8,
-					    OUT codigo_corto varchar(10),
+					    OUT codigo_corto varchar(16),
 					    OUT marca varchar(35),
 					    OUT descripcion varchar(50),
 					    OUT contenido varchar(10),
@@ -513,7 +513,7 @@ END; $$ language plpgsql;
 -- ventas.c:95, 1504, 3026, 3032,
 create or replace function select_producto( IN prod_barcode int8,
        	  	  	   		    OUT barcode int8,
-					    OUT codigo_corto varchar(10),
+					    OUT codigo_corto varchar(16),
 					    OUT marca varchar(35),
 					    OUT descripcion varchar(50),
 					    OUT contenido varchar(10),
@@ -734,7 +734,7 @@ END; $$ language plpgsql;
 -- retorna el (o los barcode) para un codigo corto dado
 -- compras.c:2749
 create or replace function codigo_corto_to_barcode
-       	  	  	   (IN prod_codigo_corto varchar(10),
+       	  	  	   (IN prod_codigo_corto varchar(16),
 			   OUT barcode int8)
 returns setof int8 as $$
 declare
@@ -750,7 +750,7 @@ query := 'select barcode from producto where codigo_corto = '
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;
     IF contador > 0 THEN
-       RAISE NOTICE 'Retornando mÃ¡s de un barcode para el codigo corto: %',
+       RAISE NOTICE 'Retornando más de un barcode para el codigo corto: %',
        	     	    prod_codigo_corto;
     END IF;
     contador := contador + 1;
@@ -781,9 +781,9 @@ RETURN;
 
 END; ' language plpgsql;
 
--- retorna TRUE cuando el codigo corto estÃ¡ libre
+-- retorna TRUE cuando el codigo corto está libre
 -- compras.c:3725
-create or replace function codigo_corto_libre(varchar(10))
+create or replace function codigo_corto_libre(varchar(16))
 returns boolean as '
 declare
 
@@ -1546,7 +1546,7 @@ create or replace function buscar_producto(IN expresion varchar(255),
 	IN usar_like boolean,
         IN con_stock boolean,
        	OUT barcode int8,
-	OUT codigo_corto varchar(10),
+	OUT codigo_corto varchar(16),
 	OUT marca varchar(35),
 	OUT descripcion varchar(50),
 	OUT contenido varchar(10),
@@ -1676,7 +1676,7 @@ end; $$ language plpgsql;
 --
 create or replace function get_detalle_compra(
 		IN id_compra integer,
-		OUT codigo_corto varchar(10),
+		OUT codigo_corto varchar(16),
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
@@ -1931,7 +1931,7 @@ END; $$ language plpgsql;
 
 create or replace function get_invoice_detail(
 		IN id_invoice integer,
-		OUT codigo_corto varchar(10),
+		OUT codigo_corto varchar(16),
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
@@ -2182,8 +2182,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION informacion_producto_venta( IN codigo_barras bigint,
-		IN in_codigo_corto varchar(10),
-		OUT codigo_corto varchar(10),
+		IN in_codigo_corto varchar(16),
+		OUT codigo_corto varchar(16),
                 OUT barcode bigint,
 		OUT descripcion varchar(50),
 		OUT marca varchar(35),

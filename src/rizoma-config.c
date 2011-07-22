@@ -114,6 +114,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "TRASPASO", "0");
   g_key_file_set_string (file, "RIZOMA", "SENCILLO_DIRECTO", "0");
   g_key_file_set_string (file, "RIZOMA", "GAVETA_DEV", "/dev/ttyUSB0");
+  g_key_file_set_string (file, "RIZOMA", "ROPA", "0");
 
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))

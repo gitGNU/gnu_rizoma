@@ -84,6 +84,8 @@ drop table if exists users cascade;
 drop table if exists venta cascade;
 drop table if exists venta_anulada cascade;
 drop table if exists venta_detalle cascade;
+drop table if exists color cascade;
+drop table if exists sub_depto cascade;
 
 -- Generated SQL Schema
 -- --------------------------------------------------------------------
@@ -455,7 +457,7 @@ create table unidad_producto
 -- Producto
 create table producto (
   barcode                   int8 not null,	-- llave primaria
-  codigo_corto              varchar(10),	-- crear ckeck point
+  codigo_corto              varchar(16),	-- crear ckeck point
   marca                     varchar(35),
   descripcion               varchar(50),
   contenido                 varchar(10),
@@ -481,6 +483,20 @@ create table producto (
   constraint pk_producto primary key (barcode),
   CONSTRAINT unique_short_code UNIQUE (codigo_corto)
 ) ;
+
+-- Color
+create table color (
+  id                        serial not null,
+  codigo		    varchar(2),
+  nombre		    varchar(20)
+);
+
+-- Sub_Depto
+create table sub_depto (
+  id                        serial not null,
+  codigo		    varchar(3),
+  nombre		    varchar(30)
+);
 
 -- Producto_recibido
 create table producto_recibido (
