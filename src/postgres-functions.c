@@ -529,12 +529,17 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT trunc(sum(vd.precio * vd.cantidad -descuento)),count(Distinct(v.id)) "
+     ("SELECT trunc(SUM(vd.precio * vd.cantidad) - "
+      "                            (SELECT SUM(descuento) FROM venta "
+      "                                     WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "                                     AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') )), "
+      "count(Distinct(v.id)) "
       "FROM venta v,venta_detalle vd "
       "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
       "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
       "AND (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d "
       "AND v.id NOT IN (select id_sale from venta_anulada)",
+      from_day, from_month, from_year, to_day+1, to_month, to_year,
       from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
 
   if (res == NULL)
