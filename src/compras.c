@@ -3484,7 +3484,90 @@ create_new_product (void)
 void
 create_new_clothing (void)
 {
+  GtkListStore *store;
+  GtkTreeView *treeview;
+
+  GtkTreeViewColumn *column;
+  GtkCellRenderer *renderer;
+
+  GtkTreeSelection *selection;
+
+
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_clothing")));
+
+  //Tallas
+  store = gtk_list_store_new (1,
+			      G_TYPE_STRING);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_sizes"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Tallas", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  //Colores
+  store = gtk_list_store_new (2,
+			      G_TYPE_STRING,  //CODIGO
+			      G_TYPE_STRING); //NOMBRE
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_colors"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  //ShortCode
+  store = gtk_list_store_new (1,
+			      G_TYPE_STRING);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_shortcodes"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  //Barcodes
+  store = gtk_list_store_new (1,
+			      G_TYPE_STRING);
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_barcodes"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Barcode", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
 }
 
 /**
