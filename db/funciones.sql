@@ -1938,7 +1938,7 @@ create or replace function get_invoice_detail(
 		OUT unidad varchar(10),
 		OUT precio integer,
 		OUT cantidad double precision,
-		OUT precio_compra bigint,
+		OUT precio_compra double precision,
 		OUT barcode bigint)
 returns setof record as $$
 declare
