@@ -2082,7 +2082,7 @@ declare
 begin
 
 if id_caja = -1 then
-    select last_value into last_caja from caja_id_seq;
+    select max(id) into last_caja from caja;
 else
     last_caja := id_caja;
 end if;
@@ -2333,11 +2333,11 @@ begin
         if sell_last_id = 0 or sell_last_id is null then
                 select sum (monto) into cash_sells
                 from venta
-                where id > sell_first_id and tipo_venta = 0;
+                where id >= sell_first_id and tipo_venta = 0;
         else
                 select sum (monto) into cash_sells
                 from venta
-                where id > sell_first_id and id <= sell_last_id and tipo_venta = 0;
+                where id >= sell_first_id and id <= sell_last_id and tipo_venta = 0;
         end if;
 
         if cash_sells is null then
