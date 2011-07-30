@@ -235,18 +235,17 @@ on_btn_save_cuadratura_clicked()
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
       
-      // Se guarda la merma con motivo "Diferencia Cuadratura", si Ã©sta es distinta de 0 --
-      if((stock_teorico - stock_fisico) != 0)
+      // Se guarda la merma con motivo "Diferencia Cuadratura" --
+      if (stock_teorico > stock_fisico)
 	{	 
-	  // Se obtiene el barcode a partir del cÃ³digo corto 
+	  // Se obtiene el barcode a partir del código corto 
 	   gchar *barcode;
 	  barcode = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto='%s'",
 								codigo_corto))
 				  , 0, "barcode");
 	  
 	  // 5 = "Diferencia Cuadratura" en la tabla tipo_merma
-	  //AjusteStock (stock_fisico, 5, barcode);
-	  AjusteStockCuadratura (stock_fisico, 5, barcode, diferencia);
+	  AjusteStock (stock_fisico, 5, barcode);
 	  printf ("Guardar\n");
 	}
 

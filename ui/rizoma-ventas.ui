@@ -70,7 +70,7 @@
             <child>
               <object class="GtkLabel" id="label60">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Pérdida:</property>
+                <property name="label" translatable="yes">Diferencia</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>

@@ -453,38 +453,6 @@ CerrarCaja (gint monto)
 }
 
 /**
- * Es llamada por la funcion "CerrarLaCaja"
- *
- * Esta funcion carga los valores a traves de consultas a la BD, de
- * cash_sell(dinero en la caja), el dinero de cierre de la caja, Calculando
- * la perdida y luego registrandola en la caja con update.
- *
- * @return TRUE si se realizo correctamented, FALSE si fallo.
- *
- */
-
-gint
-CalcularPerdida (void)
-{
-  PGresult *res;
-  gint perdida, cash_sell, cierre_caja;
-
-  cash_sell = atoi (GetDataByOne ("select * from get_arqueo_caja(-1)"));
-
-  cierre_caja = atoi (GetDataByOne ("SELECT termino FROM caja WHERE id=(SELECT last_value FROM caja_id_seq)"));
-
-  perdida = cash_sell - cierre_caja;
-
-  res = EjecutarSQL (g_strdup_printf ("update caja set perdida=%d WHERE id="
-                                      "(SELECT last_value FROM caja_id_seq)", perdida));
-
-  if (res != NULL)
-    return TRUE;
-  else
-    return FALSE;
-}
-
-/**
  * Esta funcion es llamda por "prepare_caja"
  *
  * Retornamos TRUE si la caja fue cerrada anteriormente y debemos
@@ -601,12 +569,13 @@ CerrarCajaWin (void)
   gtk_label_set_text(GTK_LABEL(widget), "");
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
+  gtk_entry_set_max_length (GTK_ENTRY(widget), 9);
   gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
   gtk_editable_select_region (GTK_EDITABLE(widget), 0, -1);
   gtk_widget_grab_focus(widget);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
-  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
+  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));  
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_close"));
   gtk_widget_show_all(widget);
@@ -622,40 +591,36 @@ void
 CerrarLaCaja (GtkWidget *widget, gpointer data)
 {
   GtkWidget *aux_widget;
-  gint monto_must_have;
-  gint monto_real_que_tiene;
-  gint monto_de_cierre;
+  gint must_have;
+  gint real_have;
+  gint end_amount;
   gboolean res;
 
+  //Lo que deberia tener
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
-  monto_must_have = (gint)g_object_get_data(G_OBJECT(aux_widget), "must-have");
+  must_have = (gint)g_object_get_data(G_OBJECT(aux_widget), "must-have");
 
+  //Lo que realmente tiene
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
-  monto_real_que_tiene = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+  real_have = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
+  //El monto de cierre (Lo que realmente tiene pero filtrado)
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
-  monto_de_cierre = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+  end_amount = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
-  if (monto_de_cierre < monto_real_que_tiene)
+  if (must_have > end_amount) //Si hay menos dinero del que debería
     {
-      Egresar (monto_real_que_tiene - monto_de_cierre, 0, user_data->user_id);
-      res = CerrarCaja (monto_de_cierre);
+      Egresar (must_have - end_amount, 2, user_data->user_id); //motivo 2: Pérdida
+      res = CerrarCaja (end_amount);
     }
-  else
+  else if (end_amount > must_have) //Si hay más dinero del que debería
     {
-    if (monto_de_cierre > monto_real_que_tiene)
-      {
-        Ingreso (monto_de_cierre - monto_real_que_tiene, 0, user_data->user_id);
-        res = CerrarCaja (monto_de_cierre);
-      }
-    else
-      {
-        res = CerrarCaja(monto_de_cierre);
-      }
+      Ingreso (end_amount - must_have, 2, user_data->user_id); //motivo2: Exceso de caja
+      res = CerrarCaja (end_amount);
     }
-
-  CalcularPerdida();
-
+  else if (end_amount == must_have) //Si está el dinero que debería
+    res = CerrarCaja(end_amount);
+  
   if (res)
     {
       CloseCajaWin ();
@@ -744,12 +709,9 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
   gint monto;
   gint must_have;
 
-  monto = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
-
-  if (monto < 0)
-    AlertMSG(GTK_WIDGET(editable), "no puede ingresar un monto de perdida menor que 0");
-  else
+  if (!HaveCharacters (gtk_entry_get_text(GTK_ENTRY(editable))))
     {
+      monto = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
       must_have = (gint)g_object_get_data(G_OBJECT(widget), "must-have");
 
@@ -757,9 +719,9 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
       gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", must_have - monto));
 
       if (must_have > monto)
-        gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("<span color=\"red\">%d</span>", must_have - monto));
+        gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("<span color=\"red\">%d</span>", monto - must_have));
       else
-        gtk_label_set_markup (GTK_LABEL(widget), "0");
+        gtk_label_set_markup (GTK_LABEL(widget), g_strdup_printf("%d", monto - must_have));
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
       gtk_entry_set_text (GTK_ENTRY(widget), g_strdup_printf("%d", monto));

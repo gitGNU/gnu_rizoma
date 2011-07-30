@@ -2196,62 +2196,20 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
   gdouble stock = GetCurrentStock (barcode);
   gchar *q;
 
-  if ((stock - cantidad) != 0)
+  if ((stock - cantidad) < 0)
     {
       q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d, now())",
 			   barcode, CUT (g_strdup_printf ("%f", stock - cantidad)), motivo);
       res = EjecutarSQL (q);
       g_free (q);
-    }
-  else
-    g_printerr ("No se ha registrado la merma, puesto que es de cero");
-
-  if (cantidad == 0)
-    {
-      q = g_strdup_printf ("UPDATE producto SET stock=0 WHERE barcode='%s'", barcode);
+      
+      gchar *new = CUT (g_strdup_printf ("%f", cantidad));
+      q = g_strdup_printf ("UPDATE producto SET stock=%s WHERE barcode='%s'", new, barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
   else
-    {
-      gchar *new = CUT (g_strdup_printf ("%f", stock - cantidad));
-      q = g_strdup_printf ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'", new, barcode);
-      res = EjecutarSQL (q);
-      g_free (q);
-    }
-}
-
-
-void
-AjusteStockCuadratura (gdouble cantidad, gint motivo, gchar *barcode, gdouble diferencia)
-{
-  PGresult *res;
-  gdouble stock = GetCurrentStock (barcode);
-  gchar *q;
-
-  if ((stock - cantidad) != 0)
-    {
-      q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d, now())",
-			   barcode, CUT (g_strdup_printf ("%f", diferencia)), motivo);
-      res = EjecutarSQL (q);
-      g_free (q);
-    }
-  else
-    g_printerr ("No se ha registrado la merma, puesto que es de cero");
-
-  if (cantidad == 0)
-    {
-      q = g_strdup_printf ("UPDATE producto SET stock=0 WHERE barcode='%s'", barcode);
-      res = EjecutarSQL (q);
-      g_free (q);
-    }
-  else
-    {
-      gchar *new = CUT (g_strdup_printf ("%f", diferencia));
-      q = g_strdup_printf ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'", new, barcode);
-      res = EjecutarSQL (q);
-      g_free (q);
-    }
+    g_printerr ("No se ha registrado la merma, puesto que es mayor al stock actual");
 }
 
 

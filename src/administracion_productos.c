@@ -53,7 +53,7 @@ gboolean deleting;
    gint merma_id;
    gint active;
    gdouble cantidad;
-   //  gdouble stock;
+   gdouble stock;
    gchar *barcode;
    GtkTreeIter iter;
    GtkListStore *store;
@@ -62,13 +62,27 @@ gboolean deleting;
 
    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
    barcode = g_strdup(gtk_label_get_text(GTK_LABEL(aux_widget)));
+   
+   stock = strtod (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_adjust_current_stock"))), &endptr);
 
    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
    cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)))), &endptr);
 
    if ((cantidad < 0) && g_str_equal(endptr, ""))
      {
-       ErrorMSG(aux_widget, "Debe ingresar un número mayor que cero");
+       ErrorMSG(aux_widget, "Debe ingresar un número positivo");
+       return;
+     }
+
+   if (cantidad > stock)
+     {
+       ErrorMSG(aux_widget, "La merma debe ser MENOR o IGUAL al stock actual");
+       return;
+     }
+
+   if (stock == 0)
+     {
+       ErrorMSG(aux_widget, "Su stock actual ya es 0, no puede declarar más merma");
        return;
      }
 
@@ -187,6 +201,9 @@ gboolean deleting;
                                1, PQvaluebycol(res, i, "nombre"),
                                -1);
          }
+
+       //Selecciona el primer item del combobox por defecto
+       gtk_combo_box_set_active (combo_merma, 0);
 
        aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
        gtk_widget_grab_focus(aux_widget);

@@ -225,8 +225,6 @@ gboolean PagarFactura (gint id_invoice);
 
 void AjusteStock (gdouble cantidad, gint motivo, gchar *barcode);
 
-void AjusteStockCuadratura (gdouble cantidad, gint motivo, gchar *barcode, gdouble diferencia);
-
 gboolean Asistencia (gint user_id, gboolean entrada);
 
 gboolean VentaFraccion (gchar *barcode);

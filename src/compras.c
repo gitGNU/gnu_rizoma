@@ -3450,6 +3450,18 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
 	}
     }
 
+  //Seleccion radiobutton
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_fractional_no")), TRUE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_task_yes")), TRUE);
+
+  //Restricciones a los entry
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")), 18);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_code")), 16);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_brand")), 20);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_desc")), 25);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_cont")), 10);
+
+  //Seleccion Combobox
   gtk_combo_box_set_active (combo, 0);
   gtk_combo_box_set_active (cmb_unit, 0);
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));

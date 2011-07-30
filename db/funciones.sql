@@ -1969,7 +1969,7 @@ returns int as $$
 declare
 	current_caja int;
 begin
-select max(id) into current_caja from caja;
+select last_value into current_caja from caja_id_seq;
 
 if (select fecha_termino from caja where id=current_caja) IS NOT NULL then
    raise notice 'Adding an egreso to caja that is closed (%)', current_caja;
@@ -2082,7 +2082,7 @@ declare
 begin
 
 if id_caja = -1 then
-    select max(id) into last_caja from caja;
+    select last_value into last_caja from caja_id_seq;
 else
     last_caja := id_caja;
 end if;

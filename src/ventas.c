@@ -758,7 +758,7 @@ SearchProductByCode (void)
         {
           GtkWidget *aux_widget;
           aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-          gchar *str = g_strdup_printf("El producto %s no tiene stock", codigo);
+          gchar *str = g_strdup_printf("Stock insuficiente, el producto %s tiene 0 stock", codigo);
 	  CleanSellLabels();
           AlertMSG (aux_widget, str);
           g_free (str);
@@ -830,7 +830,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   if (cantidad <= 0)
     {
       aux_widget = GTK_WIDGET(gtk_builder_get_object (builder, "cantidad_entry"));
-      AlertMSG (aux_widget, "No puede vender una cantidad 0 o menor");
+      AlertMSG (aux_widget, "Debe ingresar una cantidad mayor a 0");
       return FALSE;
     }
 
@@ -844,7 +844,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   else if (cantidad > stock)
     {
       aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry"));
-      AlertMSG (aux_widget, "No puede vender más productos de los que tiene en stock");
+      AlertMSG (aux_widget, "Stock insuficiente, debe ingresar una cantidad igual o menor al stock disponible");
 
       return FALSE;
     }
