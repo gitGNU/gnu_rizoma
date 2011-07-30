@@ -120,7 +120,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
   gint monto;
   gint motivo;
-
+  gchar *motivo_texto;
   
   /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
     abierta al momento de vender*/
@@ -139,6 +139,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
 
   gtk_tree_model_get (model, &iter,
                       0, &motivo,
+		      1, &motivo_texto,
                       -1);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
@@ -151,7 +152,10 @@ IngresarDinero (GtkWidget *widget, gpointer data)
     }
 
   if (Ingreso (monto, motivo, user_data->user_id))
-    CloseVentanaIngreso();
+    {      
+      CloseVentanaIngreso();
+      print_cash_box_info (get_last_cash_box_id (), monto, 0, motivo_texto);
+    }
   else
     {
       ErrorMSG(aux_widget, "No fue posible registrar el ingreso de dinero en la caja");
@@ -238,16 +242,17 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   gint active;
   gint monto;
   gint motivo;
+  gchar *motivo_texto;
 
   GtkTreeModel *model;
   GtkTreeIter iter;
   
   
-  /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
     abierta al momento de vender*/
   
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
+    if (check_caja()) // Se abre la caja en caso de que está cerrada
       open_caja (TRUE);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
@@ -272,10 +277,14 @@ EgresarDinero (GtkWidget *widget, gpointer data)
 
       gtk_tree_model_get (model, &iter,
                           0, &motivo,
+			  1, &motivo_texto,
                           -1);
 
       if (Egresar (monto, motivo, user_data->user_id))
-        CloseVentanaEgreso();
+	{	  
+	  CloseVentanaEgreso();
+	  print_cash_box_info (get_last_cash_box_id (), 0, monto, motivo_texto);
+	}
       else
         ErrorMSG(aux_widget, "No fue posible ingresar el egreso de dinero de la caja");
     }
@@ -615,17 +624,18 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
     }
   else if (end_amount > must_have) //Si hay más dinero del que debería
     {
-      Ingreso (end_amount - must_have, 2, user_data->user_id); //motivo2: Exceso de caja
+      Ingreso (end_amount - must_have, 2, user_data->user_id); //motivo 2: Exceso de caja
       res = CerrarCaja (end_amount);
     }
   else if (end_amount == must_have) //Si está el dinero que debería
     res = CerrarCaja(end_amount);
   
   if (res)
-    {
+    {      
       CloseCajaWin ();
       aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
       gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);
+      print_cash_box_info (get_last_cash_box_id (), 0, 0, NULL);
     }
   else
     ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");

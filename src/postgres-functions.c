@@ -2833,3 +2833,23 @@ PGresult *getProductsByProvider (gchar *rut)
   g_free (q);
   return res;
 }
+
+
+/**
+ * Return the last cash id
+ *
+ * @param: void
+ * @return: gint (the cash id)
+ */
+
+gint 
+get_last_cash_box_id (void)
+{
+  PGresult *res;
+  res = EjecutarSQL("SELECT last_value FROM caja_id_seq");
+
+  if ((res != NULL) && (PQntuples (res) > 0))
+    return atoi (PQgetvalue (res, 0, 0));
+  else
+    return -1;
+}

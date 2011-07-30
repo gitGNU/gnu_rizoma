@@ -29,6 +29,7 @@
 #include"tipos.h"
 #include"config_file.h"
 #include"utils.h"
+#include"postgres-functions.h"
 
 void
 PrintVale (Productos *header, gint venta_id, gint total)
@@ -169,8 +170,110 @@ PrintVale (Productos *header, gint venta_id, gint total)
 }
 
 
+void
+print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar *motivo)
+{
+  PGresult *res;
+  gchar *query;
+  gchar *total_ingreso;
+  gchar *total_egreso;
+  gchar *monto_caja;
+
+  FILE *fp;
+  char start[] = {0x1B, 0x40, 0x0};
+  char cut[] = {0x1B, 0x69, 0x0};
+
+  gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gboolean recibo_mov_caja = rizoma_get_value_boolean ("RECIBO_MOV_CAJA");
+  char *vale_dir = rizoma_get_value ("VALE_DIR");
+  char *print_command = rizoma_get_value ("PRINT_COMMAND");
+  gchar *vale_file = g_strdup_printf ("%s/Vale%d.txt", vale_dir, cash_id);
+
+  gchar *user_name = user_data->user;
+
+  if (impresora == FALSE)
+    return;
+  if (recibo_mov_caja == FALSE)
+    return;
+
+  //Consulta información de la caja correspondiente al id
+  if (monto_ingreso == 0 && monto_egreso == 0)
+    {
+      query = g_strdup_printf ("select to_char (open_date, 'DD-MM-YYYY HH24:MI') as open_date_formatted, "
+			       "to_char (close_date, 'DD-MM-YYYY HH24:MI') as close_date_formatted, * from cash_box_report (%d)", cash_id);
+      res = EjecutarSQL (query);
+      g_free (query);
+
+      //Obtiene el ingreso total
+      total_ingreso = PutPoints (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells"))
+						  + atoi (PQvaluebycol (res, 0, "cash_income"))
+						  + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
+						  + atoi (PQvaluebycol (res, 0, "cash_box_start"))
+						  + atoi (PQvaluebycol (res, 0, "bottle_deposit"))
+						  ));
+      //Obtiene el egreso total
+      total_egreso = PutPoints (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_outcome"))
+						 + atoi (PQvaluebycol (res, 0, "cash_loss_money"))
+						 + atoi (PQvaluebycol (res, 0, "nullify_sell"))
+						 + atoi (PQvaluebycol (res, 0, "current_expenses"))
+						 + atoi (PQvaluebycol (res, 0, "bottle_return"))
+						 ));
+
+      //Obtiene el monto en caja
+      monto_caja = PutPoints (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_box_start"))
+					       + atoi (PQvaluebycol (res, 0, "cash_sells"))
+					       + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
+					       + atoi (PQvaluebycol (res, 0, "cash_income"))
+					       + atoi (PQvaluebycol (res, 0, "bottle_deposit"))
+					       - atoi (PQvaluebycol (res, 0, "cash_loss_money"))
+					       - atoi (PQvaluebycol (res, 0, "cash_outcome"))
+					       - atoi (PQvaluebycol (res, 0, "nullify_sell"))
+					       - atoi (PQvaluebycol (res, 0, "current_expenses"))
+					       - atoi (PQvaluebycol (res, 0, "bottle_return"))
+					       ));
+    }
+
+  //genera comprobante caja
+  fp = fopen (vale_file, "w+");
+  fprintf (fp, "%s", start);
+  fprintf (fp, "\t CONTROL INTERNO \n");
+  fprintf (fp, "==========================================\n\n");
+  
+  fprintf (fp, "  Nombre usuario: %s \n", user_name);
+  fprintf (fp, "  ------------------ \n");
+  
+  if (monto_ingreso == 0 && monto_egreso == 0)
+    {
+      fprintf (fp, "  Fecha apertura: %s \n", PQvaluebycol (res, 0, "open_date_formatted"));
+      fprintf (fp, "  Fecha cierre: %s \n", PQvaluebycol (res, 0, "close_date_formatted"));
+      fprintf (fp, "  Monto total ingresos: %s \n", total_ingreso);
+      fprintf (fp, "  Monto total egresos: %s \n", total_egreso);
+      fprintf (fp, "  Monto en caja: %s \n", monto_caja);
+    }
+  else if (monto_ingreso > 0 && motivo != NULL)
+    {
+      fprintf (fp, "  Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+      fprintf (fp, "  Monto ingreso: %s \n", monto_ingreso);
+      fprintf (fp, "  Motivo ingreso: %s \n", motivo);
+    }
+  else if (monto_egreso > 0 && motivo != NULL)
+    {
+      fprintf (fp, "  Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+      fprintf (fp, "  Monto egreso: %s \n", monto_egreso);
+      fprintf (fp, "  Motivo egreso: %s \n", motivo);
+    }
+
+  fprintf (fp, "%s", cut); /* We cut the paper :) */
+  fclose (fp);
+  
+  //imprime comprobante caja
+  system (g_strdup_printf ("%s %s", print_command, vale_file));
+  system (g_strdup_printf ("rm %s", vale_file));
+}
+
+
 /**
- * Esta funci�n abre la gaveta
+ * Esta función abre la gaveta
  */
 void
 abrirGaveta(void)

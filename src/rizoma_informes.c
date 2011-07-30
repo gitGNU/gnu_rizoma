@@ -380,9 +380,9 @@ fill_caja_data (void)
              ("<span size=\"xx-large\"><b>$ %s</b></span>",
               PutPoints
               (g_strdup_printf ("%d",
-                                (atoi (PQvaluebycol (res, 0, "cash_box_start"))
+                                atoi (PQvaluebycol (res, 0, "cash_box_start"))
                                 + atoi (PQvaluebycol (res, 0, "cash_sells"))
-                                + atoi (PQvaluebycol (res, 0, "cash_payed_money")))
+                                + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
                                 + atoi (PQvaluebycol (res, 0, "cash_income"))
 				+ atoi (PQvaluebycol (res, 0, "bottle_deposit"))
                                 - atoi (PQvaluebycol (res, 0, "cash_loss_money"))

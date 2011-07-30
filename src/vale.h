@@ -25,6 +25,7 @@
 #define VALE_H
 
 int PrintVale (Productos *header, gint venta_id, gint total);
+void print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar *motivo);
 void abrirGaveta (void);
 
 #endif

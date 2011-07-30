@@ -247,4 +247,6 @@ gint users_working (void);
 
 gint nullify_sale (gint sale_id);
 
+gint get_last_cash_box_id ();
+
 #endif
