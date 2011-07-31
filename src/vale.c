@@ -196,7 +196,7 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
   if (recibo_mov_caja == FALSE)
     return;
 
-  //Consulta información de la caja correspondiente al id
+  //Consulta informaciÃ³n de la caja correspondiente al id
   if (monto_ingreso == 0 && monto_egreso == 0)
     {
       query = g_strdup_printf ("select to_char (open_date, 'DD-MM-YYYY HH24:MI') as open_date_formatted, "
@@ -240,26 +240,45 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
   fprintf (fp, "==========================================\n\n");
   
   fprintf (fp, "  Nombre usuario: %s \n", user_name);
+  fprintf (fp, "  ID caja: %d \n", cash_id);
   fprintf (fp, "  ------------------ \n");
   
   if (monto_ingreso == 0 && monto_egreso == 0)
     {
       fprintf (fp, "  Fecha apertura: %s \n", PQvaluebycol (res, 0, "open_date_formatted"));
-      fprintf (fp, "  Fecha cierre: %s \n", PQvaluebycol (res, 0, "close_date_formatted"));
-      fprintf (fp, "  Monto total ingresos: %s \n", total_ingreso);
-      fprintf (fp, "  Monto total egresos: %s \n", total_egreso);
-      fprintf (fp, "  Monto en caja: %s \n", monto_caja);
+      fprintf (fp, "  Fecha cierre: %s \n\n", PQvaluebycol (res, 0, "close_date_formatted"));
+
+      fprintf (fp, "  INGRESOS: \n");
+      fprintf (fp, "  ------------------ \n");
+      fprintf (fp, "  Inicio: %s \n", PQvaluebycol (res, 0, "cash_box_start"));
+      fprintf (fp, "  Ventas Efectivo: %s \n", PQvaluebycol (res, 0, "cash_sells"));
+      fprintf (fp, "  Abonos Credito: %s \n", PQvaluebycol (res, 0, "cash_payed_money"));
+      fprintf (fp, "  Deposito Envase: %s \n", PQvaluebycol (res, 0, "bottle_deposit"));
+      fprintf (fp, "  Exceso en caja: %s \n", PQvaluebycol (res, 0, "cash_income"));
+      fprintf (fp, "  Sub-total ingresos: %s \n\n", total_ingreso);
+
+      fprintf (fp, "  EGRESOS: \n");
+      fprintf (fp, "  ------------------ \n");
+      fprintf (fp, "  Retiros: %s \n", PQvaluebycol (res, 0, "cash_outcome"));
+      fprintf (fp, "  Ventas Anuladas: %s \n", PQvaluebycol (res, 0, "nullify_sell"));
+      fprintf (fp, "  Gastos Corrientes: %s \n", PQvaluebycol (res, 0, "current_expenses"));
+      fprintf (fp, "  Devolucion Envase: %s \n", PQvaluebycol (res, 0, "bottle_return"));
+      fprintf (fp, "  Perdida: %s \n", PQvaluebycol (res, 0, "cash_loss_money"));
+      fprintf (fp, "  Sub-total egresos: %s \n\n", total_egreso);
+
+      fprintf (fp, "  Total: \n");
+      fprintf (fp, "  Saldo en caja: %s \n", monto_caja);
     }
   else if (monto_ingreso > 0 && motivo != NULL)
     {
       fprintf (fp, "  Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
-      fprintf (fp, "  Monto ingreso: %s \n", monto_ingreso);
+      fprintf (fp, "  Monto ingreso: %d \n", monto_ingreso);
       fprintf (fp, "  Motivo ingreso: %s \n", motivo);
     }
   else if (monto_egreso > 0 && motivo != NULL)
     {
       fprintf (fp, "  Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
-      fprintf (fp, "  Monto egreso: %s \n", monto_egreso);
+      fprintf (fp, "  Monto egreso: %d \n", monto_egreso);
       fprintf (fp, "  Motivo egreso: %s \n", motivo);
     }
 
@@ -273,7 +292,7 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
 
 
 /**
- * Esta función abre la gaveta
+ * Esta funciÃ³n abre la gaveta
  */
 void
 abrirGaveta(void)
