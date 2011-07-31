@@ -238,13 +238,13 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
   fprintf (fp, "%s", start);
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "==========================================\n\n");
-  
-  fprintf (fp, "  Nombre usuario: %s \n", user_name);
-  fprintf (fp, "  ID caja: %d \n", cash_id);
-  fprintf (fp, "  ------------------ \n");
-  
+    
   if (monto_ingreso == 0 && monto_egreso == 0)
     {
+      fprintf (fp, "  Nombre usuario: %s \n", user_name);
+      fprintf (fp, "  ID caja: %d \n", cash_id);
+      fprintf (fp, "  ------------------ \n");
+
       fprintf (fp, "  Fecha apertura: %s \n", PQvaluebycol (res, 0, "open_date_formatted"));
       fprintf (fp, "  Fecha cierre: %s \n\n", PQvaluebycol (res, 0, "close_date_formatted"));
 
@@ -254,7 +254,7 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
       fprintf (fp, "  Ventas Efectivo: %s \n", PQvaluebycol (res, 0, "cash_sells"));
       fprintf (fp, "  Abonos Credito: %s \n", PQvaluebycol (res, 0, "cash_payed_money"));
       fprintf (fp, "  Deposito Envase: %s \n", PQvaluebycol (res, 0, "bottle_deposit"));
-      fprintf (fp, "  Exceso en caja: %s \n", PQvaluebycol (res, 0, "cash_income"));
+      fprintf (fp, "  Ingresos Efectivo: %s \n", PQvaluebycol (res, 0, "cash_income"));
       fprintf (fp, "  Sub-total ingresos: %s \n\n", total_ingreso);
 
       fprintf (fp, "  EGRESOS: \n");
@@ -271,12 +271,24 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
     }
   else if (monto_ingreso > 0 && motivo != NULL)
     {
+      fprintf (fp, "  INGRESO \n");
+      fprintf (fp, "  ------------------ \n");
+      fprintf (fp, "  Nombre usuario: %s \n", user_name);
+      fprintf (fp, "  ID caja: %d \n", cash_id);
+      fprintf (fp, "  ------------------ \n\n");
+
       fprintf (fp, "  Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
       fprintf (fp, "  Monto ingreso: %d \n", monto_ingreso);
       fprintf (fp, "  Motivo ingreso: %s \n", motivo);
     }
   else if (monto_egreso > 0 && motivo != NULL)
     {
+      fprintf (fp, "  EGRESO \n");
+      fprintf (fp, "  ------------------ \n");
+      fprintf (fp, "  Nombre usuario: %s \n", user_name);
+      fprintf (fp, "  ID caja: %d \n", cash_id);
+      fprintf (fp, "  ------------------ \n\n");
+
       fprintf (fp, "  Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
       fprintf (fp, "  Monto egreso: %d \n", monto_egreso);
       fprintf (fp, "  Motivo egreso: %s \n", motivo);

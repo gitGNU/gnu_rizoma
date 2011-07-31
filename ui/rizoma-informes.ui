@@ -1090,7 +1090,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label10">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Exceso en caja</property>
+                        <property name="label" translatable="yes">Ingresos efectivo</property>
                       </object>
                       <packing>
                         <property name="top_attach">4</property>
