@@ -250,23 +250,22 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
 
       fprintf (fp, "  INGRESOS: \n");
       fprintf (fp, "  ------------------ \n");
-      fprintf (fp, "  Inicio: %s \n", PQvaluebycol (res, 0, "cash_box_start"));
-      fprintf (fp, "  Ventas Efectivo: %s \n", PQvaluebycol (res, 0, "cash_sells"));
-      fprintf (fp, "  Abonos Credito: %s \n", PQvaluebycol (res, 0, "cash_payed_money"));
-      fprintf (fp, "  Deposito Envase: %s \n", PQvaluebycol (res, 0, "bottle_deposit"));
-      fprintf (fp, "  Ingresos Efectivo: %s \n", PQvaluebycol (res, 0, "cash_income"));
+      fprintf (fp, "  Inicio: %s \n", PutPoints (PQvaluebycol (res, 0, "cash_box_start")));
+      fprintf (fp, "  Ventas Efectivo: %s \n", PutPoints (PQvaluebycol (res, 0, "cash_sells")));
+      fprintf (fp, "  Abonos Credito: %s \n", PutPoints (PQvaluebycol (res, 0, "cash_payed_money")));
+      fprintf (fp, "  Deposito Envase: %s \n", PutPoints (PQvaluebycol (res, 0, "bottle_deposit")));
+      fprintf (fp, "  Ingresos Efectivo: %s \n", PutPoints (PQvaluebycol (res, 0, "cash_income")));
       fprintf (fp, "  Sub-total ingresos: %s \n\n", total_ingreso);
 
       fprintf (fp, "  EGRESOS: \n");
       fprintf (fp, "  ------------------ \n");
-      fprintf (fp, "  Retiros: %s \n", PQvaluebycol (res, 0, "cash_outcome"));
-      fprintf (fp, "  Ventas Anuladas: %s \n", PQvaluebycol (res, 0, "nullify_sell"));
-      fprintf (fp, "  Gastos Corrientes: %s \n", PQvaluebycol (res, 0, "current_expenses"));
-      fprintf (fp, "  Devolucion Envase: %s \n", PQvaluebycol (res, 0, "bottle_return"));
-      fprintf (fp, "  Perdida: %s \n", PQvaluebycol (res, 0, "cash_loss_money"));
+      fprintf (fp, "  Retiros: %s \n", PutPoints (PQvaluebycol (res, 0, "cash_outcome")));
+      fprintf (fp, "  Ventas Anuladas: %s \n", PutPoints (PQvaluebycol (res, 0, "nullify_sell")));
+      fprintf (fp, "  Gastos Corrientes: %s \n", PutPoints (PQvaluebycol (res, 0, "current_expenses")));
+      fprintf (fp, "  Devolucion Envase: %s \n", PutPoints (PQvaluebycol (res, 0, "bottle_return")));
+      fprintf (fp, "  Perdida: %s \n", PutPoints (PQvaluebycol (res, 0, "cash_loss_money")));
       fprintf (fp, "  Sub-total egresos: %s \n\n", total_egreso);
 
-      fprintf (fp, "  Total: \n");
       fprintf (fp, "  Saldo en caja: %s \n", monto_caja);
     }
   else if (monto_ingreso > 0 && motivo != NULL)
