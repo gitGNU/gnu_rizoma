@@ -884,7 +884,7 @@ reports_win (void)
   store = gtk_list_store_new (4,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
-                              G_TYPE_INT,
+                              G_TYPE_STRING,
                               G_TYPE_STRING);
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_devolucion"));
@@ -2326,7 +2326,7 @@ fill_devolucion ()
   /* consulta de sql que retorna los datos necesarios de una devolucion en
      un intrevalo de tiempo*/
   query = g_strdup_printf ("select fecha, id, monto, proveedor from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                           "and fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')  order by id"
+                           "and fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')  order by id"
                            , g_date_get_day (date_begin),g_date_get_month (date_begin), g_date_get_year (date_begin)
                            , g_date_get_day (date_end) + 1,g_date_get_month (date_end),  g_date_get_year (date_end));
 
@@ -2346,7 +2346,7 @@ fill_devolucion ()
         gtk_list_store_set (store, &iter,
                             0, PQgetvalue (res, i, 0),
                             1, PQgetvalue (res, i, 1),
-                            2, PQgetvalue (res, i, 2),
+                            2, PutPoints (PQgetvalue (res, i, 2)),
                             3, PQgetvalue (res, i, 3),
                             -1);
       }
@@ -2367,15 +2367,15 @@ void
 *fill_totals_dev ()
 {
   PGresult *res;
+  gchar *q;
 
   /* consulta de sql que retona las suma, promedio y numero de devoluciones */
+  q = g_strdup_printf ("select count(*), sum(monto), avg(monto) from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+		       "and fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+		       g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end));
 
-  res = EjecutarSQL
-    (g_strdup_printf ("select count(*), sum(monto), avg(monto) from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                      "and fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
-                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end))
-     );
+  res = EjecutarSQL (q);    
 
   if (res == NULL) return;
 
@@ -2384,19 +2384,18 @@ void
     {
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devolucion_amount_total")),
                             g_strdup_printf ("<b>%s</b>",
-                                             PutPoints(g_strdup_printf ("%d",
-                                                                        (atoi (PQvaluebycol (res, 0,"sum"))
-                                                                         )))));
+                                             PUT(g_strdup_printf ("%.2f",
+								  strtod (PQvaluebycol (res, 0,"sum"),(char **)NULL)
+								  ))));
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devoluciones_num")),
                             g_strdup_printf ("<b>%s</b>",
-                                             PutPoints(g_strdup_printf ("%d",
-                                                                        (atoi (PQvaluebycol (res, 0,"count"))
-                                                                         )))));
+                                             PutPoints (g_strdup_printf ("%d",
+									 atoi (PQvaluebycol (res, 0,"count"))))));
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devoluciones_avg")),
                             g_strdup_printf ("<b>%s</b>",
-                                             PutPoints(g_strdup_printf ("%d",
-                                                                        (atoi (PQvaluebycol (res, 0,"avg"))
-                                                                         )))));
+                                             PUT(g_strdup_printf ("%.2f",
+								  strtod (PQvaluebycol (res, 0,"avg"),(char **)NULL)
+								  ))));
     }
 
 
