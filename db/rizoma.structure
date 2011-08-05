@@ -195,7 +195,7 @@ create table devolucion_detalle (
   barcode                   int8 not null,
   cantidad                  float8 not null,
   precio                    int4 not null,
-  precio_compra		   				int4 not null,
+  precio_compra		    float8 not null,
   constraint pk_devolucion_detalle primary key (id,id_devolucion)
 ) ;
 

@@ -338,11 +338,11 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 
       if (l == 0)
         {
-          if ((str = strstr(line, ",")) != NULL)
-            str = ",";
-
-          else if ((str = strstr(line, ";")) != NULL)
+          if ((str = strstr(line, ";")) != NULL)
             str = ";";
+
+          else if ((str = strstr(line, ",")) != NULL)
+            str = ",";
 
           else if ((str = strstr(line, " ")) != NULL)
             str = " ";

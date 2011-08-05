@@ -1508,7 +1508,7 @@ SaveProductsSell (Productos *products, gint id_venta)
                            CUT (g_strdup_printf ("%.2f",products->product->fifo)), 
 			   iva_unit, otros_unit);
 
-      g_printf ("la consulta es %s", q);
+      g_printf ("la consulta es %s\n", q);
       
       res = EjecutarSQL (q);
       g_free (q);
@@ -2559,12 +2559,14 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
           res = EjecutarSQL (q);
           pre = strtod (PUT(PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
 
-          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %f)",
-                               id_devolucion, products->product->barcode, cantidad, precio, pre);
+          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %s)",
+                               id_devolucion, products->product->barcode, cantidad, precio, 
+			       CUT (g_strdup_printf ("%.3f", pre)));
         }
       else
-         q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %f)",
-                              id_devolucion, products->product->barcode, cantidad, precio, precioCompra);
+         q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %s)",
+                              id_devolucion, products->product->barcode, cantidad, precio, 
+			      CUT (g_strdup_printf ("%.3f", precioCompra)));
 
       res = EjecutarSQL (q);
       g_free (q);
@@ -2593,7 +2595,7 @@ SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean 
   gchar *q;
 
   q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %s, %d, %d, %d) ",
-                       CUT (g_strdup_printf ("%.2f", total)), origen, destino, vendedor);
+                       CUT (g_strdup_printf ("%.3f", total)), origen, destino, vendedor);
   traspaso_id = atoi (GetDataByOne (q));
   g_free (q);
 
@@ -2623,7 +2625,7 @@ SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gb
   gchar *q;
 
   q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %s, %d, %d, %d) ",
-                       CUT (g_strdup_printf ("%.2f", total)), origen, destino, vendedor);
+                       CUT (g_strdup_printf ("%.3f", total)), origen, destino, vendedor);
   traspaso_id = atoi (GetDataByOne (q));
   g_free (q);
 

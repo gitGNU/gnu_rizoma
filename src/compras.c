@@ -3034,6 +3034,7 @@ AskIngreso (void)
 {
   GtkWindow *wnd_ingress = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_buy"));
 
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "button_ok_ingress")));
   gtk_widget_show_all (GTK_WIDGET (wnd_ingress));
 }
 
@@ -4896,9 +4897,9 @@ DatosEnviar (void)
   gint venta_id;
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
-  gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
+  gdouble total = CalcularTotalCompra (compra->header_compra);
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total")),
-                      g_strdup_printf ("%d",total));
+                      PUT(g_strdup_printf ("%.2f",total)));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_origen")),(gchar *)ReturnNegocio());
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelID")),g_strdup_printf ("%d",InsertIdTraspaso()+1));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor")),"admin");
@@ -4959,9 +4960,9 @@ DatosRecibir (void)
   gint venta_id;
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxOrigen")));
-  gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
+  gdouble total = CalcularTotalCompra (compra->header_compra);
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total1")),
-                      g_strdup_printf ("%d",total));
+                      PUT(g_strdup_printf ("%.2f",total)));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_destino")),(gchar *)ReturnNegocio());
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelID1")),g_strdup_printf ("%d",InsertIdTraspaso()+1));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor1")),"admin");

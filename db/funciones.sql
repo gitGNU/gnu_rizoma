@@ -2597,7 +2597,7 @@ create or replace function registrar_devolucion_detalle(
        in in_barcode bigint,
        in in_cantidad double precision,
        in in_precio int,
-       in in_precio_compra int )
+       in in_precio_compra double precision)
 returns void as $$
 declare
 aux int;
