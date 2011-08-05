@@ -58,7 +58,7 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->contenido = atoi (PQvaluebycol (res, 0, "contenido"));
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
   new->product->precio = atoi (PQvaluebycol (res, 0, "precio"));
-  new->product->fifo = atoi (PQvaluebycol (res, 0, "costo_promedio")); //TODO: Corregir nomenclatura. No es fifo
+  new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
   new->product->precio_compra = GetNeto (barcode);
   new->product->iva = atoi (PQvaluebycol (res, 0, "impuesto_normal"));
   new->product->otros = atoi (PQvaluebycol (res, 0, "impuesto_otro"));

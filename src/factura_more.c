@@ -35,6 +35,7 @@
 #include"config_file.h"
 #include"factura_more.h"
 #include"postgres-functions.h"
+#include"utils.h"
 #include"boleta.h"
 
 #define COEF_PULGADA 0.3528
@@ -154,7 +155,7 @@ PrintFactura (gchar *client, gchar *rut, gchar *address, gchar *giro, gchar *com
   Producto *product;
   gint i;
 
-  current_iva = g_ascii_strtod(GetDataByOne("select monto from impuesto where id = 0"), NULL)/100 + 1.0;
+  current_iva = strtod (PUT(GetDataByOne("select monto from impuesto where id = 1")), (char **)NULL)/100 + 1.0;
 
   //Productos *header = products;
 

@@ -1034,7 +1034,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   // Recalcular el porcentaje de ganancia a partir del precio final del producto
   // TODO: Unificar este cálculo, pues se realiza una y otra vez en distintas partes
   gdouble porcentaje;
-  gint costo_promedio = atoi (PQvaluebycol (res, 0, "costo_promedio"));
+  gdouble costo_promedio = strtod (PUT(PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
   gint precio_local = atoi (g_strdup (precio));
 
   // Impuestos
@@ -1239,7 +1239,7 @@ IngresarProducto (Producto *product, gint compra)
 {
   PGresult *res;
   //  gint old_stock, stock_final;
-  gint fifo;
+  gdouble fifo;
   gdouble stock_pro, canjeado;
   gdouble imps, ganancia, margen_promedio;
   gchar *q;
@@ -1283,15 +1283,15 @@ IngresarProducto (Producto *product, gint compra)
 
   if (product->canjear == TRUE)
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%d, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
-                           lround (margen_promedio), fifo, cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%s, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
+                           lround (margen_promedio), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
   else
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%d, stock=stock+%s WHERE barcode=%s",
-                           lround (margen_promedio), fifo, cantidad, product->barcode);
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%s, stock=stock+%s WHERE barcode=%s",
+                           lround (margen_promedio), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
@@ -1354,7 +1354,7 @@ GetCurrentStock (gchar *barcode)
 
   res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM select_producto(%s)", barcode));
 
-  stock = g_ascii_strtod(PQgetvalue (res, 0, 0), NULL);
+  stock = strtod (PUT(PQgetvalue (res, 0, 0)), (char **)NULL);
 
   return stock;
 }
@@ -1381,18 +1381,20 @@ GetCurrentPrice (gchar *barcode)
     return "-1";
 }
 
-gint
+gdouble
 FiFo (gchar *barcode, gint compra)
 {
   PGresult *res;
   gchar *q;
-  gint fifo;
+  gchar *costo;
+  gdouble fifo;
 
   q = g_strdup_printf ("select calculate_fifo (%s,%d)", barcode, compra);
   res = EjecutarSQL (q);
   g_free (q);
 
-  fifo = atoi (PQgetvalue (res, 0, 0));
+  costo = PUT (g_strdup_printf ("%s", PQgetvalue (res, 0, 0)));
+  fifo = strtod (PUT(costo), (char **)NULL);
 
   return fifo;
 }
@@ -1418,7 +1420,7 @@ SaveProductsSell (Productos *products, gint id_venta)
   gchar *cantidad;
   gint precio;
   gchar *q;
-  gint pre;
+  gdouble pre;
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
@@ -1456,7 +1458,7 @@ SaveProductsSell (Productos *products, gint id_venta)
 	    {
 	      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
 	      res = EjecutarSQL (q);
-          pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+	      pre = strtod (PUT(PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
 	      iva = (gdouble) ((pre *((gdouble)margen /100 + 1))*
 		  products->product->cantidad) * (gdouble)products->product->iva / 100;
 	    }
@@ -1466,7 +1468,7 @@ SaveProductsSell (Productos *products, gint id_venta)
       else
 	    {
 	      iva = (gdouble) ((products->product->precio_compra * ((gdouble)margen /100 + 1))*
-          products->product->cantidad) * (gdouble)products->product->iva / 100;
+			       products->product->cantidad) * (gdouble)products->product->iva / 100;
 	    }
 
       if (products->product->otros != -1)
@@ -1501,9 +1503,10 @@ SaveProductsSell (Productos *products, gint id_venta)
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle */
       
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %d, %s, %s)",
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s)",
                            id_venta, products->product->barcode, cantidad, precio,
-                           products->product->fifo, iva_unit, otros_unit);
+                           CUT (g_strdup_printf ("%.2f",products->product->fifo)), 
+			   iva_unit, otros_unit);
 
       g_printf ("la consulta es %s", q);
       
@@ -1799,7 +1802,7 @@ GetOtrosName (gchar *barcode)
     return NULL;
 }
 
-gint
+gdouble
 GetNeto (gchar *barcode)
 {
   PGresult *res;
@@ -1812,12 +1815,12 @@ GetNeto (gchar *barcode)
   tuples = PQntuples (res);
 
   if (tuples != 0)
-    return atoi (PQgetvalue (res, 0, 0));
+    return strtod (PUT (PQgetvalue (res, 0, 0)), (char **)NULL);
   else
     return -1;
 }
 
-gint
+gdouble
 GetFiFo (gchar *barcode)
 {
   PGresult *res;
@@ -1828,7 +1831,7 @@ GetFiFo (gchar *barcode)
   tuples = PQntuples (res);
 
   if (tuples != 0)
-    return atoi (PQgetvalue (res, 0, 0));
+    return strtod (PUT (PQgetvalue (res, 0, 0)), (char **)NULL);
   else
     return -1;
 }
@@ -2027,8 +2030,8 @@ InversionAgregada (gchar *barcode)
   PGresult *res;
   gdouble stock = 0.0;
   gint i, tuples;
-  gdouble vendidos = strtod ((GetDataByOne (g_strdup_printf ("SELECT vendidos FROM producto WHERE barcode='%s'",
-                                                             barcode))), (char **)NULL);
+  gdouble vendidos = strtod (PUT(GetDataByOne (g_strdup_printf ("SELECT vendidos FROM producto WHERE barcode='%s'",
+								barcode))), (char **)NULL);
   gint suma = 0;
 
   res = EjecutarSQL (g_strdup_printf ("SELECT count(id) FROM compra_detalle WHERE barcode_product='%s'", barcode));
@@ -2072,7 +2075,7 @@ InversionTotalStock (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT SUM (costo_promedio * stock)::integer FROM producto");
+  res = EjecutarSQL ("SELECT round (SUM (costo_promedio * stock)) FROM producto");
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2085,7 +2088,7 @@ ValorTotalStock (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT SUM (precio * stock)::integer FROM producto");
+  res = EjecutarSQL ("SELECT round (SUM (precio * stock)) FROM producto");
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2098,7 +2101,7 @@ ContriTotalStock (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT SUM (round (costo_promedio * (margen_promedio / 100))  * stock)::integer FROM producto");
+  res = EjecutarSQL ("SELECT round (SUM (costo_promedio * (margen_promedio / 100)  * stock)) FROM producto");
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2531,9 +2534,10 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
   PGresult *res;
   Productos *header = products;
   gchar *cantidad;
-  gint precio,precioCompra;
+  gint precio;
+  gdouble precioCompra;
   gchar *q;
-  gint pre;
+  gdouble pre;
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
@@ -2553,14 +2557,14 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
         {
           q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
           res = EjecutarSQL (q);
-          pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+          pre = strtod (PUT(PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
 
-          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %d)",
-                               id_devolucion, products->product->barcode, cantidad,precio, pre);
+          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %f)",
+                               id_devolucion, products->product->barcode, cantidad, precio, pre);
         }
       else
-         q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %d)",
-                              id_devolucion, products->product->barcode, cantidad, precio,precioCompra);
+         q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %f)",
+                              id_devolucion, products->product->barcode, cantidad, precio, precioCompra);
 
       res = EjecutarSQL (q);
       g_free (q);
@@ -2583,13 +2587,13 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
  * @return 1 si se realizo correctamente la operacion 0 si hay error
  */
 gboolean
-SaveTraspaso (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
+SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
 {
   gint traspaso_id;
   gchar *q;
 
-  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %d, %d, %d, %d) ",
-                       total, origen, destino,vendedor);
+  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %s, %d, %d, %d) ",
+                       CUT (g_strdup_printf ("%.2f", total)), origen, destino, vendedor);
   traspaso_id = atoi (GetDataByOne (q));
   g_free (q);
 
@@ -2613,13 +2617,13 @@ SaveTraspaso (gint total, gint origen, gint vendedor, gint destino, gboolean tip
  */
 
 gboolean
-SaveTraspasoCompras (gint total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
+SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
 {
   gint traspaso_id;
   gchar *q;
 
-  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %d, %d, %d, %d) ",
-                       total, origen, destino,vendedor);
+  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %s, %d, %d, %d) ",
+                       CUT (g_strdup_printf ("%.2f", total)), origen, destino, vendedor);
   traspaso_id = atoi (GetDataByOne (q));
   g_free (q);
 
@@ -2647,9 +2651,9 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
   gdouble iva, otros = 0;
   gint margen;
   gchar *cantidad;
-  gint precio;
+  gdouble precio;
   gchar *q;
-  gint pre;
+  gdouble pre;
 
   do
     {
@@ -2680,10 +2684,11 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
       //{
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      pre=atoi(PQvaluebycol(res, 0, "costo_promedio"));
+      pre = strtod (PUT (PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
       
-      q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
-                           id_traspaso, products->product->barcode, cantidad, pre);
+      q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s)",
+                           id_traspaso, products->product->barcode, cantidad, 
+			   CUT (g_strdup_printf ("%.2f", pre)));
       //}
       //else
       //   q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
@@ -2778,19 +2783,19 @@ ReturnNegocio ()
  * @return total suma de los precios de compra de los productos
  */
 
-gint
+gdouble
 TotalPrecioCompra (Productos *products)
 {
   Productos *header = products;
-  gint total=0;
-  gint pre;
+  gdouble total=0;
+  gdouble pre;
   PGresult *res;
   gchar *q;
   do
     {
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      pre = atoi(PQvaluebycol(res, 0, "costo_promedio")) * products->product->cantidad;
+      pre = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL) * products->product->cantidad;
       total = total + pre;
       products = products->next;
     }
@@ -2852,4 +2857,39 @@ get_last_cash_box_id (void)
     return atoi (PQgetvalue (res, 0, 0));
   else
     return -1;
+}
+
+/**
+ * Return the PGresult with the information
+ * from query
+ *
+ * @param: (gchar *) The product's 'barcode'
+ * @param: (gchar *) The product's 'codigo_corto'
+ * @param: (gchar *) The product's 'columns' to get (void string is replaced by *)
+ * @return: (PGresult *) The result from query
+ */
+
+PGresult *
+get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas)
+{
+  PGresult *res;
+  
+  if (g_str_equal (columnas, ""))
+    columnas = g_strdup_printf ("*");
+
+  if (!g_str_equal (barcode, ""))
+    res = EjecutarSQL (g_strdup_printf ("SELECT %s FROM informacion_producto (%s, '')", columnas, barcode));
+  else if (!g_str_equal (codigo_corto, ""))
+    res = EjecutarSQL (g_strdup_printf ("SELECT %s FROM informacion_producto (%s, '')", columnas, codigo_corto));
+
+  if (res == NULL)
+    {
+      printf ("No se pudo obtener la informacion del producto \n"
+	      "columnas = %s \n"
+	      "barcode = %s \n"
+	      "codigo_corto = %s \n", columnas, barcode, codigo_corto);
+      return res;
+    }
+  else
+    return res;
 }

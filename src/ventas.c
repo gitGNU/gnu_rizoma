@@ -126,13 +126,13 @@ FillProductSell (gchar *barcode,
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
                       g_strdup_printf ("%s  %s  %s %s", marca, descripcion, contenido, unidad));
 
-  if (g_ascii_strtod (stock, NULL) <= GetMinStock (barcode))
+  if (strtod (PUT (stock), (char **)NULL) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
                           g_strdup_printf("<span foreground=\"red\"><b>%.2f dia(s)</b></span>",
-                                          g_strtod (PUT (stock_day), NULL)));
+                                          strtod (PUT (stock_day), (char **)NULL)));
   else
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
-                          g_strdup_printf ("<b>%.2f dia(s)</b>", g_strtod (PUT (stock_day), NULL)));
+                          g_strdup_printf ("<b>%.2f dia(s)</b>", strtod (PUT (stock_day), (char **)NULL)));
 
   //precio
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
@@ -150,10 +150,10 @@ FillProductSell (gchar *barcode,
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
                         g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
-                                         g_strtod (PUT (stock), NULL)));
+                                         strtod (PUT (stock), (char **)NULL)));
 
   str_aux = g_strdup(gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))));
-  str_aux = g_strdup_printf ("%.0f", g_strtod (PUT (str_aux), NULL) * atoi (precio));
+  str_aux = g_strdup_printf ("%.0f", strtod (PUT (str_aux), (char **)NULL) * atoi (precio));
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
                         g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", str_aux));
 
@@ -183,7 +183,7 @@ CanjearProducto (GtkWidget *widget, gpointer data)
         }
       else
         {
-          gdouble cantidad = strtod (g_strdup (gtk_entry_get_text (GTK_ENTRY (canje_cantidad))),
+          gdouble cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (canje_cantidad)))),
                                      (char **)NULL);
 
           CanjearProduct (barcode, cantidad);
@@ -739,7 +739,7 @@ SearchProductByCode (void)
         g_printerr("%s: the plpgsql function informacion_producto_venta(0,'%s') returned more than 1 tuple",
                    G_STRFUNC, codigo);
 
-      stock = g_strtod (PUT (PQvaluebycol (res, 0, "stock")), NULL);
+      stock = strtod (PUT (PQvaluebycol (res, 0, "stock")), (char **)NULL);
 
 
       // TODO: Crear una busqueda de productos que tengan estado t para barcode y codigo corto (para todo el programa)
@@ -825,7 +825,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   GtkWidget *aux_widget;
 
-  cantidad = g_strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), NULL);
+  cantidad = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), (char **) NULL);
 
   if (cantidad <= 0)
     {
@@ -1160,7 +1160,7 @@ MoveFocus (GtkEntry *entry, gpointer data)
 void
 AumentarCantidad (GtkEntry *entry, gpointer data)
 {
-  gdouble cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), (gchar **)NULL);
+  gdouble cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), (char **)NULL);
   gint precio = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))));
   gint precio_mayor = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor"))))));
   gdouble cantidad_mayor = strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad"))))),
@@ -1452,7 +1452,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
     }
 
   //check if the product has stock
-  if (g_ascii_strtod(PQvaluebycol(res, 0, "stock"), NULL) <= 0)
+  if (strtod (PUT(PQvaluebycol(res, 0, "stock")), (char **)NULL) <= 0)
     {
       //the product has not stock, so display a message
       //and abort the operation
@@ -1716,7 +1716,7 @@ SearchAndFill (void)
                               3, PQvaluebycol (res, i, "marca"),
                               4, atoi (PQvaluebycol (res, i, "contenido")),
                               5, PQvaluebycol (res, i, "unidad"),
-                              6, g_strdup_printf("%.3f", g_ascii_strtod (PQvaluebycol (res, i, "stock"), NULL)),
+                              6, g_strdup_printf("%.3f", strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL)),
                               7, atoi (PQvaluebycol (res, i, "precio")),
                               -1);
         }
@@ -3108,7 +3108,7 @@ nullify_sale_win (void)
       store_details = gtk_list_store_new (7,
                                           G_TYPE_INT,    //barcode
                                           G_TYPE_STRING, //description
-                                          G_TYPE_FLOAT,  //cantity
+                                          G_TYPE_DOUBLE, //cantity
                                           G_TYPE_INT,    //price
                                           G_TYPE_INT,    //subtotal
                                           G_TYPE_INT,    //id (detail)
@@ -3137,6 +3137,7 @@ nullify_sale_win (void)
                                                         "text", 2,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
       //price
       renderer = gtk_cell_renderer_text_new();
@@ -3367,9 +3368,9 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
       gtk_list_store_set (store_details, &iter,
                           0, atoi(PQvaluebycol(res, i, "barcode")),
                           1, PQvaluebycol(res, i, "descripcion"),
-                          2, g_ascii_strtod(PQvaluebycol(res, i, "cantidad"), NULL),
+                          2, strtod(PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
                           3, atoi(PQvaluebycol(res, i, "precio")),
-                          4, atoi (PQvaluebycol(res, i, "subtotal")),
+                          4, atoi(PQvaluebycol(res, i, "subtotal")),
                           5, atoi(PQvaluebycol(res, i, "id")),
                           6, atoi(PQvaluebycol(res, i, "id_venta")),
                           -1);
@@ -3498,7 +3499,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 
           for (i = 0; i < tuples; i++)
             {
-              AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), g_strtod (PUT (PQvaluebycol (res, i, "amount")), NULL));
+              AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), strtod (PUT (PQvaluebycol (res, i, "amount")), (char **)NULL));
 
               venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
 
@@ -3816,7 +3817,7 @@ DatosEnviar (void)
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
   gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total")),
-                      g_strdup_printf ("%d",TotalPrecioCompra(venta->header)));
+                      g_strdup_printf ("%f",TotalPrecioCompra(venta->header)));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_origen")),(gchar *)ReturnNegocio());
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelID")),g_strdup_printf ("%d",InsertIdTraspaso()+1));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_vendedor")),

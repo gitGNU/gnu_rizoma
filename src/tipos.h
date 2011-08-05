@@ -52,7 +52,7 @@ typedef struct _product
   gchar *producto;
   gchar *marca;
   gint id;
-  gint fifo;
+  gdouble fifo;
   gint precio;
   gint margen;
   gdouble precio_neto;

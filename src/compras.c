@@ -241,9 +241,9 @@ compras_win (void)
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_DOUBLE,
-                              G_TYPE_INT,    //Precio sin impuestos
-			      G_TYPE_INT,    //Precio con impuestos
-			      G_TYPE_INT);   //Total con impuestos
+                              G_TYPE_DOUBLE,  //Costo sin impuestos
+			      G_TYPE_DOUBLE,  //Costo con impuestos
+			      G_TYPE_DOUBLE); //Total con impuestos
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -282,7 +282,6 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -293,6 +292,7 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("P.Unit C/Imp", renderer,
@@ -302,6 +302,7 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
@@ -311,6 +312,7 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
 
   /* End History TreeView */
@@ -860,6 +862,23 @@ compras_win (void)
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_edit_prod_shortcode")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_edit_prod_barcode")), FALSE);
 
+
+  //Restricciones a los entry 
+
+  //Pestaña compras (barcode, costo, margen, precio y cantidad)
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), 25);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_price")), 9);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), 4);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_sell_price")), 9);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), 6);
+
+  //Pestaña mercaderías
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), 4);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), 9);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_cantmayorist")), 4);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_pricemayorist")), 9);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_minstock")), 6);
+
   //Focus Control
   //TODO: Solucionar el foco de las pestañas (El foco debe cambiarse a los entrys principales)
   gtk_widget_set_can_focus (GTK_NOTEBOOK (builder_get (builder, "buy_notebook")), TRUE);
@@ -924,7 +943,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       g_free (q);
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>", g_ascii_strtod (PQvaluebycol (res, 0, "stock"), NULL)));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>", strtod (PUT(PQvaluebycol (res, 0, "stock")), (char **)NULL)));
 
       day_to_sell = atoi (PQvaluebycol (res, 0, "stock_day"));
 
@@ -958,7 +977,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
-                                             PutPoints (PQvaluebycol(res, 0, "costo_promedio"))));
+					     PUT (PQvaluebycol (res, 0, "costo_promedio"))));
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
@@ -1265,7 +1284,7 @@ AddToProductsList (void)
 
   store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
 
-  cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))))), NULL);
+  cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))))), (char **)NULL);
 
   if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
       && strcmp (barcode, "") != 0) //&& margen >= 0)
@@ -1757,7 +1776,8 @@ ShowProductHistory (void)
   GtkListStore *store;
 
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object( builder, "entry_buy_barcode" ))));
-  gint i, tuples, precio = 0;
+  gint i, tuples;
+  gdouble precio = 0;
   gdouble cantidad = 0;
 
   res = EjecutarSQL
@@ -1784,16 +1804,16 @@ ShowProductHistory (void)
     {
       if (strcmp (PQvaluebycol (res, i, "iva"), "0") != 0)
         {
-          precio = lround ((double) (atoi(PQvaluebycol (res, i, "precio")) + lround((double)atoi(PQvaluebycol (res, i, "iva"))/
-                                                                                    strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL))));
+          precio = (strtod (PUT(PQvaluebycol (res, i, "precio")), (char **)NULL) + strtod (PUT(PQvaluebycol (res, i, "iva")), (char **)NULL)/
+		    strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL));
         }
       if (strcmp (PQvaluebycol (res, i, "otros_impuestos"), "0") != 0)
         {
-          precio += lround ((double) lround ((double)atoi(PQvaluebycol (res, i, "otros_impuestos")) /
-                                             strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL)));
+          precio += (strtod (PUT(PQvaluebycol (res, i, "otros_impuestos")), (char **)NULL) /
+		     strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL));
         }
 
-      cantidad = strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL);
+      cantidad = strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL);
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
@@ -1802,9 +1822,9 @@ ShowProductHistory (void)
                           1, PQvaluebycol (res, i, "id"),
                           2, PQvaluebycol (res, i, "proveedor"),
                           3, cantidad,
-                          4, atoi (PQvaluebycol (res, i, "precio")),
+                          4, strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL),
 			  5, precio,
-			  6, lround (cantidad * (gdouble)precio),
+			  6, (cantidad * precio),
                           -1);
 
     }
@@ -1813,7 +1833,7 @@ ShowProductHistory (void)
   // entry correspondientes.
   if (tuples > 0)
     {
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PQvaluebycol (res, 0, "precio"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PUT (PQvaluebycol (res, 0, "precio")));
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, 0, "precio_venta"));
     }
 }
@@ -3411,7 +3431,7 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
               gtk_list_store_set (combo_store, &iter,
                                   0, atoi (PQvaluebycol(res, i, "id")),
                                   1, PQvaluebycol (res, i, "descripcion"),
-                                  2, g_ascii_strtod (PQvaluebycol(res, i, "monto"), NULL),
+                                  2, strtod (PUT(PQvaluebycol(res, i, "monto")), (char **)NULL),
                                   -1);
             }
         }
@@ -3454,7 +3474,7 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_fractional_no")), TRUE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_task_yes")), TRUE);
 
-  //Restricciones a los entry
+  //Ventana creacion de productos
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")), 18);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_code")), 16);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_brand")), 20);
@@ -4692,9 +4712,9 @@ AddToProductsListTraspaso (void)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble cantidad;
-  gdouble precio_compra = strtod (DD (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_fifo"))))), (char **)NULL);
+  gdouble precio_compra = strtod (PUT (PQgetvalue (get_product_information (barcode, "", "costo_promedio"), 0, 0)), (char **)NULL);
   gint margen = 1;
-  gint precio = strtod (g_strdup (DD (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object  (builder, "label_sell_price"))))), (char **)NULL);
+  gint precio = atoi (PQgetvalue (get_product_information (barcode, "", "precio"), 0, 0));
   Producto *check;
 
   if (g_str_equal (barcode, ""))
@@ -4704,7 +4724,7 @@ AddToProductsListTraspaso (void)
 
   store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
 
-  cantidad = g_strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans"))))), NULL);
+  cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans"))))), (char **)NULL);
 
 
   if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
@@ -4737,7 +4757,7 @@ AddToProductsListTraspaso (void)
                               -1);
         }
 
-      if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) == 0)
+      if (strtod (PUT(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))), (char**)NULL) == 0)
         {
           gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
           tipo_traspaso = 0;
@@ -5068,8 +5088,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   GtkTreeModel *model;
   gint active;
   gint vendedor = 1; //user_data->user_id;
-  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
+  gdouble monto = CalcularTotalCompra (compra->header_compra);
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
@@ -5148,8 +5167,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
   GtkTreeModel *model;
   gint active;
   gint vendedor = 1; //user_data->user_id;
-  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy"))))));
+  gdouble monto = CalcularTotalCompra (compra->header_compra);
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));

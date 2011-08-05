@@ -253,7 +253,7 @@ create or replace function select_producto( OUT barcode int8,
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio int4,
-					    OUT costo_promedio int4,
+					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
 					    OUT otros int4,
@@ -323,7 +323,7 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT unidad varchar(10),
 		OUT stock double precision,
 		OUT precio integer,
-		OUT costo_promedio integer,
+		OUT costo_promedio double precision,
 		OUT stock_min double precision,
 		OUT margen_promedio double precision,
 		OUT contrib_agregada integer,
@@ -447,7 +447,7 @@ create or replace function buscar_productos(IN expresion varchar(255),
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio int4,
-					    OUT costo_promedio int4,
+					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
 					    OUT otros int4,
@@ -520,7 +520,7 @@ create or replace function select_producto( IN prod_barcode int8,
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio int4,
-					    OUT costo_promedio int4,
+					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
 					    OUT otros int4,
@@ -1502,7 +1502,7 @@ create or replace function registrar_venta_detalle(
        in in_barcode bigint,
        in in_cantidad double precision,
        in in_precio int,
-       in in_fifo int,
+       in in_fifo double precision,
        in in_iva double precision,
        in in_otros double precision)
 returns void as $$
@@ -1553,7 +1553,7 @@ create or replace function buscar_producto(IN expresion varchar(255),
 	OUT unidad varchar(10),
 	OUT stock float8,
 	OUT precio int4,
-	OUT costo_promedio int4,
+	OUT costo_promedio float8,
 	OUT vendidos float8,
 	OUT impuestos bool,
 	OUT otros int4,
@@ -1819,9 +1819,9 @@ END;$$ language plpgsql;
 
 -- retorna el fifo o costo_promedio de un producto
 create or replace function get_fifo(in barcode_in int8)
-returns int as $$
+returns double precision as $$
 declare
-	resultado int;
+	resultado double precision;
 begin
 
 resultado := (select costo_promedio from producto where barcode=barcode_in);
@@ -2511,14 +2511,14 @@ end; $$ language plpgsql;
 create or replace function calculate_fifo (
         in product_barcode bigint,
         in compra_id int)
-returns integer as $$
+returns double precision as $$
 declare
         current_fifo double precision;
         current_stock double precision;
         costo double precision;
         stock_add double precision;
         suma double precision;
-        fifo integer;
+        fifo double precision;
 begin
 
         select costo_promedio, stock into current_fifo, current_stock from producto where barcode=product_barcode;
@@ -2533,7 +2533,7 @@ begin
 
         current_stock = current_stock + stock_add;
 
-        fifo = (suma / current_stock)::integer;
+        fifo = (suma / current_stock);
 
         return fifo;
 end; $$ language plpgsql;
@@ -2627,7 +2627,7 @@ begin
 end;$$ language plpgsql;
 
 create or replace function registrar_traspaso(
-  IN monto integer,
+  IN monto double precision,
   IN origen integer,
   IN destino integer,
   IN vendedor integer,
@@ -2647,7 +2647,7 @@ create or replace function registrar_traspaso_detalle(
        in in_id_traspaso int,
        in in_barcode bigint,
        in in_cantidad double precision,
-       in in_precio int)
+       in in_precio double precision)
 returns void as $$
 declare
 aux int;

@@ -63,7 +63,7 @@ gboolean deleting;
    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
    barcode = g_strdup(gtk_label_get_text(GTK_LABEL(aux_widget)));
    
-   stock = strtod (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_adjust_current_stock"))), &endptr);
+   stock = GetCurrentStock (barcode);
 
    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
    cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)))), &endptr);
@@ -149,8 +149,9 @@ gboolean deleting;
    GtkTreeIter iter;
 
 
-   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));
+   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_adjust_new_stock"));   
    gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
+   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_adjust_new_stock")), 6);
 
    aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
    barcode = g_strdup(gtk_label_get_text(GTK_LABEL(aux_widget)));
@@ -159,7 +160,6 @@ gboolean deleting;
 
    if (!(g_str_equal(barcode, "")))
      {
-
        aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_adjust_current_stock"));
        gtk_label_set_markup (GTK_LABEL (aux_widget),
                              g_strdup_printf ("%.3f", GetCurrentStock (barcode)));
@@ -315,7 +315,7 @@ ModificarMargenVenta (GtkEditable *editable, gpointer data)
   gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_barcode"))));
   gint new_margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")))));
   gint new_venta = new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")))));
-  gint costo_promedio = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost")))));
+  gdouble costo_promedio = strtod (PUT(g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost"))))), (char **)NULL);
   gint contri_unit, stock;
   gdouble precio;
   gdouble iva = GetIVA (barcode);
@@ -427,7 +427,7 @@ admini_box ()
                               G_TYPE_STRING,  //1 barcode
                               G_TYPE_STRING,  //2 description
                               G_TYPE_STRING,  //3 brand
-                              G_TYPE_INT,     //4 cantidad
+                              G_TYPE_STRING,  //4 contenido
                               G_TYPE_STRING,  //5 unit
                               G_TYPE_DOUBLE,  //6 stock
                               G_TYPE_INT,     //7 price
@@ -507,7 +507,7 @@ admini_box ()
   gtk_tree_view_column_set_resizable (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Cont", renderer,
                                                      "text", 4,
                                                      "foreground", 8,
                                                      "foreground-set", 9,
@@ -515,7 +515,6 @@ admini_box ()
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_min_width (column, 60);
   gtk_tree_view_column_set_max_width (column, 60);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -745,7 +744,8 @@ FillFields(GtkTreeSelection *selection, gpointer data)
   gint contri_unit;
   gint contrib_agreg;
   gint contrib_proyect;
-  gint margen, costo_promedio, valor_stock;
+  gint margen, valor_stock;
+  gdouble costo_promedio;
   gint cantidad_mayorista, precio_mayorista;
   gchar *q;
   GtkListStore *store;
@@ -771,9 +771,9 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       /*-- INFORMACION PRODUCTO [VALORES] --*/
       iva                = GetIVA (barcode);
       otros              = GetOtros (barcode);
-      costo_promedio     = atoi (PQvaluebycol (res, 0, "costo_promedio"));
+      costo_promedio     = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
       merma              = (double)atoi (PQvaluebycol (res, 0, "unidades_merma"));
-      stock              = g_ascii_strtod (PQvaluebycol ( res, 0, "stock"), NULL);
+      stock              = strtod (PUT(PQvaluebycol ( res, 0, "stock")), (char **)NULL);
       margen             = atoi (PQvaluebycol (res, 0, "margen_promedio"));
       precio             = atoi (PQvaluebycol (res, 0, "precio"));
       vendidos           = atoi (PQvaluebycol (res, 0, "vendidos"));
@@ -879,7 +879,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_sales_day"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>%.3f</b>", g_ascii_strtod (PQvaluebycol (res, 0, "ventas_dia"), NULL)));
+                            g_strdup_printf ("<b>%.3f</b>", strtod (PUT(PQvaluebycol (res, 0, "ventas_dia")), (char **)NULL)));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -887,7 +887,7 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_avg_cost"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),
-                            g_strdup_printf ("<b>$ %d</b>", costo_promedio));
+                            g_strdup_printf ("<b>$ %.2f</b>", costo_promedio));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
@@ -931,8 +931,8 @@ FillFields(GtkTreeSelection *selection, gpointer data)
 	else
         gtk_label_set_markup (GTK_LABEL (aux_widget),
 	g_strdup_printf ("<b>$ %.2f</b>",
-	g_ascii_strtod(PQvaluebycol (res, 0, "total_vendido"),
-	NULL)));*/
+	strtod(PUT(PQvaluebycol (res, 0, "total_vendido")),
+	(char **)NULL)));*/
 
       if (strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0)
         {
@@ -999,10 +999,10 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   gdouble otros = GetOtros (barcode);
   gint margen = atoi (txt_margen);
   gint precio_final = atoi (txt_precio_final);
-  gdouble stock = strtod (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_stock"))), (char **)NULL);
-  gint costo_promedio = atoi (invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost"))), 2));
-  gdouble iva_unit = strtod (invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_iva_unit"))), 2), (char **)NULL);
-  gdouble otros_unit = strtod (invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_imp_adic_unit"))), 2), (char **)NULL);
+  gdouble stock = strtod (PUT(gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_stock")))), (char **)NULL);
+  gdouble costo_promedio = strtod (PUT(invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost"))), 2)), (char **)NULL);
+  gdouble iva_unit = strtod (PUT(invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_iva_unit"))), 2)), (char **)NULL);
+  gdouble otros_unit = strtod (PUT(invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_imp_adic_unit"))), 2)), (char **)NULL);
 
   if (iva != -1)
     iva = (gdouble)iva / 100;
@@ -1203,9 +1203,9 @@ BuscarProductosParaListar (void)
                           1, PQvaluebycol (res, i, "barcode"),
                           2, PQvaluebycol (res, i, "descripcion"),
                           3, PQvaluebycol (res, i, "marca"),
-                          4, atoi (PQvaluebycol (res, i, "contenido")),
+                          4, PQvaluebycol (res, i, "contenido"),
                           5, PQvaluebycol (res, i, "unidad"),
-                          6, g_strtod (PUT (PQvaluebycol (res, i, "stock")), NULL),
+                          6, strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL),
                           7, atoi (PQvaluebycol (res, i, "precio")),
                           8, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&
                               atoi (PQvaluebycol (res, i, "stock_min")) != 0) ? "Red" : "Black",
@@ -1400,7 +1400,7 @@ ModificarProducto (GtkWidget *widget_barcode)
       gtk_list_store_set (combo_store, &iter,
                           0, atoi (PQvaluebycol(res, i, "id")),
                           1, PQvaluebycol (res, i, "descripcion"),
-                          2, g_ascii_strtod (PQvaluebycol(res, i, "monto"), NULL),
+                          2, strtod (PUT(PQvaluebycol(res, i, "monto")), (char **)NULL),
                           -1);
       if (atoi (PQvaluebycol(res, i, "id")) == otros_index) active = i;
     }

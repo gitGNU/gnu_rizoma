@@ -87,9 +87,9 @@ ChangeVenta (void)
                               0, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
                                                   PQvaluebycol (res, i, "unidad")),
-                              1, PQvaluebycol (res, i, "cantidad"),
+                              1, PUT (PQvaluebycol (res, i, "cantidad")),
                               2, PutPoints (PQvaluebycol (res, i, "precio")),
-                              3, PQvaluebycol (res, i, "monto"),
+                              3, PutPoints (PQvaluebycol (res, i, "monto")),
                               -1);
         }
     }
@@ -454,9 +454,9 @@ fill_traspaso_detalle ()
 	  gtk_list_store_set (store, &iter,
 			      0, PQvaluebycol (res, i, "codigo_corto"),
 			      1, PQvaluebycol (res, i, "descripcion"),
-			      2, g_strtod(PUT(PQvaluebycol (res, i, "cantidad")),(gchar **)NULL),
-			      3, g_strtod(PUT(PQvaluebycol (res, i, "precio")),(gchar **)NULL),
-			      4, g_strtod(PUT(PQvaluebycol (res, i, "subtotal")),(gchar **)NULL),
+			      2, strtod(PUT(PQvaluebycol (res, i, "cantidad")),(char **)NULL),
+			      3, strtod(PUT(PQvaluebycol (res, i, "precio")),(char **)NULL),
+			      4, strtod(PUT(PQvaluebycol (res, i, "subtotal")),(char **)NULL),
 			      -1);
 	}
     }
@@ -2287,7 +2287,7 @@ fill_sells_list ()
                               1, PQgetvalue (res_sells, i, 0),
                               2, PQgetvalue (res_sells, i, 1),
                               3, PQgetvalue (res_sells, i, 2),
-                              4, PQgetvalue (res_sells, i, 3),
+                              4, PutPoints (PQgetvalue (res_sells, i, 3)),
                               5, pago,
                               -1);
         }
@@ -2570,7 +2570,7 @@ fill_products_rank ()
                           1, PQvaluebycol (res, i, "marca"),
                           2, atoi (PQvaluebycol (res, i, "contenido")),
                           3, PQvaluebycol (res, i, "unidad"),
-                          4, g_ascii_strtod (PQvaluebycol (res, i, "amount"), (gchar **)NULL),
+                          4, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
                           5, atoi (PQvaluebycol (res, i, "sold_amount")),
                           6, atoi (PQvaluebycol (res, i, "costo")),
                           7, atoi (PQvaluebycol (res, i, "contrib")),
@@ -2581,7 +2581,7 @@ fill_products_rank ()
 
 
     res = EjecutarSQL
-      (g_strdup_printf ("SELECT trunc(sum(sold_amount)) as vendidos, sum(costo) as costo,sum(contrib) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 3)  as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
+      (g_strdup_printf ("SELECT trunc(sum(sold_amount)) as vendidos, sum(costo) as costo,sum(contrib) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 2) as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
                         g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
                         g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
        );
@@ -2602,8 +2602,8 @@ fill_products_rank ()
                                          PutPoints (PQvaluebycol (res, 0, "contrib"))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
-                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PQvaluebycol (res, 0, "margen")));
+                        g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
+                                         PUT (PQvaluebycol (res, 0, "margen"))));
 }
 
 /**
@@ -2681,9 +2681,9 @@ fill_provider ()
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "nombre"),
-			  1, g_strtod(PUT(PQvaluebycol (res, i, "unidades")),(gchar **)NULL),
+			  1, strtod(PUT(PQvaluebycol (res, i, "unidades")),(char **)NULL),
 			  2, atoi(PQvaluebycol (res, i, "comprado")),
-                          3, g_strtod(PQvaluebycol (res, i, "margen"),(gchar **)NULL),
+                          3, strtod(PUT(PQvaluebycol (res, i, "margen")),(char **)NULL),
                           4, atoi(PQvaluebycol (res, i, "contribucion")),
 			  -1);
 
@@ -2726,16 +2726,16 @@ fill_cuadratura ()
 			  0, PQvaluebycol (res, i, "codigo_corto"),
                           1, PQvaluebycol (res, i, "descripcion"),
 			  2, PQvaluebycol (res, i, "marca"),
-			  3, g_strtod(PUT(PQvaluebycol (res, i, "stock_inicial")),(gchar **)NULL),
-			  4, g_strtod(PUT(PQvaluebycol (res, i, "compras_periodo")),(gchar **)NULL),
-                          5, g_strtod(PUT(PQvaluebycol (res, i, "ventas_periodo")),(gchar **)NULL),
-			  6, g_strtod(PUT(PQvaluebycol (res, i, "anulaciones_periodo")),(gchar **)NULL),
-                          7, g_strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(gchar **)NULL),
-			  8, g_strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(gchar **)NULL),
-			  9, g_strtod(PUT(PQvaluebycol (res, i, "enviados_periodo")),(gchar **)NULL),
-			  10, g_strtod(PUT(PQvaluebycol (res, i, "recibidos_periodo")),(gchar **)NULL),
-			  11, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
-			  12, g_strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(gchar **)NULL),
+			  3, strtod(PUT(PQvaluebycol (res, i, "stock_inicial")),(char **)NULL),
+			  4, strtod(PUT(PQvaluebycol (res, i, "compras_periodo")),(char **)NULL),
+                          5, strtod(PUT(PQvaluebycol (res, i, "ventas_periodo")),(char **)NULL),
+			  6, strtod(PUT(PQvaluebycol (res, i, "anulaciones_periodo")),(char **)NULL),
+                          7, strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(char **)NULL),
+			  8, strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(char **)NULL),
+			  9, strtod(PUT(PQvaluebycol (res, i, "enviados_periodo")),(char **)NULL),
+			  10, strtod(PUT(PQvaluebycol (res, i, "recibidos_periodo")),(char **)NULL),
+			  11, strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(char **)NULL),
+			  12, strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(char **)NULL),
 			  //13, 0,
 			  -1);
     }
@@ -2811,7 +2811,7 @@ fill_traspaso (gchar *local)
 			  0, PQvaluebycol (res, i, "fecha"),
                           1, PQvaluebycol (res, i, "id"),
 			  2, PQvaluebycol (res, i, (page_num == 0) ? "destino" : "origen"),
-			  3, g_strtod(PUT(PQvaluebycol (res, i, "monto")),(gchar **)NULL),
+			  3, strtod(PUT(PQvaluebycol (res, i, "monto")),(char **)NULL),
 			  -1);
     }
 }
@@ -2928,7 +2928,7 @@ calcular_traspasos (void)
     return;
 
   enviado = PQvaluebycol (res, 0, "enviados");
-  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? "%s", enviado : " No hay productos enviados");
+  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? "%s", PUT(enviado) : " No hay productos enviados");
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
 
@@ -2955,7 +2955,7 @@ calcular_traspasos (void)
   recibido = PQvaluebycol (res, 0, "recibidos");
   
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
-                        g_strdup_printf ((!g_str_equal("",recibido)) ? "%s", recibido : " No hay productos recibidos"));
+                        g_strdup_printf ((!g_str_equal("",recibido)) ? "%s", PUT(recibido) : " No hay productos recibidos"));
     
 }
 
