@@ -2984,7 +2984,8 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_date_end")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button3")), TRUE);
     }
-  else if(page_num == 6)
+
+  if(page_num == 6)
     {
       // Se calculan los traspasos y se muestran
       calcular_traspasos();

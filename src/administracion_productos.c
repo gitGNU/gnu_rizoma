@@ -76,7 +76,7 @@ gboolean deleting;
 
    if (cantidad > stock)
      {
-       ErrorMSG(aux_widget, "La merma debe ser MENOR o IGUAL al stock actual");
+       ErrorMSG(aux_widget, "La cantidad debe ser MENOR o IGUAL al stock actual");
        return;
      }
 
