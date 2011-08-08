@@ -1277,7 +1277,7 @@ IngresarProducto (Producto *product, gint compra)
   else
     imps = (gdouble) product->iva / 100;
 
-  ganancia = lround ((gdouble)(product->precio / (imps + 1)));
+  ganancia = (product->precio / (imps + 1));
 
   margen_promedio = (gdouble)((ganancia - fifo) / fifo) * 100;
 

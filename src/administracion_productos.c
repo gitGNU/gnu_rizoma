@@ -771,10 +771,10 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       /*-- INFORMACION PRODUCTO [VALORES] --*/
       iva                = GetIVA (barcode);
       otros              = GetOtros (barcode);
-      costo_promedio     = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
+      costo_promedio     = strtod (PUT(PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
       merma              = strtod (PUT(PQvaluebycol (res, 0, "unidades_merma")), (char **)NULL);
       stock              = strtod (PUT(PQvaluebycol (res, 0, "stock")), (char **)NULL);
-      margen             = atoi (PQvaluebycol (res, 0, "margen_promedio"));
+      margen             = strtod (PUT(PQvaluebycol (res, 0, "margen_promedio")), (char **)NULL);
       precio             = atoi (PQvaluebycol (res, 0, "precio"));
       vendidos           = atoi (PQvaluebycol (res, 0, "vendidos"));
       valor_stock        = costo_promedio * stock;
