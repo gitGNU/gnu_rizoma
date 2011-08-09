@@ -62,9 +62,9 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->precio_compra = GetNeto (barcode);
   new->product->iva = atoi (PQvaluebycol (res, 0, "impuesto_normal"));
   new->product->otros = atoi (PQvaluebycol (res, 0, "impuesto_otro"));
-  new->product->margen = atoi (PQvaluebycol (res, 0, "margen_promedio"));
+  new->product->margen = strtod (PUT (PQvaluebycol (res, 0, "margen_promedio")), (char **)NULL);
   new->product->canjeable = atoi (PQvaluebycol (res, 0, "canje"));
-  new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **) NULL);
+  new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **)NULL);
   /* Datos Mayoristas */
   new->product->precio_mayor = atoi (PQvaluebycol (res, 0, "precio_mayor"));
   new->product->cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));

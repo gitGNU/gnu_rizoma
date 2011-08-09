@@ -326,7 +326,7 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT costo_promedio double precision,
 		OUT stock_min double precision,
 		OUT margen_promedio double precision,
-		OUT contrib_agregada integer,
+		OUT contrib_agregada double precision,
 		OUT ventas_dia double precision,
 		OUT vendidos double precision,
 		OUT venta_neta double precision,
@@ -602,6 +602,34 @@ END LOOP;
 RETURN;
 
 END; $$ language plpgsql;
+
+
+-- This function returns the total contribution
+-- of the merchandise on stock
+CREATE OR REPLACE FUNCTION contribucion_total_stock (OUT monto_contribucion float8)
+RETURNS float8 AS $$
+DECLARE
+	query varchar(255);
+	monto_pci float8; -- monto productos con impuestos
+	monto_psi float8; -- monto productos sin impuestos
+BEGIN
+
+   -- Productos con impuestos
+   SELECT SUM (((precio / (SELECT (SUM(monto)/100)+1 FROM impuesto WHERE id = otros OR id = 1)) - costo_promedio) * stock)
+   INTO monto_pci
+   FROM producto WHERE impuestos = TRUE;
+
+   -- Productos sin impuestos
+   SELECT (SELECT SUM((precio - costo_promedio) * stock)) 
+   INTO monto_psi
+   FROM producto WHERE impuestos = FALSE;
+   
+   -- Contribucion total stock
+   monto_contribucion := COALESCE(monto_pci,0) + COALESCE(monto_psi,0);
+
+RETURN;
+END; $$ language plpgsql;
+
 
 -- retorna los numeros de boleta
 -- boleta.c:36

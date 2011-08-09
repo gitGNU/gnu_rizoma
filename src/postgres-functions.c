@@ -1083,9 +1083,9 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
                        "marca='%s', unidad='%s', contenido='%s', precio=%d, "
                        "impuestos='%d', otros=%d, "
-                       "perecibles='%d', fraccion='%d', margen_promedio=%ld WHERE barcode='%s'",
+                       "perecibles='%d', fraccion='%d', margen_promedio=%s WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
-                       iva, otros, (gint)perecible, (gint)fraccion, lround(porcentaje), barcode);
+                       iva, otros, (gint)perecible, (gint)fraccion, CUT(g_strdup_printf ("%.2f", porcentaje)), barcode);
   res = EjecutarSQL(q);
   g_free(q);
 }
@@ -1283,15 +1283,15 @@ IngresarProducto (Producto *product, gint compra)
 
   if (product->canjear == TRUE)
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%s, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
-                           lround (margen_promedio), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%s, costo_promedio=%s, stock=stock+%s, stock_pro=%s WHERE barcode=%s",
+                           CUT (g_strdup_printf ("%.2f", margen_promedio)), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, CUT (g_strdup_printf ("%.2f", stock_pro)), product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
   else
     {
-      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%ld, costo_promedio=%s, stock=stock+%s WHERE barcode=%s",
-                           lround (margen_promedio), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, product->barcode);
+      q = g_strdup_printf ("UPDATE producto SET margen_promedio=%s, costo_promedio=%s, stock=stock+%s WHERE barcode=%s",
+                           CUT (g_strdup_printf ("%2f", margen_promedio)), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
@@ -2096,12 +2096,20 @@ ValorTotalStock (void)
     return 0;
 }
 
+
+/**
+ * Returns the total contribution of stock
+ * rounded.
+ *
+ * @param: void
+ * @return: the total contribution of stock rounded
+ */
 gchar *
 ContriTotalStock (void)
 {
   PGresult *res;
 
-  res = EjecutarSQL ("SELECT round (SUM (costo_promedio * (margen_promedio / 100)  * stock)) FROM producto");
+  res = EjecutarSQL ("SELECT round(monto_contribucion) FROM contribucion_total_stock()");
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
