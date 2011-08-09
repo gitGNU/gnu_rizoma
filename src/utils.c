@@ -550,3 +550,38 @@ get_treeview_length (GtkTreeView *treeview)
     }
   return length;
 }
+
+
+/**
+ *
+ *
+ * @param: gchar *clothes_code: The clothes code
+ */
+gchar **
+decode_clothes_code (gchar *clothes_code)
+{
+  gchar *decode[7];
+  gint i = 0;
+
+  if (strlen (clothes_code) != 16)
+    return NULL;
+  
+  do
+    {
+      if (i==1 || i==3)
+	{
+	  decode[i] = g_strndup (clothes_code, 3);
+	  clothes_code = invested_strndup (clothes_code, 3);
+	}
+      else
+	{
+	  decode[i] = g_strndup (clothes_code, 2);
+	  clothes_code = invested_strndup (clothes_code, 2);
+	}
+
+      printf("extraido: %s \nrestante: %s", decode[i], clothes_code);
+      i++;
+    } while (strlen (clothes_code) != 0);
+
+  return **decode;
+}

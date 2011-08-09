@@ -6496,6 +6496,7 @@
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_nullify_buy"/>
+                <signal name="clicked" handler="clean_container" object="wnd_nullify_buy"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -6682,6 +6683,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_btn_accept_clothes_clicked"/>
               </object>
               <packing>
                 <property name="left_attach">5</property>
@@ -6774,6 +6776,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btn_add_size_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6787,6 +6790,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btn_del_size_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6811,6 +6815,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btn_add_color_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6824,6 +6829,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btn_del_color_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6876,7 +6882,7 @@
             <child>
               <object class="GtkLabel" id="label9_clothes">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Color</property>
+                <property name="label" translatable="yes">Colores</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -6888,7 +6894,7 @@
             <child>
               <object class="GtkLabel" id="label8_clothes">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Talla</property>
+                <property name="label" translatable="yes">Tallas</property>
               </object>
               <packing>
                 <property name="x_options"></property>
@@ -6898,7 +6904,7 @@
             <child>
               <object class="GtkLabel" id="label11_clothes">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Barcode</property>
+                <property name="label" translatable="yes">Barcodes</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
@@ -6992,6 +6998,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_new_clothing"/>
+                <signal name="clicked" handler="clean_container" object="wnd_new_clothing"/>
               </object>
               <packing>
                 <property name="expand">False</property>

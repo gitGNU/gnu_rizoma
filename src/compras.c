@@ -854,7 +854,7 @@ compras_win (void)
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
-  //Compras - Mescadería
+  //Compras - Mercadería
   //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), FALSE);
   //Compras - Mercadería - Editar Producto
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_edit_prod_shortcode")), FALSE);
@@ -3486,89 +3486,144 @@ create_new_clothing (void)
 {
   GtkListStore *store;
   GtkTreeView *treeview;
-
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
-
   GtkTreeSelection *selection;
 
-
-  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_clothing")));
-
-  //Tallas
-  store = gtk_list_store_new (1,
-			      G_TYPE_STRING);
-
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_sizes"));
-  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  if (store == NULL)
+    {
+      //Tallas
+      store = gtk_list_store_new (2,
+				  G_TYPE_BOOLEAN, //Para saber si se rellenó desde la BD o se agregó a mano
+				  G_TYPE_STRING); //Tallas
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Tallas", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
-  //Colores
-  store = gtk_list_store_new (2,
-			      G_TYPE_STRING,  //CODIGO
-			      G_TYPE_STRING); //NOMBRE
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set (renderer,
+		    "editable", TRUE,
+		    NULL);
+      //g_signal_connect (G_OBJECT (renderer), "edited",
+      //		 G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+      column = gtk_tree_view_column_new_with_attributes ("Talla", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_colors"));
-  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  if (store == NULL)
+    {
+      //Colores
+      store = gtk_list_store_new (3,
+				  G_TYPE_BOOLEAN, //Para saber si se rellenó desde la BD o se agregó a mano
+				  G_TYPE_STRING,  //CODIGO
+				  G_TYPE_STRING); //NOMBRE
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set (renderer,
+		    "editable", TRUE,
+		    NULL);
+      //g_signal_connect (G_OBJECT (renderer), "edited",
+      //		 G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+      column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  //ShortCode
-  store = gtk_list_store_new (1,
-			      G_TYPE_STRING);
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set (renderer,
+		    "editable", TRUE,
+		    NULL);
+      //g_signal_connect (G_OBJECT (renderer), "edited",
+      //		 G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+      column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
+							 "text", 2,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_shortcodes"));
-  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  if (store == NULL)
+    {
+      //Clothes Code
+      store = gtk_list_store_new (2,
+				  G_TYPE_BOOLEAN, //Para saber si se rellenó desde la BD o se agregó a mano
+				  G_TYPE_STRING); //Clothes Code
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
-  //Barcodes
-  store = gtk_list_store_new (1,
-			      G_TYPE_STRING);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
 
-  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_barcodes"));
-  gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+      //Barcodes
+      store = gtk_list_store_new (2,
+				  G_TYPE_BOOLEAN, //Para saber si se rellenó desde la BD o se agregó a mano
+				  G_TYPE_STRING); //BARCODE
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Barcode", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+      treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_barcodes"));
+      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Barcode", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+
+  //Limitaciones para los entry
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_clothes_depto")), 2);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_clothes_temp")), 3);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_clothes_year")), 2);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_clothes_sub_depto")), 3);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_clothes_id")), 2);
+
+  //Botones deshabilitados
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_add_size")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_del_size")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_add_color")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_del_color")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_add_new_clothes")), FALSE);
+
+  //Habilitar los widget de construcción de código
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_clothes_depto")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_clothes_temp")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_clothes_year")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_clothes_sub_depto")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_clothes_id")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_clothes")), TRUE);
+
+  //entry's deshabilitados
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_new_clothes_brand")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_new_clothes_desc")), FALSE);
+
+  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_clothing")));
 }
+
 
 /**
  * Esta funcion es llamada cuando el boton "button_new_product" es presionado
@@ -3588,6 +3643,229 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
   else
     create_new_clothing ();
 }
+
+
+/**
+ * Esta funcion es llamada cuando el boton "btn_accept_clothes" es presionado
+ * (signal click).
+ *
+ * Revisa la existencia del código en la base de datos y rellena los campos
+ * correspondientes con la información adquirida, de no existir habilita los
+ * campos para la creación de nuevos productos.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_accept_clothes_clicked (GtkButton *button, gpointer data)
+{  
+  gchar *clothes_code = g_strdup_printf ("");
+  gchar *q;
+  gint i;  
+  GObject *clothes_base_code[6];
+  GObject *clothes_next_widget[6];
+
+  //Fracciones del codigo de ropa
+  clothes_base_code[0] = builder_get (builder, "entry_clothes_depto");
+  clothes_base_code[1] = builder_get (builder, "entry_clothes_temp");
+  clothes_base_code[2] = builder_get (builder, "entry_clothes_year");
+  clothes_base_code[3] = builder_get (builder, "entry_clothes_sub_depto");
+  clothes_base_code[4] = builder_get (builder, "entry_clothes_id");
+  clothes_base_code[5] = builder_get (builder, "btn_accept_clothes");
+
+  //Los widgets del 2 paso
+  clothes_next_widget[0] = builder_get (builder, "btn_add_size");
+  clothes_next_widget[1] = builder_get (builder, "btn_del_size");
+  clothes_next_widget[2] = builder_get (builder, "btn_add_color");
+  clothes_next_widget[3] = builder_get (builder, "btn_del_color");
+  clothes_next_widget[4] = builder_get (builder, "entry_new_clothes_brand");
+  clothes_next_widget[5] = builder_get (builder, "entry_new_clothes_desc");
+
+  //Valida los campos
+  for (i = 0; i < 5; i++)
+    {
+      if (i==0 || i==2 || i==4)
+	{
+	  if (strlen (gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i]))) != 2) 
+	    {
+	      ErrorMSG (GTK_WIDGET (clothes_base_code[i]),
+			g_strdup_printf ("El campo %s debe contener 2 dígitos", (i==0) ?
+					 "departamento":(i==2) ? "año":"id"));
+	      return;
+	    }
+	}
+      else
+	{
+	  if (strlen (gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i]))) != 3)
+	    {
+	      ErrorMSG (GTK_WIDGET (clothes_base_code[i]),
+			g_strdup_printf ("El campo %s debe contener 3 dígitos", (i==1) ?
+					 "temporada":"sub departamento"));
+	      return;
+	    }
+	}
+    }
+
+  //Deshabilita la escritura en los entry (fracciones de 'clothes code') y el boton
+  for (i = 0; i < 6; i++)
+    gtk_widget_set_sensitive (GTK_WIDGET (clothes_base_code[i]), FALSE);
+
+  //Concadena todas las partes del "clothes code"
+  for (i = 0; i < 5; i++)
+    clothes_code = g_strdup_printf ("%s%s", clothes_code, gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i])));
+
+  //Habilita la escritura en los widgets que sigen
+  for (i = 0; i < 6; i++)
+    gtk_widget_set_sensitive (GTK_WIDGET (clothes_next_widget[i]), TRUE);
+
+
+  q = g_strdup_printf ("SELECT codigo_corto "
+  		       "FROM producto "
+		       "WHERE codigo_corto like '%s%%'",
+  		       clothes_code);
+  if (DataExist (q))
+    {
+      
+    }
+  else
+    {
+      
+    }
+}
+
+
+/**
+ * Is called by 'btn_add_size' button when is pressed (signal-clicked)
+ *
+ * make a new row on 'treeview_sizes'
+ */
+void
+on_btn_add_size_clicked ()
+{
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeIter iter;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sizes"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  gtk_list_store_append (store, &iter);
+  gtk_list_store_set (store, &iter,
+		      0, FALSE,
+		      1, "Ingrese Talla",
+		      -1);
+}
+
+
+/**
+ * Is called by 'btn_del_size' button when is pressed (signal-clicked)
+ *
+ * delete the selected row on 'treeview_sizes'
+ */
+void
+on_btn_del_size_clicked ()
+{
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+  gint position;
+  gboolean datoExistente;
+  gchar *nombreTalla;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sizes"));
+  selection = gtk_tree_view_get_selection (treeview);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      // Comprueba que no sea una fila de una talla pre-existente
+      // (Que no se haya agregado a través de una consulta sql)
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &datoExistente,
+			  1, &nombreTalla,
+                          -1);
+
+      if (datoExistente == FALSE)
+	{
+	  position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
+	  gtk_list_store_remove (store, &iter);
+	  select_back_deleted_row("treeview_sizes", position);
+	}
+      else
+	ErrorMSG (GTK_WIDGET (builder_get (builder, "btn_del_size")), 
+		  g_strdup_printf ("No puede eliminar la talla %s, pues existen productos con ella", nombreTalla));
+    }
+}
+
+
+/**
+ * Is called by 'btn_add_color' button when is pressed (signal-clicked)
+ *
+ * make a new row on 'treeview_color'
+ */
+void
+on_btn_add_color_clicked ()
+{
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeIter iter;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_colors"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  gtk_list_store_append (store, &iter);
+  gtk_list_store_set (store, &iter,
+		      0, FALSE,
+		      1, "Cod",
+		      2, "Color",
+		      -1);
+}
+
+
+/**
+ * Is called by 'btn_del_color' button when is pressed (signal-clicked)
+ *
+ * delete the selected row on 'treeview_colors'
+ */
+void
+on_btn_del_color_clicked ()
+{
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+  gint position;
+  gboolean datoExistente;
+  gchar *codColor;
+  gchar *nombreColor;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_colors"));
+  selection = gtk_tree_view_get_selection (treeview);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      // Comprueba que no sea una fila de una talla pre-existente
+      // (Que no se haya agregado a través de una consulta sql)
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &datoExistente,
+			  1, &codColor,
+			  2, &nombreColor,
+                          -1);
+
+      if (datoExistente == FALSE)
+	{
+	  position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
+	  gtk_list_store_remove (store, &iter);
+	  select_back_deleted_row("treeview_colors", position);
+	}
+      else
+	ErrorMSG (GTK_WIDGET (builder_get (builder, "btn_del_color")), 
+		  g_strdup_printf ("No puede eliminar el color %s, pues existen productos con él", nombreColor));
+    }
+}
+
 
 /**
  * Esta funcion es llamada cuando se activa el delete-event
@@ -6676,7 +6954,7 @@ nullify_buy_win(void)
     }
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_buy"));
-  clean_container (GTK_CONTAINER (widget));
+  //clean_container (GTK_CONTAINER (widget));
   gtk_widget_show_all (widget);
 }
 
