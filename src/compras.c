@@ -879,6 +879,10 @@ compras_win (void)
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_pricemayorist")), 9);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_minstock")), 6);
 
+  //Anulación de compras solo puede ser efectuada por el administrador
+  if (user_data->user_id != 1)
+    gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_nullify_buy_pi")), FALSE);
+
   //Focus Control
   //TODO: Solucionar el foco de las pestañas (El foco debe cambiarse a los entrys principales)
   gtk_widget_set_can_focus (GTK_NOTEBOOK (builder_get (builder, "buy_notebook")), TRUE);
@@ -7114,34 +7118,22 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
   PQclear (res);
 }
 
+
 /**
- * Callback connected the key-press-event in the main window.
+ * This is a callback from button 'btn_nullify_buy_pi'
+ * (signal clicked).
  *
- * This function must be simple, because can lead to a performance
- * issues. It currently only handles the global keys that are
- * associated to nothing.
+ * Is called by 'f5' too.
  *
- * @param widget the widget that emits the signal
- * @param event the event
- * @param data the user data
+ * Show the 'wnd_nullify_buy' window, to nullify purchases
+ * that have already been entered.
  *
- * @return TRUE on key captured, FALSE to let the key pass.
+ * @param button the button
+ * @param user_data the user data
  */
-gboolean 
-on_compras_gui_key_press_event(GtkWidget   *widget,
-			       GdkEventKey *event,
-			       gpointer     data)
+void 
+on_btn_nullify_buy_pi_clicked (GtkButton *button, gpointer data)
 {
-  switch (event->keyval)
-    {
-    case GDK_F5:
-      if (user_data->user_id == 1)
-	nullify_buy_win ();
-      break;
-
-    default:
-      return FALSE;
-    }
-
-  return TRUE;
+  if (user_data->user_id == 1)
+    nullify_buy_win ();
 }

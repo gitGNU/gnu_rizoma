@@ -2458,6 +2458,21 @@
                             <property name="position">1</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkButton" id="btn_nullify_buy_pi">
+                            <property name="label" translatable="yes">Anular Compra</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <accelerator key="F5" signal="clicked"/>
+                            <signal name="clicked" handler="on_btn_nullify_buy_pi_clicked"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2606,7 +2621,7 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="btn_nullify_buy">
-                            <property name="label" translatable="yes">Anular Compra</property>
+                            <property name="label" translatable="yes">Anular Pedido</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
