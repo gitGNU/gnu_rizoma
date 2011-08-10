@@ -301,92 +301,6 @@ GuardarModificacionesProducto (void)
 
 
 /**
- * This callback is associated with the accept button of the adjust
- * margin window.
- *
- * Saves the new stock of the product.
- * @param editable
- * @param data
- */
-void
-ModificarMargenVenta (GtkEditable *editable, gpointer data)
-{
-  gboolean margen = (gboolean) data;
-  gchar *barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_barcode"))));
-  gint new_margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")))));
-  gint new_venta = new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")))));
-  gdouble costo_promedio = strtod (PUT(g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_avg_cost"))))), (char **)NULL);
-  gint contri_unit, stock;
-  gdouble precio;
-  gdouble iva = GetIVA (barcode);
-  gdouble otros = GetOtros (barcode);
-
-  if (strcmp (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin"))), "") == 0 &&
-      strcmp (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price"))), "") == 0)
-    return;
-
-  if (costo_promedio == 0)
-    return;
-
-  iva = (gdouble) iva / 100;
-  if (otros != -1)
-    otros = (gdouble) otros / 100;
-
-  if (margen == TRUE)
-    {
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), "");
-
-      if (otros == -1)
-	precio = (gdouble) ((gdouble)(costo_promedio * (gdouble)(new_margen + 100)) * (iva+1)) / 100;
-      else
-	{
-	  precio = (gdouble) costo_promedio + (gdouble)((gdouble)(costo_promedio * new_margen) / 100);
-	  precio = (gdouble)((gdouble)(precio * iva) +
-			     (gdouble)(precio * otros) + (gdouble) precio);
-	}
-
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")),
-			  g_strdup_printf ("%ld", lround (precio)));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_contrib_unit")),
-			    g_strdup_printf
-			    ("<b>%ld</b>", lround ((gdouble)costo_promedio * (gdouble)new_margen / 100)));
-    }
-  else if (margen == FALSE)
-    {
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), "");
-
-      if (otros == -1)
-	precio = (gdouble) ((new_venta / (gdouble)((iva+1) * costo_promedio)) - 1) * 100;
-      else
-	{
-	  precio = (gdouble) new_venta / (gdouble)(iva + otros + 1);
-	  precio = (gdouble) precio - costo_promedio;
-	  precio = (gdouble)(precio / costo_promedio) * 100;
-	}
-
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")),
-			  g_strdup_printf ("%ld", lround (precio)));
-
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_contrib_unit")),
-			    g_strdup_printf
-			    ("<b>%ld</b>", lround ((gdouble)costo_promedio * (gdouble)new_margen / 100)));
-    }
-
-  contri_unit = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_contrib_unit")))));
-
-  new_venta = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")))));
-
-  stock = GetCurrentStock (barcode);
-
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_contribproyectada")),
-			g_strdup_printf ("<b>$%d</b>", contri_unit * stock));
-
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_informerca_invstock")),
-			g_strdup_printf ("<b>$%d</b>", stock * new_venta));
-}
-
-/**
  * This function initialize the 'Mercaderia' tab.
  *
  * It must be called from the startup of the application, because this
@@ -561,20 +475,6 @@ admini_box ()
   gtk_tree_view_column_set_min_width (column, 100);
   gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
-
-  //this signal is connected in this way because glade/gtkbuilde does
-  //not respect the signature of the user_data when is seted with the glade
-  widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_infomerca_percentmargin"));
-  g_signal_connect (G_OBJECT (widget), "activate",
-                    G_CALLBACK (ModificarMargenVenta), (gpointer)TRUE);
-  ///////////
-
-  widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_informerca_price"));
-  g_signal_connect (G_OBJECT (widget), "activate",
-                    G_CALLBACK (ModificarMargenVenta), (gpointer)FALSE);
-
-  //////////
 
   widget = GTK_WIDGET(gtk_builder_get_object (builder, "btn_infomerca_print"));
   g_signal_connect (G_OBJECT (widget), "clicked",
@@ -998,7 +898,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   gdouble iva_unit = strtod (PUT(invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_iva_unit"))), 2)), (char **)NULL);
   gdouble otros_unit = strtod (PUT(invested_strndup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_imp_adic_unit"))), 2)), (char **)NULL);
 
-  if (iva != -1)
+  if (iva != -1 && iva != 0)
     iva = (gdouble)iva / 100;
   else
     iva = 0;
@@ -1018,7 +918,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
     {
       // Calcula el Precio Final
       gdouble pFinal;
-      pFinal = (gdouble) (costo_promedio + (costo_promedio * iva) + (costo_promedio * otros));
+      pFinal = (gdouble) (costo_promedio * (iva + otros + 1));
       pFinal = (gdouble) (pFinal * (((gdouble)margen / 100) + 1));
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")),
@@ -1051,7 +951,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   GtkWidget *aux_widget;
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contrib_unit"));
-  gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ %ld</b>", lround(contri_unit)));
+  gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ %.2f</b>", contri_unit));
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_informerca_contribproyectada"));
   gtk_label_set_markup (GTK_LABEL (aux_widget), g_strdup_printf ("<b>$ %ld</b>", lround(contrib_proyect)));

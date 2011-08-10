@@ -3035,7 +3035,7 @@ create or replace function nullify_buy(
        OUT cantidad double precision,
        OUT cantidad_anulada double precision,
        OUT nuevo_stock double precision,
-       OUT costo integer,
+       OUT costo double precision,
        OUT precio integer
        )
 RETURNS setof record AS $$
@@ -3077,9 +3077,9 @@ EXECUTE 'INSERT INTO nota_credito_detalle (id_nota_credito, barcode, costo, prec
 	 AND fc.id_compra = '|| id_compra_in;
 
 -- Obtengo todos los productos correspondiente a la compra
-query := 'SELECT fc.id, barcode, precio AS costo, 
-          (SELECT precio FROM producto WHERE barcode = barcode) AS precio,
-	  (SELECT stock FROM producto WHERE barcode = barcode) AS stock_actual,
+query := 'SELECT fc.id, fcd.barcode, precio AS costo, 
+          (SELECT precio FROM producto WHERE barcode = fcd.barcode) AS precio,
+	  (SELECT stock FROM producto WHERE barcode = fcd.barcode) AS stock_actual,
 	  (SELECT pagada FROM factura_compra WHERE id = fc.id) AS pagada,
           SUM (cantidad) AS cantidad
       	  FROM factura_compra_detalle fcd

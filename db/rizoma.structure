@@ -253,7 +253,7 @@ create table compra_anulada_detalle (
   id   	     		    serial not null primary key,
   id_compra_anulada 	    int4 not null,
   barcode 		    int8 not null,
-  costo   		    int4,
+  costo   		    float8,
   precio  		    int4,
   cantidad 		    float8,
   cantidad_anulada 	    float8
@@ -273,7 +273,7 @@ create table nota_credito_detalle (
  id                         serial not null primary key,
  id_nota_credito     	    int4 not null,
  barcode 	    	    int8 not null,
- costo 		    	    int4,
+ costo 		    	    float8,
  precio 		    int4,
  cantidad 	    	    float8
 );

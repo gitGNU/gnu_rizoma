@@ -6615,9 +6615,9 @@ on_selection_nullify_buy_invoice_change (GtkTreeSelection *selection, gpointer d
 	  gtk_list_store_set (store, &iter,
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
-			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
-			      3, PutPoints (g_strdup (PQvaluebycol (res, i, "precio"))),
-			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "subtotal"))),
+			      2, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			      3, PUT (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      4, PUT (g_strdup (PQvaluebycol (res, i, "subtotal"))),
 			      5, id_compra,
 			      6, id_factura_compra,
 			      -1);
@@ -6696,7 +6696,7 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),
+			      4, PUT (g_strdup (PQvaluebycol (res, i, "monto"))),
 			      5, id_compra,
 			      6, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
@@ -6989,7 +6989,7 @@ nullify_buy_win(void)
     }
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_buy"));
-  //clean_container (GTK_CONTAINER (widget));
+  clean_container (GTK_CONTAINER (widget));
   gtk_widget_show_all (widget);
 }
 
@@ -7109,7 +7109,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 					      PQvaluebycol (res, i, "year"),
 					      PQvaluebycol (res, i, "hour"),
 					      PQvaluebycol (res, i, "minute")),
-			  2, PutPoints (g_strdup (PQvaluebycol (res, i, "monto"))),
+			  2, PUT (g_strdup (PQvaluebycol (res, i, "monto"))),
 			  3, PQvaluebycol (res, i, "nombre_proveedor"),
 			  4, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);
