@@ -1754,7 +1754,6 @@
     <property name="border_width">3</property>
     <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
     <property name="window_position">center</property>
-    <signal name="key_press_event" handler="on_compras_gui_key_press_event"/>
     <signal name="delete_event" handler="on_wnd_compras_delete_event"/>
     <child>
       <object class="GtkVBox" id="vbox_main">
