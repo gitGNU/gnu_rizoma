@@ -1523,7 +1523,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="hbox23">
+                  <object class="GtkHBox" id="hbox23_print_cash">
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkButton" id="btn_print_cash">

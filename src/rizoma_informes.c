@@ -519,12 +519,12 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
 	  gtk_list_store_set (store, &iter,
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
-			      2, strtod (g_strdup (PQvaluebycol (res, i, "cantidad_comprada")), (char **)NULL),
-			      3, strtod (g_strdup (PQvaluebycol (res, i, "cantidad_anulada")), (char **)NULL),
-			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "costo"))),
-			      5, PutPoints (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
-			      6, PutPoints ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
-					    "0" : PQvaluebycol (res, i, "monto_anulado")),
+			      2, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad_comprada"))), (char **)NULL),
+			      3, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad_anulada"))), (char **)NULL),
+			      4, PUT(g_strdup (PQvaluebycol (res, i, "costo"))),
+			      5, PUT(g_strdup (PQvaluebycol (res, i, "monto_compra"))),
+			      6, PUT((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
+				     "0" : PQvaluebycol (res, i, "monto_anulado")),
 			      7, id_compra,
 			      8, id_factura_compra,
 			      -1);
@@ -614,9 +614,9 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, PutPoints (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
-			      5, PutPoints ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
-					    "0" : PQvaluebycol (res, i, "monto_anulado")),
+			      4, PUT (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
+			      5, PUT ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
+				      "0" : PQvaluebycol (res, i, "monto_anulado")),
 			      6, id_compra,
 			      7, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
@@ -1999,7 +1999,7 @@ reports_win (void)
 			      G_TYPE_STRING, //description
 			      G_TYPE_DOUBLE, //cantity purchased
 			      G_TYPE_DOUBLE, //cantity nullified
-			      G_TYPE_STRING, //price
+			      G_TYPE_STRING, //Price
 			      G_TYPE_STRING, //Buy amount
 			      G_TYPE_STRING, //Nullify amount
 			      G_TYPE_INT,    //Id_compra
@@ -3609,9 +3609,9 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 					      PQvaluebycol (res, i, "minute")),
 			  2, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "anulada_pi"), "t")) ? 
 					      "Anulada" : "Vigente"),
-			  3, PutPoints (PQvaluebycol (res, i, "monto_compra")),
-			  4, PutPoints ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
-					"0" : PQvaluebycol (res, i, "monto_anulado")),
+			  3, PUT (PQvaluebycol (res, i, "monto_compra")),
+			  4, PUT ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ? 
+				  "0" : PQvaluebycol (res, i, "monto_anulado")),
 			  5, PQvaluebycol (res, i, "nombre_proveedor"),
 			  6, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);
