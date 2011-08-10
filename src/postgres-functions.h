@@ -145,7 +145,7 @@ gdouble GetCurrentStock (gchar *barcode);
 
 char * GetCurrentPrice (gchar *barcode);
 
-gint FiFo (gchar *barcode, gint compra);
+gdouble FiFo (gchar *barcode, gint compra);
 
 gboolean SaveProductsSell (Productos *products, gint id_venta);
 
@@ -181,9 +181,9 @@ gint GetOtrosIndex (gchar *barcode);
 
 gchar * GetOtrosName (gchar *barcode);
 
-gint GetNeto (gchar *barcode);
+gdouble GetNeto (gchar *barcode);
 
-gint GetFiFo (gchar *barcode);
+gdouble GetFiFo (gchar *barcode);
 
 gboolean CheckCompraIntegrity (gchar *compra);
 
@@ -225,8 +225,6 @@ gboolean PagarFactura (gint id_invoice);
 
 void AjusteStock (gdouble cantidad, gint motivo, gchar *barcode);
 
-void AjusteStockCuadratura (gdouble cantidad, gint motivo, gchar *barcode, gdouble diferencia);
-
 gboolean Asistencia (gint user_id, gboolean entrada);
 
 gboolean VentaFraccion (gchar *barcode);
@@ -248,5 +246,11 @@ gboolean provider_exist (const gchar *rut);
 gint users_working (void);
 
 gint nullify_sale (gint sale_id);
+
+gint get_last_cash_box_id ();
+
+gdouble TotalPrecioCompra (Productos *products);
+
+gboolean SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
 
 #endif

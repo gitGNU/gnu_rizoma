@@ -205,13 +205,13 @@ clientes_box ()
 
   ///////////////// clients
   store = gtk_list_store_new (7,
-                              G_TYPE_INT,    // id
-                              G_TYPE_STRING, //name + apell_p + apell_m
-                              G_TYPE_INT,    //phone
-                              G_TYPE_BOOLEAN,//credit enabled
-                              G_TYPE_INT, // Cupo
-                              G_TYPE_INT,   //deuda
-                              G_TYPE_INT); // saldo
+                              G_TYPE_INT,     // id
+                              G_TYPE_STRING,  //name + apell_p + apell_m
+                              G_TYPE_INT,     //phone
+                              G_TYPE_BOOLEAN, //credit enabled
+                              G_TYPE_STRING,  //cupo
+                              G_TYPE_STRING,  //deuda
+                              G_TYPE_STRING); //saldo
   FillClientStore (store);
 
   tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_clients"));
@@ -684,9 +684,12 @@ FillClientStore (GtkListStore *store)
                                                   PQvaluebycol(res, i, "apell_p"), PQvaluebycol(res, i, "apell_m")),
                               2, atoi (PQvaluebycol (res, i, "telefono")),
                               3, strcmp (enable, "t") ? FALSE : TRUE,
-                              4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
-                              5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
-                              6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
+                              4, PutPoints (g_strdup_printf ("%d",
+							     ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
+                              5, PutPoints (g_strdup_printf ("%d", 
+							     DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
+                              6, PutPoints (g_strdup_printf ("%d", 
+							     CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))))),
                               -1);
         }
       else
@@ -695,9 +698,12 @@ FillClientStore (GtkListStore *store)
                             1, g_strdup_printf ("%s %s %s", PQgetvalue (res, i, 1),
                                                 PQgetvalue (res, i, 2), PQgetvalue (res, i, 3)),
                             2, atoi (PQgetvalue (res, i, 7)),
-                            4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
-                            5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
-                            6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
+                            4, PutPoints (g_strdup_printf ("%d",
+							   ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
+                            5, PutPoints (g_strdup_printf ("%d",
+							   DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
+                            6, PutPoints (g_strdup_printf ("%d",
+							   CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))))),
                             -1);
     }
   return 0;
@@ -766,8 +772,7 @@ FillVentasDeudas (gint rut)
                           0, atoi (PQgetvalue (res, i, 0)),
                           1, atoi (PQgetvalue (res, i, 2)),
                           2, PQgetvalue (res, i, 3),
-                          3, g_strdup_printf
-                          ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQgetvalue (res, i, 4)),
+                          3, g_strdup_printf ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQgetvalue (res, i, 4)),
                            atoi (PQgetvalue (res, i, 5)), atoi (PQgetvalue (res, i, 6)),
                            atoi (PQgetvalue (res, i, 7)), atoi (PQgetvalue (res, i, 8))),
                           4, PutPoints (PQgetvalue (res, i, 1)),
@@ -816,10 +821,10 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
                               0, PQgetvalue (res, i, 0),
                               1, PQgetvalue (res, i, 1),
                               2, PQgetvalue (res, i, 2),
-                              3, g_strtod (PUT(PQgetvalue (res, i, 3)),(gchar **)NULL),
-                              4, PQgetvalue (res, i, 4),
-                              5, PutPoints (g_strdup_printf("%ld", lround(g_strtod (PQgetvalue (res, i, 3), (gchar **)NULL) * 
-									  g_strtod (PQgetvalue (res, i, 4), (gchar **)NULL)))) ,
+                              3, strtod (PUT (PQgetvalue (res, i, 3)),(char **)NULL),
+                              4, PutPoints (PQgetvalue (res, i, 4)),
+                              5, PutPoints (g_strdup_printf("%ld", lround(strtod (PUT(PQgetvalue (res, i, 3)), (char **)NULL) * 
+									  strtod (PUT(PQgetvalue (res, i, 4)), (char **)NULL)))) ,
                               -1);
         }
     }
@@ -1408,9 +1413,12 @@ admin_search_client(void)
                               1, PQgetvalue (res, i, 1),
                               2, atoi(PQvaluebycol (res, i, "telefono")),
                               3, strcmp (enable, "t") ? FALSE : TRUE,
-                              4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
-                              5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
-                              6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
+                              4, PutPoints (g_strdup_printf ("%d", 
+							     ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
+			      5, PutPoints (g_strdup_printf ("%d",
+							     DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
+                              6, PutPoints (g_strdup_printf ("%d",
+							     CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))))),
                               -1);
         }
       else
@@ -1418,9 +1426,12 @@ admin_search_client(void)
                             0, atoi(PQgetvalue (res, i, 0)),
                             1, PQgetvalue (res, i, 1),
                             2, atoi (PQvaluebycol (res, i, "telefono")),
-                            4, ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))),
-                            5, DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))),
-                            6, CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))),
+                            4, PutPoints (g_strdup_printf ("%d", 
+							   ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
+			    5, PutPoints (g_strdup_printf ("%d",
+							   DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
+			    6, PutPoints (g_strdup_printf ("%d",
+							   CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))))),
                             -1);
     }
 }

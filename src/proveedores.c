@@ -386,7 +386,7 @@ AgregarProveedor (GtkWidget *widget, gpointer user_data)
 
   if (atoi(telefono_c) == 0)
     {
-      ErrorMSG (wnd, "Debe ingresar sÃ³lo nÃºmeros en el campo telefono");
+      ErrorMSG (wnd, "Debe ingresar solo números en el campo telefono");
       return;
     }
 

@@ -58,13 +58,13 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->contenido = atoi (PQvaluebycol (res, 0, "contenido"));
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
   new->product->precio = atoi (PQvaluebycol (res, 0, "precio"));
-  new->product->fifo = atoi (PQvaluebycol (res, 0, "costo_promedio")); //TODO: Corregir nomenclatura. No es fifo
+  new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
   new->product->precio_compra = GetNeto (barcode);
   new->product->iva = atoi (PQvaluebycol (res, 0, "impuesto_normal"));
   new->product->otros = atoi (PQvaluebycol (res, 0, "impuesto_otro"));
-  new->product->margen = atoi (PQvaluebycol (res, 0, "margen_promedio"));
+  new->product->margen = strtod (PUT (PQvaluebycol (res, 0, "margen_promedio")), (char **)NULL);
   new->product->canjeable = atoi (PQvaluebycol (res, 0, "canje"));
-  new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **) NULL);
+  new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **)NULL);
   /* Datos Mayoristas */
   new->product->precio_mayor = atoi (PQvaluebycol (res, 0, "precio_mayor"));
   new->product->cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));

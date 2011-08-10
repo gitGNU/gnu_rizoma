@@ -116,7 +116,7 @@ inventario_win ()
 
   fcb = GTK_WIDGET (gtk_builder_get_object (builder, "filechooserbutton1"));
 
-  /* añade el filtro al filechooserbutton*/
+  /* aÃ±ade el filtro al filechooserbutton*/
   gtk_file_chooser_set_filter(GTK_FILE_CHOOSER (fcb),
 			      filter);
 
@@ -338,11 +338,11 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 
       if (l == 0)
         {
-          if ((str = strstr(line, ",")) != NULL)
-            str = ",";
-
-          else if ((str = strstr(line, ";")) != NULL)
+          if ((str = strstr(line, ";")) != NULL)
             str = ";";
+
+          else if ((str = strstr(line, ",")) != NULL)
+            str = ",";
 
           else if ((str = strstr(line, " ")) != NULL)
             str = " ";
@@ -374,9 +374,9 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 	    }
 
 	  /*Casteo*/
-	  pcomp = g_ascii_strtod (pcompC, &pEnd);
+	  pcomp = strtod (PUT(pcompC), (char **)NULL);
           precio = atoi (precioC);          
-          cant = g_ascii_strtod (cantC, &pEnd);	  
+          cant = strtod (PUT(cantC), (char **)NULL);
 	  
 	  if (pcomp == 0 || precio == 0 || cant == 0)
 	    {

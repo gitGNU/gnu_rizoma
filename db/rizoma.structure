@@ -201,7 +201,7 @@ create table devolucion_detalle (
   barcode                   int8 not null,
   cantidad                  float8 not null,
   precio                    int4 not null,
-  precio_compra		   				int4 not null,
+  precio_compra		    float8 not null,
   constraint pk_devolucion_detalle primary key (id,id_devolucion)
 ) ;
 
@@ -464,7 +464,7 @@ create table producto (
   unidad                    varchar(10),
   stock                     float8 default 0,
   precio                    int4,
-  costo_promedio            int4,	-- antes fifo
+  costo_promedio            float8,	-- antes fifo
   vendidos                  float8,
   impuestos                 bool,
   otros                     int4,
@@ -534,7 +534,7 @@ create table venta_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    int4 not null,
-  fifo                      int4 not null,
+  fifo                      float8 not null,
   iva                       float8,
   otros                     float8,
   constraint pk_venta_detalle primary key (id,id_venta)
@@ -592,7 +592,7 @@ create table tipo_merma (
 -- Traspasos
 create table traspaso (
   id                        serial not null,
-  monto                     int4,
+  monto                     float8,
   fecha                     timestamp,
   origen                    int4,
   destino	            int4,
@@ -606,7 +606,7 @@ create table traspaso_detalle (
   id_traspaso               int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
-  precio                    int4 not null,
+  precio                    float8 not null,
   constraint pk_traspaso_detalle primary key (id,id_traspaso)
 ) ;
 

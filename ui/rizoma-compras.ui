@@ -421,9 +421,9 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_adjust_product">
-    <property name="width_request">220</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Ajuste de Mercadería</property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_compras</property>

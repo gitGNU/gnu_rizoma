@@ -545,3 +545,116 @@ SelectivePrintTwoTree (GtkWidget *widget, gpointer data)
 
   LaunchApp (file);
 }
+
+
+void 
+print_cash_box_selected ( void )
+{
+  PGresult *res;
+  gchar *query;
+  gchar *total_ingreso;
+  gchar *total_egreso;
+  gchar *monto_caja;
+  gint cash_id;
+
+  gchar *temp_directory = rizoma_get_value ("TEMP_FILES");
+  gchar *file;
+  FILE *fp;
+
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_cash_box_lists"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkTreeIter iter;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
+    return;
+  
+  //Se obtiene el id seleccionado
+  gtk_tree_model_get (model, &iter,
+		      0, &cash_id,
+		      -1);
+
+  //Se obtiene informacion    
+  query = g_strdup_printf ("select to_char (open_date, 'DD-MM-YYYY HH24:MI') as open_date_formatted, "
+			   "to_char (close_date, 'DD-MM-YYYY HH24:MI') as close_date_formatted, * from cash_box_report (%d)", cash_id);
+  res = EjecutarSQL (query);
+  g_free (query);
+
+  //Obtiene el ingreso total
+  total_ingreso = PutPoints (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells"))
+					      + atoi (PQvaluebycol (res, 0, "cash_income"))
+					      + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
+					      + atoi (PQvaluebycol (res, 0, "cash_box_start"))
+					      + atoi (PQvaluebycol (res, 0, "bottle_deposit"))
+					      ));
+  //Obtiene el egreso total
+  total_egreso = PutPoints (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_outcome"))
+					     + atoi (PQvaluebycol (res, 0, "cash_loss_money"))
+					     + atoi (PQvaluebycol (res, 0, "nullify_sell"))
+					     + atoi (PQvaluebycol (res, 0, "current_expenses"))
+					     + atoi (PQvaluebycol (res, 0, "bottle_return"))
+					     ));
+
+  //Obtiene el monto en caja
+  monto_caja = PutPoints (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_box_start"))
+					   + atoi (PQvaluebycol (res, 0, "cash_sells"))
+					   + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
+					   + atoi (PQvaluebycol (res, 0, "cash_income"))
+					   + atoi (PQvaluebycol (res, 0, "bottle_deposit"))
+					   - atoi (PQvaluebycol (res, 0, "cash_loss_money"))
+					   - atoi (PQvaluebycol (res, 0, "cash_outcome"))
+					   - atoi (PQvaluebycol (res, 0, "nullify_sell"))
+					   - atoi (PQvaluebycol (res, 0, "current_expenses"))
+					   - atoi (PQvaluebycol (res, 0, "bottle_return"))
+					   ));
+
+  //Se crea el archivo
+  file = g_strdup_printf ("%s/informe-caja-%s.csv", temp_directory,
+                          CurrentDate(0));
+
+  fp = fopen (file, "w");
+
+  if (fp == NULL)
+    {
+      perror (g_strdup_printf ("Opening %s", file));
+      return;
+    }
+  else
+    printf ("Working on %s\n", file);
+
+  //Cabecera archivo
+  fprintf (fp, "Informe de Caja\n%s\n\n", CurrentDate(0));
+  fprintf (fp, ",,,,\n");
+
+  //Cuerpo archivo
+  //fprintf (fp, "  Nombre usuario: %s \n", user_name);
+  fprintf (fp, "  ID caja: %d \n", cash_id);
+  fprintf (fp, "  ------------------ \n");
+
+  fprintf (fp, "  Fecha apertura: %s \n", PQvaluebycol (res, 0, "open_date_formatted"));
+  fprintf (fp, "  Fecha cierre: %s \n\n", PQvaluebycol (res, 0, "close_date_formatted"));
+
+  fprintf (fp, "  INGRESOS: \n");
+  fprintf (fp, "  \"Inicio\", \"Ventas Efectivo\", \"Abonos Credito\", \"Deposito Envase\", \"Ingresos Efectivo\", \"Sub-total ingresos\" \n");
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_box_start")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_sells")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_payed_money")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "bottle_deposit")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_income")));
+  fprintf (fp, "  %s \n\n", total_ingreso);
+
+  fprintf (fp, "  EGRESOS: \n");
+  fprintf (fp, "  \"Retiros\", \"Ventas Anuladas\", \"Gastos Corrientes\", \"Devolucion Envase\", \"Perdida\", \"Sub-total egresos\" \n");
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_outcome")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "nullify_sell")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "current_expenses")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "bottle_return")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_loss_money")));
+  fprintf (fp, "  %s \n\n", total_egreso);
+
+  fprintf (fp, "  ,,,,,Saldo en caja:\n ,,,,, %s \n", monto_caja);
+
+  //Finaliza el archivo
+  fclose (fp);
+  LaunchApp (file);
+}
