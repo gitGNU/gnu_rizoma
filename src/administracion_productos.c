@@ -257,6 +257,8 @@ GuardarModificacionesProducto (void)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Debe setear stock minimo");
   else if (g_str_equal (margen, "") || HaveCharacters (margen))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "Debe poner un valor de margen para el producto");
+  else if (mayorista == TRUE && cantidad_mayorista < 2)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_cantmayorist")), "Cantidad mayorista debe ser mayor a 1");
   else if (g_str_equal (new_venta, "") || HaveCharacters (new_venta))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "Debe insertar un precio de venta");
   else
