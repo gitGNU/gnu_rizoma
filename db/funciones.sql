@@ -2358,14 +2358,15 @@ begin
                 sell_first_id := 0;
         end if;
 
+	-- sell_first_id es el último id de venta antes de la apertura de caja
         if sell_last_id = 0 or sell_last_id is null then
                 select sum (monto) into cash_sells
                 from venta
-                where id >= sell_first_id and tipo_venta = 0;
+                where id > sell_first_id and tipo_venta = 0;
         else
                 select sum (monto) into cash_sells
                 from venta
-                where id >= sell_first_id and id <= sell_last_id and tipo_venta = 0;
+                where id > sell_first_id and id <= sell_last_id and tipo_venta = 0;
         end if;
 
         if cash_sells is null then
