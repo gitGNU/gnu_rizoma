@@ -46,10 +46,24 @@ gboolean
 HaveCharacters (gchar *string)
 {
   gint i, len = strlen (string);
+  gint points = 0;
 
-  for (i = 0; i <= len; i++)
+  // Si solamente es un '.' o ',' se toma como texto
+  if (len == 1 && (string[0] == '.' || string[0] == ','))
+    return TRUE;
+
+  //Si tiene un caracter distinto a un numero, '.' o ',' y además
+  //hay más de un '.' o ',' se considera texto
+  for (i = 0; i < len; i++)
     {
-      if (g_ascii_isalpha (string[i]) == TRUE)
+      if (string[i] == ',' || string[i] == '.')
+	points++;
+      
+      if (points > 1)
+	return TRUE;
+
+      if (g_ascii_isdigit (string[i]) == FALSE && 
+	  string[i] != ',' && string[i] != '.')
         return TRUE;
     }
 

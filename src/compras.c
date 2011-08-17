@@ -3349,17 +3349,20 @@ on_button_calculate_clicked (GtkButton *button, gpointer data)
 void
 on_button_add_product_list_clicked (GtkButton *button, gpointer data)
 {
-  gint unidades = NULL;
-  unidades = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")))));
+  gdouble unidades;
+  gchar *unidades_text;
 
-  if (unidades == NULL || unidades < 0)
+  unidades_text = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))));
+  unidades = strtod (PUT(unidades_text), (char **)NULL);
+
+  if (unidades <= 0 || HaveCharacters (unidades_text))
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount")),
-                "No se ha especificado una cantidad válida de unidades");
+                "Ingrese una cantidad válida de unidades");
       return;
     }
   else
-    {
+    {      
       calcular = 0;
       AddToProductsList ();
     }
