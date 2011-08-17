@@ -3510,6 +3510,203 @@ create_new_product (void)
 
 
 /**
+ * This callback is triggered when a cell on 
+ * 'treeview_sizes' is edited. (editable-event)
+ * @param cell
+ * @param path_string
+ * @param new_size
+ * @param data -> A GtkListStore
+ */
+void
+on_sizes_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_size, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  
+  /* obtiene el iter para poder obtener y setear 
+     datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  //Se asegura que la talla agregada contenga 2 dígitos
+  if (strlen (new_size) != 2)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_colors")),
+		"La talla debe contener 2 dígitos");
+      return;
+    }
+  
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      0, FALSE,    // False indica que es un dato agregado a mano
+		      1, new_size, // Se le inserta la nueva talla
+		      -1);
+
+}
+
+
+/**
+ * This callback is triggeres by 'btn_create_codes' button
+ * 
+ * Get all the pieces of code and creates the corresponding
+ * codes from them.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_create_codes_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  gboolean valid;
+
+  gint i;
+  gint num_sizes = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_sizes")));
+  gint num_colors = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_sizes")));
+  gchar *sizes[num_sizes];
+  gchar *colors[num_colors];
+
+  /*Gets all sizes*/
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sizes"));
+  model = gtk_tree_view_get_model (treeview);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  i = 0;
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  1, &sizes[i],
+			  -1);
+      i++;
+      // Itero a la siguiente fila --
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+    }
+    
+  /*Gets all colors*/
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_colors"));
+  model = gtk_tree_view_get_model (treeview);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  i = 0;
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  1, &colors[i],
+			  -1);
+      i++;
+      // Itero a la siguiente fila --
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+    }
+
+
+  /*-Creating codes -*/
+
+  /*get fragments*/
+  gchar *code_base = g_strdup_printf("");
+  GObject *clothes_base_code[5];
+  clothes_base_code[0] = builder_get (builder, "entry_clothes_depto");
+  clothes_base_code[1] = builder_get (builder, "entry_clothes_temp");
+  clothes_base_code[2] = builder_get (builder, "entry_clothes_year");
+  clothes_base_code[3] = builder_get (builder, "entry_clothes_sub_depto");
+  clothes_base_code[4] = builder_get (builder, "entry_clothes_id");
+
+  for (i=0; i<5; i++)
+    code_base = g_strdup_printf ("%s%s", code_base, gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i])));
+  
+  /*codigos + tamaños*/
+  gchar *code_sizes[num_sizes];
+  for (i=0; i<num_sizes; i++)
+    {
+      code_sizes[i] = g_strdup_printf ("%s%s", code_base, sizes[i]);
+    }
+
+  /*Se rellena el treeview de codigos cortos*/
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_shortcodes"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  gint j;
+    
+  for (i = 0; i<num_sizes; i++)
+    {
+      for (j=0; j<num_colors; j++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, FALSE,
+			      1, g_strdup_printf ("%s%s", code_sizes[i], colors[j]),
+			      -1);
+	  
+	}
+    }
+  
+}
+
+
+/**
+ * This callback is triggered when a cell on 
+ * 'treeview_sizes' is edited. (editable-event)
+ * @param cell
+ * @param path_string
+ * @param new_size
+ * @param data -> A GtkListStore
+ */
+void
+on_code_color_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_c_color, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  
+  /* obtiene el iter para poder obtener y setear 
+     datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  //Se asegura que el código del color contenga 2 dígitos
+  if (strlen (new_c_color) != 2)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_colors")),
+		"El código del color debe contener 2 dígitos");
+      return;
+    }
+
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      0, FALSE,    // False indica que es un dato agregado a mano
+		      1, new_c_color, // Se le inserta la nueva talla
+		      -1);
+
+}
+
+/**
+ * This callback is triggered when a cell on 
+ * 'treeview_sizes' is edited. (editable-event)
+ * @param cell
+ * @param path_string
+ * @param new_size
+ * @param data -> A GtkListStore
+ */
+void
+on_color_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_color, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+  
+  /* obtiene el iter para poder obtener y setear 
+     datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+  
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      0, FALSE,    // False indica que es un dato agregado a mano
+		      2, new_color, // Se le inserta la nueva talla
+		      -1);
+
+}
+
+/**
  * Es llamada por la función "on_button_new_product_clicked"
  * cuando ROPA=1 en el .rizoma.
  *
@@ -3542,8 +3739,8 @@ create_new_clothing (void)
       g_object_set (renderer,
 		    "editable", TRUE,
 		    NULL);
-      //g_signal_connect (G_OBJECT (renderer), "edited",
-      //		 G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_sizes_cell_renderer_edited), (gpointer)store);
       column = gtk_tree_view_column_new_with_attributes ("Talla", renderer,
 							 "text", 1,
 							 NULL);
@@ -3569,8 +3766,8 @@ create_new_clothing (void)
       g_object_set (renderer,
 		    "editable", TRUE,
 		    NULL);
-      //g_signal_connect (G_OBJECT (renderer), "edited",
-      //		 G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_code_color_cell_renderer_edited), (gpointer)store);
       column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
 							 "text", 1,
 							 NULL);
@@ -3583,8 +3780,8 @@ create_new_clothing (void)
       g_object_set (renderer,
 		    "editable", TRUE,
 		    NULL);
-      //g_signal_connect (G_OBJECT (renderer), "edited",
-      //		 G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_color_cell_renderer_edited), (gpointer)store);
       column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
 							 "text", 2,
 							 NULL);
@@ -3755,6 +3952,9 @@ on_btn_accept_clothes_clicked (GtkButton *button, gpointer data)
   for (i = 0; i < 6; i++)
     gtk_widget_set_sensitive (GTK_WIDGET (clothes_next_widget[i]), TRUE);
 
+
+  //Deja el foco en el botón para agregar tallas
+  gtk_widget_grab_focus (GTK_WIDGET (clothes_next_widget[0]));
 
   q = g_strdup_printf ("SELECT codigo_corto "
   		       "FROM producto "

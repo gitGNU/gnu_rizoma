@@ -553,7 +553,7 @@ get_treeview_length (GtkTreeView *treeview)
 
 
 /**
- *
+ * This function divides the code into fragments corresponding
  *
  * @param: gchar *clothes_code: The clothes code
  */

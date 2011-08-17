@@ -2351,7 +2351,7 @@ begin
         end if;
 
 	-- ACLARACION: Si el id de apertura y cierre son iguales significa que no hubo venta	
-	-- La que la siguiente operaciÃ³n deberÃ­a realizarse solo si hay venta en la primera apertura de caja
+	-- La que la siguiente operación debería realizarse solo si hay venta en la primera apertura de caja
         
 	-- To avoid problems with the first sell
         if sell_first_id = 1 AND sell_first_id != sell_last_id then
