@@ -186,16 +186,25 @@ create or replace function insertar_producto(
 		IN prod_fraccion boolean)
 returns integer as $$
 begin
-		INSERT INTO producto (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia,
-				perecibles, fraccion)
-				VALUES (prod_barcode, prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva,
-				prod_otros, prod_familia, prod_perecible, prod_fraccion);
 
-		IF FOUND IS TRUE THEN
-				RETURN 1;
-		ELSE
-				RETURN 0;
-		END IF;
+	IF prod_barcode = 0 THEN
+	     INSERT INTO producto (codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia,
+	     	    	           perecibles, fraccion)
+	     VALUES (prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva,
+		     prod_otros, prod_familia, prod_perecible, prod_fraccion);
+	ELSE			
+	     INSERT INTO producto (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, familia,
+	     	    	           perecibles, fraccion)
+	     VALUES (prod_barcode, prod_codigo, prod_marca, prod_descripcion,prod_contenido, prod_unidad, prod_iva,
+		     prod_otros, prod_familia, prod_perecible, prod_fraccion);
+        END IF;
+
+	IF FOUND IS TRUE THEN
+			RETURN 1;
+	ELSE
+			RETURN 0;
+	END IF;
+
 END; $$ language plpgsql;
 
 -- revisa si existe un producto con el mismo código
@@ -474,7 +483,8 @@ query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
 		    cantidad_mayor, mayorista
              FROM producto WHERE estado = true and lower(descripcion) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR lower(marca) LIKE lower($S$
-	|| quote_literal(expresion) || $S$) and estado = true order by descripcion, marca $S$;
+	|| quote_literal(expresion) || $S$) OR upper(codigo_corto) LIKE upper($S$
+	|| quote_literal(expresion) || $S$) AND estado = true order by descripcion, marca $S$;
 
 FOR list IN EXECUTE query LOOP
     barcode := list.barcode;

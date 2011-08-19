@@ -557,11 +557,14 @@ get_treeview_length (GtkTreeView *treeview)
  *
  * @param: gchar *clothes_code: The clothes code
  */
-gchar **
+GArray *
 decode_clothes_code (gchar *clothes_code)
 {
-  gchar *decode[7];
+  gchar *fragmento;
+  GArray *decode;
   gint i = 0;
+
+  decode = g_array_new (FALSE, FALSE, sizeof (gchar*));
 
   if (strlen (clothes_code) != 16)
     return NULL;
@@ -570,18 +573,20 @@ decode_clothes_code (gchar *clothes_code)
     {
       if (i==1 || i==3)
 	{
-	  decode[i] = g_strndup (clothes_code, 3);
+	  fragmento = g_strndup (clothes_code, 3);
+	  g_array_append_val (decode, fragmento);
 	  clothes_code = invested_strndup (clothes_code, 3);
 	}
       else
 	{
-	  decode[i] = g_strndup (clothes_code, 2);
+	  fragmento = g_strndup (clothes_code, 2);
+	  g_array_append_val (decode, fragmento);
 	  clothes_code = invested_strndup (clothes_code, 2);
 	}
 
-      printf("extraido: %s \nrestante: %s", decode[i], clothes_code);
+      printf ("extraido: %s restante: %s \n", g_array_index (decode, gchar*, i), clothes_code);
       i++;
     } while (strlen (clothes_code) != 0);
 
-  return **decode;
+  return decode;
 }

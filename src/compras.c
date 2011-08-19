@@ -914,7 +914,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
   /*Si entra aqui significa que se ingresó un codigo corto, y se pasa a codigo de barra*/
   if (PQntuples (res) == 1)
     {
-      barcode = g_strdup (PQvaluebycol( res, 0, "barcode"));
+      barcode = g_strdup (PQvaluebycol(res, 0, "barcode"));
       PQclear (res);
       gtk_entry_set_text (GTK_ENTRY (entry),barcode);
     }
@@ -3563,44 +3563,55 @@ on_btn_create_codes_clicked (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   gboolean valid;
 
-  gint i;
+  gint i, j, partida_color, partida_size, num_codes;
+  gboolean existente, base_existente;
   gint num_sizes = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_sizes")));
-  gint num_colors = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_sizes")));
+  gint num_colors = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_colors")));
   gchar *sizes[num_sizes];
   gchar *colors[num_colors];
+  gint new_colors, new_sizes;
+  new_colors = new_sizes = num_codes = 0;
+  partida_color = partida_size = 0;
 
-  /*Gets all sizes*/
+  /*Gets all new sizes*/
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sizes"));
   model = gtk_tree_view_get_model (treeview);
-  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  store = GTK_LIST_STORE (model);
   valid = gtk_tree_model_get_iter_first (model, &iter);
   i = 0;
   while (valid)
     {
       gtk_tree_model_get (model, &iter,
+			  0, &existente,
 			  1, &sizes[i],
 			  -1);
+
+      if (existente == FALSE)
+	new_sizes++;
+      
       i++;
-      // Itero a la siguiente fila --
       valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
-    }
+    }  
     
-  /*Gets all colors*/
+  /*Gets all new colors*/
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_colors"));
   model = gtk_tree_view_get_model (treeview);
-  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  store = GTK_LIST_STORE (model);
   valid = gtk_tree_model_get_iter_first (model, &iter);
   i = 0;
   while (valid)
     {
       gtk_tree_model_get (model, &iter,
+			  0, &existente,
 			  1, &colors[i],
 			  -1);
+
+      if (existente == FALSE)
+	new_colors++;
+
       i++;
-      // Itero a la siguiente fila --
       valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
     }
-
 
   /*-Creating codes -*/
 
@@ -3622,25 +3633,247 @@ on_btn_create_codes_clicked (GtkButton *button, gpointer data)
     {
       code_sizes[i] = g_strdup_printf ("%s%s", code_base, sizes[i]);
     }
+ 
+  // (si hay nuevas tallas o colores y hay a lo menos 1 de ambos) o
+  // (si el codigo base es nuevo y existe a lo menos 1 color y talla)
+  base_existente = DataExist (g_strdup_printf ("SELECT * FROM clothes_code WHERE codigo_corto like '%s%%'",code_base));
+
+  if ((new_sizes > 0 || new_colors > 0 && (num_sizes > 0 && num_colors > 0)) ||
+      (!base_existente && (num_sizes > 0 && num_colors > 0)))
+    {
+      //Solo se deshabilita si no tiene texto en el
+      if (g_str_equal (gtk_entry_get_text 
+		       (GTK_ENTRY (builder_get (builder, "entry_new_clothes_brand"))), ""))
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_new_clothes_brand")), TRUE);
+
+      //Solo se deshabilita si no tiene texto en el
+      if (g_str_equal (gtk_entry_get_text 
+		       (GTK_ENTRY (builder_get (builder, "entry_new_clothes_desc"))), ""))
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_new_clothes_desc")), TRUE);
+
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_add_new_clothes")), TRUE);
+    }
+  else
+    {
+      if (!base_existente)
+	ErrorMSG (GTK_WIDGET (builder_get (builder, "btn_add_size")), 
+		  "Debe ingresar a lo menos una talla y un color");
+      else
+	ErrorMSG (GTK_WIDGET (builder_get (builder, "btn_add_size")), 
+		  "Debe ingresar a lo menos una talla o un color nuevo");
+      return;
+    }
 
   /*Se rellena el treeview de codigos cortos*/
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_shortcodes"));
-  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
-  gint j;
-    
-  for (i = 0; i<num_sizes; i++)
+  model = gtk_tree_view_get_model (treeview);
+  store = GTK_LIST_STORE (model);
+
+  /*Quitamos solamente los codigos nuevos*/
+  num_codes = get_treeview_length (treeview);
+  i=0;
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid && i < num_codes)
     {
-      for (j=0; j<num_colors; j++)
+      gtk_tree_model_get (model, &iter,
+			  0, &existente,
+			  -1);
+
+      if (existente == FALSE)
+	gtk_list_store_remove (store, &iter);
+      else
+	valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+      i++;
+    }
+
+  if (base_existente == FALSE)
+    {
+      store = GTK_LIST_STORE (model);
+      for (i=0; i<num_sizes; i++)
 	{
-	  gtk_list_store_append (store, &iter);
-	  gtk_list_store_set (store, &iter,
-			      0, FALSE,
-			      1, g_strdup_printf ("%s%s", code_sizes[i], colors[j]),
-			      -1);
-	  
+	  for (j=0; j<num_colors; j++)
+	    {
+	      gtk_list_store_append (store, &iter);
+	      gtk_list_store_set (store, &iter,
+				  0, FALSE,
+				  1, g_strdup_printf ("%s%s", code_sizes[i], colors[j]),
+				  -1);	      
+	    }
 	}
     }
+  else /*Agregamos nuevos codigos*/
+    {
+      if (new_sizes > 0 && new_colors == 0)
+	{
+	  partida_size = num_sizes - new_sizes;
+	  store = GTK_LIST_STORE (model);
+	  for (i=partida_size; i<num_sizes; i++)
+	    {
+	      for (j=0; j<num_colors; j++)
+		{
+		  gtk_list_store_append (store, &iter);
+		  gtk_list_store_set (store, &iter,
+				      0, FALSE,
+				      1, g_strdup_printf ("%s%s", code_sizes[i], colors[j]),
+				      -1);	      
+		}
+	    }
+	}
+      else if (new_colors > 0 && new_sizes == 0)
+	{
+	  partida_color = num_colors - new_colors;
+	  store = GTK_LIST_STORE (model);
+	  for (i=0; i<num_sizes; i++)
+	    {
+	      for (j=partida_color; j<num_colors; j++)
+		{
+		  gtk_list_store_append (store, &iter);
+		  gtk_list_store_set (store, &iter,
+				      0, FALSE,
+				      1, g_strdup_printf ("%s%s", code_sizes[i], colors[j]),
+				      -1);	      
+		}
+	    }
+	}
+      else if (new_colors > 0 && new_sizes > 0)
+	{
+	  partida_size = num_sizes - new_sizes;;
+	  partida_color = num_colors - new_colors;
+	  store = GTK_LIST_STORE (model);
+	  for (i=partida_size; i<num_sizes; i++)
+	    {
+	      for (j=partida_color; j<num_colors; j++)
+		{
+		  gtk_list_store_append (store, &iter);
+		  gtk_list_store_set (store, &iter,
+				      0, FALSE,
+				      1, g_strdup_printf ("%s%s", code_sizes[i], colors[j]),
+				      -1);	      
+		}
+	    }
+	}
+
+
+    }
+}
+
+
+/**
+ * This callback is triggeres by 'btn_add_clothes' button
+ * 
+ * Create clothes from information on 'wnd_new_clothing'
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_add_new_clothes_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  gboolean valid;
   
+  gboolean registrado; // Para saber si es un codigo previamente registrado
+  gchar *marca, *descripcion, *sub_depto_code;
+  gint i, fila, largo;
+  i = fila = 0;
+
+  sub_depto_code = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_clothes_sub_depto")));
+  marca = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_new_clothes_brand")));
+  descripcion = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_new_clothes_desc")));
+  
+  //Se comprueba que tengan datos
+  if (g_str_equal (marca, ""))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_new_clothes_brand")),
+			    "Debe ingresar una marca");
+      return;
+    }
+  else if (g_str_equal (descripcion, ""))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_new_clothes_desc")),
+			    "Debe ingresar una descripción");
+      return;
+    }
+
+  /* Se registra la información del subdepartamento 
+     (se asocia 'descripcion') al fragmento sub_depto */
+  registrar_nuevo_sub_depto (sub_depto_code, descripcion);
+  
+  // Se obtienen todos los colores
+  fila = 0;
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_colors"));
+  
+  largo = get_treeview_length (treeview);
+  gchar *color, *codigo_color;
+  gchar *colores[largo], *codigos_colores[largo];
+
+  model = gtk_tree_view_get_model (treeview);
+  store = GTK_LIST_STORE (model);
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &registrado,
+			  1, &codigo_color,
+			  2, &color,
+			  -1);
+
+      if (registrado == FALSE)
+	{
+	  codigos_colores[fila] = g_strdup (codigo_color);
+	  colores[fila] = g_strdup (color);
+	  fila++;
+	}
+
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+    }
+
+  // Se registran los colores nuevos
+  for (i=0; i<fila; i++)
+    registrar_nuevo_color (g_strdup_printf ("%s", codigos_colores[i]),
+			   g_strdup_printf ("%s", colores[i]));
+
+  
+  // Se obtienen todos los códigos generados 
+  fila = 0;
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_shortcodes"));
+
+  largo = get_treeview_length (treeview);
+  gchar *codigos[largo]; // Para guardar todos los codigos nuevos
+  gchar *code;           // Para guardar el codigo del treeview
+
+  model = gtk_tree_view_get_model (treeview);
+  store = GTK_LIST_STORE (model);
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &registrado,
+			  1, &code,
+			  -1);
+
+      if (registrado == FALSE)
+	{
+	  codigos[fila] = g_strdup (code);
+	  fila++;
+	}
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+    }
+
+  // Se registran todos los codigos nuevos que se han generado
+  for (i=0; i<fila; i++)
+    registrar_nuevo_codigo (g_strdup_printf ("%s", codigos[i]));
+
+  // Se registran los productos
+  for (i=0; i<fila; i++)
+    AddNewProductToDB (codigos[i], "0", descripcion, marca, "1",
+		       "UN", TRUE, 0, "", FALSE, FALSE);
+  
+  clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "wnd_new_clothing")));
+  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_new_clothing")));
 }
 
 
@@ -3851,10 +4084,12 @@ create_new_clothing (void)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_clothes_id")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_clothes")), TRUE);
 
-  //entry's deshabilitados
+  //widget's deshabilitados
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_new_clothes_brand")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_new_clothes_desc")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_create_codes")), FALSE);
 
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_clothes_depto")));
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_clothing")));
 }
 
@@ -3892,10 +4127,16 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
  */
 void
 on_btn_accept_clothes_clicked (GtkButton *button, gpointer data)
-{  
+{ 
+  //Variables para el treeview
+  GtkListStore *store;
+  GtkTreeIter iter;
+
+  PGresult *res;
   gchar *clothes_code = g_strdup_printf ("");
   gchar *q;
-  gint i;  
+  gchar *depto, *sub_depto;
+  gint i, num_res = 0;
   GObject *clothes_base_code[6];
   GObject *clothes_next_widget[6];
 
@@ -3912,15 +4153,16 @@ on_btn_accept_clothes_clicked (GtkButton *button, gpointer data)
   clothes_next_widget[1] = builder_get (builder, "btn_del_size");
   clothes_next_widget[2] = builder_get (builder, "btn_add_color");
   clothes_next_widget[3] = builder_get (builder, "btn_del_color");
-  clothes_next_widget[4] = builder_get (builder, "entry_new_clothes_brand");
-  clothes_next_widget[5] = builder_get (builder, "entry_new_clothes_desc");
+  clothes_next_widget[4] = builder_get (builder, "btn_create_codes");
+  //clothes_next_widget[4] = builder_get (builder, "entry_new_clothes_brand");
+  //clothes_next_widget[5] = builder_get (builder, "entry_new_clothes_desc");
 
   //Valida los campos
   for (i = 0; i < 5; i++)
     {
       if (i==0 || i==2 || i==4)
 	{
-	  if (strlen (gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i]))) != 2) 
+	  if (strlen (gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i]))) != 2)
 	    {
 	      ErrorMSG (GTK_WIDGET (clothes_base_code[i]),
 			g_strdup_printf ("El campo %s debe contener 2 dígitos", (i==0) ?
@@ -3949,25 +4191,100 @@ on_btn_accept_clothes_clicked (GtkButton *button, gpointer data)
     clothes_code = g_strdup_printf ("%s%s", clothes_code, gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i])));
 
   //Habilita la escritura en los widgets que sigen
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < 5; i++)
     gtk_widget_set_sensitive (GTK_WIDGET (clothes_next_widget[i]), TRUE);
 
 
   //Deja el foco en el botón para agregar tallas
   gtk_widget_grab_focus (GTK_WIDGET (clothes_next_widget[0]));
 
+  /* == Se rellena el treeview de talla == */
+  depto = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_clothes_depto")));
+  q = g_strdup_printf ("SELECT DISTINCT talla "
+  		       "FROM clothes_code "
+		       "WHERE depto = '%s'", 
+		       depto);
+  res = EjecutarSQL(q);
+  num_res = PQntuples (res);
+  
+  //Si encuentra tallas correspondientes al departamento
+  if (num_res > 0)
+    {
+      //Rellena el treeview con las tallas correspondientes al departamento
+      store = GTK_LIST_STORE (gtk_tree_view_get_model 
+			      (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_sizes"))));
+      for (i=0; i<num_res; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, TRUE,
+			      1, g_strdup (PQvaluebycol(res, i, "talla")),
+			      -1);
+	}
+    }
+
+  /* == Se rellena el treeview de colores == */
+  q = g_strdup_printf ("SELECT codigo, nombre "
+  		       "FROM color");
+  res = EjecutarSQL(q);
+  num_res = PQntuples (res);
+  
+  //Si encuentra colores pre-existentes
+  if (num_res > 0)
+    {
+      //Rellena el treeview todos los colores disponibles
+      store = GTK_LIST_STORE (gtk_tree_view_get_model 
+			      (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_colors"))));
+      for (i=0; i<num_res; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, TRUE,
+			      1, g_strdup (PQvaluebycol(res, i, "codigo")),
+			      2, g_strdup (PQvaluebycol(res, i, "nombre")),
+			      -1);
+	}
+    }
+
+  /* == Se rellena el treeview de codigo == */
   q = g_strdup_printf ("SELECT codigo_corto "
   		       "FROM producto "
-		       "WHERE codigo_corto like '%s%%'",
+		       "WHERE codigo_corto like '%s%%' "
+		       "AND length (codigo_corto) = 16",
   		       clothes_code);
-  if (DataExist (q))
+  res = EjecutarSQL(q);
+  num_res = PQntuples (res);
+  
+  //Si encuentra el codigo base
+  if (num_res > 0)
     {
-      
+      //Rellena el treeview con los codigos ya existentes
+      store = GTK_LIST_STORE (gtk_tree_view_get_model 
+			      (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_shortcodes"))));
+      for (i=0; i<num_res; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, TRUE,
+			      1, g_strdup (PQvaluebycol(res, i, "codigo_corto")),
+			      -1);
+	}
     }
-  else
-    {
-      
-    }
+
+  /* == Se ingresa la descripcion correspondiente al sub_depto == */
+  sub_depto = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_clothes_sub_depto")));
+  q = g_strdup_printf ("SELECT nombre "
+  		       "FROM sub_depto "
+		       "WHERE codigo = '%s'", 
+		       sub_depto);
+
+  res = EjecutarSQL(q);
+  num_res = PQntuples (res);
+
+  //Si encuentra la descripcion del sub_depto
+  if (num_res > 0)
+    gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_clothes_desc")),
+			g_strdup (PQvaluebycol(res, 0, "nombre")));
 }
 
 
@@ -4010,6 +4327,21 @@ on_btn_del_size_clicked ()
   gboolean datoExistente;
   gchar *nombreTalla;
 
+  gboolean base_existente;
+  gint i = 0;
+  gchar *code_base = g_strdup_printf("");
+  GObject *clothes_base_code[5];
+  clothes_base_code[0] = builder_get (builder, "entry_clothes_depto");
+  clothes_base_code[1] = builder_get (builder, "entry_clothes_temp");
+  clothes_base_code[2] = builder_get (builder, "entry_clothes_year");
+  clothes_base_code[3] = builder_get (builder, "entry_clothes_sub_depto");
+  clothes_base_code[4] = builder_get (builder, "entry_clothes_id");
+
+  for (i=0; i<5; i++)
+    code_base = g_strdup_printf ("%s%s", code_base, gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i])));
+
+  base_existente = DataExist (g_strdup_printf ("SELECT * FROM clothes_code WHERE codigo_corto like '%s%%'",code_base));
+
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sizes"));
   selection = gtk_tree_view_get_selection (treeview);
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
@@ -4023,7 +4355,7 @@ on_btn_del_size_clicked ()
 			  1, &nombreTalla,
                           -1);
 
-      if (datoExistente == FALSE)
+      if (datoExistente == FALSE || (datoExistente == TRUE && base_existente == FALSE))
 	{
 	  position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
 	  gtk_list_store_remove (store, &iter);
@@ -4077,6 +4409,21 @@ on_btn_del_color_clicked ()
   gchar *codColor;
   gchar *nombreColor;
 
+  gboolean base_existente;
+  gint i = 0;
+  gchar *code_base = g_strdup_printf("");
+  GObject *clothes_base_code[5];
+  clothes_base_code[0] = builder_get (builder, "entry_clothes_depto");
+  clothes_base_code[1] = builder_get (builder, "entry_clothes_temp");
+  clothes_base_code[2] = builder_get (builder, "entry_clothes_year");
+  clothes_base_code[3] = builder_get (builder, "entry_clothes_sub_depto");
+  clothes_base_code[4] = builder_get (builder, "entry_clothes_id");
+
+  for (i=0; i<5; i++)
+    code_base = g_strdup_printf ("%s%s", code_base, gtk_entry_get_text (GTK_ENTRY (clothes_base_code[i])));
+
+  base_existente = DataExist (g_strdup_printf ("SELECT * FROM clothes_code WHERE codigo_corto like '%s%%'",code_base));
+
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_colors"));
   selection = gtk_tree_view_get_selection (treeview);
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
@@ -4091,7 +4438,7 @@ on_btn_del_color_clicked ()
 			  2, &nombreColor,
                           -1);
 
-      if (datoExistente == FALSE)
+      if (datoExistente == FALSE || (datoExistente == TRUE && base_existente == FALSE))
 	{
 	  position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
 	  gtk_list_store_remove (store, &iter);
@@ -7323,7 +7670,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
  * This is a callback from button 'btn_nullify_buy_pi'
  * (signal clicked).
  *
- * Is called by 'f5' too.
+ * Is called by 'f5' key too.
  *
  * Show the 'wnd_nullify_buy' window, to nullify purchases
  * that have already been entered.

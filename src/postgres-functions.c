@@ -2936,3 +2936,85 @@ get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas)
   else
     return res;
 }
+
+
+/**
+ * If the code doesn't was registered previously,
+ * this function save the clothes code
+ * and all its components into 'clothes_code' table
+ *
+ * @param gchar *codigo: The code to save into clothes_code table
+ */
+void
+registrar_nuevo_codigo (gchar *codigo)
+{
+  GArray *fragmentos;
+  gchar *q;
+
+  fragmentos = decode_clothes_code (codigo);
+
+  if (!DataExist (g_strdup_printf ("SELECT * FROM clothes_code WHERE codigo_corto = '%s'", codigo)))
+    {
+      q = g_strdup_printf ("INSERT INTO clothes_code (codigo_corto, depto, temp, ano, sub_depto, id_ropa, talla, color) "
+			   "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+			   codigo, 
+			   g_array_index (fragmentos, gchar*, 0), g_array_index (fragmentos, gchar*, 1),
+			   g_array_index (fragmentos, gchar*, 2), g_array_index (fragmentos, gchar*, 3),
+			   g_array_index (fragmentos, gchar*, 4), g_array_index (fragmentos, gchar*, 5),
+			   g_array_index (fragmentos, gchar*, 6));
+      printf ("%s", q);
+      EjecutarSQL (q);
+    }
+  else
+    printf ("No se registró el código %s, puesto que ya existe", codigo);
+
+  g_array_free (fragmentos, TRUE);
+}
+
+/**
+ * If the code doesn't was registered previously,
+ * this function save the color code and color name
+ * into 'color' table
+ *
+ * @param gchar *codigo: The color code
+ * @param gchar *color: The color name
+ */
+void
+registrar_nuevo_color (gchar *codigo, gchar *color)
+{
+  gchar *q;
+
+  if (!DataExist (g_strdup_printf ("SELECT * FROM color WHERE codigo = '%s'", codigo)))
+    {
+      q = g_strdup_printf ("INSERT INTO color (codigo, nombre) "
+			   "VALUES ('%s', '%s')", codigo, color);
+      printf ("%s", q);
+      EjecutarSQL (q);
+    }
+  else
+    printf ("No se registró el color %s, puesto que ya existe", color);
+}
+
+/**
+ * If the code doesn't was registered previously,
+ * this function save the sub_depto code and sub_depto name
+ * into 'sub_depto' table
+ *
+ * @param gchar *codigo: The sub_depto code
+ * @param gchar *sub_depto: The sub_depto name
+ */
+void
+registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto)
+{
+  gchar *q;
+
+  if (!DataExist (g_strdup_printf ("SELECT * FROM sub_depto WHERE codigo = '%s'", codigo)))
+    {
+      q = g_strdup_printf ("INSERT INTO sub_depto (codigo, nombre) "
+			   "VALUES ('%s', '%s')", codigo, sub_depto);
+      printf ("%s", q);
+      EjecutarSQL (q);
+    }
+  else
+    printf ("No se registró el sub_depto %s, puesto que ya existe", sub_depto);
+}

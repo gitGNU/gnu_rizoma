@@ -66,4 +66,6 @@ gchar * invested_strndup (const gchar *texto, gint index);
 
 gint get_treeview_length (GtkTreeView *treeview);
 
+GArray * decode_clothes_code (gchar *clothes_code);
+
 #endif

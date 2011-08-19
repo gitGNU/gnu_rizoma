@@ -86,6 +86,7 @@ drop table if exists venta_anulada cascade;
 drop table if exists venta_detalle cascade;
 drop table if exists color cascade;
 drop table if exists sub_depto cascade;
+drop table if exists clothes_code cascade;
 
 -- Generated SQL Schema
 -- --------------------------------------------------------------------
@@ -456,7 +457,7 @@ create table unidad_producto
 
 -- Producto
 create table producto (
-  barcode                   int8 not null,	-- llave primaria
+  barcode                   serial8 not null,	-- llave primaria
   codigo_corto              varchar(16),	-- crear ckeck point
   marca                     varchar(35),
   descripcion               varchar(50),
@@ -480,7 +481,7 @@ create table producto (
   cantidad_mayor            int4,
   mayorista                 bool default false,
   estado                    bool default true,
-  constraint pk_producto primary key (barcode),
+  CONSTRAINT pk_producto primary key (barcode),
   CONSTRAINT unique_short_code UNIQUE (codigo_corto)
 ) ;
 
@@ -497,6 +498,21 @@ create table sub_depto (
   codigo		    varchar(3),
   nombre		    varchar(30)
 );
+
+
+-- Clothes_Code
+create table clothes_code (
+  id                        serial not null,
+  codigo_corto              varchar(16),
+  depto              	    varchar(2),
+  temp              	    varchar(3),
+  ano              	    varchar(2),
+  sub_depto                 varchar(3),
+  id_ropa              	    varchar(2),
+  talla			    varchar(2),
+  color			    varchar(2)
+);
+
 
 -- Producto_recibido
 create table producto_recibido (
@@ -814,3 +830,6 @@ alter table traspaso_detalle add constraint fk_traspaso_id
 
 CREATE INDEX indx_venta_detalle_barcode ON venta_detalle ( barcode );
 CREATE INDEX indx_venta_fecha ON venta USING btree (fecha);
+
+-- Alter sequence barcode
+ALTER SEQUENCE producto_barcode_seq RESTART WITH 1000000;
