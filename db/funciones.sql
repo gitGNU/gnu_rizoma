@@ -1895,7 +1895,7 @@ q := $S$ SELECT producto.descripcion as descripcion,
        	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
       where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY 1,2,3,4 $S$;
+      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4 $S$;
 
 for l in execute q loop
     descripcion := l.descripcion;

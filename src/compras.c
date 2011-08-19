@@ -4001,7 +4001,7 @@ create_new_clothing (void)
 		    NULL);
       g_signal_connect (G_OBJECT (renderer), "edited",
 			G_CALLBACK (on_code_color_cell_renderer_edited), (gpointer)store);
-      column = gtk_tree_view_column_new_with_attributes ("cod. Color", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Cod. Color", renderer,
 							 "text", 1,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
