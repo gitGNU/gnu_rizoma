@@ -4001,7 +4001,7 @@ create_new_clothing (void)
 		    NULL);
       g_signal_connect (G_OBJECT (renderer), "edited",
 			G_CALLBACK (on_code_color_cell_renderer_edited), (gpointer)store);
-      column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("cod. Color", renderer,
 							 "text", 1,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
@@ -4015,7 +4015,7 @@ create_new_clothing (void)
 		    NULL);
       g_signal_connect (G_OBJECT (renderer), "edited",
 			G_CALLBACK (on_color_cell_renderer_edited), (gpointer)store);
-      column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Color", renderer,
 							 "text", 2,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
@@ -4037,23 +4037,6 @@ create_new_clothing (void)
 
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
-							 "text", 1,
-							 NULL);
-      gtk_tree_view_append_column (treeview, column);
-      gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
-      gtk_tree_view_column_set_resizable (column, FALSE);
-
-      //Barcodes
-      store = gtk_list_store_new (2,
-				  G_TYPE_BOOLEAN, //Para saber si se rellenó desde la BD o se agregó a mano
-				  G_TYPE_STRING); //BARCODE
-
-      treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_barcodes"));
-      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
-
-      renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Barcode", renderer,
 							 "text", 1,
 							 NULL);
       gtk_tree_view_append_column (treeview, column);
