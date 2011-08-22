@@ -1228,7 +1228,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   GtkWidget *combo_imp;
   GtkTreeIter iter;
   GtkListStore *combo_store;
-  GtkComboBox *cmb_unit;
+  GtkComboBox *cmb_unit, *cmb_family;
   GtkListStore *modelo;
   GtkCellRenderer *cell;
 
@@ -1238,7 +1238,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   gint otros_index;
 
   PGresult *res;
-  gint tuples, i;
+  gint tuples, i, familia_id;
 
 
   if (GTK_IS_ENTRY (widget_barcode))
@@ -1256,7 +1256,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
-  q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, unidad, "
+  q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, unidad, familia, "
                        "contenido, precio FROM select_producto(%s)", barcode);
   res = EjecutarSQL(q);
   g_free(q);
@@ -1287,6 +1287,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_edit_product_unit"));
   modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_unit)));
 
+  familia_id = atoi (PQvaluebycol(res, 0, "familia"));
 
   unit = PQvaluebycol(res, 0, "unidad");
   /* widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_unit")); */
@@ -1307,7 +1308,7 @@ ModificarProducto (GtkWidget *widget_barcode)
                                      "text", 1,
                                      NULL);
 
-      res = EjecutarSQL ("SELECT * FROM unidad_producto");
+      res = EjecutarSQL ("SELECT * FROM unidad_producto ORDER BY id ASC");
       tuples = PQntuples (res);
 
       if(res != NULL)
@@ -1331,12 +1332,54 @@ ModificarProducto (GtkWidget *widget_barcode)
   if(tuples > 0)
     gtk_combo_box_set_active (cmb_unit, atoi(PQvaluebycol ( res, 0, "id")) - 1);
 
+  /*Familias*/  
+  cmb_family = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_edit_product_family"));
+  modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_family)));
+
+  /* widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_unit")); */
+  if(modelo == NULL)
+    {
+      GtkTreeIter iter;
+      gint i, tuples;
+
+      modelo = gtk_list_store_new (2,
+				   G_TYPE_INT,
+				   G_TYPE_STRING);
+
+      gtk_combo_box_set_model(GTK_COMBO_BOX(cmb_family), GTK_TREE_MODEL(modelo));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(cmb_family), cell, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cmb_family), cell,
+                                     "text", 1,
+                                     NULL);
+
+      res = EjecutarSQL ("SELECT * FROM familias ORDER BY id ASC");
+      tuples = PQntuples (res);
+
+      if(res != NULL)
+	{
+	  for (i=0 ; i < tuples ; i++)
+	    {
+	      gtk_list_store_append(modelo, &iter);
+	      gtk_list_store_set(modelo, &iter,
+	      			 0, atoi(PQvaluebycol(res, i, "id")),
+	      			 1, PQvaluebycol(res, i, "nombre"),
+	      			 -1);
+	    }
+	}
+    }
+  
+  if (familia_id > 0)
+    gtk_combo_box_set_active (cmb_family, familia_id-1);
+  else if (familia_id == 0)
+    gtk_combo_box_set_active (cmb_family, 0);
+
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_fraccionaria"));
   if (VentaFraccion (barcode))
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
-
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_perecible"));
   if (g_str_equal (GetPerecible (barcode), "Perecible"))

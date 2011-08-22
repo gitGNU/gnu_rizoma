@@ -1028,12 +1028,13 @@ Save (GtkWidget *widget, gpointer data)
   gchar *contenido;
   gchar *precio;
   gint otros;
-  char *familia;
+  gint familia = 0;
   gboolean iva;
   gboolean fraccion;
   gboolean perecible;
 
   GtkComboBox *combo_unit = GTK_COMBO_BOX (builder_get (builder, "cmb_box_edit_product_unit"));
+  GtkComboBox *combo_family = GTK_COMBO_BOX (builder_get (builder, "cmb_edit_product_family"));
   gint tab = gtk_notebook_get_current_page ( GTK_NOTEBOOK (builder_get (builder, "buy_notebook")));
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_barcode"));
@@ -1091,6 +1092,14 @@ Save (GtkWidget *widget, gpointer data)
 		      1, &unidad,
 		      -1);
 
+  /*Familia*/
+  model = gtk_combo_box_get_model (combo_family);
+  gtk_combo_box_get_active_iter (combo_family, &iter);
+
+  gtk_tree_model_get (model, &iter,
+		      0, &familia,
+		      -1);
+
   // TODO: Revisar el Otros, porque en la base de datos se guardan 0
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
   if (HaveCharacters(contenido))
@@ -1100,7 +1109,7 @@ Save (GtkWidget *widget, gpointer data)
     }
 
   SaveModifications (codigo, description, marca, unidad, contenido, precio,
-                     iva, otros, barcode, familia, perecible, fraccion);
+                     iva, otros, barcode, perecible, fraccion, familia);
 
   if (tab == 0)
     {
@@ -3384,13 +3393,16 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
   PGresult *res, *res2;
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
-  GtkComboBox *cmb_unit;
+  GtkComboBox *cmb_unit, *cmb_family;
   GtkListStore *combo_store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
-  GtkListStore *modelo;
-  GtkCellRenderer *cell, *cell2;
+  GtkListStore *modelo, *modelo_family;
+  GtkCellRenderer *cell, *cell2, *cell3;
 
   cmb_unit = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
   modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_unit)));
+
+  cmb_family = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_new_product_family"));
+  modelo_family = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_family)));
 
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_product")));
 
@@ -3441,6 +3453,7 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
         }
     }
 
+  /*Combobox Unidad*/
   if(modelo == NULL)
     {
       GtkTreeIter iter;
@@ -3474,6 +3487,41 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
 	}
     }
 
+  /*Combobox familias*/
+  if(modelo_family == NULL)
+    {
+      GtkTreeIter iter;
+      gint i, tuples;
+
+      modelo_family = gtk_list_store_new (2,
+					  G_TYPE_INT,
+					  G_TYPE_STRING);
+
+      gtk_combo_box_set_model (GTK_COMBO_BOX(cmb_family), GTK_TREE_MODEL(modelo_family));
+
+      cell3 = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(cmb_family), cell3, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cmb_family), cell3,
+                                     "text", 1,
+                                     NULL);
+
+      res2 = EjecutarSQL ("SELECT * FROM familias");
+      tuples = PQntuples (res2);
+
+      if(res2 != NULL)
+	{
+	  for (i=0 ; i < tuples ; i++)
+	    {
+	      gtk_list_store_append(modelo_family, &iter);
+	      gtk_list_store_set(modelo_family, &iter,
+	      			 0, atoi(PQvaluebycol(res2, i, "id")),
+	      			 1, PQvaluebycol(res2, i, "nombre"),
+	      			 -1);
+	    }
+	}
+    }
+
+
   //Seleccion radiobutton
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_fractional_no")), TRUE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_task_yes")), TRUE);
@@ -3488,21 +3536,165 @@ on_button_new_product_clicked (GtkButton *button, gpointer data)
   //Seleccion Combobox
   gtk_combo_box_set_active (combo, 0);
   gtk_combo_box_set_active (cmb_unit, 0);
+  gtk_combo_box_set_active (cmb_family, 0);
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 }
 
+
 /**
- * Esta funcion es llamada cuando se activa el delete-event
+ * This function is a callback from
+ * 'btn_add_new_family_clicked' button (signal click)
  *
- * Esconde los dos botones de la venta.
+ * Save a new family
  *
+ * @param button the button
+ * @param user_data the user data
  */
 void
-on_wnd_new_unit_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+save_new_family (GtkButton *button, gpointer user_data)
 {
-  gtk_widget_hide(GTK_WIDGET (builder_get (builder, "btn_save_unidad")));
-  gtk_widget_hide(GTK_WIDGET (builder_get (builder, "btn_save_unidad2")));
+  GtkTreeIter iter;
+  GtkComboBox *combo;
+  GtkWindow *parent, *win;
+  GtkButton *btn;
+  GtkListStore *store;
+  GtkCellRenderer *cell;
+  PGresult *res2;
+  gint i, tuples;
+  GtkTreeModel *model;
+  gboolean valid;
+  gchar *familia = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_new_family"))));
+  gchar *tipo = gtk_buildable_get_name(button);
+
+  win = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
+
+  if(g_str_equal (tipo, "btn_save_family"))
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_new_product_family"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_family"));
+    }
+  else
+    {
+      printf("entre en el de la ventana mod_product\n");
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_edit_product_family"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_edit_family"));
+    }
+
+  gchar *q = g_strdup_printf("SELECT * FROM familias WHERE nombre = upper('%s')", familia);
+  res2 = EjecutarSQL(q);
+  tuples = PQntuples (res2);
+
+  if(tuples > 0)
+    {
+      gtk_widget_hide(GTK_WIDGET(win));
+      gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_new_family")), "");
+      ErrorMSG (GTK_WIDGET (btn), "La familia que ingreso ya existe.");
+    }
+  else
+    {
+      q = g_strdup_printf("INSERT INTO familias VALUES (DEFAULT, upper('%s'))", familia);
+
+      res2 = EjecutarSQL(q);
+
+      res2 = EjecutarSQL ("SELECT * FROM familias");
+      tuples = PQntuples (res2);
+
+      /* metodo parcial para limpiar un combo box  */
+      /* TODO: debe haber un metodo mas eficiente */
+      i=0;
+      do
+	{
+	  model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+
+	  if(valid=gtk_tree_model_get_iter_first (model, &iter) == 1 && i<tuples-1)
+	    {
+	      store = GTK_LIST_STORE(gtk_combo_box_get_model(combo));
+
+	      gtk_list_store_remove(store, &iter);
+	      i++;
+	    }
+	  else
+	    valid = 0;
+	}
+      while(valid == 1);
+
+      /* Ahora repoblar el combo box */
+      res2 = EjecutarSQL ("SELECT * FROM familias");
+      tuples = PQntuples (res2);
+
+      if(res2 != NULL)
+	{
+	  for (i=0 ; i < tuples ; i++)
+	    {
+	      gtk_list_store_append(GTK_LIST_STORE(model), &iter);
+	      gtk_list_store_set(GTK_LIST_STORE(model), &iter,
+				 0, atoi(PQvaluebycol(res2, i, "id")),
+				 1, PQvaluebycol(res2, i, "nombre"),
+				 -1);
+	    }
+	}
+
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+
+      gtk_combo_box_set_active(combo, tuples-1);
+      gtk_widget_hide(GTK_WIDGET(win));
+      gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_new_family")), "");
+    }
 }
+
+/**
+ * This function is a callback from
+ * 'btn_show_new_family_win' button (signal click)
+ *
+ * clean and show 'wnd_new_family' window
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_new_family_clicked (GtkButton *button, gpointer user_data)
+{
+  gchar *nombre_boton = gtk_buildable_get_name (button);
+  
+  gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_new_family")), "");
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_family")));
+
+  if (g_str_equal (nombre_boton, "btn_new_family")) //Se oculta el guardar2
+    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family2")));
+  else if (g_str_equal (nombre_boton, "btn_edit_family"))
+    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family")));
+}
+
+
+/**
+ * This function is a callback from
+ * 'btn_new_unidad' or 'btn_edit_unidad' 
+ *  button (signal click)
+ *
+ * clean and show 'wnd_new_unit' window
+ * and hide the corresponding save button.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+show_new_unidad_win_clicked (GtkButton *button, gpointer user_data)
+{
+  gchar *nombre_boton = gtk_buildable_get_name (button);
+
+  gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
+
+  if (g_str_equal (nombre_boton, "btn_new_unidad")) //Se oculta el guardar2
+    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad2")));
+  else if (g_str_equal (nombre_boton, "btn_edit_unidad"))
+    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad")));
+}
+
 
 /**
  * Esta funcion es llamada cuando el boton "btn_save_unidad" es presionado
@@ -3528,7 +3720,6 @@ Save_new_unit (GtkButton *button, gpointer user_data)
   gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad"))));
   gchar *tipo = gtk_buildable_get_name(button);
 
-
   win = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_unit"));
 
   if(strcmp(tipo, "btn_save_unidad") == 0)
@@ -3537,16 +3728,14 @@ Save_new_unit (GtkButton *button, gpointer user_data)
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
       btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_unidad"));
-      gtk_widget_hide(GTK_WIDGET (gtk_builder_get_object(builder, "btn_save_unidad")));
     }
   else
     {
-      printf("lalaaalala entre \n");
+      printf("entre en el de la ventana mod_product\n");
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_edit_product_unit"));
-      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_unidad"));
-      gtk_widget_hide(GTK_WIDGET (gtk_builder_get_object(builder, "btn_save_unidad2")));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_edit_unidad"));
     }
 
   gchar *q = g_strdup_printf("SELECT * FROM unidad_producto where descripcion = upper('%s')", unidad);
@@ -4567,6 +4756,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
   GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
   GtkComboBox *combo_unit = GTK_COMBO_BOX (builder_get (builder, "cmb_box_new_product_unit"));
+  GtkComboBox *combo_family = GTK_COMBO_BOX (builder_get (builder, "cmb_new_product_family"));
 
   gboolean iva = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_task_yes")));
   gboolean fraccion = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder,
@@ -4576,9 +4766,8 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
   gchar *description = g_strdup (gtk_entry_get_text (entry_desc));
   gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
   gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
-  gchar *familia;
   gchar *unidad;
-  gint otros;
+  gint otros, familia;
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
@@ -4627,6 +4816,15 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 			  1, &unidad,
 			  -1);
 
+      /*familia*/
+      model = gtk_combo_box_get_model (combo_family);
+      gtk_combo_box_get_active_iter (combo_family, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &familia,
+			  -1);
+
+      //crear producto
       AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido),
 			 unidad, iva, otros, familia, FALSE, fraccion);
 

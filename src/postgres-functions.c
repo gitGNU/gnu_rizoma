@@ -1022,7 +1022,7 @@ DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, gint preci
 void
 SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unidad,
                    gchar *contenido, gchar *precio, gboolean iva, gint otros, gchar *barcode,
-                   gchar *familia, gboolean perecible, gboolean fraccion)
+                   gboolean perecible, gboolean fraccion, gint familia)
 {
   PGresult *res;
   gchar *q;
@@ -1082,17 +1082,17 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
                        "marca='%s', unidad='%s', contenido='%s', precio=%d, "
-                       "impuestos='%d', otros=%d, "
+                       "impuestos='%d', otros=%d, familia=%d, "
                        "perecibles='%d', fraccion='%d', margen_promedio=%s WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
-                       iva, otros, (gint)perecible, (gint)fraccion, CUT(g_strdup_printf ("%.2f", porcentaje)), barcode);
+                       iva, otros, familia, (gint)perecible, (gint)fraccion, CUT(g_strdup_printf ("%.2f", porcentaje)), barcode);
   res = EjecutarSQL(q);
   g_free(q);
 }
 
 gboolean
 AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca,
-                   gchar *contenido, gchar *unidad, gboolean iva, gint otros, gchar *familia,
+                   gchar *contenido, gchar *unidad, gboolean iva, gint otros, gint familia,
                    gboolean perecible, gboolean fraccion)
 {
   gint insertado;
@@ -1100,9 +1100,9 @@ AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *mar
 
   q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, '%s'::varchar,"
                        "upper('%s')::varchar, upper('%s')::varchar,'%s'::varchar, upper('%s')::varchar, "
-                       "%d::boolean, %d,0::smallint, %d::boolean,"
+                       "%d::boolean, %d, %d::smallint, %d::boolean,"
                        "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
-                       otros, perecible, fraccion);
+                       otros, familia, perecible, fraccion);
   insertado = atoi (GetDataByOne (q));
   g_free(q);
 
