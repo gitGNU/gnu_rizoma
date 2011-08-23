@@ -187,7 +187,7 @@ main ()
        fi
      fi
      GTK_CFLAGS=""
-     GTK_LIBS=""
+     GTK_LIBS="gthread-2.0 "
      ifelse([$3], , :, [$3])
   fi
   AC_SUBST(GTK_CFLAGS)
