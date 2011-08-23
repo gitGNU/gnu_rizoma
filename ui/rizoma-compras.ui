@@ -908,6 +908,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_new_family_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
