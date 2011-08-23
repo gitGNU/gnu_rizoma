@@ -1,33 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.16"/>
+  <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy toplevel-contextual -->
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-missing-image</property>
+  </object>
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="wnd_reports">
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Rizoma POS Comercio: Infomes</property>
     <property name="window_position">center-always</property>
-    <signal name="delete_event" handler="gtk_main_quit"/>
+    <property name="icon_name">applications-office</property>
+    <signal name="delete-event" handler="gtk_main_quit" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkVBox" id="vbox6">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkHBox" id="hbox1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="spacing">5</property>
                 <child>
                   <object class="GtkHBox" id="hbox2">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkEntry" id="entry_date_begin">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -36,15 +53,19 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <signal name="clicked" handler="display_calendar" object="entry_date_begin"/>
+                        <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="display_calendar" object="entry_date_begin" swapped="yes"/>
                         <child>
                           <object class="GtkArrow" id="arrow1">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="arrow_type">down</property>
                           </object>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -58,14 +79,21 @@
                 <child>
                   <object class="GtkHBox" id="hbox3">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkEntry" id="entry_date_end">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -74,15 +102,19 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <signal name="clicked" handler="display_calendar" object="entry_date_end"/>
+                        <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="display_calendar" object="entry_date_end" swapped="yes"/>
                         <child>
                           <object class="GtkArrow" id="arrow2">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="arrow_type">down</property>
                           </object>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -99,8 +131,9 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_btn_get_stat_clicked"/>
+                    <signal name="clicked" handler="on_btn_get_stat_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -119,6 +152,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -126,22 +160,26 @@
           <object class="GtkNotebook" id="ntbk_reports">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <signal name="switch_page" handler="on_ntbk_reports_switch_page"/>
+            <signal name="switch-page" handler="on_ntbk_reports_switch_page" swapped="no"/>
             <child>
               <object class="GtkHBox" id="hbox4">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkVBox" id="vbox2">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkHBox" id="hbox13">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <placeholder/>
                         </child>
                         <child>
                           <object class="GtkHBox" id="hbox17">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkButton" id="btn_primero">
                                 <property name="label">gtk-goto-first</property>
@@ -149,8 +187,9 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
-                                <signal name="clicked" handler="on_btn_primero_clicked"/>
+                                <signal name="clicked" handler="on_btn_primero_clicked" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -165,8 +204,9 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
-                                <signal name="clicked" handler="on_btn_atras_clicked"/>
+                                <signal name="clicked" handler="on_btn_atras_clicked" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -181,8 +221,9 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
-                                <signal name="clicked" handler="on_btn_adelante_clicked"/>
+                                <signal name="clicked" handler="on_btn_adelante_clicked" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -197,8 +238,9 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
-                                <signal name="clicked" handler="on_btn_ultimo_clicked"/>
+                                <signal name="clicked" handler="on_btn_ultimo_clicked" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -217,16 +259,21 @@
 ideal para exportar a una plantilla.
 Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                 <property name="double_buffered">False</property>
-                                <signal name="toggled" handler="on_togglebtn_clicked"/>
+                                <property name="use_action_appearance">False</property>
+                                <signal name="toggled" handler="on_togglebtn_clicked" swapped="no"/>
                                 <child>
                                   <object class="GtkHBox" id="hbox15">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <child>
                                       <object class="GtkImage" id="image10">
                                         <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="stock">gtk-justify-fill</property>
                                       </object>
                                       <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -237,6 +284,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                         <property name="label" translatable="yes">Desactivado</property>
                                       </object>
                                       <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -245,6 +294,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">4</property>
                               </packing>
                             </child>
@@ -258,53 +308,70 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkHBox" id="hbox14">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="actual_inicio_lbl">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">0</property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label29">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">     a     </property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="actual_fin_lbl">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">0</property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="label30">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">     de     </property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">3</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="fin_lbl">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">0</property>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">4</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
                             <property name="fill">False</property>
                             <property name="position">2</property>
                           </packing>
@@ -332,6 +399,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -351,17 +420,21 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkTable" id="table1">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="n_rows">4</property>
                         <property name="n_columns">6</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_average">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -373,6 +446,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_credit_average">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -384,6 +458,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_cash_average">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -393,6 +468,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_total_n">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -404,6 +480,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_credit_n">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -415,6 +492,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_total_amount">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -426,6 +504,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_cash_n">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -435,6 +514,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_credit_amount">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -446,6 +526,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_cash_amount">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -455,6 +536,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label22">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -468,6 +550,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label21">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -481,6 +564,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label20">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -492,6 +576,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label19">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -505,6 +590,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label18">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -518,6 +604,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label17">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -529,6 +616,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label16">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Total&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -540,6 +628,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label14">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Ventas Contado&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -547,6 +636,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label23">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Descuento&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -558,6 +648,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label25">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -571,6 +662,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_discount">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -582,6 +674,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_discount_n">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -593,6 +686,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_discount_avarage">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -604,6 +698,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label24">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Nº Descuentos&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -617,6 +712,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label15">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Ventas Crédito&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -635,6 +731,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkHBox" id="hbox16">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton" id="btn_print_sells">
                             <property name="label">gtk-print</property>
@@ -642,6 +739,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -653,6 +751,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkHBox" id="hbox18">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <placeholder/>
                             </child>
@@ -662,15 +761,19 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <child>
                               <object class="GtkProgressBar" id="progressbar">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="show_text">True</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -680,11 +783,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -693,6 +799,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Ventas</property>
               </object>
               <packing>
@@ -702,6 +809,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow3">
                     <property name="height_request">430</property>
@@ -717,18 +825,22 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkButton" id="btn_print_rank">
                         <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -740,37 +852,48 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkHBox" id="hbox6">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="label12">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Total:&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label13">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkTable" id="table2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="n_rows">2</property>
                         <property name="n_columns">4</property>
                         <child>
                           <object class="GtkLabel" id="lbl_rank_margin">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -782,6 +905,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_rank_contrib">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>
@@ -793,6 +917,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_rank_cost">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -804,6 +929,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_rank_sold">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="top_attach">1</property>
@@ -813,6 +939,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label7">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Margen&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -824,6 +951,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label6">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Contrib.&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -835,6 +963,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label5">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Costo&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -846,12 +975,15 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label4">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Vendido&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -870,6 +1002,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label2">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Ranking Ventas</property>
               </object>
               <packing>
@@ -880,6 +1013,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox5">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow4">
                     <property name="visible">True</property>
@@ -894,43 +1028,58 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox12">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkLabel" id="label8">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Apertura</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="lbl_open">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label9">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Cierre</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="lbl_close">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">3</property>
                       </packing>
                     </child>
@@ -944,24 +1093,31 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <child>
                   <object class="GtkHBox" id="hbox10">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkLabel" id="label34">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Ingresos&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                         <property name="justify">center</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label35">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Egresos&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -975,11 +1131,13 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <child>
                   <object class="GtkTable" id="table_data">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="n_rows">6</property>
                     <property name="n_columns">4</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_payed_money">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -991,6 +1149,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label11">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Abonos Credito</property>
                       </object>
                       <packing>
@@ -1001,6 +1160,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label44">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Retiros</property>
                       </object>
                       <packing>
@@ -1011,6 +1171,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label37">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Ventas Efectivo</property>
                       </object>
                       <packing>
@@ -1021,12 +1182,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label36">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Inicio</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_start">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1036,6 +1199,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_cash">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1047,6 +1211,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_out">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1056,6 +1221,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label40">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Gastos Corrientes</property>
                       </object>
                       <packing>
@@ -1068,6 +1234,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_current_expenses">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1079,6 +1246,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label41">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Sub Total&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -1090,6 +1258,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label10">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Ingresos efectivo</property>
                       </object>
                       <packing>
@@ -1100,6 +1269,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_ingr_total">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1111,6 +1281,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_other">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1122,6 +1293,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label43">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Sub Total&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
@@ -1135,6 +1307,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_out_total">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1146,6 +1319,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label42_mbox">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Deposito envase</property>
                       </object>
                       <packing>
@@ -1156,6 +1330,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label26">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes"> Perdida</property>
                       </object>
                       <packing>
@@ -1168,6 +1343,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label38_mbox">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Ventas anuladas</property>
                       </object>
                       <packing>
@@ -1180,6 +1356,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_loss">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1191,6 +1368,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_nullify_sell">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1202,6 +1380,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label45">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Devolucion envase</property>
                       </object>
                       <packing>
@@ -1214,6 +1393,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_bottle_deposit">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1225,6 +1405,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_bottle_return">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
@@ -1243,21 +1424,28 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <child>
                   <object class="GtkHBox" id="hbox9">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkLabel" id="label33">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">&lt;b&gt;Total: &lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="lbl_money_box_total">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1271,14 +1459,16 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <child>
                   <object class="GtkHBox" id="hbox23">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkButton" id="btn_print_cash">
                         <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="print_cash_box_selected"/>
+                        <signal name="clicked" handler="print_cash_box_selected" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1298,6 +1488,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">5</property>
                   </packing>
                 </child>
@@ -1309,6 +1500,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label3">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Caja</property>
               </object>
               <packing>
@@ -1319,9 +1511,11 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkHBox" id="hbox7">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkScrolledWindow" id="scrolledwindow5">
                         <property name="visible">True</property>
@@ -1338,6 +1532,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -1357,16 +1553,20 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkTable" id="table3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="n_columns">6</property>
                         <child>
                           <object class="GtkLabel" id="label39">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Total Devoluciones&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -1374,6 +1574,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_devolucion_amount_total">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -1383,6 +1584,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label31">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Nº Devoluciones&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -1394,6 +1596,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label28">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -1405,6 +1608,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_devoluciones_num">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -1414,6 +1618,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="lbl_devoluciones_avg">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -1430,12 +1635,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkHBox" id="hbox8">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton" id="btn_print_devolucion">
                             <property name="label">gtk-print</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -1459,6 +1666,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -1470,6 +1679,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label27">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Devolución</property>
               </object>
               <packing>
@@ -1480,6 +1690,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox7">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow7">
                     <property name="visible">True</property>
@@ -1494,6 +1705,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -1505,6 +1718,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label32">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Proveedores</property>
               </object>
               <packing>
@@ -1515,6 +1729,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox8">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow8">
                     <property name="visible">True</property>
@@ -1529,18 +1744,22 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox19">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkButton" id="btn_print_cuadratura">
                         <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -1558,8 +1777,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="on_btn_save_cuadratura_clicked"/>
+                        <signal name="clicked" handler="on_btn_save_cuadratura_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1583,6 +1803,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label38">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Cuadratura</property>
               </object>
               <packing>
@@ -1593,53 +1814,62 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkVBox" id="vbox9">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkHBox" id="hbox22">
                     <property name="visible">True</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <object class="GtkComboBox" id="cmb_stores">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="pack_type">end</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkButton" id="btn_filter_stores">
                         <property name="label" translatable="yes">filtrar</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <signal name="clicked" handler="on_btn_filter_stores_clicked"/>
+                        <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="on_btn_filter_stores_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="pack_type">end</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkComboBox" id="cmb_stores">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkVBox" id="vbox12">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkNotebook" id="ntbk_traspasos">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="switch_page" handler="on_tree_view_traspasos_grab_focus"/>
+                        <signal name="switch-page" handler="on_tree_view_traspasos_grab_focus" swapped="no"/>
                         <child>
                           <object class="GtkVBox" id="vbox10">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkScrolledWindow" id="scrolledwindow11">
                                 <property name="visible">True</property>
@@ -1654,6 +1884,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                 </child>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -1671,6 +1903,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                 </child>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -1679,6 +1913,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child type="tab">
                           <object class="GtkLabel" id="label46">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Enviado</property>
                           </object>
                           <packing>
@@ -1688,6 +1923,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkVBox" id="vbox11">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkScrolledWindow" id="scrolledwindow9">
                                 <property name="visible">True</property>
@@ -1702,6 +1938,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                 </child>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -1719,6 +1957,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                 </child>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -1730,6 +1970,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child type="tab">
                           <object class="GtkLabel" id="label47">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Recibido</property>
                           </object>
                           <packing>
@@ -1739,72 +1980,88 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkHBox" id="hbox21">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="label48">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;  Total Enviado $&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="lbl_total_enviado">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="label49">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">&lt;b&gt;  Total Recibido $&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkLabel" id="lbl_total_recibido">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox20">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkButton" id="btn_print_enviado">
                         <property name="label">gtk-print</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -1819,10 +2076,12 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1832,6 +2091,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="fill">True</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -1843,6 +2103,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label50">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Traspasos</property>
               </object>
               <packing>
@@ -1852,18 +2113,15 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkHBox" id="hbox11">
             <property name="visible">True</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
+            <property name="can_focus">False</property>
             <child>
               <placeholder/>
             </child>
@@ -1873,8 +2131,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="gtk_main_quit"/>
+                <signal name="clicked" handler="gtk_main_quit" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1882,6 +2141,12 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="pack_type">end</property>
                 <property name="position">1</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -1892,9 +2157,5 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="stock">gtk-missing-image</property>
   </object>
 </interface>

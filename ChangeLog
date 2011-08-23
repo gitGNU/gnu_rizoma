@@ -1,4 +1,462 @@
+2011-08-22  Wilson Butros <wrbutros@rizoma.cl>
+
+  * ui/rizoma-compras.ui: rizoma-compras: (fix) callback on add family button
+  from edit product window
+
+  * db/rizoma.initvalues, src/administracion_productos.c, src/compras.c,
+  src/postgres-functions.c, src/postgres-functions.h, ui/rizoma-compras.ui:
+  rizoma-compras: (add) family to add and mod product is added
+
+2011-08-17  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c, src/utils.c: rizoma-compras: (fix) buy amount decimal and
+  'HaveCharacters' fixed
+
+2011-08-11  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql: [DB-F:M];rizoma-informes: (fix) amount sells on cash
+
+  * src/administracion_productos.c, src/postgres-functions.c: rizoma-compras:
+  (fix) query with 'margen_promedio' solved, add restrictions on
+  'cantidad_mayorista' value (should be greater than 1)
+
+2011-08-09  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/administracion_productos.c, src/compras.c,
+  src/manejo_productos.c, src/postgres-functions.c: [DB-F:M:A] rizoma-compras:
+  (fix) merchandise information and some corrections in the calculations
+
+2011-08-08  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/postgres-functions.c: rizoma-compras:
+  (fix) correct the calculation of the 'margen_promedio'
+
+2011-08-05  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c: rizoma-informes: (fix) amount information on
+  'Devoluciones' tab
+
+  * db/funciones.sql, db/rizoma.structure, src/administracion_productos.c,
+  src/compras.c, src/postgres-functions.c, src/rizoma_inventario.c: [DB:
+  STRUCTURE-FUNCTION: MOD] rizoma-compras: (fix) 'traspaso enviar' and
+  'traspaso recibir' supports decimal now
+
+2011-08-05  willy <willy@lab.(none)>
+
+  * db/funciones.sql, db/rizoma.structure, src/administracion_productos.c,
+  src/compras.c, src/credito.c, src/factura_more.c, src/manejo_productos.c,
+  src/postgres-functions.c, src/postgres-functions.h, src/rizoma_informes.c,
+  src/rizoma_inventario.c, src/tipos.h, src/ventas.c: [DB:STRUCTURE-FUNCTION
+  MOD]rizoma-(all) 'costo_promedio' on 'producto' is double precision now
+
+2011-08-04  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/postgres-functions.c: rizoma-compras;
+  rizoma-informes: (fix) postgres-functions to adjust product stock
+
+2011-08-03  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: rizoma-informes: (fix) show
+  btn print on 'caja' page and 'traspasos' page fixed
+
+2011-08-01  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/printing.c, src/vale.c, ui/rizoma-informes.ui: rizoma-informes: (add)
+  button print on cash box report is added
+
+2011-07-31  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/vale.c: rizoma-ventas: (fix) 'fprintf start' is first than others lines
+  on vale file
+
+  * src/vale.c, ui/rizoma-informes.ui: rizoma-ventas: (fix) stetic change on
+  receipt
+
+  * src/vale.c: rizoma-ventas: (fix) segmentation fault to print recipt solved,
+  add details to print closing cash
+
+2011-07-30  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/caja.c, src/postgres-functions.c, src/postgres-functions.h,
+  src/proveedores.c, src/rizoma-config.c, src/rizoma_informes.c, src/vale.c,
+  src/vale.h: rizoma-ventas: (add) print cash movement (add option on .rizoma)
+
+2011-07-29  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/administracion_productos.c, src/caja.c,
+  src/compras.c, src/postgres-functions.c, src/postgres-functions.h,
+  src/rizoma_informes.c, src/utils.c, src/ventas.c, ui/rizoma-compras.ui,
+  ui/rizoma-informes.ui, ui/rizoma-ventas.ui:
+  [DB-Function:MOD]rizoma-informes;rizoma-ventas;rizoma-compras: (fix) general
+  cash corrections and some others fix
+
+2011-07-26  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql: [DB-FUNCTION]rizoma-compras:(fix) on 'Pagos' page, to get
+  information from invoice detail
+
+  * db/funciones.sql: rizoma-informes: (fix) fix to get last cash id, fix to
+  get cash sells on cash_box_report sql function
+
+2011-07-23  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/postgres-functions.c: rizoma-informes: (fix) cash sell amount fixed
+  (query of discount to subtract)
+
+2011-07-20  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/rizoma_informes.c:
+  [DB-FUNCTION:FIX]'sells_get_totals':date range -- rizoma-informes: (fix)
+  sales report information
+
+2011-07-01  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c, src/rizoma_informes.c: rizoma-informes; rizoma-compras:
+  (fix;fix) restrictions were added to the adjustment amount on 'cuadratura'
+  and 'compra sugerida'
+
+  * src/postgres-functions.c, src/postgres-functions.h, src/rizoma_informes.c:
+  rizoma-informes: (fix) save diferences mount on cuadratura
+
+2011-06-30  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c, src/printing.c, src/printing.h: rizoma-compras: (fix) print
+  only the selected products on suggest buy
+
+  * db/funciones.sql, db/rizoma.structure, src/administracion_productos.c,
+  src/compras.c, src/postgres-functions.c, src/printing.c,
+  src/rizoma_informes.c, src/ventas.c, ui/rizoma-admin.ui,
+  ui/rizoma-compras.ui, ui/rizoma-ventas.ui: rizoma-compras;rizoma-ventas:
+  (add;fix) btn to print the suggest buy ; 'iva' and 'otros' amounts are float8
+  instead of int on 'venta_detalle' table
+
+2011-06-23  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c, ui/rizoma-compras.ui: rizoma-compras: (fix) Grab focus in
+  wnd_buscador is fixed
+
+2011-06-22  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c: rizoma-compras: (fix) product descriptions column is
+  resizable now
+
+  * src/compras.c, ui/rizoma-compras.ui: rizoma-compras: (add) improvements in
+  the buying process
+
+  * src/administracion_productos.c: rizoma-compras: (fix) shortcode
+  (codigo_corto) type changed on treeview (TYPE_INT instead of TYPE_STRING) to
+  sort numerically
+
+2011-06-20  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c: rizoma-informes: (fix) 'btn_print_sells' is enabled
+  when one or more results are showed
+
+  * src/compras.c, src/postgres-functions.c, src/utils.c: rizoma-compras: (fix)
+  number of days to pay invoice solved, continuous row selection on invoice
+  treeview
+
+  * src/compras.c: rizoma-compras: (fix) cantity on add suggest buy fixed
+
+2011-06-06  alumno <alumno@escuela.(none)>
+
+  * src/compras.c, src/postgres-functions.c: rizoma-ventas: (add;fix) editing
+  of cost and price ; last buy price from selected provider
+
+2011-06-03  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/caja.c, src/rizoma_informes.c, src/ventas.c: rizoma-ventas: (fix)
+  negative cash with nullify sale solved
+
+2011-05-30  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/postgres-functions.c, src/rizoma-config.c, src/vale.c, src/vale.h:
+  rizoma-ventas: (add) cash drawer enabled
+
+2011-05-17  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c: rizoma-compras: (fix) Fail to get product description
+
+2011-05-16  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/credito.c: rizoma-admin: (fix) customer header information (on printing
+  report) corected
+
+  * db/rizoma.initvalues, src/caja.c, src/compras.c, src/parametros.c,
+  src/rizoma_informes.c, ui/rizoma-informes.ui: rizoma-informes: (add) filter
+  of stores on transfers reports and other minors fixes
+
+2011-05-13  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/rizoma.initvalues: rizoma-config: (fix) modify store name on bodega
+  table
+
+  * db/funciones.sql, db/rizoma.structure, src/admin.c, src/compras.c,
+  src/credito.c, src/datos_negocio.c, src/datos_negocio.h, src/parametros.c,
+  src/postgres-functions.c, src/postgres-functions.h, src/proveedores.c,
+  src/rizoma_informes.c, src/ventas.c, ui/rizoma-admin.ui,
+  ui/rizoma-compras.ui: rizoma-admin;rizoma-compras: (add;add) stores
+  management added; provider's rehearing days added and others minors fixes
+
+2011-05-10  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/compras.c, src/manejo_productos.c,
+  src/postgres-functions.c, src/rizoma_informes.c, src/ventas.c,
+  ui/rizoma-admin.ui, ui/rizoma-compras.ui, ui/rizoma-config.ui,
+  ui/rizoma-informes.ui, ui/rizoma-inventario.ui, ui/rizoma-ventas.ui:
+  rizoma-all: (fix) UTF-8 file format corrected after merge
+
+2011-04-26  Wilson Butros <wrbutros@rizoma.cl>
+
+  * ui/rizoma-informes.ui: rizoma-informes: (fix) label name conflict solved
+
+  * db/funciones.sql, db/rizoma.initvalues, src/rizoma_informes.c,
+  ui/rizoma-informes.ui: rizoma-informes ; rizoma-compras: (add;add) movement
+  of money by 'envase' (outcome and income)
+
+2011-04-08  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/ventas.c: rizoma-ventas: (fix) minor fix before merge
+
+  * src/ventas.c: rizoma-ventas: (fix) check that cashbox is enabled to nullify
+  sale (because 'egreso' table requires the cash id)
+
+2011-04-07  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/credito.c, src/postgres-functions.c, src/ventas.c:
+  rizoma-admin ; rizoma-ventas: (fix ; fix) nullify credit sale (with payed
+  money) and other bugs ; credit sale without entering 'rut' (with focus on
+  another widget than 'entry_credit_rut')
+
+2011-04-04  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/boleta.c, src/ventas.c: rizoma-ventas: (fix) pre-sell disabled
+
+2011-03-31  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/caja.c, src/ventas.c: rizoma-ventas: (fix) 'Horror' ortográfico solved
+
+2011-03-30  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql: rizoma-informes: (fix) show loss money (on informes) from
+  'egreso' table with 'perdida' type from 'tipo_egreso' table
+
+  * db/funciones.sql, src/Makefile.am, src/credito.c, src/postgres-functions.c,
+  src/rizoma_informes.c, src/ventas.c, ui/rizoma-informes.ui: rizoma-informes:
+  (add-fix) more specific information about the cashbox bled and other minors
+  fixes
+
+2011-03-29  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/caja.c, src/rizoma_informes.c, src/ventas.c,
+  ui/rizoma-informes.ui: rizoma-informes ; rizoma-ventas: (add ; fix) 'Ventas
+  Anuladas' is added as individual data on bled cashbox information; ensures
+  that the cashbox is open to can sell
+
+2011-03-18  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/compras.c, src/postgres-functions.c,
+  src/postgres-functions.h: rizoma-compras ; rizoma-ventas: (fix ; fix) bug on
+  selections provider solved ; price per quantity bug on 'traspasos' bug solved
+
+2011-03-14  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/vale.c: rizoma-ventas: (fix) Information to print on ticket fixed
+
+  * src/rizoma-config.c, src/vale.c: rizoma-ventas: (add-fix) Option
+  'IMPRESORA' added to .rizoma (to print ticket) - 'VALE_SELECTIVO' and
+  'PRINT_FACTURA' are included to .rizoma
+
+2011-03-13  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c: rizoma-compras: (fix) some minor fixes
+
+  * src/compras.c, src/rizoma_informes.c, src/utils.c, ui/rizoma-compras.ui:
+  rizoma-compras: (fix) some bugs on suggest buy fixed
+
+2011-03-13  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/compras.c, src/manejo_productos.c: rizoma-compras: (fix) invalid cast
+  from `GtkButton' to `GtkEntry'
+
+  * src/manejo_productos.c: rizoma-compras: (fix) In removing products from the
+  buy list
+
+2011-03-08  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/rizoma.structure, src/compras.c, src/postgres-functions.c,
+  src/rizoma_informes.c, src/utils.c, src/utils.h, src/ventas.c,
+  ui/rizoma-compras.ui, ui/rizoma-informes.ui, ui/rizoma-ventas.ui:
+  rizoma-compras: (add-fix) suggested purchase functionality added and some
+  corrections
+
+2011-03-03  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/ventas.c: rizoma-ventas: (add) improve on sell process
+
+  * src/ventas.c: rizoma-ventas: (fix) get widget name (name from gtkbuilder UI
+  definition) with gtk_builder_get_name instead of gtk_widget_get_name due to
+  changes on newer version of gtk2 library
+
+2011-02-08  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/compras.c, src/postgres-functions.c, src/postgres-functions.h,
+  src/rizoma_informes.c, ui/rizoma-compras.ui: rizoma-compras: (fix) number
+  delimiter fail to added product to transfers list (1.000 as 1) and viewing
+  'compras' in glade fixed
+
+2011-02-05  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: rizoma-informes: (add)
+  'traspasos' tab and viewing window in glade fixed
+
+2011-01-31  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/rizoma_informes.c: rizoma-informes: (add) 'traspasos'
+  on 'informe cuadratura'
+
+2011-01-15  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/administracion_productos.c, src/compras.c, ui/rizoma-compras.ui:
+  rizoma-compras: (fix) bug #32101 and fix some warnings
+
+2011-01-10  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/postgres-functions.c, src/rizoma_informes.c:
+  rizoma-informes: (add - fix) New column into 'informe cuadratura'
+  (anulaciones) - don't save 0 merma's amount now
+
+2011-01-08  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/rizoma_informes.c: rizoma-informes: (fix) SQL query
+  didn't showed products purchased after the start date
+
+2011-01-06  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c: rizoma-informes: (mod) Functionality to save
+  'Informe cuadratura' finished
+
+2011-01-04  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: rizoma-informes: (add) get
+  stock fisico and stock teorico for the save button
+
+2011-01-04  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c, ui/rizoma-informes.ui: rizoma-informes: (add) Save
+  button added but don't implemented
+
+2011-01-02  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/compras.c, ui/rizoma-compras.ui: rizoma-compras: (fix) task #10845 add
+  check if repeated unit
+
+  * db/rizoma.initvalues, src/compras.c, ui/rizoma-compras.ui: rizoma-compras:
+  (fix) task #10845 add init values and fix bug
+
+2010-12-31  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/rizoma.structure, src/compras.c, ui/rizoma-compras.ui: rizoma-compras:
+  (add) task #10845. Improve the form of new product
+
+2011-01-03  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/rizoma.initvalues, db/rizoma.structure, src/administracion_productos.c,
+  src/rizoma_informes.c: rizoma-informes: (fix) 'Ranking Ventas' report fails
+  to print for poor implementation of 'Informe Cuadratura'
+
+  * src/rizoma_informes.c: rizoma-informes: (fix) For display products to
+  choose a date before to the first buy
+
+2011-01-02  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/compras.c, ui/rizoma-compras.ui: rizoma-compras: (fix) task #10845 add
+  check if repeated unit
+
+  * db/rizoma.initvalues, src/compras.c, ui/rizoma-compras.ui: rizoma-compras:
+  (fix) task #10845 add init values and fix bug
+
+2010-12-31  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * db/rizoma.structure, src/compras.c, ui/rizoma-compras.ui: rizoma-compras:
+  (add) task #10845. Improve the form of new product
+
+2010-12-31  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c: rizoma-informes: (add) functionality to calculate
+  the difference between 'stock teorico' and 'stock fisico' added
+
+2010-12-31  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/postgres-functions.c: rizoma-compras: fix bug #31997(No changes are
+  saved products)
+
+2010-12-30  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/rizoma_informes.c, src/ventas.c: rizoma-informes:
+  (mod - fix) New criterion to the cash box query's - Alert message added in
+  ventas
+
+  * src/printing.c: rizoma-informes: (fix) Gnumeric now runs with es_CL.UTF-8
+  as environment language codification
+
+2010-12-29  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * src/printing.c, src/rizoma_informes.c, src/utils.c, src/utils.h,
+  src/vale.c, ui/rizoma-informes.ui: rizoma-informes: (add) date_end is
+  sensitive
+
+2010-12-28  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c: rizoma-informes: (fix) Print button and callback
+  conected
+
+2010-12-28  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ui/rizoma-informes.ui: rizoma-informes: (add) print button in UI
+
+2010-12-28  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/rizoma_informes.c: rizoma-informes: (add) callback to print button,
+  just missing the button
+
+  * db/funciones.sql, db/rizoma.structure, src/administracion_productos.c,
+  src/postgres-functions.c, src/rizoma_informes.c, src/ventas.c,
+  ui/rizoma-informes.ui: rizoma-informes: (add - fix) Cuadratura function -
+  calculate temp values, gtk library version requeriment and other minor fixes
+
+2010-12-13  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/ventas.c: rizoma-ventas: (fix) segmentation fault by wrong validation
+  order
+
+  * src/rizoma-config.c, src/ventas.c: rizoma-ventas - configuration: (add)
+  'SENCILLO_DIRECTO' option was added into .rizoma
+
+2010-11-26  Wilson Butros <wrbutros@rizoma.cl>
+
+  * src/administracion_productos.c, src/compras.c, src/postgres-functions.c,
+  ui/rizoma-compras.ui: rizoma-compras - Mercaderia: (add) Calculation when
+  saved a modified of product price (in modify windows)
+
+2010-11-18  Wilson Butros <wrbutros@rizoma.cl>
+
+  * db/funciones.sql, src/compras.c, src/rizoma_informes.c, src/ventas.c: Added
+  validation to avoid buy and sell annulled merchandise by administrator
+
+2010-10-18  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * autogen.sh: autoconf fixed warning, unexpected operator, now works "--help"
+  and "--with-errors"
+
+2010-10-18  Wilson Butros <wrbutros@rizoma.cl>
+
+  * autogen.sh: autoconf bug fixed (wasn't worked with 2.6 version)
+
 2010-09-29  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ChangeLog, src/rizoma_informes.c, ui/rizoma-informes.ui: Fixed export a
+  gnumeric in report sells
 
   * ChangeLog, src/admin.c: Bug fixed, user(no admin, level 1) login in
   rizoma-admin
