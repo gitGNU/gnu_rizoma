@@ -43,6 +43,7 @@
 
 PGconn *connection;
 PGconn *connection2;
+pthread_mutex_t mutex;
 
 gchar *
 CutComa (gchar *number)
@@ -121,7 +122,7 @@ DropDelimiter (gchar *number)
         }
       len--;
     }
-  
+
   while (points != 0)
     {
       num [points-1] = ' ';
@@ -164,6 +165,8 @@ SpecialChar (gchar *string)
 PGresult *
 EjecutarSQL (gchar *sentencia)
 {
+
+
   PGresult *res;
   ConnStatusType status;
   ExecStatusType status_res;
@@ -209,8 +212,9 @@ EjecutarSQL (gchar *sentencia)
                                         host, port, name, user, pass,sslmode);
 
       connection = PQconnectdb (strconn);
+      pthread_mutex_lock(&mutex);
       g_free( strconn );
-
+      pthread_mutex_unlock(&mutex);
       status = PQstatus(connection);
 
       switch (status)
@@ -506,7 +510,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
  * This function returns a PGresult with the sells
  * If anuladas parameter is NULL return all sells,
  * if TRUE, return nullified sales only and
- * if FALSE, return sales not nullified only 
+ * if FALSE, return sales not nullified only
  *
  * @param: gint begin year
  * @param: gint begin month
@@ -535,13 +539,13 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
 		       date_column, to_day+1, to_month, to_year);
 
 
-  if (g_str_equal (grupo, "TODAS")) 
+  if (g_str_equal (grupo, "TODAS"))
     printf ("Todas las ventas\n");
 
-  else if (g_str_equal (grupo, "Anuladas")) 
+  else if (g_str_equal (grupo, "Anuladas"))
     q = g_strdup_printf ("%s AND id IN (SELECT id_sale FROM venta_anulada)", q);
 
-  else if (g_str_equal (grupo, "Vigentes"))  
+  else if (g_str_equal (grupo, "Vigentes"))
     q = g_strdup_printf ("%s AND id NOT IN (SELECT id_sale FROM venta_anulada)", q);
 
   q = g_strdup_printf ("%s ORDER BY fecha DESC", q);
@@ -1525,7 +1529,7 @@ SaveProductsSell (Productos *products, gint id_venta)
         precio = products->product->precio_mayor;
       else
         precio = products->product->precio;
-      
+
 
       /* Se obtiene el iva y otros impuestos con . en vez de ,
 	 y de esa forma poder ingresarlos en la consulta SQL */
@@ -1535,14 +1539,14 @@ SaveProductsSell (Productos *products, gint id_venta)
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle */
-      
+
       q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s)",
                            id_venta, products->product->barcode, cantidad, precio,
-                           CUT (g_strdup_printf ("%.2f",products->product->fifo)), 
+                           CUT (g_strdup_printf ("%.2f",products->product->fifo)),
 			   iva_unit, otros_unit);
 
       g_printf ("la consulta es %s\n", q);
-      
+
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -2246,7 +2250,7 @@ AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
 			   barcode, CUT (g_strdup_printf ("%.3f", stock - cantidad)), motivo);
       res = EjecutarSQL (q);
       g_free (q);
-      
+
       gchar *new = CUT (g_strdup_printf ("%.3f", cantidad));
       q = g_strdup_printf ("UPDATE producto SET stock=%s WHERE barcode='%s'", new, barcode);
       res = EjecutarSQL (q);
@@ -2515,9 +2519,9 @@ nullify_sale (gint sale_id)
   PGresult *res;
   gchar *q;
 
-  /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
+  /*De estar habilitada caja, se asegura que Ã©sta se encuentre
     abierta al momento de vender*/
-  
+
   if (rizoma_get_value_boolean ("CAJA"))
     if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
       open_caja (TRUE);
@@ -2601,12 +2605,12 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
           pre = strtod (PUT(PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
 
           q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %s)",
-                               id_devolucion, products->product->barcode, cantidad, precio, 
+                               id_devolucion, products->product->barcode, cantidad, precio,
 			       CUT (g_strdup_printf ("%.3f", pre)));
         }
       else
          q = g_strdup_printf ("select registrar_devolucion_detalle(%d, %s, %s, %d, %s)",
-                              id_devolucion, products->product->barcode, cantidad, precio, 
+                              id_devolucion, products->product->barcode, cantidad, precio,
 			      CUT (g_strdup_printf ("%.3f", precioCompra)));
 
       res = EjecutarSQL (q);
@@ -2728,9 +2732,9 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
       pre = strtod (PUT (PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
-      
+
       q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s)",
-                           id_traspaso, products->product->barcode, cantidad, 
+                           id_traspaso, products->product->barcode, cantidad,
 			   CUT (g_strdup_printf ("%.2f", pre)));
       //}
       //else
@@ -2851,7 +2855,7 @@ TotalPrecioCompra (Productos *products)
 /**
  * Es llamada por AskProductProvider de [compras.c].
  *
- * @return PGresult: La respuesta a a la consulta 
+ * @return PGresult: La respuesta a a la consulta
  * (todos los productos comprados a X proveedor)
  */
 
@@ -2876,7 +2880,7 @@ PGresult *getProductsByProvider (gchar *rut)
 		      "ON pr.rut = c.rut_proveedor "
 		      "WHERE pr.rut = '%s' "
 		      "AND estado = true;", rut);
-  
+
   res = EjecutarSQL (q);
   g_free (q);
   return res;
@@ -2890,7 +2894,7 @@ PGresult *getProductsByProvider (gchar *rut)
  * @return: gint (the cash id)
  */
 
-gint 
+gint
 get_last_cash_box_id (void)
 {
   PGresult *res;
@@ -2916,7 +2920,7 @@ PGresult *
 get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas)
 {
   PGresult *res;
-  
+
   if (g_str_equal (columnas, ""))
     columnas = g_strdup_printf ("*");
 
@@ -2957,7 +2961,7 @@ registrar_nuevo_codigo (gchar *codigo)
     {
       q = g_strdup_printf ("INSERT INTO clothes_code (codigo_corto, depto, temp, ano, sub_depto, id_ropa, talla, color) "
 			   "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-			   codigo, 
+			   codigo,
 			   g_array_index (fragmentos, gchar*, 0), g_array_index (fragmentos, gchar*, 1),
 			   g_array_index (fragmentos, gchar*, 2), g_array_index (fragmentos, gchar*, 3),
 			   g_array_index (fragmentos, gchar*, 4), g_array_index (fragmentos, gchar*, 5),

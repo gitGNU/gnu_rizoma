@@ -1,3 +1,8 @@
+2011-08-23  Carlos Contreras Bolton <ccontreras.bolton@gmail.com>
+
+  * ChangeLog, m4/gtk-2.0.m4, src/rizoma_informes.c: rizoma-informes: (add)
+  sales report is parallelized with pthread
+
 2011-08-19  Wilson Butros <wrbutros@rizoma.cl>
 
   * db/funciones.sql, src/compras.c: rizoma-informes: (fix) sell ranking group

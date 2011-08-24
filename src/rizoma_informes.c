@@ -2936,7 +2936,7 @@ void
  *
  * Esta funcion a traves de una consulta sql retorna los montos totales,
  * promedio, y numero de ventas al contado, credito o descuentos en un lapso
- * de tiempo,luego las  visualiza a traves los labels correspondiente.
+ * de tiempo, luego las  visualiza a traves los labels correspondiente.
  *
  */
 
@@ -3048,11 +3048,12 @@ void
                                          PutPoints (g_strdup_printf ("%d", total_discount))));
 
   if (total_cash_discount != 0)
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_avarage")),
-                        g_strdup_printf ("<span>$%s</span>",
-                                         PutPoints (g_strdup_printf ("%d", total_cash_discount / total_discount))));
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_avarage")),
+			  g_strdup_printf ("<span>$%s</span>",
+					   PutPoints (g_strdup_printf ("%d",
+								       total_cash_discount / total_discount))));
 
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0);
+  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso, 0);
   gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Listo ..");
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")),TRUE);
 
@@ -3620,7 +3621,6 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
   PQclear (res);
 }
 
-
 /**
  * Es llamada cuando se presiona el boton "btn_get_stat" (signal clicked)
  *
@@ -3633,6 +3633,7 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 {
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_reports"));
   gint page_num = gtk_notebook_get_current_page (notebook);
+
   if (page_num == 5)
     {
       /* Informe de proveedores */
@@ -3642,12 +3643,13 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
     {
       const gchar *str_begin = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_begin")));
       const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
+      pthread_t idPthread;
+      GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+
       date_begin = g_date_new ();
       date_end = g_date_new ();
-      GtkWidget * progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
-      pthread_t idPthread;
-      if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
 
+      if (g_str_equal (str_begin, "") || g_str_equal (str_end, "")) return;
       g_date_set_parse (date_begin, str_begin);
       g_date_set_parse (date_end, str_end);
 
@@ -3655,14 +3657,15 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
       switch (page_num)
         {
         case 0:
+	  idPthread = 0;
           /* Informe de ventas */
           fill_sells_list();
           gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Cargando ..");
-          clean_container (GTK_CONTAINER (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
-
+          clean_container (GTK_CONTAINER
+			   (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
           /* llama a la funcion fill_totals() en un nuevo thread(hilo)*/
           pthread_create(&idPthread, NULL, fill_totals, NULL);
-	  pthread_detach(idPthread);
+	  /* pthread_detach(idPthread); */
           /* fill_totals(); */
           break;
         case 1:
@@ -3677,6 +3680,7 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
           fill_cash_box_list ();
           break;
         case 4:
+	  idPthread = 4;
           /* Informe de devolucion */
           fill_devolucion ();
           /* llama a la funcion fill_totals_dev() en un nuevo thread(hilo)*/
