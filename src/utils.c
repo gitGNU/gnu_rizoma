@@ -534,7 +534,7 @@ invested_strndup (const gchar *texto, gint index)
  * @return gint length: the treeview length
  */
 
-gint 
+gint
 get_treeview_length (GtkTreeView *treeview)
 {
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
@@ -568,7 +568,7 @@ decode_clothes_code (gchar *clothes_code)
 
   if (strlen (clothes_code) != 16)
     return NULL;
-  
+
   do
     {
       if (i==1 || i==3)

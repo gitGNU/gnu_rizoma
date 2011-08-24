@@ -784,16 +784,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                               <placeholder/>
                             </child>
                             <child>
-                              <object class="GtkProgressBar" id="progressbar">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="show_text">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
+                              <placeholder/>
                             </child>
                           </object>
                           <packing>
@@ -2445,7 +2436,16 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkProgressBar" id="progressbar">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="show_text">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
             </child>
             <child>
               <placeholder/>

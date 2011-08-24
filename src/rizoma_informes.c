@@ -43,7 +43,7 @@ PGresult *res_sells;
 gint contador, fin;
 GDate *date_begin;
 GDate *date_end;
-
+int flagProgress;
 
 /**
  * Es llamada cuando se presiona en el tree_view_sells (signal changed).
@@ -2954,17 +2954,13 @@ void
   gint total_ventas;
 
   GtkWidget * progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")),FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
 
   /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
-
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.1);
-  total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                                      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+  total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
+				      g_date_get_day (date_begin),  g_date_get_year (date_end),
+				      g_date_get_month (date_end), g_date_get_day (date_end),
                                       &total_cash);
-
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.35);
-
 
   /* Consulta que retorna el numero de ventas con descuento y la suma total
      con descuento en un intervalo de tiempo */
@@ -2973,8 +2969,6 @@ void
                       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
                       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
 
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.60);
-
   if (res != NULL)
     {
       total_cash_discount = atoi (PQvaluebycol (res, 0, "total_cash_discount"));
@@ -2982,20 +2976,17 @@ void
     }
 
   /* Funcion que retorna el total de ventas a credito en un intervarlo de tiempo */
-  total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                                          g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+  total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
+					  g_date_get_day (date_begin), g_date_get_year (date_end),
+					  g_date_get_month (date_end), g_date_get_day (date_end),
                                           &total_credit);
-
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.65);
-
 
   /* Funcion que retorna el total de todas las ventas(al contado, con
      descuento y a credito ) en un intervarlo de tiempo */
-  total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                             g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+  total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
+			     g_date_get_day (date_begin), g_date_get_year (date_end),
+			     g_date_get_month (date_end), g_date_get_day (date_end),
                              &total_ventas);
-
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.85);
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_amount")),
                         g_strdup_printf ("<span>$%s</span>",
@@ -3031,8 +3022,6 @@ void
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_total_n")),
                         g_strdup_printf ("<span>%s</span>",
                                          PutPoints (g_strdup_printf ("%d",total_ventas))));
-
-   gtk_progress_bar_set_fraction((GtkProgressBar*) progreso,0.95);
   if (total_ventas != 0)
     gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_average")),
                           g_strdup_printf ("<span>$%s</span>",
@@ -3053,9 +3042,10 @@ void
 					   PutPoints (g_strdup_printf ("%d",
 								       total_cash_discount / total_discount))));
 
-  gtk_progress_bar_set_fraction((GtkProgressBar*) progreso, 0);
-  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Listo ..");
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")),TRUE);
+  gtk_timeout_remove (flagProgress);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
+  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), 0);
+  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), ".. Listo ..");
 
 }
 
@@ -3072,11 +3062,13 @@ void
 void
 fill_products_rank ()
 {
-  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"))));
+  GtkListStore *store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"))));
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
 
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
   res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
@@ -3131,6 +3123,13 @@ fill_products_rank ()
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                         g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
                                          PUT (PQvaluebycol (res, 0, "margen"))));
+
+
+  gtk_timeout_remove (flagProgress);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
+  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), 0);
+  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), ".. Listo ..");
+
 }
 
 /**
@@ -3622,6 +3621,49 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 }
 
 /**
+ * This function avanza en base al tiempo el progreso de una barra de progreso
+ *
+ * @param data the user data (en este caso es un GTK_PROGRESS)
+ **/
+gint
+progress_timeout(gpointer data)
+{
+    gfloat new_val;
+    GtkAdjustment *adj;
+
+    /* Calculate the value of the progress bar using the
+     * value range set in the adjustment object */
+
+    new_val = gtk_progress_get_value( GTK_PROGRESS(data) ) + 1;
+
+    adj = GTK_PROGRESS (data)->adjustment;
+    if (new_val > adj->upper)
+      new_val = adj->lower;
+
+    /* Set the new value */
+    gtk_progress_set_value (GTK_PROGRESS (data), new_val);
+
+    /* As this is a timeout function, return TRUE so that it
+     * continues to get called */
+    return(TRUE);
+}
+
+/**
+ * This function configura un gtk_progress_bar para poder avanzarlo
+ *
+ * @param progreso widget de gtk_progress_bar
+ **/
+
+gint
+avanzar_barra_progreso (GtkWidget * progreso)
+{
+  GtkAdjustment *adj;
+  adj = (GtkAdjustment *) gtk_adjustment_new (0, 1, 150, 0, 0, 0);
+  gtk_progress_bar_new_with_adjustment (adj);
+  flagProgress = gtk_timeout_add (100, progress_timeout, progreso);
+}
+
+/**
  * Es llamada cuando se presiona el boton "btn_get_stat" (signal clicked)
  *
  * Esta funcion extrae las fechas ingresadas, y segun notebook se escoge una opcion
@@ -3658,19 +3700,33 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         {
         case 0:
 	  idPthread = 0;
+	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
+
+	  flagProgress = avanzar_barra_progreso(GTK_PROGRESS (progreso));
+
           /* Informe de ventas */
           fill_sells_list();
-          gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),"Cargando ..");
+	  /* pthread_create(&idPthread, NULL, fill_sells_list, NULL); */
+	  /* pthread_detach(idPthread); */
+
           clean_container (GTK_CONTAINER
 			   (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
-          /* llama a la funcion fill_totals() en un nuevo thread(hilo)*/
-          pthread_create(&idPthread, NULL, fill_totals, NULL);
-	  /* pthread_detach(idPthread); */
+
+	  /* llama a la funcion fill_totals() en un nuevo thread(hilo)*/
+	  pthread_create(&idPthread, NULL, fill_totals, NULL);
+	  pthread_detach(idPthread);
+
           /* fill_totals(); */
           break;
+
         case 1:
+	  idPthread = 1;
+	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),".. Cargando ..");
           /* Informe de ranking de ventas */
-          fill_products_rank ();
+          /* fill_products_rank (); */
+	  flagProgress = avanzar_barra_progreso(GTK_PROGRESS (progreso));
+
+	  pthread_create(&idPthread, NULL, fill_products_rank, NULL);
           break;
 	case 2:
 	  fill_purchases_list (widget, NULL);
@@ -3701,6 +3757,7 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         default:
           break;
         }
+      pthread_detach(idPthread);
     }
 }
 

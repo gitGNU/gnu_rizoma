@@ -43,7 +43,6 @@
 
 PGconn *connection;
 PGconn *connection2;
-pthread_mutex_t mutex;
 
 gchar *
 CutComa (gchar *number)
@@ -212,9 +211,9 @@ EjecutarSQL (gchar *sentencia)
                                         host, port, name, user, pass,sslmode);
 
       connection = PQconnectdb (strconn);
-      pthread_mutex_lock(&mutex);
+
       g_free( strconn );
-      pthread_mutex_unlock(&mutex);
+
       status = PQstatus(connection);
 
       switch (status)
@@ -285,6 +284,7 @@ EjecutarSQL2 (gchar *sentencia)
                                         host, port, name, user, pass,sslmode);
 
       connection2 = PQconnectdb (strconn);
+
       g_free( strconn );
 
       status = PQstatus(connection2);

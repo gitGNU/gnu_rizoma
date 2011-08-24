@@ -68,4 +68,5 @@ gint get_treeview_length (GtkTreeView *treeview);
 
 GArray * decode_clothes_code (gchar *clothes_code);
 
+
 #endif
