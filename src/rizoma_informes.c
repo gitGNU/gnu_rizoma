@@ -2898,6 +2898,8 @@ void
   PGresult *res;
   gchar *q;
 
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
+
   /* consulta de sql que retona las suma, promedio y numero de devoluciones */
   q = g_strdup_printf ("select count(*), sum(monto), avg(monto) from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
 		       "and fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
@@ -2914,8 +2916,8 @@ void
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devolucion_amount_total")),
                             g_strdup_printf ("<b>%s</b>",
                                              PUT(g_strdup_printf ("%.2f",
-								  strtod (PQvaluebycol (res, 0,"sum"),(char **)NULL)
-								  ))));
+								  strtod (PQvaluebycol (res, 0,"sum"),
+									  (char **)NULL) ))));
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devoluciones_num")),
                             g_strdup_printf ("<b>%s</b>",
                                              PutPoints (g_strdup_printf ("%d",
@@ -2923,10 +2925,16 @@ void
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_devoluciones_avg")),
                             g_strdup_printf ("<b>%s</b>",
                                              PUT(g_strdup_printf ("%.2f",
-								  strtod (PQvaluebycol (res, 0,"avg"),(char **)NULL)
-								  ))));
+								  strtod (PQvaluebycol (res, 0,"avg"),
+									  (char **)NULL) ))));
     }
 
+
+  gtk_timeout_remove (flagProgress);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
+  GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
+  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progreso), ".. Listo ..");
 
 }
 
@@ -2953,7 +2961,6 @@ void
   gint total_sell;
   gint total_ventas;
 
-  GtkWidget * progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
 
   /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
@@ -3044,8 +3051,9 @@ void
 
   gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
-  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), 0);
-  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), ".. Listo ..");
+  GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
+  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progreso), ".. Listo ..");
 
 }
 
@@ -3127,8 +3135,9 @@ fill_products_rank ()
 
   gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
-  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), 0);
-  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (builder_get (builder, "progressbar")), ".. Listo ..");
+  GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+  gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
+  gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progreso), ".. Listo ..");
 
 }
 
@@ -3701,53 +3710,54 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         case 0:
 	  idPthread = 0;
 	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
-
-	  flagProgress = avanzar_barra_progreso(GTK_PROGRESS (progreso));
+	  flagProgress = avanzar_barra_progreso(progreso);
 
           /* Informe de ventas */
           fill_sells_list();
-	  /* pthread_create(&idPthread, NULL, fill_sells_list, NULL); */
-	  /* pthread_detach(idPthread); */
-
           clean_container (GTK_CONTAINER
 			   (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
-
 	  /* llama a la funcion fill_totals() en un nuevo thread(hilo)*/
 	  pthread_create(&idPthread, NULL, fill_totals, NULL);
 	  pthread_detach(idPthread);
-
-          /* fill_totals(); */
           break;
 
         case 1:
 	  idPthread = 1;
-	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso),".. Cargando ..");
-          /* Informe de ranking de ventas */
-          /* fill_products_rank (); */
-	  flagProgress = avanzar_barra_progreso(GTK_PROGRESS (progreso));
+	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
+	  flagProgress = avanzar_barra_progreso(progreso);
 
+	  /* Informe de ranking de ventas */
+	  /* llama a la funcion fill_products_rank() en un nuevo thread(hilo)*/
 	  pthread_create(&idPthread, NULL, fill_products_rank, NULL);
+	  pthread_detach(idPthread);
           break;
+
 	case 2:
 	  fill_purchases_list (widget, NULL);
 	  break;
+
         case 3:
           /* Informe de caja*/
           fill_cash_box_list ();
           break;
+
         case 4:
 	  idPthread = 4;
+	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
+	  flagProgress = avanzar_barra_progreso(progreso);
+
           /* Informe de devolucion */
           fill_devolucion ();
           /* llama a la funcion fill_totals_dev() en un nuevo thread(hilo)*/
-          /* fill_totals_dev (); */
 	  pthread_create(&idPthread, NULL, fill_totals_dev, NULL);
 	  pthread_detach(idPthread);
           break;
+
 	case 6:
 	  /*Informe Cuadratura*/
 	  fill_cuadratura ();
 	  break;
+
 	case 7:
 	  /*Informe Traspasos*/
 	  fill_traspaso (NULL);
@@ -3757,7 +3767,6 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         default:
           break;
         }
-      pthread_detach(idPthread);
     }
 }
 
