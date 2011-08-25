@@ -1642,6 +1642,13 @@ reports_win (void)
    */
   
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
+
+  //Titulo
+  gtk_window_set_title (GTK_WINDOW (gtk_builder_get_object (builder, "wnd_reports")),
+			g_strdup_printf ("POS Rizoma Comercio: Informes - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
+
   
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));

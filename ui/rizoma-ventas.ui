@@ -2677,7 +2677,6 @@
     <property name="visible">True</property>
     <property name="receives_default">True</property>
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">POS Rizoma Comercio</property>
     <property name="window_position">center</property>
     <property name="icon_name">applications-other</property>
     <property name="gravity">center</property>

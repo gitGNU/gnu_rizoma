@@ -215,8 +215,13 @@ compras_win (void)
     g_printerr ("%s\n", error->message);
 
   gtk_builder_connect_signals (builder, NULL);
-
   compras_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_compras"));
+
+  //Titulo
+  gtk_window_set_title (compras_gui, 
+			g_strdup_printf ("POS Rizoma Comercio: Compras - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
 
   if (rizoma_get_value_boolean ("TRASPASO"))
     {

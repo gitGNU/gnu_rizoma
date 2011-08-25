@@ -122,9 +122,14 @@ inventario_win ()
 
   gtk_builder_connect_signals (builder, NULL);
   inventario_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_inventario"));
+
+  //Titulo
+  gtk_window_set_title (inventario_gui, 
+			g_strdup_printf ("POS Rizoma Comercio: Inventario - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
+
   gtk_widget_show_all (inventario_gui);
-
-
 }
 
 /**

@@ -8,7 +8,6 @@
   </object>
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="wnd_reports">
-    <property name="title" translatable="yes">Rizoma POS Comercio: Infomes</property>
     <property name="window_position">center-always</property>
     <property name="icon_name">applications-office</property>
     <signal name="delete_event" handler="gtk_main_quit"/>

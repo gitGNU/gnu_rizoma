@@ -583,6 +583,12 @@ ventas_win ()
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
 
+  //Titulo
+  gtk_window_set_title (ventas_gui, 
+			g_strdup_printf ("POS Rizoma Comercio: Ventas - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
+
   // check if the window must be set to fullscreen
   if (rizoma_get_value_boolean("FULLSCREEN"))
     gtk_window_maximize(GTK_WINDOW(ventas_gui));
