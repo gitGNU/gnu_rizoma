@@ -970,7 +970,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "marca")));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_cont")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "contenido")));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PUT (PQvaluebycol (res, 0, "contenido"))));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", PQvaluebycol (res, 0, "unidad")));
