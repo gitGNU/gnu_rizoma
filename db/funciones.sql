@@ -2711,6 +2711,7 @@ create or replace function producto_en_fecha(
        out codigo_corto varchar,
        out descripcion varchar,
        out marca varchar,
+       out familia integer,
        out cantidad_ingresada double precision,
        out cantidad_vendida double precision,
        out cantidad_anulada double precision,
@@ -2726,10 +2727,10 @@ q text;
 l record;
 begin
 
-q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, p.cantidad_ingresada, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion, cantidad_envio, cantidad_recibida
+q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, producto.familia, p.cantidad_ingresada, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion, cantidad_envio, cantidad_recibida
      	 	FROM producto
 		LEFT JOIN ( 
-       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
        		            FROM compra c
 
 		     	    INNER JOIN compra_detalle cd
@@ -2804,7 +2805,7 @@ q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca
                      	    WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
                      	    AND c.ingresada = 'TRUE'
                      	    AND p.estado = 'TRUE'
-                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
                      	    ORDER BY barcode) AS p
          ON producto.barcode = p.barcode
 
@@ -2823,6 +2824,7 @@ for l in execute q loop
     codigo_corto := l.codigo_corto;
     marca := l.marca;
     descripcion := l.descripcion ||' '|| l.contenido ||' '|| l.unidad;
+    familia := l.familia;
     cantidad_ingresada := l.cantidad_ingresada;
     cantidad_vendida := COALESCE(l.cantidad_vendida,0);
     cantidad_merma := COALESCE(l.unidades_merma,0);
@@ -2845,6 +2847,7 @@ create or replace function producto_en_periodo(
        out codigo_corto varchar,
        out descripcion varchar,
        out marca varchar,
+       out familia integer,
        out stock_inicial double precision,
        out compras_periodo double precision,
        out ventas_periodo double precision,
@@ -2867,6 +2870,7 @@ BEGIN
 q := $S$ SELECT stock1.barcode AS barcode,
 	        stock1.codigo_corto AS codigo_corto,
        	 	stock1.marca AS marca,
+		stock1.familia AS familia,
        	 	stock1.descripcion AS descripcion,
 		stock1.cantidad_ingresada AS cantidad_ingresada,       	 	
 
@@ -2970,6 +2974,7 @@ FOR l IN EXECUTE q loop
     barcode := l.barcode;
     codigo_corto := l.codigo_corto;
     marca := l.marca;
+    familia := l.familia;
     descripcion := l.descripcion;
     IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aún, por lo que se mostrará toda su información sin limite de fecha    
        q3 := q2|| l.barcode || $S$ GROUP BY ventas_n, mermas_n, anuladas_n, devolucion_n, envios_n, recibida_n$S$;
