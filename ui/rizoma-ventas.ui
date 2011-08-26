@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <interface>
   <requires lib="gtk+" version="2.20"/>
   <!-- interface-naming-policy toplevel-contextual -->
@@ -11,7 +11,7 @@
     <property name="message_type">warning</property>
     <property name="buttons">yes-no</property>
     <property name="text">La caja  no ha sido cerrada</property>
-    <property name="secondary_text">¿Desea cerrar la caja ahora? La aplicación será cerrada una vez que la caja sea cerrada</property>
+    <property name="secondary_text">&#xBF;Desea cerrar la caja ahora? La aplicaci&#xF3;n ser&#xE1; cerrada una vez que la caja sea cerrada</property>
     <signal name="response" handler="on_dialog_cash_box_opened_response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox3">
@@ -45,7 +45,7 @@
     <property name="transient_for">wnd_sale_credit</property>
     <property name="message_type">error</property>
     <property name="buttons">close</property>
-    <property name="text">El cliente sobrepasa su limite de crédito</property>
+    <property name="text">El cliente sobrepasa su limite de cr&#xE9;dito</property>
     <signal name="response" handler="gtk_widget_hide" object="msg_credit_out"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox5">
@@ -83,8 +83,8 @@
     <property name="transient_for">wnd_sell</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text">¿Realmente desea salir?</property>
-    <property name="secondary_text">Se perderá toda información no guardada</property>
+    <property name="text">&#xBF;Realmente desea salir?</property>
+    <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
     <signal name="response" handler="exit_response"/>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child internal-child="vbox">
@@ -584,7 +584,7 @@
   <object class="GtkWindow" id="ventas_buscar">
     <property name="height_request">400</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="title" translatable="yes" context="yes">Rizoma: Buscar Mercadería</property>
+    <property name="title" translatable="yes" context="yes">Rizoma: Buscar Mercader&#xED;a</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
@@ -737,95 +737,6 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="window_change_seller">
-    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="modal">True</property>
-    <property name="window_position">center</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="transient_for">wnd_sell</property>
-    <signal name="destroy_event" handler="CloseWindowChangeSeller"/>
-    <child>
-      <object class="GtkVBox" id="vbox3">
-        <property name="visible">True</property>
-        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-        <child>
-          <object class="GtkHBox" id="hbox7">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <child>
-              <object class="GtkLabel" id="label27">
-                <property name="visible">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="label" translatable="yes" context="yes">Ingrese ID del vendedor</property>
-              </object>
-              <packing>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_id_vendedor">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="max_length">3</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
-                <signal name="activate" handler="ChangeSeller"/>
-              </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHButtonBox" id="hbuttonbox4">
-            <property name="visible">True</property>
-            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-            <property name="layout_style">spread</property>
-            <child>
-              <object class="GtkButton" id="button3">
-                <property name="label" context="yes">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="CloseWindowChangeSeller"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button12">
-                <property name="label" context="yes">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="ChangeSeller"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -1655,7 +1566,7 @@
                 <child>
                   <object class="GtkLabel" id="label53">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">N° de Venta:</property>
+                    <property name="label" translatable="yes">N&#xB0; de Venta:</property>
                   </object>
                 </child>
                 <child>
@@ -1973,7 +1884,7 @@
                     <child>
                       <object class="GtkLabel" id="label36">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes" context="yes">Dirección:</property>
+                        <property name="label" translatable="yes" context="yes">Direcci&#xF3;n:</property>
                       </object>
                       <packing>
                         <property name="top_attach">2</property>
@@ -2031,7 +1942,7 @@
                     <child>
                       <object class="GtkLabel" id="label40">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes" context="yes">Número:</property>
+                        <property name="label" translatable="yes" context="yes">N&#xFA;mero:</property>
                       </object>
                       <packing>
                         <property name="top_attach">1</property>
@@ -2332,7 +2243,7 @@
             <child>
               <object class="GtkLabel" id="label33">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Dirección:</property>
+                <property name="label" translatable="yes" context="yes">Direcci&#xF3;n:</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -2640,7 +2551,7 @@
         <property name="spacing">5</property>
         <child>
           <object class="GtkButton" id="btn_credit">
-            <property name="label" translatable="yes" context="yes">Crédito</property>
+            <property name="label" translatable="yes" context="yes">Cr&#xE9;dito</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -2948,7 +2859,7 @@
                   <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes" context="yes">Código Simple</property>
+                    <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2981,7 +2892,7 @@
                 <child>
                   <object class="GtkLabel" id="label14">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes" context="yes">Código de barras</property>
+                    <property name="label" translatable="yes" context="yes">C&#xF3;digo de barras</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -3039,7 +2950,7 @@
                 <child>
                   <object class="GtkLabel" id="label19">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;big&gt;Boleta Nº&lt;/big&gt;&lt;/b&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;big&gt;Boleta N&#xBA;&lt;/big&gt;&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -3616,6 +3527,133 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window_change_seller">
+    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="transient_for">wnd_sell</property>
+    <signal name="destroy_event" handler="CloseWindowChangeSeller"/>
+    <child>
+      <object class="GtkVBox" id="vbox3">
+        <property name="visible">True</property>
+        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+        <child>
+          <object class="GtkHBox" id="hbox7">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <child>
+              <object class="GtkTable" id="table1_change_seller">
+                <property name="visible">True</property>
+                <property name="n_rows">2</property>
+                <property name="n_columns">2</property>
+                <child>
+                  <object class="GtkLabel" id="label27">
+                    <property name="visible">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="label" translatable="yes" context="yes">Usuario</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="entry_user_vendedor">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="max_length">30</property>
+                    <property name="invisible_char">&#x25CF;</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_pass_vendedor"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label1_change_seller">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Contrase&#xF1;a</property>
+                  </object>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="entry_pass_vendedor">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="max_length">30</property>
+                    <property name="visibility">False</property>
+                    <property name="invisible_char">&#x25CF;</property>
+                    <signal name="activate" handler="ChangeSeller"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHButtonBox" id="hbuttonbox4">
+            <property name="visible">True</property>
+            <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton" id="button3">
+                <property name="label" context="yes">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="CloseWindowChangeSeller"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button12">
+                <property name="label" context="yes">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="ChangeSeller"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
