@@ -2527,6 +2527,19 @@ CleanStatusProduct (void)
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"))));
 
+  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == FALSE)
+    {      
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_price")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_gain")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_calculate")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_amount")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_add_product_list")), FALSE);
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), "");
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
+      return;
+    }  
+
   gtk_list_store_clear (store);
 
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
