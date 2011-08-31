@@ -72,7 +72,7 @@ void IngresoParcial (void);
 
 void ChangeIngreso (GtkEntry *entry, gpointer data);
 
-void CleanStatusProduct (void);
+void CleanStatusProduct (gint option); // 0 = todo, cualquier otro numero = parcial
 
 void AskForCurrentPrice (gchar *barcode);
 

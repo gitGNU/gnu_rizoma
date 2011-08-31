@@ -1127,7 +1127,7 @@ Save (GtkWidget *widget, gpointer data)
 
   if (tab == 0)
     {
-      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
+      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), codigo);
     }
   else if (tab == 3)
     {
@@ -1345,7 +1345,7 @@ AddToProductsList (void)
       store_history = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
       gtk_list_store_clear (store_history);
 
-      CleanStatusProduct ();
+      CleanStatusProduct (0);
 
       //TODO: Se setea el sensitive cada vez que se agrega un producto a la lista, se debe evaluar
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
@@ -1584,17 +1584,19 @@ AddFoundProduct (void)
   GtkTreeIter iter;
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
   gchar *barcode;
+  gchar *codigo;
 
   if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter))
     {
       gtk_tree_model_get (model, &iter,
-                          1, &barcode,
+                          0, &codigo,
+			  1, &barcode,
                           -1);
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
 
-      SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
+      SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), codigo);
     }
 }
 
@@ -1770,7 +1772,7 @@ Comprar (GtkWidget *widget, gpointer data)
 
       ClearAllCompraData ();
 
-      CleanStatusProduct ();
+      CleanStatusProduct (0);
 
       compra->header_compra = NULL;
       compra->products_compra = NULL;
@@ -1869,7 +1871,7 @@ ClearAllCompraData (void)
 
   gtk_list_store_clear (store);
 
-  CleanStatusProduct ();
+  CleanStatusProduct (0);
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "\t\t\t");
 
@@ -2531,13 +2533,38 @@ on_btn_nullify_product_clicked (void)
 }
 
 
+/**
+ * This function is a callback from
+ * 'button_clear' button (signal click)
+ *
+ * call to the CleanStatusProduct function with
+ * option != 0 (to a partial cleaning)
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
 void
-CleanStatusProduct (void)
+on_button_clear_clicked (GtkButton *button, gpointer user_data)
+{
+  CleanStatusProduct (1);
+}
+
+/**
+ * This function clean the status product
+ *
+ * If option = 0 a full cleaning is done, 
+ * else partial cleaning is done as the case
+ *
+ * @param gint option
+ */
+void
+CleanStatusProduct (gint option)
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"))));
 
   if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == FALSE &&
-      !g_str_equal (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))), ""))
+      !g_str_equal (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))), "") &&
+      option != 0)
     {      
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_price")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_gain")), TRUE);
@@ -5820,7 +5847,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
 
-      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), barcode);
+      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), codigo);
     }
   return;
 } // void on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
@@ -5963,7 +5990,7 @@ AddToProductsListTraspaso (void)
       store_history = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
       gtk_list_store_clear (store_history);
 
-      CleanStatusProduct ();
+      CleanStatusProduct (0);
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
 
@@ -6312,7 +6339,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 
       ClearAllCompraData ();
 
-      CleanStatusProduct ();
+      CleanStatusProduct (0);
 
       compra->header_compra = NULL;
       compra->products_compra = NULL;
@@ -6391,7 +6418,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 
       ClearAllCompraData ();
 
-      CleanStatusProduct ();
+      CleanStatusProduct (0);
 
       compra->header_compra = NULL;
       compra->products_compra = NULL;
