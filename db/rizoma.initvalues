@@ -52,3 +52,5 @@ INSERT INTO unidad_producto VALUES (DEFAULT, 'CC');
 INSERT INTO unidad_producto VALUES (DEFAULT, 'GR');
 INSERT INTO unidad_producto VALUES (DEFAULT, 'KG');
 INSERT INTO unidad_producto VALUES (DEFAULT, 'UN');
+
+INSERT INTO familias VALUES (DEFAULT, 'GENERICO');

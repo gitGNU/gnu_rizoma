@@ -119,10 +119,10 @@ gboolean ExistProductHistory (gchar *barcode);
 
 void SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unidad,
                         gchar *contenido, gchar *precio, gboolean iva, int otros, gchar *barcode,
-                        gchar *familia, gboolean perecible, gboolean fraccion);
+                        gboolean perecible, gboolean fraccion, gint familia);
 
 gboolean AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca, char *contenido,
-                            gchar *unidad, gboolean iva, gint otros, gchar *familia, gboolean perecible,
+                            gchar *unidad, gboolean iva, gint otros, gint familia, gboolean perecible,
                             gboolean fraccion);
 
 void AgregarCompra (gchar *rut, gchar *nota, gint dias_pago);

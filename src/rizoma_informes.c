@@ -2092,6 +2092,18 @@ reports_win (void)
     END Informe Compras
    */
 
+  //Titulo
+  gtk_window_set_title (GTK_WINDOW (gtk_builder_get_object (builder, "wnd_reports")),
+			g_strdup_printf ("POS Rizoma Comercio: Informes - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
+
+  gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
+  
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
 
   fill_filter_nullify_cmbbox ("cmb_buy_report");
   fill_filter_nullify_cmbbox ("cmb_sell_report");
@@ -2099,8 +2111,6 @@ reports_win (void)
   // Se inicializan con la fecha actual
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_begin"), CurrentDate(1));
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_end"), CurrentDate(1));
-
-  gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
 }
 
 /**
@@ -3236,19 +3246,25 @@ fill_provider ()
  */
 
 void
-fill_cuadratura ()
+fill_cuadratura (gint familia)
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_cuadratura"))));
   GtkTreeIter iter;
   gint i, tuples;
   PGresult *res;
-  char *sql;
+  char *sql, *filtro_familia;
 
   gtk_list_store_clear (store);
 
-  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, stock_inicial, compras_periodo, anulaciones_c_periodo, ventas_periodo, anulaciones_periodo, devoluciones_periodo, mermas_periodo, enviados_periodo, recibidos_periodo, stock_teorico "
-			  "FROM producto_en_periodo('%.4d-%.2d-%.2d')",
-			  g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin) );
+  if (familia == 0)
+    filtro_familia = g_strdup_printf("");
+  else
+    filtro_familia = g_strdup_printf("WHERE familia = %d", familia);
+
+  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, familia, stock_inicial, compras_periodo, anulaciones_c_periodo, ventas_periodo, anulaciones_periodo, devoluciones_periodo, mermas_periodo, enviados_periodo, recibidos_periodo, stock_teorico "
+			  "FROM producto_en_periodo('%.4d-%.2d-%.2d') %s",
+			  g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+			  filtro_familia);
 
   res = EjecutarSQL (sql);
   tuples = PQntuples (res);
@@ -3755,7 +3771,7 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 
 	case 6:
 	  /*Informe Cuadratura*/
-	  fill_cuadratura ();
+	  fill_cuadratura (0);
 	  break;
 
 	case 7:
@@ -3849,6 +3865,70 @@ calcular_traspasos (void)
 void
 on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
+  GtkWidget *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+  gint tuples,i;
+  PGresult *res;
+
+  if (page_num != 6)
+    { //Se ocultan los widget para filtrar familias
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
+    }
+  else if (page_num != 7)
+    { //Se ocultan los widget para filtrar las tiendas
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
+    }
+
+  if (page_num == 6)
+    {      
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
+
+      res = EjecutarSQL (g_strdup_printf ("SELECT id, nombre FROM familias"));
+      tuples = PQntuples (res);
+
+      combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_family_filter"));
+      modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+
+      if (modelo == NULL)
+	{
+	  GtkCellRenderer *cell;
+	  modelo = gtk_list_store_new (2,
+				       G_TYPE_INT,
+				       G_TYPE_STRING);
+
+	  gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
+
+	  cell = gtk_cell_renderer_text_new();
+	  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+	  gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
+					 "text", 1,
+					 NULL);
+	}
+
+      gtk_list_store_clear(modelo);
+
+      gtk_list_store_append(modelo, &iter);
+      gtk_list_store_set(modelo, &iter,
+			 0, 0,
+			 1, "TODOS",
+			 -1);
+
+      for (i=0 ; i < tuples ; i++)
+	{
+	  gtk_list_store_append(modelo, &iter);
+	  gtk_list_store_set(modelo, &iter,
+			     0, atoi(PQvaluebycol(res, i, "id")),
+			     1, PQvaluebycol(res, i, "nombre"),
+			     -1);
+	}
+
+      gtk_combo_box_set_active (GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_family_filter")), 0);
+    }
+
   /*Si se selecciona la "pagina 5" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
   if(page_num == 6 &&
      gtk_widget_get_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end"))) == TRUE)
@@ -3865,6 +3945,10 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 
   if(page_num == 7)
     {
+      // Se muestran los widget para filtrar las tiendas
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_stores")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
+
       // Se calculan los traspasos y se muestran
       calcular_traspasos();
 
@@ -3954,8 +4038,9 @@ on_btn_filter_stores_clicked ()
   /* Verifica si se selecciono un destino del combobox*/
   if (active == -1)
     {
-      ErrorMSG (combo, "Debe Seleccionar un local");
+      ErrorMSG (combo, "Debe seleccionar un local");
       store = NULL;
+      return;
     }
   else
     {
@@ -4094,5 +4179,42 @@ fill_filter_nullify_cmbbox (gchar *combobox_name)
 		     1, "Anuladas",
 		     -1);
 
-  gtk_combo_box_set_active (combo, 0);
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+}
+
+void
+on_btn_apply_family_filter_clicked ()
+{
+  gchar *store;
+  gint familia;
+  GtkTreeIter iter;
+  GtkWidget *combo;
+  GtkTreeModel *model;
+  gint active;
+
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_family_filter"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  /* Verifica si se selecciono un destino del combobox*/
+  if (active == -1)
+    {
+      ErrorMSG (combo, "Debe seleccionar una familia");
+      return;
+    }
+  else
+    {
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &familia,
+                          1, &store,
+                          -1);
+    }
+
+  printf ("%s: %d", store, familia);
+  if (g_str_equal (store, "TODOS"))
+    fill_cuadratura (0);
+  else
+    fill_cuadratura (familia);
 }

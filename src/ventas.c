@@ -583,6 +583,12 @@ ventas_win ()
 
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
 
+  //Titulo
+  gtk_window_set_title (ventas_gui, 
+			g_strdup_printf ("POS Rizoma Comercio: Ventas - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
+
   // check if the window must be set to fullscreen
   if (rizoma_get_value_boolean("FULLSCREEN"))
     gtk_window_maximize(GTK_WINDOW(ventas_gui));
@@ -2244,7 +2250,9 @@ CloseWindowChangeSeller (GtkWidget *widget, gpointer data)
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "window_change_seller"));
   gtk_widget_hide (aux_widget);
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_id_vendedor"));
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_user_vendedor"));
+  gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_pass_vendedor"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), "");
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"));
@@ -2254,17 +2262,27 @@ CloseWindowChangeSeller (GtkWidget *widget, gpointer data)
 void
 ChangeSeller (GtkWidget *widget, gpointer data)
 {
-  GtkEntry *entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_id_vendedor"));
-  gint id = atoi (gtk_entry_get_text (entry));
-  gchar *user_name;
+  GtkEntry *entry;
+  gchar *user;
+  gchar *passwd;
 
-  user_name = ReturnUsername (id);
+  entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_user_vendedor"));
+  user = gtk_entry_get_text (entry);
+  entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_pass_vendedor"));
+  passwd = gtk_entry_get_text (entry);
 
-  if (user_name != NULL)
+  if (g_str_equal (user, "") || g_str_equal (passwd, ""))
     {
-      user_data->user_id = id;
-      user_data->user = ReturnUsername (id);
-      user_data->level = ReturnUserLevel (user_name);
+      ErrorMSG (widget, g_strdup_printf
+                ("Debe ingresar usuario y contraseña"));
+      return;
+    }
+
+  if (AcceptPassword (passwd, user))
+    {
+      user_data->user_id = ReturnUserId (user);
+      user_data->user = g_strdup (user);
+      user_data->level = ReturnUserLevel (user);
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                             g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
@@ -2274,7 +2292,7 @@ ChangeSeller (GtkWidget *widget, gpointer data)
   else
     {
       ErrorMSG (widget, g_strdup_printf
-                ("No existe un usuario con el indentificador %d", id));
+                ("Usuario o contraseña incorrecta"));
     }
 }
 
@@ -2293,7 +2311,7 @@ WindowChangeSeller ()
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "window_change_seller"));
   gtk_widget_show_all (GTK_WIDGET (window));
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_id_vendedor")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_user_vendedor")));
 }
 
 

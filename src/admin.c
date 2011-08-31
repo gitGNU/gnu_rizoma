@@ -213,6 +213,13 @@ admin_win()
   gtk_builder_connect_signals (builder, NULL);
 
   admin_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_admin"));
+  
+  //Titulo
+  gtk_window_set_title (admin_gui, 
+			g_strdup_printf ("POS Rizoma Comercio: Admin - Conectado a [%s@%s]",
+					 config_profile,
+					 rizoma_get_value ("SERVER_HOST")));
+
 
   // check if the window must be set to fullscreen
   if (rizoma_get_value_boolean("FULLSCREEN"))

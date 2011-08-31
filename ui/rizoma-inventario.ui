@@ -1,46 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires gtk+ 2.12 -->
+  <requires lib="gtk+" version="2.20"/>
   <!-- interface-naming-policy toplevel-contextual -->
-  <object class="GtkMessageDialog" id="msg_casiOK">
-    <property name="border_width">5</property>
-    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="type_hint">normal</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="transient_for">wnd_inventario</property>
-    <property name="has_separator">False</property>
-    <property name="message_type">warning</property>
-    <property name="buttons">ok</property>
-    <property name="text">Se realizo el Inventario</property>
-    <property name="secondary_text">Pero algunos productos no estaban en la Base de datos</property>
-    <signal name="response" handler="gtk_widget_hide" object="msg_casiOK"/>
-    <signal name="delete_event" handler="gtk_widget_hide" object="msg_casiOK"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox11">
-        <property name="visible">True</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area11">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
+  <object class="GtkListStore" id="liststore1"/>
   <object class="GtkMessageDialog" id="msg_NoOK">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
@@ -49,7 +11,6 @@
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_inventario</property>
-    <property name="has_separator">False</property>
     <property name="message_type">error</property>
     <property name="buttons">ok</property>
     <property name="text">No se Realizo el Inventario</property>
@@ -80,13 +41,86 @@
       </object>
     </child>
   </object>
+  <object class="GtkMessageDialog" id="msg_OK">
+    <property name="border_width">5</property>
+    <property name="type">popup</property>
+    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_inventario</property>
+    <property name="buttons">ok</property>
+    <property name="text">Se realizo Correctamente el Inventario</property>
+    <signal name="response" handler="gtk_widget_hide" object="msg_OK"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox4">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area4">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="msg_casiOK">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_inventario</property>
+    <property name="message_type">warning</property>
+    <property name="buttons">ok</property>
+    <property name="text">Se realizo el Inventario</property>
+    <property name="secondary_text">Pero algunos productos no estaban en la Base de datos</property>
+    <signal name="response" handler="gtk_widget_hide" object="msg_casiOK"/>
+    <signal name="delete_event" handler="gtk_widget_hide" object="msg_casiOK"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox11">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area11">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkMessageDialog" id="msg_error_file">
     <property name="border_width">5</property>
     <property name="modal">True</property>
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">wnd_inventario</property>
-    <property name="has_separator">False</property>
     <property name="message_type">error</property>
     <property name="buttons">close</property>
     <property name="text">No se pudo leer el archivo</property>
@@ -115,16 +149,53 @@
       </object>
     </child>
   </object>
+  <object class="GtkMessageDialog" id="msg_inconsistencia">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_inventario</property>
+    <property name="message_type">error</property>
+    <property name="buttons">ok</property>
+    <property name="text">Inconsistencia de datos</property>
+    <property name="secondary_text">Verifique la integridad de los datos del archivo de transacción</property>
+    <signal name="response" handler="gtk_widget_hide" object="msg_inconsistencia"/>
+    <signal name="delete_event" handler="gtk_widget_hide" object="msg_inconsistencia"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox12">
+        <property name="visible">True</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area12">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="wnd_inventario">
-    <property name="title" translatable="yes">Rizoma POS Comercio: Inventario</property>
     <property name="window_position">center-always</property>
     <property name="default_width">350</property>
     <property name="default_height">400</property>
+    <property name="icon_name">accessories-text-editor</property>
     <signal name="delete_event" handler="gtk_main_quit"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkHBox" id="hbox2">
             <property name="visible">True</property>
@@ -232,82 +303,6 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkMessageDialog" id="msg_OK">
-    <property name="border_width">5</property>
-    <property name="type">popup</property>
-    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="type_hint">normal</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="transient_for">wnd_inventario</property>
-    <property name="has_separator">False</property>
-    <property name="buttons">ok</property>
-    <property name="text">Se realizo Correctamente el Inventario</property>
-    <signal name="response" handler="gtk_widget_hide" object="msg_OK"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox4">
-        <property name="visible">True</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area4">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkListStore" id="liststore1"/>
-  <object class="GtkMessageDialog" id="msg_inconsistencia">
-    <property name="border_width">5</property>
-    <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="type_hint">normal</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="transient_for">wnd_inventario</property>
-    <property name="message_type">error</property>
-    <property name="buttons">ok</property>
-    <property name="text">Inconsistencia de datos</property>
-    <property name="secondary_text">Verifique la integridad de los datos del archivo de transacci&#xF3;n</property>
-    <signal name="response" handler="gtk_widget_hide" object="msg_inconsistencia"/>
-    <signal name="delete_event" handler="gtk_widget_hide" object="msg_inconsistencia"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox12">
-        <property name="visible">True</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area12">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
           </packing>
         </child>
       </object>

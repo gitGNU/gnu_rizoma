@@ -585,7 +585,7 @@
         <child>
           <object class="GtkTable" id="table17">
             <property name="visible">True</property>
-            <property name="n_rows">11</property>
+            <property name="n_rows">12</property>
             <property name="n_columns">2</property>
             <property name="column_spacing">5</property>
             <property name="row_spacing">5</property>
@@ -878,6 +878,49 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label1_mod_product">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Familia</property>
+              </object>
+              <packing>
+                <property name="top_attach">11</property>
+                <property name="bottom_attach">12</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox1_mod_product">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkComboBox" id="cmb_edit_product_family">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_edit_family">
+                    <property name="label">gtk-add</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_new_family_clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">11</property>
+                <property name="bottom_attach">12</property>
               </packing>
             </child>
           </object>
@@ -1273,7 +1316,7 @@
         <child>
           <object class="GtkTable" id="table3">
             <property name="visible">True</property>
-            <property name="n_rows">9</property>
+            <property name="n_rows">10</property>
             <property name="n_columns">2</property>
             <property name="homogeneous">True</property>
             <child>
@@ -1543,6 +1586,49 @@
                 <property name="bottom_attach">6</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkHBox" id="hbox1_add_product">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkComboBox" id="cmb_new_product_family">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_new_family">
+                    <property name="label">gtk-add</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_new_family_clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">9</property>
+                <property name="bottom_attach">10</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label1_add_product">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Familia</property>
+              </object>
+              <packing>
+                <property name="top_attach">9</property>
+                <property name="bottom_attach">10</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="position">0</property>
@@ -1752,8 +1838,8 @@
     <property name="width_request">800</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
     <property name="border_width">3</property>
-    <property name="title" translatable="yes">Rizoma POS Comercio: Compras</property>
     <property name="window_position">center</property>
+    <property name="icon_name">task-due</property>
     <signal name="delete_event" handler="on_wnd_compras_delete_event"/>
     <child>
       <object class="GtkVBox" id="vbox_main">
@@ -7010,6 +7096,103 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="wnd_new_family">
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="transient_for">wnd_new_product</property>
+    <child>
+      <object class="GtkVBox" id="vbox2_new_family">
+        <property name="visible">True</property>
+        <child>
+          <object class="GtkHBox" id="hbox1_new_family">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="label1_new_family">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Nombre Familia</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_new_family">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox2_new_family">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkButton" id="btn_cancel_new_family">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_new_family"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_family2">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_family"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_family">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_family"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
