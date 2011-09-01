@@ -295,6 +295,7 @@ create table cliente (
   abonado                   int4,
   credito                   int4,
   credito_enable            bool,
+  afecto_impuesto	    bool default 't',
   constraint pk_cliente primary key (rut)
 ) ;
 

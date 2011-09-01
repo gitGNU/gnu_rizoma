@@ -566,7 +566,7 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT trunc(SUM(vd.precio * vd.cantidad) - "
+     ("SELECT round(SUM(vd.precio * vd.cantidad) - "
       "                            (SELECT SUM(descuento) FROM venta "
       "                                     WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
       "                                     AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') )), "
@@ -616,7 +616,7 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf
-                     ("SELECT trunc(sum(vd.precio * vd.cantidad -descuento)),count(Distinct(v.id)) "
+                     ("SELECT round(sum(vd.precio * vd.cantidad -descuento)),count(Distinct(v.id)) "
                       "FROM venta v,venta_detalle vd "
                       "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
                       "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "

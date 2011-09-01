@@ -3477,6 +3477,21 @@ create_new_product (void)
   if (strlen (barcode) > 0 && strlen (barcode) <= 6)
     {
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_product_code")), barcode);
+
+      gint i, num = 0;
+
+      //Se prepara el relleno (agregan 0 hasta tener 6 dígitos)
+      while (strlen(barcode) < 6)
+	barcode = g_strdup_printf ("%s%d", barcode, num);
+
+      //Revisa la existencia del barcode, de ser así va aumentando el número del último dígito hasta ser único
+      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s%d", barcode, num)))
+	num++;
+
+      //Se setea el campo del barcode con esta sugerencia
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")),
+			  g_strdup_printf ("%s%d", barcode, num));
+
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_new_product_desc")));
     }
   else
@@ -5795,6 +5810,8 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
   else if (strlen (barcode) > 18)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
+  else if (strlen (barcode) < 7)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
   else if (strcmp (description, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripción");
   else if (strcmp (marca, "") == 0)

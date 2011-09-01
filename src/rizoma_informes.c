@@ -3118,7 +3118,7 @@ fill_products_rank ()
 
 
     res = EjecutarSQL
-      (g_strdup_printf ("SELECT trunc(sum(sold_amount)) as vendidos, sum(costo) as costo,sum(contrib) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 2) as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
+      (g_strdup_printf ("SELECT round(sum(sold_amount)) as vendidos, sum(costo) as costo,sum(contrib) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 2) as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
                         g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
                         g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
        );
