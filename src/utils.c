@@ -604,3 +604,47 @@ decode_clothes_code (gchar *clothes_code)
 
   return decode;
 }
+
+
+/**
+ * This function only allows the insertion 
+ * of numerical values ​​in the specified entry
+ * ("insert-text" signal)
+ * 
+ * The "insert-text" signal of GtkEditable (from corresponding GtkEntry)
+ * must be hooked to this function.
+ *
+ * @param: GtkEditable *editable: the object which received the signal.-
+ * @param: gchar *new_text: the new text to insert.-
+ * @param: gint new_text_length: the length of the new text, in bytes, 
+ *         or -1 if new_text is nul-terminated.-
+ * @param: gint *position: the position, in characters, at which to insert the new text. 
+ *         this is an in-out parameter. After the signal emission is finished,
+ *         it should point after the newly inserted text.-
+ * @param: gpointer data: user data set when the signal handler was connected.-
+ */
+void
+only_number_filter (GtkEditable *editable,
+		    gchar *new_text,
+		    gint new_text_length,
+		    gint *position,
+		    gpointer user_data)
+{
+  gchar *result;
+  
+  if (HaveCharacters (new_text))
+    {
+      new_text_length = new_text_length-1;
+      result = g_strndup (new_text, new_text_length);
+    }
+  else
+    result = g_strndup (new_text, new_text_length);
+
+  g_signal_handlers_block_by_func (editable,
+				   (gpointer) only_number_filter, user_data);
+  gtk_editable_insert_text (editable, result, new_text_length, position);
+  g_signal_handlers_unblock_by_func (editable,
+                                     (gpointer) only_number_filter, user_data);
+  g_signal_stop_emission_by_name (editable, "insert_text");
+  g_free (result);
+}

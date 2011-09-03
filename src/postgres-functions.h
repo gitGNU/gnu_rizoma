@@ -64,7 +64,7 @@ gint GetTotalSell (guint from_year, guint from_month, guint from_day,
                    guint to_year, guint to_month, guint to_day, gint *total);
 
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-                       gchar *direccion, gchar *fono, gint credito, gchar *giro);
+                       gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean afecto_impuesto);
 
 gboolean RutExist (const gchar *rut);
 

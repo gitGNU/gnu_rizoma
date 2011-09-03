@@ -68,5 +68,7 @@ gint get_treeview_length (GtkTreeView *treeview);
 
 GArray * decode_clothes_code (gchar *clothes_code);
 
+void only_number_filter (GtkEditable *editable, gchar *new_text, gint new_text_length,
+                         gint *position, gpointer user_data);
 
 #endif

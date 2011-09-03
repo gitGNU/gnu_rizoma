@@ -727,6 +727,22 @@ ventas_win ()
         }
     }
 
+  /*conectando señales*/
+
+  // Conectando la señal 'insert-text' para permitir solo números
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay")), "insert-text",
+		    G_CALLBACK (only_number_filter), NULL);
+
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay2")), "insert-text",
+		    G_CALLBACK (only_number_filter), NULL);
+
+  // Conectando la señal 'insert-text' para calcular diferencia con el monto total
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay")), "changed",
+		    G_CALLBACK (calculate_amount), NULL);
+
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay2")), "changed",
+		    G_CALLBACK (calculate_amount), NULL);
+  
 }
 
 gboolean
@@ -2695,9 +2711,18 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   res = EjecutarSQL(q);
   g_free (q);
 
-  fill_credit_data(rut, PQgetvalue(res, 0, 0),
-                   PQvaluebycol(res, 0, "direccion"),
-                   PQvaluebycol(res, 0, "telefono"));
+  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step1"))))
+    {
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")), rut);
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")), 
+			    g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 0)));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")));
+    }
+  else if (gtk_widget_get_visible (builder_get (builder,"wnd_sale_credit")))
+    fill_credit_data(rut, PQgetvalue(res, 0, 0),
+		     PQvaluebycol(res, 0, "direccion"),
+		     PQvaluebycol(res, 0, "telefono"));
+
 }
 
 void
@@ -2993,6 +3018,164 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 
 
 /**
+ * This function enters the sale when the amount
+ * entered is enough, else show the 'wnd_mixed_pay_step2'
+ * to complete.
+ */
+void
+on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
+{
+  gint total;
+  gint paga_con;
+  gchar *nombre_cliente, *rut_cliente, *paga_con_txt;
+
+  //Widgets de la segunda ventana
+  GtkWidget *f_name, *f_rut, *f_amount, *type_sell, *s_name, *s_rut, *s_amount, *diferencia;
+
+  f_name = GTK_WIDGET (builder_get (builder, "lbl_mixed_pay_client_name"));
+  f_rut = GTK_WIDGET (builder_get (builder, "lbl_mixed_pay_client_rut"));
+  f_amount = GTK_WIDGET (builder_get (builder, "lbl_mixed_pay_first_amount"));
+  type_sell = GTK_WIDGET (builder_get (builder, "radio_btn_effective_pay"));
+  s_name = GTK_WIDGET (builder_get (builder, "lbl_name_mixed_pay_2"));
+  s_rut = GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay_2"));
+  s_amount = GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2"));
+  diferencia = GTK_WIDGET (builder_get (builder, "lbl_diff_amount2"));
+
+  //Se recogen el monto total a pagar y el monto con el que se paga de la primera ventana
+  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  paga_con = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay"))));
+
+  /* Si el total es mayor al primer pago, se pide que complete la compra con otra forma de pago */
+  if (total > paga_con)
+    {
+      //Se recogen los datos de la primera ventana
+      nombre_cliente = gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")));
+      rut_cliente = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")));
+      paga_con_txt = PutPoints (g_strdup_printf ("%d", paga_con));
+      
+      //Se rellenan y limpian los widgets correspondientes según corresponda
+      gtk_label_set_markup (GTK_LABEL (f_name), g_strdup_printf ("<b>%s</b>", nombre_cliente));
+      gtk_label_set_markup (GTK_LABEL (f_rut), g_strdup_printf ("<b>%s</b>", rut_cliente));
+      gtk_label_set_markup (GTK_LABEL (f_amount), g_strdup_printf ("<b>%s</b>", paga_con_txt));
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (type_sell), TRUE);
+      gtk_entry_set_text (GTK_ENTRY (s_rut), "");
+      gtk_label_set_text (GTK_LABEL (s_name), "");
+      gtk_entry_set_text (GTK_ENTRY (s_amount), "");
+      
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_diff_amount2")),
+			    g_strdup_printf ("<span size=\"30000\"> %s </span> "
+					     "<span size=\"15000\" color =\"red\">Faltante</span>",
+					     PutPoints (g_strdup_printf ("%d", total-paga_con))));
+
+      gtk_widget_set_sensitive (s_rut, FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay2")), FALSE);
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step2")));
+      gtk_widget_grab_focus (s_amount);
+    }
+  else
+    {
+
+    }
+}
+
+
+/**
+ *
+ *
+ */
+void
+calculate_amount (GtkEditable *editable,
+		  gchar *new_text,
+		  gint new_text_length,
+		  gint *position,
+		  gpointer user_data)
+{
+  gchar *num = g_strdup_printf ("%s%s", gtk_entry_get_text (GTK_ENTRY (editable)), new_text);
+  gint paga_con = atoi (num);
+  gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  gint resto;
+  gboolean segundo_pago = gtk_widget_get_visible (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step2")));
+  
+  if (segundo_pago == TRUE)
+    total = total - atoi (CutPoints (g_strdup 
+				     (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_mixed_pay_first_amount"))))));
+
+  printf ("paga con: %d\n"
+	  "total: %d\n", paga_con, total);
+
+  if (paga_con < total)
+    {
+      resto = total - paga_con;
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, (!segundo_pago) ? "lbl_diff_amount" : "lbl_diff_amount2")),
+			    g_strdup_printf ("<span size=\"30000\"> %s </span> "
+					     "<span size=\"15000\" color =\"red\">Faltante</span>",
+					     PutPoints (g_strdup_printf ("%d", resto))));
+    }
+  else
+    {
+      resto = paga_con - total;
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, (!segundo_pago) ? "lbl_diff_amount" : "lbl_diff_amount2")),
+			    g_strdup_printf ("<span size=\"30000\"> %s </span> "
+					     "<span size=\"15000\" color =\"#04B404\">Sobrante</span>",
+					     PutPoints (g_strdup_printf ("%d", resto))));
+
+    }
+
+  if (!segundo_pago)
+    {
+      if (resto == total ||
+	  g_str_equal (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay"))), ""))
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay")), FALSE);
+      else
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay")), TRUE);
+    }
+  else 
+    {
+      if (paga_con < total)
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay2")), FALSE);
+      else
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay2")), TRUE);
+    }
+    
+}
+
+
+/**
+ * This function show the "wnd_mixed_pay_step1"
+ * window, clean their widgets, and grab focus 
+ * on "entry_rut_mixed_pay" entry.
+ */
+void
+mixed_pay_window (void)
+{
+  gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+
+  if (venta->header == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para vender");
+      return;
+    }
+    
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_diff_amount")), "");
+  
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
+
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_diff_amount")),
+			g_strdup_printf ("<span size=\"30000\"> %s </span> "
+					 "<span size=\"15000\" color =\"red\">Faltante</span>",
+					 PutPoints (g_strdup_printf ("%d", total))));
+  
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay")), FALSE);
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
+}
+
+
+/**
  * Callback connected the key-press-event in the main window.
  *
  * This function must be simple, because can lead to a performance
@@ -3030,6 +3213,10 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
     case GDK_F7:
       if (user_data->user_id == 1)
         VentanaIngreso (0);
+      break;
+
+    case GDK_F8:
+      mixed_pay_window ();
       break;
 
       //if the key pressed is not in use let it pass

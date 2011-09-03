@@ -100,5 +100,9 @@ void on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointe
 void close_nullify_sale_dialog(void);
 
 void on_btn_devolver_click (GtkWidget *widget, gpointer data);
-    
+
+void calculate_amount (GtkEditable *editable, gchar *new_text,
+                       gint new_text_length, gint *position,
+                       gpointer user_data);
+
 #endif

@@ -565,6 +565,7 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
   gchar *fono;
   gchar *giro;
   gint credito;
+  gboolean afecto_impuesto;
   GtkWidget *wnd;
 
   wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient"));
@@ -578,6 +579,7 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
   fono = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_client_phone"))));
   giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_client_giro"))));
   credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_limit_credit")))));
+  afecto_impuesto = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_aff_imp_yes")));
 
   if (strcmp (nombre, "") == 0)
     AlertMSG (wnd, "El Campo Nombre no puede estar vacío");
@@ -603,7 +605,7 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
     {
       if (VerificarRut (rut, ver) == TRUE)
         {
-          if (!(InsertClient (nombre, paterno, materno, rut, ver, direccion, fono, credito, giro)))
+          if (!(InsertClient (nombre, paterno, materno, rut, ver, direccion, fono, credito, giro, afecto_impuesto)))
             {
               ErrorMSG(wnd, "No fue posible agregar el cliente a la base de datos");
               return;
@@ -1022,6 +1024,7 @@ ModificarCliente (void)
   gchar *credito;
   gchar *rut_ver, *giro;
   gint rut;
+  gboolean afecto_impuesto;
 
   treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_clients"));
   selection = gtk_tree_view_get_selection(treeview);
@@ -1033,7 +1036,7 @@ ModificarCliente (void)
                           0, &rut,
                           -1);
 
-      q = g_strdup_printf ("select nombre, apell_p, apell_m, telefono, direccion, credito, dv, giro "
+      q = g_strdup_printf ("select nombre, apell_p, apell_m, telefono, direccion, credito, dv, giro, afecto_impuesto "
                            "FROM cliente where rut=%d", rut);
       res = EjecutarSQL(q);
       g_free(q);
@@ -1046,6 +1049,7 @@ ModificarCliente (void)
       credito = PQvaluebycol(res, 0, "credito");
       rut_ver = PQvaluebycol(res, 0, "dv");
       giro = PQvaluebycol(res, 0, "giro");
+      afecto_impuesto = ((g_str_equal (PQvaluebycol (res, 0, "afecto_impuesto"), "t")) ? TRUE : FALSE);
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
       gtk_entry_set_text (GTK_ENTRY (widget), nombre);
@@ -1070,11 +1074,21 @@ ModificarCliente (void)
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
       gtk_entry_set_text (GTK_ENTRY (widget), credito);
+      
+      if (afecto_impuesto == TRUE)
+	{
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "radio_btn_mod_aff_imp_yes"));
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
+	}
+      else
+	{
+	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "radio_btn_mod_aff_imp_no"));
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
+	}
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_modclient"));
       gtk_window_set_transient_for(GTK_WINDOW(widget), GTK_WINDOW(gtk_builder_get_object(builder, "wnd_admin")));
       gtk_widget_show_all(widget);
-
     }
 }
 
@@ -1197,6 +1211,7 @@ EliminarCliente (void)
    gchar *fono;
    gchar *giro;
    gint credito;
+   gboolean afecto_impuesto;
 
    widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
    nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
@@ -1222,31 +1237,37 @@ EliminarCliente (void)
    widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
    credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
+   widget = GTK_WIDGET (builder_get (builder, "radio_btn_mod_aff_imp_yes"));
+   afecto_impuesto = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+
    if (strcmp (nombre, "") == 0)
-     AlertMSG (widget, "El Campo Nombre no puede estar vacio");
+     AlertMSG (widget, "El Campo Nombre no puede estar vacío");
    else if (strcmp (paterno, "") == 0)
-     AlertMSG (widget, "El Apellido Paterno no puede estar vacio");
+     AlertMSG (widget, "El Apellido Paterno no puede estar vacío");
    else if (strcmp (materno, "") == 0)
-     AlertMSG (widget, "El Apellido Materno no puede estar vacio");
+     AlertMSG (widget, "El Apellido Materno no puede estar vacío");
    else if (strcmp (rut[0], "") == 0)
-     AlertMSG (widget, "El Campo rut no debe estar vacio");
+     AlertMSG (widget, "El Campo rut no debe estar vacío");
    else if (strcmp (rut[1], "") == 0)
-     AlertMSG (widget, "El Campo verificador del ru no puede estar vacio");
+     AlertMSG (widget, "El Campo verificador del ru no puede estar vacío");
    else if (strcmp (direccion, "") == 0)
-     AlertMSG (widget, "La direccion no puede estar vacia");
+     AlertMSG (widget, "La direccion no puede estar vacía");
    else if (strcmp (fono, "") == 0)
-     AlertMSG (widget, "El campo telefonico no puede estar vacio");
+     AlertMSG (widget, "El campo telefonico no puede estar vacío");
    else if (strcmp (giro, "") == 0)
-     AlertMSG (widget, "El campo giro no puede estar vaciÃ³");
+     AlertMSG (widget, "El campo giro no puede estar vacío");
    else if (credito == 0)
-     AlertMSG (widget, "El campo credito no puede estar vacio");
+     AlertMSG (widget, "El campo credito no puede estar vacío");
    else
      {
        if (VerificarRut (rut[0], rut[1]))
          {
            q = g_strdup_printf ("UPDATE cliente SET nombre='%s', apell_p='%s', apell_m='%s', "
-                                "direccion='%s', telefono='%s', credito=%d, giro='%s' WHERE rut=%d",
-                                nombre, paterno, materno, direccion, fono, credito, giro, atoi (rut[0]));
+                                "direccion='%s', telefono='%s', credito=%d, giro='%s', afecto_impuesto=%s "
+				"WHERE rut=%d",
+                                nombre, paterno, materno, direccion, fono, credito, giro, 
+				(afecto_impuesto == TRUE) ? "true":"false", atoi (rut[0]));
+
            if (EjecutarSQL (q) != NULL)
              {
                widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));

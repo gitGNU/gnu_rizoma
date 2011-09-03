@@ -633,14 +633,16 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
 
 gboolean
 InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-              gchar *direccion, gchar *fono, gint credito, gchar *giro)
+              gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean afecto_impuesto)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito) "
-                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d)",
-                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito);
+  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito, "
+		       "                     afecto_impuesto) "
+                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d, %s)",
+                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito, 
+		       (afecto_impuesto == TRUE) ? "true":"false");
   res = EjecutarSQL (q);
   g_free (q);
 

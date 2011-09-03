@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.20"/>
   <!-- interface-naming-policy toplevel-contextual -->
@@ -11,7 +11,7 @@
     <property name="message_type">warning</property>
     <property name="buttons">yes-no</property>
     <property name="text">La caja  no ha sido cerrada</property>
-    <property name="secondary_text">&#xBF;Desea cerrar la caja ahora? La aplicaci&#xF3;n ser&#xE1; cerrada una vez que la caja sea cerrada</property>
+    <property name="secondary_text">¿Desea cerrar la caja ahora? La aplicación será cerrada una vez que la caja sea cerrada</property>
     <signal name="response" handler="on_dialog_cash_box_opened_response"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox3">
@@ -45,7 +45,7 @@
     <property name="transient_for">wnd_sale_credit</property>
     <property name="message_type">error</property>
     <property name="buttons">close</property>
-    <property name="text">El cliente sobrepasa su limite de cr&#xE9;dito</property>
+    <property name="text">El cliente sobrepasa su limite de crédito</property>
     <signal name="response" handler="gtk_widget_hide" object="msg_credit_out"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox5">
@@ -83,8 +83,8 @@
     <property name="transient_for">wnd_sell</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text">&#xBF;Realmente desea salir?</property>
-    <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
+    <property name="text">¿Realmente desea salir?</property>
+    <property name="secondary_text">Se perderá toda información no guardada</property>
     <signal name="response" handler="exit_response"/>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child internal-child="vbox">
@@ -584,7 +584,7 @@
   <object class="GtkWindow" id="ventas_buscar">
     <property name="height_request">400</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="title" translatable="yes" context="yes">Rizoma: Buscar Mercader&#xED;a</property>
+    <property name="title" translatable="yes" context="yes">Rizoma: Buscar Mercadería</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
@@ -1239,7 +1239,7 @@
     <property name="height_request">250</property>
     <property name="border_width">5</property>
     <property name="modal">True</property>
-    <property name="window_position">center-on-parent</property>
+    <property name="window_position">center</property>
     <property name="transient_for">wnd_sale_credit</property>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete" object="wnd_client_search"/>
     <child>
@@ -1566,7 +1566,7 @@
                 <child>
                   <object class="GtkLabel" id="label53">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">N&#xB0; de Venta:</property>
+                    <property name="label" translatable="yes">N° de Venta:</property>
                   </object>
                 </child>
                 <child>
@@ -1884,7 +1884,7 @@
                     <child>
                       <object class="GtkLabel" id="label36">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes" context="yes">Direcci&#xF3;n:</property>
+                        <property name="label" translatable="yes" context="yes">Dirección:</property>
                       </object>
                       <packing>
                         <property name="top_attach">2</property>
@@ -1942,7 +1942,7 @@
                     <child>
                       <object class="GtkLabel" id="label40">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes" context="yes">N&#xFA;mero:</property>
+                        <property name="label" translatable="yes" context="yes">Número:</property>
                       </object>
                       <packing>
                         <property name="top_attach">1</property>
@@ -2243,7 +2243,7 @@
             <child>
               <object class="GtkLabel" id="label33">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Direcci&#xF3;n:</property>
+                <property name="label" translatable="yes" context="yes">Dirección:</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -2343,7 +2343,7 @@
                     <child>
                       <object class="GtkImage" id="image1">
                         <property name="visible">True</property>
-                        <property name="stock">gtk-missing-image</property>
+                        <property name="stock">gtk-ok</property>
                       </object>
                       <packing>
                         <property name="position">0</property>
@@ -2551,7 +2551,7 @@
         <property name="spacing">5</property>
         <child>
           <object class="GtkButton" id="btn_credit">
-            <property name="label" translatable="yes" context="yes">Cr&#xE9;dito</property>
+            <property name="label" translatable="yes" context="yes">Crédito</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -2859,7 +2859,7 @@
                   <object class="GtkLabel" id="label16">
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
+                    <property name="label" translatable="yes" context="yes">Código Simple</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2892,7 +2892,7 @@
                 <child>
                   <object class="GtkLabel" id="label14">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes" context="yes">C&#xF3;digo de barras</property>
+                    <property name="label" translatable="yes" context="yes">Código de barras</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2950,7 +2950,7 @@
                 <child>
                   <object class="GtkLabel" id="label19">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;big&gt;Boleta N&#xBA;&lt;/big&gt;&lt;/b&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;big&gt;Boleta Nº&lt;/big&gt;&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -3565,7 +3565,7 @@
                     <property name="can_focus">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="max_length">30</property>
-                    <property name="invisible_char">&#x25CF;</property>
+                    <property name="invisible_char">●</property>
                     <property name="primary_icon_sensitive">True</property>
                     <property name="secondary_icon_sensitive">True</property>
                     <signal name="activate" handler="gtk_widget_grab_focus" object="entry_pass_vendedor"/>
@@ -3578,7 +3578,7 @@
                 <child>
                   <object class="GtkLabel" id="label1_change_seller">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Contrase&#xF1;a</property>
+                    <property name="label" translatable="yes">Contraseña</property>
                   </object>
                   <packing>
                     <property name="top_attach">1</property>
@@ -3591,7 +3591,7 @@
                     <property name="can_focus">True</property>
                     <property name="max_length">30</property>
                     <property name="visibility">False</property>
-                    <property name="invisible_char">&#x25CF;</property>
+                    <property name="invisible_char">●</property>
                     <signal name="activate" handler="ChangeSeller"/>
                   </object>
                   <packing>
@@ -3653,6 +3653,600 @@
             </child>
           </object>
           <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="wnd_mixed_pay_step1">
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="transient_for">wnd_sell</property>
+    <signal name="delete_event" handler="gtk_widget_hide" object="wnd_mixed_pay_step1"/>
+    <child>
+      <object class="GtkVBox" id="vbox1_mixed_pay">
+        <property name="visible">True</property>
+        <property name="border_width">5</property>
+        <child>
+          <object class="GtkFrame" id="frame1_mixed_pay">
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <child>
+              <object class="GtkAlignment" id="alignment1_mixed_pay">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkTable" id="table1_mixed_pay">
+                    <property name="visible">True</property>
+                    <property name="n_rows">4</property>
+                    <property name="n_columns">2</property>
+                    <child>
+                      <object class="GtkLabel" id="label_name_mixed_pay">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Nombre:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_amount_mixed_pay">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Monto:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="entry_rut_mixed_pay">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">•</property>
+                        <signal name="activate" handler="search_client"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_name_mixed_pay">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="entry_amount_mixed_pay">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="max_length">9</property>
+                        <property name="invisible_char">•</property>
+                        <signal name="activate" handler="gtk_widget_grab_focus" object="btn_accept_mixed_pay"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label1_espacio">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">3</property>
+                        <property name="bottom_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_rut_mixed_pay">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Rut:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="label1_mixed_pay">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&lt;b&gt;Primer Pago&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVBox" id="vbox2_mixed_pay">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkHBox" id="hbox1_mixed_pay">
+                <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_diff_amount">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Diferencia ($) :&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="lbl_diff_amount">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="pack_type">end</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkHSeparator" id="hseparator1_mixed_pay">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHButtonBox" id="hbuttonbox2_mixed_pay">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkButton" id="btn_cancel_mixed_pay">
+                    <property name="label">gtk-cancel</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="gtk_widget_hide" object="wnd_mixed_pay_step1"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_accept_mixed_pay">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="on_btn_accept_mixed_pay_clicked"/>
+                    <child>
+                      <object class="GtkHBox" id="hbox1_btn_sell">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkImage" id="image1_btn_sell">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-ok</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label1_btn_sell">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Vender</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="wnd_mixed_pay_step2">
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="transient_for">wnd_sell</property>
+    <signal name="delete_event" handler="gtk_widget_hide" object="wnd_mixed_pay_step2"/>
+    <child>
+      <object class="GtkVBox" id="vbox1_mixed_pay_2">
+        <property name="visible">True</property>
+        <property name="border_width">5</property>
+        <child>
+          <object class="GtkFrame" id="frame1_mixed_pay_2">
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <child>
+              <object class="GtkAlignment" id="alignment2_mixed_pay_2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkTable" id="table2_mixed_pay_2">
+                    <property name="visible">True</property>
+                    <property name="n_rows">3</property>
+                    <property name="n_columns">2</property>
+                    <child>
+                      <object class="GtkLabel" id="label1_pay_one_date">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Cliente:</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label2_pay_one_date">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Rut:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label3_pay_one_date">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Primer Pago:</property>
+                      </object>
+                      <packing>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_mixed_pay_client_name">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_mixed_pay_client_rut">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="lbl_mixed_pay_first_amount">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="label1_mixed_pay_2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&lt;b&gt;Primer pago&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVBox" id="vbox2_mixed_pay_2">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkFrame" id="frame2_mixed_pay2">
+                <property name="visible">True</property>
+                <property name="label_xalign">0</property>
+                <child>
+                  <object class="GtkAlignment" id="alignment1_mixed_pay_2">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkTable" id="table1_mixed_pay_2">
+                        <property name="visible">True</property>
+                        <property name="n_rows">5</property>
+                        <property name="n_columns">2</property>
+                        <child>
+                          <object class="GtkLabel" id="label_amount_mixed_pay_2">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Monto:</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_name_mixed_pay_2">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Nombre:</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_rut_mixed_pay_2">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Rut:</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_amount_mixed_pay2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="max_length">9</property>
+                            <property name="invisible_char">•</property>
+                            <signal name="activate" handler="gtk_widget_grab_focus" object="btn_accept_mixed_pay2"/>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">3</property>
+                            <property name="bottom_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_name_mixed_pay_2">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entry_rut_mixed_pay_2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">•</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHBox" id="hbox2_mixed_pay_2">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkRadioButton" id="radio_btn_effective_pay">
+                                <property name="label" translatable="yes">Efectivo</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="radio_btn_other_pay">
+                                <property name="label" translatable="yes">Otro</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">radio_btn_effective_pay</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label1_pay_type">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Tipo de pago:</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label1_espacio2">
+                            <property name="visible">True</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">4</property>
+                            <property name="bottom_attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="label2_mixed_pay_2">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Segundo pago&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox1_mixed_pay_2">
+                <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label_diff_amount_2">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Diferencia ($):&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="lbl_diff_amount2">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="pack_type">end</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHSeparator" id="hseparator1_mixed_pay2">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHButtonBox" id="hbuttonbox2_mixed_pay_2">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkButton" id="btn_cancel_mixed_pay2">
+                    <property name="label">gtk-cancel</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="gtk_widget_hide" object="wnd_mixed_pay_step2"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_accept_mixed_pay2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <child>
+                      <object class="GtkHBox" id="hbox1_btn_sell2">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkImage" id="image1_btn_sell_2">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-ok</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label1_btn_sell2">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Vender</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
             <property name="position">1</property>
           </packing>
         </child>
