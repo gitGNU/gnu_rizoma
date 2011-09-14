@@ -298,7 +298,7 @@ create table cliente (
   abonado                   int4,
   credito                   int4,
   credito_enable            bool,
-  activo		    bool default 't'
+  activo		    bool default 't',
   constraint pk_cliente primary key (rut)
 ) ;
 
@@ -698,7 +698,7 @@ create table cheque_rest (
   codigo		    varchar (30),
   monto			    int4,
   fecha_vencimiento         timestamp,
-  facturado		    bool default 'f'
+  facturado		    bool default 'f',
   pagado		    bool default 'f'
 ) ;
 
