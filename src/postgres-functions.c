@@ -40,6 +40,7 @@
 #include"utils.h"
 #include"factura_more.h"
 #include"caja.h"
+#include"manejo_productos.h"
 
 PGconn *connection;
 PGconn *connection2;
@@ -408,6 +409,10 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gchar *inst, *fecha;
   gchar *q;
   gchar *vale_dir = rizoma_get_value ("VALE_DIR");
+  
+  gint rut1, rut2;
+  gchar *rut1_gc, *rut2_gc, *dv1, *dv2;
+  gboolean afecto_impuesto1, afecto_impuesto2;
 
   id_documento = InsertNewDocument (tipo_documento, tipo_venta);
 
@@ -421,13 +426,17 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   venta_id = atoi (GetDataByOne (q));
   g_free (q);
 
+  //Si el pago es mixto, se debe asociar el id de esta venta al detalle del pago
+  if (tipo_venta == MIXTO)
+    EjecutarSQL (g_strdup_printf ("UPDATE pago_mixto SET id_sale = %d WHERE id_sale = 0", venta_id));
+      
   if (boleta != -1)
     set_ticket_number (boleta, tipo_documento);
 
-  SaveProductsSell (venta->header, venta_id);
+  SaveProductsSell (venta->header, venta_id, tipo_venta);
 
   // Imprimir vale
-  if (vale_dir != NULL && !g_str_equal(vale_dir, ""))
+  if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
     PrintVale (venta->header, venta_id, total);
 
   // Abrir Gaveta
@@ -443,39 +452,128 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
     case CASH:
       abrirGaveta ();
       break;
+    case MIXTO:
+      abrirGaveta ();
     }
 
   switch (tipo_venta)
     {
     case CHEQUE:
-      serie = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_serie)));
-      numero = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_numero)));
-      banco = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_banco)));
-      plaza = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_plaza)));
-      monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_monto))));
+      {
+	serie = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_serie)));
+	numero = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_numero)));
+	banco = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_banco)));
+	plaza = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_plaza)));
+	monto = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->cheque_monto))));
 
-      day = atoi (g_strdup_printf ("%c%c", cheque_date[0], cheque_date[1]));
-      month = atoi (g_strdup_printf ("%c%c", cheque_date[3], cheque_date[4]));
-      year = atoi (g_strdup_printf ("%c%c%c%c", cheque_date[6], cheque_date[7], cheque_date[8],
-                                    cheque_date[9]));
+	day = atoi (g_strdup_printf ("%c%c", cheque_date[0], cheque_date[1]));
+	month = atoi (g_strdup_printf ("%c%c", cheque_date[3], cheque_date[4]));
+	year = atoi (g_strdup_printf ("%c%c%c%c", cheque_date[6], cheque_date[7], cheque_date[8],
+				      cheque_date[9]));
 
-      SaveDataCheque (venta_id, serie, atoi (numero), banco, plaza, monto, day, month, year);
+	SaveDataCheque (venta_id, serie, atoi (numero), banco, plaza, monto, day, month, year);
+      }
       break;
 
     case TARJETA:
-      inst = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_inst)));
-      numero = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_numero)));
-      fecha = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_fecha)));
+      {
+	inst = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_inst)));
+	numero = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_numero)));
+	fecha = g_strdup (gtk_entry_get_text (GTK_ENTRY (venta->tarjeta_fecha)));
 
-      SaveVentaTarjeta (venta_id, inst, numero, fecha);
+	SaveVentaTarjeta (venta_id, inst, numero, fecha);
+      }
       break;
 
     case CREDITO:
-      InsertDeuda (venta_id, atoi (rut), seller);
+      {
+	InsertDeuda (venta_id, atoi (rut), seller);
 
-      if (GetResto (atoi (rut)) != 0)
-        CancelarDeudas (0, atoi (rut));
+	if (GetResto (atoi (rut)) != 0)
+	  CancelarDeudas (0, atoi (rut));
+      }
       break;
+
+    case CHEQUE_RESTAURANT:
+      {
+	//Ingresar el o los cheques
+	ingresar_cheques (pago_chk_rest->id_emisor, venta_id, pago_chk_rest->header);
+      }
+      break;
+
+    case MIXTO:
+      {
+	//Ingreso de la info en pagos mixtos
+	gchar **str_splited;
+
+	//Se agrega el monto del pago credito a la deuda
+	if (pago_mixto->tipo_pago1 == CREDITO)
+	  {
+	    rut1_gc = g_strdup (pago_mixto->rut_credito1);
+	    str_splited = parse_rut (pago_mixto->rut_credito1);
+	    InsertDeuda (venta_id, atoi (str_splited[0]), seller);
+
+	    if (GetResto (atoi (str_splited[0])) != 0)
+	      CancelarDeudas (0, atoi (str_splited[0]));
+
+	    afecto_impuesto1 = TRUE;
+	  }
+
+	if (pago_mixto->tipo_pago2 == CREDITO)
+	  {
+	    rut2_gc = g_strdup (pago_mixto->rut_credito2);
+	    str_splited = parse_rut (pago_mixto->rut_credito2);
+	    InsertDeuda (venta_id, atoi (str_splited[0]), seller);
+
+	    if (GetResto (atoi (str_splited[0])) != 0)
+	      CancelarDeudas (0, atoi (str_splited[0]));
+
+	    afecto_impuesto2 = TRUE;
+	  }
+
+	//Se ingresan los cheques correspondientes
+	if (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT)
+	  {
+	    rut1_gc = g_strdup (pago_mixto->check_rest1->rut_emisor);
+	    ingresar_cheques (pago_mixto->check_rest1->id_emisor, 
+			      venta_id, pago_mixto->check_rest1->header);
+	    afecto_impuesto1 = FALSE;
+	  }
+	if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT)
+	  {
+	    rut2_gc = g_strdup (pago_mixto->check_rest2->rut_emisor);
+	    ingresar_cheques (pago_mixto->check_rest2->id_emisor, 
+			      venta_id, pago_mixto->check_rest2->header);
+	    afecto_impuesto2 = FALSE;
+	  }
+
+	//Si el segundo pago es en efectivo
+	if (pago_mixto->tipo_pago2 == CASH)
+	  {
+	    rut2_gc = g_strdup_printf ("0-0");
+	    afecto_impuesto2 = TRUE;
+	  }
+	  
+	//Se registra el detalle del pago mixto
+	str_splited = parse_rut (rut1_gc);
+	rut1 = atoi (str_splited[0]);
+	dv1 = str_splited[1];
+
+	str_splited = parse_rut (rut2_gc);
+	rut2 = atoi (str_splited[0]);
+	dv2 = str_splited[1];
+
+	EjecutarSQL (g_strdup_printf ("INSERT INTO pago_mixto VALUES (DEFAULT, %d, %d, %d, %d, %d, '%s', '%s', %s, %s, %d, %d)",
+				      venta_id,
+				      pago_mixto->tipo_pago1, pago_mixto->tipo_pago2,
+				      rut1, rut2, dv1, dv2,
+				      (afecto_impuesto1==TRUE) ? "true" : "false",
+				      (afecto_impuesto2==TRUE) ? "true" : "false",
+				      pago_mixto->monto_pago1, pago_mixto->monto_pago2));
+
+      }
+      break;
+
     case CASH:
       break;
     default:
@@ -633,16 +731,33 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
 
 gboolean
 InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-              gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean afecto_impuesto)
+              gchar *direccion, gchar *fono, gint credito, gchar *giro)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito, "
-		       "                     afecto_impuesto) "
-                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d, %s)",
-                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito, 
-		       (afecto_impuesto == TRUE) ? "true":"false");
+  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito) "
+                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d)",
+                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+gboolean
+insert_emisores (gchar *rut, gchar *dv, gchar *razon_social, gchar *telefono, gchar *direccion,
+		 gchar *comuna, gchar *ciudad, gchar *giro)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("INSERT INTO emisor_cheque (rut, dv, razon_social, telefono, direccion, comuna, ciudad, giro) "
+                       "VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+                       rut, dv, razon_social, telefono, direccion, comuna, ciudad, giro);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -707,8 +822,8 @@ SearchDeudasCliente (gint rut)
 
   q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
                        "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
-                       "date_part ('second', fecha) FROM venta WHERE id IN (SELECT id_venta FROM deuda WHERE "
-                       "rut_cliente=%d AND pagada='f') AND id NOT IN (SELECT id_sale FROM venta_anulada) "
+                       "date_part ('second', fecha) "
+		       "FROM search_deudas_cliente (%d) "
 		       "ORDER BY id DESC", rut);
   res = EjecutarSQL (q);
   g_free (q);
@@ -740,9 +855,7 @@ CancelarDeudas (gint abonar, gint rut)
   res = EjecutarSQL (q);
   g_free (q);
 
-  q = g_strdup_printf ("SELECT * FROM venta WHERE id IN "
-                       "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') "
-		       "AND id NOT IN (SELECT id_sale FROM venta_anulada) "
+  q = g_strdup_printf ("SELECT * FROM search_deudas_cliente (%d) "
 		       "ORDER BY fecha asc", rut);
   res = EjecutarSQL (q);
   g_free (q);
@@ -759,13 +872,13 @@ CancelarDeudas (gint abonar, gint rut)
 
   for (i = 0; i < tuples; i++)
     {
-      monto_venta = atoi (PQgetvalue (res, i, 1));
+      monto_venta = atoi (PQvaluebycol (res, i, "monto"));
 
       if (monto_venta <= abonar)
         {
           abonar -= monto_venta;
 
-          PagarDeuda (PQgetvalue (res, i, 0));
+          PagarDeuda (PQvaluebycol (res, i, "id"));
         }
     }
 
@@ -1024,13 +1137,45 @@ ClientDelete (gint rut)
   PGresult *res = NULL;
 
   if (DeudaTotalCliente (rut) == 0)
-    res = EjecutarSQL (g_strdup_printf ("DELETE FROM cliente WHERE rut=%d", rut));
+    res = EjecutarSQL (g_strdup_printf ("UPDATE cliente SET activo = 'f' WHERE rut=%d", rut));
 
   if (res != NULL)
     return TRUE;
   else
     return FALSE;
 }
+
+gboolean
+emisor_delete (gint id)
+{
+  PGresult *res = NULL;
+
+  //La consulta comprueba si hay facturas que no esten facturadas ni pagadas que pertenezcan al proveedor especificado
+  if (!DataExist (g_strdup_printf ("SELECT * FROM cheque_rest WHERE id_emisor = %d AND facturado = 'f' AND pagado = 'f'", id)))
+    {
+      res = EjecutarSQL (g_strdup_printf ("UPDATE emisor_cheque SET activo = 'f' WHERE id=%d", id));
+      return TRUE;
+    }
+  else
+    return FALSE;
+}
+
+
+gboolean
+fact_cheque_rest (gint id)
+{
+  PGresult *res = NULL;
+
+  //La consulta comprueba si hay facturas que no esten facturadas ni pagadas que pertenezcan al proveedor especificado
+  if (!DataExist (g_strdup_printf ("SELECT * FROM cheque_rest WHERE id = %d AND facturado = 't'", id)))
+    {
+      res = EjecutarSQL (g_strdup_printf ("UPDATE cheque_rest SET facturado = 't' WHERE id=%d", id));
+      return TRUE;
+    }
+  else
+    return FALSE;
+}
+
 
 gboolean
 DataProductUpdate (gchar *barcode, gchar *codigo, gchar *description, gint precio)
@@ -1449,7 +1594,7 @@ FiFo (gchar *barcode, gint compra)
  */
 
 gboolean
-SaveProductsSell (Productos *products, gint id_venta)
+SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 {
   PGresult *res;
   Productos *header = products;
@@ -1457,9 +1602,25 @@ SaveProductsSell (Productos *products, gint id_venta)
   gchar *iva_unit, *otros_unit;
   gint margen;
   gchar *cantidad;
-  gint precio;
+  gint precio, pago1, pago2, total_a_pagar;
   gchar *q;
   gdouble pre;
+  gboolean is_imp1, is_imp2;
+
+  gdouble iva_promedio, otros_promedio;
+  gdouble impuestos;
+  gdouble proporcion_producto, neto;
+  gint monto_afecto, monto_no_afecto;
+
+  if (tipo_venta == MIXTO)
+    {
+      pago1 = pago_mixto->monto_pago1;
+      pago2 = pago_mixto->monto_pago2;
+      total_a_pagar = pago_mixto->total_a_pagar;
+      is_imp1 = (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+      is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+    }
+
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
@@ -1502,7 +1663,7 @@ SaveProductsSell (Productos *products, gint id_venta)
 		  products->product->cantidad) * (gdouble)products->product->iva / 100;
 	    }
       /*
-
+	
        */
       else
 	    {
@@ -1536,8 +1697,71 @@ SaveProductsSell (Productos *products, gint id_venta)
       /* Se obtiene el iva y otros impuestos con . en vez de ,
 	 y de esa forma poder ingresarlos en la consulta SQL */
 
-      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
-      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+      if (tipo_venta == CHEQUE_RESTAURANT) //PIKO PIKO
+	{
+	  iva_unit = g_strdup_printf ("0");
+	  otros_unit = g_strdup_printf ("0");
+	}
+      else if (tipo_venta == MIXTO)
+	{
+	  // Si ambos pagos son afecto a impuesto, no se hacen tratamientos especiales
+	  if (is_imp1 == TRUE && is_imp2 == TRUE)
+	    {
+	      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
+	      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+	    }
+	  //Si niguno es afecto a impuesto
+	  else if (is_imp1 == FALSE && is_imp2 == FALSE)
+	    {
+	      iva_unit = "0";
+	      otros_unit = "0";
+	    }
+	  //Si uno es afecto a impuesto y el otro no
+	  else
+	    {
+	      if (is_imp1 == FALSE && is_imp2 == TRUE)
+		{		  
+		  //monto afecto = total - pago no afecto;
+		  monto_afecto = total_a_pagar - pago1;
+		  //monto no afecto = total - pago afecto;
+		  monto_no_afecto = total_a_pagar - pago2;
+		}
+	      else if (is_imp1 == TRUE && is_imp2 == FALSE)
+		{
+		  //monto afecto = total - pago no afecto;
+		  monto_afecto = total_a_pagar - pago2;
+		  //monto no afecto = total - pago afecto;
+		  monto_no_afecto = total_a_pagar - pago1;
+		}
+	      
+	      proporcion_producto  = ((precio * products->product->cantidad) / total_a_pagar);
+		  
+	      monto_afecto = monto_afecto * proporcion_producto;
+	      monto_no_afecto = monto_no_afecto * proporcion_producto;
+	      iva = GetIVA (products->product->barcode) / 100;
+		  		  
+	      otros = GetOtros (products->product->barcode);
+	      if (otros != -1 || otros != 0)
+		otros = otros / 100;
+	      else
+		otros = 0;
+
+	      impuestos = (iva+otros+1);
+	      neto = monto_afecto / impuestos;
+	      iva = neto * iva;
+	      otros = neto * otros;
+
+	      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
+	      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+		  
+	      impuestos = iva + otros;		  
+	    }	      
+	}
+      else
+	{
+	  iva_unit = CUT (g_strdup_printf ("%.3f", iva));
+	  otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+	}
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle */
@@ -1647,6 +1871,41 @@ SaveDataCheque (gint id_venta, gchar *serie, gint number, gchar *banco, gchar *p
   else
     return FALSE;
 }
+
+
+gboolean
+ingresar_cheques (gint id_emisor, gint id_venta, ChequesRestaurant *header)
+{
+  ChequesRestaurant *cheques = header;
+  PGresult *res;
+  gchar *q;
+
+  do
+    {
+      //Si no hay fecha de vencimiento, no guarda una fecha
+      if (g_str_equal (cheques->cheque->fecha_vencimiento, ""))
+	q = g_strdup_printf ("INSERT INTO cheque_rest (id, id_emisor, id_venta, codigo, monto, facturado)"
+			     "VALUES (DEFAULT, %d, %d, '%s', %d, false)", 
+			     id_emisor, id_venta, cheques->cheque->codigo, cheques->cheque->monto);
+      else
+	q = g_strdup_printf ("INSERT INTO cheque_rest (id, id_emisor, id_venta, codigo, monto, fecha_vencimiento, facturado)"
+			     "VALUES (DEFAULT, %d, %d, '%s', %d, to_timestamp('%s', 'DDMMYY'), false)", 
+			     id_emisor, id_venta, cheques->cheque->codigo, cheques->cheque->monto, cheques->cheque->fecha_vencimiento);
+
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      if (res == NULL)
+	return FALSE;
+      
+      cheques = cheques->next;
+
+    } while (cheques != header);
+
+  if (res != NULL)
+    return TRUE;
+}
+
 
 gint
 ReturnIncompletProducts (gint id_venta)

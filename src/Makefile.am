@@ -45,6 +45,7 @@ credito.c credito.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
 manejo_productos.c manejo_productos.h \
+manejo_pagos.c manejo_pagos.h \
 boleta.c boleta.h \
 datos_negocio.c datos_negocio.h \
 printing.c printing.h \

@@ -87,6 +87,9 @@ drop table if exists venta_detalle cascade;
 drop table if exists color cascade;
 drop table if exists sub_depto cascade;
 drop table if exists clothes_code cascade;
+drop table if exists pago_mixto cascade;
+drop table if exists emisor_cheque cascade;
+drop table if exists cheque_rest cascade;
 
 -- Generated SQL Schema
 -- --------------------------------------------------------------------
@@ -295,7 +298,7 @@ create table cliente (
   abonado                   int4,
   credito                   int4,
   credito_enable            bool,
-  afecto_impuesto	    bool default 't',
+  activo		    bool default 't'
   constraint pk_cliente primary key (rut)
 ) ;
 
@@ -657,6 +660,48 @@ create table venta (
   constraint pk_venta primary key (id)
 ) ;
 
+-- Pago_mixto
+create table pago_mixto (
+  id                   	    serial not null primary key,         	     
+  id_sale                   int4 not null,
+  tipo_pago1		    int2,
+  tipo_pago2		    int2,
+  rut1 			    int4,
+  rut2                      int4,
+  dv1                       varchar(1),
+  dv2                       varchar(1),
+  aff_imp1		    bool,
+  aff_imp2		    bool,
+  monto1                    int4,
+  monto2                    int4
+) ;
+
+-- Emisor_cheque
+create table emisor_cheque (
+  id                   	    serial not null primary key,
+  rut			    int4,
+  dv                        varchar(1),
+  razon_social		    varchar (50),
+  telefono		    varchar(15),
+  direccion		    varchar(35),
+  comuna		    varchar(15),
+  ciudad		    varchar(15),
+  giro			    varchar(30),
+  activo		    bool default 't'
+) ;
+
+-- Cheques_rest
+create table cheque_rest (
+  id                   	    serial not null primary key,
+  id_emisor		    int4 not null,
+  id_venta		    int4 not null,
+  codigo		    varchar (30),
+  monto			    int4,
+  fecha_vencimiento         timestamp,
+  facturado		    bool default 'f'
+  pagado		    bool default 'f'
+) ;
+
 -- Venta_anulada
 create table venta_anulada (
   id_sale                   int not null,
@@ -825,6 +870,15 @@ alter table traspaso_detalle add constraint fk_productos_barcode
 alter table traspaso_detalle add constraint fk_traspaso_id
   foreign key (id_traspaso)
   references traspaso (id) ;
+alter table pago_mixto add constraint fk_pago_mixto_venta
+  foreign key (id_sale)
+  references venta (id) ;
+alter table cheque_rest add constraint fk_cheque_rest_emisor_cheque
+  foreign key (id_emisor)
+  references emisor_cheque (id) ;
+alter table cheque_rest add constraint fk_cheque_rest_venta
+  foreign key (id_venta)
+  references venta (id) ;
 
 
 -- Indices

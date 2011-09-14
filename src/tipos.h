@@ -32,12 +32,12 @@ GtkWidget *main_window;
 
 gchar *config_profile;
 
-// Solo vamos a tener un peque�o display de ventas ?
+// Solo vamos a tener un pequeño display de ventas ?
 gboolean solo_venta;
 
 enum sell_type {SIMPLE, FACTURA, GUIA, VENTA};
 
-enum pay_way {CASH, CREDITO, CHEQUE, TARJETA};
+enum pay_way {CASH, CREDITO, CHEQUE_RESTAURANT, MIXTO, CHEQUE, TARJETA}; //CHEQUE_RESTAURANT = No Afecto Impuesto
 
 typedef struct _main_box
 {
@@ -269,6 +269,79 @@ typedef struct _ventas
 Venta;
 
 Venta *venta;
+
+//Información cheques de restaurant
+typedef struct _cheque_restaurant
+{
+  gchar *codigo;
+  gchar *fecha_vencimiento;
+  gint monto;
+  gint lugar;
+
+  GtkTreeIter iter;
+} 
+ChequeRest;
+
+ChequeRest *cheque_rest;
+
+typedef struct _cheques_restaurant
+{
+  struct _cheques_restaurant *back;
+  ChequeRest *cheque;
+  struct _cheques_restaurant *next;
+}
+ChequesRestaurant;
+
+ChequesRestaurant *cheques_restaurant;
+
+//Información cheques de restaurant
+typedef struct _pago_cheques_restaurant
+{
+  //Lista cheques restaurant
+  ChequesRestaurant *header;
+  ChequesRestaurant *cheques;
+
+  ChequesRestaurant *cheques_check;
+    
+  //Emisor del cheque
+  gchar *rut_emisor;
+  gchar *nombre_emisor;
+  gint id_emisor;
+
+  //El treeview correspondiente
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+}
+PagoChequesRest;
+
+PagoChequesRest *pago_chk_rest;
+
+
+typedef struct _pago_mixto
+{
+  /*Primer Pago*/
+  gint tipo_pago1;
+  /*Datos cheque restaurant*/
+  PagoChequesRest *check_rest1;
+  /*Datos credito*/
+  gchar *rut_credito1;
+  gint monto_pago1;
+    
+  /*Segundo Pago*/
+  gint tipo_pago2;
+  /*Datos cheque restaurant*/
+  PagoChequesRest *check_rest2;
+  /*Datos credito*/
+  gchar *rut_credito2;
+  gint monto_pago2;
+
+  gint total_a_pagar;
+}
+PagoMixto;
+
+PagoMixto *pago_mixto;
+
 
 typedef struct _ingreso_producto
 {

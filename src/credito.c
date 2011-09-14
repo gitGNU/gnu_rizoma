@@ -42,9 +42,11 @@
 GtkWidget *modificar_window;
 
 /////////do not delete
-///used for the print in the client tab
+///used for the print in the client and emisores tab
 Print *client_list;
 Print *client_detail;
+
+Print *emisores_list;
 /////////
 
 /**
@@ -95,9 +97,9 @@ search_client (GtkWidget *widget, gpointer data)
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_search_client")), string);
 
   q = g_strdup_printf ("SELECT rut::varchar || '-' || dv, nombre || ' ' || apell_p, telefono, credito_enable, direccion "
-                       "FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
+                       "FROM cliente WHERE activo = 't' AND (lower(nombre) LIKE lower('%s%%') OR "
                        "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%') OR "
-                       "rut::varchar like ('%s%%')",
+                       "rut::varchar like ('%s%%'))",
                        string, string, string, string);
   res = EjecutarSQL (q);
   g_free (q);
@@ -202,7 +204,6 @@ clientes_box ()
   client_detail = (Print *) malloc (sizeof (Print));
   client_detail->son = (Print *) malloc (sizeof (Print));
 
-
   ///////////////// clients
   store = gtk_list_store_new (7,
                               G_TYPE_INT,     // id
@@ -224,7 +225,7 @@ clientes_box ()
                     G_CALLBACK (DatosDeudor), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
                                                      "text", 0,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
@@ -504,6 +505,222 @@ clientes_box ()
 }
 
 void
+emisores_box ()
+{
+  GtkWidget *widget;
+  GtkWidget *tree;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  GtkListStore *cheques;
+
+  emisores_list = (Print *) malloc (sizeof (Print));
+  emisores_list->son = (Print *) malloc (sizeof (Print));
+
+  // Emisores ----------------------------------------------
+  store = gtk_list_store_new (5,
+			      G_TYPE_INT,     //Id
+                              G_TYPE_STRING,  //rut
+                              G_TYPE_STRING,  //razon social
+                              G_TYPE_STRING,  //phone
+                              G_TYPE_STRING); //direccion
+  //FillClientStore (store);
+
+  tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_emisores"));
+  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
+
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+		    G_CALLBACK (datos_cheques_restaurant), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_min_width (column, 150);
+  gtk_tree_view_column_set_max_width (column, 200);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Razon Social", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, TRUE);
+  gtk_tree_view_column_set_min_width (column, 200);
+  gtk_tree_view_column_set_max_width (column, 300);
+
+  column = gtk_tree_view_column_new_with_attributes ("Telefono", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 100);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Direccion", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 200);
+
+  emisores_list->tree = GTK_TREE_VIEW (tree);
+  emisores_list->title = "Lista de Emisores";
+  emisores_list->name = "Emisores";
+  emisores_list->date_string = NULL;
+  emisores_list->cols[0].name = "Rut";
+  emisores_list->cols[0].num = 1;
+  emisores_list->cols[1].name = "Razon Social";
+  emisores_list->cols[1].num = 2;
+  emisores_list->cols[2].name = "Telefono";
+  emisores_list->cols[2].num = 3;
+  emisores_list->cols[3].name = "Direccion";
+  emisores_list->cols[3].num = 4;
+  emisores_list->cols[4].name = NULL;
+
+  // Cheques ----------------------------------------------
+  cheques = gtk_list_store_new (8,
+				G_TYPE_INT,     //id
+				G_TYPE_INT,     //id_venta
+				G_TYPE_STRING,  //Fecha Venta
+				G_TYPE_STRING,  //Monto Venta
+				G_TYPE_STRING,  //Codigo Cheque
+				G_TYPE_STRING,  //Monto Cheque
+				G_TYPE_STRING,  //Fecha Vencimiento
+				G_TYPE_STRING);  //Facturado (Si - No)
+  //G_TYPE_STRING); //Pagado (Si - No)
+
+  tree = GTK_WIDGET (gtk_builder_get_object (builder, "treeview_cheques"));
+  gtk_tree_view_set_model(GTK_TREE_VIEW (tree), GTK_TREE_MODEL (cheques));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID Venta", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("F.Venta", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Venta", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cod. Cheque", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Cheque", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha Venc.", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Facturado", renderer,
+                                                     "text", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 65);
+  gtk_tree_view_column_set_max_width (column, 65);
+
+  /* renderer = gtk_cell_renderer_text_new (); */
+  /* column = gtk_tree_view_column_new_with_attributes ("Pagado", renderer, */
+  /*                                                    "text", 8, */
+  /*                                                    NULL); */
+  /* gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column); */
+  /* gtk_tree_view_column_set_alignment (column, 0.5); */
+  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
+  /* gtk_tree_view_column_set_resizable (column, FALSE); */
+  /* gtk_tree_view_column_set_min_width (column, 65); */
+  /* gtk_tree_view_column_set_max_width (column, 65); */
+
+  /* We fill the struct to print the last two tree views */
+  emisores_list->son->tree = GTK_TREE_VIEW (tree);
+  emisores_list->son->cols[0].name = "ID Venta";
+  emisores_list->son->cols[0].num = 1;
+  emisores_list->son->cols[1].name = "Fecha Venta";
+  emisores_list->son->cols[1].num = 2;
+  emisores_list->son->cols[2].name = "Monto Venta";
+  emisores_list->son->cols[2].num = 3;
+  emisores_list->son->cols[3].name = "Codigo Cheque";
+  emisores_list->son->cols[3].num = 4;
+  emisores_list->son->cols[4].name = "Monto Cheque";
+  emisores_list->son->cols[4].num = 5;
+  emisores_list->son->cols[5].name = "Fecha Venc.";
+  emisores_list->son->cols[5].num = 6;
+  emisores_list->son->cols[6].name = "Facturado";
+  emisores_list->son->cols[6].num = 7;
+  //emisores_list->son->cols[7].name = "Pagado";
+  //emisores_list->son->cols[7].num = 8;
+  emisores_list->son->cols[7].name = NULL;
+
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_print_emisores")), "clicked",
+		    G_CALLBACK (PrintTwoTree), (gpointer)emisores_list);
+
+  search_emisor ();
+  //setup_print_menu();
+}
+
+void
 AddClient (GtkWidget *widget, gpointer data)
 {
   GtkWidget *wnd;
@@ -565,7 +782,6 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
   gchar *fono;
   gchar *giro;
   gint credito;
-  gboolean afecto_impuesto;
   GtkWidget *wnd;
 
   wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient"));
@@ -579,7 +795,6 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
   fono = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_client_phone"))));
   giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_client_giro"))));
   credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY(gtk_builder_get_object(builder, "entry_client_limit_credit")))));
-  afecto_impuesto = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_aff_imp_yes")));
 
   if (strcmp (nombre, "") == 0)
     AlertMSG (wnd, "El Campo Nombre no puede estar vacío");
@@ -605,7 +820,7 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
     {
       if (VerificarRut (rut, ver) == TRUE)
         {
-          if (!(InsertClient (nombre, paterno, materno, rut, ver, direccion, fono, credito, giro, afecto_impuesto)))
+          if (!(InsertClient (nombre, paterno, materno, rut, ver, direccion, fono, credito, giro)))
             {
               ErrorMSG(wnd, "No fue posible agregar el cliente a la base de datos");
               return;
@@ -711,9 +926,10 @@ FillClientStore (GtkListStore *store)
   return 0;
 }
 
+
 void
 DatosDeudor (GtkTreeSelection *treeselection,
-             gpointer          user_data)
+             gpointer user_data)
 {
   GtkWidget *widget;
   GtkTreeIter iter;
@@ -748,6 +964,75 @@ DatosDeudor (GtkTreeSelection *treeselection,
       FillVentasDeudas (rut);
     }
 }
+
+
+void
+datos_cheques_restaurant (GtkTreeSelection *treeselection,
+			  gpointer user_data)
+{
+  GtkWidget *widget;
+  GtkTreeIter iter;
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  gint id;
+
+  gint tuples, i;
+  PGresult *res;
+  gchar *q;
+
+  if (gtk_tree_selection_get_selected (treeselection, NULL, &iter))
+    {
+      treeview = gtk_tree_selection_get_tree_view (treeselection);
+
+      gtk_tree_model_get (gtk_tree_view_get_model(treeview), &iter,
+                          0, &id,
+                          -1);
+
+      /* deuda = DeudaTotalCliente (rut); */
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "treeview_cheques"));
+      store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
+      gtk_list_store_clear (store);
+
+      q = g_strdup_printf ("SELECT cr.id, cr.id_venta, cr.codigo, cr.facturado, cr.monto, "
+			   "cr.pagado, v.monto AS monto_venta, "
+
+			   "date_part ('year', v.fecha) AS fvta_year, "
+			   "date_part ('month', v.fecha) AS fvta_month, "
+			   "date_part ('day', v.fecha) AS fvta_day, "
+			   
+			   "date_part ('year', fecha_vencimiento) AS fvto_year, "
+			   "date_part ('month', fecha_vencimiento) AS fvto_month, "
+			   "date_part ('day', fecha_vencimiento) AS fvto_day "
+
+			   "FROM cheque_rest cr INNER JOIN venta v ON cr.id_venta = v.id "
+			   "WHERE id_emisor = %d", id);
+      res = EjecutarSQL (q);
+      tuples = PQntuples (res);
+      
+      for (i = 0; i < tuples; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, atoi (PQvaluebycol (res, i, "id")),
+			      1, atoi (PQvaluebycol (res, i, "id_venta")),
+			      2, g_strdup_printf ("%s-%s-%s",
+						  PQvaluebycol (res, i, "fvta_day"),
+						  PQvaluebycol (res, i, "fvta_month"),
+						  PQvaluebycol (res, i, "fvta_year")),
+			      3, PutPoints (PQvaluebycol (res, i, "monto_venta")),
+			      4, PQvaluebycol (res, i, "codigo"),
+			      5, PutPoints (PQvaluebycol (res, i, "monto")),
+			      6, g_strdup_printf ("%s-%s-%s",
+						  PQvaluebycol (res, i, "fvto_day"),
+						  PQvaluebycol (res, i, "fvto_month"),
+						  PQvaluebycol (res, i, "fvto_year")),
+			      7, g_strdup_printf ("%s", g_str_equal (PQvaluebycol (res, i, "facturado"), "f") ? "NO" : "SI"),
+			      //8, g_strdup_printf ("%s", g_str_equal (PQvaluebycol (res, i, "pagado"), "f") ? "NO" : "SI"),
+			      -1);
+	}
+    }
+}
+
 
 void
 FillVentasDeudas (gint rut)
@@ -1024,7 +1309,6 @@ ModificarCliente (void)
   gchar *credito;
   gchar *rut_ver, *giro;
   gint rut;
-  gboolean afecto_impuesto;
 
   treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_clients"));
   selection = gtk_tree_view_get_selection(treeview);
@@ -1049,7 +1333,6 @@ ModificarCliente (void)
       credito = PQvaluebycol(res, 0, "credito");
       rut_ver = PQvaluebycol(res, 0, "dv");
       giro = PQvaluebycol(res, 0, "giro");
-      afecto_impuesto = ((g_str_equal (PQvaluebycol (res, 0, "afecto_impuesto"), "t")) ? TRUE : FALSE);
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
       gtk_entry_set_text (GTK_ENTRY (widget), nombre);
@@ -1075,17 +1358,6 @@ ModificarCliente (void)
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
       gtk_entry_set_text (GTK_ENTRY (widget), credito);
       
-      if (afecto_impuesto == TRUE)
-	{
-	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "radio_btn_mod_aff_imp_yes"));
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
-	}
-      else
-	{
-	  widget = GTK_WIDGET (gtk_builder_get_object(builder, "radio_btn_mod_aff_imp_no"));
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
-	}
-
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_modclient"));
       gtk_window_set_transient_for(GTK_WINDOW(widget), GTK_WINDOW(gtk_builder_get_object(builder, "wnd_admin")));
       gtk_widget_show_all(widget);
@@ -1185,10 +1457,93 @@ EliminarCliente (void)
         {
           gtk_list_store_remove(store, &iter);
           widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
-          statusbar_push (GTK_STATUSBAR(widget), "El Client fue eliminado con exito", 3000);
+          statusbar_push (GTK_STATUSBAR(widget), "El cliente fue eliminado con exito", 3000);
         }
       else
         ErrorMSG (GTK_WIDGET (treeview), "No se pudo elminar el cliente, compruebe que no tenga saldo deudor");
+    }
+}
+
+/**
+ * Callback connected to the delele an emisor button present in the
+ * emisor tab.
+ *
+ * This function deletes the emisor selected in the treeview
+ */
+void
+eliminar_emisor (void)
+{
+  GtkWidget *widget;
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  gint id;
+  GtkTreeIter iter;
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_emisores"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  selection = gtk_tree_view_get_selection (treeview);
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) && user_data->user_id == 1)
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &id,
+                          -1);
+
+      if (emisor_delete (id))
+        {
+          gtk_list_store_remove(store, &iter);
+          widget = GTK_WIDGET (gtk_builder_get_object (builder, "statusbar"));
+          statusbar_push (GTK_STATUSBAR (widget), "El emisor de cheques fue eliminado con exito", 3000);
+        }
+      else
+        ErrorMSG (GTK_WIDGET (treeview), "No se pudo elminar el emisor de cheques, compruebe que no tenga cheques por cobrar");
+    }
+}
+
+
+/**
+ * Callback connected to "facturar" button on the
+ * emisor tab.
+ *
+ * This function change the status "facturar" on "cheque_rest" table
+ */
+void
+facturar_cheque_restaurant (void)
+{
+  GtkWidget *widget;
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  gint id;
+  gchar *codigo;
+  GtkTreeIter iter;
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_cheques"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  selection = gtk_tree_view_get_selection (treeview);
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) && user_data->user_id == 1)
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &id,
+			  4, &codigo,
+                          -1);
+
+      if (fact_cheque_rest (id))
+        {
+	  //Actualiza la info
+	  //search_emisor ();
+	  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_emisores"));
+	  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+	  selection = gtk_tree_view_get_selection (treeview);
+	  datos_cheques_restaurant (selection, NULL);
+
+          widget = GTK_WIDGET (gtk_builder_get_object (builder, "statusbar"));
+          statusbar_push (GTK_STATUSBAR (widget), g_strdup_printf ("El cheque de restaurant %s ha sido facturado", codigo), 3000);
+        }
+      else
+        ErrorMSG (GTK_WIDGET (treeview), g_strdup_printf ("El cheque de restaurant %s ya estaba facturado", codigo));
     }
 }
 
@@ -1211,7 +1566,6 @@ EliminarCliente (void)
    gchar *fono;
    gchar *giro;
    gint credito;
-   gboolean afecto_impuesto;
 
    widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
    nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
@@ -1237,9 +1591,6 @@ EliminarCliente (void)
    widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
    credito = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
-   widget = GTK_WIDGET (builder_get (builder, "radio_btn_mod_aff_imp_yes"));
-   afecto_impuesto = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
-
    if (strcmp (nombre, "") == 0)
      AlertMSG (widget, "El Campo Nombre no puede estar vacío");
    else if (strcmp (paterno, "") == 0)
@@ -1263,10 +1614,9 @@ EliminarCliente (void)
        if (VerificarRut (rut[0], rut[1]))
          {
            q = g_strdup_printf ("UPDATE cliente SET nombre='%s', apell_p='%s', apell_m='%s', "
-                                "direccion='%s', telefono='%s', credito=%d, giro='%s', afecto_impuesto=%s "
+                                "direccion='%s', telefono='%s', credito=%d, giro='%s' "
 				"WHERE rut=%d",
-                                nombre, paterno, materno, direccion, fono, credito, giro, 
-				(afecto_impuesto == TRUE) ? "true":"false", atoi (rut[0]));
+                                nombre, paterno, materno, direccion, fono, credito, giro, atoi (rut[0]));
 
            if (EjecutarSQL (q) != NULL)
              {
@@ -1400,9 +1750,9 @@ admin_search_client(void)
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
 
   q = g_strdup_printf ("SELECT rut, nombre || ' ' || apell_p || ' ' || apell_m, telefono, credito_enable "
-                       "FROM cliente WHERE lower(nombre) LIKE lower('%s%%') OR "
+                       "FROM cliente WHERE activo = 't' AND (lower(nombre) LIKE lower('%s%%') OR "
                        "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%') OR "
-                       "rut::varchar like ('%s%%')",
+                       "rut::varchar like ('%s%%'))",
                        string, string, string, string);
   res = EjecutarSQL (q);
   g_free (q);
@@ -1456,3 +1806,308 @@ admin_search_client(void)
                             -1);
     }
 }
+
+/**
+ * This function search the emisor filtering according to the search criteria
+ * on the "entry_search_emisores" entry. (activate-signal)
+ *
+ * 
+ */
+void
+search_emisor (void)
+{
+  GtkWidget *widget;
+  GtkWidget *aux_widget;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  gchar *string;
+  gchar *q;
+  gint i;
+  gint tuples;
+  PGresult *res;
+
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_search_emisores"));
+  string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
+
+  q = g_strdup_printf ("SELECT id, rut, dv, razon_social, telefono, direccion, comuna, ciudad, giro "
+                       "FROM emisor_cheque WHERE activo = 't' AND (lower(razon_social) LIKE lower('%s%%') OR "
+                       "rut::varchar like ('%s%%')) ",
+                       string, string);
+  res = EjecutarSQL (q);
+  g_free (q);
+  tuples = PQntuples (res);
+
+  // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "treeview_cheques"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (aux_widget)));
+  gtk_list_store_clear (store);
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "treeview_emisores"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (aux_widget)));
+  gtk_list_store_clear (store);
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, atoi (PQvaluebycol (res, i, "id")),
+			  1, g_strdup_printf ("%s-%s", 
+					      PQvaluebycol (res, i, "rut"),
+					      PQvaluebycol (res, i, "dv")),
+			  2, PQvaluebycol (res, i, "razon_social"),
+			  3, PQvaluebycol (res, i, "telefono"),
+			  4, PQvaluebycol (res, i, "direccion"),
+			  -1);
+    }
+}
+
+/**
+ * This function shows the 'wnd_add_check_manager' window
+ * to add a check manager (an "emisor"). (signal-clicked)
+ *
+ * @param: GtkButton *button
+ * @param: gpointer user_data
+ */
+void
+on_btn_add_emisores_clicked (GtkButton *button, gpointer user_data)
+{
+  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_add_check_manager")));
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_add_check_manager")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_cm_rut")));
+}
+
+
+/**
+ * This function add the check manager (an "emisor")
+ * (signal-clicked)
+ *
+ * @param: GtkButton *button
+ * @param: gpointer user_data
+ */
+void
+on_btn_add_cm_clicked (GtkButton *button, gpointer user_data)
+{
+  gchar *rut, *dv, *rs, *tel, *dir, *comuna, *ciudad, *giro;
+  GtkEntry *rut_w, *dv_w, *rs_w, *tel_w, *dir_w, *comuna_w, *ciudad_w, *giro_w;
+  GtkWidget *wnd;
+
+  wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_add_check_manager"));
+
+  rut_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_rut"));
+  dv_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_dv"));
+  rs_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_rs"));
+  tel_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_tel"));
+  dir_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_dir"));
+  comuna_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_comuna"));
+  ciudad_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_ciudad"));
+  giro_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_cm_giro"));
+
+  rut = g_strdup (gtk_entry_get_text (rut_w));
+  dv = g_strdup (gtk_entry_get_text (dv_w));
+  rs = g_strdup (gtk_entry_get_text (rs_w));
+  tel = g_strdup (gtk_entry_get_text (tel_w));
+  dir = g_strdup (gtk_entry_get_text (dir_w));
+  comuna = g_strdup (gtk_entry_get_text (comuna_w));
+  ciudad = g_strdup (gtk_entry_get_text (ciudad_w));
+  giro = g_strdup (gtk_entry_get_text (giro_w));
+
+  if (strcmp (rut, "") == 0)
+    AlertMSG (rut_w, "Debe ingresar un rut válido");
+  else if (strcmp (dv, "") == 0)
+    AlertMSG (wnd, "Debe ingresar un dígito verificador");
+  else if (strcmp (rs, "") == 0)
+    AlertMSG (wnd, "Debe ingresar una razón social");
+  else if (strcmp (tel, "") == 0)
+    AlertMSG (wnd, "Debe ingresar un telefono");
+  else if (strcmp (dir, "") == 0)
+    AlertMSG (wnd, "Debe ingresar una dirección");
+  else if (strcmp (comuna, "") == 0)
+    AlertMSG (wnd, "Debe ingresar una comuna");
+  else if (strcmp (ciudad, "") == 0)
+    AlertMSG (wnd, "Debe ingresar una ciudad");
+  else if (strcmp (giro, "") == 0)
+    AlertMSG (wnd, "Debe especificar el giro del emisor");
+  else
+    {
+      if (VerificarRut (rut, dv) == TRUE)
+        {
+          if (!(insert_emisores (rut, dv, rs, tel, dir, comuna, ciudad, giro)))
+            {
+              ErrorMSG (wnd, "No fue posible agregar el emisor a la base de datos");
+              return;
+            }
+          else
+	    gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_add_check_manager")));
+
+	  search_emisor ();
+        }
+      else
+        AlertMSG (wnd, "El Rut no es valido!!");
+    }
+}
+
+
+/**
+ * This function modify the check manager (an "emisor")
+ * (signal-clicked)
+ *
+ * @param: GtkButton *button
+ * @param: gpointer user_data
+ */
+void
+on_btn_edit_emisores_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+  GtkTreeView *treeview;
+  GtkTreeIter iter;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+
+  PGresult *res;
+  gchar *q;
+  gint id;
+  gchar *rut, *dv, *rs, *tel, *dir, *comuna, *ciudad, *giro;
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object(builder, "treeview_emisores"));
+  selection = gtk_tree_view_get_selection (treeview);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model(treeview));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &id,
+                          -1);
+
+      q = g_strdup_printf ("SELECT rut, dv, razon_social, telefono, direccion, comuna, ciudad, giro "
+                           "FROM emisor_cheque WHERE id=%d", id);
+      res = EjecutarSQL(q);
+      g_free(q);
+
+      rut = PQvaluebycol (res, 0, "rut");
+      dv = PQvaluebycol (res, 0, "dv");
+      rs = PQvaluebycol (res, 0, "razon_social");
+      tel = PQvaluebycol (res, 0, "telefono");
+      dir = PQvaluebycol (res, 0, "direccion");
+      comuna = PQvaluebycol (res, 0, "comuna");
+      ciudad = PQvaluebycol (res, 0, "ciudad");
+      giro = PQvaluebycol (res, 0, "giro");
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_rut"));
+      gtk_entry_set_text (GTK_ENTRY (widget), rut);
+
+      widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_mod_cm_dv"));
+      gtk_entry_set_text (GTK_ENTRY (widget), dv);
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_rs"));
+      gtk_entry_set_text (GTK_ENTRY (widget), rs);
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_tel"));
+      gtk_entry_set_text (GTK_ENTRY (widget), tel);
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_dir"));
+      gtk_entry_set_text (GTK_ENTRY (widget), dir);
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_comuna"));
+      gtk_entry_set_text (GTK_ENTRY (widget), comuna);
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_ciudad"));
+      gtk_entry_set_text (GTK_ENTRY (widget), ciudad);
+      
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_giro"));
+      gtk_entry_set_text (GTK_ENTRY (widget), giro);
+      
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_mod_cm_id"));
+      gtk_label_set_text (GTK_LABEL (widget), g_strdup_printf ("%d",id));
+
+      widget = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_mod_check_manager"));
+      gtk_window_set_transient_for (GTK_WINDOW (widget), GTK_WINDOW (gtk_builder_get_object (builder, "wnd_admin")));
+      gtk_widget_show_all(widget);
+    }
+}
+
+/**
+ * Callback connected to the accept button present in the modificate
+ * client dialog.
+ *
+ * This function validates the information entered by the user
+ */
+void
+on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkWidget *widget;
+  gchar *q;
+
+  gint id;
+  gchar *rut, *dv, *rs, *tel, *dir, *comuna, *ciudad, *giro;
+  GtkEntry *rut_w, *dv_w, *rs_w, *tel_w, *dir_w, *comuna_w, *ciudad_w, *giro_w;
+  GtkWidget *wnd;
+
+  wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_check_manager"));
+
+  rut_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_rut"));
+  dv_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_dv"));
+  rs_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_rs"));
+  tel_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_tel"));
+  dir_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_dir"));
+  comuna_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_comuna"));
+  ciudad_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_ciudad"));
+  giro_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_giro"));
+
+  rut = g_strdup (gtk_entry_get_text (rut_w));
+  dv = g_strdup (gtk_entry_get_text (dv_w));
+  rs = g_strdup (gtk_entry_get_text (rs_w));
+  tel = g_strdup (gtk_entry_get_text (tel_w));
+  dir = g_strdup (gtk_entry_get_text (dir_w));
+  comuna = g_strdup (gtk_entry_get_text (comuna_w));
+  ciudad = g_strdup (gtk_entry_get_text (ciudad_w));
+  giro = g_strdup (gtk_entry_get_text (giro_w));
+  id = atoi (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_mod_cm_id")))));
+
+  if (strcmp (rut, "") == 0)
+    AlertMSG (GTK_WIDGET (rut_w), "Debe ingresar un rut válido");
+  else if (strcmp (dv, "") == 0)
+    AlertMSG (GTK_WIDGET (dv_w), "Debe ingresar un dígito verificador");
+  else if (strcmp (rs, "") == 0)
+    AlertMSG (GTK_WIDGET (rs_w), "Debe ingresar una razón social");
+  else if (strcmp (tel, "") == 0)
+    AlertMSG (GTK_WIDGET (tel_w), "Debe ingresar un telefono");
+  else if (strcmp (dir, "") == 0)
+    AlertMSG (GTK_WIDGET (dir_w), "Debe ingresar una dirección");
+  else if (strcmp (comuna, "") == 0)
+    AlertMSG (GTK_WIDGET (comuna_w), "Debe ingresar una comuna");
+  else if (strcmp (ciudad, "") == 0)
+    AlertMSG (GTK_WIDGET (ciudad_w), "Debe ingresar una ciudad");
+  else if (strcmp (giro, "") == 0)
+    AlertMSG (GTK_WIDGET (giro_w), "Debe especificar el giro del emisor");
+  else
+    {      
+      if (VerificarRut (rut, dv))
+	{
+	  //Verifica que el no haya otro emisor con el mismo rut
+	  if (DataExist (g_strdup_printf ("SELECT rut FROM emisor_cheque WHERE rut=%s AND id != %d", rut, id)))
+	    {
+	      ErrorMSG (GTK_WIDGET (rut_w), g_strdup_printf ("Ya existe un emisor con el rut %s", rut));
+	      return;
+	    }
+
+	  q = g_strdup_printf ("UPDATE emisor_cheque SET rut=%s, dv='%s', razon_social='%s', "
+			       "telefono='%s', direccion='%s', comuna='%s', ciudad='%s', giro='%s' "
+			       "WHERE id=%d",
+			       rut, dv, rs, tel, dir, comuna, ciudad, giro, id);
+
+	  if (EjecutarSQL (q) != NULL)
+	    {
+	      widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+	      statusbar_push (GTK_STATUSBAR(widget), "Se modificaron los datos con exito", 3000);
+	    }
+	  else
+	    ErrorMSG (widget, "No se puedo modificar el emisor de cheques");
+
+	  gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_check_manager")));
+	  search_emisor ();
+	}
+      else
+	AlertMSG (creditos->rut, "El Rut no es valido!!");
+    }
+}
+

@@ -1321,6 +1321,44 @@ end loop;
 return;
 end; $$ language plpgsql;
 
+-- busca emisores
+-- proveedor.c:71
+create or replace function buscar_emisor(
+       in pattern varchar(100),
+       out id integer,
+       out rut integer,
+       out dv varchar(1),
+       out razon_social varchar(100),
+       out telefono integer,
+       out direccion varchar(100),
+       out comuna varchar(100),
+       out ciudad varchar(100),
+       out giro varchar(100))
+returns setof record as $$
+declare
+	q text;
+	l record;
+begin
+q := 'SELECT id, rut, dv, razon_social, telefono, direccion, comuna, ciudad, giro
+     	     FROM emisor_cheque WHERE lower(razon_social) LIKE lower('
+	     || quote_literal($1) || ') '
+	     || 'OR lower(rut::varchar) LIKE lower(' || quote_literal($1) || ') ORDER BY razon_social';
+
+for l in execute q loop
+    id = l.id;
+    rut = l.rut;
+    dv = l.dv;
+    razon_social = l.razon_social;
+    telefono = l.telefono;
+    direccion = l.direccion;
+    comuna = l.comuna;
+    ciudad = l.ciudad;
+    giro = l.giro;
+    return next;
+end loop;
+return;
+end; $$ language plpgsql;
+
 -- retorna todos los proveedores
 -- proveedores.c:98
 create or replace function select_proveedor ( OUT rut int4,
@@ -3139,3 +3177,72 @@ UPDATE compra SET anulada_pi = 't' WHERE id = id_compra_in;
 
 RETURN;
 END; $$ language plpgsql;
+
+--
+-- This funtion get true if date is valid
+--
+CREATE OR REPLACE FUNCTION is_valid_date(char, char) RETURNS boolean AS $$
+DECLARE
+     result BOOL;
+BEGIN
+     SELECT TO_CHAR(TO_DATE($1,$2),$2) = $1
+     INTO result;
+     RETURN result;
+END; $$ LANGUAGE plpgsql;
+
+
+----
+-- Busca deudas del cliente
+CREATE OR replace FUNCTION search_deudas_cliente (
+       IN rut INT,
+       OUT id INT,
+       OUT monto INT,
+       OUT maquina INT,
+       OUT vendedor INT,
+       OUT fecha TIMESTAMP WITHOUT TIME ZONE)
+RETURNS setof record AS $$
+DECLARE
+        sale_amount INTEGER;
+        sale_type INTEGER;
+        query TEXT;
+	l RECORD;
+BEGIN
+	--                       0      1             2            3       4       5
+	--TIPO PAGO EN RIZOMA (CASH, CREDITO, CHEQUE_RESTAURANT, MIXTO, CHEQUE, TARJETA)
+
+	query := $S$ SELECT v.id, v.monto, v.maquina, v.vendedor, v.fecha, v.tipo_venta, 
+	      	     	    pm.rut1, pm.rut2, pm.tipo_pago1, pm.tipo_pago2, pm.monto1, pm.monto2
+	      	     FROM venta v LEFT JOIN pago_mixto pm ON pm.id_sale = v.id
+		     WHERE v.id IN (SELECT id_venta FROM deuda WHERE rut_cliente=$S$||rut||$S$ AND pagada='f')
+		     AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+		     ORDER BY v.id DESC $S$;
+
+        FOR l IN EXECUTE query loop
+	      	id = l.id;
+		maquina = l.maquina;
+		vendedor = l.vendedor;
+		fecha = l.fecha;
+
+		-- Si es una venta mixta
+		IF l.tipo_venta = 3 THEN
+
+		   -- Si ambos pagos son credito y pertenecen a la misma cuenta 
+		   IF l.tipo_pago1 = 1 AND l.rut1 = rut AND l.tipo_pago2 = 1 AND l.rut2 = rut THEN
+		      monto = l.monto1 + l.monto2;
+		   ELSE
+		      -- Si el primer pago fue a credito y pertenece a esta cuenta
+		      IF l.tipo_pago1 = 1 AND l.rut1 = rut THEN
+		         monto = l.monto1;
+		      ELSE -- Si el segundo pago fue a credito y pertenece a esta cuenta
+			 monto = l.monto2;
+		      END IF;
+		   END IF;
+
+		ELSE
+		   monto = l.monto;
+		END IF;
+		RETURN NEXT;
+        END loop;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;

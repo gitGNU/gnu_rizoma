@@ -2282,7 +2282,7 @@ on_btn_primero_clicked()
     {
       if (i < hasta )
         {
-          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
           switch (sell_type)
             {
             case CASH:
@@ -2290,6 +2290,12 @@ on_btn_primero_clicked()
               break;
             case CREDITO:
               pago = "Credito";
+              break;
+	    case CHEQUE_RESTAURANT:
+              pago = "Cheque Rest.";
+              break;
+	    case MIXTO:
+              pago = "Mixto";
               break;
             case CHEQUE:
               pago = "Cheque";
@@ -2367,7 +2373,7 @@ on_btn_atras_clicked()
 	{
 	  if (i < hasta )
 	    {
-	      sell_type = atoi (PQgetvalue (res_sells, i, 5));
+	      sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
 	      switch (sell_type)
 		{
 		case CASH:
@@ -2375,6 +2381,12 @@ on_btn_atras_clicked()
 		  break;
 		case CREDITO:
 		  pago = "Credito";
+		  break;
+		case CHEQUE_RESTAURANT:
+		  pago = "Cheque Rest.";
+		  break;
+		case MIXTO:
+		  pago = "Mixto";
 		  break;
 		case CHEQUE:
 		  pago = "Cheque";
@@ -2451,7 +2463,7 @@ on_btn_adelante_clicked()
         {
           if (i < hasta )
             {
-              sell_type = atoi (PQgetvalue (res_sells, i, 5));
+              sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
               switch (sell_type)
                 {
                 case CASH:
@@ -2460,6 +2472,12 @@ on_btn_adelante_clicked()
                 case CREDITO:
                   pago = "Credito";
                   break;
+		case CHEQUE_RESTAURANT:
+		  pago = "Cheque Rest.";
+		  break;
+		case MIXTO:
+		  pago = "Mixto";
+		  break;
                 case CHEQUE:
                   pago = "Cheque";
                   break;
@@ -2533,7 +2551,7 @@ on_btn_ultimo_clicked()
     {
       if (i < hasta )
         {
-          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
           switch (sell_type)
             {
             case CASH:
@@ -2541,6 +2559,12 @@ on_btn_ultimo_clicked()
               break;
             case CREDITO:
               pago = "Credito";
+              break;
+	    case CHEQUE_RESTAURANT:
+              pago = "Cheque Rest.";
+              break;
+	    case MIXTO:
+              pago = "Mixto";
               break;
             case CHEQUE:
               pago = "Cheque";
@@ -2665,7 +2689,7 @@ on_togglebtn_clicked()
 	{
 	  /* if (i < 100 ) */
 	  /*   { */
-	  sell_type = atoi (PQgetvalue (res_sells, i, 5));
+	  sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
 	  switch (sell_type)
 	    {
 	    case CASH:
@@ -2674,6 +2698,12 @@ on_togglebtn_clicked()
 	    case CREDITO:
 	      pago = "Credito";
 	      break;
+	    case CHEQUE_RESTAURANT:
+              pago = "Cheque Rest.";
+              break;
+	    case MIXTO:
+              pago = "Mixto";
+              break;
 	    case CHEQUE:
 	      pago = "Cheque";
 	      break;
@@ -2798,7 +2828,7 @@ fill_sells_list ()
     {
       if (i < 100 )
         {
-          sell_type = atoi (PQgetvalue (res_sells, i, 5));
+          sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
           switch (sell_type)
             {
             case CASH:
@@ -2806,6 +2836,12 @@ fill_sells_list ()
               break;
             case CREDITO:
               pago = "Credito";
+              break;
+	    case CHEQUE_RESTAURANT:
+              pago = "Cheque Rest.";
+              break;
+	    case MIXTO:
+              pago = "Mixto";
               break;
             case CHEQUE:
               pago = "Cheque";

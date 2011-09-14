@@ -45,6 +45,8 @@ gint FillClientStore (GtkListStore *store);
 
 void DatosDeudor(GtkTreeSelection *treeselection, gpointer user_data);
 
+void datos_cheques_restaurant (GtkTreeSelection *treeselection, gpointer user_data);
+
 void FillVentasDeudas (gint rut);
 
 void ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data);

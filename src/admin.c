@@ -231,7 +231,8 @@ admin_win()
   datos_box(); //business info
   preferences_box(); //preferences tab
   clientes_box(); //clients tab
-  stores_box (); //stores tab
+  emisores_box(); //clients tab
+  stores_box(); //stores tab
   gtk_widget_show_all (admin_gui);
 }
 

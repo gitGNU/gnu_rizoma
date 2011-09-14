@@ -64,7 +64,7 @@ gint GetTotalSell (guint from_year, guint from_month, guint from_day,
                    guint to_year, guint to_month, guint to_day, gint *total);
 
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-                       gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean afecto_impuesto);
+                       gchar *direccion, gchar *fono, gint credito, gchar *giro);
 
 gboolean RutExist (const gchar *rut);
 
@@ -147,7 +147,7 @@ char * GetCurrentPrice (gchar *barcode);
 
 gdouble FiFo (gchar *barcode, gint compra);
 
-gboolean SaveProductsSell (Productos *products, gint id_venta);
+gboolean SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta);
 
 PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day);
 
@@ -252,5 +252,12 @@ gint get_last_cash_box_id ();
 gdouble TotalPrecioCompra (Productos *products);
 
 gboolean SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
+
+gboolean emisor_delete (gint id);
+
+gboolean insert_emisores (gchar *rut, gchar *dv, gchar *razon_social, gchar *telefono, gchar *direccion,
+                          gchar *comuna, gchar *ciudad, gchar *giro);
+
+gboolean fact_cheque_rest (gint id);
 
 #endif
