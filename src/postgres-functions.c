@@ -410,7 +410,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gchar *q;
   gchar *vale_dir = rizoma_get_value ("VALE_DIR");
   
-  gint rut1, rut2;
+  gint rut1, rut2, monto2;
   gchar *rut1_gc, *rut2_gc, *dv1, *dv2;
   gboolean afecto_impuesto1, afecto_impuesto2;
 
@@ -563,13 +563,24 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 	rut2 = atoi (str_splited[0]);
 	dv2 = str_splited[1];
 
+	/*Se registra el detalle del pago mixto*/
+
+	/*Solo el cheque de restaurant se registra tal cual como se ingresa
+	  (siendo igual o mayor al monto para liquidar la venta) 
+	  puesto que solo con éste no se da vuelto*/
+
+	if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT)
+	  monto2 = pago_mixto->monto_pago2;
+	else
+	  monto2 = pago_mixto->total_a_pagar - pago_mixto->monto_pago1;
+	
 	EjecutarSQL (g_strdup_printf ("INSERT INTO pago_mixto VALUES (DEFAULT, %d, %d, %d, %d, %d, '%s', '%s', %s, %s, %d, %d)",
 				      venta_id,
 				      pago_mixto->tipo_pago1, pago_mixto->tipo_pago2,
 				      rut1, rut2, dv1, dv2,
 				      (afecto_impuesto1==TRUE) ? "true" : "false",
 				      (afecto_impuesto2==TRUE) ? "true" : "false",
-				      pago_mixto->monto_pago1, pago_mixto->monto_pago2));
+				      pago_mixto->monto_pago1, monto2));
 
       }
       break;
