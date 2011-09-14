@@ -329,12 +329,14 @@ clientes_box ()
     }
 
   ////////////////sales
-  ventas = gtk_list_store_new (6,
+  ventas = gtk_list_store_new (8,
                                G_TYPE_INT,      //ID Venta
                                G_TYPE_INT,      //Maquina
                                G_TYPE_STRING,   //Vendedor
                                G_TYPE_STRING,   //Fecha
-                               G_TYPE_STRING,   //Tipo Pago
+                               G_TYPE_STRING,   //Modo Pago
+			       G_TYPE_STRING,   //Tipo Pago
+			       G_TYPE_STRING,   //Complemento
 			       G_TYPE_STRING);  //Monto
 
   //FillVentasDeudas ();
@@ -384,7 +386,7 @@ clientes_box ()
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Tipo Pago", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Modo Pago", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
@@ -393,8 +395,26 @@ clientes_box ()
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Tipo Pago", renderer,
                                                      "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Complemento", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
+                                                     "text", 7,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -413,11 +433,15 @@ clientes_box ()
   client_detail->cols[2].num = 2;
   client_detail->cols[3].name = "Fecha";
   client_detail->cols[3].num = 3;
-  client_detail->cols[4].name = "Tipo Pago";
+  client_detail->cols[4].name = "Modo Pago";
   client_detail->cols[4].num = 4;
-  client_detail->cols[5].name = "Monto";
+  client_detail->cols[5].name = "Tipo Pago";
   client_detail->cols[5].num = 5;
-  client_detail->cols[6].name = NULL;
+  client_detail->cols[6].name = "Complemento";
+  client_detail->cols[6].num = 6;
+  client_detail->cols[7].name = "Monto";
+  client_detail->cols[7].num = 7;
+  client_detail->cols[8].name = NULL;
 
 
   //sale details
@@ -1056,6 +1080,8 @@ FillVentasDeudas (gint rut)
   gint tuples;
   GtkTreeIter iter;
   PGresult *res;
+  gchar *monto_complementario, *tipo_complementario;
+  gint tipo_comp;
 
   res = SearchDeudasCliente (rut);
 
@@ -1067,6 +1093,26 @@ FillVentasDeudas (gint rut)
 
   for (i = 0; i < tuples; i++)
     {
+      if (atoi (PQvaluebycol (res, i, "tipo_venta")) == MIXTO)
+	{
+	  tipo_comp = atoi (PQvaluebycol (res, i, "tipo_complementario"));
+	  if (tipo_comp == CASH)
+	    tipo_complementario = g_strdup_printf ("EFECTIVO");
+	  else if (tipo_comp == CREDITO)
+	    tipo_complementario = g_strdup_printf ("CREDITO");
+	  else if (tipo_comp == CHEQUE_RESTAURANT)
+	    tipo_complementario = g_strdup_printf ("CHEQ. REST");
+	  else
+	    tipo_complementario = g_strdup_printf ("OTRO");
+	}
+      else
+	tipo_complementario = g_strdup_printf ("--");
+
+      if (!g_str_equal (PQvaluebycol (res, i, "monto_complementario"), "0"))
+	monto_complementario = PutPoints (g_strdup (PQvaluebycol (res, i, "monto_complementario")));
+      else
+	monto_complementario = g_strdup_printf ("--");
+
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, atoi (PQvaluebycol (res, i, "id")),
@@ -1076,7 +1122,9 @@ FillVentasDeudas (gint rut)
 					      atoi (PQvaluebycol (res, i, "month")), atoi (PQvaluebycol (res, i, "year")),
 					      atoi (PQvaluebycol (res, i, "hour")), atoi (PQvaluebycol (res, i, "minute"))),
 			  4, g_strdup_printf ("%s", (atoi (PQvaluebycol (res, i, "tipo_venta")) == MIXTO) ? "Mixto" : "Crédito"),
-                          5, PutPoints (PQvaluebycol (res, i, "monto")),
+			  5, tipo_complementario,
+			  6, monto_complementario,
+                          7, PutPoints (PQvaluebycol (res, i, "monto")),
                           -1);
     }
 }

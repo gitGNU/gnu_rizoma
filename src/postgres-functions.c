@@ -830,7 +830,7 @@ SearchDeudasCliente (gint rut)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, tipo_venta, "
+  q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, tipo_venta, tipo_complementario, monto_complementario, "
 		       "date_part('day', fecha) AS day, date_part('month', fecha) AS month, date_part('year', fecha) AS year, "
                        "date_part('hour', fecha) AS hour, date_part('minute', fecha) AS minute, date_part ('second', fecha) AS second "
 		       "FROM search_deudas_cliente (%d) "

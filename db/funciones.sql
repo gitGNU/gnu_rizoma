@@ -1078,22 +1078,18 @@ END LOOP;
 return TRUE;
 end; ' language plpgsql;
 
--- retorna la deuda total de un cliente
+-- retorna la deuda total de un cliente a partir de su rut
 -- postgres-functions.c:415
-create or replace function deuda_total_cliente(int4)
-returns setof record as '
-declare
-	list record;
-	query text;
-begin
-query:= ''SELECT SUM (monto) as monto FROM ventas WHERE id IN (SELECT id_venta FROM deudas WHERE rut_cliente='' || quote_literal($1) || '' AND pagada=FALSE)'';
+CREATE OR REPLACE FUNCTION deuda_total_cliente (IN rut_cliente int4)
+RETURNS INTEGER AS $$
+DECLARE
+	resultado INTEGER;
+BEGIN
 
-FOR list IN EXECUTE query LOOP
-	return next list;
-END LOOP;
+resultado := (SELECT SUM (monto) FROM search_deudas_cliente (rut_cliente));
 
-return;
-end; ' language plpgsql;
+RETURN resultado;
+END; $$ LANGUAGE plpgsql;
 
 -- inserta un nuevo abono
 -- postgres-functions.c:455
@@ -3195,6 +3191,9 @@ END; $$ LANGUAGE plpgsql;
 
 ----
 -- Busca deudas del cliente
+-- Si la venta fue mixta, retorna información del segundo modo de pago
+-- de ser solamente a crédito, retorna solo información de credito y rellena
+-- las demás columnas con -1
 CREATE OR replace FUNCTION search_deudas_cliente (
        IN rut INT,
        OUT id INT,
@@ -3202,6 +3201,8 @@ CREATE OR replace FUNCTION search_deudas_cliente (
        OUT maquina INT,
        OUT vendedor INT,
        OUT tipo_venta INT,
+       OUT tipo_complementario INT,
+       OUT monto_complementario INT,
        OUT fecha TIMESTAMP WITHOUT TIME ZONE)
 RETURNS setof record AS $$
 DECLARE
@@ -3237,13 +3238,19 @@ BEGIN
 		      -- Si el primer pago fue a credito y pertenece a esta cuenta
 		      IF l.tipo_pago1 = 1 AND l.rut1 = rut THEN
 		         monto = l.monto1;
+			 tipo_complementario = l.tipo_pago2;
+			 monto_complementario = l.monto2;
 		      ELSE -- Si el segundo pago fue a credito y pertenece a esta cuenta
 			 monto = l.monto2;
+			 tipo_complementario = l.tipo_pago1;
+			 monto_complementario = l.monto1;
 		      END IF;
 		   END IF;
 
 		ELSE
 		   monto = l.monto;
+		   tipo_complementario = -1;
+		   monto_complementario = 0;
 		END IF;
 		RETURN NEXT;
         END loop;
