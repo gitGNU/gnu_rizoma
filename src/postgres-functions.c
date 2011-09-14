@@ -803,13 +803,12 @@ DeudaTotalCliente (gint rut)
   PGresult *res;
   gint deuda;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT SUM (monto) as monto FROM venta WHERE id IN "
-                                      "(SELECT id_venta FROM deuda WHERE rut_cliente=%d AND pagada='f') "
-				      "AND id NOT IN (SELECT id_sale FROM venta_anulada)",
+  res = EjecutarSQL (g_strdup_printf ("SELECT SUM (monto) as monto "
+				      "FROM search_deudas_cliente (%d)",
                                       rut));
 
   deuda = atoi (PQgetvalue (res, 0, 0));
-  deuda -= GetResto(rut);
+  deuda -= GetResto (rut);
 
   return deuda;
 }
@@ -820,9 +819,9 @@ SearchDeudasCliente (gint rut)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, date_part('day', fecha), date_part('month', fecha), "
-                       "date_part('year', fecha), date_part('hour', fecha), date_part('minute', fecha), "
-                       "date_part ('second', fecha) "
+  q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, tipo_venta, "
+		       "date_part('day', fecha) AS day, date_part('month', fecha) AS month, date_part('year', fecha) AS year, "
+                       "date_part('hour', fecha) AS hour, date_part('minute', fecha) AS minute, date_part ('second', fecha) AS second "
 		       "FROM search_deudas_cliente (%d) "
 		       "ORDER BY id DESC", rut);
   res = EjecutarSQL (q);

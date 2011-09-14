@@ -917,14 +917,15 @@ create or replace function select_cliente(
        OUT mail varchar(30),
        OUT abonado int4,
        OUT credito int4,
-       OUT credito_enable boolean)
+       OUT credito_enable boolean,
+       OUT activo boolean)
 returns setof record as $$
 declare
 	l record;
 	query varchar(255);
 begin
 query := 'select rut, dv, nombre, apell_p, apell_m, giro, direccion, telefono,
-      	 	  telefono_movil, mail, abonado, credito, credito_enable
+      	 	  telefono_movil, mail, abonado, credito, credito_enable, activo
 		  FROM cliente';
 
 FOR l IN EXECUTE query LOOP
@@ -941,6 +942,7 @@ FOR l IN EXECUTE query LOOP
     abonado = l.abonado;
     credito = l.credito;
     credito_enable = l.credito_enable;
+    activo = l.activo;
     RETURN NEXT;
 END LOOP;
 
@@ -3199,6 +3201,7 @@ CREATE OR replace FUNCTION search_deudas_cliente (
        OUT monto INT,
        OUT maquina INT,
        OUT vendedor INT,
+       OUT tipo_venta INT,
        OUT fecha TIMESTAMP WITHOUT TIME ZONE)
 RETURNS setof record AS $$
 DECLARE
@@ -3222,6 +3225,7 @@ BEGIN
 		maquina = l.maquina;
 		vendedor = l.vendedor;
 		fecha = l.fecha;
+		tipo_venta = l.tipo_venta;
 
 		-- Si es una venta mixta
 		IF l.tipo_venta = 3 THEN

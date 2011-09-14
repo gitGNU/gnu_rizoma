@@ -329,12 +329,13 @@ clientes_box ()
     }
 
   ////////////////sales
-  ventas = gtk_list_store_new (5,
-                               G_TYPE_INT,
-                               G_TYPE_INT,
-                               G_TYPE_STRING,
-                               G_TYPE_STRING,
-                               G_TYPE_STRING);
+  ventas = gtk_list_store_new (6,
+                               G_TYPE_INT,      //ID Venta
+                               G_TYPE_INT,      //Maquina
+                               G_TYPE_STRING,   //Vendedor
+                               G_TYPE_STRING,   //Fecha
+                               G_TYPE_STRING,   //Tipo Pago
+			       G_TYPE_STRING);  //Monto
 
   //FillVentasDeudas ();
 
@@ -383,8 +384,17 @@ clientes_box ()
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Tipo Pago", renderer,
                                                      "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
+                                                     "text", 5,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -403,9 +413,11 @@ clientes_box ()
   client_detail->cols[2].num = 2;
   client_detail->cols[3].name = "Fecha";
   client_detail->cols[3].num = 3;
-  client_detail->cols[4].name = "Monto";
+  client_detail->cols[4].name = "Tipo Pago";
   client_detail->cols[4].num = 4;
-  client_detail->cols[5].name = NULL;
+  client_detail->cols[5].name = "Monto";
+  client_detail->cols[5].num = 5;
+  client_detail->cols[6].name = NULL;
 
 
   //sale details
@@ -883,7 +895,8 @@ FillClientStore (GtkListStore *store)
   PGresult *res;
   gint tuples, i;
   gchar *enable;
-  res = EjecutarSQL ("SELECT rut, nombre, apell_p, apell_m, telefono, credito_enable FROM select_cliente()");
+  res = EjecutarSQL ("SELECT rut, nombre, apell_p, apell_m, telefono, credito_enable FROM select_cliente() "
+		     "WHERE activo = 't'");
 
   tuples = PQntuples (res);
 
@@ -897,16 +910,16 @@ FillClientStore (GtkListStore *store)
           enable = PQvaluebycol (res, i, "credito_enable");
           gtk_list_store_set (store, &iter,
                               0, atoi (PQvaluebycol(res, i, "rut")),
-                              1, g_strdup_printf ("%s %s %s", PQvaluebycol(res, i, "nombre"),
-                                                  PQvaluebycol(res, i, "apell_p"), PQvaluebycol(res, i, "apell_m")),
+                              1, g_strdup_printf ("%s %s %s", PQvaluebycol (res, i, "nombre"),
+                                                  PQvaluebycol (res, i, "apell_p"), PQvaluebycol (res, i, "apell_m")),
                               2, atoi (PQvaluebycol (res, i, "telefono")),
                               3, strcmp (enable, "t") ? FALSE : TRUE,
                               4, PutPoints (g_strdup_printf ("%d",
 							     ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
                               5, PutPoints (g_strdup_printf ("%d", 
-							     DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
+							     DeudaTotalCliente (atoi (PQvaluebycol(res, i, "rut"))))),
                               6, PutPoints (g_strdup_printf ("%d", 
-							     CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))))),
+							     CreditoDisponible (atoi (PQvaluebycol(res, i, "rut"))))),
                               -1);
         }
       else
@@ -918,9 +931,9 @@ FillClientStore (GtkListStore *store)
                             4, PutPoints (g_strdup_printf ("%d",
 							   ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
                             5, PutPoints (g_strdup_printf ("%d",
-							   DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
+							   DeudaTotalCliente (atoi (PQvaluebycol(res, i, "rut"))))),
                             6, PutPoints (g_strdup_printf ("%d",
-							   CreditoDisponible (atoi(PQvaluebycol(res, i, "rut"))))),
+							   CreditoDisponible (atoi (PQvaluebycol(res, i, "rut"))))),
                             -1);
     }
   return 0;
@@ -1049,20 +1062,21 @@ FillVentasDeudas (gint rut)
   tuples = PQntuples (res);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_sales"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
   gtk_list_store_clear (store);
 
   for (i = 0; i < tuples; i++)
     {
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-                          0, atoi (PQgetvalue (res, i, 0)),
-                          1, atoi (PQgetvalue (res, i, 2)),
-                          2, PQgetvalue (res, i, 3),
-                          3, g_strdup_printf ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQgetvalue (res, i, 4)),
-                           atoi (PQgetvalue (res, i, 5)), atoi (PQgetvalue (res, i, 6)),
-                           atoi (PQgetvalue (res, i, 7)), atoi (PQgetvalue (res, i, 8))),
-                          4, PutPoints (PQgetvalue (res, i, 1)),
+                          0, atoi (PQvaluebycol (res, i, "id")),
+                          1, atoi (PQvaluebycol (res, i, "maquina")),
+                          2, PQvaluebycol (res, i, "vendedor"),
+                          3, g_strdup_printf ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQvaluebycol (res, i, "day")),
+					      atoi (PQvaluebycol (res, i, "month")), atoi (PQvaluebycol (res, i, "year")),
+					      atoi (PQvaluebycol (res, i, "hour")), atoi (PQvaluebycol (res, i, "minute"))),
+			  4, g_strdup_printf ("%s", (atoi (PQvaluebycol (res, i, "tipo_venta")) == MIXTO) ? "Mixto" : "Crédito"),
+                          5, PutPoints (PQvaluebycol (res, i, "monto")),
                           -1);
     }
 }
