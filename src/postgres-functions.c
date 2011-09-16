@@ -1215,7 +1215,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT costo_promedio FROM producto WHERE barcode ='%s'", barcode);
+  q = g_strdup_printf ("SELECT COALESCE (costo_promedio,0) AS costo_promedio FROM producto WHERE barcode ='%s'", barcode);
   res = EjecutarSQL(q);
   g_free(q);
 
@@ -1236,11 +1236,16 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
       q = g_strdup_printf ("SELECT monto FROM impuesto WHERE id = 1");
       res = EjecutarSQL(q);
       iva_local = (gdouble) atoi (PQvaluebycol (res, 0, "monto"));
+      g_free(q);
 
       // Calculo
-      iva_local = (iva_local / 100) + 1;
-      porcentaje = (gdouble) ((precio_local / (gdouble)(iva_local * costo_promedio)) -1) * 100;
-      g_free(q);
+      if (costo_promedio != 0)
+	{
+	  iva_local = (iva_local / 100) + 1;
+	  porcentaje = (gdouble) ((precio_local / (gdouble)(iva_local * costo_promedio)) -1) * 100;
+	}
+      else
+	porcentaje = 0;
     }
 
   /*Tiene IVA y Otros es una opcion distinta a "Sin Impuestos"*/
@@ -1254,18 +1259,26 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
       g_free(q);
 
       // Calculo
-      iva_local = (gdouble) (iva_local / 100);
-      otros_local = (gdouble) (otros_local / 100);
+      if (costo_promedio != 0)
+	{
+	  iva_local = (gdouble) (iva_local / 100);
+	  otros_local = (gdouble) (otros_local / 100);
 
-      porcentaje = (gdouble) precio_local / (gdouble)(iva_local + otros_local + 1);
-      porcentaje = (gdouble) porcentaje - costo_promedio;
-      porcentaje = lround ((gdouble)(porcentaje / costo_promedio) * 100);
+	  porcentaje = (gdouble) precio_local / (gdouble)(iva_local + otros_local + 1);
+	  porcentaje = (gdouble) porcentaje - costo_promedio;
+	  porcentaje = lround ((gdouble)(porcentaje / costo_promedio) * 100);
+	}
+      else
+	porcentaje = 0;
     }
 
   /*No tiene IVA y Otros es la opcion "Sin Impuestos"*/
   else if (iva == FALSE && (otros == 0 || otros == -1))
     {
-      porcentaje = (gdouble) ((precio_local / costo_promedio) - 1) * 100;
+      if (costo_promedio != 0)
+	porcentaje = (gdouble) ((precio_local / costo_promedio) - 1) * 100;
+      else
+	porcentaje = 0;
     }
 
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
