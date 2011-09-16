@@ -212,7 +212,14 @@ CalcularSoloAfecto (Productos *header)
   do
     {
       if (GetIVA (cal->product->barcode) != -1)
-	total += (gdouble)(cal->product->precio * cal->product->cantidad);
+	{
+	  if (cal->product->mayorista == FALSE && cal->product->cantidad < cal->product->cantidad_mayorista)
+	    total += (gdouble)(cal->product->precio * cal->product->cantidad);
+	  else if (cal->product->mayorista == TRUE && cal->product->cantidad >= cal->product->cantidad_mayorista)
+	    total += (gdouble)(cal->product->precio_mayor * cal->product->cantidad);
+	  else
+	    total += (gdouble)(cal->product->precio * cal->product->cantidad);
+	}
       
       cal = cal->next;
     }
@@ -233,7 +240,14 @@ CalcularSoloNoAfecto (Productos *header)
   do
     {
       if (GetIVA (cal->product->barcode) == -1)
-	total += (gdouble)(cal->product->precio * cal->product->cantidad);
+	{
+	  if (cal->product->mayorista == FALSE && cal->product->cantidad < cal->product->cantidad_mayorista)
+	    total += (gdouble)(cal->product->precio * cal->product->cantidad);
+	  else if (cal->product->mayorista == TRUE && cal->product->cantidad >= cal->product->cantidad_mayorista)
+	    total += (gdouble)(cal->product->precio_mayor * cal->product->cantidad);
+	  else
+	    total += (gdouble)(cal->product->precio * cal->product->cantidad);
+	}
       
       cal = cal->next;
     }
