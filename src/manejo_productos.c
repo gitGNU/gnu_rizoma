@@ -267,8 +267,10 @@ CalcularTotalProporcionAfecta (Productos *header)
     return total;
 
   do
-    {
-      total += (gdouble)(cal->product->proporcion_afecta_imp);
+    { //La proporcion afecta la tienen solo los productos con impuestos
+      if (GetIVA (cal->product->barcode) != -1)
+	total += (gdouble)(cal->product->proporcion_afecta_imp);
+
       cal = cal->next;
     }
   while (cal != header);
@@ -287,8 +289,10 @@ CalcularTotalProporcionNoAfecta (Productos *header)
     return total;
 
   do
-    {
-      total += (gdouble)(cal->product->proporcion_no_afecta_imp);
+    { //La proporcion no afecta la tienen solo los productos con impuestos
+      if (GetIVA (cal->product->barcode) != -1)	
+	total += (gdouble)(cal->product->proporcion_no_afecta_imp);
+      
       cal = cal->next;
     }
   while (cal != header);

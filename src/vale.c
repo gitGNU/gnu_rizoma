@@ -161,9 +161,14 @@ PrintVale (Productos *header, gint venta_id, gint total, gint tipo_pago)
       else if (tipo_pago == MIXTO)
 	{ 
 	  //Los productos no afectos a impuestos + la proporcion no afeta a impuestos de todos los productos afectos
-	  siva = lround (CalcularSoloNoAfecto (products)) + lround (CalcularTotalProporcionNoAfecta (products->product->proporcion_no_afecta_imp));
+	  siva = CalcularSoloNoAfecto (products) + CalcularTotalProporcionNoAfecta (products);
+	  printf ("\nsiva: %d, solo no afecto: %d, total prop no afecta: %d\n", 
+		  lround (siva), 
+		  lround (CalcularSoloNoAfecto (products)),
+		  lround (CalcularTotalProporcionNoAfecta (products)));
 	  //El total afecto a impuestos de la proporcion de todos los productos afecto
-	  civa = lround (CalcularTotalProporcionAfecta (products->product->proporcion_afecta_imp));
+	  civa = CalcularTotalProporcionAfecta (products);
+	  printf ("\nciva: %d\n", lround (civa));
 	}
 
       fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));

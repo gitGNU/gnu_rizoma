@@ -567,7 +567,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 	rut2 = atoi (str_splited[0]);
 	dv2 = str_splited[1];
 
-	/*Se registra el detalle del pago mixto*/		
+	/*Se registra el detalle del pago mixto*/	
 	EjecutarSQL (g_strdup_printf ("INSERT INTO pago_mixto VALUES (DEFAULT, %d, %d, %d, %d, %d, '%s', '%s', %s, %s, %d, %d)",
 				      venta_id,
 				      pago_mixto->tipo_pago1, pago_mixto->tipo_pago2,
@@ -1631,9 +1631,16 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
   if (tipo_venta == MIXTO)
     {
-      pago1 = pago_mixto->monto_pago1;
-      pago2 = pago_mixto->monto_pago2;
       total_venta = pago_mixto->total_a_pagar;
+      pago1 = pago_mixto->monto_pago1;
+      
+      /*
+	Se asegura que el pago sea justo puesto que en casos, como el segundo pago con
+	cheque de restaurant, puede haber un ingreso mayor al pago requerido, ese pago excesivo se
+        registra pero no participa del los calculos aquí requeridos 
+      */
+      pago2 = total_venta - pago_mixto->monto_pago1;
+
       total_prod_afecto = CalcularSoloAfecto (products);
       total_prod_no_afecto = CalcularSoloNoAfecto (products);
       is_imp1 = (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
