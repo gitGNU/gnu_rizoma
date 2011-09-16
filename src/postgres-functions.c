@@ -439,7 +439,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   // Imprimir vale
   if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
-    PrintVale (venta->header, venta_id, total, tipo_venta);
+    PrintVale (venta->header, venta_id, boleta, total, tipo_venta);
 
   // Abrir Gaveta
   switch (tipo_venta)

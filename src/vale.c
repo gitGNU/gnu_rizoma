@@ -33,7 +33,7 @@
 #include"manejo_productos.h"
 
 void
-PrintVale (Productos *header, gint venta_id, gint total, gint tipo_pago)
+PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_pago)
 {
   Productos *products = header;
   FILE *fp;
@@ -58,7 +58,7 @@ PrintVale (Productos *header, gint venta_id, gint total, gint tipo_pago)
   fprintf (fp, "%s", start);
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
-  fprintf (fp, "Numero de venta: %d\n", venta_id);
+  fprintf (fp, "Num. venta: %d - Num. boleta: %d\n", venta_id, boleta);
   fprintf (fp, "Vendedor: %s\n", user_data->user);
   fprintf (fp, "==========================================\n\n");
 
