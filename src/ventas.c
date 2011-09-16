@@ -3165,7 +3165,8 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   general = (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (general)) == TRUE) ? TRUE : FALSE;
 
   //Se recogen el monto total a pagar y el monto con el que se paga en la primera ventana
-  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  //total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  total = llround (CalcularTotal (venta->header));
   if (general)
     paga_con = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay"))));
   else if (pago_chk_rest->header != NULL)
@@ -3211,6 +3212,19 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   /* Si el total es mayor al primer pago, se pide que complete la compra con otra forma de pago */
   if (total > paga_con)
     {
+      //El pago no afecto debe ser menor o igual al total de los productos afectos
+      if (cheque_restaurant == TRUE)
+	{
+	  gint monto_solo_afecto = lround (CalcularSoloAfecto (venta->header));
+	  if (paga_con > monto_solo_afecto)
+	    {
+	      limpiar_lista ();
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")),
+			g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
+	      return;
+	    }
+	}
+
       //Se llena la estructura de pago mixto
       pago_mixto->tipo_pago1 = (cheque_restaurant) ? CHEQUE_RESTAURANT : CREDITO;
       pago_mixto->check_rest1 = (cheque_restaurant) ? pago_chk_rest : NULL;
@@ -3264,6 +3278,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
       //printf ("%s", (cheque_restaurant) ? "cheque_restaurant" : "credito");
 
       //Se registra la venta
+      
       SaveSell (total, maquina, vendedor, (cheque_restaurant) ? CHEQUE_RESTAURANT : CREDITO, rut_cliente, "0", ticket, tipo_documento,
 		NULL, FALSE, TRUE);
       
@@ -3313,7 +3328,8 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
 
   //gboolean afecto_impuesto1, afecto_impuesto2;
 
-  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  //total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  total = llround (CalcularTotal (venta->header));
   pago_mixto->total_a_pagar = total;
 
   /*-- Primer Pago --*/
@@ -3402,6 +3418,26 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   pago_mixto->rut_credito2 = (tipo_pago2 == CREDITO) ? rut_cuenta2 : NULL;
   pago_mixto->monto_pago2 = paga_con;
 
+  /* Solo el cheque de restaurant se registra tal cual como se ingresa
+     (siendo igual o mayor al monto para liquidar la venta) 
+     puesto que solo con éste no se da vuelto */
+
+  if (pago_mixto->tipo_pago2 != CHEQUE_RESTAURANT)
+    pago_mixto->monto_pago2 = pago_mixto->total_a_pagar - pago_mixto->monto_pago1;
+
+  //El pago no afecto debe ser menor o igual al total de los productos afectos
+  if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT)
+    {
+      gint monto_solo_afecto = lround (CalcularSoloAfecto (venta->header));
+      if (pago_mixto->monto_pago2 > monto_solo_afecto)
+	{
+	  limpiar_lista ();
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2")),
+		    g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
+	  return;
+	}
+    }
+
   //Se registra la venta -- TODO: solo se le esta pasando el primer cliente, ver bien el asunto cuando es mixto
   SaveSell (total, maquina, vendedor, MIXTO, rut_cuenta1, "0", ticket, tipo_documento,
   	    NULL, FALSE, TRUE);
@@ -3409,6 +3445,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   //Se cierra y limpia todo
   CleanEntryAndLabelData();
   ListClean (); //Se debe ejecutar antes de vaciar la lista de venta (la estructura)
+  limpiar_lista (); // vacía la lista de cheques de restaurant
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),

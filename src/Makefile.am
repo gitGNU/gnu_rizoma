@@ -24,6 +24,7 @@ rizoma_admin_SOURCES = admin.c tipos.h admin.h \
 datos.h \
 postgres-functions.c postgres-functions.h \
 errors.c errors.h \
+manejo_productos.c manejo_productos.h \
 boleta.c boleta.h \
 credito.c credito.h \
 encriptar.c encriptar.h \

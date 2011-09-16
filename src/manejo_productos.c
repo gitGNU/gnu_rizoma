@@ -200,6 +200,89 @@ CalcularTotal (Productos *header)
   return total;
 }
 
+gdouble
+CalcularSoloAfecto (Productos *header)
+{
+  Productos *cal = header;
+  gdouble total = 0;
+
+  if (cal == NULL)
+    return total;
+
+  do
+    {
+      if (GetIVA (cal->product->barcode) != -1)
+	total += (gdouble)(cal->product->precio * cal->product->cantidad);
+      
+      cal = cal->next;
+    }
+  while (cal != header);
+
+  return total;
+}
+
+gdouble
+CalcularSoloNoAfecto (Productos *header)
+{
+  Productos *cal = header;
+  gdouble total = 0;
+
+  if (cal == NULL)
+    return total;
+
+  do
+    {
+      if (GetIVA (cal->product->barcode) == -1)
+	total += (gdouble)(cal->product->precio * cal->product->cantidad);
+      
+      cal = cal->next;
+    }
+  while (cal != header);
+
+  return total;
+}
+
+
+gdouble
+CalcularTotalProporcionAfecta (Productos *header)
+{
+  Productos *cal = header;
+  gdouble total = 0;
+
+  if (cal == NULL)
+    return total;
+
+  do
+    {
+      total += (gdouble)(cal->product->proporcion_afecta_imp);
+      cal = cal->next;
+    }
+  while (cal != header);
+
+  return total;
+}
+
+
+gdouble
+CalcularTotalProporcionNoAfecta (Productos *header)
+{
+  Productos *cal = header;
+  gdouble total = 0;
+
+  if (cal == NULL)
+    return total;
+
+  do
+    {
+      total += (gdouble)(cal->product->proporcion_no_afecta_imp);
+      cal = cal->next;
+    }
+  while (cal != header);
+
+  return total;
+}
+
+
 gint
 ReturnTotalProducts (Productos *header)
 {

@@ -30,9 +30,10 @@
 #include"config_file.h"
 #include"utils.h"
 #include"postgres-functions.h"
+#include"manejo_productos.h"
 
 void
-PrintVale (Productos *header, gint venta_id, gint total)
+PrintVale (Productos *header, gint venta_id, gint total, gint tipo_pago)
 {
   Productos *products = header;
   FILE *fp;
@@ -60,7 +61,6 @@ PrintVale (Productos *header, gint venta_id, gint total)
   fprintf (fp, "Numero de venta: %d\n", venta_id);
   fprintf (fp, "Vendedor: %s\n", user_data->user);
   fprintf (fp, "==========================================\n\n");
-  fprintf (fp, "Gracias por su compra \n");
 
   do {
     if (products->product->iva != 0)
@@ -152,10 +152,25 @@ PrintVale (Productos *header, gint venta_id, gint total)
   //impresora = rizoma_get_value_boolean ("IMPRESORA");
   if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
     {
+      gint diferencia;
+      if (tipo_pago == CHEQUE_RESTAURANT)
+	{
+	  siva = total;
+	  civa = 0;
+	}
+      else if (tipo_pago == MIXTO)
+	{ 
+	  //Los productos no afectos a impuestos + la proporcion no afeta a impuestos de todos los productos afectos
+	  siva = lround (CalcularSoloNoAfecto (products)) + lround (CalcularTotalProporcionNoAfecta (products->product->proporcion_no_afecta_imp));
+	  //El total afecto a impuestos de la proporcion de todos los productos afecto
+	  civa = lround (CalcularTotalProporcionAfecta (products->product->proporcion_afecta_imp));
+	}
+
       fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
       fprintf (fp, "Sub Total afecto:      \t\t%s$ %u %s\n", size2, lround(civa), size1);
       fprintf (fp, "\n\n");
       fprintf (fp, "Total Venta: \t\t\t%s$ %d %s\n", size2, total, size1);
+      fprintf (fp, "\n\n\t\tGracias por su compra! \n");
       fprintf (fp, "\n\n\n\n\n");
       fprintf (fp, "%s", cut); /* We cut the paper :) */
       fclose (fp);

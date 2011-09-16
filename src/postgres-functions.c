@@ -433,11 +433,13 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (boleta != -1)
     set_ticket_number (boleta, tipo_documento);
 
+  /* Registra el detalle de venta y pobla la estructura de producto con
+     los monto afecto y no afecto de cada producto (cuando es pago mixto) */
   SaveProductsSell (venta->header, venta_id, tipo_venta);
 
   // Imprimir vale
   if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
-    PrintVale (venta->header, venta_id, total);
+    PrintVale (venta->header, venta_id, total, tipo_venta);
 
   // Abrir Gaveta
   switch (tipo_venta)
@@ -452,6 +454,8 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
     case CASH:
       abrirGaveta ();
       break;
+    case CHEQUE_RESTAURANT:
+      abrirGaveta ();
     case MIXTO:
       abrirGaveta ();
     }
@@ -563,17 +567,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 	rut2 = atoi (str_splited[0]);
 	dv2 = str_splited[1];
 
-	/*Se registra el detalle del pago mixto*/
-
-	/*Solo el cheque de restaurant se registra tal cual como se ingresa
-	  (siendo igual o mayor al monto para liquidar la venta) 
-	  puesto que solo con éste no se da vuelto*/
-
-	if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT)
-	  monto2 = pago_mixto->monto_pago2;
-	else
-	  monto2 = pago_mixto->total_a_pagar - pago_mixto->monto_pago1;
-	
+	/*Se registra el detalle del pago mixto*/		
 	EjecutarSQL (g_strdup_printf ("INSERT INTO pago_mixto VALUES (DEFAULT, %d, %d, %d, %d, %d, '%s', '%s', %s, %s, %d, %d)",
 				      venta_id,
 				      pago_mixto->tipo_pago1, pago_mixto->tipo_pago2,
@@ -1612,7 +1606,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gchar *iva_unit, *otros_unit;
   gint margen;
   gchar *cantidad;
-  gint precio, pago1, pago2, total_a_pagar;
+  gint precio, pago1, pago2, total_venta;
   gchar *q;
   gdouble pre;
   gboolean is_imp1, is_imp2;
@@ -1620,15 +1614,23 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gdouble iva_promedio, otros_promedio;
   gdouble impuestos;
   gdouble proporcion_producto, neto;
-  gint monto_afecto, monto_no_afecto;
+  gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
 
   if (tipo_venta == MIXTO)
     {
       pago1 = pago_mixto->monto_pago1;
       pago2 = pago_mixto->monto_pago2;
-      total_a_pagar = pago_mixto->total_a_pagar;
+      total_venta = pago_mixto->total_a_pagar;
+      total_prod_afecto = CalcularSoloAfecto (products);
+      total_prod_no_afecto = CalcularSoloNoAfecto (products);
       is_imp1 = (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
       is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+
+      printf ("\nTotal a pagar: %d\n", total_venta);
+      printf ("\nTotal afecto: %d\n", lround (total_prod_afecto));
+      printf ("\nTotal no afecto: %d\n", lround (total_prod_no_afecto));
+      printf ("\nMonto 1: %d\n", pago1);
+      printf ("\nMonto 2: %d\n", pago2);
     }
 
   do
@@ -1707,12 +1709,12 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       /* Se obtiene el iva y otros impuestos con . en vez de ,
 	 y de esa forma poder ingresarlos en la consulta SQL */
 
-      if (tipo_venta == CHEQUE_RESTAURANT) //PIKO PIKO
+      if (tipo_venta == CHEQUE_RESTAURANT) //Si se realizó solamene con cheque de restaurant
 	{
 	  iva_unit = g_strdup_printf ("0");
 	  otros_unit = g_strdup_printf ("0");
 	}
-      else if (tipo_venta == MIXTO)
+      else if (tipo_venta == MIXTO) //Si se realizó de forma mixta
 	{
 	  // Si ambos pagos son afecto a impuesto, no se hacen tratamientos especiales
 	  if (is_imp1 == TRUE && is_imp2 == TRUE)
@@ -1726,30 +1728,63 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	      iva_unit = "0";
 	      otros_unit = "0";
 	    }
-	  //Si uno es afecto a impuesto y el otro no
-	  else
-	    {
+	  //Si uno es afecto a impuesto y el otro no (y además el producto esta afecto a impuestos)
+	  else if (GetIVA (products->product->barcode) != -1)
+	    { //TODO: Calcular solo con el total_afecto
+
 	      if (is_imp1 == FALSE && is_imp2 == TRUE)
-		{		  
-		  //monto afecto = total - pago no afecto;
-		  monto_afecto = total_a_pagar - pago1;
-		  //monto no afecto = total - pago afecto;
-		  monto_no_afecto = total_a_pagar - pago2;
+		{
+		  //El pago no afecto debe ser menor o igual al total de los productos afectos
+		  if (pago1 <= lround (total_prod_afecto)) //RESTRICCION IMPUESTA POR JAIME!
+		    {
+		      monto_afecto = total_prod_afecto - pago1;
+		      monto_no_afecto = pago1;
+		    }
+		  else
+		    {
+		      printf ("\nNo se completó la venta %d: \n"
+			      "No se debe permitir una venta donde el pago no afecto a impuesto "
+			      "sea mayor al total de productos afectos a impuesto\n", id_venta);
+		      return;
+		    }
 		}
 	      else if (is_imp1 == TRUE && is_imp2 == FALSE)
 		{
-		  //monto afecto = total - pago no afecto;
-		  monto_afecto = total_a_pagar - pago2;
-		  //monto no afecto = total - pago afecto;
-		  monto_no_afecto = total_a_pagar - pago1;
+		  //El pago no afecto debe ser menor o igual al total de los productos afectos
+		  if (pago2 <= lround (total_prod_afecto)) //RESTRICCION IMPUESTA POR JAIME!
+		    {
+		      monto_afecto = total_prod_afecto - pago2;
+		      monto_no_afecto = pago2;
+		    }
+		  else
+		    {
+		      printf ("\nNo se completó la venta %d: \n"
+			      "No se debe permitir una venta donde el pago no afecto a impuesto "
+			      "sea mayor al total de productos afectos a impuesto\n", id_venta);
+		      return;
+		    }
 		}
 	      
-	      proporcion_producto  = ((precio * products->product->cantidad) / total_a_pagar);
-		  
+	      proporcion_producto  = ((precio * products->product->cantidad) / total_prod_afecto);
+	
+	      //Se calculan los montos afecto y no a impuestos
 	      monto_afecto = monto_afecto * proporcion_producto;
 	      monto_no_afecto = monto_no_afecto * proporcion_producto;
-	      iva = GetIVA (products->product->barcode) / 100;
-		  		  
+
+	      //Se registran los montos en la estructura de productos, para ser impresos en la boleta
+	      products->product->proporcion_afecta_imp = lround (monto_afecto);
+	      products->product->proporcion_no_afecta_imp = lround (monto_no_afecto);
+
+	      printf ("\nafecto: %d, no afecto: %d, subtotal: %d\n", 
+		      lround (monto_afecto), lround (monto_no_afecto), lround (monto_afecto + monto_no_afecto));
+
+	      //Se obtienen los impuestos del producto
+	      iva = GetIVA (products->product->barcode);
+	      if (iva != -1 || iva != 0)
+		iva = iva / 100;
+	      else
+		iva = 0;
+
 	      otros = GetOtros (products->product->barcode);
 	      if (otros != -1 || otros != 0)
 		otros = otros / 100;
@@ -1764,10 +1799,15 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
 	      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
 		  
-	      impuestos = iva + otros;		  
-	    }	      
+	      impuestos = iva + otros;
+	    }
+	  else //Si es un pago mixto (con un pago afecto y el otro no), pero el producto no esta afecto a impuestos
+	    {
+	      iva_unit = g_strdup_printf ("0");
+	      otros_unit = g_strdup_printf ("0");
+	    }
 	}
-      else
+      else //cualquier tipo de pago afecto a impuesto
 	{
 	  iva_unit = CUT (g_strdup_printf ("%.3f", iva));
 	  otros_unit = CUT (g_strdup_printf ("%.3f", otros));

@@ -55,4 +55,12 @@ gdouble CalcularTotalCompra (Productos *header);
 
 gboolean LookCanjeable (Productos *header);
 
+gdouble CalcularSoloAfecto (Productos *header);
+
+gdouble CalcularSoloNoAfecto (Productos *header);
+
+gdouble CalcularTotalProporcionAfecta (Productos *header);
+
+gdouble CalcularTotalProporcionNoAfecta (Productos *header);
+
 #endif
