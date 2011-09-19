@@ -141,6 +141,7 @@ create table deuda (
 -- Documentos_emitidos
 create table documentos_emitidos (
   id                        serial not null,
+  id_venta		    int4 not null,
   tipo_documento            int2,
   forma_pago                int2,
   num_documento             int4,
@@ -150,12 +151,11 @@ create table documentos_emitidos (
 
 -- Documentos_emitidos_detalle
 create table documentos_emitidos_detalle (
-  id                        int4 not null,
+  id                        serial not null primary key,
   id_documento              int4 not null,
   barcode_product           int8 not null,
   precio                    int4,
-  cantidad                  float8,
-  constraint pk_documentos_emitidos_detalle primary key (id,id_documento)
+  cantidad                  float8
 ) ;
 
 -- Cheques

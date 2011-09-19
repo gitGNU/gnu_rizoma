@@ -3218,9 +3218,15 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 	  gint monto_solo_afecto = lround (CalcularSoloAfecto (venta->header));
 	  if (paga_con > monto_solo_afecto)
 	    {
-	      limpiar_lista ();
-	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")),
-			g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
+	      if (general == TRUE)
+		{
+		  limpiar_lista (); //Se tiene que volver a crear el cheque, por lo tanto de saca de la lista.
+		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")),
+			    g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
+		}
+	      else
+		ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_code_detail_mp")),
+			  g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
 	      return;
 	    }
 	}

@@ -365,13 +365,13 @@ DeleteProduct (gchar *codigo)
 }
 
 gint
-InsertNewDocument (gint document_type, gint sell_type)
+InsertNewDocument (gint sell_id, gint document_type, gint sell_type)
 {
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf
-                     ("INSERT INTO documentos_emitidos (tipo_documento, forma_pago, num_documento, fecha_emision)"
-                      "VALUES (%d, %d, %d, NOW())", document_type, sell_type, get_ticket_number (document_type) + 1));
+                     ("INSERT INTO documentos_emitidos (id_venta, tipo_documento, forma_pago, num_documento, fecha_emision)"
+                      "VALUES (%d, %d, %d, %d, NOW())", sell_id, document_type, sell_type, get_ticket_number (document_type) + 1));
 
   res = EjecutarSQL ("SELECT last_value FROM documentos_emitidos_id_seq");
 
@@ -380,6 +380,24 @@ InsertNewDocument (gint document_type, gint sell_type)
   else
     return -1;
 }
+
+
+gboolean
+InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble cantidad)
+{
+  PGresult *res;
+
+  res = EjecutarSQL (g_strdup_printf
+                     ("INSERT INTO documentos_emitidos_detalle (id_documento, barcode_product, precio, cantidad) "
+                      "VALUES (%d, %s, %d, %s)", document_id, barcode, precio, CUT (g_strdup_printf ("%.2f",cantidad))));
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+
+}
+
 
 /**
  * Es llamada por las funciones on_sell_button_clicked[ventas.c],
@@ -409,16 +427,25 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gchar *inst, *fecha;
   gchar *q;
   gchar *vale_dir = rizoma_get_value ("VALE_DIR");
-  
+  gboolean vale_continuo = rizoma_get_value_boolean ("VALE_CONTINUO");
+
   gint rut1, rut2, monto2;
   gchar *rut1_gc, *rut2_gc, *dv1, *dv2;
   gboolean afecto_impuesto1, afecto_impuesto2;
 
-  id_documento = InsertNewDocument (tipo_documento, tipo_venta);
+  /* id_documento = InsertNewDocument (tipo_documento, tipo_venta); */
 
-  if (id_documento == -1)
-    return FALSE;
+  /* if (id_documento == -1) */
+  /*   return FALSE; */
 
+  /*
+    TODO: id_documento no se justifica en la tabla venta.
+    la tabla documentos_emitidos hace referencia a ventas, puesto
+    que es una relación de uno a muchos.
+    id_documento debe ser eliminado de la tabla venta, actualmente se
+    mantiene para no dificultar las migraciones.
+  */
+  id_documento = 0;
   q = g_strdup_printf( "SELECT inserted_id FROM registrar_venta( %d, %d, %d, "
                        "%d::smallint, %d::smallint, %s::smallint, %d, '%d' )",
                        total, machine, seller, tipo_documento, tipo_venta,
@@ -426,20 +453,18 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   venta_id = atoi (GetDataByOne (q));
   g_free (q);
 
-  //Si el pago es mixto, se debe asociar el id de esta venta al detalle del pago
-  if (tipo_venta == MIXTO)
-    EjecutarSQL (g_strdup_printf ("UPDATE pago_mixto SET id_sale = %d WHERE id_sale = 0", venta_id));
-      
-  if (boleta != -1)
-    set_ticket_number (boleta, tipo_documento);
-
   /* Registra el detalle de venta y pobla la estructura de producto con
      los monto afecto y no afecto de cada producto (cuando es pago mixto) */
   SaveProductsSell (venta->header, venta_id, tipo_venta);
 
   // Imprimir vale
   if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
-    PrintVale (venta->header, venta_id, boleta, total, tipo_venta);
+    {
+      if (vale_continuo)
+	PrintValeContinuo (venta->header, venta_id, boleta, total, tipo_venta, tipo_documento, NULL);
+      else
+	PrintVale (venta->header, venta_id, boleta, total, tipo_venta, tipo_documento);
+    }
 
   // Abrir Gaveta
   switch (tipo_venta)
@@ -456,8 +481,10 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
       break;
     case CHEQUE_RESTAURANT:
       abrirGaveta ();
+      break;
     case MIXTO:
       abrirGaveta ();
+      break;
     }
 
   switch (tipo_venta)
@@ -567,7 +594,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 	rut2 = atoi (str_splited[0]);
 	dv2 = str_splited[1];
 
-	/*Se registra el detalle del pago mixto*/	
+	/*Se registra el detalle del pago mixto*/
 	EjecutarSQL (g_strdup_printf ("INSERT INTO pago_mixto VALUES (DEFAULT, %d, %d, %d, %d, %d, '%s', '%s', %s, %s, %d, %d)",
 				      venta_id,
 				      pago_mixto->tipo_pago1, pago_mixto->tipo_pago2,
@@ -586,11 +613,12 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
       return FALSE;
     }
 
+  //TODO: en el case FACTURA, el id_documento debería funcionar de otra forma.
   switch (tipo_documento)
     {
     case FACTURA: //specific operations for invoice
       if (rizoma_get_value_boolean ("PRINT_FACTURA")) //print the invoice
-        PrintDocument(tipo_documento, rut, total, id_documento,venta->header);
+        PrintDocument(tipo_documento, rut, total, id_documento, venta->header);
       break;
 
     case SIMPLE: //specific operations for cash
@@ -677,7 +705,7 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
       "FROM venta v,venta_detalle vd "
       "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
       "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
-      "AND (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d "
+      "AND tipo_venta = %d "
       "AND v.id NOT IN (select id_sale from venta_anulada)",
       from_day, from_month, from_year, to_day+1, to_month, to_year,
       from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
@@ -700,8 +728,8 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
     (g_strdup_printf
      ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
       "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND ((SELECT forma_pago FROM documentos_emitidos "
-      "WHERE id=id_documento)=%d OR (SELECT forma_pago FROM documentos_emitidos WHERE id=id_documento)=%d) and venta.id not in ( select id_sale from venta_anulada)",
+      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND ((tipo_venta)=%d OR (tipo_venta)=%d) "
+      "AND venta.id NOT IN ( select id_sale from venta_anulada)",
       from_day, from_month, from_year, to_day+1, to_month, to_year, CREDITO, TARJETA));
 
   if (res == NULL)

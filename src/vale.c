@@ -33,7 +33,7 @@
 #include"manejo_productos.h"
 
 void
-PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_pago)
+PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_pago, gint tipo_documento)
 {
   Productos *products = header;
   FILE *fp;
@@ -47,12 +47,18 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
   char size1[] = {0x1B, 0x45, 0x0, 0x0};
   int n_copy = atoi (vale_copy);
   int i, precio;
+  gint id_documento;
   gdouble siva = 0.0, civa = 0.0;
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
 
   if (impresora == FALSE)
     return;
+
+  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago);
+
+  if (boleta != -1)
+    set_ticket_number (boleta, tipo_documento);
 
   fp = fopen (vale_file, "w+");
   fprintf (fp, "%s", start);
@@ -63,112 +69,74 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
   fprintf (fp, "==========================================\n\n");
 
   do {
-    if (products->product->iva != 0)
-      {
-        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
-	    products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)
-          precio = products->product->precio_mayor;
-        else
-          precio = products->product->precio;
+    if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
+	products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)      
+      precio = products->product->precio_mayor;
+    else
+      precio = products->product->precio;
 
-	gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
-	if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
+    gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+    if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
+      {
+	if (g_str_has_suffix(products->product->producto,"@"))
 	  {
-	    if (g_str_has_suffix(products->product->producto,"@"))
-	      {
-		hay_selectivo = TRUE;
+	    hay_selectivo = TRUE;
 	    
-		fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
-			 g_strndup (products->product->producto, 30),
-			 products->product->marca,
-			 products->product->cantidad,
-			 precio,
-			 lround ((double)(products->product->cantidad * precio)));
-	      }
-	    civa += (double)(products->product->cantidad * precio);
-	  }
-	else
-	  {
-	    fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
+	    fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
 		     g_strndup (products->product->producto, 30),
 		     products->product->marca,
 		     products->product->cantidad,
-		     precio,
-		     lround ((double)(products->product->cantidad * precio)));
-
-	    civa += (double)(products->product->cantidad * precio);
+		     PutPoints (g_strdup_printf ("%d",precio)),
+		     PutPoints (g_strdup_printf ("%lu",
+						 lround ((double)(products->product->cantidad * precio)))));
+	    if (products->product->iva != 0)
+	      civa += (double)(products->product->cantidad * precio);
+	    else if (products->product->iva == 0)
+	      siva += (double)(products->product->cantidad * precio);
 	  }
       }
-
-    products = products->next;
-
-  } while (products != header);
-
-  fprintf (fp, "\n\n");
-
-  do {
-    if (products->product->iva == 0)
+    else
       {
-        if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
-	    products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)
-          precio = products->product->precio_mayor;
-        else
-          precio = products->product->precio;
+	fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+		 g_strndup (products->product->producto, 30),
+		 products->product->marca,
+		 products->product->cantidad,
+		 PutPoints (g_strdup_printf ("%d",precio)),
+		 PutPoints (g_strdup_printf ("%lu",
+					     lround ((double)(products->product->cantidad * precio)))));
 
-	gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
-	if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
-	  {
-	    if (g_str_has_suffix(products->product->producto,"@"))
-	      {
-		hay_selectivo = TRUE;
-		
-		fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
-			 g_strndup (products->product->producto, 30),
-			 products->product->marca,
-			 products->product->cantidad,
-			 precio,
-			 lround ((double)(products->product->cantidad * precio)));
-	      }
-	    siva += (double)(products->product->cantidad * precio);
-	  }
-	else
-	  {
-	    fprintf (fp, "%s %s\n\tCant.: %.2f $ %d \t$ %lu\n",
-		     g_strndup (products->product->producto, 30),
-		     products->product->marca,
-		     products->product->cantidad,
-		     precio,
-		     lround ((double)(products->product->cantidad * precio)));
-
-	    siva += (double)(products->product->cantidad * precio);
-	  }
+	if (products->product->iva != 0)
+	  civa += (double)(products->product->cantidad * precio);
+	else if (products->product->iva == 0)
+	  siva += (double)(products->product->cantidad * precio);
       }
 
-    products = products->next;
+    //Guarda el detalle del documento emitido
+    InsertNewDocumentDetail (id_documento, products->product->barcode, precio, products->product->cantidad);
 
+    products = products->next;
   } while (products != header);
 
   gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
   //impresora = rizoma_get_value_boolean ("IMPRESORA");
   if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
     {
-      gint diferencia;
       if (tipo_pago == CHEQUE_RESTAURANT)
 	{
 	  siva = total;
 	  civa = 0;
 	}
       else if (tipo_pago == MIXTO)
-	{ 
+	{
 	  //Los productos no afectos a impuestos + la proporcion no afeta a impuestos de todos los productos afectos
 	  siva = CalcularSoloNoAfecto (products) + CalcularTotalProporcionNoAfecta (products);
-	  printf ("\nsiva: %d, solo no afecto: %d, total prop no afecta: %d\n", 
-		  lround (siva), 
+	  printf ("\nsiva: %ld, solo no afecto: %ld, total prop no afecta: %ld\n", 
+		  lround (siva),
 		  lround (CalcularSoloNoAfecto (products)),
 		  lround (CalcularTotalProporcionNoAfecta (products)));
 	  //El total afecto a impuestos de la proporcion de todos los productos afecto
 	  civa = CalcularTotalProporcionAfecta (products);
-	  printf ("\nciva: %d\n", lround (civa));
+	  printf ("\nciva: %ld\n", lround (civa));
 	}
 
       fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
@@ -187,6 +155,209 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
       system(g_strdup_printf ("%s %s", print_command, vale_file));
 
   system (g_strdup_printf ("rm %s", vale_file));
+}
+
+
+void
+PrintValeContinuo (Productos *header, gint venta_id, gint boleta, 
+		   gint total, gint tipo_pago, gint tipo_documento, Productos *prod)
+{
+  FILE *fp;
+  char *vale_dir = rizoma_get_value ("VALE_DIR");
+  char *vale_copy = rizoma_get_value ("VALE_COPY");
+  char *print_command = rizoma_get_value ("PRINT_COMMAND");
+  gchar *vale_file = g_strdup_printf ("%s/Vale%d.txt", vale_dir, venta_id);
+  char start[] = {0x1B, 0x40, 0x0};
+  char cut[] = {0x1B, 0x69, 0x0};
+  char size2[] = {0x1B, 0x45, 0x1, 0x0};
+  char size1[] = {0x1B, 0x45, 0x0, 0x0};
+  char pageSize[] = {0x1B, 0x43, 0x06, 0x0};
+  char pageSize2[] = {0x1B, 0x43, 0x30, 0x6,0x0};
+  char salto[] = {0x1B, 0x61, 20, 0x0};
+  char f[] = {0x0A, 0x0};
+  char abrirCaja[] = {0x1B, 0x70, 0x0};
+  char abrirCaja2[] = {0x1B, 0x70, 0x0, 0x64, 0x64, 0x0};
+  int n_copy = atoi (vale_copy);
+  gint i, precio, cantProd = 1;
+  gint id_documento;
+  gdouble siva = 0.0, civa = 0.0;
+  gint prop_afecta = 0, prop_no_afecta = 0;
+  gboolean hay_selectivo = FALSE;
+  gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gboolean continuar = TRUE;
+  
+  gint pph = 5; // Productos Por Hoja
+  Productos *products;
+  
+  if (prod != NULL && prod == header)
+    return;
+
+  if (prod == NULL)
+    products = header;
+  else
+    products = prod;
+
+  if (impresora == FALSE)
+    return;
+
+  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago);
+
+  if (boleta != -1)
+    set_ticket_number (boleta, tipo_documento);  
+
+  fp = fopen (vale_file, "w+");
+  //fprintf (fp, "\t CONTROL INTERNO \n");
+  fprintf (fp, "%s", start);
+  //fprintf (fp, "%s", pageSize);
+  fprintf (fp, "%s%s%s%s",f,f,f,f);
+  fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+  fprintf (fp, "Num. venta: %d - Num. boleta: %d\n", venta_id, boleta);
+  fprintf (fp, "Vendedor: %s\n", user_data->user);
+  //fprintf (fp, "========================================\n\n");
+  fprintf (fp, "\n");
+
+  while ((products != header && continuar) || (cantProd != pph && continuar)) 
+    {
+      if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
+	  products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)      
+	precio = products->product->precio_mayor;   
+      else
+	precio = products->product->precio;
+
+      gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+      if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
+	{
+	  if (g_str_has_suffix(products->product->producto,"@"))
+	    {
+	      hay_selectivo = TRUE;
+	    
+	      fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+		       g_strndup (products->product->producto, 30),
+		       products->product->marca,
+		       products->product->cantidad,
+		       PutPoints (g_strdup_printf ("%d",precio)),
+		       PutPoints (g_strdup_printf ("%lu",
+						   lround ((double)(products->product->cantidad * precio)))));
+	      if (products->product->iva != 0)
+		{
+		  civa += (double)(products->product->cantidad * precio);
+		  if (tipo_pago == MIXTO)
+		    {
+		      prop_afecta += products->product->proporcion_afecta_imp;
+		      prop_no_afecta += products->product->proporcion_no_afecta_imp;
+		    }
+		}
+	      else if (products->product->iva == 0)
+		siva += (double)(products->product->cantidad * precio);	      
+	    }
+	}
+      else
+	{
+	  fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+		   g_strndup (products->product->producto, 30),
+		   products->product->marca,
+		   products->product->cantidad,
+		   PutPoints (g_strdup_printf ("%d",precio)),
+		   PutPoints (g_strdup_printf ("%lu",
+					       lround ((double)(products->product->cantidad * precio)))));
+
+	  if (products->product->iva != 0)
+	    {
+	      civa += (double)(products->product->cantidad * precio);
+	      if (tipo_pago == MIXTO)
+		{
+		  prop_afecta += products->product->proporcion_afecta_imp;
+		  prop_no_afecta += products->product->proporcion_no_afecta_imp;
+		}
+	    }
+	  else if (products->product->iva == 0)
+	    siva += (double)(products->product->cantidad * precio);
+	}
+      
+      //Guarda el detalle del documento emitido
+      InsertNewDocumentDetail (id_documento, products->product->barcode, precio, products->product->cantidad);
+
+      //Si es el último producto
+      if (prod != NULL && prod == header)
+	products = products->back;
+
+      products = products->next;
+    
+      if (cantProd < pph)
+	{
+	  cantProd++;
+	  continuar = (products == header) ? FALSE : TRUE;
+	}
+      else
+	{
+	  cantProd++;
+	  continuar = FALSE;
+	}
+    }
+
+  //fprintf (fp, "\n\n");
+
+  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
+    {
+      if (tipo_pago == CHEQUE_RESTAURANT)
+	{
+	  siva = total;
+	  civa = 0;
+	}
+      else if (tipo_pago == MIXTO)
+	{ 
+	  //Los productos no afectos a impuestos + la proporcion no afeta a impuestos de todos los productos afectos
+	  siva = siva + prop_no_afecta;
+	  //El total afecto a impuestos de la proporcion de todos los productos afecto
+	  civa = prop_afecta;
+	}
+
+      fprintf (fp, "\nSub Total no afecto: \t$%7s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
+      fprintf (fp, "Sub Total afecto:      \t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%u",lround(civa))), size1);
+      fprintf (fp, "\n\n");
+      gdouble totalLocal = civa + siva;
+      fprintf (fp, "Total Venta: \t\t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
+      fprintf (fp, "\n\n\tGracias por su compra! \n");
+      fprintf (fp, "\n\n");
+      
+      //fprintf (fp, "%s", cut); /* We cut the paper :) */
+      //fprintf (fp, "%s", salto);
+      
+      if ((cantProd-1) == 1)
+	fprintf (fp, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f,f,f,f,f,f);
+      else if ((cantProd-1) == 2)
+	fprintf (fp, "%s%s%s%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f,f,f,f);
+      else if ((cantProd-1) == 3)
+	fprintf (fp, "%s%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f,f);
+      else if ((cantProd-1) == 4)
+	fprintf (fp, "%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f);
+      else if ((cantProd-1) == 5)
+	fprintf (fp, "%s%s%s%s%s",
+		 f,f,f,f,f);
+
+      //fprintf (fp, "%s", abrirCaja);
+      //fprintf (fp, "%s", abrirCaja2);
+      fclose (fp);
+    }
+
+  if (((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo) || 
+      (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")))
+    for (i = 0; i < n_copy; i++) 
+      system(g_strdup_printf ("%s %s", print_command, vale_file));
+
+  //system (g_strdup_printf ("cp %s /home/alumno/Escritorio/", vale_file));
+  system (g_strdup_printf ("rm %s", vale_file));
+
+  if (products != header)
+    {
+      boleta = get_ticket_number (tipo_documento);
+      PrintValeContinuo (header, venta_id, boleta, total, tipo_pago, tipo_documento, products);
+    }
 }
 
 
@@ -216,7 +387,7 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
   if (recibo_mov_caja == FALSE)
     return;
 
-  //Consulta informaciÃ³n de la caja correspondiente al id
+  //Consulta información de la caja correspondiente al id
   if (monto_ingreso == 0 && monto_egreso == 0)
     {
       query = g_strdup_printf ("select to_char (open_date, 'DD-MM-YYYY HH24:MI') as open_date_formatted, "

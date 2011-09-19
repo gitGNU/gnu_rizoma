@@ -260,4 +260,8 @@ gboolean insert_emisores (gchar *rut, gchar *dv, gchar *razon_social, gchar *tel
 
 gboolean fact_cheque_rest (gint id);
 
+gint InsertNewDocument (gint sell_id, gint document_type, gint sell_type);
+
+gboolean InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble cantidad);
+
 #endif
