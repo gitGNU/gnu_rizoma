@@ -89,7 +89,7 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
 	  {
 	    hay_selectivo = TRUE;
 	    
-	    fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+	    fprintf (fp, "%s %s\nCant.: %.2f $%7s  $%7s\n",
 		     g_strndup (products->product->producto, 30),
 		     products->product->marca,
 		     products->product->cantidad,
@@ -104,7 +104,7 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
       }
     else
       {
-	fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+	fprintf (fp, "%s %s\nCant.: %.2f $%7s  $%7s\n",
 		 g_strndup (products->product->producto, 30),
 		 products->product->marca,
 		 products->product->cantidad,
@@ -149,12 +149,13 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
 	  printf ("\nciva: %ld\n", lround (civa));
 	}
 
-      fprintf (fp, "\nSub Total no afecto: \t\t$ %lu\n", lround(siva));
-      fprintf (fp, "Sub Total afecto:      \t\t%s$ %u %s\n", size2, lround(civa), size1);
+      fprintf (fp, "\n%sSub Total no afecto:  $%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(siva))), size1);
+      fprintf (fp, "Sub Total afecto:     %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%u",lround(civa))), size1);
       fprintf (fp, "\n\n");
-      fprintf (fp, "Total Venta: \t\t\t%s$ %d %s\n", size2, total, size1);
-      fprintf (fp, "\n\n\t\tGracias por su compra! \n");
-      fprintf (fp, "\n\n\n\n\n");
+      gdouble totalLocal = civa + siva;
+      fprintf (fp, "Total Venta:          %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
+      fprintf (fp, "\n\n\tGracias por su compra! \n");
+      fprintf (fp, "\n\n\n");
       fprintf (fp, "%s", cut); /* We cut the paper :) */
       fclose (fp);
     }
