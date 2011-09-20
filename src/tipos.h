@@ -73,8 +73,8 @@ typedef struct _product
   /* En ventas Mixtas, su proporción de impuesto 
      (de los productos que sí pagan impuestos)
      con respecto al total de pago afecto a impuesto */
-  gint proporcion_afecta_imp;
-  gint proporcion_no_afecta_imp;
+  gdouble proporcion_afecta_imp;
+  gdouble proporcion_no_afecta_imp;
 
   /*
     Solo para usar en compras

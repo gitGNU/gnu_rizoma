@@ -181,7 +181,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
   gint i, precio, cantProd = 1;
   gint id_documento;
   gdouble siva = 0.0, civa = 0.0;
-  gint prop_afecta = 0, prop_no_afecta = 0;
+  gdouble prop_afecta = 0.0, prop_no_afecta = 0.0;
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
   gboolean continuar = TRUE;

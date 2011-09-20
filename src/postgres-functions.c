@@ -1820,8 +1820,8 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	      monto_no_afecto = monto_no_afecto * proporcion_producto;
 
 	      //Se registran los montos en la estructura de productos, para ser impresos en la boleta
-	      products->product->proporcion_afecta_imp = lround (monto_afecto);
-	      products->product->proporcion_no_afecta_imp = lround (monto_no_afecto);
+	      products->product->proporcion_afecta_imp = monto_afecto;
+	      products->product->proporcion_no_afecta_imp = monto_no_afecto;
 
 	      printf ("\nafecto: %d, no afecto: %d, subtotal: %d\n", 
 		      lround (monto_afecto), lround (monto_no_afecto), lround (monto_afecto + monto_no_afecto));
