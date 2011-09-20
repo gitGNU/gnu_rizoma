@@ -593,6 +593,14 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 	str_splited = parse_rut (rut2_gc);
 	rut2 = atoi (str_splited[0]);
 	dv2 = str_splited[1];
+	
+	/* Se registra el monto exacto el dinero suficiente para completar la venta
+	   a no ser que sea cheque de restaurant, ya que éste permite registrar "excesos"
+	   puesto que no se le entrega vuelto */
+	if (pago_mixto->tipo_pago2 != CHEQUE_RESTAURANT)
+	  monto2 = pago_mixto->total_a_pagar - pago_mixto->monto_pago1;
+	else
+	  monto2 = pago_mixto->monto_pago2;
 
 	/*Se registra el detalle del pago mixto*/
 	EjecutarSQL (g_strdup_printf ("INSERT INTO pago_mixto VALUES (DEFAULT, %d, %d, %d, %d, %d, '%s', '%s', %s, %s, %d, %d)",
