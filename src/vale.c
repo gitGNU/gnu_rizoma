@@ -51,9 +51,16 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
   gdouble siva = 0.0, civa = 0.0;
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gboolean is_imp1, is_imp2;
 
   if (impresora == FALSE)
     return;
+
+  if (tipo_pago == MIXTO)
+    {
+      is_imp1 = (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+      is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+    }
 
   id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago);
 
@@ -121,12 +128,15 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
   //impresora = rizoma_get_value_boolean ("IMPRESORA");
   if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
     {
-      if (tipo_pago == CHEQUE_RESTAURANT)
+      //Si el pago es con cheque de restaurant, o ambos son mapgos no afectos a impuestos
+      if (tipo_pago == CHEQUE_RESTAURANT ||
+	  (tipo_pago == MIXTO && (is_imp1 == FALSE && is_imp2 == FALSE)))
 	{
 	  siva = total;
 	  civa = 0;
 	}
-      else if (tipo_pago == MIXTO)
+      else if (tipo_pago == MIXTO && ( (is_imp1 == TRUE && is_imp2 == FALSE) ||
+				       (is_imp1 == FALSE && is_imp2 == TRUE) ))
 	{
 	  //Los productos no afectos a impuestos + la proporcion no afeta a impuestos de todos los productos afectos
 	  siva = CalcularSoloNoAfecto (products) + CalcularTotalProporcionNoAfecta (products);
@@ -185,6 +195,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
   gboolean continuar = TRUE;
+  gboolean is_imp1, is_imp2;
   
   gint pph = 5; // Productos Por Hoja
   Productos *products;
@@ -199,6 +210,12 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
 
   if (impresora == FALSE)
     return;
+
+  if (tipo_pago == MIXTO)
+    {
+      is_imp1 = (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+      is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
+    }
 
   id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago);
 
@@ -241,7 +258,8 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
 	      if (products->product->iva != 0)
 		{
 		  civa += (double)(products->product->cantidad * precio);
-		  if (tipo_pago == MIXTO)
+		  if (tipo_pago == MIXTO && ( (is_imp1 == TRUE && is_imp2 == FALSE) ||
+					      (is_imp1 == FALSE && is_imp2 == TRUE) ))
 		    {
 		      prop_afecta += products->product->proporcion_afecta_imp;
 		      prop_no_afecta += products->product->proporcion_no_afecta_imp;
@@ -264,7 +282,8 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
 	  if (products->product->iva != 0)
 	    {
 	      civa += (double)(products->product->cantidad * precio);
-	      if (tipo_pago == MIXTO)
+	      if (tipo_pago == MIXTO && ( (is_imp1 == TRUE && is_imp2 == FALSE) ||
+					  (is_imp1 == FALSE && is_imp2 == TRUE) ))
 		{
 		  prop_afecta += products->product->proporcion_afecta_imp;
 		  prop_no_afecta += products->product->proporcion_no_afecta_imp;
@@ -300,12 +319,15 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
   gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
   if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
     {
-      if (tipo_pago == CHEQUE_RESTAURANT)
+      //Si el pago es con cheque de restaurant, o ambos son mapgos no afectos a impuestos
+      if (tipo_pago == CHEQUE_RESTAURANT ||
+	  (tipo_pago == MIXTO && (is_imp1 == FALSE && is_imp2 == FALSE)))
 	{
 	  siva = total;
 	  civa = 0;
 	}
-      else if (tipo_pago == MIXTO)
+      else if (tipo_pago == MIXTO && ( (is_imp1 == TRUE && is_imp2 == FALSE) ||
+				       (is_imp1 == FALSE && is_imp2 == TRUE) ))
 	{ 
 	  //Los productos no afectos a impuestos + la proporcion no afeta a impuestos de todos los productos afectos
 	  siva = siva + prop_no_afecta;

@@ -3284,6 +3284,26 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 	  break;
 	}
       
+      //Si el pago es solamente con cheque de restaurant
+      if (cheque_restaurant == TRUE)
+	{
+	  gint monto_solo_no_afecto = lround (CalcularSoloNoAfecto (venta->header));
+	  gint monto_solo_afecto = lround (CalcularSoloAfecto (venta->header));
+	  if (monto_solo_no_afecto > 0)
+	    {
+	      if (general == TRUE)
+		{
+		  limpiar_lista (); //Se tiene que volver a crear el cheque, por lo tanto de saca de la lista.
+		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")),
+			    g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
+		}
+	      else
+		ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_code_detail_mp")),
+			  g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
+	      return;
+	    }
+	}
+
       //printf ("%s", (cheque_restaurant) ? "cheque_restaurant" : "credito");
 
       //Se registra la venta
