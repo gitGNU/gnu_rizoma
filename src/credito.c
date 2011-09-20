@@ -772,6 +772,25 @@ AddClient (GtkWidget *widget, gpointer data)
   gtk_widget_show_all (aux);
 }
 
+
+void
+add_emisor (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *wnd;
+  GtkWidget *aux;
+  wnd = gtk_widget_get_toplevel(widget);
+
+  aux = GTK_WIDGET (gtk_builder_get_object (builder, "entry_srch_emisor"));
+  gtk_widget_grab_focus (aux);
+
+  aux = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_add_check_manager"));
+  clean_container (GTK_CONTAINER (aux));
+  gtk_window_set_transient_for (GTK_WINDOW (aux), GTK_WINDOW (wnd));
+  gtk_window_set_modal (GTK_WINDOW (aux), TRUE);
+  gtk_widget_show_all (aux);
+}
+
+
 void
 CloseAddClientWindow (void)
 {
