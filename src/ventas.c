@@ -3231,6 +3231,9 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 	    }
 	}
 
+      //Se limpia el treeview de los cheques seleccionados
+      gtk_list_store_clear (pago_chk_rest->store);
+
       //Se llena la estructura de pago mixto
       pago_mixto->tipo_pago1 = (cheque_restaurant) ? CHEQUE_RESTAURANT : CREDITO;
       pago_mixto->check_rest1 = (cheque_restaurant) ? pago_chk_rest : NULL;
@@ -3545,7 +3548,6 @@ calculate_amount (GtkEditable *editable,
     }
 }
 
-
 /**
  * This function show the "wnd_mixed_pay_step1"
  * window, clean their widgets, and grab focus 
@@ -3580,8 +3582,7 @@ mixed_pay_window (void)
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay")), "");
   gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_diff_amount")), "");
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_code_mixed_pay")), "");
-
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_subtotal_mixed_pay")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_diff_amount")),
 			g_strdup_printf ("<span size=\"30000\"> %s </span> "
@@ -3589,8 +3590,13 @@ mixed_pay_window (void)
 					 PutPoints (g_strdup_printf ("%d", total))));
   
   //Selecciones por defecto
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_general")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_cheques")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_general")), TRUE);
+
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_cheques")), TRUE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_general")), TRUE);
+
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
 
   //Oculto por defecto
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "hbox3_detail_mixed_pay")));
@@ -3599,10 +3605,11 @@ mixed_pay_window (void)
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_accept_mixed_pay")), FALSE);
   
+  pago_chk_rest->treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_mixed_pay"));
   //Se inicializa el treeview - gtk_tree_view_get_model (pago_chk_rest->treeview) == NULL
-  if (pago_chk_rest->treeview == NULL)
+  if (gtk_tree_view_get_model (pago_chk_rest->treeview) == NULL)
     {
-      pago_chk_rest->treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_mixed_pay"));      
+      pago_chk_rest->treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_mixed_pay"));
 
       // TreeView Providers
       pago_chk_rest->store = gtk_list_store_new (3,
@@ -3648,6 +3655,7 @@ mixed_pay_window (void)
     }
 
   limpiar_lista (); //Limpia la estructura de cheques
+  gtk_list_store_clear (pago_chk_rest->store); //limpia la lista de cheques  
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
   gtk_window_set_position (GTK_WINDOW (builder_get (builder, "wnd_mixed_pay_step1")),
 			   GTK_WIN_POS_CENTER_ALWAYS);
@@ -3696,6 +3704,7 @@ change_ingress_mode (GtkToggleButton *togglebutton, gpointer user_data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")));
 
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_credito")), FALSE);
+      calculate_amount (NULL, NULL, 0, NULL, NULL);
     }
 }
 
