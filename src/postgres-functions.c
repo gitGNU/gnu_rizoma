@@ -1373,7 +1373,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
 {
   Productos *products = header;
   PGresult *res;
-  gdouble iva, otros = 0;
+  gdouble iva = 0, otros = 0;
   gchar *cantidad;
   gchar *precio_compra;
   gchar *q;
@@ -1385,11 +1385,15 @@ SaveBuyProducts (Productos *header, gint id_compra)
         iva = (gdouble) (products->product->precio_compra *
                          products->product->cantidad) *
           (gdouble)products->product->iva / 100;
+      else
+	iva = 0;
 
       if (products->product->otros != -1)
         otros = (gdouble) (products->product->precio_compra *
                            products->product->cantidad) *
           (gdouble)products->product->otros / 100;
+      else
+	otros = 0;
 
       cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
       precio_compra = g_strdup_printf ("%.2f", products->product->precio_compra);
@@ -1438,12 +1442,17 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
   gchar *q;
   gdouble iva = 0, otros = 0;
 
-  iva = (gdouble) (product->precio_compra * product->cantidad) *
-    (gdouble)product->iva / 100;
+  if (product->iva != -1)
+    iva = (gdouble) (product->precio_compra * product->cantidad) *
+      (gdouble)product->iva / 100;
+  else
+    iva = 0;
 
   if (product->otros != -1)
     otros = (gdouble) (product->precio_compra * product->cantidad) *
       (gdouble)product->otros / 100;
+  else
+    otros = 0;
 
 
   cantidad = CUT (g_strdup_printf ("%.2f", product->cantidad));
