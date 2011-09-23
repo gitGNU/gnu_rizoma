@@ -816,7 +816,7 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Sub-Total Neto", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
@@ -5567,9 +5567,9 @@ on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpoint
                               1, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
                                                   PQvaluebycol (res, i, "unidad")),
-                              2, PQvaluebycol(res, i, "precio"),
+                              2, PQvaluebycol(res, i, "precio_compra"),
                               3, strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
-                              4, (gdouble) (strtod (PUT(PQvaluebycol(res, i, "precio")), (char **)NULL) * strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL)),
+                              4, (gdouble) (strtod (PUT(PQvaluebycol(res, i, "precio_compra")), (char **)NULL) * strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL)),
                               -1);
         }
     }
