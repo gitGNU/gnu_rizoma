@@ -76,7 +76,7 @@ ChangeVenta (void)
       /* consulta que arroja el detalle de una venta*/
       res = EjecutarSQL2
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, (cantidad * venta_detalle.precio)::int AS monto FROM venta_detalle, producto WHERE producto.barcode=venta_detalle.barcode and id_venta=%s", idventa));
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, round((cantidad * venta_detalle.precio)) AS monto FROM venta_detalle, producto WHERE producto.barcode=venta_detalle.barcode and id_venta=%s", idventa));
 
       tuples = PQntuples (res);
 
@@ -125,7 +125,7 @@ ChangeDevolucion (void)
       /* consulta que arroja el detalle de una devolucion*/
       res = EjecutarSQL
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, devolucion_detalle.precio, (cantidad * devolucion_detalle.precio)::int AS "
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, devolucion_detalle.precio, round((cantidad * devolucion_detalle.precio)) AS "
           "monto FROM devolucion_detalle, producto WHERE producto.barcode = devolucion_detalle.barcode and id_devolucion=%s", iddevolucion));
 
       tuples = PQntuples (res);
@@ -3249,9 +3249,9 @@ fill_provider ()
 
   res = EjecutarSQL ("SELECT nombre, "
                      "       (SELECT SUM (cantidad_ingresada) FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedor.rut)) as unidades,"
-                     "       (SELECT SUM (cantidad_ingresada * precio) FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedor.rut))::integer as comprado,"
+                     "       round((SELECT SUM (cantidad_ingresada * precio) FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedor.rut))) as comprado,"
                      "       round((SELECT (SUM (margen) / COUNT (*)::numeric) FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedor.rut))::numeric,3) as margen,"
-                     "       (SELECT SUM (precio_venta - (precio * (margen / 100) +1))  FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedor.rut))::integer as contribucion "
+                     "       round((SELECT SUM (precio_venta - (precio * (margen / 100) +1))  FROM compra_detalle WHERE id_compra IN (SELECT id FROM compra WHERE rut_proveedor=proveedor.rut))) as contribucion "
                      "FROM proveedor");
 
   tuples = PQntuples (res);
