@@ -167,7 +167,7 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
   gtk_tree_path_free (path);
 
   gtk_tree_model_get (model, &iter,
-                      11, &stock_teorico,
+                      12, &stock_teorico,
                       -1);
 
   if (stock_fisicoNum > stock_teorico)
@@ -185,13 +185,13 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
     }
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-		      12, stock_fisicoNum,
+		      13, stock_fisicoNum,
 		      -1);
 
   gdouble diferenciaNum = stock_teorico - stock_fisicoNum;
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-		      13, diferenciaNum,
+		      14, diferenciaNum,
 		      -1);
 
   if (diferenciaNum != 0)
@@ -228,9 +228,9 @@ on_btn_save_cuadratura_clicked()
       // Obtengo los valores del treeview --
       gtk_tree_model_get (model, &iter,
 			  0, &codigo_corto,
-                          11, &stock_teorico,
-                          12, &stock_fisico,
-			  13, &diferencia,
+                          12, &stock_teorico,
+                          13, &stock_fisico,
+			  14, &diferencia,
                           -1);
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
