@@ -4134,7 +4134,7 @@ on_btn_add_new_clothes_clicked (GtkButton *button, gpointer data)
   // Se registran los productos
   for (i=0; i<fila; i++)
     AddNewProductToDB (codigos[i], "0", descripcion, marca, "1",
-		       "UN", TRUE, 0, "", FALSE, FALSE);
+		       "UN", TRUE, 0, 1, FALSE, FALSE);
   
   clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "wnd_new_clothing")));
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_new_clothing")));
