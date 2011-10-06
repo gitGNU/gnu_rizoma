@@ -3375,6 +3375,32 @@ registrar_nuevo_color (gchar *codigo, gchar *color)
     printf ("No se registró el color %s, puesto que ya existe", color);
 }
 
+
+/**
+ * If the code doesn't was registered previously,
+ * this function save the color code and color name
+ * into 'color' table
+ *
+ * @param gchar *codigo: The color code
+ * @param gchar *talla: The size name
+ */
+void
+registrar_nueva_talla (gchar *codigo, gchar *talla)
+{
+  gchar *q;
+
+  if (!DataExist (g_strdup_printf ("SELECT * FROM talla WHERE codigo = '%s'", codigo)))
+    {
+      q = g_strdup_printf ("INSERT INTO talla (codigo, nombre) "
+			   "VALUES ('%s', '%s')", codigo, talla);
+      printf ("%s", q);
+      EjecutarSQL (q);
+    }
+  else
+    printf ("No se registró la talla %s, puesto que ya existe", talla);
+}
+
+
 /**
  * If the code doesn't was registered previously,
  * this function save the sub_depto code and sub_depto name

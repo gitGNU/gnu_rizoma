@@ -503,6 +503,12 @@ create table sub_depto (
   nombre		    varchar(30)
 );
 
+-- Talla
+create table talla (
+  id                        serial not null,
+  codigo		    varchar(2),
+  nombre		    varchar(30)
+);
 
 -- Clothes_Code
 create table clothes_code (
