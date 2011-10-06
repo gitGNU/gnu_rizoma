@@ -62,6 +62,7 @@ typedef struct _product
   gint contenido;
   gchar *barcode;
   gint lugar;
+  gint tipo;
 
   /* Venta por fraccion */
   gboolean fraccion;

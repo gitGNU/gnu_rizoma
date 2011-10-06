@@ -30,6 +30,7 @@
 #include"config_file.h"
 #include"utils.h"
 #include"postgres-functions.h"
+#include"boleta.h"
 #include"manejo_productos.h"
 
 void
@@ -150,7 +151,7 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
 	}
 
       fprintf (fp, "\n%sSub Total no afecto:  $%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(siva))), size1);
-      fprintf (fp, "Sub Total afecto:     %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%u",lround(civa))), size1);
+      fprintf (fp, "Sub Total afecto:     %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(civa))), size1);
       fprintf (fp, "\n\n");
       gdouble totalLocal = civa + siva;
       fprintf (fp, "Total Venta:          %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
@@ -179,15 +180,15 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
   char *print_command = rizoma_get_value ("PRINT_COMMAND");
   gchar *vale_file = g_strdup_printf ("%s/Vale%d.txt", vale_dir, venta_id);
   char start[] = {0x1B, 0x40, 0x0};
-  char cut[] = {0x1B, 0x69, 0x0};
+  //char cut[] = {0x1B, 0x69, 0x0};
   char size2[] = {0x1B, 0x45, 0x1, 0x0};
   char size1[] = {0x1B, 0x45, 0x0, 0x0};
-  char pageSize[] = {0x1B, 0x43, 0x06, 0x0};
-  char pageSize2[] = {0x1B, 0x43, 0x30, 0x6,0x0};
-  char salto[] = {0x1B, 0x61, 20, 0x0};
+  //char pageSize[] = {0x1B, 0x43, 0x06, 0x0};
+  //char pageSize2[] = {0x1B, 0x43, 0x30, 0x6,0x0};
+  //char salto[] = {0x1B, 0x61, 20, 0x0};
   char f[] = {0x0A, 0x0};
-  char abrirCaja[] = {0x1B, 0x70, 0x0};
-  char abrirCaja2[] = {0x1B, 0x70, 0x0, 0x64, 0x64, 0x0};
+  //char abrirCaja[] = {0x1B, 0x70, 0x0};
+  //char abrirCaja2[] = {0x1B, 0x70, 0x0, 0x64, 0x64, 0x0};
   int n_copy = atoi (vale_copy);
   gint i, precio, cantProd = 1;
   gint id_documento;
@@ -337,7 +338,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
 	}
 
       fprintf (fp, "\nSub Total no afecto: \t$%7s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
-      fprintf (fp, "Sub Total afecto:      \t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%u",lround(civa))), size1);
+      fprintf (fp, "Sub Total afecto:      \t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(civa))), size1);
       fprintf (fp, "\n\n");
       gdouble totalLocal = civa + siva;
       fprintf (fp, "Total Venta: \t\t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);

@@ -134,4 +134,8 @@ void FillPartialTree (GtkTreeView *tree);
 
 void on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_amount, gpointer data);
 
+gboolean show_description (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
+
+gboolean show_default (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
+
 #endif

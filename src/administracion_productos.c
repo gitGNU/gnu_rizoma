@@ -1066,6 +1066,7 @@ BuscarProductosParaListar (void)
 {
   PGresult *res;
   gchar *q;
+  gchar *materia_prima;
   gchar *string;
   gint i, resultados;
   GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_find_products"));
@@ -1073,11 +1074,12 @@ BuscarProductosParaListar (void)
   GtkWidget *widget;
   GtkListStore *store;
 
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
   widget = GTK_WIDGET(gtk_builder_get_object (builder,"find_product_entry"));
   string = g_strdup (gtk_entry_get_text(GTK_ENTRY(widget)));
   q = g_strdup_printf ( "SELECT * FROM buscar_producto( '%s', "
                         "'{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}',"
-                        "TRUE, FALSE )", string);
+                        "TRUE, FALSE ) WHERE tipo != %s", string, materia_prima);
   res = EjecutarSQL (q);
   g_free (q);
 

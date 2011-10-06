@@ -33,5 +33,6 @@ gint del_chk_rest_from_list (gchar *codigo);
 gdouble calcular_total_cheques (ChequesRestaurant *header);
 gint cantidad_cheques (ChequesRestaurant *header);
 gint limpiar_lista (void);
+Productos *buscar_por_codigo (ChequesRestaurant *header, gchar *code);
 
 #endif

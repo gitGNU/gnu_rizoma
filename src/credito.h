@@ -70,4 +70,9 @@ void ModificarClienteDB (void);
 gint LimiteCredito (const gchar *rut);
 
 void setup_print_menu();
+
+void search_emisor (void);
+
+void emisores_box ();
+
 #endif

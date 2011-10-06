@@ -543,7 +543,7 @@ clientes_box ()
 void
 emisores_box ()
 {
-  GtkWidget *widget;
+  //GtkWidget *widget;
   GtkWidget *tree;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
@@ -1336,12 +1336,12 @@ Abonar (void)
 	  
 	  // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
 	  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sales"));
-	  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
-	  gtk_list_store_clear (store);
+	  store = GTK_TREE_MODEL (gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+	  gtk_list_store_clear (GTK_LIST_STORE(store));
 
 	  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sale_details"));
-	  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
-	  gtk_list_store_clear (store);
+	  store = GTK_TREE_MODEL(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+	  gtk_list_store_clear (GTK_LIST_STORE(store));
         }
       else
         ErrorMSG(widget, "No se pudo abonar el monto a la deuda");
@@ -1993,21 +1993,21 @@ on_btn_add_cm_clicked (GtkButton *button, gpointer user_data)
   giro = g_strdup (gtk_entry_get_text (giro_w));
 
   if (strcmp (rut, "") == 0)
-    AlertMSG (rut_w, "Debe ingresar un rut válido");
+    AlertMSG (GTK_WIDGET(rut_w), "Debe ingresar un rut válido");
   else if (strcmp (dv, "") == 0)
-    AlertMSG (wnd, "Debe ingresar un dígito verificador");
+    AlertMSG (GTK_WIDGET(dv_w), "Debe ingresar un dígito verificador");
   else if (strcmp (rs, "") == 0)
-    AlertMSG (wnd, "Debe ingresar una razón social");
+    AlertMSG (GTK_WIDGET(rs_w), "Debe ingresar una razón social");
   else if (strcmp (tel, "") == 0)
-    AlertMSG (wnd, "Debe ingresar un telefono");
+    AlertMSG (GTK_WIDGET(tel_w), "Debe ingresar un telefono");
   else if (strcmp (dir, "") == 0)
-    AlertMSG (wnd, "Debe ingresar una dirección");
+    AlertMSG (GTK_WIDGET(dir_w), "Debe ingresar una dirección");
   else if (strcmp (comuna, "") == 0)
-    AlertMSG (wnd, "Debe ingresar una comuna");
+    AlertMSG (GTK_WIDGET(comuna_w), "Debe ingresar una comuna");
   else if (strcmp (ciudad, "") == 0)
-    AlertMSG (wnd, "Debe ingresar una ciudad");
+    AlertMSG (GTK_WIDGET(ciudad_w), "Debe ingresar una ciudad");
   else if (strcmp (giro, "") == 0)
-    AlertMSG (wnd, "Debe especificar el giro del emisor");
+    AlertMSG (GTK_WIDGET(giro_w), "Debe especificar el giro del emisor");
   else
     {
       if (VerificarRut (rut, dv) == TRUE)
@@ -2023,7 +2023,7 @@ on_btn_add_cm_clicked (GtkButton *button, gpointer user_data)
 	  search_emisor ();
         }
       else
-        AlertMSG (wnd, "El Rut no es valido!!");
+        AlertMSG (GTK_WIDGET(rut_w), "El Rut no es valido!!");
     }
 }
 
@@ -2124,6 +2124,7 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
   GtkWidget *wnd;
 
   wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_check_manager"));
+  widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
 
   rut_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_rut"));
   dv_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_dv"));
@@ -2177,8 +2178,7 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
 			       rut, dv, rs, tel, dir, comuna, ciudad, giro, id);
 
 	  if (EjecutarSQL (q) != NULL)
-	    {
-	      widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
+	    {	      
 	      statusbar_push (GTK_STATUSBAR(widget), "Se modificaron los datos con exito", 3000);
 	    }
 	  else

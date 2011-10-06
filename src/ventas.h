@@ -105,4 +105,6 @@ void calculate_amount (GtkEditable *editable, gchar *new_text,
                        gint new_text_length, gint *position,
                        gpointer user_data);
 
+void on_btn_ok_srch_emisor_clicked (GtkButton *button, gpointer user_data);
+
 #endif

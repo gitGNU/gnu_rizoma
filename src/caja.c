@@ -28,9 +28,12 @@
 
 #include"postgres-functions.h"
 
+#include"config_file.h"
 #include"errors.h"
 #include"caja.h"
 #include"utils.h"
+#include"vale.h"
+
 
 GtkWidget *calendar_win;
 guint day, month, year;
@@ -122,11 +125,11 @@ IngresarDinero (GtkWidget *widget, gpointer data)
   gint motivo;
   gchar *motivo_texto;
   
-  /*De estar habilitada caja, se asegura que Ã©sta se encuentre 
+  /*De estar habilitada caja, se asegura que ésta se encuentre 
     abierta al momento de vender*/
   
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
+    if (check_caja()) // Se abre la caja en caso de que está cerrada
       open_caja (TRUE);
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_in_motiv"));
@@ -153,7 +156,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
 
   if (Ingreso (monto, motivo, user_data->user_id))
     {      
-      CloseVentanaIngreso();
+      CloseVentanaIngreso ();
       print_cash_box_info (get_last_cash_box_id (), monto, 0, motivo_texto);
     }
   else
@@ -719,7 +722,7 @@ on_entry_caja_close_have_changed (GtkEditable *editable, gpointer data)
   gint monto;
   gint must_have;
 
-  if (!HaveCharacters (gtk_entry_get_text(GTK_ENTRY(editable))))
+  if (!HaveCharacters (g_strdup (gtk_entry_get_text(GTK_ENTRY(editable)))))
     {
       monto = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
