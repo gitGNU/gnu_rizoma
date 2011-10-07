@@ -149,7 +149,8 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
 	  printf ("\nciva: %ld\n", lround (civa));
 	}
 
-      fprintf (fp, "\n%sSub Total no afecto:  $%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(siva))), size1);
+      fprintf (fp, "\n");
+      fprintf (fp, "Sub Total no afecto:  $%7s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
       fprintf (fp, "Sub Total afecto:     %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%u",lround(civa))), size1);
       fprintf (fp, "\n\n");
       gdouble totalLocal = civa + siva;
