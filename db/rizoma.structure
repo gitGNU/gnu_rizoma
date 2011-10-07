@@ -473,7 +473,7 @@ create table producto (
   vendidos                  float8,
   impuestos                 bool,
   otros                     int4,
-  familia                   int2,
+  familia                   int2 default 1,
   perecibles                bool,
   stock_min                 float8 default 0,
   margen_promedio           float8 default 0,
