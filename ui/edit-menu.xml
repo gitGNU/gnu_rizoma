@@ -1,0 +1,6 @@
+<ui>
+  <popup>
+    <menuitem name="ModProducts" action="ModProducts" />
+    <menuitem name="ModRawMaterial" action="ModRawMaterial" />
+  </popup>
+</ui>

@@ -1117,6 +1117,135 @@ BuscarProductosParaListar (void)
     }
 }
 
+
+/**
+ * This function is called from edit menú.
+ * Call the "ModificarProducto" function.
+ * 
+ * @param: void
+ */
+void
+ModificarProductoMenu (void)
+{
+  ModificarProducto (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+}
+
+/**
+ * This function is called from edit menú.
+ * Show "wnd_comp_deriv" windows
+ * 
+ * @param: void
+ */
+void
+ModificarDerivados (void)
+{
+  ModificarProducto (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+}
+
+
+/**
+ * Setup the popup menu that must appear when user clicks in the edit
+ * button present in the compras tab.
+ *
+ * @param: void
+ * TODO: hacer que esta cosa funcione!!!!
+ */
+void
+setup_mod_prod_menu (void)
+{
+  GError *error = NULL;
+  GtkWidget *widget;
+  GtkUIManager *manager;
+  GtkAccelGroup *accel_group;
+  GtkActionGroup *action_group;
+  GtkActionEntry entry[] =
+    {
+      {"ModProducts", NULL, "Editar el producto", NULL, NULL, ModificarProductoMenu},
+      {"ModRawMaterial", NULL, "Editar derivados", NULL, NULL, ModificarDerivados}
+    };
+  manager = gtk_ui_manager_new ();
+  accel_group = gtk_ui_manager_get_accel_group (manager);
+
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_compras"));
+  gtk_window_add_accel_group (GTK_WINDOW (widget), accel_group);
+
+  action_group = gtk_action_group_new ("my edit menu");
+
+  gtk_action_group_add_actions (action_group, entry, 2, NULL);
+
+  gtk_ui_manager_insert_action_group (manager, action_group, 0);
+  gtk_ui_manager_add_ui_from_file (manager, DATADIR"/ui/edit-menu.xml", &error);
+  if (error != NULL)
+    g_print("%s: %s\n", G_STRFUNC, error->message);
+
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button"));
+  g_object_set_data (G_OBJECT (widget), "uimanager2", (gpointer)manager);
+}
+
+/**
+ * This function show de "edit menú" when the product
+ * is a raw material, else the "ModificarProducto" function 
+ * is called.
+ *
+ * @param: button
+ * @param: data
+ */
+void
+on_edit_product_button_clicked (GtkButton *button, gpointer data)
+{
+  //Variables de consulta
+  PGresult *res;
+  gchar *q;
+
+  //Información del producto
+  GtkWidget *widget_barcode;
+  gchar *barcode;
+  gchar *materia_prima;
+
+  //Menu
+  GtkUIManager *uimanager;
+  GtkWidget *widget;
+
+  widget_barcode = GTK_WIDGET (builder_get (builder, "entry_buy_barcode"));
+
+  //Se obtiene el id de la materia prima
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
+
+  //Se obtiene el barcode
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_barcode)));
+  if (g_str_equal (barcode, "")) return;
+  
+  //Se obtiene el tipo de producto
+  q = g_strdup_printf ("SELECT tipo FROM select_producto(%s)", barcode);
+  res = EjecutarSQL(q);
+  g_free(q);
+
+  if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      g_printerr("error en %s\n%s",G_STRFUNC, PQresultErrorMessage(res));
+      return;
+    }
+
+  if (PQntuples (res) == 0) return;
+
+  // Si el producto es una materia prima se despliega el menú de elección
+  if (g_str_equal (PQvaluebycol (res, 0, "tipo"), materia_prima))
+    {
+      //Se muestra el menú de elección
+      /* TODO: Hacer que esto funcione
+	uimanager = GTK_UI_MANAGER (g_object_get_data (G_OBJECT (button), "uimanager2"));
+	widget = gtk_ui_manager_get_widget (uimanager, "/popup");
+	gtk_menu_popup (GTK_MENU (widget), NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time ());
+	gtk_widget_show_all (widget);
+      */
+
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_edit_raw_product")));
+    }
+  else //De lo contrario simplemente se inicia la modificación del producto
+    ModificarProducto (widget_barcode);
+}
+
+
 /**
  * This function saves the modifications that the user entedered in
  * the modification product window

@@ -1803,13 +1803,13 @@ on_btn_admin_print_clicked(GtkButton *button, gpointer user_data)
   GtkUIManager *uimanager;
   GtkWidget *widget;
 
-  uimanager = GTK_UI_MANAGER(g_object_get_data(G_OBJECT(button), "uimanager"));
+  uimanager = GTK_UI_MANAGER (g_object_get_data (G_OBJECT (button), "uimanager"));
 
-  widget = gtk_ui_manager_get_widget(uimanager, "/popup");
+  widget = gtk_ui_manager_get_widget (uimanager, "/popup");
 
-  gtk_menu_popup (GTK_MENU(widget), NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time());
+  gtk_menu_popup (GTK_MENU (widget), NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time ());
 
-  gtk_widget_show_all(widget);
+  gtk_widget_show_all (widget);
 }
 
 void
