@@ -1949,14 +1949,33 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
 }
 
 PGresult *
-ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode)
+ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day)
 {
   PGresult *res;
   gchar *q;
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode);
+    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
+     from_day, from_month, from_year, to_day+1, to_month, to_year);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+PGresult *
+ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);

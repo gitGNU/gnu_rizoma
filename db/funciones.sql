@@ -2125,11 +2125,12 @@ q := $S$ SELECT producto.barcode as barcode,
 	      producto.unidad as unidad,
 	      SUM (venta_detalle.cantidad) as amount,
 	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer/*-(venta_detalle.iva+venta_detalle.otros)::integer*/) as sold_amount,
-	      SUM ((venta_detalle.cantidad*venta_detalle.fifo)::integer) as costo,
-       	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as contrib
+	      SUM (venta_detalle.cantidad*venta_detalle.fifo) as costo,
+       	      SUM ((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad))) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
       where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5 $S$;
+      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5
+      ORDER BY producto.descripcion ASC $S$;
 
 for l in execute q loop
     barcode := l.barcode;
@@ -2148,20 +2149,18 @@ return;
 end; $$ language plpgsql;
 
 --
--- Ranking de ventas de ventas de la(s) mercadería(s) asociada(s)
--- al producto derivado o compuesto seleccionado en el ranking de
--- vemtas.
+-- Ranking de ventas de ventas de las materias primas
+-- (ventas indirectas).
 --
 CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
-       	  	  	   		      IN ends date,
-       					      IN barcode_der_comp bigint, --barcode del producto derivado o compuesto
+       	  	  	   		      IN ends date,       					      
 					      OUT barcode varchar,
 					      OUT descripcion varchar,
 					      OUT marca varchar,
 					      OUT contenido varchar,
 					      OUT unidad varchar,
 					      OUT cantidad double precision,
-					      OUT precio double precision,
+					      OUT monto_vendido double precision,
 					      OUT costo double precision,
 					      OUT contribucion double precision)
 RETURNS SETOF RECORD AS $$
@@ -2170,11 +2169,11 @@ DECLARE
 	l record;
 BEGIN
 
-	q := $S$ SELECT p.barcode, p.marca, p.descripcion, p.contenido, p.unidad,
-		        SUM(vmcd.cantidad) AS cantidad,
-			SUM (((vmcd.cantidad*vmcd.precio)-(v.descuento*((vmcd.cantidad*vmcd.precio)/(v.monto+v.descuento))))::integer) AS precio,
-			SUM(vmcd.fifo) AS costo,
-       			SUM (((vmcd.precio*vmcd.cantidad)-((vmcd.iva+vmcd.otros)+(vmcd.fifo*vmcd.cantidad)))::integer) AS contribucion       
+	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad,
+		        SUM (vmcd.cantidad) AS cantidad,
+			SUM ((vmcd.cantidad*vmcd.precio)-(v.descuento*((vmcd.cantidad*vmcd.precio)/(v.monto+v.descuento)))) AS monto_vendido,
+			SUM (vmcd.cantidad*vmcd.fifo) AS costo,
+       			SUM ((vmcd.precio*vmcd.cantidad)-((vmcd.iva+vmcd.otros)+(vmcd.fifo*vmcd.cantidad))) AS contribucion
 		 FROM venta_mc_detalle vmcd
 		 INNER JOIN venta_detalle vd
 		 ON vd.id_venta = vmcd.id_venta_vd
@@ -2183,9 +2182,8 @@ BEGIN
 		 ON v.id = vd.id_venta
 		 INNER JOIN producto p
 		 ON p.barcode = vmcd.barcode
-		 WHERE vd.barcode = $S$ || barcode_der_comp || $S$
-		 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-		 GROUP BY 1,2,3,4,5 $S$;
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		 GROUP BY 1,2,3,4,5 ORDER BY p.descripcion ASC $S$;
 
       	FOR l IN EXECUTE q loop
 	    barcode := l.barcode;
@@ -2194,7 +2192,59 @@ BEGIN
     	    contenido := l.contenido;
     	    unidad := l.unidad;
     	    cantidad := l.cantidad;
-    	    precio := l.precio;
+    	    monto_vendido := l.monto_vendido;
+    	    costo := l.costo;
+    	    contribucion := l.contribucion;
+    	    RETURN NEXT;
+        END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+--
+-- Ranking de ventas de los productos derivados
+-- (ventas indirectas).
+--
+CREATE OR REPLACE FUNCTION ranking_ventas_deriv (IN starts date,
+       	  	  	   		      	 IN ends date,
+						 IN barcode_mp varchar,
+					      	 OUT barcode varchar,
+					      	 OUT descripcion varchar,
+					      	 OUT marca varchar,
+					      	 OUT contenido varchar,
+					      	 OUT unidad varchar,
+					      	 OUT cantidad double precision,
+					      	 OUT monto_vendido double precision,
+					      	 OUT costo double precision,
+					      	 OUT contribucion double precision)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+BEGIN
+
+	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad,
+		        SUM (vd.cantidad) AS cantidad,
+			SUM ((vd.cantidad*vd.precio)-(v.descuento*((vd.cantidad*vd.precio)/(v.monto+v.descuento)))) AS monto_vendido,
+			SUM (vd.cantidad*vd.fifo) AS costo,
+       			SUM ((vd.precio*vd.cantidad)-((vd.iva+vd.otros)+(vd.fifo*vd.cantidad))) AS contribucion
+		 FROM venta_detalle vd
+		 INNER JOIN venta v
+		 ON v.id = vd.id_venta
+		 INNER JOIN producto p
+		 ON p.barcode = vd.barcode
+		 WHERE vd.barcode IN (SELECT barcode_derivado FROM componente_mc WHERE barcode_madre = $S$ || barcode_mp || $S$)
+		 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		 GROUP BY 1,2,3,4,5 ORDER BY p.descripcion ASC $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+    	    cantidad := l.cantidad;
+    	    monto_vendido := l.monto_vendido;
     	    costo := l.costo;
     	    contribucion := l.contribucion;
     	    RETURN NEXT;
