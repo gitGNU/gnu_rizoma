@@ -151,6 +151,8 @@ gboolean SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta);
 
 PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day);
 
+PGresult * ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode);
+
 gboolean AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gchar *comuna,
                            gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro);
 

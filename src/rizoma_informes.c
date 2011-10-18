@@ -51,7 +51,6 @@ int flagProgress;
  * Esta funcion visualiza los productos de un detalle de la venta en el tree_view
  *
  */
-
 void
 ChangeVenta (void)
 {
@@ -101,7 +100,6 @@ ChangeVenta (void)
  * Esta funcion visualiza los productos de un detalle de la devolucion en el tree_view.
  *
  */
-
 void
 ChangeDevolucion (void)
 {
@@ -145,6 +143,53 @@ ChangeDevolucion (void)
     }
 }
 
+
+void
+change_sell_rank (GtkCellRendererText *cell, gchar *path_string, gchar *stock_fisico, gpointer data)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkListStore *store_sr_mp = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_sell_rank_mp"))));
+  GtkTreeIter iter;
+  gchar *barcode_producto;
+  gint i, tuples;
+  PGresult *res;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &barcode_producto,
+                          -1);
+
+      gtk_list_store_clear (GTK_LIST_STORE (store_sr_mp));
+
+      res = ReturnMpProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+				  g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+				  barcode_producto);
+      
+      tuples = PQntuples (res);
+
+      for (i = 0; i < tuples; i++)
+        {
+          gtk_list_store_append (store_sr_mp, &iter);
+          gtk_list_store_set (store_sr_mp, &iter,
+                              0, g_strdup (PQvaluebycol (res, i, "descripcion")),
+                              1, g_strdup (PQvaluebycol (res, i, "marca")),
+                              2, g_strdup (PQvaluebycol (res, i, "contenido")),
+                              3, g_strdup (PQvaluebycol (res, i, "unidad")),
+			      4, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			      5, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL)),
+			      6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+			      7, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL)),
+			      8, ((strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL) /
+				   strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)) * 100),
+                              -1);
+        }
+    }
+}
+
+
 /**
  * Es llamada cuando se edita "stock físico" en el tree_view_cuadratura (signal edited).
  *
@@ -152,7 +197,6 @@ ChangeDevolucion (void)
  * y "stock físico" (stock_teorico - stock_fisico)
  *
  */
-
 void
 on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *stock_fisico, gpointer data)
 {
@@ -208,7 +252,6 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
  * como motivo.
  *
  */
-
 void
 on_btn_save_cuadratura_clicked()
 {
@@ -848,7 +891,8 @@ reports_win (void)
 
   /* Sells Rank */
 
-  store = gtk_list_store_new (9,
+  store = gtk_list_store_new (10,
+			      G_TYPE_STRING, //Barcode
                               G_TYPE_STRING,
                               G_TYPE_STRING,
                               G_TYPE_INT,
@@ -860,6 +904,157 @@ reports_win (void)
                               G_TYPE_DOUBLE);
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (change_sell_rank), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Medida", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_min_width (column, 40);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unidades", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Vendido $", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 70);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
+                                                     "text", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 7);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Contrib. $", renderer,
+                                                     "text", 8,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 8);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Margen %", renderer,
+                                                     "text", 9,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 9);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
+
+  print->tree = treeview;
+  print->title = "Ranking de Ventas";
+  print->date_string = NULL;
+  print->cols[1].name = "Producto";
+  print->cols[2].name = "Marca";
+  print->cols[3].name = "Medida";
+  print->cols[4].name = "Unidad";
+  print->cols[5].name = "Unidades";
+  print->cols[6].name = "Vendido $";
+  print->cols[7].name = "Costo";
+  print->cols[8].name = "Contrib";
+  print->cols[9].name = "Margen";
+  print->cols[10].name = NULL;
+
+  g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+                    G_CALLBACK (PrintTree), (gpointer)print);
+
+
+  /* End Sells Rank */
+
+
+  /* Sells Rank MP*/
+
+  store = gtk_list_store_new (9,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_STRING,
+                              G_TYPE_DOUBLE,
+                              G_TYPE_INT,
+                              G_TYPE_INT,
+			      G_TYPE_INT,
+			      G_TYPE_DOUBLE);
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sell_rank_mp"));
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
 
   renderer = gtk_cell_renderer_text_new ();
@@ -916,7 +1111,6 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_min_width (column, 50);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -929,7 +1123,6 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 5);
   gtk_tree_view_column_set_min_width (column, 70);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -942,10 +1135,9 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 6);
   gtk_tree_view_column_set_min_width (column, 50);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
-  renderer = gtk_cell_renderer_text_new ();
+    renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Contrib. $", renderer,
                                                      "text", 7,
                                                      NULL);
@@ -971,7 +1163,8 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)8, NULL);
 
-  print->tree = treeview;
+
+  /*print->tree = treeview;
   print->title = "Ranking de Ventas";
   print->date_string = NULL;
   print->cols[0].name = "Producto";
@@ -981,15 +1174,14 @@ reports_win (void)
   print->cols[4].name = "Unidades";
   print->cols[5].name = "Vendido $";
   print->cols[6].name = "Costo";
-  print->cols[7].name = "Contrib";
-  print->cols[8].name = "Margen";
-  print->cols[9].name = NULL;
+  print->cols[7].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-                    G_CALLBACK (PrintTree), (gpointer)print);
+  G_CALLBACK (PrintTree), (gpointer)print);*/
 
 
-  /* End Sells Rank */
+  /* End Sells Rank MP */
+
 
   /* Cash Box */
 
@@ -3143,18 +3335,18 @@ fill_products_rank ()
 
   for (i = 0; i < tuples; i++)
     {
-
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-                          0, PQvaluebycol (res, i, "descripcion"),
-                          1, PQvaluebycol (res, i, "marca"),
-                          2, atoi (PQvaluebycol (res, i, "contenido")),
-                          3, PQvaluebycol (res, i, "unidad"),
-                          4, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
-                          5, atoi (PQvaluebycol (res, i, "sold_amount")),
-                          6, atoi (PQvaluebycol (res, i, "costo")),
-                          7, atoi (PQvaluebycol (res, i, "contrib")),
-                          8, (((gdouble)atoi (PQvaluebycol (res, i, "contrib")) /
+			  0, PQvaluebycol (res, i, "barcode"),
+                          1, PQvaluebycol (res, i, "descripcion"),
+                          2, PQvaluebycol (res, i, "marca"),
+                          3, atoi (PQvaluebycol (res, i, "contenido")),
+                          4, PQvaluebycol (res, i, "unidad"),
+                          5, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
+                          6, atoi (PQvaluebycol (res, i, "sold_amount")),
+                          7, atoi (PQvaluebycol (res, i, "costo")),
+                          8, atoi (PQvaluebycol (res, i, "contrib")),
+                          9, (((gdouble)atoi (PQvaluebycol (res, i, "contrib")) /
                                atoi (PQvaluebycol (res, i, "costo"))) * 100),
                           -1);
     }

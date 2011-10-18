@@ -1948,6 +1948,26 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
     return NULL;
 }
 
+PGresult *
+ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
 gboolean
 AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gchar *comuna,
                   gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro)
@@ -2520,8 +2540,10 @@ gchar *
 InversionTotalStock (void)
 {
   PGresult *res;
+  gchar *compuesta; //TODO: mas adelante esto se diferenciará derivados de compuestos
 
-  res = EjecutarSQL ("SELECT round (SUM (costo_promedio * stock)) FROM producto");
+  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
+  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (costo_promedio * stock)),0) FROM producto WHERE tipo != %s", compuesta));
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2533,8 +2555,10 @@ gchar *
 ValorTotalStock (void)
 {
   PGresult *res;
+  gchar *discreta;
 
-  res = EjecutarSQL ("SELECT round (SUM (precio * stock)) FROM producto");
+  discreta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DISCRETA'"), 0, "id"));
+  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (precio * stock)),0) FROM producto WHERE tipo = %s", discreta));
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);

@@ -510,7 +510,13 @@ FOR datos IN EXECUTE query LOOP
     marca := datos.marca;
     contenido := datos.contenido;
     unidad := datos.unidad;
-    stock := datos.stock;
+
+    IF datos.tipo = compuesta THEN
+        stock := (SELECT disponible FROM obtener_stock_desde_barcode (datos.barcode));
+    ELSE
+        stock := datos.stock;
+    END IF;
+
     precio := datos.precio;
 
     -- Costo_promedio de los compuestos debería estar en el producto mismo?
@@ -623,10 +629,10 @@ query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
 		    otros, familia, perecibles, stock_min, margen_promedio,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista, tipo
-             FROM producto WHERE estado = true and lower(descripcion) LIKE lower($S$
+             FROM producto WHERE estado = true AND (lower(descripcion) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR lower(marca) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR upper(codigo_corto) LIKE upper($S$
-	|| quote_literal(expresion) || $S$) AND estado = true order by descripcion, marca $S$;
+	|| quote_literal(expresion) || $S$)) ORDER BY descripcion, marca $S$;
 
 compuesta := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'COMPUESTA');
 
@@ -799,17 +805,22 @@ DECLARE
 	query varchar(255);
 	monto_pci float8; -- monto productos con impuestos
 	monto_psi float8; -- monto productos sin impuestos
+	discreta int4; -- id de mercadería del tipo discreta (normal)
 BEGIN
+
+   discreta := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'DISCRETA');
 
    -- Productos con impuestos
    SELECT SUM (((precio / (SELECT (SUM(monto)/100)+1 FROM impuesto WHERE id = otros OR id = 1)) - costo_promedio) * stock)
    INTO monto_pci
-   FROM producto WHERE impuestos = TRUE;
+   FROM producto WHERE impuestos = TRUE
+   AND tipo = discreta;
 
    -- Productos sin impuestos
    SELECT (SELECT SUM((precio - costo_promedio) * stock)) 
    INTO monto_psi
-   FROM producto WHERE impuestos = FALSE;
+   FROM producto WHERE impuestos = FALSE
+   AND tipo = discreta;
    
    -- Contribucion total stock
    monto_contribucion := COALESCE(monto_pci,0) + COALESCE(monto_psi,0);
@@ -2091,6 +2102,7 @@ end; $$ language plpgsql;
 create or replace function ranking_ventas(
        in starts date,
        in ends date,
+       out barcode varchar,
        out descripcion varchar,
        out marca varchar,
        out contenido varchar,
@@ -2106,7 +2118,8 @@ q text;
 l record;
 begin
 
-q := $S$ SELECT producto.descripcion as descripcion,
+q := $S$ SELECT producto.barcode as barcode,
+     	      producto.descripcion as descripcion,
        	      producto.marca as marca,
 	      producto.contenido as contenido,
 	      producto.unidad as unidad,
@@ -2116,9 +2129,10 @@ q := $S$ SELECT producto.descripcion as descripcion,
        	      SUM (((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad)))::integer) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
       where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4 $S$;
+      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5 $S$;
 
 for l in execute q loop
+    barcode := l.barcode;
     descripcion := l.descripcion;
     marca := l.marca;
     contenido := l.contenido;
@@ -2132,6 +2146,63 @@ end loop;
 
 return;
 end; $$ language plpgsql;
+
+--
+-- Ranking de ventas de ventas de la(s) mercadería(s) asociada(s)
+-- al producto derivado o compuesto seleccionado en el ranking de
+-- vemtas.
+--
+CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
+       	  	  	   		      IN ends date,
+       					      IN barcode_der_comp bigint, --barcode del producto derivado o compuesto
+					      OUT barcode varchar,
+					      OUT descripcion varchar,
+					      OUT marca varchar,
+					      OUT contenido varchar,
+					      OUT unidad varchar,
+					      OUT cantidad double precision,
+					      OUT precio double precision,
+					      OUT costo double precision,
+					      OUT contribucion double precision)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+BEGIN
+
+	q := $S$ SELECT p.barcode, p.marca, p.descripcion, p.contenido, p.unidad,
+		        SUM(vmcd.cantidad) AS cantidad,
+			SUM (((vmcd.cantidad*vmcd.precio)-(v.descuento*((vmcd.cantidad*vmcd.precio)/(v.monto+v.descuento))))::integer) AS precio,
+			SUM(vmcd.fifo) AS costo,
+       			SUM (((vmcd.precio*vmcd.cantidad)-((vmcd.iva+vmcd.otros)+(vmcd.fifo*vmcd.cantidad)))::integer) AS contribucion       
+		 FROM venta_mc_detalle vmcd
+		 INNER JOIN venta_detalle vd
+		 ON vd.id_venta = vmcd.id_venta_vd
+		 AND vd.id = vmcd.id_venta_detalle
+		 INNER JOIN venta v
+		 ON v.id = vd.id_venta
+		 INNER JOIN producto p
+		 ON p.barcode = vmcd.barcode
+		 WHERE vd.barcode = $S$ || barcode_der_comp || $S$
+		 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		 GROUP BY 1,2,3,4,5 $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+    	    cantidad := l.cantidad;
+    	    precio := l.precio;
+    	    costo := l.costo;
+    	    contribucion := l.contribucion;
+    	    RETURN NEXT;
+        END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
 
 create or replace function get_guide_detail(
 		IN id_guia integer,

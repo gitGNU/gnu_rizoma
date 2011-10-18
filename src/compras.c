@@ -55,6 +55,14 @@ GtkWidget *entry_plazo;
 gint tipo_traspaso = 1;
 gint calcular = 0;
 
+/*FLAG:
+  Auxiliar para el proceso de búsqueda de un producto
+  permite saber si se desea buscar un producto para
+  agregar a la compra, o una materia prima para 
+  añadir derivados a ella
+*/
+gboolean add_deriv = FALSE;
+
 // Representa el numero de filas que se han 
 // borrado en el filtro de busqueda
 gint numFilasBorradas = 0;
@@ -1652,6 +1660,7 @@ AddFoundProduct (void)
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
   gchar *barcode;
   gchar *codigo;
+  gdouble costo;
 
   if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter))
     {
@@ -1659,14 +1668,44 @@ AddFoundProduct (void)
                           0, &codigo,
 			  1, &barcode,
                           -1);
+      
+      //Si se llamó desde la ventana de compra principal simplemente se selecciona el producto
+      if (add_deriv == FALSE)
+	{
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
+	  SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), codigo);
+	}
+      //Si se llama desde la ventana de creación de derivados, continúa con el proceso del mismo
+      else if (add_deriv == TRUE)
+	{
+	  costo = strtod (PUT
+			  (g_strdup (PQvaluebycol 
+				     (EjecutarSQL 
+				      (g_strdup_printf ("SELECT costo_promedio FROM producto WHERE barcode = %s", barcode)), 0, "costo_promedio"))),
+			   (char **)NULL);
+	  CompraAgregarALista (barcode, 1, 0, costo, 0, FALSE);
+	  
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
+	  on_btn_der_mp_yes_clicked (NULL, NULL);
+	}
 
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
-
-      SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), codigo);
     }
 }
 
+void
+on_btn_new_deriv_clicked (GtkButton *button, gpointer user_data)
+{
+  /*
+    Se setea el FLAG add_deriv a TRUE para indicar que se 
+    agregará una materia prima, y así continuar con los procedimientos
+    necesarios para ello.
+  */
+  add_deriv = TRUE;
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_merchandise")));  
+  SearchByName ();
+}
 
 void
 SearchName (void)
@@ -1675,14 +1714,21 @@ SearchName (void)
   gchar *q;
   PGresult *res;
   gint i, resultado;
+  gchar *materia_prima;
 
   GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   GtkTreeIter iter;
+  
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, "
                        "contenido, unidad, stock FROM buscar_productos('%s%%')",
                        search_string);
+
+  if (add_deriv == TRUE)
+    q = g_strdup_printf ("%s WHERE tipo = %s", q, materia_prima);
+
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -6245,6 +6291,7 @@ on_btn_edit_derivates_clicked (GtkButton *button, gpointer data)
   gchar *barcode;
   gdouble costo;
   
+  add_deriv = TRUE; //setea la FLAG como TRUE, para indicar que se editarán los derivados de la materia prima
   barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   costo = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
 
@@ -6675,9 +6722,13 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
     g_strdup_printf ("%.3f",compra->products_compra->product->precio_compra));*/
 
   //Quita el producto de la lista de compra si es que solo se esta editando
-  if (g_str_equal (gtk_buildable_get_name (GTK_WIDGET (button)), "btn_edit_derivates"))
+  //if (g_str_equal (gtk_buildable_get_name (GTK_WIDGET (button)), "btn_edit_derivates"))
+  if (add_deriv == TRUE)
     DropBuyProduct (compra->products_compra->product->codigo);
-  
+
+  // Devuelve la flag a la normalidad
+  add_deriv = FALSE;
+
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_comp_deriv")));
 }
 

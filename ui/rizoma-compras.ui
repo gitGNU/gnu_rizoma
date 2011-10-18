@@ -1691,7 +1691,7 @@
   <object class="GtkWindow" id="wnd_buscador">
     <property name="height_request">400</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="title" translatable="yes" context="yes">Rizoma: Buscar de Productos</property>
+    <property name="title" translatable="yes" context="yes">Rizoma: Buscar mercaderías</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="destroy_with_parent">True</property>
@@ -7676,6 +7676,7 @@
               <object class="GtkButton" id="btn_ena_dis_product">
                 <property name="label" translatable="yes">Habilitar/Deshabilitar</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
               </object>
@@ -7690,6 +7691,7 @@
               <object class="GtkButton" id="btn_make_offer">
                 <property name="label" translatable="yes">Crear Oferta</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
               </object>
@@ -7820,7 +7822,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_new_mp">
-                <property name="label" translatable="yes">Materia Prima</property>
+                <property name="label" translatable="yes">Materia prima</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -7834,11 +7836,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="btn_new_cmp_der">
-                <property name="label" translatable="yes">Compuestas/Derivadas</property>
+              <object class="GtkButton" id="btn_new_deriv">
+                <property name="label" translatable="yes">Derivadas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_btn_new_deriv_clicked"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8755,6 +8758,7 @@
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
+    <signal name="delete_event" handler="gtk_widget_hide" object="wnd_edit_raw_product"/>
     <child>
       <object class="GtkVBox" id="vbox1_choise_edit_rp">
         <property name="visible">True</property>

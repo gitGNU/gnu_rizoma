@@ -60,6 +60,8 @@ void SelectProveedores (GtkWidget *widget, gpointer data);
 
 void FillProveedores (void);
 
+void AddFoundProduct (void);
+
 void AddProveedor (GtkWidget *widget, gpointer data);
 
 void AddProveedorWindow (GtkWidget *widget, gpointer user_data);
