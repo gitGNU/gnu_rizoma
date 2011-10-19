@@ -1263,7 +1263,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   GtkListStore *modelo;
   GtkCellRenderer *cell;
 
-  gchar *q, *unit;
+  gchar *q, *unit, *materia_prima;
   gchar *barcode;
   gint active;
   gint otros_index;
@@ -1271,6 +1271,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   PGresult *res;
   gint tuples, i, familia_id;
 
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
 
   if (GTK_IS_ENTRY (widget_barcode))
     {
@@ -1288,7 +1289,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, unidad, familia, "
-                       "contenido, precio FROM select_producto(%s)", barcode);
+                       "contenido, precio, tipo FROM select_producto(%s)", barcode);
   res = EjecutarSQL(q);
   g_free(q);
 
@@ -1314,6 +1315,11 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_price"));
   gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "precio"));
+  
+  if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), materia_prima))
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), FALSE);
+  else
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), TRUE);
 
   cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_edit_product_unit"));
   modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_unit)));

@@ -1693,6 +1693,14 @@ AddFoundProduct (void)
     }
 }
 
+/**
+ * Setea la flag global indicando que se crearan productos derivados
+ * y muestra la ventana de búsqueda de productos, para elegir la materia
+ * prima desde la cual saldrán los derivados.
+ *
+ * @param: button
+ * @param: user_data
+ */
 void
 on_btn_new_deriv_clicked (GtkButton *button, gpointer user_data)
 {

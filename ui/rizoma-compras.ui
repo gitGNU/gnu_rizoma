@@ -8815,6 +8815,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="ModificarProducto" object="entry_buy_barcode"/>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_edit_raw_product"/>
               </object>
               <packing>
                 <property name="position">2</property>
