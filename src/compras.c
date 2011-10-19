@@ -7358,8 +7358,8 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
   /*Variables de informacion*/
   gboolean enabled;
   gchar *codigo_corto; //Se obtienen desde el treeview
-  gdouble costo, cantidad; //Se obtienen desde el treeview
-  gchar *barcode, *precio; //Se obtienen a través de una consulta sql
+  gdouble costo, cantidad, precio; //Se obtienen desde el treeview
+  gchar *barcode; //Se obtienen a través de una consulta sql
 
   /*Variables consulta*/
   PGresult *res;
@@ -7374,6 +7374,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 			  0, &enabled,
 			  1, &codigo_corto,
 			  3, &costo,
+			  4, &precio,
 			  8, &cantidad,
                           -1);
 
@@ -7382,7 +7383,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 	  q = g_strdup_printf ("SELECT barcode, precio FROM producto where codigo_corto = '%s'", codigo_corto);
 	  res = EjecutarSQL (q);
 	  barcode = PQvaluebycol (res, 0, "barcode");
-	  precio = PQvaluebycol (res, 0, "precio");
+	  //precio = PQvaluebycol (res, 0, "precio");
 
 	  if (cantidad == 0)
 	    cantidad = 1;
@@ -7390,7 +7391,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 	  //Set Buy's Entries
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), g_strdup_printf ("%f",costo));
-	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), precio);
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), g_strdup_printf ("%d", lround(precio)));
 	  calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), g_strdup_printf ("%f",cantidad));
 
