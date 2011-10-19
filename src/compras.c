@@ -7510,7 +7510,10 @@ on_sell_price_edited (GtkCellRendererText *cell, gchar *path_string, gchar *prec
   gdouble precioAntes;
   gdouble subTotal, costo, cantidad;
   gboolean fraccion, enable;
-  gchar *barcode;
+  gchar *barcode, *materia_prima;
+
+  // Obtiene el id de la materia prima
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   // Se inicializan en 0
   subTotal = costo = cantidad = 0;
@@ -7528,6 +7531,16 @@ on_sell_price_edited (GtkCellRendererText *cell, gchar *path_string, gchar *prec
 
   if (precio < 0) // precio no puede ser negativo
     precio = 0;
+
+  // Se verifica si el producto es una materia prima, de serlo, no se debe modificar su precio de venta
+  if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s' AND tipo = %s", 
+				  barcode, materia_prima)))
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_products_providers")), 
+		"Esta es una materia prima y no tiene precio de venta. \n"
+		"Edite cualquiera de sus mercaderías derivadas");
+      return;
+    }
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      4, precio,
@@ -8174,8 +8187,8 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
   /*Variables de informacion*/
   gboolean enabled;
   gchar *codigo_corto; //Se obtienen desde el treeview
-  gdouble costo, cantidad; //Se obtienen desde el treeview
-  gchar *barcode, *precio; //Se obtienen a través de una consulta sql
+  gdouble costo, precio, cantidad; //Se obtienen desde el treeview
+  gchar *barcode; //Se obtienen a través de una consulta sql
 
   /*Variables consulta*/
   PGresult *res;
@@ -8190,6 +8203,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 			  0, &enabled,
 			  1, &codigo_corto,
 			  3, &costo,
+			  4, &precio,
 			  8, &cantidad,
                           -1);
 
@@ -8198,7 +8212,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 	  q = g_strdup_printf ("SELECT barcode, precio FROM producto where codigo_corto = '%s'", codigo_corto);
 	  res = EjecutarSQL (q);
 	  barcode = PQvaluebycol (res, 0, "barcode");
-	  precio = PQvaluebycol (res, 0, "precio");
+	  //precio = PQvaluebycol (res, 0, "precio");
 
 	  if (cantidad == 0)
 	    cantidad = 1;
@@ -8206,7 +8220,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 	  //Set Buy's Entries
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), g_strdup_printf ("%f",costo));
-	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), precio);
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), g_strdup_printf ("%ld",lround (precio)));
 	  calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), g_strdup_printf ("%f",cantidad));
 
