@@ -863,8 +863,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="gtk_widget_show" object="wnd_new_unit"/>
-                    <signal name="clicked" handler="gtk_widget_show" object="btn_save_unidad2"/>
+                    <signal name="clicked" handler="show_new_unidad_win_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1571,8 +1570,7 @@
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Agregar una nueva Unidad</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="gtk_widget_show" object="wnd_new_unit"/>
-                    <signal name="clicked" handler="gtk_widget_show" object="btn_save_unidad"/>
+                    <signal name="clicked" handler="show_new_unidad_win_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6052,8 +6050,6 @@
     <property name="title" translatable="yes">POS Rizoma:  Agregar nueva Unidad</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
-    <signal name="delete_event" handler="on_wnd_new_unit_delete_event"/>
-    <signal name="delete_event" handler="gtk_widget_hide" object="btn_save_unidad"/>
     <signal name="delete_event" handler="gtk_widget_hide" object="wnd_new_unit"/>
     <child>
       <object class="GtkVBox" id="vbox25">
@@ -6093,32 +6089,61 @@
           <object class="GtkHBox" id="hbox34">
             <property name="visible">True</property>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_save_unidad2">
+              <object class="GtkButton" id="btn_save_unidad_em">
                 <property name="label">gtk-save</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="no_show_all">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="Save_new_unit"/>
+                <signal name="clicked" handler="save_new_unit"/>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_unidad_amd">
+                <property name="label">gtk-save</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="no_show_all">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_unit" after="yes"/>
               </object>
               <packing>
                 <property name="position">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="btn_save_unidad">
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_unidad_amp">
                 <property name="label">gtk-save</property>
+                <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="no_show_all">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="Save_new_unit" after="yes"/>
+                <signal name="clicked" handler="save_new_unit"/>
               </object>
               <packing>
-                <property name="position">2</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_unidad_amc">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_unit"/>
+              </object>
+              <packing>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>
@@ -7171,7 +7196,25 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="btn_save_family2">
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_family_amc">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_family"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_family_amp">
                 <property name="label">gtk-save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -7186,7 +7229,22 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="btn_save_family">
+              <object class="GtkButton" id="btn_save_family_em">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_family"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_family_amd">
                 <property name="label">gtk-save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -7363,6 +7421,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="show_new_unidad_win_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -7521,6 +7580,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_new_family_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -8476,6 +8536,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="show_new_unidad_win_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -8634,6 +8695,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_new_family_clicked"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

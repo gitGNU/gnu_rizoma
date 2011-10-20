@@ -1424,9 +1424,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
-
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
-
 
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
 
@@ -1434,13 +1432,11 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   if (GetIVA (barcode) != -1)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
-
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
-
-  combo_imp = GTK_WIDGET(gtk_builder_get_object(builder, "cmbbox_edit_prod_extratax"));
-  combo_store = GTK_LIST_STORE(gtk_combo_box_get_model (GTK_COMBO_BOX(combo_imp)));
+  combo_imp = GTK_WIDGET (gtk_builder_get_object (builder, "cmbbox_edit_prod_extratax"));
+  combo_store = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX(combo_imp)));
 
   if (combo_store == NULL)
     {
@@ -1461,8 +1457,6 @@ ModificarProducto (GtkWidget *widget_barcode)
     }
 
   gtk_list_store_clear (combo_store);
-
-
   otros_index = GetOtrosIndex(barcode);
   active = -1;
 

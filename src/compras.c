@@ -3647,7 +3647,7 @@ create_new_merchandise (gchar *tipo)
 
       ventana = GTK_WIDGET (builder_get (builder, "wnd_new_mp"));
     }
-  else if (g_str_equal (tipo, "mcd")) //Si es mercadería compuestas y derivadas
+  else if (g_str_equal (tipo, "mcd")) //Si es mercadería compuesta o derivada
     {
       combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_mcd_imp_others"));
       cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_mcd_unit"));
@@ -3673,7 +3673,7 @@ create_new_merchandise (gchar *tipo)
 
   gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
 
-  if (strlen (barcode) > 0 && strlen (barcode) <= 6)
+  if ((strlen (barcode) > 0 && strlen (barcode) <= 6) || g_str_equal (tipo, "mcd"))
     {
       gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), barcode);
 
@@ -3881,14 +3881,29 @@ save_new_family (GtkButton *button, gpointer user_data)
 
   win = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
 
-  if(g_str_equal (tipo, "btn_save_family"))
+  /*Al editar o agregar una mercadería*/
+  if (g_str_equal (tipo, "btn_save_family_amd")) //Mercadería discretas
     {
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_new_product_family"));
       btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_family"));
     }
-  else
+  else if (g_str_equal (tipo, "btn_save_family_amp")) //Materia prima
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_new_mp_family"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mp_family"));
+    }
+  else if (g_str_equal (tipo, "btn_save_family_amc")) //compuesta o derivada
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_new_family"));
+      gtk_window_set_transient_for (win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_mcd_family"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mcd_family"));
+    }
+  else if (g_str_equal (tipo, "btn_save_family_em")) //Editar Mercadería (cualquiera)
     {
       printf("entre en el de la ventana mod_product\n");
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
@@ -3976,10 +3991,23 @@ on_btn_new_family_clicked (GtkButton *button, gpointer user_data)
   gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_new_family")), "");
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_family")));
 
-  if (g_str_equal (nombre_boton, "btn_new_family")) //Se oculta el guardar2
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family2")));
-  else if (g_str_equal (nombre_boton, "btn_edit_family"))
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family")));
+  //Se ocultan todos los botones editar
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_amd"))); //En agregar mercadería discreta
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_amp"))); //En agregar materia prima
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_amc"))); //En agrefar mercadería compuesta
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_em"))); //En editar mercadería
+
+  //Se muestra solo el botón guardar que corresponda
+  if (g_str_equal (nombre_boton, "btn_new_family")) //Ventana nueva mercadería discreta
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_amd")));
+  else if (g_str_equal (nombre_boton, "btn_new_mp_family")) //Ventana nueva materia prima
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_amp")));
+  else if (g_str_equal (nombre_boton, "btn_new_mcd_family")) //Ventana nueva mercadería compuesta o derivada
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_amc")));
+
+  else if (g_str_equal (nombre_boton, "btn_edit_family")) //Ventana editar mercadería (el que sea)
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_em")));
 }
 
 /**
@@ -4001,10 +4029,23 @@ show_new_unidad_win_clicked (GtkButton *button, gpointer user_data)
   gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
 
-  if (g_str_equal (nombre_boton, "btn_new_unidad")) //Se oculta el guardar2
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad2")));
-  else if (g_str_equal (nombre_boton, "btn_edit_unidad"))
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad")));
+  //Se ocultan todos los botones guardar
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amd"))); //En agregar mercadería discreta
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amp"))); //En agregar materia prima
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc"))); //En agrefar mercadería compuesta
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_em"))); //En editar mercadería
+
+  //Se muestra solo el botón guardar que corresponda
+  if (g_str_equal (nombre_boton, "btn_new_unidad")) //Ventana nueva mercadería discreta
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amd")));
+  else if (g_str_equal (nombre_boton, "btn_new_mp_unidad")) //Ventana nueva materia prima
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amp")));
+  else if (g_str_equal (nombre_boton, "btn_new_mcd_unidad")) //Ventana nueva mercadería compuesta o derivada
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc")));
+
+  else if (g_str_equal (nombre_boton, "btn_edit_unidad")) //Ventana editar mercadería (el que sea)
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_em")));
 }
 
 
@@ -4988,20 +5029,6 @@ on_btn_del_color_clicked ()
 
 
 /**
- * Esta funcion es llamada cuando se activa el delete-event
- *
- * Esconde los dos botones de la venta.
- *
- */
-void
-on_wnd_new_unit_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
-  gtk_widget_hide(GTK_WIDGET (builder_get (builder, "btn_save_unidad")));
-  gtk_widget_hide(GTK_WIDGET (builder_get (builder, "btn_save_unidad2")));
-}
-
-
-/**
  * Esta funcion es llamada cuando el boton "btn_save_unidad" es presionado
  * (signal click).
  *
@@ -5010,7 +5037,7 @@ on_wnd_new_unit_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
  *
  */
 void
-Save_new_unit (GtkButton *button, gpointer user_data)
+save_new_unit (GtkButton *button, gpointer user_data)
 {
   GtkTreeIter iter;
   GtkComboBox *combo;
@@ -5023,18 +5050,33 @@ Save_new_unit (GtkButton *button, gpointer user_data)
   GtkTreeModel *model;
   gboolean valid;
   gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad"))));
-  gchar *tipo = gtk_buildable_get_name(button);
+  gchar *nombre_boton = gtk_buildable_get_name(button);
 
   win = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_unit"));
 
-  if(strcmp(tipo, "btn_save_unidad") == 0)
+  /*Al editar o agregar una mercadería*/
+  if (strcmp (nombre_boton, "btn_save_unidad_amd") == 0) //Mercadería discreta
     {
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_product"));
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
       btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_unidad"));
     }
-  else
+  else if (strcmp (nombre_boton, "btn_save_unidad_amp") == 0) //Materia prima
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_mp"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_mp_unit"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mp_unidad"));
+    }
+  else if (strcmp (nombre_boton, "btn_save_unidad_amc") == 0) //compuesta o derivada
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_mcd"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_mcd_unit"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mcd_unidad"));
+    }
+  else if (strcmp (nombre_boton, "btn_save_unidad_em") == 0) //Editar Mercadería (cualquiera)
     {
       printf("entre en el de la ventana mod_product\n");
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
