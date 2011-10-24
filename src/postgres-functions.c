@@ -382,6 +382,19 @@ InsertNewDocument (gint sell_id, gint document_type, gint sell_type)
 }
 
 
+gint
+get_last_sell_id ()
+{
+  PGresult *res;
+  res = EjecutarSQL ("SELECT last_value FROM venta_id_seq");
+
+  if (res != NULL)
+    return atoi (PQgetvalue (res, 0, 0));
+  else
+    return 1;
+}
+
+
 gboolean
 InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble cantidad)
 {
@@ -433,10 +446,6 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gchar *rut1_gc, *rut2_gc, *dv1, *dv2;
   gboolean afecto_impuesto1, afecto_impuesto2;
 
-  /* id_documento = InsertNewDocument (tipo_documento, tipo_venta); */
-
-  /* if (id_documento == -1) */
-  /*   return FALSE; */
 
   /*
     TODO: id_documento no se justifica en la tabla venta.
@@ -452,6 +461,14 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
                        CUT(discount), id_documento, canceled);
   venta_id = atoi (GetDataByOne (q));
   g_free (q);
+
+
+  /* Solo se registra un 'Documento' cuando se imprime una boleta o factura */
+
+  /* id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_venta); */
+  /* if (id_documento == -1) */
+  /*   return FALSE; */
+
 
   /* Registra el detalle de venta y pobla la estructura de producto con
      los monto afecto y no afecto de cada producto (cuando es pago mixto) */

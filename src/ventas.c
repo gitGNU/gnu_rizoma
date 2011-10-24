@@ -612,8 +612,13 @@ ventas_win ()
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                         g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
 
+  
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+
+  // El numerno de venta no se debe basar en el numero de ticket, puesto que aquel corresponde a los documentos que se han emitido
+  /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
+  /*                       g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE))); */
 
   venta->store =  gtk_list_store_new (8,
                                       G_TYPE_STRING,
@@ -1206,7 +1211,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
   ListClean ();
 }
@@ -2748,7 +2753,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
   clean_credit_data();
 
@@ -3365,7 +3370,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 
       //Se actualiza el numero de ticket de venta
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-			    g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+			    g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
       
       //Se cierra la ventana y se cambia el foco al entry de barcode
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
@@ -3518,7 +3523,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
       
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step2")));
@@ -4902,7 +4907,7 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
       ListClean ();
     }
@@ -5090,7 +5095,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
       ListClean ();
 

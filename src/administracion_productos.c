@@ -338,17 +338,18 @@ admini_box ()
                         g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (ContriTotalStock ())));
   //products list
-  store = gtk_list_store_new (10,
+  store = gtk_list_store_new (11,
                               G_TYPE_STRING,  //0 shortcode
                               G_TYPE_STRING,  //1 barcode
                               G_TYPE_STRING,  //2 description
                               G_TYPE_STRING,  //3 brand
                               G_TYPE_STRING,  //4 contenido
                               G_TYPE_STRING,  //5 unit
-                              G_TYPE_DOUBLE,  //6 stock
-                              G_TYPE_INT,     //7 price
-                              G_TYPE_STRING,  //8
-                              G_TYPE_BOOLEAN);//9
+			      G_TYPE_STRING,  //6 tipo
+                              G_TYPE_DOUBLE,  //7 stock
+                              G_TYPE_INT,     //8 price
+                              G_TYPE_STRING,  //9
+                              G_TYPE_BOOLEAN);//10
 
   treeview = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
   gtk_tree_view_set_model (GTK_TREE_VIEW(treeview), GTK_TREE_MODEL(store));
@@ -364,9 +365,10 @@ admini_box ()
   print->cols[3].name = "Marca";
   print->cols[4].name = "Cantidad";
   print->cols[5].name = "Unidad";
-  print->cols[6].name = "Stock";
-  print->cols[7].name = "Precio";
-  print->cols[8].name = NULL;
+  print->cols[6].name = "Tipo";
+  print->cols[7].name = "Stock";
+  print->cols[8].name = "Precio";
+  print->cols[9].name = NULL;
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 
@@ -378,8 +380,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Código", renderer,
                                                      "text", 0,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -390,8 +392,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Código de Barras", renderer,
                                                      "text", 1,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -401,8 +403,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
                                                      "text", 2,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -413,8 +415,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
                                                      "text", 3,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -425,8 +427,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cont", renderer,
                                                      "text", 4,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -438,8 +440,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unid", renderer,
                                                      "text", 5,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -448,32 +450,45 @@ admini_box ()
   gtk_tree_view_column_set_max_width (column, 38);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+    renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Tipo", renderer,
+                                                     "text", 6,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  //gtk_tree_view_column_set_min_width (column, 38);
+  //gtk_tree_view_column_set_max_width (column, 38);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
-                                                     "text", 6,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "text", 7,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_sort_column_id (column, 7);
   gtk_tree_view_column_set_min_width (column, 100);
   gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
-                                                     "text", 7,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "text", 8,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW(treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_sort_column_id (column, 7);
+  gtk_tree_view_column_set_sort_column_id (column, 8);
   gtk_tree_view_column_set_min_width (column, 100);
   gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -605,7 +620,7 @@ FillEditFields (GtkTreeSelection *selection, gpointer data)
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           0, &codigo,
                           2, &product,
-                          7, &precio,
+                          8, &precio,
                           -1);
 
       entry = GTK_WIDGET(gtk_builder_get_object(builder, "entry_"));
@@ -1067,7 +1082,7 @@ BuscarProductosParaListar (void)
   PGresult *res;
   gchar *q;
   gchar *materia_prima;
-  gchar *string;
+  gchar *string, *tipo;
   gint i, resultados;
   GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_find_products"));
   GtkTreeIter iter;
@@ -1095,6 +1110,8 @@ BuscarProductosParaListar (void)
 
   for (i = 0; i < resultados; i++)
     {
+      tipo = g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT nombre FROM tipo_mercaderia WHERE id = %s", 
+								   PQvaluebycol (res, i, "tipo"))), 0, "nombre"));
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "codigo_corto"),
@@ -1103,11 +1120,12 @@ BuscarProductosParaListar (void)
                           3, PQvaluebycol (res, i, "marca"),
                           4, PQvaluebycol (res, i, "contenido"),
                           5, PQvaluebycol (res, i, "unidad"),
-                          6, strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL),
-                          7, atoi (PQvaluebycol (res, i, "precio")),
-                          8, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&
+			  6, tipo,
+                          7, strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL),
+                          8, atoi (PQvaluebycol (res, i, "precio")),
+                          9, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&
                               atoi (PQvaluebycol (res, i, "stock_min")) != 0) ? "Red" : "Black",
-                          9, TRUE,
+                          10, TRUE,
                           -1);
     }
   if (resultados > 0)
