@@ -63,6 +63,7 @@ typedef struct _product
   gchar *barcode;
   gint lugar;
   gint tipo;
+  gint familia;
 
   /* Venta por fraccion */
   gboolean fraccion;
@@ -70,6 +71,7 @@ typedef struct _product
   /* Impuestos */
   gint iva;
   gint otros;
+  gint otros_id;
 
   /* En ventas Mixtas, su proporción de impuesto 
      (de los productos que sí pagan impuestos)

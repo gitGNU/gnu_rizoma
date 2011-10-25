@@ -3604,10 +3604,12 @@ create_new_merchandise (gchar *tipo)
 {
   PGresult *res, *res2;
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
+  gchar *cod_corto;
   gchar *barcode_madre;
   gint active;
   Productos *prod;
-  GtkWidget *ventana, *barcode_w, *codigo_corto_w, *descripcion_w, *marca_w, *contenido_w, *radio_fraccion, *radio_imp;
+  GtkWidget *ventana, *barcode_w, *codigo_corto_w, *descripcion_w, *marca_w, 
+    *contenido_w, *radio_fraccion_no, *radio_fraccion_yes, *radio_imp, *radio_imp_no;
 
   GtkListStore *combo_store;
   GtkComboBox *combo, *cmb_unit, *cmb_family;
@@ -3628,7 +3630,7 @@ create_new_merchandise (gchar *tipo)
       marca_w = GTK_WIDGET (builder_get (builder, "entry_new_product_brand"));
       contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_product_cont"));
       
-      radio_fraccion = GTK_WIDGET (builder_get (builder, "radio_btn_fractional_no"));
+      radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_fractional_no"));
       radio_imp = GTK_WIDGET (builder_get (builder, "radio_btn_task_yes"));
 
       ventana = GTK_WIDGET (builder_get (builder, "wnd_new_product"));
@@ -3645,7 +3647,7 @@ create_new_merchandise (gchar *tipo)
       marca_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_brand"));
       contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_cont"));
       
-      radio_fraccion = GTK_WIDGET (builder_get (builder, "radio_btn_mp_fractional_no"));
+      radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_mp_fractional_no"));
       radio_imp = GTK_WIDGET (builder_get (builder, "radio_btn_mp_task_yes"));
 
       ventana = GTK_WIDGET (builder_get (builder, "wnd_new_mp"));
@@ -3678,8 +3680,10 @@ create_new_merchandise (gchar *tipo)
       marca_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_brand"));      
       contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_cont"));
       
-      radio_fraccion = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_fractional_no"));
+      radio_fraccion_yes = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_fractional_yes"));
+      radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_fractional_no"));
       radio_imp = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_task_yes"));
+      radio_imp_no = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_task_no"));
 
       ventana = GTK_WIDGET (builder_get (builder, "wnd_new_mcd"));
     }
@@ -3692,28 +3696,51 @@ create_new_merchandise (gchar *tipo)
 
   gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
 
-  if ((strlen (barcode) > 0 && strlen (barcode) <= 6) || g_str_equal (tipo, "mcd"))
+  
+  if (strlen (barcode) > 0 && strlen (barcode) <= 6)
     {
-      gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), barcode);
+      cod_corto = g_strdup (barcode);
+      
+      if (!codigo_disponible (cod_corto))
+	{
+	  cod_corto = sugerir_codigo (cod_corto, 4, 6);
+	  gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
+	}
+      else
+	gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
 
-      gint i, num = 0;
-
-      //Se prepara el relleno (agregan 0 hasta tener 6 dígitos)
-      while (strlen(barcode) < 6)
-	barcode = g_strdup_printf ("%s%d", barcode, num);
-
-      //Revisa la existencia del barcode, de ser así va aumentando el número del último dígito hasta ser único
-      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s%d", barcode, num)))
-	num++;
+      /* - Sugerencia de barcode - */
+      barcode = sugerir_codigo (barcode, 7, 18);
 
       //Se setea el campo del barcode con esta sugerencia
-      gtk_entry_set_text (GTK_ENTRY (barcode_w),
-			  g_strdup_printf ("%s%d", barcode, num));
+      gtk_entry_set_text (GTK_ENTRY (barcode_w), g_strdup (barcode));
 
       gtk_widget_grab_focus (GTK_WIDGET (descripcion_w));
     }
   else
     {
+      /*El proceso de creación de materias derivadas debe sugerir un barcode*/
+      if (g_str_equal (tipo, "mcd"))
+	{
+	  if (!codigo_disponible (barcode))
+	    {
+	      barcode = sugerir_codigo (barcode, 7, 18);
+	      gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), barcode);
+	    }
+	  else
+	    gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), barcode);
+	}
+
+      //Se sugiere un codigo corto
+      cod_corto = g_strndup (barcode, 5);
+      if (!codigo_disponible (cod_corto))
+	{
+	  cod_corto = sugerir_codigo (cod_corto, 4, 6);
+	  gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
+	}
+      else
+	gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
+
       gtk_widget_grab_focus (GTK_WIDGET (codigo_corto_w));
     }
 
@@ -3748,7 +3775,7 @@ create_new_merchandise (gchar *tipo)
                                   2, strtod (PUT (PQvaluebycol (res, i, "monto")), (char **)NULL),
                                   -1);
 	      if (g_str_equal (tipo, "mcd"))
-		if (atoi (PQvaluebycol(res, i, "id")) == prod->product->otros) active = i;
+		if (atoi (PQvaluebycol(res, i, "id")) == prod->product->otros_id) active = i;
             }
 	  if (g_str_equal (tipo, "mcd"))
 	    gtk_combo_box_set_active (combo, active != -1 ? active : 0);
@@ -3824,7 +3851,7 @@ create_new_merchandise (gchar *tipo)
 				  1, PQvaluebycol (res2, i, "nombre"),
 				  -1);
 	      if (g_str_equal (tipo, "mcd"))
-		if (atoi (PQvaluebycol(res2, i, "id")) == prod->product->tipo) active = i;
+		if (atoi (PQvaluebycol(res2, i, "id")) == prod->product->familia) active = i;
 	    }
 	  if (g_str_equal (tipo, "mcd"))
 	    gtk_combo_box_set_active (cmb_family, active != -1 ? active : 0);
@@ -3835,20 +3862,22 @@ create_new_merchandise (gchar *tipo)
   if (g_str_equal (tipo, "mcd"))
     {
       gtk_entry_set_text (GTK_ENTRY (marca_w), prod->product->marca);
-      gtk_entry_set_text (GTK_ENTRY (descripcion_w), prod->product->producto);
       gtk_entry_set_text (GTK_ENTRY (contenido_w), g_strdup_printf ("%d", prod->product->contenido));
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_new_mcd_sell_price")));
+      //gtk_entry_set_text (GTK_ENTRY (descripcion_w), prod->product->producto);
+      gtk_widget_grab_focus ((descripcion_w));
     }
 
   //Seleccion radiobutton
   if (g_str_equal (tipo, "mcd"))
     {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion), (prod->product->fraccion == TRUE) ? TRUE : FALSE);
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp), (prod->product->fraccion != 0) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_yes), (prod->product->fraccion == TRUE) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_no), (prod->product->fraccion == FALSE) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp), (prod->product->iva != 0) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp_no), (prod->product->iva == 0) ? TRUE : FALSE);
     }
   else
     {
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion), TRUE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_no), TRUE);
       gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp), TRUE);
     }
 
@@ -6184,8 +6213,8 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
-  else if (strlen (codigo) > 16)
-    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 16 caracteres");
+  else if (strlen (codigo) > 6)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
   else if (HaveCharacters(barcode))
@@ -6209,11 +6238,23 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE barcode = %s", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con este codigo corto de barcode");
+          return;
+        }
+
       if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
+          return;
+        }
+
 
       if (gtk_combo_box_get_active (combo) == 0)
         otros = 0;
@@ -6296,8 +6337,8 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
-  else if (strlen (codigo) > 16)
-    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 16 caracteres");
+  else if (strlen (codigo) > 6)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
   else if (HaveCharacters (barcode))
@@ -6329,11 +6370,23 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE barcode = %s", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con este codigo corto de barcode");
+          return;
+        }
+
       if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
+          return;
+        }
+
       if (gtk_combo_box_get_active (combo) == 0)
         otros = 0;
       else
@@ -6444,8 +6497,8 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
-  else if (strlen (codigo) > 16)
-    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 16 caracteres");
+  else if (strlen (codigo) > 6)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
   else if (HaveCharacters (barcode))
@@ -6477,11 +6530,23 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE barcode = %s", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con este codigo corto de barcode");
+          return;
+        }
+
       if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
+          return;
+        }
+
       if (gtk_combo_box_get_active (combo) == 0)
         otros = 0;
       else

@@ -3523,3 +3523,124 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
   printf ("Se asoció %s con %s", barcode_madre, barcode_derivado);
   return TRUE;
 }
+
+
+/**
+ * This function return the available code
+ * with the max lenght specified.
+ *
+ * @param : gchar *codigo   : The code to look at
+ * @param : gint min_lenght : The minimum code lenght
+ * @param : gint max_lenght : The maximum code lenght
+ *
+ * @return : gchar *: The available code  
+ */
+gchar *
+sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght)
+{
+  gboolean maximo = FALSE;
+  gchar *code = g_strdup (codigo);
+  long double code_num;
+
+  /*Comprobaciones iniciales*/
+  //longitud de los tamaños maximos y minimos
+  if (max_lenght > 18 || min_lenght < 1 ||
+      max_lenght < 1  || max_lenght < min_lenght)
+    return g_strdup_printf ("");
+  if (g_str_equal (code, "") || strlen (code) > 18)
+    return g_strdup_printf ("");
+
+  /*Para codigos solamente numéricos*/
+  if (!HaveCharacters (code))
+    {      
+      //Se prepara el relleno (agregan 0 hasta quedar del largo mínimo)
+      while (strlen (code) < min_lenght)
+	code = g_strdup_printf ("%s%d", code, 0);
+      
+      //Se parsea a dato numérico
+      code_num = strtod (code, (char **)NULL);
+      
+      //Revisa la existencia del barcode o codigo_corto, de ser así va aumentando el número del último dígito hasta ser único
+      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto "
+					 "WHERE barcode = %ld OR codigo_corto = '%ld'", lroundl(code_num), lroundl(code_num))))
+	{
+	  if (strlen (g_strdup_printf ("%ld", lroundl (code_num))) > max_lenght)
+	    maximo = FALSE;
+
+	  if (maximo == FALSE)
+	    code_num++;
+	  else
+	    code_num--;
+	}
+
+      code = g_strdup_printf ("%ld", lroundl (code_num));
+      return code;
+    }
+  else
+    {
+      gboolean first = TRUE;
+      //Se prepara el relleno (agregan 0 hasta quedar del largo mínimo)
+      while (strlen (code) < min_lenght)
+	code = g_strdup_printf ("%s%d", code, 0);      
+      
+      gint largo_inicial = strlen (code);
+      gchar *aux;
+      //Revisa la existencia del barcode o codigo_corto, de ser así va aumentando el número del último dígito hasta ser único
+      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", code)))
+	{
+	  if (strlen (code) > max_lenght)
+	    maximo = FALSE;
+
+	  if (maximo == FALSE)
+	    {
+	      if (!HaveCharacters (g_strdup_printf ("%c", code [largo_inicial-1])))
+		{
+		  //Parte desde el numero 0
+		  aux = (first == TRUE) ? g_strdup ("0") : invested_strndup (code, largo_inicial-1);
+		  first == FALSE;
+		  code = g_strdup_printf ("%s%d", g_strndup (code, largo_inicial-1), atoi (aux)+1);
+		}
+	      else
+		{
+		  //Parte desde la a
+		  aux = (first == TRUE) ? g_strdup ("a") : invested_strndup (code, largo_inicial-1);
+		  first == FALSE;
+
+		  if (!g_str_equal (aux, "z"))
+		    code = g_strdup_printf ("%s%c", g_strndup (code, largo_inicial-1), atoi (aux)+1);
+		  else
+		    return "";
+		}
+	    }
+	  
+	  return code;
+	}
+    }
+}
+
+/**
+ * This function returns the code availability
+ * 
+ * @param: gchar *code: The code to looking at
+ * @return: gboolean: return TRUE if the code is available, else return FALSE;
+ */
+gboolean
+codigo_disponible (gchar *code)
+{
+  if (strlen (code) > 18)
+    return FALSE;
+
+  if (!HaveCharacters (code))
+    {
+      if (!DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s "
+				       "OR codigo_corto = '%s'", code, code)))
+	return TRUE;
+    }
+  else
+    {
+      if (!DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", code)))
+	return TRUE;
+    }
+
+  return FALSE;
+}

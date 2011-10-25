@@ -277,4 +277,8 @@ gboolean SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean t
 gboolean asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre, gchar *barcode_derivado, 
                                    gint tipo_derivado, gdouble cant_mud);
 
+gchar * sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght);
+
+gboolean codigo_disponible (gchar *code);
+
 #endif
