@@ -3725,10 +3725,10 @@ create_new_merchandise (gchar *tipo)
 	  if (!codigo_disponible (barcode))
 	    {
 	      barcode = sugerir_codigo (barcode, 7, 18);
-	      gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), barcode);
+	      gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
 	    }
 	  else
-	    gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), barcode);
+	    gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
 	}
 
       //Se sugiere un codigo corto
