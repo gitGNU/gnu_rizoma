@@ -35,7 +35,7 @@ fi
 
 if autoconf --version > /dev/null 2>&1; then
 
-    if autoconf --version | grep '2.[5670]' > /dev/null>&1; then
+    if autoconf --version | egrep -e '2.([5670]|[123456789][0-9]+)' > /dev/null>&1; then
 	echo "autoconf   ... yes"
     else
 	echo "autoconf   ... no"
@@ -77,7 +77,7 @@ fi
 
 if autoheader --version> /dev/null 2>&1; then
 
-    if autoheader --version | grep '2.[5-9]' > /dev/null>&1; then
+    if autoheader --version | egrep -e '2.([5670]|[123456789][0-9]+)' > /dev/null>&1; then
 	echo "autoheader ... yes"
     else
 	echo "autoheader ... no"
