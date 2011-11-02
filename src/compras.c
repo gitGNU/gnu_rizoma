@@ -196,10 +196,10 @@ compras_win (void)
   GError *error = NULL;
 
   /*ComboBox - PrecioCompra*/
-  /*GtkComboBox *combo;
-    GtkTreeIter iter;
-    GtkListStore *modelo;
-    GtkCellRenderer *cell2;*/
+  GtkComboBox *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+  GtkCellRenderer *cell2;
 
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
@@ -835,21 +835,21 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   /*ComboBox - PrecioCompra*/
-  /*modelo = gtk_list_store_new (1, G_TYPE_STRING);
-    combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
-    cell2 = gtk_cell_renderer_text_new ();
-    gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell2, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);*/
+  modelo = gtk_list_store_new (1, G_TYPE_STRING);
+  combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  cell2 = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell2, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);
 
   /*Se agregan las opciones al combobox*/
-  /*gtk_list_store_append (modelo, &iter);
-    gtk_list_store_set (modelo, &iter, 0, "Precio neto", -1);
+  gtk_list_store_append (modelo, &iter);
+  gtk_list_store_set (modelo, &iter, 0, "Costo neto", -1);
 
-    gtk_list_store_append (modelo, &iter);
-    gtk_list_store_set (modelo, &iter, 0, "Precio bruto", -1);
+  gtk_list_store_append (modelo, &iter);
+  gtk_list_store_set (modelo, &iter, 0, "Costo bruto", -1);
 
-    gtk_combo_box_set_model (combo, (GtkTreeModel *)modelo);
-    gtk_combo_box_set_active (combo, 0);*/
+  gtk_combo_box_set_model (combo, (GtkTreeModel *)modelo);
+  gtk_combo_box_set_active (combo, 0);
 
   /* End Pay Invoices */
 
@@ -1059,7 +1059,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
-	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);	  
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
 	}
       else if (g_str_equal (tipo, discreta))
 	{
@@ -1071,6 +1071,8 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
 	}
+
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
 
       // Se habilita el botón de traspaso
       if (rizoma_get_value_boolean ("TRASPASO"))
@@ -1223,15 +1225,15 @@ CalcularPrecioFinal (void)
   gdouble iva = GetIVA (barcode);
   gdouble otros = GetOtros (barcode);
 
-  /*
-    Obtener valores cmbPrecioCompra
-    GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
-    GtkTreeIter iter;
-    GtkTreeModel *model = gtk_combo_box_get_model (combo);
-    gtk_combo_box_get_active_iter (combo, &iter);
-    gchar *opcion;
-    gtk_tree_model_get (model, &iter, 0, &opcion, -1);
-  */
+  /* Obtener valores cmbPrecioCompra */
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gchar *opcion;
+  gtk_tree_model_get (model, &iter, 0, &opcion, -1);
+
+  printf ("Opcion: %s\n", opcion);
 
   if (iva != -1)
     iva = (gdouble)iva / 100 + 1;
@@ -1265,10 +1267,12 @@ CalcularPrecioFinal (void)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
-      if (otros == -1 && iva != -1 )
+      //Si tiene solo IVA
+      if (otros == -1 && iva != -1  && g_str_equal (opcion, "Costo neto"))
         precio = (gdouble) ((gdouble)(precio_final / iva) / (gdouble) (ganancia + 100)) * 100;
 
-      else if (iva != -1 && otros != -1)
+      //Si tiene ambos impuestos
+      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1276,10 +1280,10 @@ CalcularPrecioFinal (void)
           precio = (gdouble) precio_final / (gdouble)(iva + otros + 1);
           precio = (gdouble) precio / (gdouble)(ganancia / 100 + 1);
         }
-      else if (iva == -1 && otros == -1)
-        {
-          precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
-        }
+
+      //Si no tiene impuestos
+      else if (iva == -1 && otros == -1 || g_str_equal (opcion, "Costo bruto"))
+	precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")),
                           g_strdup_printf ("%ld", lround (precio)));
@@ -1290,10 +1294,12 @@ CalcularPrecioFinal (void)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
-      if (otros == -1 && iva != -1 )
+      //Si solo tiene IVA
+      if (otros == -1 && iva != -1 && g_str_equal (opcion, "Costo neto"))
         porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
 
-      else if (iva != -1 && otros != -1 )
+      //Si tiene ambos impuestos
+      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1302,7 +1308,9 @@ CalcularPrecioFinal (void)
           ganancia = (gdouble) precio - ingresa;
           porcentaje = (gdouble)(ganancia / ingresa) * 100;
         }
-      else if (iva == -1 && otros == -1 )
+
+      //Si no tiene impuestos
+      else if (iva == -1 && otros == -1 || g_str_equal (opcion, "Costo bruto"))
         porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
 
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")),
@@ -1312,12 +1320,14 @@ CalcularPrecioFinal (void)
   /* -- Final price ("precio_final") is calculated here -- */
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
     {
-      calcular = 1; // FLAG - Permite saber que se ha realizado un cÃ¡lculo.
+      calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
-      if (otros == -1 && iva != -1 )
+      //Si solo tiene IVA
+      if (otros == -1 && iva != -1 && g_str_equal (opcion, "Costo neto"))
         precio = (gdouble) ((gdouble)(ingresa * (gdouble)(ganancia + 100)) * iva) / 100;
 
-      else if (iva != -1 && otros != -1)
+      //Si tiene ambos impuestos
+      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1326,7 +1336,9 @@ CalcularPrecioFinal (void)
           precio = (gdouble)((gdouble)(precio * iva) +
                              (gdouble)(precio * otros) + (gdouble) precio);
         }
-      else if (iva == -1 && otros == -1)
+
+      //Si no tiene impuestos
+      else if (iva == -1 && otros == -1 || g_str_equal (opcion, "Costo bruto"))
         precio = (gdouble)(ingresa * (gdouble)(ganancia + 100)) / 100;
 
       if (ganancia == 0)
@@ -1346,6 +1358,7 @@ CalcularPrecioFinal (void)
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "cmbPrecioCompra")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), TRUE);
     }
@@ -2691,6 +2704,7 @@ CleanStatusProduct (gint option)
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_gain")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_calculate")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_amount")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_add_product_list")), FALSE);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), "");
@@ -2706,7 +2720,7 @@ CleanStatusProduct (gint option)
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-  //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
 
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -2737,6 +2751,7 @@ CleanStatusProduct (gint option)
   //TODO: Ver como simplificar el set_sensitive
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), TRUE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), FALSE);
@@ -7091,7 +7106,7 @@ AddToProductsListTraspaso (void)
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-  //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
@@ -7157,7 +7172,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-      //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
@@ -7438,7 +7453,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
@@ -7517,7 +7532,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));

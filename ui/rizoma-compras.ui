@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
@@ -170,7 +170,7 @@
             <child>
               <object class="GtkLabel" id="label127">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -180,7 +180,7 @@
             <child>
               <object class="GtkLabel" id="label128">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Número Factura</property>
+                <property name="label" translatable="yes" context="yes">N&#xFA;mero Factura</property>
               </object>
             </child>
           </object>
@@ -341,7 +341,7 @@
             <child>
               <object class="GtkLabel" id="label43">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -351,7 +351,7 @@
             <child>
               <object class="GtkLabel" id="label111">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Numero Guía</property>
+                <property name="label" translatable="yes" context="yes">Numero Gu&#xED;a</property>
               </object>
             </child>
           </object>
@@ -422,7 +422,7 @@
   </object>
   <object class="GtkWindow" id="wnd_adjust_product">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Ajuste de Mercadería</property>
+    <property name="title" translatable="yes">Ajuste de Mercader&#xED;a</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
@@ -562,7 +562,7 @@
   </object>
   <object class="GtkWindow" id="wnd_mod_product">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Descripción Producto</property>
+    <property name="title" translatable="yes">Descripci&#xF3;n Producto</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="transient_for">wnd_compras</property>
@@ -817,7 +817,7 @@
             <child>
               <object class="GtkLabel" id="label30">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Descripción</property>
+                <property name="label" translatable="yes">Descripci&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -828,7 +828,7 @@
             <child>
               <object class="GtkLabel" id="label16">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Código de Barras</property>
+                <property name="label" translatable="yes">C&#xF3;digo de Barras</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -839,7 +839,7 @@
             <child>
               <object class="GtkLabel" id="label15">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Código Corto</property>
+                <property name="label" translatable="yes">C&#xF3;digo Corto</property>
               </object>
               <packing>
                 <property name="x_options">GTK_FILL</property>
@@ -983,8 +983,8 @@
     <property name="transient_for">wnd_compras</property>
     <property name="message_type">question</property>
     <property name="buttons">yes-no</property>
-    <property name="text">¿Realmente desea salir?</property>
-    <property name="secondary_text">Se perderá toda información no guardada</property>
+    <property name="text">&#xBF;Realmente desea salir?</property>
+    <property name="secondary_text">Se perder&#xE1; toda informaci&#xF3;n no guardada</property>
     <signal name="response" handler="on_quit_message_response"/>
     <signal name="delete_event" handler="gtk_widget_hide_on_delete"/>
     <child internal-child="vbox">
@@ -1026,7 +1026,7 @@
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkRadioButton" id="radiobutton8">
-                <property name="label" translatable="yes" context="yes">Guía</property>
+                <property name="label" translatable="yes" context="yes">Gu&#xED;a</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
@@ -1242,7 +1242,7 @@
             <child>
               <object class="GtkLabel" id="label64">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -1252,7 +1252,7 @@
             <child>
               <object class="GtkLabel" id="label63">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Número Factura</property>
+                <property name="label" translatable="yes" context="yes">N&#xFA;mero Factura</property>
               </object>
             </child>
           </object>
@@ -1488,7 +1488,7 @@
             <child>
               <object class="GtkLabel" id="label60">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Venta Fracción</property>
+                <property name="label" translatable="yes" context="yes">Venta Fracci&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">6</property>
@@ -1528,7 +1528,7 @@
             <child>
               <object class="GtkLabel" id="label38">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Descripción</property>
+                <property name="label" translatable="yes" context="yes">Descripci&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -1538,7 +1538,7 @@
             <child>
               <object class="GtkLabel" id="label37">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Código de Barras</property>
+                <property name="label" translatable="yes" context="yes">C&#xF3;digo de Barras</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -1548,7 +1548,7 @@
             <child>
               <object class="GtkLabel" id="label36">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Código Simple</property>
+                <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
               </object>
             </child>
             <child>
@@ -1689,7 +1689,7 @@
   <object class="GtkWindow" id="wnd_buscador">
     <property name="height_request">400</property>
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-    <property name="title" translatable="yes" context="yes">Rizoma: Buscar mercaderías</property>
+    <property name="title" translatable="yes" context="yes">Rizoma: Buscar mercader&#xED;as</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="destroy_with_parent">True</property>
@@ -1870,7 +1870,7 @@
                     <child>
                       <object class="GtkLabel" id="label19">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Código de Barras</property>
+                        <property name="label" translatable="yes">C&#xF3;digo de Barras</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1919,7 +1919,7 @@
                                 <child>
                                   <object class="GtkLabel" id="label27">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">_Añadir a Traspaso</property>
+                                    <property name="label" translatable="yes">_A&#xF1;adir a Traspaso</property>
                                     <property name="use_underline">True</property>
                                   </object>
                                   <packing>
@@ -2031,7 +2031,7 @@
                             <child>
                               <object class="GtkLabel" id="label71">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Código</property>
+                                <property name="label" translatable="yes">C&#xF3;digo</property>
                               </object>
                               <packing>
                                 <property name="left_attach">4</property>
@@ -2385,16 +2385,15 @@
                               <object class="GtkHBox" id="hbox88">
                                 <property name="visible">True</property>
                                 <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="label1111">
+                                  <object class="GtkComboBox" id="cmbPrecioCompra">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Precio Neto</property>
                                   </object>
                                   <packing>
-                                    <property name="position">1</property>
+                                    <property name="position">0</property>
                                   </packing>
+                                </child>
+                                <child>
+                                  <placeholder/>
                                 </child>
                               </object>
                             </child>
@@ -3066,7 +3065,7 @@
                             <child>
                               <object class="GtkLabel" id="label45">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Dirección</property>
+                                <property name="label" translatable="yes">Direcci&#xF3;n</property>
                               </object>
                               <packing>
                                 <property name="top_attach">1</property>
@@ -3090,7 +3089,7 @@
                             <child>
                               <object class="GtkLabel" id="label47">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Nº Factura</property>
+                                <property name="label" translatable="yes">N&#xBA; Factura</property>
                               </object>
                               <packing>
                                 <property name="top_attach">3</property>
@@ -3696,7 +3695,7 @@
                             <child>
                               <object class="GtkLabel" id="label69">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Dirección</property>
+                                <property name="label" translatable="yes">Direcci&#xF3;n</property>
                               </object>
                               <packing>
                                 <property name="top_attach">1</property>
@@ -4040,7 +4039,7 @@
                         <child>
                           <object class="GtkLabel" id="label81">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Contribución Proyectada</property>
+                            <property name="label" translatable="yes">Contribuci&#xF3;n Proyectada</property>
                           </object>
                           <packing>
                             <property name="left_attach">2</property>
@@ -4172,7 +4171,7 @@
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkRadioButton" id="radio_mayorist_yes">
-                            <property name="label" translatable="yes">Sí</property>
+                            <property name="label" translatable="yes">S&#xED;</property>
                             <property name="width_request">40</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -4379,7 +4378,7 @@
                     <child>
                       <object class="GtkLabel" id="label87">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Código de Barras</property>
+                        <property name="label" translatable="yes">C&#xF3;digo de Barras</property>
                       </object>
                       <packing>
                         <property name="x_options"></property>
@@ -4389,7 +4388,7 @@
                     <child>
                       <object class="GtkLabel" id="label88">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Código Corto</property>
+                        <property name="label" translatable="yes">C&#xF3;digo Corto</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -4399,7 +4398,7 @@
                     <child>
                       <object class="GtkLabel" id="label89">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Descripción</property>
+                        <property name="label" translatable="yes">Descripci&#xF3;n</property>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
@@ -4475,7 +4474,7 @@
                     <child>
                       <object class="GtkLabel" id="label97">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Ventas/Día</property>
+                        <property name="label" translatable="yes">Ventas/D&#xED;a</property>
                       </object>
                       <packing>
                         <property name="left_attach">4</property>
@@ -4834,7 +4833,7 @@
             <child type="tab">
               <object class="GtkLabel" id="label11">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">_Mercadería</property>
+                <property name="label" translatable="yes">_Mercader&#xED;a</property>
                 <property name="use_underline">True</property>
                 <property name="mnemonic_widget">find_product_entry</property>
               </object>
@@ -5195,7 +5194,7 @@
                             <child>
                               <object class="GtkLabel" id="label118">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Dirección</property>
+                                <property name="label" translatable="yes">Direcci&#xF3;n</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -5238,7 +5237,7 @@
                             <child>
                               <object class="GtkLabel" id="lbl_lapso_rep_vendedor">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Lapso Reposición</property>
+                                <property name="label" translatable="yes">Lapso Reposici&#xF3;n</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -5253,7 +5252,7 @@
                               <object class="GtkEntry" id="entry_lap_rep">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="invisible_char">●</property>
+                                <property name="invisible_char">&#x25CF;</property>
                               </object>
                               <packing>
                                 <property name="left_attach">2</property>
@@ -5396,7 +5395,7 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_ingress_guide">
-    <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Guía</property>
+    <property name="title" translatable="yes" context="yes">POS Rizoma: Compra Gu&#xED;a</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
@@ -5486,7 +5485,7 @@
             <child>
               <object class="GtkLabel" id="label12">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Fecha Emisión</property>
+                <property name="label" translatable="yes" context="yes">Fecha Emisi&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -5496,7 +5495,7 @@
             <child>
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Número Guía</property>
+                <property name="label" translatable="yes" context="yes">N&#xFA;mero Gu&#xED;a</property>
               </object>
             </child>
           </object>
@@ -6074,7 +6073,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -6182,7 +6181,7 @@
               <object class="GtkEntry" id="entry_filter_providers">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">●</property>
+                <property name="invisible_char">&#x25CF;</property>
                 <signal name="changed" handler="on_entry_filter_providers_changed"/>
               </object>
               <packing>
@@ -6389,7 +6388,7 @@
                 <child>
                   <object class="GtkLabel" id="label56_nb">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">N° Factura:</property>
+                    <property name="label" translatable="yes">N&#xB0; Factura:</property>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -6417,7 +6416,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
-                        <property name="invisible_char">•</property>
+                        <property name="invisible_char">&#x2022;</property>
                       </object>
                       <packing>
                         <property name="position">0</property>
@@ -6455,7 +6454,7 @@
                     <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
+                    <property name="invisible_char">&#x2022;</property>
                     <signal name="activate" handler="on_btn_nullify_buy_search_clicked"/>
                   </object>
                   <packing>
@@ -6468,7 +6467,7 @@
                     <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
+                    <property name="invisible_char">&#x2022;</property>
                     <signal name="activate" handler="on_btn_nullify_buy_search_clicked"/>
                   </object>
                   <packing>
@@ -6481,7 +6480,7 @@
                     <property name="width_request">100</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">•</property>
+                    <property name="invisible_char">&#x2022;</property>
                     <signal name="activate" handler="on_btn_nullify_buy_search_clicked"/>
                   </object>
                   <packing>
@@ -6706,7 +6705,7 @@
             <child>
               <object class="GtkLabel" id="label3_clothes">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Año</property>
+                <property name="label" translatable="yes">A&#xF1;o</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -6743,7 +6742,7 @@
               <object class="GtkEntry" id="entry_clothes_depto">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -6756,7 +6755,7 @@
               <object class="GtkEntry" id="entry_clothes_temp">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -6771,7 +6770,7 @@
               <object class="GtkEntry" id="entry_clothes_year">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -6786,7 +6785,7 @@
               <object class="GtkEntry" id="entry_clothes_sub_depto">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
@@ -6801,7 +6800,7 @@
               <object class="GtkEntry" id="entry_clothes_id">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">4</property>
@@ -7049,7 +7048,7 @@
               <object class="GtkEntry" id="entry_new_clothes_brand">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -7060,7 +7059,7 @@
             <child>
               <object class="GtkLabel" id="label38_clothes">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Descripción</property>
+                <property name="label" translatable="yes" context="yes">Descripci&#xF3;n</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -7072,7 +7071,7 @@
               <object class="GtkEntry" id="entry_new_clothes_desc">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -7161,7 +7160,7 @@
               <object class="GtkEntry" id="entry_new_family">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
               </object>
@@ -7288,7 +7287,7 @@
               <object class="GtkEntry" id="entry_new_mp_cont">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7301,7 +7300,7 @@
               <object class="GtkEntry" id="entry_new_mp_brand">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7314,7 +7313,7 @@
               <object class="GtkEntry" id="entry_new_mp_desc">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7327,7 +7326,7 @@
               <object class="GtkEntry" id="entry_new_mp_barcode">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7340,7 +7339,7 @@
               <object class="GtkEntry" id="entry_new_mp_code">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7370,7 +7369,7 @@
             <child>
               <object class="GtkLabel" id="label38_mp">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Descripción</property>
+                <property name="label" translatable="yes" context="yes">Descripci&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -7380,7 +7379,7 @@
             <child>
               <object class="GtkLabel" id="label37_mp">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Código de Barras</property>
+                <property name="label" translatable="yes" context="yes">C&#xF3;digo de Barras</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -7390,7 +7389,7 @@
             <child>
               <object class="GtkLabel" id="label36_mp">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Código Simple</property>
+                <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
               </object>
             </child>
             <child>
@@ -7609,7 +7608,7 @@
               <object class="GtkEntry" id="entry_new_mp_buy_price">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7632,7 +7631,7 @@
               <object class="GtkEntry" id="entry_new_mp_cantity">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -7700,7 +7699,7 @@
   </object>
   <object class="GtkWindow" id="wnd_new_products_selection">
     <property name="width_request">600</property>
-    <property name="title" translatable="yes">Creación de mercadería</property>
+    <property name="title" translatable="yes">Creaci&#xF3;n de mercader&#xED;a</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
@@ -7718,7 +7717,7 @@
             <property name="row_spacing">20</property>
             <child>
               <object class="GtkButton" id="btn_make_product">
-                <property name="label" translatable="yes">Crear Mercadería</property>
+                <property name="label" translatable="yes">Crear Mercader&#xED;a</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -7823,7 +7822,7 @@
                     <child>
                       <object class="GtkLabel" id="lbl_option_merchandise">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Seleccione una opción&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Seleccione una opci&#xF3;n&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                         <property name="justify">center</property>
                       </object>
@@ -7833,7 +7832,7 @@
                 <child type="label">
                   <object class="GtkLabel" id="label4_frame_1">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Descripción&lt;/b&gt;</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Descripci&#xF3;n&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                 </child>
@@ -7849,7 +7848,7 @@
   </object>
   <object class="GtkWindow" id="wnd_new_merchandise">
     <property name="width_request">600</property>
-    <property name="title" translatable="yes">Creación de mercadería</property>
+    <property name="title" translatable="yes">Creaci&#xF3;n de mercader&#xED;a</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
@@ -7867,7 +7866,7 @@
             <property name="row_spacing">20</property>
             <child>
               <object class="GtkButton" id="btn_new_product">
-                <property name="label" translatable="yes">Mercadería discreta</property>
+                <property name="label" translatable="yes">Mercader&#xED;a discreta</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -7971,7 +7970,7 @@
                     <child>
                       <object class="GtkLabel" id="lbl_merchandise_description">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Seleccione una opción&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Seleccione una opci&#xF3;n&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                         <property name="justify">center</property>
                       </object>
@@ -7981,7 +7980,7 @@
                 <child type="label">
                   <object class="GtkLabel" id="label4_frame_1_nm">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Descripción&lt;/b&gt;</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Descripci&#xF3;n&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                 </child>
@@ -8018,7 +8017,7 @@
             <child>
               <object class="GtkLabel" id="label5_comp_deriv">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;Creación de productos derivados&lt;/b&gt;</property>
+                <property name="label" translatable="yes">&lt;b&gt;Creaci&#xF3;n de productos derivados&lt;/b&gt;</property>
                 <property name="use_markup">True</property>
               </object>
               <packing>
@@ -8328,7 +8327,7 @@
         <child>
           <object class="GtkLabel" id="label1_message_der_mp">
             <property name="visible">True</property>
-            <property name="label" translatable="yes">¿Desea crear derivados de este producto?</property>
+            <property name="label" translatable="yes">&#xBF;Desea crear derivados de este producto?</property>
           </object>
           <packing>
             <property name="position">1</property>
@@ -8384,7 +8383,7 @@
   </object>
   <object class="GtkWindow" id="wnd_new_mcd">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes" context="yes">POS Rizoma: Nueva Mercadería Derivada</property>
+    <property name="title" translatable="yes" context="yes">POS Rizoma: Nueva Mercader&#xED;a Derivada</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_comp_deriv</property>
@@ -8403,7 +8402,7 @@
               <object class="GtkEntry" id="entry_new_mcd_cont">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8416,7 +8415,7 @@
               <object class="GtkEntry" id="entry_new_mcd_brand">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8429,7 +8428,7 @@
               <object class="GtkEntry" id="entry_new_mcd_desc">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8442,7 +8441,7 @@
               <object class="GtkEntry" id="entry_new_mcd_barcode">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8455,7 +8454,7 @@
               <object class="GtkEntry" id="entry_new_mcd_code">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8485,7 +8484,7 @@
             <child>
               <object class="GtkLabel" id="label38_mcd">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Descripción</property>
+                <property name="label" translatable="yes" context="yes">Descripci&#xF3;n</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>
@@ -8495,7 +8494,7 @@
             <child>
               <object class="GtkLabel" id="label37_mcd">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Código de Barras</property>
+                <property name="label" translatable="yes" context="yes">C&#xF3;digo de Barras</property>
               </object>
               <packing>
                 <property name="top_attach">1</property>
@@ -8505,7 +8504,7 @@
             <child>
               <object class="GtkLabel" id="label36_mcd">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes" context="yes">Código Simple</property>
+                <property name="label" translatable="yes" context="yes">C&#xF3;digo Simple</property>
               </object>
             </child>
             <child>
@@ -8724,7 +8723,7 @@
               <object class="GtkEntry" id="entry_new_mcd_sell_price">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8747,7 +8746,7 @@
               <object class="GtkEntry" id="entry_new_mcd_cantity_mother">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -8832,7 +8831,7 @@
           <object class="GtkLabel" id="lbl_choise_edit">
             <property name="visible">True</property>
             <property name="label" translatable="yes">
-&lt;b&gt;¿Qué desea hacer con esta Materia Prima?&lt;/b&gt;
+&lt;b&gt;&#xBF;Qu&#xE9; desea hacer con esta Materia Prima?&lt;/b&gt;
 </property>
             <property name="use_markup">True</property>
           </object>
