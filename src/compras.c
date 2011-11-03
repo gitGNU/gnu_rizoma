@@ -1380,7 +1380,33 @@ AddToProductsList (void)
   gchar *materia_prima = g_strdup (PQvaluebycol 
 				   (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
   gchar *tipo = g_strdup (PQvaluebycol (EjecutarSQL(q), 0, "tipo"));
+    
+  /*Se regulariza el precio de compra de acuerdo a si es neto o bruto*/
 
+  //Obtener valores cmbPrecioCompra
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gchar *opcion;
+  gtk_tree_model_get (model, &iter, 0, &opcion, -1);
+
+  //Se asegura de obtener el precio neto del producto como precio_compra
+  if (g_str_equal (opcion, "Costo bruto"))
+    {
+      gdouble iva, otros, total_imp;
+      iva = otros = total_imp = 0;
+      iva = GetIVA (barcode);  
+      otros = GetOtros (barcode);
+      
+      if (iva != -1)
+	iva = (gdouble)iva/100;
+      if (otros != -1)
+	otros = (gdouble)otros/100;      
+     
+      total_imp = iva + otros + 1;      
+      precio_compra = precio_compra / total_imp;
+    }
 
   if (g_str_equal (barcode, ""))
     {
@@ -1418,6 +1444,24 @@ AddToProductsList (void)
         }
       else
         {
+	  //No se permite ingresar 2 costos o precios distintos al mismo producto en una misma instancia de compra
+	  if (check->precio_compra != precio_compra)
+	    {
+	      CleanStatusProduct (1);
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), 
+			g_strdup_printf ("Ya ha ingresado este producto con $ %.3f de costo neto, si desea modificarlo \n"
+					 "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio_compra));
+	      return;
+	    }
+	  else if (check->precio != precio)
+	    {
+	      CleanStatusProduct (1);
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_sell_price")), 
+			g_strdup_printf ("Ya ha ingresado este producto con $ %d como precio de venta, si desea modificarlo \n"
+					 "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio));
+	      return;
+	    }
+	  
           check->cantidad += cantidad;
 
           gtk_list_store_set (store_buy, &check->iter,
