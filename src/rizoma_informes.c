@@ -3441,7 +3441,7 @@ void
  */
 
 void
-fill_products_rank ()
+fill_products_rank (gint familia)
 {
   GtkListStore *store =
     GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_rank"))));
@@ -3453,7 +3453,7 @@ fill_products_rank ()
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
   res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
 
   tuples = PQntuples (res);
 
@@ -3516,10 +3516,12 @@ fill_products_rank ()
 
 
 void
-fill_products_rank_mp ()
+fill_products_rank_mp (gint familia)
 {
   GtkListStore *store =
     GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_sell_rank_mp"))));
+  GtkListStore *deriv_store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_sell_rank_deriv"))));
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
@@ -3528,11 +3530,12 @@ fill_products_rank_mp ()
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
   res = ReturnMpProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
 
   tuples = PQntuples (res);
 
   gtk_list_store_clear (store);
+  gtk_list_store_clear (deriv_store);
 
   /* viualiza los productos en el tree_view*/
 
@@ -4332,7 +4335,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   gint tuples,i;
   PGresult *res;
 
-  if (page_num != 6)
+  if (page_num != 6 || page_num != 1)
     { //Se ocultan los widget para filtrar familias
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
@@ -4343,7 +4346,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
     }
 
-  if (page_num == 6)
+  if (page_num == 6 || page_num == 1)
     {      
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
@@ -4391,20 +4394,20 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     }
 
   /*Si se selecciona la "pagina 5" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
-  if(page_num == 6 &&
+  if ((page_num == 6 || page_num == 1) &&
      gtk_widget_get_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end"))) == TRUE)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button3")), FALSE);
     }
-  else if(page_num != 6 &&
+  else if ((page_num != 6 || page_num != 1) &&
      gtk_widget_get_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end"))) == FALSE)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button3")), TRUE);
     }
 
-  if(page_num == 7)
+  if (page_num == 7)
     {
       // Se muestran los widget para filtrar las tiendas
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_stores")));
@@ -4673,9 +4676,28 @@ on_btn_apply_family_filter_clicked ()
                           -1);
     }
 
-  printf ("%s: %d", store, familia);
-  if (g_str_equal (store, "TODOS"))
-    fill_cuadratura (0);
-  else
-    fill_cuadratura (familia);
+  printf ("%s: %d\n", store, familia);
+
+  // Obtiene la página del notebook de informe que está activa (para saber que informe se desa filtrar)
+  GtkNotebook *notebook, *sub_notebook;
+  gint page_num, sub_page_num;
+
+  //Treeview de informes
+  notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_reports"));
+  page_num = gtk_notebook_get_current_page (notebook);
+  //Treeview de ranking
+  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
+  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
+
+  /* Se filtra el informe de la página que se encuentra activa */
+  if (page_num == 1) //Ranking de ventas
+    {
+      if (sub_page_num == 0) //ranking ventas general
+	(g_str_equal (store, "TODOS")) ? fill_products_rank (0) : fill_products_rank (familia);
+      else if (sub_page_num == 1) //ranking ventas materias primas
+	(g_str_equal (store, "TODOS")) ? fill_products_rank_mp (0) : fill_products_rank_mp (familia);
+    }
+  else if (page_num == 6) //Cuadratura
+    (g_str_equal (store, "TODOS")) ? fill_cuadratura (0) : fill_cuadratura (familia);
+  
 }

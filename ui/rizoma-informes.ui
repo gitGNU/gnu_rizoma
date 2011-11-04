@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <interface>
   <requires lib="gtk+" version="2.20"/>
   <!-- interface-naming-policy toplevel-contextual -->
@@ -30,7 +30,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
-                        <property name="invisible_char">●</property>
+                        <property name="invisible_char">&#x25CF;</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                       </object>
@@ -70,7 +70,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
-                        <property name="invisible_char">●</property>
+                        <property name="invisible_char">&#x25CF;</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                       </object>
@@ -576,7 +576,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label19">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -589,7 +589,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label18">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -602,7 +602,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label17">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Ventas&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -688,7 +688,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label24">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Descuentos&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Descuentos&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -701,7 +701,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label15">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Ventas Crédito&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Ventas Cr&#xE9;dito&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -1049,7 +1049,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkEntry" id="entry_buy_id">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">•</property>
+                        <property name="invisible_char">&#x2022;</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked"/>
@@ -1061,7 +1061,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkLabel" id="label56">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">N° Factura</property>
+                        <property name="label" translatable="yes">N&#xB0; Factura</property>
                       </object>
                       <packing>
                         <property name="position">3</property>
@@ -1071,7 +1071,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkEntry" id="entry_buy_invoice">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">•</property>
+                        <property name="invisible_char">&#x2022;</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked"/>
@@ -1093,7 +1093,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkEntry" id="entry_buy_provider">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">•</property>
+                        <property name="invisible_char">&#x2022;</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked"/>
@@ -1765,7 +1765,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkLabel" id="label31">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Devoluciones&lt;/b&gt;</property>
+                            <property name="label" translatable="yes">&lt;b&gt;N&#xBA; Devoluciones&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -1852,7 +1852,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child type="tab">
               <object class="GtkLabel" id="label27">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Devolución</property>
+                <property name="label" translatable="yes">Devoluci&#xF3;n</property>
               </object>
               <packing>
                 <property name="position">4</property>
@@ -2282,7 +2282,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
               <object class="GtkEntry" id="entry_srch_provider">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
+                <property name="invisible_char">&#x2022;</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
                 <signal name="activate" handler="on_entry_srch_provider_activate"/>

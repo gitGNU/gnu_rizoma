@@ -2107,6 +2107,7 @@ create or replace function ranking_ventas(
        out marca varchar,
        out contenido varchar,
        out unidad varchar,
+       out familia integer,
        out amount double precision,
        out sold_amount double precision,
        out costo double precision,
@@ -2123,13 +2124,14 @@ q := $S$ SELECT producto.barcode as barcode,
        	      producto.marca as marca,
 	      producto.contenido as contenido,
 	      producto.unidad as unidad,
+	      producto.familia as familia,
 	      SUM (venta_detalle.cantidad) as amount,
 	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer/*-(venta_detalle.iva+venta_detalle.otros)::integer*/) as sold_amount,
 	      SUM (venta_detalle.cantidad*venta_detalle.fifo) as costo,
        	      SUM ((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad))) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
       where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5
+      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5,6
       ORDER BY producto.descripcion ASC $S$;
 
 for l in execute q loop
@@ -2138,6 +2140,7 @@ for l in execute q loop
     marca := l.marca;
     contenido := l.contenido;
     unidad := l.unidad;
+    familia := l.familia;
     amount := l.amount;
     sold_amount := l.sold_amount;
     costo := l.costo;
@@ -2162,14 +2165,15 @@ CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
 					      OUT cantidad double precision,
 					      OUT monto_vendido double precision,
 					      OUT costo double precision,
-					      OUT contribucion double precision)
+					      OUT contribucion double precision,
+					      OUT familia integer)
 RETURNS SETOF RECORD AS $$
 DECLARE
 	q text;
 	l record;
 BEGIN
 
-	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad,
+	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
 		        SUM (vmcd.cantidad) AS cantidad,
 			SUM ((vmcd.cantidad*vmcd.precio)-(v.descuento*((vmcd.cantidad*vmcd.precio)/(v.monto+v.descuento)))) AS monto_vendido,
 			SUM (vmcd.cantidad*vmcd.fifo) AS costo,
@@ -2183,7 +2187,7 @@ BEGIN
 		 INNER JOIN producto p
 		 ON p.barcode = vmcd.barcode
 		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-		 GROUP BY 1,2,3,4,5 ORDER BY p.descripcion ASC $S$;
+		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
 
       	FOR l IN EXECUTE q loop
 	    barcode := l.barcode;
@@ -2191,10 +2195,11 @@ BEGIN
 	    marca := l.marca;
     	    contenido := l.contenido;
     	    unidad := l.unidad;
+	    familia := l.familia;
     	    cantidad := l.cantidad;
     	    monto_vendido := l.monto_vendido;
     	    costo := l.costo;
-    	    contribucion := l.contribucion;
+    	    contribucion := l.contribucion;	    
     	    RETURN NEXT;
         END LOOP;
 

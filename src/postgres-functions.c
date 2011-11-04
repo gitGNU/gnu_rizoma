@@ -1947,14 +1947,19 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 }
 
 PGresult *
-ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day)
+ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
 {
   PGresult *res;
-  gchar *q;
+  gchar *q, *family_filter;
+
+  if (family == 0)
+    family_filter = g_strdup_printf("");
+  else
+    family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year);
+    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -1966,14 +1971,19 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
 }
 
 PGresult *
-ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day)
+ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
 {
   PGresult *res;
-  gchar *q;
+  gchar *q, *family_filter;
+
+  if (family == 0)
+    family_filter = g_strdup_printf("");
+  else
+    family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year);
+    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
