@@ -1167,20 +1167,38 @@ Save (GtkWidget *widget, gpointer data)
   /* aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_unit")); */
   /* unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))); */
 
-  model = gtk_combo_box_get_model (combo_unit);
-  gtk_combo_box_get_active_iter (combo_unit, &iter);
+  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_unit)) != -1)
+    {
+      model = gtk_combo_box_get_model (combo_unit);
+      gtk_combo_box_get_active_iter (combo_unit, &iter);
 
-  gtk_tree_model_get (model, &iter,
-		      1, &unidad,
-		      -1);
+      gtk_tree_model_get (model, &iter,
+			  1, &unidad,
+			  -1);
+    }
+  else
+    {
+      ErrorMSG (GTK_WIDGET (combo_unit), "Seleccione una unidad");
+      return;
+    }
+
 
   /*Familia*/
-  model = gtk_combo_box_get_model (combo_family);
-  gtk_combo_box_get_active_iter (combo_family, &iter);
+  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_family)) != -1)
+    {
+      model = gtk_combo_box_get_model (combo_family);
+      gtk_combo_box_get_active_iter (combo_family, &iter);
 
-  gtk_tree_model_get (model, &iter,
-		      0, &familia,
-		      -1);
+      gtk_tree_model_get (model, &iter,
+			  0, &familia,
+			  -1);
+    }
+  else
+    {
+      ErrorMSG (GTK_WIDGET (combo_family), "Seleccione una unidad");
+      return;
+    }
+
 
   // TODO: Revisar el Otros, porque en la base de datos se guardan 0
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición

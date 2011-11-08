@@ -144,6 +144,65 @@ ChangeDevolucion (void)
 }
 
 
+/**
+ * Es llamada por el evento "change" del treeview 
+ * "treeview_sells_exempt_tax"
+ *
+ * Rellena el detalle de la venta exenta seleccionada en el 
+ * treeview "treeview_sells_exempt_tax_details"
+ *
+ * @param: GtkTreeSelection treeselection
+ * @param: gpointer user_data
+ */
+void
+fill_exempt_sells_details (GtkTreeSelection *treeselection, gpointer user_data)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "treeview_sells_exempt_tax"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkListStore *store_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_sells_exempt_tax_details"))));
+  GtkTreeIter iter;
+  gchar *idventa;
+  gint i, tuples;
+  PGresult *res;
+
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          1, &idventa,
+                          -1);
+
+      gtk_list_store_clear (GTK_LIST_STORE (store_detail));
+
+      /* consulta que arroja el detalle de una venta*/
+      res = EjecutarSQL2
+        (g_strdup_printf
+         ("SELECT codigo_corto, descripcion, marca, contenido, unidad, cantidad, "
+	  "       venta_detalle.precio, round((cantidad * venta_detalle.precio)) AS monto "
+	  "FROM venta_detalle, producto "
+	  "WHERE producto.barcode=venta_detalle.barcode "
+	  "AND id_venta=%s", idventa));
+
+      tuples = PQntuples (res);
+
+      for (i = 0; i < tuples; i++)
+        {
+          gtk_list_store_append (store_detail, &iter);
+          gtk_list_store_set (store_detail, &iter,
+			      0, g_strdup_printf ("%s", PQvaluebycol (res, i, "codigo_corto")),
+                              1, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
+                                                  PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
+                                                  PQvaluebycol (res, i, "unidad")),
+                              2, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+                              3, atoi (PQvaluebycol (res, i, "precio")),
+                              4, atoi (PQvaluebycol (res, i, "monto")),
+                              -1);
+        }
+    }
+}
+
+
 void
 change_sell_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *stock_fisico, gpointer data)
 {
@@ -704,6 +763,9 @@ reports_win (void)
   libroEnviados->son = (Print *) malloc (sizeof (Print));
   libroRecibidos->son = (Print *) malloc (sizeof (Print));
 
+  // Informe Ventas Exentas
+  Print *exempt = (Print *) malloc (sizeof (Print));
+  exempt->son = (Print *) malloc (sizeof (Print));
 
   builder = gtk_builder_new ();
 
@@ -1312,7 +1374,6 @@ reports_win (void)
 
 
   /* Cash Box */
-
   store = gtk_list_store_new (5,
                               G_TYPE_INT,
                               G_TYPE_STRING,
@@ -1514,10 +1575,10 @@ reports_win (void)
 
   /* End Devoluciones */
 
+
   /*
     Start Proveedores
    */
-
 
   store = gtk_list_store_new (5,
                               G_TYPE_STRING,
@@ -1589,7 +1650,6 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
-
   /*
     End Proveedores
    */
@@ -1598,7 +1658,6 @@ reports_win (void)
   /*
     Start Cuadratura
    */
-
 
   store = gtk_list_store_new (15,
 			      G_TYPE_STRING, // 0, Codigo Corto
@@ -1840,7 +1899,6 @@ reports_win (void)
    */
 
   // ENVIO -----
-
   store = gtk_list_store_new (4,
 			      G_TYPE_STRING, // 0, Fecha
 			      G_TYPE_STRING, // 1, ID
@@ -2418,6 +2476,256 @@ reports_win (void)
   /*
     END Informe Compras
    */
+
+
+  /*
+    START informe ventas exentas a impuesto
+   */
+  store = gtk_list_store_new (6,
+                              G_TYPE_STRING,  //Fecha
+                              G_TYPE_STRING,  //ID Venta
+                              G_TYPE_STRING,  //Maquina
+                              G_TYPE_STRING,  //Vendedor
+			      G_TYPE_STRING,  //Tipo Pago
+                              G_TYPE_INT);    //Monto
+                            //G_TYPE_STRING);
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sells_exempt_tax"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+		    G_CALLBACK (fill_exempt_sells_details), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 0);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID Venta", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Maq.", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Vendedor", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Tipo Pago", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  /* renderer = gtk_cell_renderer_text_new (); */
+  /* column = gtk_tree_view_column_new_with_attributes ("Estado", renderer, */
+  /*                                                    "text", 6, */
+  /*                                                    NULL); */
+  /* gtk_tree_view_append_column (treeview, column); */
+  /* gtk_tree_view_column_set_alignment (column, 0.5); */
+  /* g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL); */
+  /* gtk_tree_view_column_set_sort_column_id (column, 6); */
+  /* gtk_tree_view_column_set_resizable (column, FALSE); */
+
+  exempt->tree = treeview;
+  exempt->title = "Libro de Ventas Exentas";
+  exempt->name = "ventas";
+  exempt->date_string = NULL;
+  exempt->cols[0].name = "Fecha";
+  exempt->cols[0].num = 0;
+  exempt->cols[1].name = "Monto";
+  exempt->cols[1].num = 4;
+  exempt->cols[2].name = NULL;
+
+
+  // Ventas exetas a impuesto (detalle)
+  store = gtk_list_store_new (5,
+			      G_TYPE_STRING,  //Codigo_corto
+                              G_TYPE_STRING,  //marca, descripcion, contenido, unidad
+                              G_TYPE_DOUBLE,  //cantidad
+                              G_TYPE_INT,     //unitario
+                              G_TYPE_INT);    //total
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sells_exempt_tax_details"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 0);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  //gtk_tree_view_column_set_min_width (column, 260);
+  //gtk_tree_view_column_set_max_width (column, 260);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 260);
+  gtk_tree_view_column_set_max_width (column, 260);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
+  exempt->son->tree = treeview;
+  exempt->son->cols[0].name = "Codigo";
+  exempt->son->cols[0].num = 0;
+  exempt->son->cols[1].name = "Producto";
+  exempt->son->cols[1].num = 1;
+  exempt->son->cols[2].name = "Cantidad";
+  exempt->son->cols[2].num = 2;
+  exempt->son->cols[3].name = "Unitario";
+  exempt->son->cols[3].num = 3;
+  exempt->son->cols[4].name = "Total";
+  exempt->son->cols[4].num = 4;
+  exempt->son->cols[5].name = NULL;
+
+  //g_signal_connect (builder_get (builder, "btn_print_sells"), "clicked",
+  //G_CALLBACK (PrintTwoTree), (gpointer)libro);
+
+
+  //Montos Vendidos con Cheques de restaurant
+  store = gtk_list_store_new (4,
+			      G_TYPE_INT,     //id_venta
+			      G_TYPE_STRING,  //Fecha Venta
+			      G_TYPE_STRING,  //Codigo Cheque
+			      G_TYPE_INT);    //Monto Cheque
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_ticket_amount"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("ID Venta", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 0);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 260);
+  gtk_tree_view_column_set_max_width (column, 260);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("F.Venta", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cod. Cheque", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Cheque", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+  /* End Sells (tax exempt) */
+
 
   //Titulo
   gtk_window_set_title (GTK_WINDOW (gtk_builder_get_object (builder, "wnd_reports")),
@@ -3077,7 +3385,6 @@ return;
  * traves de el tree_view correspondiente.
  *
  */
-
 void
 fill_sells_list ()
 {
@@ -3204,6 +3511,142 @@ fill_sells_list ()
 
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 8 del switch.
+ *
+ * Esta funcion a traves de una consulta sql retorna los datos de
+ * ventas exentas en un lapso de tiempo, luego las visualiza a traves del
+ * tree_view correspondiente.
+ *
+ */
+void 
+fill_exempt_sells ()
+{  
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,"treeview_sells_exempt_tax"))));
+  gchar *pago = NULL;
+  gint tuples, i;
+  gint sell_type;
+  GtkTreeIter iter;
+  PGresult *res;
+  gchar *q;
+
+  /*Datos labels*/
+  gint monto_ventas_exentas, monto_cheques;
+  gchar *nventas, *ncheques;
+  monto_ventas_exentas = monto_cheques = 0;
+
+  gtk_list_store_clear (store);
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_sells_exempt_tax_details")))));
+
+  /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
+     retorna los datos de ventas en un intervalo de fechas */
+  res = exempt_sells_on_date
+    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+
+  tuples = PQntuples (res);
+  nventas = PutPoints (g_strdup_printf ("%d", tuples));
+
+  /* verifica que tipo de venta es*/
+  for (i = 0; i < tuples; i++)
+    {
+      sell_type = atoi (PQvaluebycol (res, i, "tipo_venta"));
+      switch (sell_type)
+	{
+	case CASH:
+	  pago = "Contado";
+	  break;
+	case CREDITO:
+	  pago = "Credito";
+	  break;
+	case CHEQUE_RESTAURANT:
+	  pago = "Cheque Rest.";
+	  break;
+	case MIXTO:
+	  pago = "Mixto";
+	  break;
+	case CHEQUE:
+	  pago = "Cheque";
+	  break;
+	case TARJETA:
+	  pago = "Tarjeta";
+	  break;
+	default:
+	  pago = "Indefinido";
+	  break;
+	}
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, PQvaluebycol (res, i, "fmt_fecha"),
+			  1, PQvaluebycol (res, i, "id"),
+			  2, PQvaluebycol (res, i, "maquina"),
+			  3, PQvaluebycol (res, i, "vendedor"),
+			  4, pago,
+			  5, atoi (PQvaluebycol (res, i, "monto")),
+			  -1);
+      monto_ventas_exentas += atoi (PQvaluebycol (res, i, "monto"));
+    }
+
+
+  /* Rellena la información de los cheques de restaurant en el lapso 
+     de tiempo determinado */  
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_ticket_amount"))));
+  gtk_list_store_clear (store);
+
+  q = g_strdup_printf ("SELECT cr.id, cr.id_venta, cr.codigo, cr.facturado, cr.monto, "
+		       "cr.pagado, v.monto AS monto_venta, "
+
+		       "date_part ('year', v.fecha) AS fvta_year, "
+		       "date_part ('month', v.fecha) AS fvta_month, "
+		       "date_part ('day', v.fecha) AS fvta_day, "
+			   
+		       "date_part ('year', fecha_vencimiento) AS fvto_year, "
+		       "date_part ('month', fecha_vencimiento) AS fvto_month, "
+		       "date_part ('day', fecha_vencimiento) AS fvto_day "
+
+		       "FROM cheque_rest cr INNER JOIN venta v ON cr.id_venta = v.id "
+		       "WHERE v.fecha >= to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+		       "AND v.fecha <= to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+		       g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end));
+
+  res = EjecutarSQL (q);
+  tuples = PQntuples (res);
+  ncheques = PutPoints (g_strdup_printf ("%d", tuples));
+      
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, atoi (PQvaluebycol (res, i, "id_venta")),
+			  1, g_strdup_printf ("%s-%s-%s",
+					      PQvaluebycol (res, i, "fvta_day"),
+					      PQvaluebycol (res, i, "fvta_month"),
+					      PQvaluebycol (res, i, "fvta_year")),
+			  2, PQvaluebycol (res, i, "codigo"),
+			  3, atoi (PQvaluebycol (res, i, "monto")),
+			  -1);
+      monto_cheques += atoi (PQvaluebycol (res, i, "monto"));
+    }
+
+  //Numero de ventas
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_num_exempt_sells")), nventas);
+  //Numero de cheques
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_num_cheques")), ncheques);
+  //Total ventas no afectas a impuesto
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_total_exempt_sell_amount")), 
+		      g_strconcat ("$ ",PutPoints (g_strdup_printf ("%d", monto_ventas_exentas)), NULL));
+  //Total cheques
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_cheques_amount")), 
+		      g_strconcat ("$ ",PutPoints (g_strdup_printf ("%d", monto_cheques)), NULL));
+  //Total no afecto a impuesto
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_total_exempt_amount")), 
+		      g_strconcat ("$ ",PutPoints (g_strdup_printf ("%d", monto_cheques+monto_ventas_exentas)), NULL));
+		      
+}
+
+
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
  * opcion 3 del switch.
  *
  * Esta funcion a traves de una consulta sql retorna los datos de una
@@ -3211,7 +3654,6 @@ fill_sells_list ()
  * tree_view correspondiente.
  *
  */
-
 void
 fill_devolucion ()
 {
@@ -4133,13 +4575,13 @@ avanzar_barra_progreso (GtkWidget * progreso)
   flagProgress = gtk_timeout_add (100, progress_timeout, progreso);
 }
 
+
 /**
  * Es llamada cuando se presiona el boton "btn_get_stat" (signal clicked)
  *
  * Esta funcion extrae las fechas ingresadas, y segun notebook se escoge una opcion
  *
  */
-
 void
 on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 {
@@ -4244,6 +4686,11 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 	  calcular_traspasos ();
 	  break;
 
+	case 8:
+	  /*Informe Exentos*/
+	  fill_exempt_sells ();
+	  break;
+	  
         default:
           break;
         }
@@ -4698,6 +5145,5 @@ on_btn_apply_family_filter_clicked ()
 	(g_str_equal (store, "TODOS")) ? fill_products_rank_mp (0) : fill_products_rank_mp (familia);
     }
   else if (page_num == 6) //Cuadratura
-    (g_str_equal (store, "TODOS")) ? fill_cuadratura (0) : fill_cuadratura (familia);
-  
+    (g_str_equal (store, "TODOS")) ? fill_cuadratura (0) : fill_cuadratura (familia);  
 }

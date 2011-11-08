@@ -714,6 +714,39 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
     return NULL;
 }
 
+PGresult *
+exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
+		      gint to_year, gint to_month, gint to_day)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT v.id, v.maquina, v.vendedor, v.tipo_venta, "
+		       "       (SELECT SUM (vd.cantidad * vd.precio) "
+		       "               FROM venta_detalle vd "
+		       "               WHERE vd.id_venta = v.id "
+		       "               AND vd.impuestos = false) AS monto, "
+		       "       to_char (fecha, 'DD/MM/YY HH24:MI:SS') AS fmt_fecha "
+		       "FROM venta v "
+		       "WHERE v.fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+		       "AND v.fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+		       "AND v.id NOT IN (SELECT id_sale FROM venta_anulada) "
+		       "AND (SELECT SUM (vd.cantidad * vd.precio) "
+		       "            FROM venta_detalle vd "
+		       "            WHERE vd.id_venta = v.id "
+		       "            AND vd.impuestos = false) IS NOT NULL "
+		       "ORDER BY v.fecha DESC",
+		       from_day, from_month, from_year,
+		       to_day+1, to_month, to_year);
+
+  res = EjecutarSQL (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
 gint
 GetTotalCashSell (guint from_year, guint from_month, guint from_day,
                   guint to_year, guint to_month, guint to_day, gint *total)
@@ -1920,10 +1953,10 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle */
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %d)",
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %d, %s)",
 			   id_venta, products->product->barcode, cantidad, precio,
 			   CUT (g_strdup_printf ("%.2f",products->product->fifo)),
-			   iva_unit, otros_unit, products->product->tipo);
+			   iva_unit, otros_unit, products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
 
       g_printf ("la consulta es %s\n", q);
       res = EjecutarSQL (q);

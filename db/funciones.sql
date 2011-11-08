@@ -1767,7 +1767,8 @@ create or replace function registrar_venta_detalle(
        in in_fifo double precision,
        in in_iva double precision,
        in in_otros double precision,
-       in in_tipo int4)
+       in in_tipo int4,
+       in in_impuestos boolean)
 returns void as $$
 declare
 aux int;
@@ -1789,7 +1790,8 @@ begin
 				  fifo,
 				  iva,
 				  otros,
-				  tipo)
+				  tipo,
+				  impuestos)
 	       	    VALUES(num_linea,
 		    	   in_id_venta,
 			   in_barcode,
@@ -1798,7 +1800,8 @@ begin
 			   in_fifo,
 			   in_iva,
 			   in_otros, 
-			   in_tipo);
+			   in_tipo,
+			   in_impuestos);
 
 end;$$ language plpgsql;
 
@@ -2111,7 +2114,8 @@ create or replace function ranking_ventas(
        out amount double precision,
        out sold_amount double precision,
        out costo double precision,
-       out contrib double precision
+       out contrib double precision,
+       out impuestos boolean
        )
 returns setof record as $$
 declare
@@ -2125,13 +2129,14 @@ q := $S$ SELECT producto.barcode as barcode,
 	      producto.contenido as contenido,
 	      producto.unidad as unidad,
 	      producto.familia as familia,
+	      producto.impuestos as impuestos,
 	      SUM (venta_detalle.cantidad) as amount,
 	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer/*-(venta_detalle.iva+venta_detalle.otros)::integer*/) as sold_amount,
 	      SUM (venta_detalle.cantidad*venta_detalle.fifo) as costo,
        	      SUM ((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad))) as contrib
       FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
       where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5,6
+      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5,6,7
       ORDER BY producto.descripcion ASC $S$;
 
 for l in execute q loop
@@ -2145,6 +2150,7 @@ for l in execute q loop
     sold_amount := l.sold_amount;
     costo := l.costo;
     contrib := l.contrib;
+    impuestos := l.impuestos;
     return next;
 end loop;
 
@@ -2951,16 +2957,16 @@ declare
        q text;
        l record;
 begin
+	--Tipo Venta = 0 (es en efectivo), tipo_venta debería llamarse "tipo_pago"
         select SUM (descuento) into total_cash_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
-                and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
+                and tipo_venta=0 and venta.id not in (select id_sale from venta_anulada);
 
         select count(*) into total_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
-                and (select forma_pago FROM documentos_emitidos where id=id_documento)=0 and venta.id not in (select id_sale from venta_anulada);
-
-
+                and tipo_venta=0 and venta.id not in (select id_sale from venta_anulada);
 return next;
 return;
 end; $$ language plpgsql;
+
 
 --Funcion incr_fecha
 --Esta funcion incrementa la fecha en un dia mas

@@ -69,6 +69,7 @@ typedef struct _product
   gboolean fraccion;
 
   /* Impuestos */
+  gboolean impuestos; //Se usa en venta
   gint iva;
   gint otros;
   gint otros_id;

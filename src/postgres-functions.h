@@ -54,6 +54,9 @@ PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
                                gint to_year, gint to_month, gint to_day,
                                gchar *date_column, gchar *fields, gchar *grupo);
 
+PGresult * exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
+                                 gint to_year, gint to_month, gint to_day);
+
 gint GetTotalCashSell (guint from_year, guint from_month, guint from_day,
                        guint to_year, guint to_month, guint to_day, gint *total);
 

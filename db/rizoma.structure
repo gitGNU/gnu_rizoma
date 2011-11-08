@@ -587,6 +587,7 @@ create table venta_detalle (
   iva                       float8,
   otros                     float8,
   tipo			    int4,
+  impuestos		    bool,
   constraint pk_venta_detalle primary key (id,id_venta)
 ) ;
 
