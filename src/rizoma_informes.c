@@ -4787,7 +4787,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
     }
-  else if (page_num != 7)
+  if (page_num != 7)
     { //Se ocultan los widget para filtrar las tiendas
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
