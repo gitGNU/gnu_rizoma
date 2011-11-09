@@ -63,6 +63,10 @@ gint GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 gint GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
                          guint to_year, guint to_month, guint to_day, gint *total);
 
+void total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
+                                   guint to_year, guint to_month, guint to_day, 
+                                   gint *total_iva, gint *total_otros);
+
 gint GetTotalSell (guint from_year, guint from_month, guint from_day,
                    guint to_year, guint to_month, guint to_day, gint *total);
 

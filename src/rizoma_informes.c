@@ -75,7 +75,7 @@ ChangeVenta (void)
       /* consulta que arroja el detalle de una venta*/
       res = EjecutarSQL2
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, venta_detalle.precio, round((cantidad * venta_detalle.precio)) AS monto FROM venta_detalle, producto WHERE producto.barcode=venta_detalle.barcode and id_venta=%s", idventa));
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, vd.iva, vd.otros, round((cantidad * vd.precio)) AS monto FROM venta_detalle vd, producto WHERE producto.barcode=vd.barcode and id_venta=%s", idventa));
 
       tuples = PQntuples (res);
 
@@ -85,10 +85,12 @@ ChangeVenta (void)
           gtk_list_store_set (store_detail, &iter,
                               0, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
-                                                  PQvaluebycol (res, i, "unidad")),
-                              1, PUT (PQvaluebycol (res, i, "cantidad")),
-                              2, PutPoints (PQvaluebycol (res, i, "precio")),
-                              3, PutPoints (PQvaluebycol (res, i, "monto")),
+                                                  PQvaluebycol (res, i, "unidad")),			      
+                              1, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+                              2, atoi (PQvaluebycol (res, i, "precio")),
+			      3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "iva"))), (char **)NULL),
+                              4, strtod (PUT (g_strdup (PQvaluebycol (res, i, "otros"))), (char **)NULL),
+                              5, atoi (PQvaluebycol (res, i, "monto")),
                               -1);
         }
     }
@@ -881,11 +883,13 @@ reports_win (void)
   libro->cols[1].num = 4;
   libro->cols[2].name = NULL;
 
-  store = gtk_list_store_new (4,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING);
+  store = gtk_list_store_new (6,
+                              G_TYPE_STRING,  //Producto (marca, descripcion, contendo unidad)
+                              G_TYPE_DOUBLE,  //Cantidad (vendida)
+                              G_TYPE_INT,     //Unitario (precio por unidad)
+			      G_TYPE_DOUBLE,  //IVA (en pesos)
+			      G_TYPE_DOUBLE,  //Otros impuestos (en pesos)
+                              G_TYPE_INT);    //Sub-Total (precio unitario * cantidad)
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail"));
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
@@ -908,9 +912,10 @@ reports_win (void)
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)1, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
@@ -921,9 +926,10 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("IVA", renderer,
                                                      "text", 3,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -931,6 +937,29 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Otros Imp.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Sub-Total", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   libro->son->tree = treeview;
   libro->son->cols[0].name = "Producto";
@@ -939,9 +968,13 @@ reports_win (void)
   libro->son->cols[1].num = 1;
   libro->son->cols[2].name = "Unitario";
   libro->son->cols[2].num = 2;
-  libro->son->cols[3].name = "Total";
+  libro->son->cols[3].name = "IVA";
   libro->son->cols[3].num = 3;
-  libro->son->cols[4].name = NULL;
+  libro->son->cols[4].name = "Otros impuestos";
+  libro->son->cols[4].num = 4;
+  libro->son->cols[5].name = "Sub-Total";
+  libro->son->cols[5].num = 5;
+  libro->son->cols[6].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_sells"), "clicked",
                     G_CALLBACK (PrintTwoTree), (gpointer)libro);
@@ -3775,6 +3808,8 @@ void
   gint total_credit;
   gint total_sell;
   gint total_ventas;
+  gint total_iva;
+  gint total_otros;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
 
@@ -3783,6 +3818,12 @@ void
 				      g_date_get_day (date_begin),  g_date_get_year (date_end),
 				      g_date_get_month (date_end), g_date_get_day (date_end),
                                       &total_cash);
+
+  /*Esta funcion entrega el total del iva y otros dentro del rango de fecha entregado*/
+  total_taxes_on_time_interval (g_date_get_year (date_begin), g_date_get_month (date_begin),
+				g_date_get_day (date_begin),  g_date_get_year (date_end),
+				g_date_get_month (date_end), g_date_get_day (date_end),
+				&total_iva, &total_otros);
 
   /* Consulta que retorna el numero de ventas con descuento y la suma total
      con descuento en un intervalo de tiempo */
@@ -3810,6 +3851,20 @@ void
 			     g_date_get_month (date_end), g_date_get_day (date_end),
                              &total_ventas);
 
+  /*Taxes*/
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_iva")),
+                        g_strdup_printf ("<span>$%s</span>",
+                                         PutPoints (g_strdup_printf ("%d", total_iva))));
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_otros")),
+                        g_strdup_printf ("<span>$%s</span>",
+                                         PutPoints (g_strdup_printf ("%d", total_otros))));
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_impuestos")),
+                        g_strdup_printf ("<span>$%s</span>",
+                                         PutPoints (g_strdup_printf ("%d", total_iva + total_otros))));
+
+  /*Cash sell*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_amount")),
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_sell))));
@@ -3824,6 +3879,7 @@ void
                           g_strdup_printf ("<span>$%s</span>",
                                            PutPoints (g_strdup_printf ("%d", total_cash_sell / total_cash))));
 
+  /*Credit sell*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_credit_amount")),
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_credit_sell))));
@@ -3837,6 +3893,7 @@ void
                           g_strdup_printf ("<span>$%s</span>",
                                            PutPoints (g_strdup_printf ("%d", total_credit_sell / total_credit))));
 
+  /*Total sell*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_total_amount")),
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_sell))));
@@ -3844,11 +3901,13 @@ void
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_total_n")),
                         g_strdup_printf ("<span>%s</span>",
                                          PutPoints (g_strdup_printf ("%d",total_ventas))));
+
   if (total_ventas != 0)
     gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_average")),
                           g_strdup_printf ("<span>$%s</span>",
                                            PutPoints (g_strdup_printf ("%d", total_sell / total_ventas))));
 
+  /*Discounts*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount")),
                         g_strdup_printf ("<span>$%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_discount))));

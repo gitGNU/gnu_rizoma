@@ -798,6 +798,41 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
   return atoi (PQgetvalue (res, 0, 0));
 }
 
+
+/**
+ * This function get the subtotal of taxes (IVA and Others) 
+ * from sells within a date range.
+ *
+ * @param: guint from_year, guint from_month, guint from_day
+ * @param: guint to_year, guint to_month, guint to_day, 
+ * @param: gdouble *total_iva: In which to store the result (IVA total)
+ * @param: gdouble *total_otros: In which to store the result (Others total)
+ */
+void
+total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
+			      guint to_year, guint to_month, guint to_day, 
+			      gint *total_iva, gint *total_otros)
+{
+  PGresult *res;
+
+  res = EjecutarSQL
+    (g_strdup_printf
+     ("SELECT ROUND (SUM((SELECT SUM(iva)   FROM venta_detalle WHERE id_venta=v.id))) AS total_iva, "
+      "       ROUND (SUM((SELECT SUM(otros) FROM venta_detalle WHERE id_venta=v.id))) AS total_otros "
+      "FROM venta v "
+      "WHERE fecha >= TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND fecha   <  TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND v.id NOT IN (SELECT id_sale FROM venta_anulada)",
+      from_day, from_month, from_year, to_day+1, to_month, to_year));
+
+  if (res == NULL)
+    return 0;
+
+  *total_iva = atoi(PQvaluebycol (res, 0, "total_iva"));
+  *total_otros = atoi (PQvaluebycol (res, 0, "total_otros"));
+}
+
+
 gint
 GetTotalSell (guint from_year, guint from_month, guint from_day,
               guint to_year, guint to_month, guint to_day, gint *total)
@@ -1367,8 +1402,8 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 	porcentaje = 0;
     }
 
-  q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
-                       "marca='%s', unidad='%s', contenido='%s', precio=%d, "
+  q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion=UPPER('%s'),"
+                       "marca=UPPER('%s'), unidad=UPPER('%s'), contenido='%s', precio=%d, "
                        "impuestos='%d', otros=%d, familia=%d, "
                        "perecibles='%d', fraccion='%d', margen_promedio=%s WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
