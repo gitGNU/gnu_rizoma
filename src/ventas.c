@@ -4416,6 +4416,8 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   gint sale_id;
   gint monto;
 
+  gboolean is_credit_sell;
+  
   PGresult *res;
   gchar *q;
   gint tuples, i;
@@ -4429,8 +4431,11 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 		      3, &monto,
                       -1);
 
+  //Se ve di la venta es a crédito
+  is_credit_sell = DataExist (g_strdup_printf ("SELECT id FROM venta WHERE tipo_venta=1 AND id=%d", sale_id));
+
   /*Se comprueba que el monto de la venta sea menor al dinero en caja*/
-  if (monto > ArqueoCaja())
+  if (monto > ArqueoCaja() && is_credit_sell == FALSE)
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "treeview_nullify_sale")), 
 		"No existe monto suficiente en caja para anular esta venta");
@@ -4439,7 +4444,6 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 
   if (nullify_sale (sale_id) == 0)
     {
-
       gtk_list_store_clear (sell);
       CleanEntryAndLabelData ();
       ListClean ();
