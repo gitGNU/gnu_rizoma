@@ -2647,18 +2647,48 @@ returns boolean as $$
 declare
         sale_amount integer;
         id_tipo_egreso integer;
+	tipo_pago integer;
+	forma_pago1 integer;
+	forma_pago2 integer;
+	monto_pago1 integer;
+	monto_pago2 integer;
         query text;
 	l record;
 begin
 
-        select monto into sale_amount from venta where id=sale_id;
-        select id into id_tipo_egreso from tipo_egreso where descrip='Nulidad de Venta';
-	
-	-- Si es la anulacion de una venta a credito no debe ser ingresado en la tabla venta_anulada
+	-- Tipo de pagos:
+	-----------------
+	-- EFECTIVO           = 0
+	-- CREDITO            = 1
+	-- CHEQUE RESTAURANT  = 2
+	-- MIXTO              = 3
+	-- CHEQUE             = 4 --SIN USO
+	-- TARJETA            = 5 --SIN USO
+
+        SELECT monto INTO sale_amount FROM venta WHERE id=sale_id;
+        SELECT id INTO id_tipo_egreso FROM tipo_egreso WHERE descrip='Nulidad de Venta';
+	SELECT tipo_venta INTO tipo_pago FROM venta WHERE id=sale_id;
+
+	-- Si el pago es mixto se obtienen las formas de pago
+	IF (tipo_pago = 3) THEN
+	   SELECT tipo_pago1 INTO forma_pago1 FROM pago_mixto WHERE id_sale=sale_id;
+	   SELECT tipo_pago2 INTO forma_pago2 FROM pago_mixto WHERE id_sale=sale_id;
+	   SELECT monto1 INTO monto_pago1 FROM pago_mixto WHERE id_sale=sale_id;
+	   SELECT monto2 INTO monto_pago2 FROM pago_mixto WHERE id_sale=sale_id;
+	END IF;
+
+	-- Si es la anulacion de una venta a credito o con cheque de restaurant o mixto sin pago efectivo no debe egresar dinero de caja
 	-- Debe  considerar esa venta como "pagada", de esa forma de "restituye" el credito del cliente (correspondiente a esa venta)
-	IF (SELECT id FROM venta WHERE tipo_venta=1 AND id=sale_id) IS NOT NULL then
+	IF (tipo_pago = 1 OR tipo_pago = 2 OR (tipo_pago = 3 AND (forma_pago1 != 0 AND forma_pago2 != 0))) THEN
        	   UPDATE deuda SET pagada='t' WHERE id_venta=sale_id;
 	ELSE
+	   IF (tipo_pago = 3) THEN --Si el pago es con cheque de restaurant se egresa solo el monto efectivo
+	      IF (forma_pago1 = 0) THEN -- Si el pago 1 fue en efectivo
+	      	 sale_amount = monto_pago1;
+	      ELSE -- Si el pago 2 fue en efectivo
+	         sale_amount = monto_pago2;
+	      END IF;
+	   END IF;
 	   perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
 	END IF;
 

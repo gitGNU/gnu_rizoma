@@ -4415,6 +4415,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   gint sale_id;
   gint monto;
+  gint tipo_venta, tipo_pago1, tipo_pago2;
 
   gboolean is_credit_sell;
   
@@ -4431,11 +4432,21 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 		      3, &monto,
                       -1);
 
-  //Se ve di la venta es a crédito
-  is_credit_sell = DataExist (g_strdup_printf ("SELECT id FROM venta WHERE tipo_venta=1 AND id=%d", sale_id));
+  //Se ve el tipo de venta, de ser mixta se obtienen los tipos y montos de cada pago
+  tipo_venta = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT tipo_venta FROM venta WHERE id=%d", sale_id)), 0, "tipo_venta"));
+  if (tipo_venta == MIXTO)
+    {
+      tipo_pago1 = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT tipo_pago1 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "tipo_pago1"));
+      tipo_pago2 = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT tipo_pago2 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "tipo_pago2"));
+      if (tipo_pago1 == CASH)
+	monto = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto1 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "monto1"));
+      else if (tipo_pago2 == CASH)
+	monto = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto2 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "monto2"));
+    }
 
   /*Se comprueba que el monto de la venta sea menor al dinero en caja*/
-  if (monto > ArqueoCaja() && is_credit_sell == FALSE)
+  if ((tipo_venta == CASH || (tipo_venta == MIXTO && (tipo_pago1 == CASH || tipo_pago2 == CASH)))
+      && monto > ArqueoCaja()) //Entra aquí si la venta fué en efectivo y no hay dinero para devolver
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "treeview_nullify_sale")), 
 		"No existe monto suficiente en caja para anular esta venta");
