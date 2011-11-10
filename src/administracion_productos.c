@@ -231,18 +231,36 @@ GuardarModificacionesProducto (void)
   gboolean mayorista;
   gint precio_mayorista;
   gint cantidad_mayorista;
+  gchar *precio_actual;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
+  if (g_str_equal (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_barcode"))), ""))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "find_product_entry")), "Seleccione un producto a editar");
+      return;
+    }
+
+  widget = GTK_WIDGET (builder_get (builder, "lbl_informerca_barcode"));
   barcode = g_strdup (gtk_label_get_text (GTK_LABEL (widget)));
 
+  widget = GTK_WIDGET (builder_get (builder, "entry_informerca_price"));
+  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  //Comprueba si se modificó el precio de venta y realiza el calculo correspondiente
+  precio_actual = PQvaluebycol
+    (EjecutarSQL (g_strdup_printf ("SELECT precio FROM producto WHERE barcode = %s", barcode)), 0, "precio");
+  if (!g_str_equal (new_venta, precio_actual))
+    CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), NULL);
+  else
+    CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), NULL);
+
+  widget = GTK_WIDGET (builder_get (builder, "entry_informerca_price"));
+  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+  
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
   stock_minimo = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
   margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_price"));
-  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
   mayorista = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
@@ -261,6 +279,12 @@ GuardarModificacionesProducto (void)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_cantmayorist")), "Cantidad mayorista debe ser mayor a 1");
   else if (g_str_equal (new_venta, "") || HaveCharacters (new_venta))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "Debe insertar un precio de venta");
+  else if (margen < 0)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "El porcentaje de ganancia debe ser mayor a 0");
+  else if (new_venta < 0)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "El precio de venta debe ser mayor a 0");
+  else if (stock_minimo < 0)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Stock mínimo debe ser mayor a 0");
   else
     {
       SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
@@ -289,8 +313,9 @@ GuardarModificacionesProducto (void)
             }
 
           gtk_list_store_set (GTK_LIST_STORE (store), &iter,
-                              7, atoi(new_venta),
+                              8, atoi(new_venta),
                               -1);
+
           statusbar_push (GTK_STATUSBAR(gtk_builder_get_object(builder, "statusbar")),
                           "Ha sido editado el producto existosamente", 5000);
         }
@@ -885,7 +910,6 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   gchar *txt_margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin"))));
   gchar *txt_precio_final = g_strdup (gtk_entry_get_text (GTK_ENTRY
 							  (builder_get (builder, "entry_informerca_price"))));
-
   /*TODO: MASCARA ANTI CARACTERES -
     Comprueba si hay texto antes del parseo, de no haber nada setea un 0
     se puede cambiar cuando los entry solo permitan el ingreso de números*/
@@ -900,7 +924,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   if (g_str_equal (txt_precio_final, ""))
     gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), "0");
 
-  /*DESCARTADO: En el evento "CHANGE" mostraba el siguiente nÃºmero borrando el primero si era 0 --->
+  /*DESCARTADO: En el evento "CHANGE" mostraba el siguiente número borrando el primero si era 0 --->
     if (strlen (txt_margen) == 2 && g_str_equal (g_strdup_printf ("%c",txt_margen[0]), "0"))
     gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")),
     g_strdup_printf ("%c",txt_margen[1]));*/
