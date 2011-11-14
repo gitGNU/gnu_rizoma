@@ -26,7 +26,8 @@ rizoma-ventas.ui \
 rizoma-compras.ui \
 rizoma-informes.ui \
 rizoma-inventario.ui \
-print-menu.xml
+print-menu.xml \
+edit-menu.xml
 
 rizomaUIdir = $(pkgdatadir)/ui
 rizomaUI_DATA = rizoma-admin.ui \
@@ -37,4 +38,5 @@ rizoma-ventas.ui \
 rizoma-compras.ui \
 rizoma-informes.ui \
 rizoma-inventario.ui \
-print-menu.xml
+print-menu.xml \
+edit-menu.xml

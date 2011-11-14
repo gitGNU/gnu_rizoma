@@ -90,6 +90,10 @@ drop table if exists clothes_code cascade;
 drop table if exists pago_mixto cascade;
 drop table if exists emisor_cheque cascade;
 drop table if exists cheque_rest cascade;
+drop table if exists tipo_mercaderia cascade;
+drop table if exists componente_mc cascade;
+drop table if exists venta_mc_detalle cascade;
+
 
 -- Generated SQL Schema
 -- --------------------------------------------------------------------
@@ -121,9 +125,9 @@ create table asistencia (
 create table bodega
 (
   id serial not null,
-  nombre character varying(50),
-  tipo character varying(50),
-  estado boolean default 't',
+  nombre		    character varying(50),
+  tipo 			    character varying(50),
+  estado 		    boolean default 't',
   constraint pk_bodega primary key (id)
 );
 
@@ -141,7 +145,7 @@ create table deuda (
 -- Documentos_emitidos
 create table documentos_emitidos (
   id                        serial not null,
-  id_venta		    int4 not null,
+  id_venta		    int4 not null, -- not null se debe quitar para migrar bases antiguas
   tipo_documento            int2,
   forma_pago                int2,
   num_documento             int4,
@@ -485,22 +489,46 @@ create table producto (
   cantidad_mayor            int4,
   mayorista                 bool default false,
   estado                    bool default true,
+  tipo			    int4 default 1, -- 1 = mercadería discreta
   CONSTRAINT pk_producto primary key (barcode),
   CONSTRAINT unique_short_code UNIQUE (codigo_corto)
 ) ;
+
+
+-- Componente_mercaderia_compuesta
+create table componente_mc (
+  id   	     		    serial not null,
+  barcode_madre             bigint not null,
+  tipo_madre		    int4,
+  barcode_derivado          bigint not null,
+  tipo_derivado		    int4,
+  cant_mud                  float8, -- Cantidad de madre que usa el derivado	
+  CONSTRAINT pk_componente_mc primary key (id)
+) ;
+
+
+-- Tipo_mercaderia
+create table tipo_mercaderia (
+  id                        serial not null,
+  nombre		    varchar(20),
+  CONSTRAINT pk_tipo_mercaderia primary key (id)
+);
+
 
 -- Color
 create table color (
   id                        serial not null,
   codigo		    varchar(2),
-  nombre		    varchar(20)
+  nombre		    varchar(20),
+  CONSTRAINT pk_color primary key (id)
 );
 
 -- Sub_Depto
 create table sub_depto (
   id                        serial not null,
   codigo		    varchar(3),
-  nombre		    varchar(30)
+  nombre		    varchar(30),
+  CONSTRAINT pk_sub_depto primary key (id)
 );
 
 -- Talla
@@ -520,7 +548,8 @@ create table clothes_code (
   sub_depto                 varchar(3),
   id_ropa              	    varchar(2),
   talla			    varchar(2),
-  color			    varchar(2)
+  color			    varchar(2),
+  CONSTRAINT pk_clothes_code primary key (id)
 );
 
 
@@ -563,8 +592,26 @@ create table venta_detalle (
   fifo                      float8 not null,
   iva                       float8,
   otros                     float8,
+  tipo			    int4,
+  impuestos		    bool,
   constraint pk_venta_detalle primary key (id,id_venta)
 ) ;
+
+-- Venta_mercaderia_compuesta_detalle
+create table venta_mc_detalle (
+  id                        serial not null,
+  id_venta_detalle          int4 not null,
+  id_venta_vd               int4 not null,
+  barcode                   int8 not null,
+  cantidad                  float8,
+  precio                    int4 not null,
+  fifo                      float8 not null,
+  iva                       float8,
+  otros                     float8,
+  tipo			    int4,
+  constraint pk_venta_mc_detalle primary key (id)
+) ;
+
 
 -- Proveedor
 create table proveedor (
@@ -747,6 +794,15 @@ alter table venta_detalle add constraint fk_productos_barcode
 alter table venta_detalle add constraint fk_venta_id
   foreign key (id_venta)
   references venta (id)  ;
+alter table venta_detalle add constraint fk_venta_detalle_tipo
+  foreign key (tipo)
+  references tipo_mercaderia (id)  ;
+alter table venta_mc_detalle add constraint fk_venta_mc_detalle_venta_detalle
+  foreign key (id_venta_detalle, id_venta_vd)
+  references venta_detalle (id, id_venta)  ;
+alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo
+  foreign key (tipo)
+  references tipo_mercaderia (id)  ;
 alter table producto_recibido add constraint fk_productos_recibidos_productos
   foreign key (barcode)
   references producto (barcode)  ;
@@ -885,6 +941,16 @@ alter table cheque_rest add constraint fk_cheque_rest_emisor_cheque
 alter table cheque_rest add constraint fk_cheque_rest_venta
   foreign key (id_venta)
   references venta (id) ;
+alter table producto add constraint fk_producto_tipo_mercaderia
+  foreign key (tipo)
+  references tipo_mercaderia (id) ;
+alter table componente_mc add constraint fk_componente_mc_madre_tipo_mercaderia
+  foreign key (tipo_madre)
+  references tipo_mercaderia (id) ;
+alter table componente_mc add constraint fk_componente_mc_derivado_tipo_mercaderia
+  foreign key (tipo_derivado)
+  references tipo_mercaderia (id) ;
+
 
 
 -- Indices

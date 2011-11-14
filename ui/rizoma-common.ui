@@ -3,6 +3,7 @@
   <!-- interface-requires gtk+ 2.12 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkAboutDialog" id="about">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="type_hint">normal</property>
     <property name="program_name">POS Rizoma Comercio</property>
@@ -29,35 +30,334 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="wnd_add_check_manager">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Agregar  emisor de cheques</property>
+    <property name="window_position">center-always</property>
+    <signal name="delete-event" handler="gtk_widget_hide" object="wnd_add_check_manager" swapped="yes"/>
+    <child>
+      <object class="GtkVBox" id="vbox2_cm">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkTable" id="table2_cm">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="n_rows">7</property>
+            <property name="n_columns">2</property>
+            <property name="column_spacing">5</property>
+            <property name="row_spacing">5</property>
+            <child>
+              <object class="GtkEntry" id="entry_cm_giro">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">6</property>
+                <property name="bottom_attach">7</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_cm_ciudad">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label17_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Giro:</property>
+              </object>
+              <packing>
+                <property name="top_attach">6</property>
+                <property name="bottom_attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label20_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Ciudad:</property>
+              </object>
+              <packing>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_cm_dir">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_cm_tel">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label22_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Dirección:</property>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label19_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Teléfono:</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_cm_comuna">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label16_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Comuna:</property>
+              </object>
+              <packing>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox3_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkEntry" id="entry_cm_rut">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="max_length">8</property>
+                    <property name="invisible_char">•</property>
+                    <property name="xalign">1</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label13_cm">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">-</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="entry_cm_dv">
+                    <property name="width_request">30</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="max_length">1</property>
+                    <property name="invisible_char">•</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label14_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Rut:</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label15_cm">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">*Razón social:</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_cm_rs">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="label24_cm">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Los datos con * son obligatorios</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox4_cm">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton" id="btn_cancel_add_cm">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <accelerator key="Escape" signal="clicked"/>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_add_check_manager" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_add_cm">
+                <property name="label">gtk-add</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_btn_add_cm_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
     </child>
   </object>
   <object class="GtkWindow" id="wnd_addclient">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Agregar Cliente</property>
     <property name="window_position">center-always</property>
-    <signal name="delete_event" handler="CloseAddClientWindow"/>
+    <signal name="delete-event" handler="CloseAddClientWindow" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox2">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkTable" id="table2">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="n_rows">8</property>
             <property name="n_columns">2</property>
             <property name="column_spacing">5</property>
@@ -104,6 +404,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label23">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Limite de Credito:</property>
               </object>
               <packing>
@@ -114,6 +415,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label17">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Giro:</property>
               </object>
               <packing>
@@ -124,6 +426,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label20">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Teléfono:</property>
               </object>
               <packing>
@@ -160,6 +463,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label22">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Apellido Materno:</property>
               </object>
               <packing>
@@ -170,6 +474,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label19">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Apellido Paterno:</property>
               </object>
               <packing>
@@ -193,6 +498,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label16">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Dirección:</property>
               </object>
               <packing>
@@ -203,6 +509,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkHBox" id="hbox3">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkEntry" id="entry_client_rut">
                     <property name="visible">True</property>
@@ -219,6 +526,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
                 <child>
                   <object class="GtkLabel" id="label13">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">-</property>
                   </object>
                   <packing>
@@ -250,12 +558,14 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label14">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Rut:</property>
               </object>
             </child>
             <child>
               <object class="GtkLabel" id="label15">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Nombre:</property>
               </object>
               <packing>
@@ -286,6 +596,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
         <child>
           <object class="GtkLabel" id="label24">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Los datos con * son obligatorios</property>
           </object>
           <packing>
@@ -297,15 +608,17 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
         <child>
           <object class="GtkHBox" id="hbox4">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkButton" id="btn_cancel_add_client">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
-                <signal name="clicked" handler="CloseAddClientWindow"/>
+                <signal name="clicked" handler="CloseAddClientWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -319,8 +632,9 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="AgregarClienteABD"/>
+                <signal name="clicked" handler="AgregarClienteABD" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -340,15 +654,18 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
     </child>
   </object>
   <object class="GtkWindow" id="wnd_addprovider">
+    <property name="can_focus">False</property>
     <property name="border_width">10</property>
     <property name="window_position">center-always</property>
-    <signal name="delete_event" handler="CloseAgregarProveedorWindow"/>
+    <signal name="delete-event" handler="CloseAgregarProveedorWindow" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkTable" id="table1">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="n_rows">10</property>
             <property name="n_columns">2</property>
             <property name="column_spacing">5</property>
@@ -356,13 +673,14 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkHBox" id="hbox1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkEntry" id="entry_addprov_rut">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">8</property>
                     <property name="xalign">1</property>
-                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_dv"/>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_dv" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -373,6 +691,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
                 <child>
                   <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">-</property>
                   </object>
                   <packing>
@@ -387,7 +706,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="max_length">1</property>
-                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_name"/>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_name" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -405,12 +724,14 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Rut:</property>
               </object>
             </child>
             <child>
               <object class="GtkLabel" id="label3">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Nombre:</property>
               </object>
               <packing>
@@ -421,6 +742,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label4">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Dirección:</property>
               </object>
               <packing>
@@ -431,6 +753,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label11">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Giro:</property>
               </object>
               <packing>
@@ -441,6 +764,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label6">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Comuna</property>
               </object>
               <packing>
@@ -451,6 +775,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label5">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Ciudad:</property>
               </object>
               <packing>
@@ -461,6 +786,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label8">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">*Teléfono:</property>
               </object>
               <packing>
@@ -471,6 +797,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label9">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Correo Electrónico:</property>
               </object>
               <packing>
@@ -481,6 +808,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label10">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Web:</property>
               </object>
               <packing>
@@ -491,6 +819,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
             <child>
               <object class="GtkLabel" id="label7">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Contacto:</property>
               </object>
               <packing>
@@ -502,7 +831,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_name">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_addr"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_addr" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -516,7 +845,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_addr">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_comuna"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_comuna" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -530,7 +859,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_comuna">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_city"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_city" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -544,7 +873,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_city">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_phone"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_phone" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -558,7 +887,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_phone">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_email"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_email" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -572,7 +901,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_email">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_web"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_web" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -586,7 +915,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_web">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_contact"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_contact" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -600,7 +929,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_contact">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_giro"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_addprov_giro" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -614,7 +943,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkEntry" id="entry_addprov_giro">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="btn_cancel_add_provider"/>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="btn_cancel_add_provider" swapped="yes"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -634,6 +963,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
         <child>
           <object class="GtkLabel" id="label12">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Los datos con * son obligatorios</property>
           </object>
           <packing>
@@ -645,15 +975,17 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
         <child>
           <object class="GtkHBox" id="hbox2">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkButton" id="btn_cancel_add_provider">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
-                <signal name="clicked" handler="CloseAgregarProveedorWindow"/>
+                <signal name="clicked" handler="CloseAgregarProveedorWindow" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -667,285 +999,9 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="AgregarProveedor"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="wnd_add_check_manager">
-    <property name="border_width">5</property>
-    <property name="title" translatable="yes">Agregar  emisor de cheques</property>
-    <property name="window_position">center-always</property>
-    <signal name="delete_event" handler="gtk_widget_hide" object="wnd_add_check_manager"/>
-    <child>
-      <object class="GtkVBox" id="vbox2_cm">
-        <property name="visible">True</property>
-        <child>
-          <object class="GtkTable" id="table2_cm">
-            <property name="visible">True</property>
-            <property name="n_rows">7</property>
-            <property name="n_columns">2</property>
-            <property name="column_spacing">5</property>
-            <property name="row_spacing">5</property>
-            <child>
-              <object class="GtkEntry" id="entry_cm_giro">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">6</property>
-                <property name="bottom_attach">7</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_cm_ciudad">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label17_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Giro:</property>
-              </object>
-              <packing>
-                <property name="top_attach">6</property>
-                <property name="bottom_attach">7</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label20_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Ciudad:</property>
-              </object>
-              <packing>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_cm_dir">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_cm_tel">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label22_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Dirección:</property>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label19_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Teléfono:</property>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_cm_comuna">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label16_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Comuna:</property>
-              </object>
-              <packing>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox3_cm">
-                <property name="visible">True</property>
-                <child>
-                  <object class="GtkEntry" id="entry_cm_rut">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">8</property>
-                    <property name="invisible_char">•</property>
-                    <property name="xalign">1</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label13_cm">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">-</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="entry_cm_dv">
-                    <property name="width_request">30</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="max_length">1</property>
-                    <property name="invisible_char">•</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label14_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Rut:</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label15_cm">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">*Razón social:</property>
-              </object>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_cm_rs">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label24_cm">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Los datos con * son obligatorios</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHBox" id="hbox4_cm">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkButton" id="btn_cancel_add_cm">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <accelerator key="Escape" signal="clicked"/>
-                <signal name="clicked" handler="gtk_widget_hide" object="wnd_add_check_manager"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_add_cm">
-                <property name="label">gtk-add</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_btn_add_cm_clicked"/>
+                <signal name="clicked" handler="AgregarProveedor" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

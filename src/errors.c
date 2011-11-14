@@ -40,6 +40,10 @@ CloseErrorWindow (GtkButton *button, gpointer data)
             if (widget != NULL)
                 {
                     gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), TRUE);
+                    
+                    //Debería regresar el foco y usabilidad a la ventana de la cual emerge el error
+                    gtk_window_present (GTK_WINDOW (gtk_widget_get_toplevel (widget)));
+                    gtk_window_set_modal (GTK_WINDOW (gtk_widget_get_toplevel (widget)), TRUE);
 
                     gtk_window_set_focus (GTK_WINDOW (gtk_widget_get_toplevel (widget)),
                                           widget);
@@ -59,6 +63,7 @@ ErrorMSG (GtkWidget *widget, gchar *motivo)
     GtkWidget *image;
     GtkWidget *label;
     GtkWidget *button;
+    GtkWidget *win;
 
     GtkWidget *vbox;
     GtkWidget *hbox;
@@ -66,7 +71,8 @@ ErrorMSG (GtkWidget *widget, gchar *motivo)
     if (error_window != NULL)
         return -1;
 
-    if (widget != NULL) gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
+    win = gtk_widget_get_toplevel (widget);
+    if (widget != NULL) gtk_widget_set_sensitive (win, FALSE);
 
     error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_size_request (error_window, -1, 130);
@@ -74,7 +80,9 @@ ErrorMSG (GtkWidget *widget, gchar *motivo)
     gtk_window_set_position (GTK_WINDOW (error_window), GTK_WIN_POS_CENTER_ALWAYS);
     gtk_widget_show (error_window);
     gtk_window_present (GTK_WINDOW (error_window));
-    //  gtk_window_set_transient_for (GTK_WINDOW (error_window), GTK_WINDOW (main_window));
+    gtk_window_set_modal (GTK_WINDOW (error_window), TRUE);
+    gtk_window_set_transient_for (GTK_WINDOW (error_window), GTK_WINDOW (win));
+
     gtk_container_set_border_width (GTK_CONTAINER (error_window), 20);
 
     g_signal_connect (G_OBJECT (error_window), "destroy",
@@ -118,6 +126,7 @@ AlertMSG (GtkWidget *widget, gchar *motivo)
     GtkWidget *image;
     GtkWidget *label;
     GtkWidget *button;
+    GtkWidget *win;
 
     GtkWidget *vbox;
     GtkWidget *hbox;
@@ -125,7 +134,8 @@ AlertMSG (GtkWidget *widget, gchar *motivo)
     if (error_window != NULL)
         return -1;
 
-    gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
+    win = gtk_widget_get_toplevel (widget);
+    if (widget != NULL) gtk_widget_set_sensitive (win, FALSE);
 
     error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_size_request (error_window, -1, 130);
@@ -133,7 +143,8 @@ AlertMSG (GtkWidget *widget, gchar *motivo)
     gtk_window_set_position (GTK_WINDOW (error_window), GTK_WIN_POS_CENTER_ALWAYS);
     gtk_widget_show (error_window);
     gtk_window_present (GTK_WINDOW (error_window));
-    //  gtk_window_set_transient_for (GTK_WINDOW (error_window), GTK_WINDOW (main_window));
+    gtk_window_set_modal (GTK_WINDOW (error_window), TRUE);
+    gtk_window_set_transient_for (GTK_WINDOW (error_window), GTK_WINDOW (win));
 
     gtk_container_set_border_width (GTK_CONTAINER (error_window), 20);
 
@@ -179,6 +190,7 @@ ExitoMSG (GtkWidget *widget, gchar *motivo)
     GtkWidget *image;
     GtkWidget *label;
     GtkWidget *button;
+    GtkWidget *win;
 
     GtkWidget *vbox;
     GtkWidget *hbox;
@@ -186,7 +198,8 @@ ExitoMSG (GtkWidget *widget, gchar *motivo)
     if (error_window != NULL)
         return -1;
 
-    gtk_widget_set_sensitive (gtk_widget_get_toplevel (widget), FALSE);
+    win = gtk_widget_get_toplevel (widget);
+    if (widget != NULL) gtk_widget_set_sensitive (win, FALSE);
 
     error_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_widget_set_size_request (error_window, -1, 130);
@@ -194,7 +207,8 @@ ExitoMSG (GtkWidget *widget, gchar *motivo)
     gtk_window_set_position (GTK_WINDOW (error_window), GTK_WIN_POS_CENTER_ALWAYS);
     gtk_widget_show (error_window);
     gtk_window_present (GTK_WINDOW (error_window));
-    //  gtk_window_set_transient_for (GTK_WINDOW (error_window), GTK_WINDOW (main_window));
+    gtk_window_set_modal (GTK_WINDOW (error_window), TRUE);
+    gtk_window_set_transient_for (GTK_WINDOW (error_window), GTK_WINDOW (win));
 
     gtk_container_set_border_width (GTK_CONTAINER (error_window), 20);
 

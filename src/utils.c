@@ -49,7 +49,7 @@ HaveCharacters (gchar *string)
   gint points = 0;
 
   // Si solamente es un '.' o ',' se toma como texto
-  if (len == 1 && (string[0] == '.' || string[0] == ','))
+  if (len == 1 && (string[0] == '.' || string[0] == ',' || string[0] == '-'))
     return TRUE;
 
   //Si tiene un caracter distinto a un numero, '.' o ',' y además
@@ -62,8 +62,11 @@ HaveCharacters (gchar *string)
       if (points > 1)
 	return TRUE;
 
+      if (string[i] == '-' && i != 0)
+	return TRUE;
+
       if (g_ascii_isdigit (string[i]) == FALSE && 
-	  string[i] != ',' && string[i] != '.')
+	  string[i] != ',' && string[i] != '.' && string[i] != '-')
         return TRUE;
     }
 
@@ -312,12 +315,14 @@ statusbar_pop (GtkStatusbar *statusbar)
 {
   guint *context_id = NULL;
 
+  //TODO: g_object_get_data retorna un gpointer... ver implicancias de ello
   context_id = g_object_get_data (G_OBJECT(statusbar), "context_id");
 
   if (context_id != NULL)
     {
       gtk_statusbar_pop (GTK_STATUSBAR(statusbar), *context_id);
-      g_free (context_id);
+      //g_free se comenta puesto que provoca una caída.
+      //g_free (context_id);
     }
 
   return FALSE;

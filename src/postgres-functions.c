@@ -382,6 +382,19 @@ InsertNewDocument (gint sell_id, gint document_type, gint sell_type)
 }
 
 
+gint
+get_last_sell_id ()
+{
+  PGresult *res;
+  res = EjecutarSQL ("SELECT last_value FROM venta_id_seq");
+
+  if (res != NULL)
+    return atoi (PQgetvalue (res, 0, 0));
+  else
+    return 1;
+}
+
+
 gboolean
 InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble cantidad)
 {
@@ -433,10 +446,6 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   gchar *rut1_gc, *rut2_gc, *dv1, *dv2;
   gboolean afecto_impuesto1, afecto_impuesto2;
 
-  /* id_documento = InsertNewDocument (tipo_documento, tipo_venta); */
-
-  /* if (id_documento == -1) */
-  /*   return FALSE; */
 
   /*
     TODO: id_documento no se justifica en la tabla venta.
@@ -452,6 +461,14 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
                        CUT(discount), id_documento, canceled);
   venta_id = atoi (GetDataByOne (q));
   g_free (q);
+
+
+  /* Solo se registra un 'Documento' cuando se imprime una boleta o factura */
+
+  /* id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_venta); */
+  /* if (id_documento == -1) */
+  /*   return FALSE; */
+
 
   /* Registra el detalle de venta y pobla la estructura de producto con
      los monto afecto y no afecto de cada producto (cuando es pago mixto) */
@@ -697,6 +714,39 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
     return NULL;
 }
 
+PGresult *
+exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
+		      gint to_year, gint to_month, gint to_day)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT v.id, v.maquina, v.vendedor, v.tipo_venta, "
+		       "       (SELECT SUM (vd.cantidad * vd.precio) "
+		       "               FROM venta_detalle vd "
+		       "               WHERE vd.id_venta = v.id "
+		       "               AND vd.impuestos = false) AS monto, "
+		       "       to_char (fecha, 'DD/MM/YY HH24:MI:SS') AS fmt_fecha "
+		       "FROM venta v "
+		       "WHERE v.fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+		       "AND v.fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+		       "AND v.id NOT IN (SELECT id_sale FROM venta_anulada) "
+		       "AND (SELECT SUM (vd.cantidad * vd.precio) "
+		       "            FROM venta_detalle vd "
+		       "            WHERE vd.id_venta = v.id "
+		       "            AND vd.impuestos = false) IS NOT NULL "
+		       "ORDER BY v.fecha DESC",
+		       from_day, from_month, from_year,
+		       to_day+1, to_month, to_year);
+
+  res = EjecutarSQL (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
 gint
 GetTotalCashSell (guint from_year, guint from_month, guint from_day,
                   guint to_year, guint to_month, guint to_day, gint *total)
@@ -747,6 +797,41 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
 
   return atoi (PQgetvalue (res, 0, 0));
 }
+
+
+/**
+ * This function get the subtotal of taxes (IVA and Others) 
+ * from sells within a date range.
+ *
+ * @param: guint from_year, guint from_month, guint from_day
+ * @param: guint to_year, guint to_month, guint to_day, 
+ * @param: gdouble *total_iva: In which to store the result (IVA total)
+ * @param: gdouble *total_otros: In which to store the result (Others total)
+ */
+void
+total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
+			      guint to_year, guint to_month, guint to_day, 
+			      gint *total_iva, gint *total_otros)
+{
+  PGresult *res;
+
+  res = EjecutarSQL
+    (g_strdup_printf
+     ("SELECT ROUND (SUM((SELECT SUM(iva)   FROM venta_detalle WHERE id_venta=v.id))) AS total_iva, "
+      "       ROUND (SUM((SELECT SUM(otros) FROM venta_detalle WHERE id_venta=v.id))) AS total_otros "
+      "FROM venta v "
+      "WHERE fecha >= TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND fecha   <  TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND v.id NOT IN (SELECT id_sale FROM venta_anulada)",
+      from_day, from_month, from_year, to_day+1, to_month, to_year));
+
+  if (res == NULL)
+    return 0;
+
+  *total_iva = atoi(PQvaluebycol (res, 0, "total_iva"));
+  *total_otros = atoi (PQvaluebycol (res, 0, "total_otros"));
+}
+
 
 gint
 GetTotalSell (guint from_year, guint from_month, guint from_day,
@@ -1317,8 +1402,8 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 	porcentaje = 0;
     }
 
-  q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion='%s',"
-                       "marca='%s', unidad='%s', contenido='%s', precio=%d, "
+  q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion=UPPER('%s'),"
+                       "marca=UPPER('%s'), unidad=UPPER('%s'), contenido='%s', precio=%d, "
                        "impuestos='%d', otros=%d, familia=%d, "
                        "perecibles='%d', fraccion='%d', margen_promedio=%s WHERE barcode='%s'",
                        codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
@@ -1330,16 +1415,16 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 gboolean
 AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca,
                    gchar *contenido, gchar *unidad, gboolean iva, gint otros, gint familia,
-                   gboolean perecible, gboolean fraccion)
+                   gboolean perecible, gboolean fraccion, gint tipo)
 {
   gint insertado;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto(%s::bigint, '%s'::varchar,"
-                       "upper('%s')::varchar, upper('%s')::varchar,'%s'::varchar, upper('%s')::varchar, "
-                       "%d::boolean, %d, %d::smallint, %d::boolean,"
-                       "%d::boolean)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
-                       otros, familia, perecible, fraccion);
+  q = g_strdup_printf ("SELECT insertar_producto::integer FROM insertar_producto (%s::bigint, '%s'::varchar, "
+                       "upper('%s')::varchar, upper('%s')::varchar, '%s'::varchar, upper('%s')::varchar, "
+                       "%d::boolean, %d, %d::smallint, %d::boolean, "
+                       "%d::boolean, %d::int)",barcode, codigo, SPE(marca), SPE(description), contenido, unidad, iva,
+                       otros, familia, perecible, fraccion, tipo);
   insertado = atoi (GetDataByOne (q));
   g_free(q);
 
@@ -1598,7 +1683,7 @@ GetCurrentStock (gchar *barcode)
   PGresult *res;
   gdouble stock;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM select_producto(%s)", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM select_producto (%s)", barcode));
 
   stock = strtod (PUT(PQgetvalue (res, 0, 0)), (char **)NULL);
 
@@ -1652,6 +1737,10 @@ FiFo (gchar *barcode, gint compra)
  *
  * @param products puntero que apunta a los valores del producto que se va vender
  * @param id_venta es el id de la venta que se esta realizando
+ * @param tipo_venta es un enum (tipo_pago), para registrar la venta de acuerdo 
+ *        a la forma en que se paga
+ * @param detalle_compuesto es un boolean que indica si se esta registrando el detalle 
+ *        de la venta o el detalle de un compuesto (dentro del detalle de la venta)
  * @return 1 si se realizo correctamente la operacion 0 si hay error
  */
 
@@ -1669,10 +1758,19 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gdouble pre;
   gboolean is_imp1, is_imp2;
 
-  gdouble iva_promedio, otros_promedio;
+  //gdouble iva_promedio, otros_promedio;
   gdouble impuestos;
   gdouble proporcion_producto, neto;
   gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
+
+  //Tipo de mercadería
+  gchar *compuesta;
+
+  //contador
+  gint i;
+
+  //Se obtiene el id del tipo 'compuesta' de mercadería
+  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
 
   if (tipo_venta == MIXTO)
     {
@@ -1692,8 +1790,8 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
 
       printf ("\nTotal a pagar: %d\n", total_venta);
-      printf ("\nTotal afecto: %d\n", lround (total_prod_afecto));
-      printf ("\nTotal no afecto: %d\n", lround (total_prod_no_afecto));
+      printf ("\nTotal afecto: %ld\n", lround (total_prod_afecto));
+      printf ("\nTotal no afecto: %ld\n", lround (total_prod_no_afecto));
       printf ("\nMonto 1: %d\n", pago1);
       printf ("\nMonto 2: %d\n", pago2);
     }
@@ -1753,10 +1851,20 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
                                                                100 + 1)) *
                           products->product->cantidad) * (gdouble)products->product->otros / 100;
 
-      res = EjecutarSQL
-        (g_strdup_printf
-         ("UPDATE producto SET vendidos = vendidos+%s, stock=%s WHERE barcode='%s'",
-          cantidad, CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
+      //Se actualiza el stock del producto de acuerdo al tipo que éste sea
+      if (products->product->tipo == atoi (compuesta)) //Si el producto es compuesto se descuenta el stock de sus mercaderías madre
+	{
+	  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM update_stock_producto_compuesto (%s, %s)",
+					      products->product->barcode, cantidad));
+	}
+      else
+	{
+	  res = EjecutarSQL
+	    (g_strdup_printf
+	     ("UPDATE producto SET vendidos = vendidos+%s, stock=%s WHERE barcode='%s'",
+	      cantidad, CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
+	}
+
 
       /*      res = EjecutarSQL (g_strdup_printf
               ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
@@ -1810,7 +1918,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 		      printf ("\nNo se completó la venta %d: \n"
 			      "No se debe permitir una venta donde el pago no afecto a impuesto "
 			      "sea mayor al total de productos afectos a impuesto\n", id_venta);
-		      return;
+		      return FALSE;
 		    }
 		}
 	      else if (is_imp1 == TRUE && is_imp2 == FALSE)
@@ -1826,7 +1934,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 		      printf ("\nNo se completó la venta %d: \n"
 			      "No se debe permitir una venta donde el pago no afecto a impuesto "
 			      "sea mayor al total de productos afectos a impuesto\n", id_venta);
-		      return;
+		      return FALSE;
 		    }
 		}
 	      
@@ -1840,7 +1948,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	      products->product->proporcion_afecta_imp = monto_afecto;
 	      products->product->proporcion_no_afecta_imp = monto_no_afecto;
 
-	      printf ("\nafecto: %d, no afecto: %d, subtotal: %d\n", 
+	      printf ("\nafecto: %ld, no afecto: %ld, subtotal: %ld\n", 
 		      lround (monto_afecto), lround (monto_no_afecto), lround (monto_afecto + monto_no_afecto));
 
 	      //Se obtienen los impuestos del producto
@@ -1880,16 +1988,24 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle */
-
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s)",
-                           id_venta, products->product->barcode, cantidad, precio,
-                           CUT (g_strdup_printf ("%.2f",products->product->fifo)),
-			   iva_unit, otros_unit);
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %d, %s)",
+			   id_venta, products->product->barcode, cantidad, precio,
+			   CUT (g_strdup_printf ("%.2f",products->product->fifo)),
+			   iva_unit, otros_unit, products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
 
       g_printf ("la consulta es %s\n", q);
-
       res = EjecutarSQL (q);
       g_free (q);
+
+      //Si el producto es compuesto, se registran sus componentes
+      if (products->product->tipo == atoi (compuesta))
+	{
+	  q = g_strdup_printf ("select registrar_venta_mc_detalle(%d, %s, %s, %d, %s, %s)", 
+			       id_venta, products->product->barcode, cantidad, 
+			       precio, iva_unit, otros_unit);
+	  res = EjecutarSQL (q);
+	  g_free (q);
+	}
 
       products = products->next;
     }
@@ -1899,14 +2015,19 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 }
 
 PGresult *
-ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day)
+ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
 {
   PGresult *res;
-  gchar *q;
+  gchar *q, *family_filter;
+
+  if (family == 0)
+    family_filter = g_strdup_printf("");
+  else
+    family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year);
+    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -1916,6 +2037,50 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
   else
     return NULL;
 }
+
+PGresult *
+ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+{
+  PGresult *res;
+  gchar *q, *family_filter;
+
+  if (family == 0)
+    family_filter = g_strdup_printf("");
+  else
+    family_filter = g_strdup_printf("WHERE familia = %d", family);
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+PGresult *
+ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
 
 gboolean
 AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gchar *comuna,
@@ -2019,6 +2184,8 @@ ingresar_cheques (gint id_emisor, gint id_venta, ChequesRestaurant *header)
 
   if (res != NULL)
     return TRUE;
+  
+  return FALSE;
 }
 
 
@@ -2487,8 +2654,10 @@ gchar *
 InversionTotalStock (void)
 {
   PGresult *res;
+  gchar *compuesta; //TODO: mas adelante esto se diferenciará derivados de compuestos
 
-  res = EjecutarSQL ("SELECT round (SUM (costo_promedio * stock)) FROM producto");
+  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
+  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (costo_promedio * stock)),0) FROM producto WHERE tipo != %s", compuesta));
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2500,8 +2669,10 @@ gchar *
 ValorTotalStock (void)
 {
   PGresult *res;
+  gchar *discreta;
 
-  res = EjecutarSQL ("SELECT round (SUM (precio * stock)) FROM producto");
+  discreta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DISCRETA'"), 0, "id"));
+  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (precio * stock)),0) FROM producto WHERE tipo = %s", discreta));
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2895,11 +3066,11 @@ nullify_sale (gint sale_id)
   PGresult *res;
   gchar *q;
 
-  /*De estar habilitada caja, se asegura que Ã©sta se encuentre
+  /*De estar habilitada caja, se asegura que ésta se encuentre
     abierta al momento de vender*/
 
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que estÃ© cerrada
+    if (check_caja()) // Se abre la caja en caso de que esté cerrada
       open_caja (TRUE);
 
   q = g_strdup_printf("select * from nullify_sale(%d, %d)", user_data->user_id, sale_id);
@@ -3071,10 +3242,10 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
 {
   PGresult *res;
   Productos *header = products;
-  gdouble iva, otros = 0;
-  gint margen;
+  //gdouble iva, otros = 0;
+  //gint margen;
   gchar *cantidad;
-  gdouble precio;
+  //gdouble precio;
   gchar *q;
   gdouble pre;
 
@@ -3423,4 +3594,157 @@ registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto)
     }
   else
     printf ("No se registró el sub_depto %s, puesto que ya existe", sub_depto);
+}
+
+
+/**
+ * This function save the association
+ * between the mother and derived merchandise
+ *
+ * @param : gchar *barcode_madre
+ * @param : gint tipo_madre
+ * @param : gchar *barcode_derivado
+ * @param : gint tipo_derivado
+ * @param : gdouble cant_mud : Cantidad de madre que usa el derivado
+ */
+gboolean
+asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
+			  gchar *barcode_derivado, gint tipo_derivado,
+			  gdouble cant_mud)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("INSERT INTO componente_mc (barcode_madre, tipo_madre, barcode_derivado, tipo_derivado, cant_mud) "
+		                          "VALUES (     %s,           %d,           %s,              %d,         %s  ) ", 
+		       barcode_madre, tipo_madre, barcode_derivado, tipo_derivado, CUT (g_strdup_printf ("%.3f", cant_mud)));
+  res = EjecutarSQL(q);
+  g_free(q);
+
+  if (res == NULL)
+    return FALSE;
+
+  printf ("Se asoció %s con %s", barcode_madre, barcode_derivado);
+  return TRUE;
+}
+
+
+/**
+ * This function return the available code
+ * with the max lenght specified.
+ *
+ * @param : gchar *codigo   : The code to look at
+ * @param : gint min_lenght : The minimum code lenght
+ * @param : gint max_lenght : The maximum code lenght
+ *
+ * @return : gchar *: The available code  
+ */
+gchar *
+sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght)
+{
+  gboolean maximo = FALSE;
+  gchar *code = g_strdup (codigo);
+  long double code_num;
+
+  /*Comprobaciones iniciales*/
+  //longitud de los tamaños maximos y minimos
+  if (max_lenght > 18 || min_lenght < 1 ||
+      max_lenght < 1  || max_lenght < min_lenght)
+    return g_strdup_printf ("");
+  if (g_str_equal (code, "") || strlen (code) > 18)
+    return g_strdup_printf ("");
+
+  /*Para codigos solamente numéricos*/
+  if (!HaveCharacters (code))
+    {      
+      //Se prepara el relleno (agregan 0 hasta quedar del largo mínimo)
+      while (strlen (code) < min_lenght)
+	code = g_strdup_printf ("%s%d", code, 0);
+      
+      //Se parsea a dato numérico
+      code_num = strtod (code, (char **)NULL);
+      
+      //Revisa la existencia del barcode o codigo_corto, de ser así va aumentando el número del último dígito hasta ser único
+      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto "
+					 "WHERE barcode = %ld OR codigo_corto = '%ld'", lroundl(code_num), lroundl(code_num))))
+	{
+	  if (strlen (g_strdup_printf ("%ld", lroundl (code_num))) > max_lenght)
+	    maximo = FALSE;
+
+	  if (maximo == FALSE)
+	    code_num++;
+	  else
+	    code_num--;
+	}
+
+      code = g_strdup_printf ("%ld", lroundl (code_num));
+      return code;
+    }
+  else
+    {
+      gboolean first = TRUE;
+      //Se prepara el relleno (agregan 0 hasta quedar del largo mínimo)
+      while (strlen (code) < min_lenght)
+	code = g_strdup_printf ("%s%d", code, 0);      
+      
+      gint largo_inicial = strlen (code);
+      gchar *aux;
+      //Revisa la existencia del barcode o codigo_corto, de ser así va aumentando el número del último dígito hasta ser único
+      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", code)))
+	{
+	  if (strlen (code) > max_lenght)
+	    maximo = FALSE;
+
+	  if (maximo == FALSE)
+	    {
+	      if (!HaveCharacters (g_strdup_printf ("%c", code [largo_inicial-1])))
+		{
+		  //Parte desde el numero 0
+		  aux = (first == TRUE) ? g_strdup ("0") : invested_strndup (code, largo_inicial-1);
+		  first == FALSE;
+		  code = g_strdup_printf ("%s%d", g_strndup (code, largo_inicial-1), atoi (aux)+1);
+		}
+	      else
+		{
+		  //Parte desde la a
+		  aux = (first == TRUE) ? g_strdup ("a") : invested_strndup (code, largo_inicial-1);
+		  first == FALSE;
+
+		  if (!g_str_equal (aux, "z"))
+		    code = g_strdup_printf ("%s%c", g_strndup (code, largo_inicial-1), atoi (aux)+1);
+		  else
+		    return "";
+		}
+	    }
+	  
+	  return code;
+	}
+    }
+}
+
+/**
+ * This function returns the code availability
+ * 
+ * @param: gchar *code: The code to looking at
+ * @return: gboolean: return TRUE if the code is available, else return FALSE;
+ */
+gboolean
+codigo_disponible (gchar *code)
+{
+  if (strlen (code) > 18)
+    return FALSE;
+
+  if (!HaveCharacters (code))
+    {
+      if (!DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s "
+				       "OR codigo_corto = '%s'", code, code)))
+	return TRUE;
+    }
+  else
+    {
+      if (!DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", code)))
+	return TRUE;
+    }
+
+  return FALSE;
 }

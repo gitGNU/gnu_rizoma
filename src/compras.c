@@ -55,6 +55,14 @@ GtkWidget *entry_plazo;
 gint tipo_traspaso = 1;
 gint calcular = 0;
 
+/*FLAG:
+  Auxiliar para el proceso de búsqueda de un producto
+  permite saber si se desea buscar un producto para
+  agregar a la compra, o una materia prima para 
+  añadir derivados a ella
+*/
+gboolean add_deriv = FALSE;
+
 // Representa el numero de filas que se han 
 // borrado en el filtro de busqueda
 gint numFilasBorradas = 0;
@@ -188,10 +196,10 @@ compras_win (void)
   GError *error = NULL;
 
   /*ComboBox - PrecioCompra*/
-  /*GtkComboBox *combo;
-    GtkTreeIter iter;
-    GtkListStore *modelo;
-    GtkCellRenderer *cell2;*/
+  GtkComboBox *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+  GtkCellRenderer *cell2;
 
   compra = (Compra *) g_malloc (sizeof (Compra));
   compra->header = NULL;
@@ -827,21 +835,21 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   /*ComboBox - PrecioCompra*/
-  /*modelo = gtk_list_store_new (1, G_TYPE_STRING);
-    combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
-    cell2 = gtk_cell_renderer_text_new ();
-    gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell2, TRUE);
-    gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);*/
+  modelo = gtk_list_store_new (1, G_TYPE_STRING);
+  combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  cell2 = gtk_cell_renderer_text_new ();
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell2, TRUE);
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell2, "text", 0, NULL);
 
   /*Se agregan las opciones al combobox*/
-  /*gtk_list_store_append (modelo, &iter);
-    gtk_list_store_set (modelo, &iter, 0, "Precio neto", -1);
+  gtk_list_store_append (modelo, &iter);
+  gtk_list_store_set (modelo, &iter, 0, "Costo neto", -1);
 
-    gtk_list_store_append (modelo, &iter);
-    gtk_list_store_set (modelo, &iter, 0, "Precio bruto", -1);
+  gtk_list_store_append (modelo, &iter);
+  gtk_list_store_set (modelo, &iter, 0, "Costo bruto", -1);
 
-    gtk_combo_box_set_model (combo, (GtkTreeModel *)modelo);
-    gtk_combo_box_set_active (combo, 0);*/
+  gtk_combo_box_set_model (combo, (GtkTreeModel *)modelo);
+  gtk_combo_box_set_active (combo, 0);
 
   /* End Pay Invoices */
 
@@ -850,6 +858,10 @@ compras_win (void)
 
   //setup the providers tab
   proveedores_box();
+
+  //Setup edit product button
+  setup_mod_prod_menu ();
+
 
   //Default disable entry and buttons
   //TODO: Ver como simplificar el set_sensitive
@@ -898,6 +910,21 @@ compras_win (void)
   //Se oculta la opción para ingresar guias
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radiobutton8")), FALSE);
 
+  //signals
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_make_product")), "enter-notify-event",
+		    G_CALLBACK (show_description), NULL);
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_ena_dis_product")), "enter-notify-event",
+		    G_CALLBACK (show_description), NULL);
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_make_offer")), "enter-notify-event",
+		    G_CALLBACK (show_description), NULL);
+
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_make_product")), "leave-notify-event",
+		    G_CALLBACK (show_default), NULL);
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_ena_dis_product")), "leave-notify-event",
+		    G_CALLBACK (show_default), NULL);
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_make_offer")), "leave-notify-event",
+		    G_CALLBACK (show_default), NULL);
+
   gtk_widget_show_all (compras_gui);
 } // compras_win (void)
 
@@ -909,6 +936,12 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
   PGresult *res;
   gchar *q;
   gchar *codigo;
+  gchar *tipo, *compuesta, *materia_prima, *discreta;
+
+  //ID, tipos de mercaderías
+  discreta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DISCRETA'"), 0, "id"));
+  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   codigo = barcode;
   q = g_strdup_printf ("select barcode "
@@ -930,8 +963,9 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
   if (g_str_equal( GetDataByOne (q), "t"))
     {
       g_free(q);
-      q = g_strdup_printf ("SELECT estado FROM producto where barcode = '%s'", barcode);
+      q = g_strdup_printf ("SELECT estado, tipo FROM producto where barcode = '%s'", barcode);
       res = EjecutarSQL(q);
+      tipo = g_strdup (PQvaluebycol (res, 0, "tipo"));
 
       /*Para asegurarse de que el producto no haya sido inhabilitado (borrado) por el administrador*/
       if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
@@ -949,6 +983,23 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	  PQclear (res);
 	  return;
 	}
+      else if (g_str_equal (tipo, compuesta))
+	{
+	  //TODO: debe mostrar todos sus componentes para compraralos (algo así como una sugerida solo con sus componentes)
+	  GtkWidget *aux_widget;
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "compras_gui"));
+	  gchar *str = g_strdup_printf("El código %s pertenece a una mercadería derivada, debe comprar sus componentes", codigo);
+	  AlertMSG (aux_widget, str);
+	  
+	  //Limipia todo antes de irse
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), "");
+	  g_free (str);
+	  g_free (q);
+	  g_free (codigo);
+	  PQclear (res);
+	  return;
+	}
+
 
       ShowProductHistory ();
 
@@ -996,15 +1047,32 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_code")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",PQvaluebycol (res, 0, "codigo_corto")));
 
-      //Enable entry sensitive
+      //Enable entry sensitive (all when is discret merchancy, some when is raw material)
       //TODO: Buscar la forma de simplificar los sensitive
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+      
+      if (g_str_equal (tipo, materia_prima))
+	{
+	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "0");
+	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), "0");
+
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE); //OJO
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+	}
+      else if (g_str_equal (tipo, discreta))
+	{
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE); //OJO
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_gain")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+	}
+
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
 
       // Se habilita el botón de traspaso
       if (rizoma_get_value_boolean ("TRASPASO"))
@@ -1099,20 +1167,38 @@ Save (GtkWidget *widget, gpointer data)
   /* aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_edit_prod_unit")); */
   /* unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget))); */
 
-  model = gtk_combo_box_get_model (combo_unit);
-  gtk_combo_box_get_active_iter (combo_unit, &iter);
+  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_unit)) != -1)
+    {
+      model = gtk_combo_box_get_model (combo_unit);
+      gtk_combo_box_get_active_iter (combo_unit, &iter);
 
-  gtk_tree_model_get (model, &iter,
-		      1, &unidad,
-		      -1);
+      gtk_tree_model_get (model, &iter,
+			  1, &unidad,
+			  -1);
+    }
+  else
+    {
+      ErrorMSG (GTK_WIDGET (combo_unit), "Seleccione una unidad");
+      return;
+    }
+
 
   /*Familia*/
-  model = gtk_combo_box_get_model (combo_family);
-  gtk_combo_box_get_active_iter (combo_family, &iter);
+  if (gtk_combo_box_get_active (GTK_COMBO_BOX (combo_family)) != -1)
+    {
+      model = gtk_combo_box_get_model (combo_family);
+      gtk_combo_box_get_active_iter (combo_family, &iter);
 
-  gtk_tree_model_get (model, &iter,
-		      0, &familia,
-		      -1);
+      gtk_tree_model_get (model, &iter,
+			  0, &familia,
+			  -1);
+    }
+  else
+    {
+      ErrorMSG (GTK_WIDGET (combo_family), "Seleccione una unidad");
+      return;
+    }
+
 
   // TODO: Revisar el Otros, porque en la base de datos se guardan 0
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
@@ -1157,15 +1243,15 @@ CalcularPrecioFinal (void)
   gdouble iva = GetIVA (barcode);
   gdouble otros = GetOtros (barcode);
 
-  /*
-    Obtener valores cmbPrecioCompra
-    GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
-    GtkTreeIter iter;
-    GtkTreeModel *model = gtk_combo_box_get_model (combo);
-    gtk_combo_box_get_active_iter (combo, &iter);
-    gchar *opcion;
-    gtk_tree_model_get (model, &iter, 0, &opcion, -1);
-  */
+  /* Obtener valores cmbPrecioCompra */
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gchar *opcion;
+  gtk_tree_model_get (model, &iter, 0, &opcion, -1);
+
+  printf ("Opcion: %s\n", opcion);
 
   if (iva != -1)
     iva = (gdouble)iva / 100 + 1;
@@ -1199,10 +1285,12 @@ CalcularPrecioFinal (void)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
-      if (otros == -1 && iva != -1 )
+      //Si tiene solo IVA
+      if (otros == -1 && iva != -1  && g_str_equal (opcion, "Costo neto"))
         precio = (gdouble) ((gdouble)(precio_final / iva) / (gdouble) (ganancia + 100)) * 100;
 
-      else if (iva != -1 && otros != -1)
+      //Si tiene ambos impuestos
+      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1210,10 +1298,10 @@ CalcularPrecioFinal (void)
           precio = (gdouble) precio_final / (gdouble)(iva + otros + 1);
           precio = (gdouble) precio / (gdouble)(ganancia / 100 + 1);
         }
-      else if (iva == -1 && otros == -1)
-        {
-          precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
-        }
+
+      //Si no tiene impuestos
+      else if (iva == -1 && otros == -1 || g_str_equal (opcion, "Costo bruto"))
+	precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")),
                           g_strdup_printf ("%ld", lround (precio)));
@@ -1224,10 +1312,12 @@ CalcularPrecioFinal (void)
     {
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
-      if (otros == -1 && iva != -1 )
+      //Si solo tiene IVA
+      if (otros == -1 && iva != -1 && g_str_equal (opcion, "Costo neto"))
         porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
 
-      else if (iva != -1 && otros != -1 )
+      //Si tiene ambos impuestos
+      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1236,7 +1326,9 @@ CalcularPrecioFinal (void)
           ganancia = (gdouble) precio - ingresa;
           porcentaje = (gdouble)(ganancia / ingresa) * 100;
         }
-      else if (iva == -1 && otros == -1 )
+
+      //Si no tiene impuestos
+      else if (iva == -1 && otros == -1 || g_str_equal (opcion, "Costo bruto"))
         porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
 
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")),
@@ -1246,12 +1338,14 @@ CalcularPrecioFinal (void)
   /* -- Final price ("precio_final") is calculated here -- */
   else if (precio_final == 0 && ingresa != 0 && ganancia >= 0)
     {
-      calcular = 1; // FLAG - Permite saber que se ha realizado un cÃ¡lculo.
+      calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
-      if (otros == -1 && iva != -1 )
+      //Si solo tiene IVA
+      if (otros == -1 && iva != -1 && g_str_equal (opcion, "Costo neto"))
         precio = (gdouble) ((gdouble)(ingresa * (gdouble)(ganancia + 100)) * iva) / 100;
 
-      else if (iva != -1 && otros != -1)
+      //Si tiene ambos impuestos
+      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -1260,7 +1354,9 @@ CalcularPrecioFinal (void)
           precio = (gdouble)((gdouble)(precio * iva) +
                              (gdouble)(precio * otros) + (gdouble) precio);
         }
-      else if (iva == -1 && otros == -1)
+
+      //Si no tiene impuestos
+      else if (iva == -1 && otros == -1 || g_str_equal (opcion, "Costo bruto"))
         precio = (gdouble)(ingresa * (gdouble)(ganancia + 100)) / 100;
 
       if (ganancia == 0)
@@ -1280,6 +1376,7 @@ CalcularPrecioFinal (void)
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "cmbPrecioCompra")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), TRUE);
     }
@@ -1296,6 +1393,39 @@ AddToProductsList (void)
   gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
   Producto *check;
 
+  /*Se obtiene el tipo de la mercadería seleccionada*/
+  gchar *q = g_strdup_printf ("SELECT estado, tipo FROM producto where barcode = '%s'", barcode);
+  gchar *materia_prima = g_strdup (PQvaluebycol 
+				   (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+  gchar *tipo = g_strdup (PQvaluebycol (EjecutarSQL(q), 0, "tipo"));
+    
+  /*Se regulariza el precio de compra de acuerdo a si es neto o bruto*/
+
+  //Obtener valores cmbPrecioCompra
+  GtkComboBox *combo = (GtkComboBox *) gtk_builder_get_object (builder, "cmbPrecioCompra");
+  GtkTreeIter iter;
+  GtkTreeModel *model = gtk_combo_box_get_model (combo);
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gchar *opcion;
+  gtk_tree_model_get (model, &iter, 0, &opcion, -1);
+
+  //Se asegura de obtener el precio neto del producto como precio_compra
+  if (g_str_equal (opcion, "Costo bruto"))
+    {
+      gdouble iva, otros, total_imp;
+      iva = otros = total_imp = 0;
+      iva = GetIVA (barcode);  
+      otros = GetOtros (barcode);
+      
+      if (iva != -1)
+	iva = (gdouble)iva/100;
+      if (otros != -1)
+	otros = (gdouble)otros/100;      
+     
+      total_imp = iva + otros + 1;      
+      precio_compra = precio_compra / total_imp;
+    }
+
   if (g_str_equal (barcode, ""))
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")),
@@ -1309,7 +1439,9 @@ AddToProductsList (void)
 
   cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))))), (char **)NULL);
 
-  if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
+  
+  if (precio_compra != 0 && (g_str_equal (tipo, materia_prima) == TRUE || // Si es materia prima no necesita precio de venta
+			     (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0))
       && strcmp (barcode, "") != 0) //&& margen >= 0)
     {
       if (compra->header_compra != NULL)
@@ -1330,6 +1462,24 @@ AddToProductsList (void)
         }
       else
         {
+	  //No se permite ingresar 2 costos o precios distintos al mismo producto en una misma instancia de compra
+	  if (check->precio_compra != precio_compra)
+	    {
+	      CleanStatusProduct (1);
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), 
+			g_strdup_printf ("Ya ha ingresado este producto con $ %.3f de costo neto, si desea modificarlo \n"
+					 "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio_compra));
+	      return;
+	    }
+	  else if (check->precio != precio)
+	    {
+	      CleanStatusProduct (1);
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_sell_price")), 
+			g_strdup_printf ("Ya ha ingresado este producto con $ %d como precio de venta, si desea modificarlo \n"
+					 "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio));
+	      return;
+	    }
+	  
           check->cantidad += cantidad;
 
           gtk_list_store_set (store_buy, &check->iter,
@@ -1585,6 +1735,7 @@ AddFoundProduct (void)
   GtkTreeModel *model = gtk_tree_view_get_model (treeview);
   gchar *barcode;
   gchar *codigo;
+  gdouble costo;
 
   if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter))
     {
@@ -1592,14 +1743,52 @@ AddFoundProduct (void)
                           0, &codigo,
 			  1, &barcode,
                           -1);
+      
+      //Si se llamó desde la ventana de compra principal simplemente se selecciona el producto
+      if (add_deriv == FALSE)
+	{
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
+	  SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), codigo);
+	}
+      //Si se llama desde la ventana de creación de derivados, continúa con el proceso del mismo
+      else if (add_deriv == TRUE)
+	{
+	  costo = strtod (PUT
+			  (g_strdup (PQvaluebycol 
+				     (EjecutarSQL 
+				      (g_strdup_printf ("SELECT costo_promedio FROM producto WHERE barcode = %s", barcode)), 0, "costo_promedio"))),
+			   (char **)NULL);
+	  CompraAgregarALista (barcode, 1, 0, costo, 0, FALSE);
+	  
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
+	  on_btn_der_mp_yes_clicked (NULL, NULL);
+	}
 
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
-
-      SearchProductHistory (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), codigo);
     }
 }
 
+/**
+ * Setea la flag global indicando que se crearan productos derivados
+ * y muestra la ventana de búsqueda de productos, para elegir la materia
+ * prima desde la cual saldrán los derivados.
+ *
+ * @param: button
+ * @param: user_data
+ */
+void
+on_btn_new_deriv_clicked (GtkButton *button, gpointer user_data)
+{
+  /*
+    Se setea el FLAG add_deriv a TRUE para indicar que se 
+    agregará una materia prima, y así continuar con los procedimientos
+    necesarios para ello.
+  */
+  add_deriv = TRUE;
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_merchandise")));  
+  SearchByName ();
+}
 
 void
 SearchName (void)
@@ -1608,14 +1797,21 @@ SearchName (void)
   gchar *q;
   PGresult *res;
   gint i, resultado;
+  gchar *materia_prima;
 
   GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   GtkTreeIter iter;
+  
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, "
                        "contenido, unidad, stock FROM buscar_productos('%s%%')",
                        search_string);
+
+  if (add_deriv == TRUE)
+    q = g_strdup_printf ("%s WHERE tipo = %s", q, materia_prima);
+
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -2562,7 +2758,7 @@ CleanStatusProduct (gint option)
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"))));
 
-  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == FALSE &&
+  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_price"))) == FALSE &&
       !g_str_equal (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))), "") &&
       option != 0)
     {      
@@ -2570,6 +2766,7 @@ CleanStatusProduct (gint option)
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_gain")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_calculate")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_amount")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_add_product_list")), FALSE);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), "");
@@ -2585,7 +2782,7 @@ CleanStatusProduct (gint option)
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-  //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
 
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -2616,6 +2813,7 @@ CleanStatusProduct (gint option)
   //TODO: Ver como simplificar el set_sensitive
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), TRUE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
   gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_amount")), FALSE);
@@ -3383,6 +3581,16 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     }
 }
 
+void
+on_entry_buy_price_activate (GtkEntry *entry, gpointer  user_data)
+{
+  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_gain"))) == FALSE &&
+      gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == FALSE)
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "button_calculate")));
+  else
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
+}
+
 
 /**
  * Es llamada cuando el boton "button_calculate" es presionado (signal click).
@@ -3397,9 +3605,25 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 void
 on_button_calculate_clicked (GtkButton *button, gpointer data)
 {
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
   gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
   gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
+
+  gchar *q = g_strdup_printf ("SELECT estado, tipo FROM producto where barcode = '%s'", barcode);
+  gchar *materia_prima = g_strdup (PQvaluebycol 
+				   (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+  gchar *tipo = g_strdup (PQvaluebycol (EjecutarSQL(q), 0, "tipo"));
+
+  //Si es materia prima no se realiza un cálculo
+  if (g_str_equal (tipo, materia_prima))
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_price")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_calculate")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_amount")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_add_product_list")), TRUE);
+      return;
+    }
 
   if (ingresa == 0 && ganancia == 0 && precio_final == 0)
     {
@@ -3445,58 +3669,156 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
 }
 
 /**
- * Es llamada por la función "on_button_new_product_clicked"
- * cuando ROPA=0 en el .rizoma.
+ * Inicializa una ventana de creación de mercadería
+ * dependiendo del tipo que desee crear
+ * 
+ * @param gchar tipo: tipo de mercadería a crear ("md", "mp", "mc")
+ * mercadería discreta, materia prima, mercadería compuesta
  *
- * Visualiza la ventana "wnd_new_product" y carga los
- * respectivos datos de ésta: los entry's, botones, y combo box'
- *
- * @param void
  */
 void
-create_new_product (void)
+create_new_merchandise (gchar *tipo)
 {
   PGresult *res, *res2;
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
-  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
-  GtkComboBox *cmb_unit, *cmb_family;
-  GtkListStore *combo_store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
+  gchar *cod_corto;
+  gchar *barcode_madre;
+  gint active;
+  Productos *prod;
+  GtkWidget *ventana, *barcode_w, *codigo_corto_w, *descripcion_w, *marca_w, 
+    *contenido_w, *radio_fraccion_no, *radio_fraccion_yes, *radio_imp, *radio_imp_no;
+
+  GtkListStore *combo_store;
+  GtkComboBox *combo, *cmb_unit, *cmb_family;
   GtkListStore *modelo, *modelo_family;
+
   GtkCellRenderer *cell, *cell2, *cell3;
 
-  cmb_unit = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
-  modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_unit)));
+  /*Según el tipo de mercadería que se desee crear*/
+  if (g_str_equal (tipo, "md")) //Si es mercadería discreta
+    {
+      combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_product_imp_others"));
+      cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
+      cmb_family = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_new_product_family"));
 
-  cmb_family = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_new_product_family"));
-  modelo_family = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_family)));
+      barcode_w = GTK_WIDGET (builder_get (builder, "entry_new_product_barcode"));
+      codigo_corto_w = GTK_WIDGET (builder_get (builder, "entry_new_product_code"));
+      descripcion_w = GTK_WIDGET (builder_get (builder, "entry_new_product_desc"));
+      marca_w = GTK_WIDGET (builder_get (builder, "entry_new_product_brand"));
+      contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_product_cont"));
+      
+      radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_fractional_no"));
+      radio_imp = GTK_WIDGET (builder_get (builder, "radio_btn_task_yes"));
 
-  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_product")));
+      ventana = GTK_WIDGET (builder_get (builder, "wnd_new_product"));
+    }
+  else if (g_str_equal (tipo, "mp")) //Si es materia prima
+    {
+      combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_mp_imp_others"));
+      cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_box_new_mp_unit"));
+      cmb_family = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_mp_family"));
+      
+      barcode_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_barcode"));
+      codigo_corto_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_code"));
+      descripcion_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_desc"));
+      marca_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_brand"));
+      contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_mp_cont"));
+      
+      radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_mp_fractional_no"));
+      radio_imp = GTK_WIDGET (builder_get (builder, "radio_btn_mp_task_yes"));
 
-  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")), barcode);
+      ventana = GTK_WIDGET (builder_get (builder, "wnd_new_mp"));
+    }
+  else if (g_str_equal (tipo, "mcd")) //Si es mercadería compuesta o derivada
+    {
 
+      GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_mother")));
+      GtkTreeIter iter;
+
+      //Se obtiene el barcode de su mercadería madre
+      gtk_tree_model_get_iter_first (model, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &barcode_madre,
+			  -1);
+      
+      barcode_madre = g_strdup (PQvaluebycol (EjecutarSQL
+					      (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", barcode_madre)),
+					      0, "barcode"));
+      prod = CreateNew (barcode_madre, 1);
+      
+      combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_mcd_imp_others"));
+      cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_box_new_mcd_unit"));
+      cmb_family = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_mcd_family"));
+      
+      barcode_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_barcode"));
+      codigo_corto_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_code"));
+      descripcion_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_desc"));
+      marca_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_brand"));      
+      contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_mcd_cont"));
+      
+      radio_fraccion_yes = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_fractional_yes"));
+      radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_fractional_no"));
+      radio_imp = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_task_yes"));
+      radio_imp_no = GTK_WIDGET (builder_get (builder, "radio_btn_mcd_task_no"));
+
+      ventana = GTK_WIDGET (builder_get (builder, "wnd_new_mcd"));
+    }
+
+  combo_store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
+  modelo = GTK_LIST_STORE (gtk_combo_box_get_model (cmb_unit));
+  modelo_family = GTK_LIST_STORE (gtk_combo_box_get_model (cmb_family));
+
+  clean_container (GTK_CONTAINER (ventana));
+
+  gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
+
+  
   if (strlen (barcode) > 0 && strlen (barcode) <= 6)
     {
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_product_code")), barcode);
+      cod_corto = g_strdup (barcode);
+      
+      if (!codigo_disponible (cod_corto))
+	{
+	  cod_corto = sugerir_codigo (cod_corto, 4, 6);
+	  gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
+	}
+      else
+	gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
 
-      gint i, num = 0;
-
-      //Se prepara el relleno (agregan 0 hasta tener 6 dígitos)
-      while (strlen(barcode) < 6)
-	barcode = g_strdup_printf ("%s%d", barcode, num);
-
-      //Revisa la existencia del barcode, de ser así va aumentando el número del último dígito hasta ser único
-      while (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s%d", barcode, num)))
-	num++;
+      /* - Sugerencia de barcode - */
+      barcode = sugerir_codigo (barcode, 7, 18);
 
       //Se setea el campo del barcode con esta sugerencia
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")),
-			  g_strdup_printf ("%s%d", barcode, num));
+      gtk_entry_set_text (GTK_ENTRY (barcode_w), g_strdup (barcode));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_new_product_desc")));
+      gtk_widget_grab_focus (GTK_WIDGET (descripcion_w));
     }
   else
     {
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_new_product_code")));
+      /*El proceso de creación de materias derivadas debe sugerir un barcode*/
+      if (g_str_equal (tipo, "mcd"))
+	{
+	  if (!codigo_disponible (barcode))
+	    {
+	      barcode = sugerir_codigo (barcode, 7, 18);
+	      gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
+	    }
+	  else
+	    gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
+	}
+
+      //Se sugiere un codigo corto
+      cod_corto = g_strndup (barcode, 5);
+      if (!codigo_disponible (cod_corto))
+	{
+	  cod_corto = sugerir_codigo (cod_corto, 4, 6);
+	  gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
+	}
+      else
+	gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
+
+      gtk_widget_grab_focus (GTK_WIDGET (codigo_corto_w));
     }
 
   if (combo_store == NULL)
@@ -3504,7 +3826,6 @@ create_new_product (void)
       res = EjecutarSQL ("SELECT * FROM select_otros_impuestos()");
       if (res != NULL)
         {
-
           GtkTreeIter iter;
           gint i, tuples;
 
@@ -3515,27 +3836,31 @@ create_new_product (void)
                                             G_TYPE_STRING, //1 descripcion
                                             G_TYPE_DOUBLE);//2 monto
 
-          gtk_combo_box_set_model (combo, GTK_TREE_MODEL(combo_store));
+          gtk_combo_box_set_model (combo, GTK_TREE_MODEL (combo_store));
 
           cell = gtk_cell_renderer_text_new ();
-          gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
-          gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell,
+          gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), cell, TRUE);
+          gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), cell,
                                           "text", 1,
                                           NULL);
           for (i = 0; i < tuples; i++)
             {
               gtk_list_store_append (combo_store, &iter);
               gtk_list_store_set (combo_store, &iter,
-                                  0, atoi (PQvaluebycol(res, i, "id")),
+                                  0, atoi (PQvaluebycol (res, i, "id")),
                                   1, PQvaluebycol (res, i, "descripcion"),
-                                  2, strtod (PUT(PQvaluebycol(res, i, "monto")), (char **)NULL),
+                                  2, strtod (PUT (PQvaluebycol (res, i, "monto")), (char **)NULL),
                                   -1);
+	      if (g_str_equal (tipo, "mcd"))
+		if (atoi (PQvaluebycol(res, i, "id")) == prod->product->otros_id) active = i;
             }
+	  if (g_str_equal (tipo, "mcd"))
+	    gtk_combo_box_set_active (combo, active != -1 ? active : 0);
         }
     }
 
   /*Combobox Unidad*/
-  if(modelo == NULL)
+  if (modelo == NULL)
     {
       GtkTreeIter iter;
       gint i, tuples;
@@ -3544,27 +3869,31 @@ create_new_product (void)
 				   G_TYPE_INT,
 				   G_TYPE_STRING);
 
-      gtk_combo_box_set_model(GTK_COMBO_BOX(cmb_unit), GTK_TREE_MODEL(modelo));
+      gtk_combo_box_set_model (GTK_COMBO_BOX (cmb_unit), GTK_TREE_MODEL (modelo));
 
-      cell2 = gtk_cell_renderer_text_new();
-      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(cmb_unit), cell2, TRUE);
-      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cmb_unit), cell2,
-                                     "text", 1,
-                                     NULL);
+      cell2 = gtk_cell_renderer_text_new ();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (cmb_unit), cell2, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (cmb_unit), cell2,
+				      "text", 1,
+				      NULL);
 
       res2 = EjecutarSQL ("SELECT * FROM unidad_producto");
       tuples = PQntuples (res2);
 
-      if(res2 != NULL)
+      if (res2 != NULL)
 	{
 	  for (i=0 ; i < tuples ; i++)
 	    {
-	      gtk_list_store_append(modelo, &iter);
-	      gtk_list_store_set(modelo, &iter,
-	      			 0, atoi(PQvaluebycol(res2, i, "id")),
-	      			 1, PQvaluebycol(res2, i, "descripcion"),
-	      			 -1);
+	      gtk_list_store_append (modelo, &iter);
+	      gtk_list_store_set (modelo, &iter,
+				  0, atoi (PQvaluebycol (res2, i, "id")),
+				  1, PQvaluebycol (res2, i, "descripcion"),
+				  -1);
+	      if (g_str_equal (tipo, "mcd"))
+		if (g_str_equal (PQvaluebycol (res2, i, "descripcion"), prod->product->unidad)) active = i;
 	    }
+	  if (g_str_equal (tipo, "mcd"))
+	    gtk_combo_box_set_active (cmb_unit, active != -1 ? active : 0);
 	}
     }
 
@@ -3578,7 +3907,7 @@ create_new_product (void)
 					  G_TYPE_INT,
 					  G_TYPE_STRING);
 
-      gtk_combo_box_set_model (GTK_COMBO_BOX(cmb_family), GTK_TREE_MODEL(modelo_family));
+      gtk_combo_box_set_model (GTK_COMBO_BOX (cmb_family), GTK_TREE_MODEL (modelo_family));
 
       cell3 = gtk_cell_renderer_text_new();
       gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(cmb_family), cell3, TRUE);
@@ -3589,36 +3918,62 @@ create_new_product (void)
       res2 = EjecutarSQL ("SELECT * FROM familias");
       tuples = PQntuples (res2);
 
-      if(res2 != NULL)
+      if (res2 != NULL)
 	{
 	  for (i=0 ; i < tuples ; i++)
 	    {
-	      gtk_list_store_append(modelo_family, &iter);
-	      gtk_list_store_set(modelo_family, &iter,
-	      			 0, atoi(PQvaluebycol(res2, i, "id")),
-	      			 1, PQvaluebycol(res2, i, "nombre"),
-	      			 -1);
+	      gtk_list_store_append (modelo_family, &iter);
+	      gtk_list_store_set (modelo_family, &iter,
+				  0, atoi (PQvaluebycol (res2, i, "id")),
+				  1, PQvaluebycol (res2, i, "nombre"),
+				  -1);
+	      if (g_str_equal (tipo, "mcd"))
+		if (atoi (PQvaluebycol(res2, i, "id")) == prod->product->familia) active = i;
 	    }
+	  if (g_str_equal (tipo, "mcd"))
+	    gtk_combo_box_set_active (cmb_family, active != -1 ? active : 0);
 	}
     }
 
+  /*La mercadería derivada hereda datos de su madre*/
+  if (g_str_equal (tipo, "mcd"))
+    {
+      gtk_entry_set_text (GTK_ENTRY (marca_w), prod->product->marca);
+      gtk_entry_set_text (GTK_ENTRY (contenido_w), g_strdup_printf ("%d", prod->product->contenido));
+      //gtk_entry_set_text (GTK_ENTRY (descripcion_w), prod->product->producto);
+      gtk_widget_grab_focus ((descripcion_w));
+    }
 
   //Seleccion radiobutton
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_fractional_no")), TRUE);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder,"radio_btn_task_yes")), TRUE);
+  if (g_str_equal (tipo, "mcd"))
+    {
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_yes), (prod->product->fraccion == TRUE) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_no), (prod->product->fraccion == FALSE) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp), (prod->product->iva != 0) ? TRUE : FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp_no), (prod->product->iva == 0) ? TRUE : FALSE);
+    }
+  else
+    {
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_no), TRUE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_imp), TRUE);
+    }
 
   //Ventana creacion de productos
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_barcode")), 18);
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_code")), 16);
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_brand")), 20);
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_desc")), 25);
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_new_product_cont")), 10);
+  gtk_entry_set_max_length (GTK_ENTRY (barcode_w), 18);
+  gtk_entry_set_max_length (GTK_ENTRY (codigo_corto_w), 16);
+  gtk_entry_set_max_length (GTK_ENTRY (marca_w), 20);
+  gtk_entry_set_max_length (GTK_ENTRY (descripcion_w), 25);
+  gtk_entry_set_max_length (GTK_ENTRY (contenido_w), 10);
 
   //Seleccion Combobox
-  gtk_combo_box_set_active (combo, 0);
-  gtk_combo_box_set_active (cmb_unit, 0);
-  gtk_combo_box_set_active (cmb_family, 0);
-  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
+  if (!g_str_equal (tipo, "mcd"))
+    {
+      gtk_combo_box_set_active (combo, 0);
+      gtk_combo_box_set_active (cmb_unit, 0);
+      gtk_combo_box_set_active (cmb_family, 0);
+    }
+
+  gtk_widget_show_all (ventana);
 }
 
 
@@ -3712,14 +4067,29 @@ save_new_family (GtkButton *button, gpointer user_data)
 
   win = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
 
-  if(g_str_equal (tipo, "btn_save_family"))
+  /*Al editar o agregar una mercadería*/
+  if (g_str_equal (tipo, "btn_save_family_amd")) //Mercadería discretas
     {
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_new_product_family"));
       btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_family"));
     }
-  else
+  else if (g_str_equal (tipo, "btn_save_family_amp")) //Materia prima
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_family"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_new_mp_family"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mp_family"));
+    }
+  else if (g_str_equal (tipo, "btn_save_family_amc")) //compuesta o derivada
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_new_family"));
+      gtk_window_set_transient_for (win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_mcd_family"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mcd_family"));
+    }
+  else if (g_str_equal (tipo, "btn_save_family_em")) //Editar Mercadería (cualquiera)
     {
       printf("entre en el de la ventana mod_product\n");
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
@@ -3807,10 +4177,23 @@ on_btn_new_family_clicked (GtkButton *button, gpointer user_data)
   gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_new_family")), "");
   gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "wnd_new_family")));
 
-  if (g_str_equal (nombre_boton, "btn_new_family")) //Se oculta el guardar2
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family2")));
-  else if (g_str_equal (nombre_boton, "btn_edit_family"))
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family")));
+  //Se ocultan todos los botones editar
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_amd"))); //En agregar mercadería discreta
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_amp"))); //En agregar materia prima
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_amc"))); //En agrefar mercadería compuesta
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_family_em"))); //En editar mercadería
+
+  //Se muestra solo el botón guardar que corresponda
+  if (g_str_equal (nombre_boton, "btn_new_family")) //Ventana nueva mercadería discreta
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_amd")));
+  else if (g_str_equal (nombre_boton, "btn_new_mp_family")) //Ventana nueva materia prima
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_amp")));
+  else if (g_str_equal (nombre_boton, "btn_new_mcd_family")) //Ventana nueva mercadería compuesta o derivada
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_amc")));
+
+  else if (g_str_equal (nombre_boton, "btn_edit_family")) //Ventana editar mercadería (el que sea)
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_family_em")));
 }
 
 /**
@@ -3832,10 +4215,23 @@ show_new_unidad_win_clicked (GtkButton *button, gpointer user_data)
   gtk_entry_set_text(GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad")), "");
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_unit")));
 
-  if (g_str_equal (nombre_boton, "btn_new_unidad")) //Se oculta el guardar2
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad2")));
-  else if (g_str_equal (nombre_boton, "btn_edit_unidad"))
-    gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad")));
+  //Se ocultan todos los botones guardar
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amd"))); //En agregar mercadería discreta
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amp"))); //En agregar materia prima
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc"))); //En agrefar mercadería compuesta
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_em"))); //En editar mercadería
+
+  //Se muestra solo el botón guardar que corresponda
+  if (g_str_equal (nombre_boton, "btn_new_unidad")) //Ventana nueva mercadería discreta
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amd")));
+  else if (g_str_equal (nombre_boton, "btn_new_mp_unidad")) //Ventana nueva materia prima
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amp")));
+  else if (g_str_equal (nombre_boton, "btn_new_mcd_unidad")) //Ventana nueva mercadería compuesta o derivada
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc")));
+
+  else if (g_str_equal (nombre_boton, "btn_edit_unidad")) //Ventana editar mercadería (el que sea)
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_em")));
 }
 
 
@@ -4071,6 +4467,7 @@ on_btn_add_new_clothes_clicked (GtkButton *button, gpointer data)
   
   gboolean registrado; // Para saber si es un codigo previamente registrado
   gchar *marca, *descripcion, *sub_depto_code;
+  gchar *tipo;
   gint i, fila, largo;
   i = fila = 0;
 
@@ -4197,10 +4594,14 @@ on_btn_add_new_clothes_clicked (GtkButton *button, gpointer data)
   for (i=0; i<fila; i++)
     registrar_nuevo_codigo (g_strdup_printf ("%s", codigos[i]));
 
+
+  //Tipo producto (discreta)
+  tipo = PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DISCRETA'"), 0, "id");
+
   // Se registran los productos
   for (i=0; i<fila; i++)
     AddNewProductToDB (codigos[i], "0", descripcion, marca, "1",
-		       "UN", TRUE, 0, 1, FALSE, FALSE);
+		       "UN", TRUE, 0, 1, FALSE, FALSE, atoi (tipo));
   
   clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "wnd_new_clothing")));
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_new_clothing")));
@@ -4438,9 +4839,94 @@ void
 on_button_new_product_clicked (GtkButton *button, gpointer data)
 {
   if (g_str_equal(rizoma_get_value ("ROPA"),"0"))
-    create_new_product ();
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_products_selection")));
   else
     create_new_clothing ();
+}
+
+
+/**
+ * Show window to create the merchandise selected
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+new_merchandise (GtkButton *button, gpointer data)
+{
+  gchar *button_name;
+  button_name = g_strdup (gtk_buildable_get_name (button));
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_merchandise")));
+  
+  if (g_str_equal (button_name, "btn_new_product"))
+    create_new_merchandise ("md");
+  else if (g_str_equal (button_name, "btn_new_mp"))
+    create_new_merchandise ("mp");
+  else if (g_str_equal (button_name, "btn_make_deriv"))
+    create_new_merchandise ("mcd");
+}
+
+
+/**
+ * This function is called when the mouse pointer
+ * over the button positions (enter-notify-event signal).
+ *
+ * Update de option description
+ *
+ * @param the object which received the signal
+ * @param the GdkEventCrossing which triggered this signal
+ * @param user_data the user data
+ *
+ * @return TRUE to stop other handlers from being invoked for the event. FALSE to propagate the event further.
+ *
+ */
+gboolean
+show_description (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
+{
+  gchar *widget_name;
+  widget_name = g_strdup (gtk_buildable_get_name (widget));
+
+  if (g_str_equal (widget_name, "btn_make_product"))
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_option_merchandise")), "<i>Crear mercaderías \n"
+			                                                               "(discretas, compuestas y materias primas)</i>");
+  else if (g_str_equal (widget_name, "btn_ena_dis_product"))
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_option_merchandise")), "<i>Habilitar o deshabilitar mercaderias</i>");
+
+  else if (g_str_equal (widget_name, "btn_make_offer"))
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_option_merchandise")), "<i>Crear oferta a partir de mercaderías\n"
+			                                                               "ya existentes</i>");
+  return FALSE;
+}
+
+
+/**
+ * This function is called when the mouse pointer
+ * non-over the button positions (enter-notify-event signal).
+ *
+ * Update de option description
+ *
+ * @param the object which received the signal
+ * @param the GdkEventCrossing which triggered this signal
+ * @param user_data the user data
+ *
+ * @return TRUE to stop other handlers from being invoked for the event. FALSE to propagate the event further.
+ *
+ */
+gboolean
+show_default (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data)
+{
+  gchar *widget_name;
+  widget_name = g_strdup (gtk_buildable_get_name (widget));
+
+  if (g_str_equal (widget_name, "btn_make_product"))
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_option_merchandise")), "<b>Seleccione una opción</b>");
+  else if (g_str_equal (widget_name, "btn_ena_dis_product"))
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_option_merchandise")), "<b>Seleccione una opción</b>");
+  else if (g_str_equal (widget_name, "btn_make_offer"))
+    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_option_merchandise")), "<b>Seleccione una opción</b>");
+
+  return FALSE;
 }
 
 
@@ -4785,20 +5271,6 @@ on_btn_del_color_clicked ()
 
 
 /**
- * Esta funcion es llamada cuando se activa el delete-event
- *
- * Esconde los dos botones de la venta.
- *
- */
-void
-on_wnd_new_unit_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_data)
-{
-  gtk_widget_hide(GTK_WIDGET (builder_get (builder, "btn_save_unidad")));
-  gtk_widget_hide(GTK_WIDGET (builder_get (builder, "btn_save_unidad2")));
-}
-
-
-/**
  * Esta funcion es llamada cuando el boton "btn_save_unidad" es presionado
  * (signal click).
  *
@@ -4807,7 +5279,7 @@ on_wnd_new_unit_delete_event(GtkWidget *widget, GdkEvent *event, gpointer user_d
  *
  */
 void
-Save_new_unit (GtkButton *button, gpointer user_data)
+save_new_unit (GtkButton *button, gpointer user_data)
 {
   GtkTreeIter iter;
   GtkComboBox *combo;
@@ -4820,18 +5292,33 @@ Save_new_unit (GtkButton *button, gpointer user_data)
   GtkTreeModel *model;
   gboolean valid;
   gchar *unidad = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_unidad"))));
-  gchar *tipo = gtk_buildable_get_name(button);
+  gchar *nombre_boton = gtk_buildable_get_name(button);
 
   win = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_unit"));
 
-  if(strcmp(tipo, "btn_save_unidad") == 0)
+  /*Al editar o agregar una mercadería*/
+  if (strcmp (nombre_boton, "btn_save_unidad_amd") == 0) //Mercadería discreta
     {
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_product"));
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_product_unit"));
       btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_unidad"));
     }
-  else
+  else if (strcmp (nombre_boton, "btn_save_unidad_amp") == 0) //Materia prima
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_mp"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_mp_unit"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mp_unidad"));
+    }
+  else if (strcmp (nombre_boton, "btn_save_unidad_amc") == 0) //compuesta o derivada
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_new_mcd"));
+      gtk_window_set_transient_for(win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_mcd_unit"));
+      btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mcd_unidad"));
+    }
+  else if (strcmp (nombre_boton, "btn_save_unidad_em") == 0) //Editar Mercadería (cualquiera)
     {
       printf("entre en el de la ventana mod_product\n");
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
@@ -5884,12 +6371,13 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
   gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
   gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
   gchar *unidad;
+  gchar *tipo;
   gint otros, familia;
 
   if (strcmp (codigo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
-  else if (strlen (codigo) > 16)
-    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 16 caracteres");
+  else if (strlen (codigo) > 6)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
   else if (HaveCharacters(barcode))
@@ -5913,9 +6401,152 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
         }
+      else if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE barcode = %s", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con este codigo corto de barcode");
+          return;
+        }
+
       if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
         {
-          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo de barras");
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
+          return;
+        }
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
+          return;
+        }
+
+
+      if (gtk_combo_box_get_active (combo) == 0)
+        otros = 0;
+      else
+        {
+          model = gtk_combo_box_get_model (combo);
+          gtk_combo_box_get_active_iter (combo, &iter);
+          gtk_tree_model_get (model, &iter,
+                              0, &otros,
+                              -1);
+        }
+      model = gtk_combo_box_get_model (combo_unit);
+      gtk_combo_box_get_active_iter (combo_unit, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  1, &unidad,
+			  -1);
+
+      /*familia*/
+      model = gtk_combo_box_get_model (combo_family);
+      gtk_combo_box_get_active_iter (combo_family, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &familia,
+			  -1);
+
+      //Tipo producto (discreta)
+      tipo = PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DISCRETA'"), 0, "id");
+
+      //crear producto
+      AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido),
+			 unidad, iva, otros, familia, FALSE, fraccion, atoi (tipo));
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
+
+      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), codigo);
+    }
+  return;
+} // void on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
+
+
+/**
+ * Esta funcion es llamada cuando el boton "btn_add_new_product" es
+ * presionado (signal click).
+ *
+ * Esta funcion obtiene todos los datos de la materia prima que se llenaron en la
+ * ventana "wnd_new_mp", para ingresar una nueva materia prima a la base de datos
+ */
+void
+on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
+  GtkEntry *entry_code = GTK_ENTRY (builder_get (builder, "entry_new_mp_code"));
+  GtkEntry *entry_barcode = GTK_ENTRY (builder_get (builder, "entry_new_mp_barcode"));
+  GtkEntry *entry_desc = GTK_ENTRY (builder_get (builder, "entry_new_mp_desc"));
+  GtkEntry *entry_brand = GTK_ENTRY (builder_get (builder, "entry_new_mp_brand"));
+  GtkEntry *entry_cont = GTK_ENTRY (builder_get (builder, "entry_new_mp_cont"));
+  GtkEntry *entry_buy_price = GTK_ENTRY (builder_get (builder, "entry_new_mp_buy_price"));
+  GtkEntry *entry_cantity = GTK_ENTRY (builder_get (builder, "entry_new_mp_cantity"));
+
+  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_mp_imp_others"));
+  GtkComboBox *combo_unit = GTK_COMBO_BOX (builder_get (builder, "cmb_box_new_mp_unit"));
+  GtkComboBox *combo_family = GTK_COMBO_BOX (builder_get (builder, "cmb_new_mp_family"));
+
+  gboolean iva = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_mp_task_yes")));
+  gboolean fraccion = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder,
+										    "radio_btn_mp_fractional_yes")));
+  gchar *codigo = g_strdup (gtk_entry_get_text (entry_code));
+  gchar *barcode = g_strdup (gtk_entry_get_text (entry_barcode));
+  gchar *description = g_strdup (gtk_entry_get_text (entry_desc));
+  gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
+  gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
+  gchar *costo = g_strdup (gtk_entry_get_text (entry_buy_price));
+  gchar *cantidad = g_strdup (gtk_entry_get_text (entry_cantity));
+  gchar *unidad;
+  gchar *tipo;
+  gint otros, familia;
+
+  if (strcmp (codigo, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
+  else if (strlen (codigo) > 6)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
+  else if (strcmp (barcode, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
+  else if (HaveCharacters (barcode))
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
+  else if (strlen (barcode) > 18)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
+  else if (strlen (barcode) < 7)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
+  else if (strcmp (description, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
+  else if (strcmp (marca, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_brand), "Debe ingresar al Marca de la materia prima");
+  else if (strcmp (contenido, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cont), "Debe ingresar el Contenido la materia prima");
+  else if (strcmp (costo, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_buy_price), "Debe ingresar el costo neto de la materia prima");
+  else if (HaveCharacters (costo))
+    ErrorMSG (GTK_WIDGET (entry_buy_price), "Costo (neto) debe ser un valor numérico");
+  else if (strcmp (cantidad, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cantity), "Debe ingresar la cantidad a comprar");
+  else if (HaveCharacters (cantidad))
+    ErrorMSG (GTK_WIDGET (entry_cantity), "Cantidad debe ser un valor numérico");
+  else if (HaveCharacters (contenido))
+    ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
+  else
+    {
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
+          return;
+        }
+      else if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE barcode = %s", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con este codigo corto de barcode");
+          return;
+        }
+
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
+          return;
+        }
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
           return;
         }
 
@@ -5944,16 +6575,530 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
 			  0, &familia,
 			  -1);
 
+      //Tipo producto (discreta)
+      tipo = PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id");
+      
       //crear producto
-      AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido),
-			 unidad, iva, otros, familia, FALSE, fraccion);
+      if (AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido),
+			     unidad, iva, otros, familia, FALSE, fraccion, atoi (tipo)))
+	EjecutarSQL (g_strdup_printf ("UPDATE producto set costo_promedio = %s WHERE barcode = %s", CUT (costo), barcode));
 
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_product")));
+      //Agrega el producto a la lista de compra
+      if (CompraAgregarALista (barcode, strtod (PUT (cantidad), (char **)NULL), 0, strtod (PUT (costo), (char **)NULL), 0, FALSE))
+	{
+	  AddToTree ();
 
-      SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), codigo);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
+	}
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_mp")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_derivar_mp")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_der_mp_yes")));
+
+      //SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), codigo);
     }
   return;
-} // void on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
+} // void on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
+
+
+void
+on_btn_edit_derivates_clicked (GtkButton *button, gpointer data)
+{
+  gchar *barcode;
+  gdouble costo;
+  
+  add_deriv = TRUE; //setea la FLAG como TRUE, para indicar que se editarán los derivados de la materia prima
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
+  costo = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
+
+  CompraAgregarALista (barcode, 1, 0, costo, 0, FALSE);
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_edit_raw_product")));
+  on_btn_der_mp_yes_clicked (button, data);
+}
+
+
+/**
+ * Esta funcion es llamada cuando el boton "btn_add_new_product" es
+ * presionado (signal click).
+ *
+ * Esta funcion obtiene todos los datos de la mercadería derivada 
+ * o compuesta que se llenaron en la ventana "wnd_new_mcd", 
+ * para ingresar la mercadería correspondiente a la base de datos
+ */
+void
+on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
+  GtkEntry *entry_code = GTK_ENTRY (builder_get (builder, "entry_new_mcd_code"));
+  GtkEntry *entry_barcode = GTK_ENTRY (builder_get (builder, "entry_new_mcd_barcode"));
+  GtkEntry *entry_desc = GTK_ENTRY (builder_get (builder, "entry_new_mcd_desc"));
+  GtkEntry *entry_brand = GTK_ENTRY (builder_get (builder, "entry_new_mcd_brand"));
+  GtkEntry *entry_cont = GTK_ENTRY (builder_get (builder, "entry_new_mcd_cont"));
+  GtkEntry *entry_sell_price = GTK_ENTRY (builder_get (builder, "entry_new_mcd_sell_price"));
+  GtkEntry *entry_cantity = GTK_ENTRY (builder_get (builder, "entry_new_mcd_cantity_mother"));
+
+  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmbbox_new_mcd_imp_others"));
+  GtkComboBox *combo_unit = GTK_COMBO_BOX (builder_get (builder, "cmb_box_new_mcd_unit"));
+  GtkComboBox *combo_family = GTK_COMBO_BOX (builder_get (builder, "cmb_new_mcd_family"));
+  GtkListStore *store;
+
+  gboolean iva = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_mcd_task_yes")));
+  gboolean fraccion = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder,
+										    "radio_btn_mcd_fractional_yes")));
+  gchar *codigo = g_strdup (gtk_entry_get_text (entry_code));
+  gchar *barcode = g_strdup (gtk_entry_get_text (entry_barcode));
+  gchar *description = g_strdup (gtk_entry_get_text (entry_desc));
+  gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
+  gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
+  gchar *precio = g_strdup (gtk_entry_get_text (entry_sell_price));
+  gchar *cantidad = g_strdup (gtk_entry_get_text (entry_cantity));
+  gchar *unidad;
+  gchar *tipo;
+  gint otros, familia;
+
+  if (strcmp (codigo, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_code), "Debe ingresar un codigo corto");
+  else if (strlen (codigo) > 6)
+    ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
+  else if (strcmp (barcode, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
+  else if (HaveCharacters (barcode))
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
+  else if (strlen (barcode) > 18)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
+  else if (strlen (barcode) < 7)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
+  else if (strcmp (description, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
+  else if (strcmp (marca, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_brand), "Debe ingresar al Marca de la mercadería derivada");
+  else if (strcmp (contenido, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cont), "Debe ingresar el Contenido la mercadería derivada");
+  else if (strcmp (precio, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_sell_price), "Debe ingresar el precio de venta de la mercadería derivada");
+  else if (HaveCharacters (precio))
+    ErrorMSG (GTK_WIDGET (entry_sell_price), "Precio venta ser un valor numérico");
+  else if (strcmp (cantidad, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cantity), "Debe ingresar la cantidad a comprar");
+  else if (HaveCharacters (cantidad))
+    ErrorMSG (GTK_WIDGET (entry_cantity), "Cantidad debe ser un valor numérico");
+  else if (HaveCharacters (contenido))
+    ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
+  else
+    {
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
+          return;
+        }
+      else if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE barcode = %s", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con este codigo corto de barcode");
+          return;
+        }
+
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
+          return;
+        }
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+        {
+          ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
+          return;
+        }
+
+      if (gtk_combo_box_get_active (combo) == 0)
+        otros = 0;
+      else
+        {
+          model = gtk_combo_box_get_model (combo);
+          gtk_combo_box_get_active_iter (combo, &iter);
+          gtk_tree_model_get (model, &iter,
+                              0, &otros,
+                              -1);
+        }
+      model = gtk_combo_box_get_model (combo_unit);
+      gtk_combo_box_get_active_iter (combo_unit, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  1, &unidad,
+			  -1);
+
+      /*familia*/
+      model = gtk_combo_box_get_model (combo_family);
+      gtk_combo_box_get_active_iter (combo_family, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &familia,
+			  -1);
+
+      //Tipo producto (discreta)
+      tipo = PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id");
+      
+      //crear producto
+      if (AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido),
+			     unidad, iva, otros, familia, FALSE, fraccion, atoi (tipo)))
+	EjecutarSQL (g_strdup_printf ("UPDATE producto set precio = %s WHERE barcode = %s", CUT (precio), barcode));
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_mcd")));
+
+      //Agrega la mercadería compuesta o derivada al treeview "deriv"
+      store = GTK_LIST_STORE (gtk_tree_view_get_model
+			      (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_deriv"))));
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter, 
+			  0, codigo, 
+			  1, g_strdup_printf ("%s %s", description, marca),
+			  2, atoi (precio),
+			  3, strtod (PUT (cantidad), (char **)NULL),
+			  -1);
+
+      //SearchProductHistory (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_barcode")), codigo);
+    }
+  return;
+}
+
+
+/**
+ *
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_assoc_comp_deriv_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeIter iter;
+  gboolean valid;
+
+  gint num_madres = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_mother")));
+  gint num_deriv = get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_deriv")));
+  gchar *barcode_madre[num_madres];
+  gchar *barcode_deriv[num_deriv];
+  gchar *codigo_corto;
+  gint tipo_madre[num_madres];
+  gint tipo_deriv;
+  gint i;
+  gdouble cant_mud[num_deriv];
+
+  gboolean derivados;
+
+  /*NOTA: De los siguientes, en ambos caso se estan creando mercaderías compuestas, solo que la relación cambia
+          Derivadas = 1 Madre, Muchas Derivadas (EJ: Cortes de un animal)
+	  Bandeo    = Muchas Madres, 1 Derivada (EJ: Bandeo (Varios productos asociados como uno))
+   */
+
+  //Si los botones para agregar mercaderías madre NO estan visibles se estan creando productos derivados
+  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder, "hbuttonbox1_comp_deriv"))) == FALSE)
+    derivados = TRUE;
+  else //Si los botones para agregar mercaderías madre estan visibles se esta creando una oferta o bandeo
+    derivados = FALSE;
+
+  tipo_deriv = atoi (g_strdup
+		     (PQvaluebycol 
+		      (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id")));
+
+  /*Obteniendo datos de los treeview de las mercaderías MADRES*/
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_mother")));
+  store = GTK_LIST_STORE (model);
+  valid = gtk_tree_model_get_iter_first (model, &iter); //Obtiene la primera fila del treeview
+
+  i = 0;
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &codigo_corto,
+			  -1);
+
+      barcode_madre[i] = g_strdup (PQvaluebycol (EjecutarSQL
+						 (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", codigo_corto)),
+						 0, "barcode"));
+
+      tipo_madre[i] = atoi (PQvaluebycol (EjecutarSQL 
+					    (g_strdup_printf ("SELECT tipo FROM producto WHERE barcode = %s", barcode_madre[i])),
+					    0, "tipo"));
+
+      i++;
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+    }
+
+
+  /*Obteniendo datos de los treeview de las mercaderías DERIVADAS*/
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_deriv")));
+  store = GTK_LIST_STORE (model);
+  valid = gtk_tree_model_get_iter_first (model, &iter); //Obtiene la primera fila del treeview
+
+  i = 0;
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &codigo_corto,
+			  3, &cant_mud[i],
+			  -1);
+
+      barcode_deriv[i] = g_strdup (PQvaluebycol (EjecutarSQL
+						 (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", codigo_corto)),
+						 0, "barcode"));
+      i++;
+      valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
+    }
+  
+  //Se ingresan de acuerdo a la asociación de mercaderías
+  if (derivados == FALSE) //Si hay varias mercaderías madres y un derivado (como en el bandeo de mercaderías)
+    {
+      for (i = 0; i<num_madres; i++) //Si la mercadería no esta asociada a esta fuente con anterioridad
+	if (!DataExist (g_strdup_printf ("SELECT barcode_derivado FROM componente_mc WHERE barcode_madre = %s", barcode_madre[i])))
+	  asociar_derivada_a_madre (barcode_madre[i], tipo_madre[i],
+				    barcode_deriv[0], tipo_deriv,
+				    cant_mud[i]);
+    }
+  else if (derivados == TRUE) //Si hay varias mercaderías derivadas y una madre (como en el caso de los cortes de un animal)
+    {
+      for (i = 0; i<num_deriv; i++) //Si la mercadería no esta asociada a esta fuente con anterioridad
+	if (!DataExist (g_strdup_printf ("SELECT barcode_madre FROM componente_mc WHERE barcode_derivado = %s", barcode_deriv[i])))
+	  asociar_derivada_a_madre (barcode_madre[0], tipo_madre[0],
+				    barcode_deriv[i], tipo_deriv,
+				    cant_mud[i]);
+    }
+
+  //Se habilita el botón de compra (cuando se crea la materia prima)
+  //gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
+  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_comp_deriv")));
+}
+
+
+/**
+ * This function is a callback from
+ * 'btn_der_mp_yes' button (signal click)
+ *
+ * Show 'wnd_comp_deriv' window
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
+{
+  gchar *q;
+  PGresult *res;
+  gint tuples, i;
+
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+  GtkTreeIter iter;
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_derivar_mp")));
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "hbuttonbox1_comp_deriv")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_make_deriv")));
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_mother"));
+  
+  if (gtk_tree_view_get_model (treeview) == NULL)
+    {
+      store = gtk_list_store_new (3,
+				  G_TYPE_STRING,  //Codigo Corto
+				  G_TYPE_STRING,  //Marca Descripción
+				  G_TYPE_DOUBLE); //Costo
+
+      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+							 "text", 0,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Descripcion", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Costo", renderer,
+							 "text", 2,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
+    }
+
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_deriv"));
+  
+  if (gtk_tree_view_get_model (treeview) == NULL)
+    {
+      store = gtk_list_store_new (4,
+				  G_TYPE_STRING,  //Codigo Corto
+				  G_TYPE_STRING,  //Marca Descripción
+				  G_TYPE_INT,     //Precio
+				  G_TYPE_DOUBLE); //Cantidad
+
+      gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+							 "text", 0,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Descripcion", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
+							 "text", 2,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Cant. Madre", renderer,
+							 "text", 3,
+							 NULL);
+      gtk_tree_view_append_column (treeview, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+    }
+
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_comp_deriv")));
+  //Se limpia el treeview "deriv"
+  //gtk_list_store_clear (store);
+
+  //Agrega la materia prima al treeview "mother"
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_mother"))));
+
+  //Se limpia el treeview "mother"
+  //gtk_list_store_clear (store);
+
+  gtk_list_store_append (store, &iter);
+  gtk_list_store_set (store, &iter, 
+		      0, compra->products_compra->product->codigo, 
+		      1, g_strdup_printf ("%s %s",
+					  compra->products_compra->product->producto,
+					  compra->products_compra->product->marca),
+		      2, compra->products_compra->product->precio_compra,
+		      -1);
+
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_subtotal_mother_price")),
+		      g_strdup_printf ("%.3f",compra->products_compra->product->precio_compra));
+
+
+  //Agrega los productos derivados de mother (de tenerlo) TODO: Debe estar en postgres function
+  q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_derivado, "
+		              "(SELECT codigo_corto FROM producto WHERE barcode = cmc.barcode_derivado) AS codigo, "
+		              "(SELECT marca FROM producto WHERE barcode = cmc.barcode_derivado) AS marca, "
+		              "(SELECT descripcion FROM producto WHERE barcode = cmc.barcode_derivado) AS descripcion, "
+		              "(SELECT precio FROM producto WHERE barcode = cmc.barcode_derivado) AS precio "
+		       "FROM componente_mc cmc "
+		       "WHERE cmc.barcode_madre = '%s' "
+		       "AND (SELECT estado FROM producto WHERE barcode = cmc.barcode_derivado) = true",
+		       compra->products_compra->product->barcode);
+  res = EjecutarSQL(q);
+
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_deriv"))));
+
+  if (res != NULL)
+    {
+      tuples = PQntuples (res);
+      for (i = 0; i < tuples; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter, 
+			      0, g_strdup (PQvaluebycol (res, i, "codigo")),
+			      1, g_strdup_printf ("%s %s",
+						  PQvaluebycol (res, i, "marca"),
+						  PQvaluebycol (res, i, "descripcion")),
+			      2, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad_mud"))), (char **)NULL),
+			      -1);
+	}
+    }
+
+  /*gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_subtotal_mother_price")),
+    g_strdup_printf ("%.3f",compra->products_compra->product->precio_compra));*/
+
+  //Quita el producto de la lista de compra si es que solo se esta editando
+  if (add_deriv == TRUE) //Esto es cuando se edita la materia prima (para agregar mcd)
+    DropBuyProduct (compra->products_compra->product->codigo);
+  else //Esto es cuando se acaba de crear la materia prima y se le van a agregar mcd
+    gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), compra->products_compra->product->barcode);
+
+  // Devuelve la flag a la normalidad
+  add_deriv = FALSE;
+
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_comp_deriv")));
+}
+
+
+void
+on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+  gint position;
+
+  gchar *codigo_corto;
+  gchar *barcode;
+  PGresult *res;
+  gchar *q;
+  
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_deriv"));
+  selection = gtk_tree_view_get_selection (treeview);
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    {
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+                          0, &codigo_corto,
+                          -1);
+      
+      //Se obtiene el barcode
+      q = g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", codigo_corto);
+      res = EjecutarSQL (q);
+      barcode = g_strdup (PQvaluebycol (res, 0, "barcode"));
+
+      q = g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode);
+      EjecutarSQL (q);            
+
+      position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
+      gtk_list_store_remove (store, &iter);
+      select_back_deleted_row ("treeview_deiv", position);
+    }
+}
 
 
 /**
@@ -6109,7 +7254,7 @@ AddToProductsListTraspaso (void)
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-  //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
@@ -6175,7 +7320,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-      //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
@@ -6456,7 +7601,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
@@ -6535,7 +7680,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
@@ -6694,7 +7839,10 @@ on_sell_price_edited (GtkCellRendererText *cell, gchar *path_string, gchar *prec
   gdouble precioAntes;
   gdouble subTotal, costo, cantidad;
   gboolean fraccion, enable;
-  gchar *barcode;
+  gchar *barcode, *materia_prima;
+
+  // Obtiene el id de la materia prima
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   // Se inicializan en 0
   subTotal = costo = cantidad = 0;
@@ -6712,6 +7860,16 @@ on_sell_price_edited (GtkCellRendererText *cell, gchar *path_string, gchar *prec
 
   if (precio < 0) // precio no puede ser negativo
     precio = 0;
+
+  // Se verifica si el producto es una materia prima, de serlo, no se debe modificar su precio de venta
+  if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s' AND tipo = %s", 
+				  barcode, materia_prima)))
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "tree_view_products_providers")), 
+		"Esta es una materia prima y no tiene precio de venta. \n"
+		"Edite cualquiera de sus mercaderías derivadas");
+      return;
+    }
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      4, precio,
@@ -7358,7 +8516,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
   /*Variables de informacion*/
   gboolean enabled;
   gchar *codigo_corto; //Se obtienen desde el treeview
-  gdouble costo, cantidad, precio; //Se obtienen desde el treeview
+  gdouble costo, precio, cantidad; //Se obtienen desde el treeview
   gchar *barcode; //Se obtienen a través de una consulta sql
 
   /*Variables consulta*/
@@ -7391,7 +8549,7 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 	  //Set Buy's Entries
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), g_strdup_printf ("%f",costo));
-	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), g_strdup_printf ("%d", lround(precio)));
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), g_strdup_printf ("%ld",lround (precio)));
 	  calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), g_strdup_printf ("%f",cantidad));
 

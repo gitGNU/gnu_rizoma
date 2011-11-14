@@ -612,8 +612,13 @@ ventas_win ()
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                         g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
 
+  
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+
+  // El numerno de venta no se debe basar en el numero de ticket, puesto que aquel corresponde a los documentos que se han emitido
+  /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
+  /*                       g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE))); */
 
   venta->store =  gtk_list_store_new (8,
                                       G_TYPE_STRING,
@@ -778,9 +783,12 @@ gboolean
 SearchProductByCode (void)
 {
   gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
+  gchar *materia_prima;
   gdouble stock = 0;
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
+
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM informacion_producto_venta (0, '%s')", codigo));
   //gtk_label_set_text (GTK_LABEL (builder_get (builder, "codigo_corto")), PQvaluebycol (res, 0, "codigo_corto"));
@@ -790,6 +798,20 @@ SearchProductByCode (void)
       if (PQntuples(res) > 1)
         g_printerr("%s: the plpgsql function informacion_producto_venta(0,'%s') returned more than 1 tuple",
                    G_STRFUNC, codigo);
+
+
+      // Si el producto es "Materia Prima" no se puede comercializar
+      if (g_str_equal (PQvaluebycol (res, 0, "tipo"), materia_prima) == TRUE)
+	{
+	  GtkWidget *aux_widget;
+	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+	  gchar *str = g_strdup_printf("El código %s corresponde a una materia prima, no es comercializable", codigo);
+	  CleanSellLabels();
+	  AlertMSG (aux_widget, str);
+	  g_free (str);
+      
+	  return FALSE;
+	}
 
       stock = strtod (PUT (PQvaluebycol (res, 0, "stock")), (char **)NULL);
 
@@ -871,6 +893,7 @@ AgregarProducto (GtkButton *button, gpointer data)
   gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
   guint32 total;
+  gint tipo;
   gdouble stock = GetCurrentStock (barcode);
   gdouble cantidad;
   GtkTreeIter iter;
@@ -989,6 +1012,12 @@ AgregarProducto (GtkButton *button, gpointer data)
                               -1);
 
         }
+
+      //Se obtiene el tipo de mercaderia
+      tipo = atoi (PQgetvalue (EjecutarSQL (g_strdup_printf ("SELECT tipo FROM producto WHERE barcode = %s", barcode)), 0, 0));
+      //Se agrega a los datos del producto a vender
+      venta->products->product->tipo = tipo;
+
       /*
         Eliminamos los datos del producto en las entradas
       */
@@ -1182,7 +1211,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
   ListClean ();
 }
@@ -1199,7 +1228,7 @@ MoveFocus (GtkEntry *entry, gpointer data)
 { // Al presionar [ENTER] en el entry "Cantidad"
   if (atoi(rizoma_get_value("VENTA_DIRECTA")) == FALSE || // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
       (atoi(rizoma_get_value("VENTA_DIRECTA")) == TRUE && // O Si VENTA_DIRECTA = 1 Y Es una venta fracción
-       (VentaFraccion (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"))))) )) 
+       (VentaFraccion (g_strdup (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")))))) )) 
     {
       GtkWidget *button;
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
@@ -1424,6 +1453,9 @@ gint
 SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+  gchar *tipo, *materia_prima;
+
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   if (barcode == NULL)
     {
@@ -1477,19 +1509,31 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
           if (ventas != FALSE)
             CleanSellLabels ();
         }
-      else // TODO: Verificar utilidad de los else
-        if (GetCurrentStock (barcode) == 0)
-          {
-            AlertMSG (widget, "No hay mercadería en Stock.\nDebe ingresar mercadería");
+      else if (GetCurrentStock (barcode) == 0) //Nota: Creo que jamás entrará aquí
+	{
+	  AlertMSG (widget, "No hay mercadería en Stock.\nDebe ingresar mercadería");
+	  
+	  if (ventas != FALSE)
+	    CleanSellLabels ();
+	}
+      else
+	{
+	  if (ventas != FALSE)
+	    CleanSellLabels ();
+	}
+      return -1;
+    }
 
-            if (ventas != FALSE)
-              CleanSellLabels ();
-          }
-        else
-          {
-            if (ventas != FALSE)
-              CleanSellLabels ();
-          }
+  // Si el producto es "Materia Prima" no se puede comercializar
+  if (g_str_equal (PQvaluebycol (res, 0, "tipo"), materia_prima) == TRUE)
+    {
+      GtkWidget *aux_widget;
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      gchar *str = g_strdup_printf("El código %s corresponde a una materia prima, no es comercializable", barcode);
+      CleanSellLabels();
+      AlertMSG (aux_widget, str);
+      g_free (str);
+      
       return -1;
     }
 
@@ -1559,7 +1603,7 @@ void
 CloseBuscarWindow (GtkWidget *widget, gpointer data)
 {
   gboolean add = (gboolean) data;
-  gboolean fraccion = VentaFraccion (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry"))));
+  gboolean fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")))));
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));  
 
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_buscar")));
@@ -1727,18 +1771,20 @@ SearchAndFill (void)
   gint resultados, i;
   gchar *q;
   gchar *string;
+  gchar *materia_prima;
   GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"));
   GtkTreeIter iter;
   GtkListStore *store;
 
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "ventas_buscar_entry"))));
   store = GTK_LIST_STORE (gtk_tree_view_get_model (tree));
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   if (!(g_str_equal (string, "")))
     {
       q = g_strdup_printf ("SELECT * FROM buscar_producto ('%s', "
                            "'{\"barcode\", \"codigo_corto\",\"marca\","
-                           "\"descripcion\"}', true, true )", string);
+                           "\"descripcion\"}', true, true ) WHERE tipo != %s", string, materia_prima);
       res = EjecutarSQL (q);
       resultados = PQntuples (res);
     }
@@ -1825,7 +1871,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 void
 Descuento (GtkWidget *widget, gpointer data)
 {
-  const gchar *widget_name = gtk_buildable_get_name (widget);
+  gchar *widget_name = g_strdup (gtk_buildable_get_name (widget));
 
   gint amount = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
   gint total;
@@ -2344,9 +2390,9 @@ ChangeSeller (GtkWidget *widget, gpointer data)
   gchar *passwd;
 
   entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_user_vendedor"));
-  user = gtk_entry_get_text (entry);
+  user = g_strdup (gtk_entry_get_text (entry));
   entry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_pass_vendedor"));
-  passwd = gtk_entry_get_text (entry);
+  passwd = g_strdup (gtk_entry_get_text (entry));
 
   if (g_str_equal (user, "") || g_str_equal (passwd, ""))
     {
@@ -2707,7 +2753,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
   clean_credit_data();
 
@@ -2777,7 +2823,7 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
 
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2")));
     }
-  else if (gtk_widget_get_visible (builder_get (builder,"wnd_sale_credit")))
+  else if (gtk_widget_get_visible (GTK_WIDGET(builder_get (builder,"wnd_sale_credit"))))
     {
       aux = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
       gtk_entry_set_text(GTK_ENTRY(aux), rut);
@@ -3148,12 +3194,11 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   s_amount = GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2"));
   diferencia = GTK_WIDGET (builder_get (builder, "lbl_diff_amount2"));
   w_cr = GTK_WIDGET (builder_get (builder, "radio_btn_cheques"));
-  general = GTK_WIDGET (builder_get (builder, "radio_btn_general"));
   f_code = GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay"));
 
   //Se recogen los datos de la primera ventana
-  nombre_cliente = gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")));
-  rut_cliente = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")));
+  nombre_cliente = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay"))));
+  rut_cliente = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay"))));
   
   str_splited = parse_rut (rut_cliente);
   rut = atoi (str_splited[0]);
@@ -3162,7 +3207,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   //Se ve si se seleccionó el cheque de restaurant o el credito
   cheque_restaurant = (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (w_cr)) == TRUE) ? TRUE : FALSE;
   //Se ve si se se paga a cheques de restaurant en el modo general o a detalle
-  general = (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (general)) == TRUE) ? TRUE : FALSE;
+  general = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_general")));
 
   //Se recogen el monto total a pagar y el monto con el que se paga en la primera ventana
   //total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
@@ -3191,7 +3236,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
     }
   else if (cheque_restaurant == TRUE && general == TRUE)
     {
-      cod_chk_rest_gen = gtk_entry_get_text (f_code);
+      cod_chk_rest_gen = g_strdup (gtk_entry_get_text (GTK_ENTRY (f_code)));
 
       if (g_str_equal (cod_chk_rest_gen, ""))
 	{
@@ -3325,7 +3370,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 
       //Se actualiza el numero de ticket de venta
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-			    g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+			    g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
       
       //Se cierra la ventana y se cambia el foco al entry de barcode
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
@@ -3377,7 +3422,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   dv1 = g_strdup (str_splited[1]);
   g_free (str_splited);
 
-  printf ("%s, %d, %d\n", rut_cuenta1, rut1, dv1);
+  printf ("%s, %d, %s\n", rut_cuenta1, rut1, dv1);
   printf ("%d\n", primer_pago);
 
   /*-- Segundo Pago --*/
@@ -3394,7 +3439,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
 	}
       
       //Obtiene el segundo rut
-      rut_cuenta2 = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay_2")));
+      rut_cuenta2 = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay_2"))));
 
       //Obtiene el rut sin dígito verificador
       str_splited = parse_rut (rut_cuenta2);
@@ -3478,7 +3523,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
       
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step2")));
@@ -4370,7 +4415,10 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   GtkTreeIter iter;
   gint sale_id;
   gint monto;
+  gint tipo_venta, tipo_pago1, tipo_pago2;
 
+  gboolean is_credit_sell;
+  
   PGresult *res;
   gchar *q;
   gint tuples, i;
@@ -4384,8 +4432,21 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 		      3, &monto,
                       -1);
 
+  //Se ve el tipo de venta, de ser mixta se obtienen los tipos y montos de cada pago
+  tipo_venta = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT tipo_venta FROM venta WHERE id=%d", sale_id)), 0, "tipo_venta"));
+  if (tipo_venta == MIXTO)
+    {
+      tipo_pago1 = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT tipo_pago1 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "tipo_pago1"));
+      tipo_pago2 = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT tipo_pago2 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "tipo_pago2"));
+      if (tipo_pago1 == CASH)
+	monto = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto1 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "monto1"));
+      else if (tipo_pago2 == CASH)
+	monto = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto2 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "monto2"));
+    }
+
   /*Se comprueba que el monto de la venta sea menor al dinero en caja*/
-  if (monto > ArqueoCaja())
+  if ((tipo_venta == CASH || (tipo_venta == MIXTO && (tipo_pago1 == CASH || tipo_pago2 == CASH)))
+      && monto > ArqueoCaja()) //Entra aquí si la venta fué en efectivo y no hay dinero para devolver
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "treeview_nullify_sale")), 
 		"No existe monto suficiente en caja para anular esta venta");
@@ -4394,7 +4455,6 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 
   if (nullify_sale (sale_id) == 0)
     {
-
       gtk_list_store_clear (sell);
       CleanEntryAndLabelData ();
       ListClean ();
@@ -4862,7 +4922,7 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
       ListClean ();
     }
@@ -5012,8 +5072,8 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   GtkTreeModel *model;
   gint active;
   gint vendedor = user_data->user_id;
-  gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
-                                          (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  /*gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
+    (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));*/
 
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
@@ -5050,7 +5110,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE)));
+                            g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
 
       ListClean ();
 

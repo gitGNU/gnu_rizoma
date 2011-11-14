@@ -60,6 +60,8 @@ void SelectProveedores (GtkWidget *widget, gpointer data);
 
 void FillProveedores (void);
 
+void AddFoundProduct (void);
+
 void AddProveedor (GtkWidget *widget, gpointer data);
 
 void AddProveedorWindow (GtkWidget *widget, gpointer user_data);
@@ -133,5 +135,9 @@ void on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, g
 void FillPartialTree (GtkTreeView *tree);
 
 void on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_amount, gpointer data);
+
+gboolean show_description (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
+
+gboolean show_default (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 
 #endif

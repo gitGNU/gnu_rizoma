@@ -54,11 +54,18 @@ PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
                                gint to_year, gint to_month, gint to_day,
                                gchar *date_column, gchar *fields, gchar *grupo);
 
+PGresult * exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
+                                 gint to_year, gint to_month, gint to_day);
+
 gint GetTotalCashSell (guint from_year, guint from_month, guint from_day,
                        guint to_year, guint to_month, guint to_day, gint *total);
 
 gint GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
                          guint to_year, guint to_month, guint to_day, gint *total);
+
+void total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
+                                   guint to_year, guint to_month, guint to_day, 
+                                   gint *total_iva, gint *total_otros);
 
 gint GetTotalSell (guint from_year, guint from_month, guint from_day,
                    guint to_year, guint to_month, guint to_day, gint *total);
@@ -123,7 +130,7 @@ void SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *
 
 gboolean AddNewProductToDB (gchar *codigo, gchar *barcode, gchar *description, gchar *marca, char *contenido,
                             gchar *unidad, gboolean iva, gint otros, gint familia, gboolean perecible,
-                            gboolean fraccion);
+                            gboolean fraccion, gint tipo);
 
 void AgregarCompra (gchar *rut, gchar *nota, gint dias_pago);
 
@@ -149,7 +156,11 @@ gdouble FiFo (gchar *barcode, gint compra);
 
 gboolean SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta);
 
-PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day);
+PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family);
+
+PGresult * ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family);
+
+PGresult * ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre);
 
 gboolean AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gchar *comuna,
                            gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro);
@@ -263,5 +274,18 @@ gboolean fact_cheque_rest (gint id);
 gint InsertNewDocument (gint sell_id, gint document_type, gint sell_type);
 
 gboolean InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble cantidad);
+
+gboolean ingresar_cheques (gint id_emisor, gint id_venta, ChequesRestaurant *header);
+
+gboolean SaveProductsDevolucion (Productos *products, gint id_devolucion);
+
+gboolean SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_traspaso);
+
+gboolean asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre, gchar *barcode_derivado, 
+                                   gint tipo_derivado, gdouble cant_mud);
+
+gchar * sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght);
+
+gboolean codigo_disponible (gchar *code);
 
 #endif

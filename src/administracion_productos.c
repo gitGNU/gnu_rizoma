@@ -231,18 +231,36 @@ GuardarModificacionesProducto (void)
   gboolean mayorista;
   gint precio_mayorista;
   gint cantidad_mayorista;
+  gchar *precio_actual;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_barcode"));
+  if (g_str_equal (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_informerca_barcode"))), ""))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "find_product_entry")), "Seleccione un producto a editar");
+      return;
+    }
+
+  widget = GTK_WIDGET (builder_get (builder, "lbl_informerca_barcode"));
   barcode = g_strdup (gtk_label_get_text (GTK_LABEL (widget)));
 
+  widget = GTK_WIDGET (builder_get (builder, "entry_informerca_price"));
+  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+  //Comprueba si se modificó el precio de venta y realiza el calculo correspondiente
+  precio_actual = PQvaluebycol
+    (EjecutarSQL (g_strdup_printf ("SELECT precio FROM producto WHERE barcode = %s", barcode)), 0, "precio");
+  if (!g_str_equal (new_venta, precio_actual))
+    CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), NULL);
+  else
+    CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), NULL);
+
+  widget = GTK_WIDGET (builder_get (builder, "entry_informerca_price"));
+  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+  
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
   stock_minimo = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
   margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_price"));
-  new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "radio_mayorist_yes"));
   mayorista = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
@@ -261,6 +279,12 @@ GuardarModificacionesProducto (void)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_cantmayorist")), "Cantidad mayorista debe ser mayor a 1");
   else if (g_str_equal (new_venta, "") || HaveCharacters (new_venta))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "Debe insertar un precio de venta");
+  else if (margen < 0)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "El porcentaje de ganancia debe ser mayor a 0");
+  else if (new_venta < 0)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "El precio de venta debe ser mayor a 0");
+  else if (stock_minimo < 0)
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Stock mínimo debe ser mayor a 0");
   else
     {
       SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
@@ -289,8 +313,9 @@ GuardarModificacionesProducto (void)
             }
 
           gtk_list_store_set (GTK_LIST_STORE (store), &iter,
-                              7, atoi(new_venta),
+                              8, atoi(new_venta),
                               -1);
+
           statusbar_push (GTK_STATUSBAR(gtk_builder_get_object(builder, "statusbar")),
                           "Ha sido editado el producto existosamente", 5000);
         }
@@ -338,17 +363,18 @@ admini_box ()
                         g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
                                          PutPoints (ContriTotalStock ())));
   //products list
-  store = gtk_list_store_new (10,
+  store = gtk_list_store_new (11,
                               G_TYPE_STRING,  //0 shortcode
                               G_TYPE_STRING,  //1 barcode
                               G_TYPE_STRING,  //2 description
                               G_TYPE_STRING,  //3 brand
                               G_TYPE_STRING,  //4 contenido
                               G_TYPE_STRING,  //5 unit
-                              G_TYPE_DOUBLE,  //6 stock
-                              G_TYPE_INT,     //7 price
-                              G_TYPE_STRING,  //8
-                              G_TYPE_BOOLEAN);//9
+			      G_TYPE_STRING,  //6 tipo
+                              G_TYPE_DOUBLE,  //7 stock
+                              G_TYPE_INT,     //8 price
+                              G_TYPE_STRING,  //9
+                              G_TYPE_BOOLEAN);//10
 
   treeview = GTK_WIDGET(gtk_builder_get_object (builder, "treeview_find_products"));
   gtk_tree_view_set_model (GTK_TREE_VIEW(treeview), GTK_TREE_MODEL(store));
@@ -364,9 +390,10 @@ admini_box ()
   print->cols[3].name = "Marca";
   print->cols[4].name = "Cantidad";
   print->cols[5].name = "Unidad";
-  print->cols[6].name = "Stock";
-  print->cols[7].name = "Precio";
-  print->cols[8].name = NULL;
+  print->cols[6].name = "Tipo";
+  print->cols[7].name = "Stock";
+  print->cols[8].name = "Precio";
+  print->cols[9].name = NULL;
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 
@@ -378,8 +405,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Código", renderer,
                                                      "text", 0,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -390,8 +417,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Código de Barras", renderer,
                                                      "text", 1,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -401,8 +428,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
                                                      "text", 2,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -413,8 +440,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
                                                      "text", 3,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -425,8 +452,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cont", renderer,
                                                      "text", 4,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -438,8 +465,8 @@ admini_box ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unid", renderer,
                                                      "text", 5,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -448,32 +475,45 @@ admini_box ()
   gtk_tree_view_column_set_max_width (column, 38);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+    renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Tipo", renderer,
+                                                     "text", 6,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  //gtk_tree_view_column_set_min_width (column, 38);
+  //gtk_tree_view_column_set_max_width (column, 38);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Stock", renderer,
-                                                     "text", 6,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "text", 7,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_sort_column_id (column, 7);
   gtk_tree_view_column_set_min_width (column, 100);
   gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
-                                                     "text", 7,
-                                                     "foreground", 8,
-                                                     "foreground-set", 9,
+                                                     "text", 8,
+                                                     "foreground", 9,
+                                                     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW(treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_sort_column_id (column, 7);
+  gtk_tree_view_column_set_sort_column_id (column, 8);
   gtk_tree_view_column_set_min_width (column, 100);
   gtk_tree_view_column_set_max_width (column, 100);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -605,7 +645,7 @@ FillEditFields (GtkTreeSelection *selection, gpointer data)
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           0, &codigo,
                           2, &product,
-                          7, &precio,
+                          8, &precio,
                           -1);
 
       entry = GTK_WIDGET(gtk_builder_get_object(builder, "entry_"));
@@ -870,7 +910,6 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   gchar *txt_margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin"))));
   gchar *txt_precio_final = g_strdup (gtk_entry_get_text (GTK_ENTRY
 							  (builder_get (builder, "entry_informerca_price"))));
-
   /*TODO: MASCARA ANTI CARACTERES -
     Comprueba si hay texto antes del parseo, de no haber nada setea un 0
     se puede cambiar cuando los entry solo permitan el ingreso de números*/
@@ -885,7 +924,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
   if (g_str_equal (txt_precio_final, ""))
     gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), "0");
 
-  /*DESCARTADO: En el evento "CHANGE" mostraba el siguiente nÃºmero borrando el primero si era 0 --->
+  /*DESCARTADO: En el evento "CHANGE" mostraba el siguiente número borrando el primero si era 0 --->
     if (strlen (txt_margen) == 2 && g_str_equal (g_strdup_printf ("%c",txt_margen[0]), "0"))
     gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")),
     g_strdup_printf ("%c",txt_margen[1]));*/
@@ -1066,18 +1105,20 @@ BuscarProductosParaListar (void)
 {
   PGresult *res;
   gchar *q;
-  gchar *string;
+  gchar *materia_prima;
+  gchar *string, *tipo;
   gint i, resultados;
   GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_find_products"));
   GtkTreeIter iter;
   GtkWidget *widget;
   GtkListStore *store;
 
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
   widget = GTK_WIDGET(gtk_builder_get_object (builder,"find_product_entry"));
   string = g_strdup (gtk_entry_get_text(GTK_ENTRY(widget)));
   q = g_strdup_printf ( "SELECT * FROM buscar_producto( '%s', "
                         "'{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}',"
-                        "TRUE, FALSE )", string);
+                        "TRUE, FALSE ) WHERE tipo != %s", string, materia_prima);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1093,6 +1134,8 @@ BuscarProductosParaListar (void)
 
   for (i = 0; i < resultados; i++)
     {
+      tipo = g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT nombre FROM tipo_mercaderia WHERE id = %s", 
+								   PQvaluebycol (res, i, "tipo"))), 0, "nombre"));
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "codigo_corto"),
@@ -1101,11 +1144,12 @@ BuscarProductosParaListar (void)
                           3, PQvaluebycol (res, i, "marca"),
                           4, PQvaluebycol (res, i, "contenido"),
                           5, PQvaluebycol (res, i, "unidad"),
-                          6, strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL),
-                          7, atoi (PQvaluebycol (res, i, "precio")),
-                          8, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&
+			  6, tipo,
+                          7, strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL),
+                          8, atoi (PQvaluebycol (res, i, "precio")),
+                          9, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&
                               atoi (PQvaluebycol (res, i, "stock_min")) != 0) ? "Red" : "Black",
-                          9, TRUE,
+                          10, TRUE,
                           -1);
     }
   if (resultados > 0)
@@ -1114,6 +1158,135 @@ BuscarProductosParaListar (void)
       gtk_tree_selection_select_path (gtk_tree_view_get_selection (tree), gtk_tree_path_new_from_string ("0"));
     }
 }
+
+
+/**
+ * This function is called from edit menú.
+ * Call the "ModificarProducto" function.
+ * 
+ * @param: void
+ */
+void
+ModificarProductoMenu (void)
+{
+  ModificarProducto (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+}
+
+/**
+ * This function is called from edit menú.
+ * Show "wnd_comp_deriv" windows
+ * 
+ * @param: void
+ */
+void
+ModificarDerivados (void)
+{
+  ModificarProducto (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+}
+
+
+/**
+ * Setup the popup menu that must appear when user clicks in the edit
+ * button present in the compras tab.
+ *
+ * @param: void
+ * TODO: hacer que esta cosa funcione!!!!
+ */
+void
+setup_mod_prod_menu (void)
+{
+  GError *error = NULL;
+  GtkWidget *widget;
+  GtkUIManager *manager;
+  GtkAccelGroup *accel_group;
+  GtkActionGroup *action_group;
+  GtkActionEntry entry[] =
+    {
+      {"ModProducts", NULL, "Editar el producto", NULL, NULL, ModificarProductoMenu},
+      {"ModRawMaterial", NULL, "Editar derivados", NULL, NULL, ModificarDerivados}
+    };
+  manager = gtk_ui_manager_new ();
+  accel_group = gtk_ui_manager_get_accel_group (manager);
+
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_compras"));
+  gtk_window_add_accel_group (GTK_WINDOW (widget), accel_group);
+
+  action_group = gtk_action_group_new ("my edit menu");
+
+  gtk_action_group_add_actions (action_group, entry, 2, NULL);
+
+  gtk_ui_manager_insert_action_group (manager, action_group, 0);
+  gtk_ui_manager_add_ui_from_file (manager, DATADIR"/ui/edit-menu.xml", &error);
+  if (error != NULL)
+    g_print("%s: %s\n", G_STRFUNC, error->message);
+
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button"));
+  g_object_set_data (G_OBJECT (widget), "uimanager2", (gpointer)manager);
+}
+
+/**
+ * This function show de "edit menú" when the product
+ * is a raw material, else the "ModificarProducto" function 
+ * is called.
+ *
+ * @param: button
+ * @param: data
+ */
+void
+on_edit_product_button_clicked (GtkButton *button, gpointer data)
+{
+  //Variables de consulta
+  PGresult *res;
+  gchar *q;
+
+  //Información del producto
+  GtkWidget *widget_barcode;
+  gchar *barcode;
+  gchar *materia_prima;
+
+  //Menu
+  GtkUIManager *uimanager;
+  GtkWidget *widget;
+
+  widget_barcode = GTK_WIDGET (builder_get (builder, "entry_buy_barcode"));
+
+  //Se obtiene el id de la materia prima
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
+
+  //Se obtiene el barcode
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_barcode)));
+  if (g_str_equal (barcode, "")) return;
+  
+  //Se obtiene el tipo de producto
+  q = g_strdup_printf ("SELECT tipo FROM select_producto(%s)", barcode);
+  res = EjecutarSQL(q);
+  g_free(q);
+
+  if (PQresultStatus(res) != PGRES_TUPLES_OK)
+    {
+      g_printerr("error en %s\n%s",G_STRFUNC, PQresultErrorMessage(res));
+      return;
+    }
+
+  if (PQntuples (res) == 0) return;
+
+  // Si el producto es una materia prima se despliega el menú de elección
+  if (g_str_equal (PQvaluebycol (res, 0, "tipo"), materia_prima))
+    {
+      //Se muestra el menú de elección
+      /* TODO: Hacer que esto funcione
+	uimanager = GTK_UI_MANAGER (g_object_get_data (G_OBJECT (button), "uimanager2"));
+	widget = gtk_ui_manager_get_widget (uimanager, "/popup");
+	gtk_menu_popup (GTK_MENU (widget), NULL, NULL, NULL, NULL, 1, gtk_get_current_event_time ());
+	gtk_widget_show_all (widget);
+      */
+
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_edit_raw_product")));
+    }
+  else //De lo contrario simplemente se inicia la modificación del producto
+    ModificarProducto (widget_barcode);
+}
+
 
 /**
  * This function saves the modifications that the user entedered in
@@ -1132,7 +1305,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   GtkListStore *modelo;
   GtkCellRenderer *cell;
 
-  gchar *q, *unit;
+  gchar *q, *unit, *materia_prima;
   gchar *barcode;
   gint active;
   gint otros_index;
@@ -1140,6 +1313,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   PGresult *res;
   gint tuples, i, familia_id;
 
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
 
   if (GTK_IS_ENTRY (widget_barcode))
     {
@@ -1157,7 +1331,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   q = g_strdup_printf ("SELECT codigo_corto, descripcion, marca, unidad, familia, "
-                       "contenido, precio FROM select_producto(%s)", barcode);
+                       "contenido, precio, tipo FROM select_producto(%s)", barcode);
   res = EjecutarSQL(q);
   g_free(q);
 
@@ -1183,6 +1357,11 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_price"));
   gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "precio"));
+  
+  if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), materia_prima))
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), FALSE);
+  else
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), TRUE);
 
   cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_edit_product_unit"));
   modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(cmb_unit)));
@@ -1287,9 +1466,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
-
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
-
 
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
 
@@ -1297,13 +1474,11 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   if (GetIVA (barcode) != -1)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
-
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);
 
-
-  combo_imp = GTK_WIDGET(gtk_builder_get_object(builder, "cmbbox_edit_prod_extratax"));
-  combo_store = GTK_LIST_STORE(gtk_combo_box_get_model (GTK_COMBO_BOX(combo_imp)));
+  combo_imp = GTK_WIDGET (gtk_builder_get_object (builder, "cmbbox_edit_prod_extratax"));
+  combo_store = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX(combo_imp)));
 
   if (combo_store == NULL)
     {
@@ -1324,8 +1499,6 @@ ModificarProducto (GtkWidget *widget_barcode)
     }
 
   gtk_list_store_clear (combo_store);
-
-
   otros_index = GetOtrosIndex(barcode);
   active = -1;
 

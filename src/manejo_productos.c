@@ -37,13 +37,14 @@ CreateNew (gchar *barcode, gdouble cantidad)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
-                       "unidad, precio, costo_promedio, margen_promedio, "
+  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, otros, familia, impuestos, fraccion, "
+                       "unidad, COALESCE(precio, 0) AS precio, margen_promedio, tipo, "
+		       "(SELECT costo FROM obtener_costo_promedio_desde_barcode (%s)) AS costo_promedio, "
                        "(SELECT monto FROM impuesto WHERE id=1 AND producto.impuestos='t') as impuesto_normal, "
                        "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
                        "canje, stock_pro, precio_mayor, cantidad_mayor, mayorista "
                        "FROM select_producto(%s) as producto",
-                       barcode);
+                       barcode, barcode);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -62,9 +63,14 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->precio_compra = GetNeto (barcode);
   new->product->iva = atoi (PQvaluebycol (res, 0, "impuesto_normal"));
   new->product->otros = atoi (PQvaluebycol (res, 0, "impuesto_otro"));
+  new->product->otros_id = atoi (PQvaluebycol (res, 0, "otros"));
+  new->product->impuestos = g_str_equal (PQvaluebycol (res, 0, "impuestos"), "t") == TRUE ? TRUE : FALSE;
+  new->product->fraccion = g_str_equal (PQvaluebycol (res, 0, "fraccion"), "t") == TRUE ? TRUE : FALSE;
+  new->product->familia = atoi (PQvaluebycol (res, 0, "familia"));
   new->product->margen = strtod (PUT (PQvaluebycol (res, 0, "margen_promedio")), (char **)NULL);
   new->product->canjeable = atoi (PQvaluebycol (res, 0, "canje"));
   new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **)NULL);
+  new->product->tipo = atoi (PQvaluebycol (res, 0, "tipo"));
   /* Datos Mayoristas */
   new->product->precio_mayor = atoi (PQvaluebycol (res, 0, "precio_mayor"));
   new->product->cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));
