@@ -37,6 +37,8 @@ gchar * PutComa (gchar *number);
 
 PGresult * EjecutarSQL (gchar *sentencia);
 
+PGresult * EjecutarSQL2 (gchar *sentencia);
+
 gchar * SQLgetvalue( PGresult *res, gint fila, const gchar *col );
 
 gint EjecutarSQLInsert (gchar *sentencia);

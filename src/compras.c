@@ -9109,7 +9109,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 		       "ON c.id = fc.id_compra "
 		       "WHERE c.ingresada = 't' "
 		       "AND c.anulada = 'f' "
-		       "AND c.anulada_pi = 'f'");
+		       "AND c.anulada_pi = 'f' ");
 
   /*Comprobando datos*/
   if (!g_str_equal(id_compra, ""))

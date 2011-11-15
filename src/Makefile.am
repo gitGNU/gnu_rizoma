@@ -144,3 +144,6 @@ rizoma_informes_LDFLAGS = -Wl,--export-dynamic
 INCLUDES = $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) -DDATADIR=\"$(pkgdatadir)\"
 
 EXTRA_DIST = ChangeLog
+
+check-syntax:
+	gcc -o nul -S $(CFLAGS) $(PGSQL_CFLAGS) $(GTK_CFLAGS) ${CHK_SOURCES} -DDATADIR=\"$(pkgdatadir)\"

@@ -42,6 +42,8 @@ void PrintTree (GtkWidget *widget, gpointer data);
 
 void PrintTwoTree (GtkWidget *widget, gpointer data);
 
+void PrintThreeTree (GtkWidget *widget, gpointer data);
+
 void SelectivePrintTwoTree (GtkWidget *widget, gpointer data);
 
 #endif

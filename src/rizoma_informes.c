@@ -34,6 +34,7 @@
 #include "postgres-functions.h"
 #include "config_file.h"
 #include "utils.h"
+#include "errors.h"
 #include "encriptar.h"
 #include "rizoma_errors.h"
 #include "printing.h"
@@ -62,7 +63,6 @@ ChangeVenta (void)
   gchar *idventa;
   gint i, tuples;
   PGresult *res;
-
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
@@ -730,6 +730,55 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 }
 
 
+void
+fill_filter_nullify_cmbbox (gchar *combobox_name)
+{
+  GtkWidget *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, combobox_name));
+  modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+
+  if (modelo == NULL)
+    {
+      GtkCellRenderer *cell;
+      modelo = gtk_list_store_new (2,
+				   G_TYPE_INT,
+				   G_TYPE_STRING);
+
+      gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
+				     "text", 1,
+				     NULL);
+    }
+
+  gtk_list_store_clear(modelo);
+
+  gtk_list_store_append(modelo, &iter);
+  gtk_list_store_set(modelo, &iter,
+		     0, 0,
+		     1, "TODAS",
+		     -1);
+
+  gtk_list_store_append(modelo, &iter);
+  gtk_list_store_set(modelo, &iter,
+		     0, 1,
+		     1, "Vigentes",
+		     -1);
+
+  gtk_list_store_append(modelo, &iter);
+  gtk_list_store_set(modelo, &iter,
+		     0, 2,
+		     1, "Anuladas",
+		     -1);
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+}
+
 /**
  * Es llamada por la funcion "check_passwd".
  *
@@ -739,7 +788,6 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
  *
  *
  */
-
 void
 reports_win (void)
 {
@@ -753,6 +801,7 @@ reports_win (void)
 
   Print *print = (Print *) malloc (sizeof (Print));
   Print *cuadratura = (Print *) malloc (sizeof (Print));
+  Print *proveedor = (Print *) malloc (sizeof (Print));
 
   Print *libro = (Print *) malloc (sizeof (Print));
   Print *libro2 = (Print *) malloc (sizeof (Print));
@@ -764,6 +813,10 @@ reports_win (void)
   Print *libroRecibidos = (Print *) malloc (sizeof (Print));
   libroEnviados->son = (Print *) malloc (sizeof (Print));
   libroRecibidos->son = (Print *) malloc (sizeof (Print));
+
+  Print *libro_compra = (Print *) malloc (sizeof (Print));
+  libro_compra->son = (Print *) malloc (sizeof (Print));
+  libro_compra->son->son = (Print *) malloc (sizeof (Print));
 
   // Informe Ventas Exentas
   Print *exempt = (Print *) malloc (sizeof (Print));
@@ -1683,6 +1736,19 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
+  proveedor->tree = treeview;
+  proveedor->title = "Informe Proveedor";
+  proveedor->date_string = NULL;
+  proveedor->cols[0].name = "Proveedor";
+  proveedor->cols[1].name = "Unidades";
+  proveedor->cols[2].name = "Comprado $";
+  proveedor->cols[3].name = "Margen %";
+  proveedor->cols[4].name = "Contribución $";
+  proveedor->cols[5].name = NULL;
+
+  g_signal_connect (builder_get (builder, "btn_print_providers"), "clicked",
+                    G_CALLBACK (PrintTree), (gpointer)proveedor);
+
   /*
     End Proveedores
    */
@@ -2319,6 +2385,21 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
+  libro_compra->tree = treeview;
+  libro_compra->title = "Libro de Compras";
+  libro_compra->name = "Compras";
+  libro_compra->date_string = NULL;
+  libro_compra->cols[0].name = "ID";
+  libro_compra->cols[0].num = 0;
+  libro_compra->cols[1].name = "Fecha";
+  libro_compra->cols[1].num = 1;
+  libro_compra->cols[2].name = "Estado";
+  libro_compra->cols[2].num = 2;
+  libro_compra->cols[3].name = "Monto Compra";
+  libro_compra->cols[3].num = 3;
+  libro_compra->cols[4].name = "Monto Anulado";
+  libro_compra->cols[4].num = 4;
+  libro_compra->cols[5].name = NULL;
 
   //Facturas
   store = gtk_list_store_new (8,
@@ -2406,6 +2487,20 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 5);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+
+  libro_compra->son->tree = treeview;
+  libro_compra->son->cols[0].name = "N° Factura";
+  libro_compra->son->cols[0].num = 0;
+  libro_compra->son->cols[1].name = "Fecha Ingreso";
+  libro_compra->son->cols[1].num = 1;
+  libro_compra->son->cols[2].name = "Pagada";
+  libro_compra->son->cols[2].num = 2;
+  libro_compra->son->cols[3].name = "Fecha Pago";
+  libro_compra->son->cols[3].num = 3;
+  libro_compra->son->cols[4].name = "Monto Anulado";
+  libro_compra->son->cols[4].num = 4;
+  libro_compra->son->cols[5].name = NULL;
 
 
   //Detalle Factura
@@ -2505,6 +2600,27 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 6);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  libro_compra->son->son->tree = treeview;
+  libro_compra->son->son->cols[0].name = "Barcode";
+  libro_compra->son->son->cols[0].num = 0;
+  libro_compra->son->son->cols[1].name = "Descripcion";
+  libro_compra->son->son->cols[1].num = 1;
+  libro_compra->son->son->cols[2].name = "Cant. comprada";
+  libro_compra->son->son->cols[2].num = 2;
+  libro_compra->son->son->cols[3].name = "Cant. anulada";
+  libro_compra->son->son->cols[3].num = 3;
+  libro_compra->son->son->cols[4].name = "Precio";
+  libro_compra->son->son->cols[4].num = 4;
+  libro_compra->son->son->cols[5].name = "Monto Compra";
+  libro_compra->son->son->cols[5].num = 5;
+  libro_compra->son->son->cols[6].name = "Monto Anulado";
+  libro_compra->son->son->cols[6].num = 6;
+  libro_compra->son->son->cols[7].name = NULL;
+
+  g_signal_connect (builder_get (builder, "btn_print_buy_products"), "clicked",
+                    G_CALLBACK (PrintThreeTree), (gpointer)libro_compra);
+
 
   /*
     END Informe Compras
@@ -4635,6 +4751,72 @@ avanzar_barra_progreso (GtkWidget * progreso)
 }
 
 
+
+/**
+ * Is called by "on_ntbk_reports_switch_page" and "on_btn_get_stat_clicked"
+ *
+ * This function show transfer information (recibed and sent)
+ * on "ntbk_traspasos".
+ *
+ */
+void
+calcular_traspasos (void)
+{
+  PGresult *res;
+  char *sql;
+
+  if (g_date_get_year (date_begin) == G_DATE_BAD_YEAR || g_date_get_year (date_end) == G_DATE_BAD_YEAR)
+    // Total Enviados
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
+			    "FROM traspaso "
+			    "WHERE origen = 1" );
+  else
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
+			    "FROM traspaso "
+			    "WHERE origen = 1 "
+			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
+			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+
+  res = EjecutarSQL (sql);
+  g_free (sql);
+
+  gchar *enviado, *recibido;
+
+  if (res == NULL)
+    return;
+
+  enviado = PQvaluebycol (res, 0, "enviados");
+  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? " No hay productos enviados" : "%s", PUT(enviado));
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
+
+
+  if (g_date_get_year (date_begin) == G_DATE_BAD_YEAR || g_date_get_year (date_end) == G_DATE_BAD_YEAR)
+    // Total Recibidos
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
+			    "FROM traspaso "
+			    "WHERE origen != 1" );
+  else
+    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
+			    "FROM traspaso "
+			    "WHERE origen != 1 "
+			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
+			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+
+  res = EjecutarSQL (sql);
+  g_free (sql);
+
+  if (res == NULL)
+    return;
+
+  recibido = PQvaluebycol (res, 0, "recibidos");
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
+                        g_strdup_printf ((g_str_equal("",recibido)) ? " No hay productos recibidos" : "%s", PUT(recibido)));
+}
+
 /**
  * Es llamada cuando se presiona el boton "btn_get_stat" (signal clicked)
  *
@@ -4755,75 +4937,6 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         }
     }
 }
-
-
-/**
- * Is called by "on_ntbk_reports_switch_page" and "on_btn_get_stat_clicked"
- *
- * This function show transfer information (recibed and sent)
- * on "ntbk_traspasos".
- *
- */
-
-void
-calcular_traspasos (void)
-{
-  PGresult *res;
-  char *sql;
-
-  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
-    // Total Enviados
-    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
-			    "FROM traspaso "
-			    "WHERE origen = 1" );
-  else
-    sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
-			    "FROM traspaso "
-			    "WHERE origen = 1 "
-			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
-			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
-			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
-
-  res = EjecutarSQL (sql);
-  g_free (sql);
-
-  gchar *enviado, *recibido;
-
-  if (res == NULL)
-    return;
-
-  enviado = PQvaluebycol (res, 0, "enviados");
-  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? "%s", PUT(enviado) : " No hay productos enviados");
-
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
-
-
-  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
-    // Total Recibidos
-    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
-			    "FROM traspaso "
-			    "WHERE origen != 1" );
-  else
-    sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
-			    "FROM traspaso "
-			    "WHERE origen != 1 "
-			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
-			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
-			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
-
-  res = EjecutarSQL (sql);
-  g_free (sql);
-
-  if (res == NULL)
-    return;
-
-  recibido = PQvaluebycol (res, 0, "recibidos");
-
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
-                        g_strdup_printf ((!g_str_equal("",recibido)) ? "%s", PUT(recibido) : " No hay productos recibidos"));
-
-}
-
 
 /**
  * Is triggered by "switch-page" event on "ntbk_reports"
@@ -5028,12 +5141,12 @@ on_btn_filter_stores_clicked ()
   char *sql, *local_consulta;
 
   if ((store == NULL || g_str_equal (store, "TODOS")) || active == -1)
-    local_consulta = g_strdup_printf("");
+    local_consulta = g_strdup ("");
   else
-    local_consulta = g_strdup_printf("AND b.nombre = '%s'", store);
+    local_consulta = g_strdup_printf ("AND b.nombre = '%s'", store);
 
 
-  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
+  if (g_date_get_year (date_begin) == G_DATE_BAD_YEAR || g_date_get_year (date_end) == G_DATE_BAD_YEAR)
     // Total Enviados
     sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
 			    "FROM traspaso t "
@@ -5041,7 +5154,7 @@ on_btn_filter_stores_clicked ()
 			    "ON t.origen = b.id "
 			    "%s "
 			    "WHERE origen = 1"
-			    , local_consulta);
+			    ,local_consulta);
   else
     sql = g_strdup_printf ( "SELECT SUM(monto) AS enviados "
 			    "FROM traspaso t "
@@ -5063,12 +5176,12 @@ on_btn_filter_stores_clicked ()
     return;
 
   enviado = PQvaluebycol (res, 0, "enviados");
-  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? "%s", enviado : " No hay productos enviados");
+  enviado = g_strdup_printf ((g_str_equal("", enviado)) ? " No hay productos enviados" : "%s", enviado);
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
 
 
-  if (g_date_get_year (date_begin) == NULL || g_date_get_year (date_end) == NULL)
+  if (g_date_get_year (date_begin) == G_DATE_BAD_YEAR || g_date_get_year (date_end) == G_DATE_BAD_YEAR)
     // Total Recibidos
     sql = g_strdup_printf ( "SELECT SUM(monto) AS recibidos "
 			    "FROM traspaso t "
@@ -5098,59 +5211,10 @@ on_btn_filter_stores_clicked ()
   recibido = PQvaluebycol (res, 0, "recibidos");
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
-                        g_strdup_printf ((!g_str_equal("",recibido)) ? "%s", recibido : " No hay productos recibidos"));
+                        g_strdup_printf ((g_str_equal("",recibido)) ? " No hay productos recibidos" : "%s", recibido));
 
 }
 
-
-void
-fill_filter_nullify_cmbbox (gchar *combobox_name)
-{
-  GtkWidget *combo;
-  GtkTreeIter iter;
-  GtkListStore *modelo;
-
-  combo = GTK_WIDGET (gtk_builder_get_object(builder, combobox_name));
-  modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
-
-  if (modelo == NULL)
-    {
-      GtkCellRenderer *cell;
-      modelo = gtk_list_store_new (2,
-				   G_TYPE_INT,
-				   G_TYPE_STRING);
-
-      gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
-
-      cell = gtk_cell_renderer_text_new();
-      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
-      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
-				     "text", 1,
-				     NULL);
-    }
-
-  gtk_list_store_clear(modelo);
-
-  gtk_list_store_append(modelo, &iter);
-  gtk_list_store_set(modelo, &iter,
-		     0, 0,
-		     1, "TODAS",
-		     -1);
-
-  gtk_list_store_append(modelo, &iter);
-  gtk_list_store_set(modelo, &iter,
-		     0, 1,
-		     1, "Vigentes",
-		     -1);
-
-  gtk_list_store_append(modelo, &iter);
-  gtk_list_store_set(modelo, &iter,
-		     0, 2,
-		     1, "Anuladas",
-		     -1);
-
-  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
-}
 
 void
 on_btn_apply_family_filter_clicked ()
