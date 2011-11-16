@@ -105,7 +105,6 @@ PrintTree (GtkWidget *widget, gpointer data)
         {
           column_type = gtk_tree_model_get_column_type (model, i);
 
-
           switch (column_type)
             {
             case G_TYPE_STRING:
@@ -245,7 +244,7 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
 
   fprintf (fp, "%s\n%s\n\n", print->title, print->date_string);
 
-  do    
+  do
     {
       //Se agrega la cabecera de las columnas del treeview padre
       for (i = 0; i < father_cols; i++)
@@ -294,7 +293,11 @@ PrintTwoTree (GtkWidget *widget, gpointer data)
       gtk_tree_view_row_activated (print->tree, gtk_tree_model_get_path (model_father, &iter_father), 
 				   gtk_tree_view_get_column (print->tree, 0));
 
-      gtk_tree_model_get_iter_first (model_son, &iter_son);
+      if (gtk_tree_model_get_iter_first (model_son, &iter_son) == FALSE)
+	{
+	  printf ("No se seleccionó una fila del treeview hijo, puede ser que no haya información\n");
+	  return;
+	}
 
       //Se agrega la cabecera de las columnas del treeview hijo
       fprintf (fp, ",");

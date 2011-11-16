@@ -799,7 +799,8 @@ reports_win (void)
 
   GError *error = NULL;
 
-  Print *print = (Print *) malloc (sizeof (Print));
+  Print *ranking = (Print *) malloc (sizeof (Print));
+  Print *ranking_mp = (Print *) malloc (sizeof (Print));
   Print *cuadratura = (Print *) malloc (sizeof (Print));
   Print *proveedor = (Print *) malloc (sizeof (Print));
 
@@ -1167,22 +1168,23 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
 
-  print->tree = treeview;
-  print->title = "Ranking de Ventas";
-  print->date_string = NULL;
-  print->cols[1].name = "Producto";
-  print->cols[2].name = "Marca";
-  print->cols[3].name = "Medida";
-  print->cols[4].name = "Unidad";
-  print->cols[5].name = "Unidades";
-  print->cols[6].name = "Vendido $";
-  print->cols[7].name = "Costo";
-  print->cols[8].name = "Contrib";
-  print->cols[9].name = "Margen";
-  print->cols[10].name = NULL;
+  ranking->tree = treeview;
+  ranking->title = "Ranking de Ventas";
+  ranking->date_string = NULL;
+  ranking->cols[0].name = "Barcode";
+  ranking->cols[1].name = "Producto";
+  ranking->cols[2].name = "Marca";
+  ranking->cols[3].name = "Medida";
+  ranking->cols[4].name = "Unidad";
+  ranking->cols[5].name = "Unidades";
+  ranking->cols[6].name = "Vendido $";
+  ranking->cols[7].name = "Costo";
+  ranking->cols[8].name = "Contrib";
+  ranking->cols[9].name = "Margen";
+  ranking->cols[10].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-                    G_CALLBACK (PrintTree), (gpointer)print);
+                    G_CALLBACK (PrintTree), (gpointer)ranking);
 
 
   /* End Sells Rank */
@@ -1290,7 +1292,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
-    renderer = gtk_cell_renderer_text_new ();
+  renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Contrib. $", renderer,
                                                      "text", 8,
                                                      NULL);
@@ -1316,21 +1318,23 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
 
+  ranking_mp->tree = treeview;
+  ranking_mp->title = "Ranking de Ventas (Materias primas)";
+  ranking_mp->date_string = NULL;
+  ranking_mp->cols[0].name = "Barcode";
+  ranking_mp->cols[1].name = "Producto";
+  ranking_mp->cols[2].name = "Marca";
+  ranking_mp->cols[3].name = "Medida";
+  ranking_mp->cols[4].name = "Unidad";
+  ranking_mp->cols[5].name = "Unidades";
+  ranking_mp->cols[6].name = "Vendido $";
+  ranking_mp->cols[7].name = "Costo";
+  ranking_mp->cols[8].name = "Contrib";
+  ranking_mp->cols[9].name = "Margen";
+  ranking_mp->cols[10].name = NULL;
 
-  /*print->tree = treeview;
-  print->title = "Ranking de Ventas";
-  print->date_string = NULL;
-  print->cols[0].name = "Producto";
-  print->cols[1].name = "Marca";
-  print->cols[2].name = "Medida";
-  print->cols[3].name = "Unidad";
-  print->cols[4].name = "Unidades";
-  print->cols[5].name = "Vendido $";
-  print->cols[6].name = "Costo";
-  print->cols[7].name = NULL;
-
-  g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-  G_CALLBACK (PrintTree), (gpointer)print);*/
+  g_signal_connect (builder_get (builder, "btn_print_rank_mp"), "clicked",
+		    G_CALLBACK (PrintTree), (gpointer)ranking_mp);
 
 
   /* End Sells Rank MP */
@@ -4951,19 +4955,9 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   GtkWidget *combo;
   GtkTreeIter iter;
   GtkListStore *modelo;
-  gint tuples,i;
+  gint tuples,i,sub_page_num;
   PGresult *res;
-
-  if (page_num != 6 || page_num != 1)
-    { //Se ocultan los widget para filtrar familias
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
-    }
-  if (page_num != 7)
-    { //Se ocultan los widget para filtrar las tiendas
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
-    }
+  GtkNotebook *sub_notebook;
 
   if (page_num == 6 || page_num == 1)
     {      
@@ -5010,22 +5004,46 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 	}
 
       gtk_combo_box_set_active (GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_family_filter")), 0);
+
+      // Botón imprimir en las subpestañas del ranking de ventas
+      if (page_num == 1)
+	{
+	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
+	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
+	  
+	  if (sub_page_num == 0) //Sell rank
+	    {
+	      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
+	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
+	    }
+	  else if (sub_page_num == 1) //Sell rank MP
+	    {
+	      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
+	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
+	    }
+	}
+    }
+  else // Si (page_num != 6 || page_num != 1) Se ocultan los widget para filtrar familias
+    { 
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
     }
 
-  /*Si se selecciona la "pagina 5" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
-  if ((page_num == 6 || page_num == 1) &&
+  /*Si se selecciona la "pagina 6" (la pestaña cuadratura) y el entry de la fecha de termino esta habilitado*/
+  if ((page_num == 6) &&
      gtk_widget_get_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end"))) == TRUE)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button3")), FALSE);
     }
-  else if ((page_num != 6 || page_num != 1) &&
+  else if ((page_num != 6) &&
      gtk_widget_get_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end"))) == FALSE)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_date_end")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button3")), TRUE);
     }
 
+  /*Traspasos*/
   if (page_num == 7)
     {
       // Se muestran los widget para filtrar las tiendas
@@ -5086,7 +5104,12 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 			     -1);
 	}
 
-      gtk_combo_box_set_active (combo, 0);
+      gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+    }  
+  else // SI (page_num != 7) Se ocultan los widget para filtrar las tiendas
+    { 
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
     }
 }
 
@@ -5269,4 +5292,26 @@ on_btn_apply_family_filter_clicked ()
     }
   else if (page_num == 6) //Cuadratura
     (g_str_equal (store, "TODOS")) ? fill_cuadratura (0) : fill_cuadratura (familia);  
+}
+
+
+/**
+ * Is triggered by "switch-page" event on "ntbk_sell_rank"
+ *
+ * This function aims update the pages information when
+ * to switch between them.
+ */
+void
+on_ntbk_sells_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
+{
+  if (page_num == 0) //Sell rank
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
+    }
+  else if (page_num == 1) //Sell rank MP
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
+    }
 }

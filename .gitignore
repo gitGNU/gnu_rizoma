@@ -29,6 +29,7 @@ src/Makefile.in
 src/fakebuy
 src/.deps
 src/Makefile
+src/nul
 src/rizoma-config
 *.out
 *.orig
