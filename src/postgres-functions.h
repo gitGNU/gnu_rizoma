@@ -290,4 +290,8 @@ gchar * sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght);
 
 gboolean codigo_disponible (gchar *code);
 
+gint get_last_sell_id ();
+
+gboolean SaveDevolucion (gint total, gint rut);
+
 #endif

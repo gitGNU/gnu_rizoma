@@ -598,7 +598,7 @@ ventas_win ()
   ventas_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_sell"));
 
   //Titulo
-  gtk_window_set_title (ventas_gui, 
+  gtk_window_set_title (GTK_WINDOW (ventas_gui), 
 			g_strdup_printf ("POS Rizoma Comercio: Ventas - Conectado a [%s@%s]",
 					 config_profile,
 					 rizoma_get_value ("SERVER_HOST")));
@@ -620,14 +620,11 @@ ventas_win ()
   /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
   /*                       g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE))); */
 
-  venta->store =  gtk_list_store_new (8,
+  venta->store =  gtk_list_store_new (5,
                                       G_TYPE_STRING,
                                       G_TYPE_STRING,
-                                      G_TYPE_STRING,
-                                      G_TYPE_INT,
-                                      G_TYPE_STRING,
-                                      G_TYPE_STRING,
-                                      G_TYPE_INT,
+				      G_TYPE_STRING,
+				      G_TYPE_INT,
                                       G_TYPE_STRING);
   if (venta->header != NULL)
     {
@@ -644,13 +641,14 @@ ventas_win ()
           gtk_list_store_insert_after (venta->store, &iter, NULL);
           gtk_list_store_set (venta->store, &iter,
                               0, fill->product->codigo,
-                              1, fill->product->producto,
-                              2, fill->product->marca,
-                              3, fill->product->contenido,
-                              4, fill->product->unidad,
-                              5, g_strdup_printf ("%.3f", fill->product->cantidad),
-                              6, precio,
-                              7, PutPoints (g_strdup_printf ("%.0f", fill->product->cantidad * precio)),
+                              1, g_strdup_printf ("%s %s %d %s",
+						  fill->product->producto,
+						  fill->product->marca,
+						  fill->product->contenido,
+						  fill->product->unidad),
+                              2, g_strdup_printf ("%.3f", fill->product->cantidad),
+                              3, precio,
+                              4, PutPoints (g_strdup_printf ("%.0f", fill->product->cantidad * precio)),
                               -1);
           fill = fill->next;
         }
@@ -677,34 +675,35 @@ ventas_win ()
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 400);
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
-                                                     "text", 2,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+  /* renderer = gtk_cell_renderer_text_new (); */
+  /* column = gtk_tree_view_column_new_with_attributes ("Marca", renderer, */
+  /*                                                    "text", 2, */
+  /*                                                    NULL); */
+  /* gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column); */
+  /* gtk_tree_view_column_set_alignment (column, 0.5); */
+  /* gtk_tree_view_column_set_resizable (column, FALSE); */
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Cont.", renderer,
-                                                     "text", 3,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+  /* renderer = gtk_cell_renderer_text_new (); */
+  /* column = gtk_tree_view_column_new_with_attributes ("Cont.", renderer, */
+  /*                                                    "text", 3, */
+  /*                                                    NULL); */
+  /* gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column); */
+  /* gtk_tree_view_column_set_alignment (column, 0.5); */
+  /* gtk_tree_view_column_set_resizable (column, FALSE); */
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Uni.", renderer,
-                                                     "text", 4,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
-  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+  /* renderer = gtk_cell_renderer_text_new (); */
+  /* column = gtk_tree_view_column_new_with_attributes ("Uni.", renderer, */
+  /*                                                    "text", 4, */
+  /*                                                    NULL); */
+  /* gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column); */
+  /* g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL); */
+  /* gtk_tree_view_column_set_resizable (column, FALSE); */
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
-                                                     "text", 5,
+                                                     "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -713,7 +712,7 @@ ventas_win ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Precio Uni.", renderer,
-                                                     "text", 6,
+                                                     "text", 3,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -722,7 +721,7 @@ ventas_win ()
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Sub Total", renderer,
-                                                     "text", 7,
+                                                     "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -970,13 +969,14 @@ AgregarProducto (GtkButton *button, gpointer data)
           gtk_list_store_insert_after (venta->store, &iter, NULL);
           gtk_list_store_set (venta->store, &iter,
                               0, venta->products->product->codigo,
-                              1, venta->products->product->producto,
-                              2, venta->products->product->marca,
-                              3, venta->products->product->contenido,
-                              4, venta->products->product->unidad,
-                              5, g_strdup_printf ("%.3f", venta->products->product->cantidad),
-                              6, precio,
-                              7, PutPoints (g_strdup_printf
+                              1, g_strdup_printf ("%s %s %d %s",
+						  venta->products->product->producto,
+						  venta->products->product->marca,
+						  venta->products->product->contenido,
+						  venta->products->product->unidad),
+                              2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
+                              3, precio,
+                              4, PutPoints (g_strdup_printf
                                             ("%.0f", venta->products->product->cantidad * precio)),
                               -1);
 
@@ -1004,9 +1004,9 @@ AgregarProducto (GtkButton *button, gpointer data)
 
 
           gtk_list_store_set (venta->store, &venta->product_check->product->iter,
-                              5, g_strdup_printf ("%.3f", venta->product_check->product->cantidad),
-                              6, precio,
-                              7, PutPoints (g_strdup_printf
+                              2, g_strdup_printf ("%.3f", venta->product_check->product->cantidad),
+                              3, precio,
+                              4, PutPoints (g_strdup_printf
                                             ("%.0f", venta->product_check->product->cantidad *
                                              precio)),
                               -1);
