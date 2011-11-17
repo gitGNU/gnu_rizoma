@@ -418,7 +418,6 @@ InicializarCaja (gint monto)
  * @return monto de la consulta, -1 si fallo
  *
  */
-
 gint
 ArqueoCaja (void)
 {

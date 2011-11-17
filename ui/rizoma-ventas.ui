@@ -4006,7 +4006,7 @@
           <object class="GtkLabel" id="label101">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes" context="yes">&lt;span size="xx-large"&gt;&lt;b&gt;Ventas&lt;/b&gt;&lt;/span&gt;</property>
+            <property name="label" translatable="yes" context="yes">&lt;span size="xx-large"&gt;&lt;b&gt;POS Rizoma Comercio - Ventas&lt;/b&gt;&lt;/span&gt;</property>
             <property name="use_markup">True</property>
             <property name="justify">center</property>
           </object>
@@ -4095,7 +4095,7 @@
                   <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Total&lt;/span&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Total:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4109,7 +4109,7 @@
                   <object class="GtkLabel" id="label6">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Cant. Mayorista&lt;/span&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Cant. Mayorista:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4125,7 +4125,7 @@
                   <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Stock&lt;/span&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Stock:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4139,7 +4139,7 @@
                   <object class="GtkLabel" id="label8">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Precio Mayor&lt;/span&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Precio Mayor: &lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4153,7 +4153,7 @@
                   <object class="GtkLabel" id="label9">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Precio Unitario&lt;/span&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt; Precio Unitario:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4181,7 +4181,7 @@
                   <object class="GtkLabel" id="label19">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;span size="15000"&gt;Boleta Nº&lt;/span&gt;&lt;/b&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="15000"&gt;Boleta Nº&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4217,7 +4217,7 @@
                   <object class="GtkLabel" id="label20">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes" context="yes">&lt;b&gt;&lt;span size="15000"&gt;Vendedor: &lt;/span&gt;&lt;/b&gt;</property>
+                    <property name="label" translatable="yes" context="yes">&lt;span size="15000"&gt;Vendedor: &lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                   <packing>
@@ -4311,7 +4311,7 @@
                       <object class="GtkLabel" id="label11">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Producto &lt;/span&gt;</property>
+                        <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt; Producto: &lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -4460,7 +4460,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Código Simple&lt;/span&gt;</property>
+                        <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Código Simple:&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -4598,12 +4598,6 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkVBox" id="vbox1_stock_min">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -4626,7 +4620,7 @@
                       <object class="GtkLabel" id="label13">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Stock para&lt;/span&gt;</property>
+                        <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Stock para:&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -4674,6 +4668,12 @@
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>

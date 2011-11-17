@@ -157,7 +157,7 @@ FillProductSell (gchar *barcode,
   str_aux = g_strdup(gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))));
   str_aux = g_strdup_printf ("%.0f", strtod (PUT (str_aux), (char **)NULL) * atoi (precio));
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
-                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", str_aux));
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", PutPoints(str_aux)));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), 
 			g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", codigo_corto));
@@ -612,11 +612,11 @@ ventas_win ()
   gtk_widget_show_all (ventas_gui);
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
-                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", user_data->user));
+                        g_strdup_printf ("<span size=\"15000\">%s</span>", user_data->user));
 
   
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%.6d</span>", get_last_sell_id ()));
+                        g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
 
   // El numerno de venta no se debe basar en el numero de ticket, puesto que aquel corresponde a los documentos que se han emitido
   /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
@@ -1216,7 +1216,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+                        g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
 
   ListClean ();
 }
@@ -1233,7 +1233,7 @@ MoveFocus (GtkEntry *entry, gpointer data)
 { // Al presionar [ENTER] en el entry "Cantidad"
   if (atoi(rizoma_get_value("VENTA_DIRECTA")) == FALSE || // Si VENTA_DIRECTA = 0 mueve el foco al botón "Añadir"
       (atoi(rizoma_get_value("VENTA_DIRECTA")) == TRUE && // O Si VENTA_DIRECTA = 1 Y Es una venta fracción
-       (VentaFraccion (g_strdup (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")))))) )) 
+       (VentaFraccion (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry")))))) )) 
     {
       GtkWidget *button;
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
@@ -1260,7 +1260,7 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
       subtotal = llround ((gdouble)cantidad * precio);
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                            g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                              PutPoints (g_strdup_printf ("%u", subtotal))));
     }
   else
@@ -1269,7 +1269,7 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
         subtotal = llround ((gdouble)cantidad * precio_mayor);
 
         gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
-                              g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                              g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                                PutPoints (g_strdup_printf ("%u", subtotal))));
       }
 }
@@ -1458,7 +1458,7 @@ gint
 SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-  gchar *tipo, *materia_prima;
+  gchar *materia_prima;
 
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
@@ -1608,7 +1608,7 @@ void
 CloseBuscarWindow (GtkWidget *widget, gpointer data)
 {
   gboolean add = (gboolean) data;
-  gboolean fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")))));
+  gboolean fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry")))));
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));  
 
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_buscar")));
@@ -2416,7 +2416,7 @@ ChangeSeller (GtkWidget *widget, gpointer data)
       user_data->level = ReturnUserLevel (user);
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
-                            g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", user_data->user));
+                            g_strdup_printf ("<span size=\"15000\">%s</span>", user_data->user));
 
       CloseWindowChangeSeller (widget, NULL);
     }
@@ -2761,7 +2761,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+			g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
 
   clean_credit_data();
 
@@ -3144,27 +3144,6 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
 
 }
 
-/**
- * This function enters the sale when the amount
- * entered is enough, else show the 'wnd_mixed_pay_step2'
- * to complete. (signal-clicked)
- *
- * @param: GtkButton *button
- * @param: gpointer data
- */
-void
-on_entry_rut_mixed_pay_activate (GtkEntry *entry, gpointer data)
-{
-  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step1"))))
-    {
-      if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_cheques"))))
-	show_srch_emisor (entry, data);
-      else
-	search_client (GTK_WIDGET (entry), data);
-    }
-  else if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step2"))))
-    search_client (GTK_WIDGET (entry), data);
-}
 
 /**
  * This function enters the sale when the amount
@@ -3378,7 +3357,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 
       //Se actualiza el numero de ticket de venta
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-			    g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+			    g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
       
       //Se cierra la ventana y se cambia el foco al entry de barcode
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
@@ -3531,7 +3510,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+			g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
       
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step2")));
@@ -3860,7 +3839,7 @@ on_btn_add_chk_rest_clicked (GtkButton *button, gpointer user_data)
 	{
 	  add_chk_rest_to_list (codigo, fecha_venc, atoi(monto));
 
-	  gtk_list_store_insert (pago_chk_rest->store, &iter, NULL);
+	  gtk_list_store_insert_after (pago_chk_rest->store, &iter, NULL);
           gtk_list_store_set (pago_chk_rest->store, &iter,
                               0, pago_chk_rest->cheques->cheque->codigo,
                               1, pago_chk_rest->cheques->cheque->fecha_vencimiento,
@@ -3898,7 +3877,7 @@ on_btn_del_chk_rest_clicked (GtkButton *button, gpointer user_data)
   GtkTreeIter iter;
   GtkTreeSelection *selection;
   gchar *codigo;
-  gint position;
+  //gint position;
   gint subtotal;
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (pago_chk_rest->treeview));
@@ -4513,6 +4492,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   close_nullify_sale_dialog ();
 }
 
+
 void
 on_dialog_cash_box_opened_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {
@@ -4563,62 +4543,6 @@ on_btn_devolver_clicked (GtkWidget *widget, gpointer data)
 
 /**
  * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
- * de la ventana "wnd_devolver".
- *
- * Esta Funcion visualiza la ventana "wnd_srch_provider"(que es para buscar
- * un proveedor) y ademas  carga el tree_view para luego visualizar la
- * busqueda de proveedores encontrados.
- *
- * @param entry the entry that emits the signal
- * @param data the user data
- *
- */
-
-void
-on_entry_provider_activate (GtkEntry *entry, gpointer user_data)
-{
-  GtkWindow *window;
-  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));;
-  GtkListStore *store;
-  GtkCellRenderer *renderer;
-  GtkTreeViewColumn *column;
-  gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
-  gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
-
-
-  if (gtk_tree_view_get_model (tree) == NULL )
-    {
-      store = gtk_list_store_new (2,
-                                  G_TYPE_STRING,
-                                  G_TYPE_STRING);
-
-      gtk_tree_view_set_model (GTK_TREE_VIEW (tree), GTK_TREE_MODEL (store));
-
-      renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
-                                                         "text", 0,
-                                                         NULL);
-      gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
-      gtk_tree_view_column_set_resizable (column, FALSE);
-
-      renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
-                                                         "text", 1,
-                                                         NULL);
-      gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
-      gtk_tree_view_column_set_resizable (column, FALSE);
-    }
-
-  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_provider"));
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_srch_provider")), str_schr);
-  on_entry_srch_provider_activate(entry);
-
-  gtk_widget_show_all (GTK_WIDGET (window));
-}
-
-
-/**
- * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
  * de la ventana "wnd_devolver).
  *
  * Esta Funcion visualiza la ventana "wnd_srch_provider"(que es para buscar
@@ -4629,7 +4553,7 @@ on_entry_provider_activate (GtkEntry *entry, gpointer user_data)
  *
  */
 void
-on_entry_srch_provider_activate (GtkEntry *entry)
+on_entry_srch_provider_activate (GtkEntry *entry, gpointer user_data)
 {
   GtkListStore *store;
   GtkTreeIter iter;
@@ -4688,44 +4612,43 @@ on_entry_srch_provider_activate (GtkEntry *entry)
  *
  */
 void
-show_srch_emisor (GtkEntry *entry, gpointer user_data)
+on_entry_provider_activate (GtkEntry *entry, gpointer user_data)
 {
   GtkWindow *window;
-  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_emisor"));
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));;
   GtkListStore *store;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
-  gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
+  //gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
   gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
 
 
   if (gtk_tree_view_get_model (tree) == NULL )
     {
-      store = gtk_list_store_new (3,
-				  G_TYPE_INT,     //id
-                                  G_TYPE_STRING,  //Razon Social
-                                  G_TYPE_STRING); //Rut
+      store = gtk_list_store_new (2,
+                                  G_TYPE_STRING,
+                                  G_TYPE_STRING);
 
       gtk_tree_view_set_model (GTK_TREE_VIEW (tree), GTK_TREE_MODEL (store));
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Emisor", renderer,
-                                                         "text", 1,
+      column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+                                                         "text", 0,
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
       gtk_tree_view_column_set_resizable (column, FALSE);
 
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
-                                                         "text", 2,
+                                                         "text", 1,
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
       gtk_tree_view_column_set_resizable (column, FALSE);
     }
 
-  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_emisor"));
-  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_srch_emisor")), str_schr);
-  on_entry_srch_emisor_activate (entry);
+  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_provider"));
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object(builder, "entry_srch_provider")), str_schr);
+  on_entry_srch_provider_activate(entry, NULL);
 
   gtk_widget_show_all (GTK_WIDGET (window));
 }
@@ -4741,7 +4664,7 @@ show_srch_emisor (GtkEntry *entry, gpointer user_data)
  * @param entry the entry that emits the signal
  */
 void
-on_entry_srch_emisor_activate (GtkEntry *entry)
+on_entry_srch_emisor_activate (GtkEntry *entry, gpointer user_data)
 {
   GtkListStore *store;
   GtkTreeIter iter;
@@ -4787,6 +4710,85 @@ on_entry_srch_emisor_activate (GtkEntry *entry)
 }
 
 
+/**
+ * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
+ * de la ventana "wnd_devolver".
+ *
+ * Esta Funcion visualiza la ventana "wnd_srch_provider"(que es para buscar
+ * un proveedor) y ademas  carga el tree_view para luego visualizar la
+ * busqueda de proveedores encontrados.
+ *
+ * @param entry the entry that emits the signal
+ * @param data the user data
+ *
+ */
+void
+show_srch_emisor (GtkEntry *entry, gpointer user_data)
+{
+  GtkWindow *window;
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_emisor"));
+  GtkListStore *store;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+  //gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
+  gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
+
+
+  if (gtk_tree_view_get_model (tree) == NULL )
+    {
+      store = gtk_list_store_new (3,
+				  G_TYPE_INT,     //id
+                                  G_TYPE_STRING,  //Razon Social
+                                  G_TYPE_STRING); //Rut
+
+      gtk_tree_view_set_model (GTK_TREE_VIEW (tree), GTK_TREE_MODEL (store));
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Emisor", renderer,
+                                                         "text", 1,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
+                                                         "text", 2,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+
+  window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_emisor"));
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_srch_emisor")), str_schr);
+  on_entry_srch_emisor_activate (entry, NULL);
+
+  gtk_widget_show_all (GTK_WIDGET (window));
+}
+
+
+/**
+ * This function enters the sale when the amount
+ * entered is enough, else show the 'wnd_mixed_pay_step2'
+ * to complete. (signal-clicked)
+ *
+ * @param: GtkButton *button
+ * @param: gpointer data
+ */
+void
+on_entry_rut_mixed_pay_activate (GtkEntry *entry, gpointer data)
+{
+  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step1"))))
+    {
+      if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_cheques"))))
+	show_srch_emisor (entry, data);
+      else
+	search_client (GTK_WIDGET (entry), data);
+    }
+  else if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step2"))))
+    search_client (GTK_WIDGET (entry), data);
+}
+
+
 void
 on_btn_ok_srch_emisor_clicked (GtkButton *button, gpointer user_data)
 {
@@ -4796,8 +4798,8 @@ on_btn_ok_srch_emisor_clicked (GtkButton *button, gpointer user_data)
   GtkTreeIter iter;
   gchar *rut, *razon_social;
   gint id;
-  PGresult *res;
-  gchar *q;
+  //PGresult *res;
+  //gchar *q;
 
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "tree_view_srch_emisor"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
@@ -4867,17 +4869,6 @@ FillProveedorData (gchar *rut)
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_devolucion")));
 }
 
-/**
- * Es llamada cuando se selecciona un proveedor del TreeView a traves de un
- * enter (signal row-actived) o presionando el boton de la ventana "wnd_devolver"
- * (signal clicked).
- *
- * Esta funcion extrae lo seleccionado en TreeView y lo carga en strs y se
- * envia en la funcion FillProveedorData().
- *
- * @param TreeView the tree that emits the signal
- *
- */
 
 /**
  * Es llamada cuando el boton "btn_devolucion" es presionado (signal click).
@@ -4890,7 +4881,6 @@ FillProveedorData (gchar *rut)
  * @param button the button
  * @param user_data the user data
  */
-
 void
 on_btn_devolucion_clicked (GtkButton *button, gpointer data)
 {
@@ -4930,11 +4920,12 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+			    g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
 
       ListClean ();
     }
 }
+
 
 /**
  * Es llamada por la funcion realizar_traspaso_Env()
@@ -4943,7 +4934,6 @@ on_btn_devolucion_clicked (GtkButton *button, gpointer data)
  * "traspaso_enviar_win", ademas del combobox de destino, con los respectivos valores
  *
  */
-
 void
 DatosEnviar (void)
 {
@@ -5001,6 +4991,18 @@ DatosEnviar (void)
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
 }
 
+
+/**
+ * Es llamada cuando se selecciona un proveedor del TreeView a traves de un
+ * enter (signal row-actived) o presionando el boton de la ventana "wnd_devolver"
+ * (signal clicked).
+ *
+ * Esta funcion extrae lo seleccionado en TreeView y lo carga en strs y se
+ * envia en la funcion FillProveedorData().
+ *
+ * @param TreeView the tree that emits the signal
+ *
+ */
 void
 on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
 {
@@ -5026,7 +5028,6 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
 }
 
 
-
 /**
  * Es llamada cuando el boton "btn_traspaso_enviar" es presionado (signal click).
  *
@@ -5042,7 +5043,7 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
 {
   GtkWindow *window;
 
-  gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
+  //gchar *tipo_vendedor = rizoma_get_value ("VENDEDOR");
 
   /*Comprueba que hallan productos añadidos en el treView para traspasar */
 
@@ -5118,7 +5119,8 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "");
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                            g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+			    g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_last_sell_id ()));
+
 
       ListClean ();
 

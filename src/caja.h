@@ -58,4 +58,6 @@ void open_caja (gboolean automatic_mode);
 
 gint caja_get_last_amount (void);
 
+gint ArqueoCaja (void);
+
 #endif

@@ -244,7 +244,7 @@ limpiar_lista (void)
   return 0;
 }
 
-Productos *
+ChequesRestaurant *
 buscar_por_codigo (ChequesRestaurant *header, gchar *code)
 {
   ChequesRestaurant *find = header;
