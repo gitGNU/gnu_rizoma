@@ -719,7 +719,7 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, "font", "15", NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
