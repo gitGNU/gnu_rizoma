@@ -294,4 +294,12 @@ gint get_last_sell_id ();
 
 gboolean SaveDevolucion (gint total, gint rut);
 
+gchar * ReturnNegocio ();
+
+gint InsertIdTraspaso ();
+
+gint ReturnBodegaID (gchar *destino);
+
+gboolean SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
+
 #endif

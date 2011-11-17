@@ -124,8 +124,9 @@ FillProductSell (gchar *barcode,
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
-                      g_strdup_printf ("%s  %s  %s %s", marca, descripcion, contenido, unidad));
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
+                      g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s  %s  %s %s</span>", 
+				       marca, descripcion, contenido, unidad));
 
   if (strtod (PUT (stock), (char **)NULL) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
@@ -137,28 +138,29 @@ FillProductSell (gchar *barcode,
 
   //precio
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
-                        g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                          PutPoints (precio)));
 
   //precio de mayorista
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor")),
-                        g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                          PutPoints (precio_mayor)));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad")),
-                        g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                          PutPoints (cantidad_mayor)));
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")),
-                        g_strdup_printf ("<span weight=\"ultrabold\">%.2f</span>",
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%.2f</span>",
                                          strtod (PUT (stock), (char **)NULL)));
 
   str_aux = g_strdup(gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))));
   str_aux = g_strdup_printf ("%.0f", strtod (PUT (str_aux), (char **)NULL) * atoi (precio));
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
-                        g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", str_aux));
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", str_aux));
 
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), codigo_corto);
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), 
+			g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", codigo_corto));
 }
 
 void
@@ -610,11 +612,11 @@ ventas_win ()
   gtk_widget_show_all (ventas_gui);
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
-                        g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", user_data->user));
 
   
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
-                        g_strdup_printf ("<b><big>%.6d</big></b>", get_last_sell_id ()));
+                        g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%.6d</span>", get_last_sell_id ()));
 
   // El numerno de venta no se debe basar en el numero de ticket, puesto que aquel corresponde a los documentos que se han emitido
   /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
@@ -664,7 +666,7 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -673,9 +675,10 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_min_width (column, 400);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   /* renderer = gtk_cell_renderer_text_new (); */
   /* column = gtk_tree_view_column_new_with_attributes ("Marca", renderer, */
@@ -707,7 +710,7 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -716,8 +719,9 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Sub Total", renderer,
@@ -725,8 +729,9 @@ ventas_win ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_max_width (column, 100);
 
   if (venta->header != NULL)
     CalcularVentas (venta->header);
@@ -1849,17 +1854,20 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
       if (ventas == TRUE)
         {
-          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), product);
+	  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), 
+				g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", product));
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
-                                g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                                g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%d", precio))));
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
-                                g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
+                                g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%u", atoi (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))) *
                                                                              atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))))));
 
-	  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), codigo);
+	  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), 
+				g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", codigo));
+
           gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), barcode);
 
           SearchBarcodeProduct (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), (gpointer)TRUE);
@@ -1871,7 +1879,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 void
 Descuento (GtkWidget *widget, gpointer data)
 {
-  gchar *widget_name = g_strdup (gtk_buildable_get_name (widget));
+  gchar *widget_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
 
   gint amount = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
   gint total;
@@ -2408,7 +2416,7 @@ ChangeSeller (GtkWidget *widget, gpointer data)
       user_data->level = ReturnUserLevel (user);
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
-                            g_strdup_printf ("<b><big>%s</big></b>", user_data->user));
+                            g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", user_data->user));
 
       CloseWindowChangeSeller (widget, NULL);
     }
@@ -4417,7 +4425,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   gint monto;
   gint tipo_venta, tipo_pago1, tipo_pago2;
 
-  gboolean is_credit_sell;
+  //gboolean is_credit_sell;
   
   PGresult *res;
   gchar *q;
@@ -4944,10 +4952,10 @@ DatosEnviar (void)
   GtkListStore *modelo;
   gint tuples,i;
   PGresult *res;
-  gint venta_id;
+  //gint venta_id;
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
-  gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
+  //gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_monto_total")),
                       g_strdup_printf ("%f",TotalPrecioCompra(venta->header)));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_origen")),(gchar *)ReturnNegocio());
@@ -5066,7 +5074,7 @@ realizar_traspaso_Env (GtkWidget *widget, gpointer data)
 void
 on_enviar_button_clicked (GtkButton *button, gpointer data)
 {
-  gint * destino;
+  gint destino;
   GtkTreeIter iter;
   GtkWidget *combo;
   GtkTreeModel *model;
