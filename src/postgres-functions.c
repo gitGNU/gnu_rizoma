@@ -2119,7 +2119,8 @@ GetMinStock (gchar *barcode)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT stock_min FROM producto WHERE barcode='%s'",
+  q = g_strdup_printf ("SELECT COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min "
+		       "FROM producto WHERE barcode='%s'",
                        barcode);
   res = EjecutarSQL (q);
   g_free (q);
@@ -2699,16 +2700,16 @@ ContriTotalStock (void)
 }
 
 void
-SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *margen, gchar *new_venta,
+SetModificacionesProducto (gchar *barcode, gchar *dias_stock, gchar *margen, gchar *new_venta,
                            gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
                            gint cantidad_mayorista)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("UPDATE producto SET stock_min=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
+  q = g_strdup_printf ("UPDATE producto SET dias_stock=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
                        "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
-                       stock_minimo, CUT(margen), new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
+                       dias_stock, CUT(margen), new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
                        (gint)mayorista, barcode);
   res = EjecutarSQL (q);
   g_free (q);

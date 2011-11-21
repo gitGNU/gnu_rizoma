@@ -224,7 +224,7 @@ gchar * ValorTotalStock (void);
 
 gchar * ContriTotalStock (void);
 
-void SetModificacionesProducto (gchar *barcode, gchar *stock_minimo, gchar *margen, gchar *new_venta,
+void SetModificacionesProducto (gchar *barcode, gchar *dias_stock, gchar *margen, gchar *new_venta,
                                 gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
                                 gint cantidad_mayorista);
 

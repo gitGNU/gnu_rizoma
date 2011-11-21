@@ -479,7 +479,7 @@ create table producto (
   otros                     int4,
   familia                   int2 default 1,
   perecibles                bool,
-  stock_min                 float8 default 0,
+  dias_stock                float8 default 0,
   margen_promedio           float8 default 0,
   fraccion                  bool default false,
   canje                     bool default false,

@@ -270,6 +270,7 @@ create or replace function select_producto( OUT barcode int8,
 					    OUT familia int2,
 					    OUT perecibles bool,
 					    OUT stock_min float8,
+					    OUT dias_stock float8,
 					    OUT margen_promedio float8,
 					    OUT fraccion bool,
 					    OUT canje bool,
@@ -287,7 +288,8 @@ declare
 begin
 query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
-		    otros, familia, perecibles, stock_min, margen_promedio,
+		    otros, familia, perecibles, margen_promedio, dias_stock,
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista, tipo
 		    FROM producto ORDER BY descripcion, marca$S$;
@@ -324,6 +326,7 @@ FOR list IN EXECUTE query LOOP
     familia := list.familia;
     perecibles := list.perecibles;
     stock_min := list.stock_min;
+    dias_stock := list.dias_stock;
     margen_promedio := list.margen_promedio;
     fraccion := list.fraccion;
     canje := list.canje;
@@ -462,6 +465,7 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT precio integer,
 		OUT costo_promedio double precision,
 		OUT stock_min double precision,
+		OUT dias_stock double precision,
 		OUT margen_promedio double precision,
 		OUT contrib_agregada double precision,
 		OUT ventas_dia double precision,
@@ -488,9 +492,10 @@ BEGIN
 
 query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
-		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day,
+		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day,		    
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
-		    select_merma (producto.barcode) as unidades_merma,
+		    select_merma (producto.barcode) as unidades_merma, dias_stock,
 		    select_ventas_dia(producto.barcode) as ventas_dia
 		FROM producto WHERE $S$;
 
@@ -527,6 +532,7 @@ FOR datos IN EXECUTE query LOOP
     END IF;
 
     stock_min := datos.stock_min;
+    dias_stock := datos.dias_stock;
     stock_day := datos.stock_day;
     margen_promedio := datos.margen_promedio;
     contrib_agregada := round(datos.contrib_agregada);
@@ -609,6 +615,7 @@ create or replace function buscar_productos(IN expresion varchar(255),
 					    OUT familia int2,
 					    OUT perecibles bool,
 					    OUT stock_min float8,
+					    OUT dias_stock float8,
 					    OUT margen_promedio float8,
 					    OUT fraccion bool,
 					    OUT canje bool,
@@ -626,8 +633,9 @@ declare
 begin
 query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
-		    otros, familia, perecibles, stock_min, margen_promedio,
-		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
+		    otros, familia, perecibles, margen_promedio, 
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
+		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, dias_stock,
 		    cantidad_mayor, mayorista, tipo
              FROM producto WHERE estado = true AND (lower(descripcion) LIKE lower($S$
 	|| quote_literal(expresion) || $S$) OR lower(marca) LIKE lower($S$
@@ -666,6 +674,7 @@ FOR list IN EXECUTE query LOOP
     familia := list.familia;
     perecibles := list.perecibles;
     stock_min := list.stock_min;
+    dias_stock := list.dias_stock;
     margen_promedio := list.margen_promedio;
     fraccion := list.fraccion;
     canje := list.canje;
@@ -702,6 +711,7 @@ create or replace function select_producto( IN prod_barcode int8,
 					    OUT familia int2,
 					    OUT perecibles bool,
 					    OUT stock_min float8,
+					    OUT dias_stock float8,
 					    OUT margen_promedio float8,
 					    OUT fraccion bool,
 					    OUT canje bool,
@@ -719,8 +729,9 @@ declare
 begin
 query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
-		    otros, familia, perecibles, stock_min, margen_promedio,
-		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
+		    otros, familia, perecibles, margen_promedio,
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
+		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, dias_stock,
 		    cantidad_mayor, mayorista, tipo
              FROM producto WHERE barcode= $S$
 	     || quote_literal(prod_barcode);
@@ -757,6 +768,7 @@ FOR list IN EXECUTE query LOOP
     familia := list.familia;
     perecibles := list.perecibles;
     stock_min := list.stock_min;
+    dias_stock := list.dias_stock;
     margen_promedio := list.margen_promedio;
     fraccion := list.fraccion;
     canje := list.canje;
@@ -1828,6 +1840,7 @@ create or replace function buscar_producto(IN expresion varchar(255),
 	OUT familia int2,
 	OUT perecibles bool,
 	OUT stock_min float8,
+	OUT dias_stock float8,
 	OUT margen_promedio float8,
 	OUT fraccion bool,
 	OUT canje bool,
@@ -1847,7 +1860,8 @@ begin
 	      	     	    (SELECT disponible FROM obtener_stock_desde_barcode (barcode)) AS stock,
 			    (SELECT costo FROM obtener_costo_promedio_desde_barcode (barcode)) AS costo_promedio,
 	      	     	    precio, vendidos, impuestos, otros, familia, perecibles,
-			    stock_min, margen_promedio, fraccion, canje, stock_pro,
+			    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min, 
+			    margen_promedio, fraccion, canje, stock_pro, dias_stock,
 			    tasa_canje, precio_mayor, cantidad_mayor, mayorista, tipo FROM producto WHERE $S$;
 
         IF con_stock IS TRUE THEN
@@ -1888,6 +1902,7 @@ begin
 	    familia := list.familia;
 	    perecibles := list.perecibles;
 	    stock_min := list.stock_min;
+	    dias_stock := list.dias_stock;
 	    margen_promedio := list.margen_promedio;
 	    fraccion := list.fraccion;
 	    canje := list.canje;

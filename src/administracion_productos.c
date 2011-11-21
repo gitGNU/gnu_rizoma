@@ -339,7 +339,7 @@ GuardarModificacionesProducto (void)
 {
   GtkWidget *widget;
   gchar *barcode;
-  gchar *stock_minimo;
+  gchar *dias_stock;
   gchar *margen;
   gchar *new_venta;
   gboolean mayorista;
@@ -370,8 +370,8 @@ GuardarModificacionesProducto (void)
   widget = GTK_WIDGET (builder_get (builder, "entry_informerca_price"));
   new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
   
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
-  stock_minimo = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_dstock"));
+  dias_stock = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_infomerca_percentmargin"));
   margen = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
@@ -385,7 +385,7 @@ GuardarModificacionesProducto (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_cantmayorist"));
   cantidad_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
-  if (g_str_equal (stock_minimo, "") || HaveCharacters (stock_minimo))
+  if (g_str_equal (dias_stock, "") || HaveCharacters (dias_stock))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Debe setear stock minimo");
   else if (g_str_equal (margen, "") || HaveCharacters (margen))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "Debe poner un valor de margen para el producto");
@@ -397,11 +397,11 @@ GuardarModificacionesProducto (void)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "El porcentaje de ganancia debe ser mayor a 0");
   else if (new_venta < 0)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_price")), "El precio de venta debe ser mayor a 0");
-  else if (stock_minimo < 0)
+  else if (dias_stock < 0)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Stock mínimo debe ser mayor a 0");
   else
     {
-      SetModificacionesProducto (barcode, stock_minimo, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
+      SetModificacionesProducto (barcode, dias_stock, margen, new_venta, FALSE, 0, mayorista, precio_mayorista,
                                  cantidad_mayorista);
 
       GtkWidget *treeview;
@@ -931,9 +931,9 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       gtk_label_set_markup (GTK_LABEL (aux_widget),
                             g_strdup_printf ("<b>%.3f</b>", strtod (PUT(PQvaluebycol (res, 0, "ventas_dia")), (char **)NULL)));
 
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_minstock"));
+      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_dstock"));
       gtk_entry_set_text (GTK_ENTRY (aux_widget),
-                          PQvaluebycol (res, 0, "stock_min"));
+                          PQvaluebycol (res, 0, "dias_stock"));
 
       aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_informerca_avg_cost"));
       gtk_label_set_markup (GTK_LABEL (aux_widget),

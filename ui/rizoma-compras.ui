@@ -4169,7 +4169,7 @@
                       <object class="GtkLabel" id="label98">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Stock Minimo</property>
+                        <property name="label" translatable="yes">Dias Stock</property>
                       </object>
                       <packing>
                         <property name="left_attach">5</property>
@@ -4331,7 +4331,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="entry_informerca_minstock">
+                      <object class="GtkEntry" id="entry_informerca_dstock">
                         <property name="width_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
