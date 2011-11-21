@@ -426,7 +426,7 @@ stores_box ()
   GtkTreeView *treeview;
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
-  GtkTreeSelection *selection;
+  //GtkTreeSelection *selection;
 
   store = gtk_list_store_new (2,
                               G_TYPE_STRING,  //ID
@@ -569,7 +569,7 @@ on_btn_add_stores_clicked (GtkButton *button, gpointer user_data)
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_new_store"));
   clean_container (GTK_CONTAINER (window));
-  gtk_widget_show (window);
+  gtk_widget_show (GTK_WIDGET (window));
 }
 
 

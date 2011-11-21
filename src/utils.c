@@ -388,7 +388,7 @@ clean_container (GtkContainer *container)
       else
         {
           widget = GTK_WIDGET (list->data);
-          widget_name = g_strdup (gtk_buildable_get_name (widget));
+          widget_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
 	  if (widget_name != NULL && !validate_string ("[0-9]+", widget_name) && !validate_string ("Gtk", widget_name))
             {
               if (GTK_IS_ENTRY (widget))

@@ -22,6 +22,7 @@
  */
 
 #include<gtk/gtk.h>
+#include<stdlib.h>
 
 #include"tipos.h"
 

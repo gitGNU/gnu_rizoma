@@ -302,4 +302,16 @@ gint ReturnBodegaID (gchar *destino);
 
 gboolean SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
 
+void registrar_nuevo_codigo (gchar *codigo);
+
+void registrar_nuevo_color (gchar *codigo, gchar *color);
+
+void registrar_nueva_talla (gchar *codigo, gchar *talla);
+
+void registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto);
+
+PGresult *getProductsByProvider (gchar *rut);
+
+PGresult * get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas);
+
 #endif

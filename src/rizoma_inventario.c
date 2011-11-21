@@ -31,16 +31,16 @@
 #include<stdlib.h>
 #include<string.h>
 
-
 #include "tipos.h"
 
 #include "postgres-functions.h"
 #include "config_file.h"
 #include "utils.h"
 #include "manejo_productos.h"
+#include "rizoma_errors.h"
+#include "encriptar.h"
 
 GtkBuilder *builder;
-
 
 /**
  * Es llamada por la funcion "on_btn_ejecutar_Inv" y recibe el parametro tipo
@@ -124,7 +124,7 @@ inventario_win ()
   inventario_gui = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_inventario"));
 
   //Titulo
-  gtk_window_set_title (inventario_gui, 
+  gtk_window_set_title (GTK_WINDOW (inventario_gui),
 			g_strdup_printf ("POS Rizoma Comercio: Inventario - Conectado a [%s@%s]",
 					 config_profile,
 					 rizoma_get_value ("SERVER_HOST")));
@@ -200,7 +200,7 @@ check_passwd (GtkWidget *widget, gpointer data)
 int
 main (int argc, char **argv)
 {
-  GtkWindow *login_window;
+  //GtkWindow *login_window;
   GError *err = NULL;
 
   GtkComboBox *combo;
@@ -291,15 +291,16 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
   double pcomp = 0.0; /*Costo*/
   int precio = 1000; /*Precio venta*/
   int margen = 20;
-  int cont_products_no_BD = 0,cont_products = 0;
-  char *pEnd;
-  gchar *dir, *string, *stringfinal;
+  int cont_products_no_BD = 0,cont_products = 0;  
+  gchar *dir, *string;
   GtkTextBuffer *buffer;
   GtkTextMark *mark;
   GtkTextIter iter;
   GdkColor color;
   char *str;
   int l;
+  //char *pEnd;
+  //gchar *stringfinal;
 
   gdk_color_parse ("red", &color);
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (gtk_builder_get_object (builder, "textview1")));

@@ -25,6 +25,7 @@
 
 #include<string.h>
 #include<stdlib.h>
+#include<math.h>
 
 #include"tipos.h"
 #include"credito.h"
@@ -1191,8 +1192,8 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
                               2, PQgetvalue (res, i, 2),
                               3, strtod (PUT (PQgetvalue (res, i, 3)),(char **)NULL),
                               4, PutPoints (PQgetvalue (res, i, 4)),
-                              5, PutPoints (g_strdup_printf("%ld", lround(strtod (PUT(PQgetvalue (res, i, 3)), (char **)NULL) * 
-									  strtod (PUT(PQgetvalue (res, i, 4)), (char **)NULL)))) ,
+                              5, PutPoints (g_strdup_printf("%ld", lround (strtod (PUT (PQgetvalue (res, i, 3)), (char **)NULL) * 
+									  strtod (PUT (PQgetvalue (res, i, 4)), (char **)NULL)))),
                               -1);
         }
     }

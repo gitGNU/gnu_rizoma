@@ -112,7 +112,7 @@ DropDelimiter (gchar *number)
     {
       if (num[len] == no_decimal_point[0])
         {
-	  points = points++;
+	  points += points;
 	  sublen = len;
 	  while (sublen != 0)
 	    {
@@ -677,9 +677,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
  * @param: gchar date colum
  * @param: gchar fields
  * @param: gchar grupo, "Anuladas", "Ingresadas", "TODAS"
- *
  */
-
 PGresult *
 SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
                     gint to_year, gint to_month, gint to_day,
@@ -826,7 +824,7 @@ total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
       from_day, from_month, from_year, to_day+1, to_month, to_year));
 
   if (res == NULL)
-    return 0;
+    return;
 
   *total_iva = atoi(PQvaluebycol (res, 0, "total_iva"));
   *total_otros = atoi (PQvaluebycol (res, 0, "total_otros"));
@@ -1465,7 +1463,6 @@ SaveBuyProducts (Productos *header, gint id_compra)
 
   do
     {
-
       if (products->product->iva != -1)
         iva = (gdouble) (products->product->precio_compra *
                          products->product->cantidad) *
@@ -1767,7 +1764,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gchar *compuesta;
 
   //contador
-  gint i;
+  //gint i;
 
   //Se obtiene el id del tipo 'compuesta' de mercadería
   compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
@@ -1993,7 +1990,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 			   CUT (g_strdup_printf ("%.2f",products->product->fifo)),
 			   iva_unit, otros_unit, products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
 
-      g_printf ("la consulta es %s\n", q);
+      printf ("la consulta es %s\n", q);
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -2021,7 +2018,7 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
   gchar *q, *family_filter;
 
   if (family == 0)
-    family_filter = g_strdup_printf("");
+    family_filter = g_strdup ("");
   else
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
@@ -2045,7 +2042,7 @@ ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
   gchar *q, *family_filter;
 
   if (family == 0)
-    family_filter = g_strdup_printf("");
+    family_filter = g_strdup ("");
   else
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
@@ -3310,11 +3307,8 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_trasp
 gint
 InsertIdTraspaso ()
 {
-
   PGresult *res;
-
   res = EjecutarSQL (g_strdup_printf ("SELECT MAX(id) FROM traspaso"));
-
   return atoi (PQgetvalue (res, 0, 0));
 }
 
@@ -3650,9 +3644,9 @@ sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght)
   //longitud de los tamaños maximos y minimos
   if (max_lenght > 18 || min_lenght < 1 ||
       max_lenght < 1  || max_lenght < min_lenght)
-    return g_strdup_printf ("");
+    return g_strdup ("");
   if (g_str_equal (code, "") || strlen (code) > 18)
-    return g_strdup_printf ("");
+    return g_strdup ("");
 
   /*Para codigos solamente numéricos*/
   if (!HaveCharacters (code))
@@ -3701,14 +3695,14 @@ sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght)
 		{
 		  //Parte desde el numero 0
 		  aux = (first == TRUE) ? g_strdup ("0") : invested_strndup (code, largo_inicial-1);
-		  first == FALSE;
+		  first = FALSE;
 		  code = g_strdup_printf ("%s%d", g_strndup (code, largo_inicial-1), atoi (aux)+1);
 		}
 	      else
 		{
 		  //Parte desde la a
 		  aux = (first == TRUE) ? g_strdup ("a") : invested_strndup (code, largo_inicial-1);
-		  first == FALSE;
+		  first = FALSE;
 
 		  if (!g_str_equal (aux, "z"))
 		    code = g_strdup_printf ("%s%c", g_strndup (code, largo_inicial-1), atoi (aux)+1);
@@ -3720,6 +3714,8 @@ sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght)
 	  return code;
 	}
     }
+
+  return "";
 }
 
 /**

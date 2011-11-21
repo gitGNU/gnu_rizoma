@@ -63,4 +63,6 @@ gdouble CalcularTotalProporcionAfecta (Productos *header);
 
 gdouble CalcularTotalProporcionNoAfecta (Productos *header);
 
+Productos * CreateNew (gchar *barcode, gdouble cantidad);
+
 #endif

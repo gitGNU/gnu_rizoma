@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "tipos.h"
 #include "postgres-functions.h"
@@ -265,7 +266,7 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
   GtkTreeIter iter;
   gdouble stock_fisicoNum = strtod (PUT (stock_fisico), (char **)NULL);
   gdouble stock_teorico;
-  gchar *diferencia;
+  //gchar *diferencia;
 
   gtk_tree_model_get_iter (model, &iter, path);
   gtk_tree_path_free (path);
@@ -587,7 +588,8 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
   gchar *q;
   PGresult *res;
 
-  gint id_compra, id_factura_compra;
+  gint id_compra = 0 ;
+  gint id_factura_compra;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
@@ -3386,148 +3388,6 @@ on_btn_ultimo_clicked()
 
 }
 
-/**
- * Es llamada cuando se presiona el boton "btn_ultimo" (signal clicked).
- *
- * Esta funcion inserta las 100 ultimas ventas en el tree_view_sells.
- *
- */
-void
-on_togglebtn_clicked()
-{
-  gchar *str_tb = gtk_label_get_text (GTK_LABEL (builder_get (builder, "labelTB")));
-
-  if(strcmp(str_tb, "Activado") == 0)
-    {
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Desactivado");
-      //gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), FALSE);
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "     a     ");
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "     de     ");
-      fill_sells_list();
-    }
-  else
-    {
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Activado");
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
-      //gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), TRUE);
-
-      GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
-												 "tree_view_sells"))));
-      gchar *pago = NULL;
-      gint tuples, i;
-      gint sell_type;
-      GtkTreeIter iter;
-
-      GtkWidget *combo;
-      GtkTreeModel *model_combo;
-      GtkTreeIter iter_combo;
-      gchar *store_combo;
-      gint active;
-
-      // Combo-Box
-      combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_sell_report"));
-      active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
-
-      /* Verifica si hay alguna opción seleccionada*/
-      if (active == -1)
-	store_combo = "TODAS";
-      else
-	{
-	  model_combo = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
-	  gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter_combo);
-
-	  gtk_tree_model_get (model_combo, &iter_combo,
-			      1, &store_combo,
-			      -1);
-	}
-
-      printf ("%s\n",store_combo);
-
-      gtk_list_store_clear (store);
-      gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
-												 "tree_view_sell_detail")))));
-
-      /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
-	 retorna los datos de ventas en un intervalo de fechas*/
-      res_sells = SearchTuplesByDate
-	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-	 g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
-	          " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
-	 store_combo);
-
-      tuples = PQntuples (res_sells);
-
-      /* si las tuplas son mayores a 100, se activan los botones de adelante y
-	 ultimo, y se inactivan los de atras y primero*/
-
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), "");
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")), "");
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "fin_lbl")), "");
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "");
-      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "");
-      if (tuples == 0)
-	return;
-
-      /* verifica que tipo de venta es*/
-      for (i = 0; i < tuples; i++)
-	{
-	  /* if (i < 100 ) */
-	  /*   { */
-	  sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
-	  switch (sell_type)
-	    {
-	    case CASH:
-	      pago = "Contado";
-	      break;
-	    case CREDITO:
-	      pago = "Credito";
-	      break;
-	    case CHEQUE_RESTAURANT:
-              pago = "Cheque Rest.";
-              break;
-	    case MIXTO:
-              pago = "Mixto";
-              break;
-	    case CHEQUE:
-	      pago = "Cheque";
-	      break;
-	    case TARJETA:
-	      pago = "Tarjeta";
-	      break;
-	    default:
-	      pago = "Indefinido";
-	      break;
-	    }
-	  gtk_list_store_append (store, &iter);
-	  gtk_list_store_set (store, &iter,
-			      0, PQgetvalue (res_sells, i, 4),
-			      1, PQgetvalue (res_sells, i, 0),
-			      2, PQgetvalue (res_sells, i, 1),
-			      3, PQgetvalue (res_sells, i, 2),
-			      4, PQgetvalue (res_sells, i, 3),
-			      5, pago,
-			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
-								     PQgetvalue (res_sells, i, 0))) ?
-						 "Anulada":"Vigente"),
-			      -1);
-	}
-      /* else */
-      /*   { */
-      /*     contador = 100; */
-      /*     fin = tuples; */
-      /*     return; */
-      /*   } */
-    }
-
-
-return;
-
-}
-
 
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
@@ -3661,6 +3521,150 @@ fill_sells_list ()
         }
     }
 }
+
+
+/**
+ * Es llamada cuando se presiona el boton "btn_ultimo" (signal clicked).
+ *
+ * Esta funcion inserta las 100 ultimas ventas en el tree_view_sells.
+ *
+ */
+void
+on_togglebtn_clicked()
+{
+  gchar *str_tb = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "labelTB"))));
+
+  if(strcmp(str_tb, "Activado") == 0)
+    {
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Desactivado");
+      //gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), FALSE);
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "     a     ");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "     de     ");
+      fill_sells_list();
+    }
+  else
+    {
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "labelTB")), "Activado");
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_adelante")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ultimo")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_atras")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_primero")), FALSE);
+      //gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_print_sells")), TRUE);
+
+      GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
+												 "tree_view_sells"))));
+      gchar *pago = NULL;
+      gint tuples, i;
+      gint sell_type;
+      GtkTreeIter iter;
+
+      GtkWidget *combo;
+      GtkTreeModel *model_combo;
+      GtkTreeIter iter_combo;
+      gchar *store_combo;
+      gint active;
+
+      // Combo-Box
+      combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_sell_report"));
+      active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+      /* Verifica si hay alguna opción seleccionada*/
+      if (active == -1)
+	store_combo = "TODAS";
+      else
+	{
+	  model_combo = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+	  gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter_combo);
+
+	  gtk_tree_model_get (model_combo, &iter_combo,
+			      1, &store_combo,
+			      -1);
+	}
+
+      printf ("%s\n",store_combo);
+
+      gtk_list_store_clear (store);
+      gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,
+												 "tree_view_sell_detail")))));
+
+      /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
+	 retorna los datos de ventas en un intervalo de fechas*/
+      res_sells = SearchTuplesByDate
+	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+	 g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+	          " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
+	 store_combo);
+
+      tuples = PQntuples (res_sells);
+
+      /* si las tuplas son mayores a 100, se activan los botones de adelante y
+	 ultimo, y se inactivan los de atras y primero*/
+
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_inicio_lbl")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "actual_fin_lbl")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "fin_lbl")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label29")), "");
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label30")), "");
+      if (tuples == 0)
+	return;
+
+      /* verifica que tipo de venta es*/
+      for (i = 0; i < tuples; i++)
+	{
+	  /* if (i < 100 ) */
+	  /*   { */
+	  sell_type = atoi (PQvaluebycol (res_sells, i, "tipo_venta"));
+	  switch (sell_type)
+	    {
+	    case CASH:
+	      pago = "Contado";
+	      break;
+	    case CREDITO:
+	      pago = "Credito";
+	      break;
+	    case CHEQUE_RESTAURANT:
+              pago = "Cheque Rest.";
+              break;
+	    case MIXTO:
+              pago = "Mixto";
+              break;
+	    case CHEQUE:
+	      pago = "Cheque";
+	      break;
+	    case TARJETA:
+	      pago = "Tarjeta";
+	      break;
+	    default:
+	      pago = "Indefinido";
+	      break;
+	    }
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, PQgetvalue (res_sells, i, 4),
+			      1, PQgetvalue (res_sells, i, 0),
+			      2, PQgetvalue (res_sells, i, 1),
+			      3, PQgetvalue (res_sells, i, 2),
+			      4, PQgetvalue (res_sells, i, 3),
+			      5, pago,
+			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
+								     PQgetvalue (res_sells, i, 0))) ?
+						 "Anulada":"Vigente"),
+			      -1);
+	}
+      /* else */
+      /*   { */
+      /*     contador = 100; */
+      /*     fin = tuples; */
+      /*     return; */
+      /*   } */
+    }
+
+
+return;
+
+}
+
 
 /**
  * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
@@ -3876,7 +3880,7 @@ void
 
   res = EjecutarSQL (q);
 
-  if (res == NULL) return;
+  if (res == NULL) return (NULL); //TODO: OJO con este retorno
 
   /*se visualizan los datos en las correspondientes etiquetas (labels)*/
   else
@@ -3904,6 +3908,7 @@ void
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
   gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progreso), ".. Listo ..");
 
+  return (NULL); //TODO: OJO con este retorno
 }
 
 /**
@@ -4049,6 +4054,7 @@ void
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
   gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progreso), ".. Listo ..");
 
+  return (NULL); //TODO: OJO con este retorno
 }
 
 
@@ -4323,7 +4329,7 @@ fill_cuadratura (gint familia)
   gtk_list_store_clear (store);
 
   if (familia == 0)
-    filtro_familia = g_strdup_printf("");
+    filtro_familia = g_strdup ("");
   else
     filtro_familia = g_strdup_printf("WHERE familia = %d", familia);
 
@@ -4384,7 +4390,7 @@ fill_traspaso (gchar *local)
   gint page_num = gtk_notebook_get_current_page (notebook);
 
   if (local == NULL || g_str_equal (local, "TODOS"))
-    local_consulta = g_strdup_printf("");
+    local_consulta = g_strdup ("");
   else
     local_consulta = g_strdup_printf("AND b.nombre = '%s'", local);
 
@@ -4493,7 +4499,7 @@ wnd_search_provider (GtkEntry *entry, gpointer user_data)
   GtkListStore *store;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
-  gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
+  //gchar *srch_provider = g_strdup (gtk_entry_get_text (entry));
   gchar *str_schr = g_strdup (gtk_entry_get_text (entry));
 
   if (gtk_tree_view_get_model (tree) == NULL )
@@ -4524,37 +4530,6 @@ wnd_search_provider (GtkEntry *entry, gpointer user_data)
   on_entry_srch_provider_activate(entry);
 
   gtk_widget_show_all (GTK_WIDGET (window));
-}
-
-/**
- * This function add the selected provider on
- * 'entry_buy_provider' to search purchases associated to him
- *
- * @param: GtkTreeView from where to get provider's rut
- *
- */
-void
-on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
-{
-  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
-  GtkTreeModel *model = gtk_tree_view_get_model (tree);
-  GtkTreeIter iter;
-  gchar *str;
-  gchar **strs;
-
-  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
-    {
-      gtk_tree_model_get (model, &iter,
-                          1, &str,
-                          -1);
-
-      strs = g_strsplit (str, "-", 2);
-
-      gtk_entry_set_text (GTK_WIDGET (builder_get (builder, "entry_buy_provider")), *strs);
-      on_btn_get_stat_clicked (GTK_WIDGET (builder_get (builder, "entry_buy_provider")), NULL);
-
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
-    }
 }
 
 
@@ -4743,8 +4718,7 @@ progress_timeout(gpointer data)
  * This function configura un gtk_progress_bar para poder avanzarlo
  *
  * @param progreso widget de gtk_progress_bar
- **/
-
+ */
 gint
 avanzar_barra_progreso (GtkWidget * progreso)
 {
@@ -4753,7 +4727,6 @@ avanzar_barra_progreso (GtkWidget * progreso)
   gtk_progress_bar_new_with_adjustment (adj);
   flagProgress = gtk_timeout_add (100, progress_timeout, progreso);
 }
-
 
 
 /**
@@ -4941,6 +4914,39 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         }
     }
 }
+
+
+/**
+ * This function add the selected provider on
+ * 'entry_buy_provider' to search purchases associated to him
+ *
+ * @param: GtkTreeView from where to get provider's rut
+ *
+ */
+void
+on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
+{
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeIter iter;
+  gchar *str;
+  gchar **strs;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          1, &str,
+                          -1);
+
+      strs = g_strsplit (str, "-", 2);
+
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_provider")), *strs);
+      on_btn_get_stat_clicked (GTK_WIDGET (builder_get (builder, "entry_buy_provider")), NULL);
+
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
+    }
+}
+
 
 /**
  * Is triggered by "switch-page" event on "ntbk_reports"
