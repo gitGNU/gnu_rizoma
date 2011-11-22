@@ -505,7 +505,7 @@ fill_caja_data (void)
  * o "tree_view_recibidos" (signal changed).
  *
  * Obtiene el id seleccionado y depliega la informacion correspondiente
- * en el  "tree_view_enviados_detalle" o "tree_view_recibidos_detalle"
+ * en el  "tree_view_enviado_detalle" o "tree_view_recibido_detalle"
  * según corresponda.
  *
  */
@@ -961,6 +961,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_min_width (column, 260);
   gtk_tree_view_column_set_max_width (column, 260);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
@@ -1071,6 +1072,7 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_min_width (column, 160);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
@@ -1224,6 +1226,7 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_min_width (column, 160);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
@@ -1366,6 +1369,7 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_min_width (column, 160);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
@@ -1615,8 +1619,9 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 0);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_min_width (column, 260);
-  gtk_tree_view_column_set_max_width (column, 260);
+  //gtk_tree_view_column_set_min_width (column, 260);
+  //gtk_tree_view_column_set_max_width (column, 260);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
@@ -1696,6 +1701,7 @@ reports_win (void)
   gtk_tree_view_column_set_min_width (column, 3000);
   gtk_tree_view_column_set_max_width (column, 300);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unidades", renderer,
@@ -2104,8 +2110,9 @@ reports_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
-  gtk_tree_view_column_set_min_width (column, 510);
+  //gtk_tree_view_column_set_min_width (column, 300);
   gtk_tree_view_column_set_resizable (column, TRUE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
@@ -2258,6 +2265,7 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
@@ -2546,6 +2554,7 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   //Cantity purchased
   renderer = gtk_cell_renderer_text_new();
@@ -2771,6 +2780,7 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_min_width (column, 260);
   gtk_tree_view_column_set_max_width (column, 260);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,

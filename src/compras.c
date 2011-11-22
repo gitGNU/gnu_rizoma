@@ -256,7 +256,7 @@ compras_win (void)
                               G_TYPE_DOUBLE,
                               G_TYPE_DOUBLE,  //Costo sin impuestos
 			      G_TYPE_DOUBLE,  //Costo con impuestos
-			      G_TYPE_DOUBLE); //Total con impuestos
+			      G_TYPE_INT); //Total con impuestos
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -286,6 +286,7 @@ compras_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
@@ -298,7 +299,7 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("P.Unit S/Imp", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Neto", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -308,7 +309,7 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("P.Unit C/Imp", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Bruto", renderer,
                                                      "text", 5,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -318,7 +319,7 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Total Bruto", renderer,
                                                      "text", 6,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -369,6 +370,7 @@ compras_win (void)
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer,
@@ -2232,7 +2234,7 @@ ShowProductHistory (void)
                           3, cantidad,
                           4, strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL),
 			  5, precio,
-			  6, (cantidad * precio),
+			  6, lround (cantidad * precio),
                           -1);
 
     }
@@ -8422,7 +8424,9 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
 		"No existen mercaderías asociadas a este proveedor");
     }
   
-  gdouble dias_stock, ventas_dia, sugerido;
+  gdouble dias_stock, dias_stock_min, unidades_rep, 
+    cantidad_pedido, stock_actual, stock_min, 
+    ventas_dia, sugerido, stock_reposicion;
   gboolean fraccion;
 
   //Se obtiene el treeview de productos del proveedor
@@ -8435,12 +8439,18 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
   for (i = 0; i < tuples; i++)
     {
       sugerido = 0;
-      dias_stock = strtod (PUT(PQvaluebycol (res, i, "stock_day")), (char **)NULL);
-      ventas_dia = strtod (PUT(PQvaluebycol (res, i, "ventas_dia")), (char **)NULL);
+      stock_actual = strtod (PUT(PQvaluebycol (res, i, "stock")), (char **)NULL),
+      dias_stock_min = strtod (PUT(PQvaluebycol (res, i, "dias_stock")), (char **)NULL); //Dias minimos de stock
+      dias_stock = strtod (PUT(PQvaluebycol (res, i, "stock_day")), (char **)NULL);     //Dias de stock disponibles
+      ventas_dia = strtod (PUT(PQvaluebycol (res, i, "ventas_dia")), (char **)NULL);    //Promedio de ventas
+      cantidad_pedido = strtod (PUT(PQvaluebycol (res, i, "cantidad_pedido")), (char **)NULL); //Cantidad Pedida no ingresada
       fraccion = (g_str_equal (PQvaluebycol (res, i, "fraccion"), "t")) ? TRUE : FALSE;
+      stock_min = dias_stock_min * ventas_dia; //Stock minimo
+      unidades_rep = lapso_rep * ventas_dia; //Unidades de reposicion
 
-      if (dias_stock <= (lapso_rep + 1))
-	sugerido = ((lapso_rep + 1) * ventas_dia);
+      /*Algorithm of suggested cantity to buy*/
+      stock_reposicion = (dias_stock_min < lapso_rep) ? lapso_rep * ventas_dia : dias_stock_min * ventas_dia;
+      sugerido = (((stock_actual + cantidad_pedido) - ventas_dia) > stock_reposicion) ? 0 : stock_reposicion;
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
@@ -8454,7 +8464,7 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
 			  3, strtod (PUT(PQvaluebycol (res, i, "precio_compra")), (char **)NULL),
 			  4, strtod (PUT(PQvaluebycol (res, i, "precio")), (char **)NULL),
 			  5, ventas_dia,
-                          6, strtod (PUT(PQvaluebycol (res, i, "stock")), (char **)NULL),
+                          6, stock_actual,
 			  7, dias_stock,
 			  8, (fraccion == TRUE) ? sugerido : lround (sugerido),
 			  -1);
@@ -8725,8 +8735,6 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 void 
 hide_wnd_suggest_buy (GtkButton *button, gpointer user_data)
 {
-  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy")));
-
   if (rutBorrado != NULL || nombreBorrado != NULL || lapRepBorrado != NULL || 
       descripcionBorrada != NULL)
     {
@@ -8742,6 +8750,10 @@ hide_wnd_suggest_buy (GtkButton *button, gpointer user_data)
       g_free (rut_proveedor_global);
       rut_proveedor_global = NULL;
     }
+
+  numFilasBorradas = 0;
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_suggest_buy")));
+  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_suggest_buy")));
 }
 
 

@@ -570,6 +570,7 @@ proveedores_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Giro", renderer,
@@ -577,6 +578,7 @@ proveedores_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Contacto", renderer,

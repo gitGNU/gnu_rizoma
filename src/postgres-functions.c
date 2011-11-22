@@ -3406,22 +3406,33 @@ PGresult *getProductsByProvider (gchar *rut)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf("SELECT DISTINCT p.*, "
-		      "(select_ventas_dia(p.barcode)::float) AS ventas_dia, "
-		      "(stock::float / select_ventas_dia(p.barcode)::float) AS stock_day, "
-		      "(select precio "
-	                      "from compra_detalle "
-	                      "where id_compra = (select max (id_compra) from compra_detalle where barcode_product= p.barcode) "
-	                      "and barcode_product = p.barcode) AS precio_compra "
-		      "FROM producto p "
-		      "INNER JOIN compra_detalle cd "
-		      "ON p.barcode = cd.barcode_product "
-		      "INNER JOIN compra c "
-		      "ON c.id = cd.id_compra "
-		      "INNER JOIN proveedor pr "
-		      "ON pr.rut = c.rut_proveedor "
-		      "WHERE pr.rut = '%s' "
-		      "AND estado = true;", rut);
+  //TODO: Ojo con el MAX (id_compra), evaluar el uso de last_value  
+  q = g_strdup_printf("SELECT DISTINCT p.barcode, p.codigo_corto, p.descripcion, p.marca, p.contenido, "
+		      "                p.unidad, p.precio, p.stock, p.dias_stock, p.fraccion, "
+		      "       (select_ventas_dia(p.barcode)::float) AS ventas_dia, "
+		      "       (stock::float / select_ventas_dia(p.barcode)::float) AS stock_day, "
+		      "	      (SELECT precio "
+		      "	              FROM compra_detalle "
+		      "	              WHERE id_compra = (select MAX (id_compra) from compra_detalle where barcode_product= p.barcode) "
+		      "	              AND barcode_product = p.barcode) AS precio_compra, "
+		      "	      (SELECT SUM (cantidad-cantidad_ingresada) "
+		      "	              FROM compra_detalle "
+		      "	              INNER JOIN compra ON compra.id = compra_detalle.id_compra "
+		      "		      WHERE barcode_product = p.barcode "
+		      "		      AND compra.anulada = 'f' "
+		      "		      AND compra.anulada_pi = 'f' "
+		      "		      AND compra.ingresada = 'f') AS cantidad_pedido "
+		      "       FROM producto p "
+		      "       INNER JOIN compra_detalle cd "
+		      "       ON p.barcode = cd.barcode_product "
+		      "       INNER JOIN compra c "
+		      "       ON c.id = cd.id_compra "
+		      "       INNER JOIN proveedor pr "
+		      "       ON pr.rut = c.rut_proveedor "
+		      "       WHERE pr.rut = %s "
+		      "       AND c.anulada = false "
+		      "       AND c.anulada_pi = false "
+		      "       AND estado = true ", rut);
 
   res = EjecutarSQL (q);
   g_free (q);

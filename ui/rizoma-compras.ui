@@ -9620,7 +9620,7 @@
     <property name="default_width">800</property>
     <property name="default_height">456</property>
     <property name="transient_for">wnd_compras</property>
-    <signal name="delete-event" handler="gtk_widget_hide" object="wnd_suggest_buy" swapped="yes"/>
+    <signal name="delete-event" handler="hide_wnd_suggest_buy" object="wnd_suggest_buy" swapped="yes"/>
     <child>
       <object class="GtkVBox" id="vbox_suggest_buy">
         <property name="visible">True</property>
