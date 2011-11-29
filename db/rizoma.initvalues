@@ -21,7 +21,7 @@ INSERT INTO formas_pago VALUES (DEFAULT, '30 Dias', 30);
 
 INSERT INTO impuesto VALUES (0, 'Sin Impuesto', 0, 'f');
 INSERT INTO impuesto VALUES (DEFAULT, 'Impuesto al Valor Agregado', 19, 'f');
-INSERT INTO impuesto VALUES (DEFAULT, 'Bebidas', 15, 't');
+INSERT INTO impuesto VALUES (DEFAULT, 'Bebidas', 13, 't');
 INSERT INTO impuesto VALUES (DEFAULT, 'Piscos y Whisky', 27, 't');
 INSERT INTO impuesto VALUES (DEFAULT, 'Vinos y Cervezas', 15, 't');
 
@@ -58,5 +58,6 @@ INSERT INTO unidad_producto VALUES (DEFAULT, 'CC');
 INSERT INTO unidad_producto VALUES (DEFAULT, 'GR');
 INSERT INTO unidad_producto VALUES (DEFAULT, 'KG');
 INSERT INTO unidad_producto VALUES (DEFAULT, 'UN');
+INSERT INTO unidad_producto VALUES (DEFAULT, 'ML');
 
 INSERT INTO familias VALUES (DEFAULT, 'GENERICO');

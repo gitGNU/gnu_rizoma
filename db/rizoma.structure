@@ -889,7 +889,7 @@ alter table pagos add constraint fk_pagos_factura_compra
   references factura_compra (id)  ;
 alter table documentos_emitidos_detalle add constraint fk_documento_emitido_documento_emitido_detalle
   foreign key (id_documento)
-  references Documentos_emitidos (id)  ;
+  references documentos_emitidos (id)  ;
 alter table documentos_emitidos_detalle add constraint fk_documento_emitido_detalle_producto
   foreign key (barcode_product)
   references producto (barcode)  ;
