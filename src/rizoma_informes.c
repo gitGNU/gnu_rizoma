@@ -842,13 +842,13 @@ reports_win (void)
 
   /* Sells */
   store = gtk_list_store_new (7,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-			      G_TYPE_STRING,
-                              G_TYPE_STRING);
+                              G_TYPE_STRING,  //Fecha
+                              G_TYPE_INT,     //ID Venta
+                              G_TYPE_STRING,  //ID Maquina
+                              G_TYPE_STRING,  //Vendedor
+                              G_TYPE_INT,     //Monto
+			      G_TYPE_STRING,  //Tipo pago
+                              G_TYPE_STRING); //Estado
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_sells"));
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
@@ -908,6 +908,7 @@ reports_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Tipo Pago", renderer,
@@ -3110,10 +3111,10 @@ on_btn_primero_clicked()
           gtk_list_store_append (store, &iter);
           gtk_list_store_set (store, &iter,
                               0, PQgetvalue (res_sells, i, 4),
-                              1, PQgetvalue (res_sells, i, 0),
+                              1, atoi (PQgetvalue (res_sells, i, 0)),
                               2, PQgetvalue (res_sells, i, 1),
                               3, PQgetvalue (res_sells, i, 2),
-                              4, PQgetvalue (res_sells, i, 3),
+                              4, atoi (PQgetvalue (res_sells, i, 3)),
                               5, pago,
 			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
 								     PQgetvalue (res_sells, i, 0))) ?
@@ -3201,10 +3202,10 @@ on_btn_atras_clicked()
 	      gtk_list_store_append (store, &iter);
 	      gtk_list_store_set (store, &iter,
 				  0, PQgetvalue (res_sells, i, 4),
-				  1, PQgetvalue (res_sells, i, 0),
+				  1, atoi (PQgetvalue (res_sells, i, 0)),
 				  2, PQgetvalue (res_sells, i, 1),
 				  3, PQgetvalue (res_sells, i, 2),
-				  4, PQgetvalue (res_sells, i, 3),
+				  4, atoi (PQgetvalue (res_sells, i, 3)),
 				  5, pago,
 				  6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
 									 PQgetvalue (res_sells, i, 0))) ?
@@ -3291,10 +3292,10 @@ on_btn_adelante_clicked()
               gtk_list_store_append (store, &iter);
               gtk_list_store_set (store, &iter,
                                   0, PQgetvalue (res_sells, i, 4),
-                                  1, PQgetvalue (res_sells, i, 0),
+                                  1, atoi (PQgetvalue (res_sells, i, 0)),
                                   2, PQgetvalue (res_sells, i, 1),
                                   3, PQgetvalue (res_sells, i, 2),
-                                  4, PQgetvalue (res_sells, i, 3),
+                                  4, atoi (PQgetvalue (res_sells, i, 3)),
                                   5, pago,
 				  6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
 									 PQgetvalue (res_sells, i, 0))) ?
@@ -3379,10 +3380,10 @@ on_btn_ultimo_clicked()
           gtk_list_store_append (store, &iter);
           gtk_list_store_set (store, &iter,
                               0, PQgetvalue (res_sells, i, 4),
-                              1, PQgetvalue (res_sells, i, 0),
+                              1, atoi (PQgetvalue (res_sells, i, 0)),
                               2, PQgetvalue (res_sells, i, 1),
                               3, PQgetvalue (res_sells, i, 2),
-                              4, PQgetvalue (res_sells, i, 3),
+                              4, atoi (PQgetvalue (res_sells, i, 3)),
                               5, pago,
 			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
 								     PQgetvalue (res_sells, i, 0))) ?
@@ -3450,7 +3451,9 @@ fill_sells_list ()
   res_sells = SearchTuplesByDate
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-     "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+     "fecha", " id, maquina, "
+              " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
+              " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
               " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
      store_combo);
 
@@ -3513,10 +3516,10 @@ fill_sells_list ()
           gtk_list_store_append (store, &iter);
           gtk_list_store_set (store, &iter,
                               0, PQgetvalue (res_sells, i, 4),
-                              1, PQgetvalue (res_sells, i, 0),
+                              1, atoi (PQgetvalue (res_sells, i, 0)),
                               2, PQgetvalue (res_sells, i, 1),
                               3, PQgetvalue (res_sells, i, 2),
-                              4, PutPoints (PQgetvalue (res_sells, i, 3)),
+                              4, atoi (PQgetvalue (res_sells, i, 3)),
                               5, pago,
 			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
 								     PQgetvalue (res_sells, i, 0))) ?
@@ -3652,10 +3655,10 @@ on_togglebtn_clicked()
 	  gtk_list_store_append (store, &iter);
 	  gtk_list_store_set (store, &iter,
 			      0, PQgetvalue (res_sells, i, 4),
-			      1, PQgetvalue (res_sells, i, 0),
+			      1, atoi (PQgetvalue (res_sells, i, 0)),
 			      2, PQgetvalue (res_sells, i, 1),
 			      3, PQgetvalue (res_sells, i, 2),
-			      4, PQgetvalue (res_sells, i, 3),
+			      4, atoi (PQgetvalue (res_sells, i, 3)),
 			      5, pago,
 			      6, g_strdup_printf("%s", (g_str_equal (PQgetvalue (res_sells, i, 6),
 								     PQgetvalue (res_sells, i, 0))) ?
