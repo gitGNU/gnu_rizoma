@@ -1116,7 +1116,7 @@ BuscarProductosParaListar (void)
   PGresult *res;
   gchar *q;
   gchar *materia_prima;
-  gchar *string, *tipo;
+  gchar *string;
   gint i, resultados;
   GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_find_products"));
   GtkTreeIter iter;
@@ -1128,7 +1128,7 @@ BuscarProductosParaListar (void)
   string = g_strdup (gtk_entry_get_text(GTK_ENTRY(widget)));
   q = g_strdup_printf ( "SELECT * FROM buscar_producto( '%s', "
                         "'{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}',"
-                        "TRUE, FALSE ) WHERE tipo != %s", string, materia_prima);
+                        "TRUE, FALSE ) WHERE tipo_id != %s", string, materia_prima);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1144,8 +1144,6 @@ BuscarProductosParaListar (void)
 
   for (i = 0; i < resultados; i++)
     {
-      tipo = g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT nombre FROM tipo_mercaderia WHERE id = %s", 
-								   PQvaluebycol (res, i, "tipo"))), 0, "nombre"));
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, PQvaluebycol (res, i, "codigo_corto"),
@@ -1154,7 +1152,7 @@ BuscarProductosParaListar (void)
                           3, PQvaluebycol (res, i, "marca"),
                           4, PQvaluebycol (res, i, "contenido"),
                           5, PQvaluebycol (res, i, "unidad"),
-			  6, tipo,
+			  6, PQvaluebycol (res, i, "tipo_mer"),
                           7, strtod (PUT (PQvaluebycol (res, i, "stock")), (char **)NULL),
                           8, atoi (PQvaluebycol (res, i, "precio")),
                           9, (atoi (PQvaluebycol (res, i, "stock")) <= atoi (PQvaluebycol (res, i, "stock_min")) &&

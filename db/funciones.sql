@@ -1849,17 +1849,19 @@ create or replace function buscar_producto(IN expresion varchar(255),
 	OUT precio_mayor int4,
 	OUT cantidad_mayor int4,
 	OUT mayorista bool, 
-	OUT tipo int4)
+	OUT tipo_id int4,
+	OUT tipo_mer varchar(20))
 returns setof record as $$
 declare
 	list record;
 	query text;
 	i integer;
+	compuesta integer;
 begin
-	query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido, unidad, 
-	      	     	    (SELECT disponible FROM obtener_stock_desde_barcode (barcode)) AS stock,
-			    (SELECT costo FROM obtener_costo_promedio_desde_barcode (barcode)) AS costo_promedio,
+	compuesta := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'COMPUESTA');
+	query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido, unidad, stock, costo_promedio,
 	      	     	    precio, vendidos, impuestos, otros, familia, perecibles,
+			    (SELECT nombre FROM tipo_mercaderia WHERE id = tipo) AS tipo_mercaderia,
 			    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min, 
 			    margen_promedio, fraccion, canje, stock_pro, dias_stock,
 			    tasa_canje, precio_mayor, cantidad_mayor, mayorista, tipo FROM producto WHERE $S$;
@@ -1893,9 +1895,21 @@ begin
 	    descripcion := list.descripcion;
 	    contenido := list.contenido;
 	    unidad := list.unidad;
-	    stock := list.stock;
+
+	    IF list.tipo = compuesta THEN
+		stock := (SELECT disponible FROM obtener_stock_desde_barcode (barcode));
+	    ELSE
+		stock := list.stock;
+            END IF;
+
 	    precio := list.precio;
-	    costo_promedio := list.costo_promedio;
+
+	    IF list.tipo = compuesta THEN
+		costo_promedio := (SELECT costo FROM obtener_costo_promedio_desde_barcode (barcode));
+	    ELSE
+		costo_promedio := list.costo_promedio;
+	    END IF;
+
 	    vendidos := list.vendidos;
 	    impuestos := list.impuestos;
 	    otros := list.otros;
@@ -1911,7 +1925,8 @@ begin
 	    precio_mayor := list.precio_mayor;
 	    cantidad_mayor := list.cantidad_mayor;
 	    mayorista := list.mayorista;
-	    tipo := list.tipo;
+	    tipo_id := list.tipo;
+	    tipo_mer := list.tipo_mercaderia;
 	RETURN NEXT;
     END LOOP;
 
