@@ -2386,9 +2386,12 @@ GetNeto (gchar *barcode)
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT precio FROM compra_detalle WHERE "
-                                      "barcode_product='%s' AND id_compra IN (SELECT id FROM "
-                                      "compra ORDER BY fecha DESC)", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT cd.precio "
+				      "FROM compra_detalle cd "
+				      "INNER JOIN compra c "
+				      "ON cd.id_compra = c.id "
+				      "WHERE barcode_product = %s "
+				      "ORDER BY c.fecha DESC", barcode));
 
   tuples = PQntuples (res);
 

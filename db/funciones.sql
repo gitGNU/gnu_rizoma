@@ -3160,107 +3160,96 @@ q text;
 l record;
 begin
 
-q := $S$ SELECT DISTINCT producto.barcode, producto.codigo_corto, producto.marca, producto.descripcion, producto.contenido, producto.unidad, producto.familia, p.cantidad_ingresada, p.cantidad_c_anuladas, p.cantidad_vendida, p.unidades_merma, p.cantidad_anulada, p.cantidad_devolucion, cantidad_envio, cantidad_recibida
-     	 	FROM producto
-		LEFT JOIN ( 
-       		     SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
-       		            FROM compra c
+q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+       	 	FROM producto p
 
-		     	    INNER JOIN compra_detalle cd
-       		     	    ON c.id = cd.id_compra
+	 	-- Las compras ingresadas hechas hasta la fecha determinada	
+	 	LEFT JOIN (SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cd.barcode_product AS barcode
+		          	  FROM compra_detalle cd				       
+       		     	          INNER JOIN compra c
+       		     	          ON c.id = cd.id_compra
 
-       		     	    INNER JOIN producto p
-       		     	    ON cd.barcode_product = p.barcode 
+       		     	          WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+                     	          AND cd.cantidad_ingresada > 0
+                     	          GROUP BY barcode) AS cantidad_ingresada
+                ON p.barcode = cantidad_ingresada.barcode
 			    
-			    -- Las anulaciones de compras hechas hasta la fecha determinada
-			    LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode
-			    	       FROM compra_anulada ca
-				       INNER JOIN compra_anulada_detalle cad
-				       ON ca.id = cad.id_compra_anulada
+	        -- Las anulaciones de compras hechas hasta la fecha determinada
+		LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode
+		       	          FROM compra_anulada ca
+				  INNER JOIN compra_anulada_detalle cad
+				  ON ca.id = cad.id_compra_anulada
 
-				       WHERE ca.fecha_anulacion < $S$ || quote_literal(fecha_inicio) || $S$
-				       GROUP BY barcode) AS compras_anuladas
-       		            ON p.barcode = compras_anuladas.barcode
+				  WHERE ca.fecha_anulacion < $S$ || quote_literal(fecha_inicio) || $S$
+				  GROUP BY barcode) AS compras_anuladas
+	        ON p.barcode = compras_anuladas.barcode
 
-       		     	    -- Las Ventas hechas hasta la fecha determinada
-       		     	    LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
-       	     	  	                      FROM venta v
-			  	 	      INNER JOIN venta_detalle vd 
-			  	 	      ON v.id = vd.id_venta
+       		-- Las Ventas hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta v
+		 	      	  INNER JOIN venta_detalle vd 
+			  	  ON v.id = vd.id_venta
 
-			  	 	      WHERE v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			  	 	      GROUP BY barcode) AS ventas
-       		            ON p.barcode = ventas.barcode
+			  	  WHERE v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			  	  GROUP BY barcode) AS ventas
+		ON p.barcode = ventas.barcode
 
-       	                    -- Las anulaciones de venta hechas hasta la fecha determinada
-       		     	    LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
-       	     	  	                      FROM venta v
-			  	 	      INNER JOIN venta_detalle vd 
-			  	 	      ON v.id = vd.id_venta
+       	        -- Las anulaciones de venta hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta v
+		 	          INNER JOIN venta_detalle vd 
+			  	  ON v.id = vd.id_venta
 
-			  	 	      INNER JOIN venta_anulada va
-			    	 	      ON va.id_sale = v.id
+			  	  INNER JOIN venta_anulada va
+			    	  ON va.id_sale = v.id
 
-			         	      WHERE va.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			         	      GROUP BY barcode) AS ventas_anuladas
-       		            ON p.barcode = ventas_anuladas.barcode
+				  WHERE va.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode) AS ventas_anuladas
+                ON p.barcode = ventas_anuladas.barcode
        
-			    -- Las Mermas sufridas hasta la fecha determinada
-       			    LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
-       	     	  	                      FROM merma m
+	        -- Las Mermas sufridas hasta la fecha determinada
+		LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
+       	     	                  FROM merma m
 
-			         	      WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			         	      GROUP BY barcode) AS merma
-       			    ON p.barcode = merma.barcode
+		         	  WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode) AS merma
+	        ON p.barcode = merma.barcode
 
-                            -- Las devoluciones hechas hasta la fecha determinada
-       			    LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
-       	     	  	                      FROM devolucion d
-			 	 	      INNER JOIN devolucion_detalle dd
-			 	 	      ON d.id = dd.id_devolucion
+                -- Las devoluciones hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
+       	     	                  FROM devolucion d
+		 	          INNER JOIN devolucion_detalle dd
+			 	  ON d.id = dd.id_devolucion
 
-			         	      WHERE d.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			         	      GROUP BY barcode) AS devolucion
-                            ON p.barcode = devolucion.barcode
+			          WHERE d.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode) AS devolucion
+                ON p.barcode = devolucion.barcode
 
-			    -- Los traspasos enviados hasta la fecha determinada
-       			    LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_envio
-       	     	  	                      FROM traspaso t
-			 	 	      INNER JOIN traspaso_detalle td
-			 	 	      ON t.id = td.id_traspaso
+	        -- Los traspasos enviados hasta la fecha determinada
+       		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_envio
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_detalle td
+			 	  ON t.id = td.id_traspaso
 
-			         	      WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-					      AND t.origen = 1
-			         	      GROUP BY barcode) AS traspaso_envio
-                            ON p.barcode = traspaso_envio.barcode
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen = 1
+			          GROUP BY barcode) AS traspaso_envio
+                ON p.barcode = traspaso_envio.barcode
 
-			    -- Los traspasos enviados hasta la fecha determinada
-       			    LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_recibida
-       	     	  	                      FROM traspaso t
-			 	 	      INNER JOIN traspaso_detalle td
-			 	 	      ON t.id = td.id_traspaso
+	        -- Los traspasos recibidos hasta la fecha determinada
+       		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_recibida
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_detalle td
+			 	  ON t.id = td.id_traspaso
 
-			         	      WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-					      AND t.origen != 1
-			         	      GROUP BY barcode) AS traspaso_recibido
-                            ON p.barcode = traspaso_recibido.barcode
-
-                     	    WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-                     	    AND c.ingresada = 'TRUE'
-                     	    AND p.estado = 'TRUE'
-                     	    GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
-                     	    ORDER BY barcode) AS p
-         ON producto.barcode = p.barcode
-
-         INNER JOIN compra_detalle cd
-	 ON cd.barcode_product = producto.barcode
-
-	 INNER JOIN compra c
-	 ON c.id = cd.id_compra
-
-	 WHERE c.ingresada = 'TRUE'
-	 AND producto.estado = 'TRUE'
-	 ORDER BY producto.barcode ASC $S$;
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen != 1
+			          GROUP BY barcode) AS traspaso_recibido
+                ON p.barcode = traspaso_recibido.barcode
+                    	    
+                WHERE p.estado = true
+                GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+                ORDER BY barcode $S$;
 
 for l in execute q loop
     barcode := l.barcode;
@@ -3268,7 +3257,7 @@ for l in execute q loop
     marca := l.marca;
     descripcion := l.descripcion ||' '|| l.contenido ||' '|| l.unidad;
     familia := l.familia;
-    cantidad_ingresada := l.cantidad_ingresada;
+    cantidad_ingresada := COALESCE (l.cantidad_ingresada,0);
     cantidad_c_anuladas := COALESCE(l.cantidad_c_anuladas,0);
     cantidad_vendida := COALESCE(l.cantidad_vendida,0);
     cantidad_merma := COALESCE(l.unidades_merma,0);
@@ -3306,8 +3295,6 @@ create or replace function producto_en_periodo(
 RETURNS setof record AS $$
 DECLARE
 q text;
-q2 text;
-q3 text;
 l record;
 z record;
 BEGIN
@@ -3317,7 +3304,6 @@ q := $S$ SELECT stock1.barcode AS barcode,
        	 	stock1.marca AS marca,
 		stock1.familia AS familia,
        	 	stock1.descripcion AS descripcion,
-		stock1.cantidad_ingresada AS cantidad_ingresada,       	 	
 
 		-- Los mismos datos de distintas fechas --
        	 	-- stock inicial
@@ -3355,109 +3341,22 @@ q := $S$ SELECT stock1.barcode AS barcode,
 	 FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$ ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date + 1) || $S$ ) stock2
        	 ON stock1.barcode = stock2.barcode $S$;
 
-q2 := $S$SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada_n, COALESCE(cantidad_c_anuladas,0) AS cantidad_c_anuladas_n, COALESCE(cantidad_vendida,0) AS ventas_n, COALESCE(unidades_merma,0) AS mermas_n, COALESCE(cantidad_anulada,0) AS anuladas_n, COALESCE(cantidad_devolucion,0) AS devolucion_n, COALESCE(cantidad_envio,0) AS envios_n, COALESCE(cantidad_recibida,0) AS recibida_n
-         FROM compra c
-
-         INNER JOIN compra_detalle cd
-         ON c.id = cd.id_compra
-
-         INNER JOIN producto p
-         ON cd.barcode_product = p.barcode 
-	 
-	 -- Las anulaciones de compras hechas hasta la fecha determinada
-    	 LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode_ca
-	      	   	   FROM compra_anulada ca
-			   INNER JOIN compra_anulada_detalle cad
-			   ON ca.id = cad.id_compra_anulada
-			   GROUP BY barcode) AS compras_anuladas_n
-	 ON p.barcode = compras_anuladas_n.barcode_ca
-
-         -- Las Ventas hechas hasta la fecha determinada
-         LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode_v -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
-       	     	  	  FROM venta v
-			  INNER JOIN venta_detalle vd 
-			  ON v.id = vd.id_venta
-			  GROUP BY barcode_v) AS ventas_n
-         ON p.barcode = ventas_n.barcode_v
-
-         -- Las anulaciones de venta hechas hasta la fecha determinada
-         LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode_a 
-       	     	  	  FROM venta v
-			  INNER JOIN venta_detalle vd 
-			  ON v.id = vd.id_venta
-			  INNER JOIN venta_anulada va
-			  ON va.id_sale = v.id
-			  GROUP BY barcode_a) AS ventas_anuladas_n
-         ON p.barcode = ventas_anuladas_n.barcode_a
-       
-         -- Las Mermas sufridas hasta la fecha determinada
-         LEFT JOIN (SELECT merma.barcode AS barcode_m, SUM(merma.unidades) AS unidades_merma
-       	     	  	 FROM merma
-			 GROUP BY barcode_m) AS merma_n
-         ON p.barcode = merma_n.barcode_m
-
-         -- Las devoluciones hechas hasta la fecha determinada
-         LEFT JOIN (SELECT dd.barcode AS barcode_d, SUM(dd.cantidad) AS cantidad_devolucion
-       	     	  	 FROM devolucion d
-			 INNER JOIN devolucion_detalle dd
-			 ON d.id = dd.id_devolucion
-			 GROUP BY barcode_d) AS devolucion_n
-         ON p.barcode = devolucion_n.barcode_d
-
-	 -- Los traspasos enviados hasta la fecha determinada
-     	 LEFT JOIN (SELECT td.barcode AS barcode_td, SUM(td.cantidad) AS cantidad_envio
-      	                 FROM traspaso t
-			 INNER JOIN traspaso_detalle td
-			 ON t.id = td.id_traspaso
-		         AND t.origen = 1
-			 GROUP BY barcode) AS traspaso_envio_n
-         ON p.barcode = traspaso_envio_n.barcode_td
-
-	 -- Los traspasos enviados hasta la fecha determinada
-       	 LEFT JOIN (SELECT td.barcode AS barcode_td2, SUM(td.cantidad) AS cantidad_recibida
-       	                 FROM traspaso t
-	 	         INNER JOIN traspaso_detalle td
-			 ON t.id = td.id_traspaso
-		         AND t.origen != 1
-			 GROUP BY barcode) AS traspaso_recibido_n
-         ON p.barcode = traspaso_recibido_n.barcode_td2
-
-         WHERE c.ingresada = 'TRUE'
-         AND p.estado = 'TRUE'
-         AND p.barcode =$S$;
-
 FOR l IN EXECUTE q loop
     barcode := l.barcode;
     codigo_corto := l.codigo_corto;
     marca := l.marca;
     familia := l.familia;
     descripcion := l.descripcion;
-    IF l.cantidad_ingresada IS NULL THEN   -- Significa que no ha sido comprado aún, por lo que se mostrará toda su información sin limite de fecha    
-       q3 := q2|| l.barcode || $S$ GROUP BY cantidad_c_anuladas_n, ventas_n, mermas_n, anuladas_n, devolucion_n, envios_n, recibida_n$S$;
-       FOR z IN EXECUTE q3 loop
-          stock_inicial := 0;
-          compras_periodo := z.cantidad_ingresada_n;
-	  anulaciones_c_periodo := z.cantidad_c_anuladas_n;
-          ventas_periodo := z.ventas_n;
-	  anulaciones_periodo := z.anuladas_n;
-          devoluciones_periodo := z.devolucion_n;
-          mermas_periodo := z.mermas_n;
-	  enviados_periodo := z.envios_n;
-	  recibidos_periodo := z.recibida_n;
-          stock_teorico := z.cantidad_ingresada_n - z.cantidad_c_anuladas_n - z.mermas_n - z.ventas_n - z.devolucion_n + z.anuladas_n - z.envios_n + z.recibida_n;
-       END loop;
-    ELSE
-       stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
-       compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
-       anulaciones_c_periodo := l.stock2_cantidad_c_anuladas - l.stock1_cantidad_c_anuladas;
-       ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
-       anulaciones_periodo := l.stock2_cantidad_anulada - l.stock1_cantidad_anulada;
-       devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
-       mermas_periodo := l.stock2_cantidad_merma - l.stock1_cantidad_merma;
-       enviados_periodo := l.stock2_cantidad_envio - l.stock1_cantidad_envio;
-       recibidos_periodo := l.stock2_cantidad_recibida - l.stock1_cantidad_recibida;
-       stock_teorico := l.stock2_cantidad_fecha;
-    END IF;
+    stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
+    compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
+    anulaciones_c_periodo := l.stock2_cantidad_c_anuladas - l.stock1_cantidad_c_anuladas;
+    ventas_periodo := l.stock2_cantidad_vendida - l.stock1_cantidad_vendida;
+    anulaciones_periodo := l.stock2_cantidad_anulada - l.stock1_cantidad_anulada;
+    devoluciones_periodo := l.stock2_cantidad_devoluciones - l.stock1_cantidad_devoluciones;
+    mermas_periodo := l.stock2_cantidad_merma - l.stock1_cantidad_merma;
+    enviados_periodo := l.stock2_cantidad_envio - l.stock1_cantidad_envio;
+    recibidos_periodo := l.stock2_cantidad_recibida - l.stock1_cantidad_recibida;
+    stock_teorico := l.stock2_cantidad_fecha;
     RETURN NEXT;
 END loop;
 
