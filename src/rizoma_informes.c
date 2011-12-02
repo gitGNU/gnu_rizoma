@@ -61,7 +61,7 @@ ChangeVenta (void)
   GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
   GtkListStore *store_detail = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail"))));
   GtkTreeIter iter;
-  gchar *idventa;
+  gint idventa;
   gint i, tuples;
   PGresult *res;
 
@@ -76,7 +76,7 @@ ChangeVenta (void)
       /* consulta que arroja el detalle de una venta*/
       res = EjecutarSQL2
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, vd.iva, vd.otros, round((cantidad * vd.precio)) AS monto FROM venta_detalle vd, producto WHERE producto.barcode=vd.barcode and id_venta=%s", idventa));
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, vd.iva, vd.otros, round((cantidad * vd.precio)) AS monto FROM venta_detalle vd, producto WHERE producto.barcode=vd.barcode and id_venta=%d", idventa));
 
       tuples = PQntuples (res);
 
