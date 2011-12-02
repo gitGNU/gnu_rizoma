@@ -1789,7 +1789,7 @@ SearchAndFill (void)
     {
       q = g_strdup_printf ("SELECT * FROM buscar_producto ('%s', "
                            "'{\"barcode\", \"codigo_corto\",\"marca\","
-                           "\"descripcion\"}', true, true ) WHERE tipo != %s", string, materia_prima);
+                           "\"descripcion\"}', true, true ) WHERE tipo_id != %s", string, materia_prima);
       res = EjecutarSQL (q);
       resultados = PQntuples (res);
     }

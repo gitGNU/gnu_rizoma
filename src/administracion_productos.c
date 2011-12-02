@@ -1126,7 +1126,7 @@ BuscarProductosParaListar (void)
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
   widget = GTK_WIDGET(gtk_builder_get_object (builder,"find_product_entry"));
   string = g_strdup (gtk_entry_get_text(GTK_ENTRY(widget)));
-  q = g_strdup_printf ( "SELECT * FROM buscar_producto( '%s', "
+  q = g_strdup_printf ( "SELECT * FROM buscar_producto ('%s', "
                         "'{\"barcode\", \"codigo_corto\",\"marca\",\"descripcion\"}',"
                         "TRUE, FALSE ) WHERE tipo_id != %s", string, materia_prima);
   res = EjecutarSQL (q);
