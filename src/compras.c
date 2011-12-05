@@ -6135,7 +6135,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 					      PQvaluebycol (res, i, "year"),
 					      PQvaluebycol (res, i, "hour"),
 					      PQvaluebycol (res, i, "minute")),
-			  2, PUT (g_strdup (PQvaluebycol (res, i, "monto"))),
+			  2, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
 			  3, PQvaluebycol (res, i, "nombre_proveedor"),
 			  4, PQvaluebycol (res, i, "rut_proveedor"),
 			  -1);
@@ -7219,7 +7219,7 @@ on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
       barcode = g_strdup (PQvaluebycol (res, 0, "barcode"));
 
       q = g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode);
-      EjecutarSQL (q);            
+      EjecutarSQL (q);
 
       position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);
@@ -8805,8 +8805,8 @@ on_selection_nullify_buy_invoice_change (GtkTreeSelection *selection, gpointer d
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
 			      2, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-			      3, PUT (g_strdup (PQvaluebycol (res, i, "precio"))),
-			      4, PUT (g_strdup (PQvaluebycol (res, i, "subtotal"))),
+			      3, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      4, atoi (g_strdup (PQvaluebycol (res, i, "subtotal"))),
 			      5, id_compra,
 			      6, id_factura_compra,
 			      -1);
@@ -8885,7 +8885,7 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, PUT (g_strdup (PQvaluebycol (res, i, "monto"))),
+			      4, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
 			      5, id_compra,
 			      6, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
@@ -8981,7 +8981,7 @@ nullify_buy_win(void)
       store_buy = gtk_list_store_new (5,
 				      G_TYPE_INT,     //Id
 				      G_TYPE_STRING,  //Date
-				      G_TYPE_STRING,  //Total amount
+				      G_TYPE_INT,     //Total amount
 				      G_TYPE_STRING,  //Nombre proveedor
 				      G_TYPE_STRING); //Rut proveedor
 
@@ -9024,6 +9024,7 @@ nullify_buy_win(void)
       g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 2);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
     }
 
   // TreeView Facturas
@@ -9036,7 +9037,7 @@ nullify_buy_win(void)
 					  G_TYPE_STRING, // Fecha Ingreso
 					  G_TYPE_STRING, // Pagada
 					  G_TYPE_STRING, // Fecha Pago
-					  G_TYPE_STRING, // Monto Total
+					  G_TYPE_INT,    // Monto Total
 					  G_TYPE_INT,    // ID Compra
 					  G_TYPE_INT);   // ID Factura Compra
 
@@ -9101,6 +9102,7 @@ nullify_buy_win(void)
       g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 4);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
     }
 
   //TreeView Detalle Factura
@@ -9112,8 +9114,8 @@ nullify_buy_win(void)
                                           G_TYPE_STRING, //barcode
                                           G_TYPE_STRING, //description
                                           G_TYPE_DOUBLE, //cantity
-                                          G_TYPE_STRING, //price
-                                          G_TYPE_STRING, //subtotal
+                                          G_TYPE_INT,    //price
+                                          G_TYPE_INT,    //subtotal
                                           G_TYPE_INT,    //Id_compra
                                           G_TYPE_INT);   //id_factura_compra
 
@@ -9138,7 +9140,7 @@ nullify_buy_win(void)
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
-      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 1);
       gtk_tree_view_column_set_resizable (column, FALSE);
 
@@ -9156,7 +9158,7 @@ nullify_buy_win(void)
 
       //price
       renderer = gtk_cell_renderer_text_new();
-      column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
+      column = gtk_tree_view_column_new_with_attributes("Costo", renderer,
                                                         "text", 3,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
@@ -9164,6 +9166,7 @@ nullify_buy_win(void)
       g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 3);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
       //subtotal
       renderer = gtk_cell_renderer_text_new();
@@ -9175,6 +9178,7 @@ nullify_buy_win(void)
       g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 4);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
     }
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_nullify_buy"));

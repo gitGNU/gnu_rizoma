@@ -4463,13 +4463,14 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
               gtk_list_store_insert_after (sell, &iter, NULL);
               gtk_list_store_set (sell, &iter,
                                   0, venta->products->product->codigo,
-                                  1, venta->products->product->producto,
-                                  2, venta->products->product->marca,
-                                  3, venta->products->product->contenido,
-                                  4, venta->products->product->unidad,
-                                  5, g_strdup_printf ("%.3f", venta->products->product->cantidad),
-                                  6, venta->products->product->precio,
-                                  7, PutPoints (g_strdup_printf
+				  1, g_strdup_printf ("%s %s %d %s",
+						  venta->products->product->producto,
+						  venta->products->product->marca,
+						  venta->products->product->contenido,
+						  venta->products->product->unidad),
+                                  2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
+                                  3, venta->products->product->precio,
+                                  4, PutPoints (g_strdup_printf
                                                 ("%.0f", venta->products->product->cantidad * venta->products->product->precio)),
                                   -1);
 

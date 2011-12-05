@@ -7785,7 +7785,7 @@
             <property name="row_spacing">20</property>
             <child>
               <object class="GtkButton" id="btn_new_product">
-                <property name="label" translatable="yes">Mercadería discreta</property>
+                <property name="label" translatable="yes">Mercadería corriente</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -7817,7 +7817,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_new_deriv">
-                <property name="label" translatable="yes">Derivadas</property>
+                <property name="label" translatable="yes">Mercadería derivada</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
