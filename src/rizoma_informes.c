@@ -76,7 +76,7 @@ ChangeVenta (void)
       /* consulta que arroja el detalle de una venta*/
       res = EjecutarSQL2
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, vd.iva, vd.otros, round((cantidad * vd.precio)) AS monto FROM venta_detalle vd, producto WHERE producto.barcode=vd.barcode and id_venta=%d", idventa));
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, round(vd.iva) AS iva, round(vd.otros) AS otros, round((cantidad * vd.precio)) AS monto FROM venta_detalle vd, producto WHERE producto.barcode=vd.barcode and id_venta=%d", idventa));
 
       tuples = PQntuples (res);
 
@@ -89,8 +89,8 @@ ChangeVenta (void)
                                                   PQvaluebycol (res, i, "unidad")),			      
                               1, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
                               2, atoi (PQvaluebycol (res, i, "precio")),
-			      3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "iva"))), (char **)NULL),
-                              4, strtod (PUT (g_strdup (PQvaluebycol (res, i, "otros"))), (char **)NULL),
+			      3, atoi (g_strdup (PQvaluebycol (res, i, "iva"))),
+                              4, atoi (g_strdup (PQvaluebycol (res, i, "otros"))),
                               5, atoi (PQvaluebycol (res, i, "monto")),
                               -1);
         }
@@ -944,8 +944,8 @@ reports_win (void)
                               G_TYPE_STRING,  //Producto (marca, descripcion, contendo unidad)
                               G_TYPE_DOUBLE,  //Cantidad (vendida)
                               G_TYPE_INT,     //Unitario (precio por unidad)
-			      G_TYPE_DOUBLE,  //IVA (en pesos)
-			      G_TYPE_DOUBLE,  //Otros impuestos (en pesos)
+			      G_TYPE_INT,     //IVA (en pesos)
+			      G_TYPE_INT,     //Otros impuestos (en pesos)
                               G_TYPE_INT);    //Sub-Total (precio unitario * cantidad)
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_sell_detail"));

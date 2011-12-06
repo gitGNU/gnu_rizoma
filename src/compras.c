@@ -472,12 +472,12 @@ compras_win (void)
   /* Pending Request Detail */
 
   store = gtk_list_store_new (8,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_STRING,
+                              G_TYPE_STRING,   //codigo
+                              G_TYPE_STRING,   //producto
+                              G_TYPE_DOUBLE,   //Costo unitario
+                              G_TYPE_DOUBLE,   //cantidad solicitada
+                              G_TYPE_DOUBLE,   //cantidad ingresada
+                              G_TYPE_STRING,   //sub-total
                               G_TYPE_STRING,
                               G_TYPE_BOOLEAN);
 
@@ -506,14 +506,16 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Unit.", renderer,
                                                      "text", 2,
                                                      "foreground", 6,
                                                      "foreground-set", 7,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer,
@@ -523,9 +525,8 @@ compras_win (void)
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -536,7 +537,7 @@ compras_win (void)
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
@@ -697,13 +698,13 @@ compras_win (void)
   /* Pay Invoices */
 
   store = gtk_list_store_new (7,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING);
+                              G_TYPE_STRING,   //ID Factura
+                              G_TYPE_STRING,   //RUT
+                              G_TYPE_STRING,   //N° Factura
+                              G_TYPE_STRING,   //ID compra
+                              G_TYPE_STRING,   //F. Emisión
+                              G_TYPE_STRING,   //F. Pagos
+                              G_TYPE_INT);     //Monto Compra
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_invoice_list"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -716,7 +717,7 @@ compras_win (void)
                     G_CALLBACK (on_tree_view_invoice_list_selection_changed), NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("ID", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ID Factura", renderer,
                                                      "text", 0,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -733,9 +734,10 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)1, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Numero", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("N° Factura", renderer,
                                                      "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -744,7 +746,7 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Compra", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("ID Compra", renderer,
                                                      "text", 3,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -778,13 +780,14 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
   store = gtk_list_store_new (5,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE);
+                              G_TYPE_STRING,  //Codigo
+                              G_TYPE_STRING,  //Descripcion
+                              G_TYPE_DOUBLE,  //Costo unitario
+                              G_TYPE_DOUBLE,  //Cantidad
+                              G_TYPE_INT);    //Sub-total
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_invoice_detail"));
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -807,12 +810,14 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Unit.", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Unit.", renderer,
                                                      "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
@@ -822,7 +827,6 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
@@ -833,7 +837,6 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   /*ComboBox - PrecioCompra*/
@@ -2359,9 +2362,9 @@ IngresoDetalle (GtkTreeSelection *selection, gpointer data)
                               1, g_strdup_printf ("%s %s %s %s", PQvaluebycol(res, i, "descripcion"),
                                                   PQvaluebycol(res, i, "marca"), PQvaluebycol(res, i, "contenido"),
                                                   PQvaluebycol(res, i, "unidad")),
-                              2, PQvaluebycol(res, i, "precio"),
-                              3, strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
-                              4, strtod (PUT(PQvaluebycol(res, i, "cantidad_ingresada")), (char **)NULL),
+                              2, strtod (PUT (PQvaluebycol(res, i, "precio")), (char **)NULL),
+                              3, sol,
+                              4, ing,
                               5, PutPoints (PQvaluebycol(res, i, "costo_ingresado")),
                               6, color ? "Red" : "Black",
                               7, TRUE,
@@ -3145,7 +3148,7 @@ FillPagarFacturas (gchar *rut_proveedor)
                                               atoi (PQvaluebycol (res, i, "mes")), atoi (PQvaluebycol (res, i, "ano"))),
                           5, g_strdup_printf ("%.2d/%.2d/%.4d", atoi (PQvaluebycol (res, i, "pay_day")),
                                               atoi (PQvaluebycol (res, i, "pay_month")), atoi (PQvaluebycol (res, i, "pay_year"))),
-                          6, PQvaluebycol (res, i, "monto"),
+                          6, atoi (PQvaluebycol (res, i, "monto")),
                           -1);
       total_amount += atoi (PQvaluebycol (res, i, "monto"));
     }
@@ -6455,9 +6458,9 @@ on_tree_view_invoice_list_selection_changed (GtkTreeSelection *selection, gpoint
                               1, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
                                                   PQvaluebycol (res, i, "unidad")),
-                              2, PQvaluebycol(res, i, "precio_compra"),
-                              3, strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
-                              4, (gdouble) (strtod (PUT(PQvaluebycol(res, i, "precio_compra")), (char **)NULL) * strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL)),
+                              2, strtod (PUT (PQvaluebycol (res, i, "precio_compra")), (char **)NULL),
+                              3, strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
+                              4, lround (strtod (PUT(PQvaluebycol(res, i, "precio_compra")), (char **)NULL) * strtod (PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL)),
                               -1);
         }
     }

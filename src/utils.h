@@ -71,4 +71,7 @@ GArray * decode_clothes_code (gchar *clothes_code);
 void only_number_filter (GtkEditable *editable, gchar *new_text, gint new_text_length,
                          gint *position, gpointer user_data);
 
+void control_rut (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model,
+                  GtkTreeIter *iter, gpointer user_data);
+
 #endif
