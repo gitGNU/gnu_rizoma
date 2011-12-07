@@ -8722,6 +8722,9 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
       g_array_free (lapRepBorrado, TRUE); lapRepBorrado = NULL;
       g_array_free (descripcionBorrada, TRUE); descripcionBorrada = NULL;
     }
+
+  /*El contador de proveedores filtrados retorna a cero*/
+  numFilasBorradas = 0;
 }
 
 
