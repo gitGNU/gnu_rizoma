@@ -1707,9 +1707,10 @@ BuyWindow (void)
                                                      "text", 0,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_prov), column);
-  gtk_tree_view_column_set_min_width (column, 75);
-  gtk_tree_view_column_set_max_width (column, 75);
+  //gtk_tree_view_column_set_min_width (column, 75);
+  //gtk_tree_view_column_set_max_width (column, 75);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)0, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
@@ -2143,10 +2144,11 @@ SearchByName (void)
 void
 Comprar (GtkWidget *widget, gpointer data)
 {
-  gchar *rut = g_strdup (gtk_label_get_text (GTK_LABEL (compra->rut_label)));
+  gchar *rut = CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (compra->rut_label))));
   gchar *nota = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->nota_entry)));
   gint dias_pago = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (entry_plazo))));
 
+  rut = g_strndup (rut, strlen (rut)-2);
 
   if (strcmp (rut, "") == 0)
     {
@@ -2452,11 +2454,10 @@ FillProveedores (void)
     los proveedores */
 
   if (rut_proveedor_global != NULL)
-    res = EjecutarSQL (g_strdup_printf ("SELECT rut, nombre FROM select_proveedor() "
-					"WHERE rut = %s "
+    res = EjecutarSQL (g_strdup_printf ("SELECT rut, dv, nombre FROM select_proveedor(%s) "
 					"ORDER BY nombre ASC", rut_proveedor_global));
   else
-  res = EjecutarSQL ("SELECT rut, nombre FROM select_proveedor() "
+  res = EjecutarSQL ("SELECT rut, dv, nombre FROM select_proveedor() "
                      "ORDER BY nombre ASC");
 
   if (res == NULL)
@@ -2471,7 +2472,8 @@ FillProveedores (void)
     {
       gtk_list_store_append (compra->store_prov, &iter);
       gtk_list_store_set (compra->store_prov, &iter,
-                          0, PQvaluebycol(res, i, "rut"),
+                          0, g_strconcat (PQvaluebycol(res, i, "rut"),
+					  PQvaluebycol(res, i, "dv"), NULL),
                           1, PQvaluebycol(res, i, "nombre"),
                           -1);
     }
@@ -2842,21 +2844,23 @@ AddProveedorWindow (GtkWidget *widget, gpointer user_data)
 void
 Seleccionado (GtkTreeSelection *selection, gpointer data)
 {
-  GtkTreeIter iter;  gchar *value;
+  GtkTreeIter iter;  
+  gchar *rut, *rut_completo;
   PGresult *res;
   gchar *q;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       gtk_tree_model_get (GTK_TREE_MODEL (compra->store_prov), &iter,
-                          0, &value,
+                          0, &rut_completo,
                           -1);
-      q = g_strdup_printf ("SELECT rut, nombre FROM select_proveedor (%s)", value);
+      rut = g_strndup (rut_completo, strlen (rut_completo)-1);
+      q = g_strdup_printf ("SELECT rut, nombre FROM select_proveedor (%s)", rut);
       res = EjecutarSQL (q);
       g_free (q);
 
-      gtk_label_set_text (GTK_LABEL (compra->rut_label),
-                          PQvaluebycol( res, 0, "rut"));
+      gtk_label_set_text (GTK_LABEL (compra->rut_label), //PQvaluebycol( res, 0, "rut"));
+			  formato_rut (rut_completo));
       gtk_label_set_text (GTK_LABEL (compra->nombre_label),
                           PQvaluebycol( res, 0, "nombre"));
     }
@@ -3115,7 +3119,8 @@ FillPagarFacturas (gchar *rut_proveedor)
   q = g_strdup_printf ("SELECT fc.id, fc.num_factura, fc.monto, "
 		       "date_part ('day', fc.fecha) as dia, date_part('month', fc.fecha) as mes, date_part('year', fc.fecha) as ano, "
 		       "fc.id_compra, date_part ('day', fecha_pago) AS pay_day, date_part ('month', fecha_pago) AS pay_month, date_part ('year', fecha_pago) AS pay_year, "
-		       "fp.nombre, fc.id, fc.rut_proveedor "
+		       "fp.nombre, fc.id, fc.rut_proveedor, "
+		       "(SELECT dv FROM proveedor WHERE rut = fc.rut_proveedor) AS dv "
 		       "FROM formas_pago fp "
 		       "INNER JOIN factura_compra fc "
 		       "ON fp.id = fc.forma_pago "
@@ -3141,7 +3146,8 @@ FillPagarFacturas (gchar *rut_proveedor)
       gtk_list_store_append (store_invoice, &iter);
       gtk_list_store_set (store_invoice, &iter,
                           0, PQvaluebycol (res, i, "id"),
-                          1, PQvaluebycol (res, i, "rut_proveedor"),
+                          1, g_strconcat (PQvaluebycol (res, i, "rut_proveedor"),
+					  PQvaluebycol (res, i, "dv"), NULL),
                           2, PQvaluebycol (res, i, "num_factura"),
                           3, PQvaluebycol (res, i, "id_compra"),
                           4, g_strdup_printf ("%.2d/%.2d/%.4d", atoi (PQvaluebycol (res, i, "dia")),
@@ -3154,7 +3160,7 @@ FillPagarFacturas (gchar *rut_proveedor)
     }
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_invoice_total_amount")),
-                        g_strdup_printf ("<b>$ %s</b>", PUT(g_strdup_printf("%d", total_amount))));
+                        g_strdup_printf ("<b>$ %s</b>", PutPoints (g_strdup_printf("%d", total_amount))));
 }
 
 
@@ -3276,7 +3282,9 @@ FillProveedorData (gchar *rut, gboolean guias)
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_guide_invoice_provider")), PQvaluebycol (res, 0, "nombre"));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_rut")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", 
+					     formato_rut (g_strconcat (PQvaluebycol (res, 0, "rut"), 
+								       PQvaluebycol (res, 0, "dv"), NULL))));
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_guide_invoice_contact")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
@@ -3310,7 +3318,9 @@ FillProveedorData (gchar *rut, gboolean guias)
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_invoice_provider")), PQvaluebycol (res, 0, "nombre"));
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_rut")),
-                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", rut));
+                            g_strdup_printf ("<span weight=\"ultrabold\">%s</span>", 
+					     formato_rut (g_strconcat (PQvaluebycol (res, 0, "rut"),
+								       PQvaluebycol (res, 0, "dv"), NULL))));
 
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "label_invoice_contact")),
                             g_strdup_printf ("<span weight=\"ultrabold\">%s</span>",
@@ -5952,8 +5962,8 @@ on_entry_srch_provider_activate (GtkEntry *entry)
 
   for (i = 0; i < tuples; i++)
     {
-      str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
-                            PQvaluebycol (res, i, "dv"), NULL);
+      str_axu = g_strconcat (PQvaluebycol (res, i, "rut"),
+			     PQvaluebycol (res, i, "dv"), NULL);
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
@@ -5998,6 +6008,7 @@ wnd_search_provider (GtkEntry *entry, gpointer user_data)
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)1, NULL);
     }
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_provider"));
@@ -6155,7 +6166,7 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
   GtkTreeModel *model = gtk_tree_view_get_model (tree);
   GtkTreeIter iter;
   gchar *str;
-  gchar **strs;
+  //gchar **strs;
   //gint tab = gtk_notebook_get_current_page ( GTK_NOTEBOOK (builder_get (builder, "buy_notebook")));
   //gboolean guide;
 
@@ -6165,17 +6176,17 @@ on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
                           1, &str,
                           -1);
 
-      strs = g_strsplit (str, "-", 2);
+      str = g_strndup (str, strlen (str)-1);
 
       if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder, "wnd_nullify_buy"))))
 	{
-	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_provider")), *strs);
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_provider")), str);
 	  on_btn_nullify_buy_search_clicked (NULL, NULL);
 	}
       else
 	{
 	  //guide = tab == 2 ? TRUE : FALSE; //Ex page 2 "Ingreso Factura" is disabled
-	  FillProveedorData (*strs, FALSE);
+	  FillProveedorData (str, FALSE);
 	}
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_srch_provider")));
@@ -6474,15 +6485,17 @@ on_btn_pay_invoice_clicked (void)
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_invoice_list")));
   GtkTreeIter iter;
   gchar *id_invoice;
-  gchar *rut_provider = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_invoice_rut"))));
+  gchar *rut_provider;
   gint position;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       gtk_tree_model_get (model, &iter,
                           0, &id_invoice,
+			  1, &rut_provider,
                           -1);
 
+      rut_provider = g_strndup (rut_provider, strlen (rut_provider)-1);
       position = atoi (gtk_tree_model_get_string_from_iter(model, &iter));
       
       if (PagarFactura (atoi (id_invoice)) == FALSE)

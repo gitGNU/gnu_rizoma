@@ -24,6 +24,8 @@
 #include<gtk/gtk.h>
 #include<stdlib.h>
 
+#include<string.h>
+
 #include"tipos.h"
 
 #include"postgres-functions.h"
@@ -218,9 +220,9 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
   gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "nombre"));
 
-  q = g_strconcat(PQvaluebycol (res, 0, "rut"), "-", PQvaluebycol(res, 0, "dv"), NULL);
+  q = g_strconcat(PQvaluebycol (res, 0, "rut"), PQvaluebycol (res, 0, "dv"), NULL);  
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
-  gtk_label_set_text (GTK_LABEL (widget), q);
+  gtk_label_set_text (GTK_LABEL (widget), formato_rut (q));
   g_free (q);
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
@@ -483,8 +485,8 @@ ModificarProveedor (void)
   gchar *giro_c;
   gchar *lap_rep_c;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
-  rut_c = g_strdup(gtk_label_get_text (GTK_LABEL (widget)));
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_prov_rut"));
+  rut_c = CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget))));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
   nombre_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
