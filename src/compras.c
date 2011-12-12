@@ -8152,6 +8152,7 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
       g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
       gtk_tree_view_column_set_sort_column_id (column, 0);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)0, NULL);
 
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
@@ -8378,7 +8379,8 @@ on_btn_suggest_buy_clicked (GtkButton *button, gpointer user_data)
     {
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
-			  0, PQvaluebycol (res, i, "rut"),
+			  0, g_strconcat (PQvaluebycol (res, i, "rut"),
+					  PQvaluebycol (res, i, "dv"), NULL),
                           1, PQvaluebycol (res, i, "nombre"),
 			  2, strtod (PUT (PQvaluebycol (res, i, "lapso_reposicion")), (char **)NULL),
 			  3, PQvaluebycol (res, i, "giro"),
@@ -8425,6 +8427,7 @@ AskProductProvider (GtkTreeView *tree_view, GtkTreePath *path_parameter,
   PGresult *res;
   gint i, tuples;
 
+  rut = g_strndup (rut, strlen (rut)-1);
   res = getProductsByProvider (rut);
 
   // servirá para elegir el proveedor al confirmar la compra

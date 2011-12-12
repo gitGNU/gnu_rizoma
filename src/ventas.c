@@ -2789,7 +2789,7 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   GtkListStore *store;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
-  gchar *rut;
+  gchar *rut, *dv;
   PGresult *res;
   gchar *q;
 
@@ -2810,10 +2810,13 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
   gtk_widget_hide(aux);
 
-  q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono from cliente where rut = %s",
-                      strtok(g_strdup(rut),"-"));
+  dv = invested_strndup (rut, strlen (rut)-1);
+  rut = g_strndup (rut, strlen (rut)-1);
+
+  q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono from cliente where rut = %s", rut);
   res = EjecutarSQL(q);
   g_free (q);
+  rut = g_strdup_printf ("%s-%s", rut, dv);
 
   if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step1"))))
     {
@@ -2833,15 +2836,15 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
     }
   else if (gtk_widget_get_visible (GTK_WIDGET(builder_get (builder,"wnd_sale_credit"))))
     {
-      aux = GTK_WIDGET(gtk_builder_get_object(builder, "entry_credit_rut"));
-      gtk_entry_set_text(GTK_ENTRY(aux), rut);
+      aux = GTK_WIDGET (gtk_builder_get_object(builder, "entry_credit_rut"));
+      gtk_entry_set_text (GTK_ENTRY(aux), rut);
 
       aux = GTK_WIDGET(gtk_builder_get_object(builder, "btn_credit_sale"));
       gtk_widget_grab_focus(aux);
 
       fill_credit_data(rut, PQgetvalue(res, 0, 0),
-		       PQvaluebycol(res, 0, "direccion"),
-		       PQvaluebycol(res, 0, "telefono"));
+		       PQvaluebycol (res, 0, "direccion"),
+		       PQvaluebycol (res, 0, "telefono"));
     }
 }
 
@@ -4693,7 +4696,7 @@ on_entry_srch_emisor_activate (GtkEntry *entry, gpointer user_data)
    */
   for (i = 0; i < tuples; i++)
     {
-      str_axu = g_strconcat (PQvaluebycol (res, i, "rut"),"-",
+      str_axu = g_strconcat (PQvaluebycol (res, i, "rut"),
                              PQvaluebycol (res, i, "dv"), NULL);
 
       gtk_list_store_append (store, &iter);
@@ -4752,11 +4755,12 @@ show_srch_emisor (GtkEntry *entry, gpointer user_data)
       gtk_tree_view_column_set_resizable (column, FALSE);
 
       renderer = gtk_cell_renderer_text_new ();
-      column = gtk_tree_view_column_new_with_attributes ("Rut Proveedor", renderer,
+      column = gtk_tree_view_column_new_with_attributes ("Rut Emisor", renderer,
                                                          "text", 2,
                                                          NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
       gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)2, NULL);
     }
 
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_srch_emisor"));
@@ -4797,7 +4801,7 @@ on_btn_ok_srch_emisor_clicked (GtkButton *button, gpointer user_data)
   GtkListStore *store;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
-  gchar *rut, *razon_social;
+  gchar *rut, *dv, *razon_social;
   gint id;
   //PGresult *res;
   //gchar *q;
@@ -4819,6 +4823,10 @@ on_btn_ok_srch_emisor_clicked (GtkButton *button, gpointer user_data)
 		      1, &razon_social,
 		      2, &rut,
 		      -1);
+
+  dv = invested_strndup (rut, strlen (rut)-1);
+  rut = g_strndup (rut, strlen (rut)-1);
+  rut = g_strconcat (rut, "-", dv, NULL);
 
   //Cierro la ventana se búsqueda del emisor
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_srch_emisor"));
