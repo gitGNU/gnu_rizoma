@@ -751,34 +751,34 @@ ventas_win ()
     }
 
   /*conectando señales*/
+  only_number_filer_on_container (GTK_CONTAINER (builder_get (builder, "wnd_mixed_pay_step1")));
 
   // Conectando la señal 'insert-text' para permitir solo números
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_code_mixed_pay")), "insert-text",
-		    G_CALLBACK (only_number_filter), NULL);
+  /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_code_mixed_pay")), "insert-text", */
+  /* 		    G_CALLBACK (only_numberi_filter), NULL); */
 
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay")), "insert-text",
-		    G_CALLBACK (only_number_filter), NULL);
+  /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_mixed_pay")), "insert-text", */
+  /* 		    G_CALLBACK (only_numberi_filter), NULL); */
 
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay2")), "insert-text",
-		    G_CALLBACK (only_number_filter), NULL);
+  /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_mixed_pay2")), "insert-text", */
+  /* 		    G_CALLBACK (only_numberi_filter), NULL); */
 
-  // TODO: crear (al igual que clean_container) una función que asigne este callback a todos los entry
-  // numéricos
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_code_detail_mp")), "insert-text",
-		    G_CALLBACK (only_number_filter), NULL);
+  /* // TODO: crear (al igual que clean_container) una función que asigne este callback a todos los entry */
+  /* // numéricos */
+  /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_code_detail_mp")), "insert-text", */
+  /* 		    G_CALLBACK (only_numberi_filter), NULL); */
 
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_exp_date_mp")), "insert-text",
-		    G_CALLBACK (only_number_filter), NULL);
+  /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_exp_date_mp")), "insert-text", */
+  /* 		    G_CALLBACK (only_numberi_filter), NULL); */
 
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_detail_mp")), "insert-text",
-		    G_CALLBACK (only_number_filter), NULL);
-
+  /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_detail_mp")), "insert-text", */
+  /* 		    G_CALLBACK (only_numberi_filter), NULL); */
 
   // Conectando la señal 'insert-text' para calcular diferencia con el monto total
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay")), "changed",
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_mixed_pay")), "changed",
 		    G_CALLBACK (calculate_amount), NULL);
 
-  g_signal_connect (G_OBJECT (builder_get (builder, "entry_amount_mixed_pay2")), "changed",
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_mixed_pay2")), "changed",
 		    G_CALLBACK (calculate_amount), NULL);
 
 }
@@ -2177,7 +2177,7 @@ change_pay2_mode (GtkToggleButton *togglebutton, gpointer user_data)
   //The "Efectivo" toggle button
   if (gtk_toggle_button_get_active (togglebutton))
     {
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay2")));
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay_2")), FALSE);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay_2")), "");
       gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay_2")), "");
@@ -2821,7 +2821,7 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")),
 			    g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 0)));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay")));
     }
   else if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_mixed_pay_step2"))))
     {
@@ -2829,7 +2829,7 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
       gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay_2")),
 			    g_strdup_printf ("<b>%s</b>", PQgetvalue (res, 0, 0)));
 
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay2")));
     }
   else if (gtk_widget_get_visible (GTK_WIDGET(builder_get (builder,"wnd_sale_credit"))))
     {
@@ -3178,10 +3178,10 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   type_sell = GTK_WIDGET (builder_get (builder, "radio_btn_effective_pay"));
   s_name = GTK_WIDGET (builder_get (builder, "lbl_name_mixed_pay_2"));
   s_rut = GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay_2"));
-  s_amount = GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2"));
+  s_amount = GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay2"));
   diferencia = GTK_WIDGET (builder_get (builder, "lbl_diff_amount2"));
   w_cr = GTK_WIDGET (builder_get (builder, "radio_btn_cheques"));
-  f_code = GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay"));
+  f_code = GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay"));
 
   //Se recogen los datos de la primera ventana
   nombre_cliente = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay"))));
@@ -3200,7 +3200,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   //total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
   total = llround (CalcularTotal (venta->header));
   if (general)
-    paga_con = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay"))));
+    paga_con = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_int_amount_mixed_pay"))));
   else if (pago_chk_rest->header != NULL)
     paga_con = lround (calcular_total_cheques (pago_chk_rest->header));
   else
@@ -3253,11 +3253,11 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 	      if (general == TRUE)
 		{
 		  limpiar_lista (); //Se tiene que volver a crear el cheque, por lo tanto de saca de la lista.
-		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")),
+		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay")),
 			    g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
 		}
 	      else
-		ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_code_detail_mp")),
+		ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_code_detail_mp")),
 			  g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
 	      return;
 	    }
@@ -3326,11 +3326,11 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 	      if (general == TRUE)
 		{
 		  limpiar_lista (); //Se tiene que volver a crear el cheque, por lo tanto de saca de la lista.
-		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")),
+		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay")),
 			    g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
 		}
 	      else
-		ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_code_detail_mp")),
+		ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_code_detail_mp")),
 			  g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
 	      return;
 	    }
@@ -3413,7 +3413,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   printf ("%d\n", primer_pago);
 
   /*-- Segundo Pago --*/
-  paga_con = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay2"))));
+  paga_con = atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_int_amount_mixed_pay2"))));
 
   //Si el pago es a credito obtiene el 2do rut
   if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_effective_pay"))))
@@ -3493,7 +3493,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
       if (pago_mixto->monto_pago2 > monto_solo_afecto)
 	{
 	  limpiar_lista ();
-	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay2")),
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay2")),
 		    g_strdup_printf ("El pago con cheque de restaurant debe ser menor o igual a %d", monto_solo_afecto));
 	  return;
 	}
@@ -3631,9 +3631,9 @@ mixed_pay_window (void)
     
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")), "");
   gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")), "");
-  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_int_amount_mixed_pay")), "");
   gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_diff_amount")), "");
-  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_code_mixed_pay")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_int_code_mixed_pay")), "");
   gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_subtotal_mixed_pay")), "");
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_diff_amount")),
@@ -3708,10 +3708,9 @@ mixed_pay_window (void)
 
   limpiar_lista (); //Limpia la estructura de cheques
   gtk_list_store_clear (pago_chk_rest->store); //limpia la lista de cheques  
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step1")));  
   gtk_window_set_position (GTK_WINDOW (builder_get (builder, "wnd_mixed_pay_step1")),
 			   GTK_WIN_POS_CENTER_ALWAYS);
-
 }
 
 
@@ -3728,7 +3727,7 @@ change_ingress_mode (GtkToggleButton *togglebutton, gpointer user_data)
   //The general toggle button
   if (gtk_toggle_button_get_active (togglebutton))
     {
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay")));
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "hbox3_detail_mixed_pay")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "scrolledwindow1_mixed_pay")));
@@ -3736,15 +3735,15 @@ change_ingress_mode (GtkToggleButton *togglebutton, gpointer user_data)
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1_cod_mixed_pay")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label_amount_mixed_pay")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay")));      
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay")));      
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay")));
 
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_credito")), TRUE);
     }
   else
     {
-      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_code_detail_mp")));
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_amount_mixed_pay")), "");
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_code_detail_mp")));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_int_amount_mixed_pay")), "");
 
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "hbox3_detail_mixed_pay")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "scrolledwindow1_mixed_pay")));
@@ -3752,8 +3751,8 @@ change_ingress_mode (GtkToggleButton *togglebutton, gpointer user_data)
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1_cod_mixed_pay")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label_amount_mixed_pay")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_amount_mixed_pay")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay")));
 
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_credito")), FALSE);
       calculate_amount (NULL, NULL, 0, NULL, NULL);
@@ -3776,7 +3775,7 @@ change_pay_mode (GtkToggleButton *togglebutton, gpointer user_data)
     {
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "label1_cod_mixed_pay")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_detail")), TRUE);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")), "");
       gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")), "");
@@ -3785,7 +3784,7 @@ change_pay_mode (GtkToggleButton *togglebutton, gpointer user_data)
     {
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "label1_cod_mixed_pay")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_detail")), FALSE);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_rut_mixed_pay")), "");
       gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_name_mixed_pay")), "");
@@ -3808,9 +3807,9 @@ on_btn_add_chk_rest_clicked (GtkButton *button, gpointer user_data)
   gchar *codigo, *fecha_venc, *monto, *fecha_valida;
   gint subtotal;
 
-  codigo_w = GTK_WIDGET (builder_get (builder, "entry_code_detail_mp"));
-  fecha_venc_w = GTK_WIDGET (builder_get (builder, "entry_exp_date_mp"));
-  monto_w = GTK_WIDGET (builder_get (builder, "entry_amount_detail_mp"));
+  codigo_w = GTK_WIDGET (builder_get (builder, "entry_int_code_detail_mp"));
+  fecha_venc_w = GTK_WIDGET (builder_get (builder, "entry_int_exp_date_mp"));
+  monto_w = GTK_WIDGET (builder_get (builder, "entry_int_amount_detail_mp"));
 
   codigo = g_strdup (gtk_entry_get_text (GTK_ENTRY (codigo_w)));
   fecha_venc = g_strdup (gtk_entry_get_text (GTK_ENTRY (fecha_venc_w)));
@@ -4464,10 +4463,10 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
               gtk_list_store_set (sell, &iter,
                                   0, venta->products->product->codigo,
 				  1, g_strdup_printf ("%s %s %d %s",
-						  venta->products->product->producto,
-						  venta->products->product->marca,
-						  venta->products->product->contenido,
-						  venta->products->product->unidad),
+						      venta->products->product->producto,
+						      venta->products->product->marca,
+						      venta->products->product->contenido,
+						      venta->products->product->unidad),
                                   2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
                                   3, venta->products->product->precio,
                                   4, PutPoints (g_strdup_printf
@@ -4616,7 +4615,7 @@ void
 on_entry_provider_activate (GtkEntry *entry, gpointer user_data)
 {
   GtkWindow *window;
-  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));;
+  GtkTreeView *tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "tree_view_srch_provider"));
   GtkListStore *store;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
@@ -4833,10 +4832,10 @@ on_btn_ok_srch_emisor_clicked (GtkButton *button, gpointer user_data)
   pago_chk_rest->id_emisor = id;
   pago_chk_rest->rut_emisor = g_strdup (rut);
 
-  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"entry_code_mixed_pay"))))
-    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_code_mixed_pay")));
+  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"entry_int_code_mixed_pay"))))
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay")));
   else
-    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_code_detail_mp")));
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_code_detail_mp")));
 }
 
 

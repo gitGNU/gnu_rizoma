@@ -613,7 +613,7 @@ decode_clothes_code (gchar *clothes_code)
 
 /**
  * This function only allows the insertion 
- * of numerical values ​​in the specified entry
+ * of integer numerical values in the specified entry
  * ("insert-text" signal)
  * 
  * The "insert-text" signal of GtkEditable (from corresponding GtkEntry)
@@ -629,11 +629,11 @@ decode_clothes_code (gchar *clothes_code)
  * @param: gpointer data: user data set when the signal handler was connected.-
  */
 void
-only_number_filter (GtkEditable *editable,
-		    gchar *new_text,
-		    gint new_text_length,
-		    gint *position,
-		    gpointer user_data)
+only_numberi_filter (GtkEditable *editable,
+		     gchar *new_text,
+		     gint new_text_length,
+		     gint *position,
+		     gpointer user_data)
 {
   gchar *result;
   
@@ -646,10 +646,98 @@ only_number_filter (GtkEditable *editable,
     result = g_strndup (new_text, new_text_length);
 
   g_signal_handlers_block_by_func (editable,
-				   (gpointer) only_number_filter, user_data);
+				   (gpointer) only_numberi_filter, user_data);
   gtk_editable_insert_text (editable, result, new_text_length, position);
   g_signal_handlers_unblock_by_func (editable,
-                                     (gpointer) only_number_filter, user_data);
+                                     (gpointer) only_numberi_filter, user_data);
   g_signal_stop_emission_by_name (editable, "insert_text");
   g_free (result);
+}
+
+
+/**
+ * This function only allows the insertion of integer and decimal 
+ * values in the specified entry ("insert-text" signal)
+ * 
+ * The "insert-text" signal of GtkEditable (from corresponding GtkEntry)
+ * must be hooked to this function.
+ *
+ * @param: GtkEditable *editable: the object which received the signal.-
+ * @param: gchar *new_text: the new text to insert.-
+ * @param: gint new_text_length: the length of the new text, in bytes, 
+ *         or -1 if new_text is nul-terminated.-
+ * @param: gint *position: the position, in characters, at which to insert the new text. 
+ *         this is an in-out parameter. After the signal emission is finished,
+ *         it should point after the newly inserted text.-
+ * @param: gpointer data: user data set when the signal handler was connected.-
+ */
+void
+only_numberd_filter (GtkEditable *editable,
+		     gchar *new_text,
+		     gint new_text_length,
+		     gint *position,
+		     gpointer user_data)
+{
+  gchar *result, *texto_actual;
+  
+  texto_actual = g_strdup (gtk_entry_get_text (GTK_ENTRY (editable)));
+  texto_actual = g_strdup_printf ("%s%s", texto_actual, new_text);
+  if (HaveCharacters (texto_actual)) // se debe concatenar el texto completo
+    {
+      new_text_length = new_text_length-1;
+      result = g_strndup (new_text, new_text_length);
+    }
+  else
+    result = g_strndup (new_text, new_text_length);
+
+  g_signal_handlers_block_by_func (editable,
+				   (gpointer) only_numberd_filter, user_data);
+  gtk_editable_insert_text (editable, result, new_text_length, position);
+  g_signal_handlers_unblock_by_func (editable,
+                                     (gpointer) only_numberd_filter, user_data);
+  g_signal_stop_emission_by_name (editable, "insert_text");
+  g_free (result);
+}
+
+/**
+ * This function add a filter on all entry widgets (that meet criteria)
+ * from a container specified to accept only number on them.
+ *
+ * @param container: The container to apply filters
+ */
+void
+only_number_filer_on_container (GtkContainer *container)
+{
+  GList *list = gtk_container_get_children (container);
+  GtkWidget *widget;
+  gchar *widget_name = NULL;
+
+  while (list != NULL)
+    {
+      widget_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (list->data)));
+      if (GTK_IS_CONTAINER (list->data) && !GTK_IS_TREE_VIEW (list->data) && !GTK_IS_BUTTON (list->data))
+	only_number_filer_on_container (GTK_CONTAINER (list->data));
+      else
+        {
+          widget = GTK_WIDGET (list->data);
+          widget_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
+	  if (widget_name != NULL && !validate_string ("[0-9]+", widget_name) && !validate_string ("Gtk", widget_name))
+            {
+              if (GTK_IS_ENTRY (widget))
+                {
+		  if (validate_string ("entry_int", widget_name))
+		    g_signal_connect (G_OBJECT (builder_get (builder, widget_name)), "insert-text",
+				      G_CALLBACK (only_numberi_filter), NULL);
+		  else if (validate_string ("entry_dec", widget_name))
+		    g_signal_connect (G_OBJECT (builder_get (builder, widget_name)), "insert-text",
+				      G_CALLBACK (only_numberd_filter), NULL);
+                }
+            }
+          g_free (widget_name);
+        }
+
+      list = g_list_next (list);
+    }
+
+  g_list_free (list);
 }

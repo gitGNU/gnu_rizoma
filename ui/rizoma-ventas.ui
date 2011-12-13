@@ -1998,7 +1998,7 @@
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <signal name="toggled" handler="change_ingress_mode" swapped="no"/>
-                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_code_mixed_pay" swapped="yes"/>
+                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_int_code_mixed_pay" swapped="yes"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -2033,7 +2033,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_amount_mixed_pay">
+                          <object class="GtkEntry" id="entry_int_amount_mixed_pay">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="max_length">9</property>
@@ -2048,7 +2048,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_code_mixed_pay">
+                          <object class="GtkEntry" id="entry_int_code_mixed_pay">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="max_length">11</property>
@@ -2127,7 +2127,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry_code_detail_mp">
+                              <object class="GtkEntry" id="entry_int_code_detail_mp">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">11</property>
@@ -2153,7 +2153,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry_exp_date_mp">
+                              <object class="GtkEntry" id="entry_int_exp_date_mp">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">6</property>
@@ -2179,7 +2179,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="entry_amount_detail_mp">
+                              <object class="GtkEntry" id="entry_int_amount_detail_mp">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="max_length">5</property>
@@ -2611,7 +2611,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry_amount_mixed_pay2">
+                          <object class="GtkEntry" id="entry_int_amount_mixed_pay2">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="max_length">9</property>
