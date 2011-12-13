@@ -76,4 +76,8 @@ void only_numberd_filter (GtkEditable *editable, gchar *new_text, gint new_text_
 
 void only_number_filer_on_container (GtkContainer *container);
 
+void control_rut (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model,
+                  GtkTreeIter *iter, gpointer user_data);
+gchar * formato_rut (gchar *rut);
+
 #endif

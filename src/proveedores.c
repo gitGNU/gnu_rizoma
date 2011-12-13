@@ -24,6 +24,8 @@
 #include<gtk/gtk.h>
 #include<stdlib.h>
 
+#include<string.h>
+
 #include"tipos.h"
 
 #include"postgres-functions.h"
@@ -111,7 +113,7 @@ BuscarProveedor (GtkWidget *widget, gpointer data)
   /* se agrega al proveedor al tree view y sus datos*/
   for (i = 0; i < tuples; i++)
     {
-      str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),"-",
+      str_axu = g_strconcat(PQvaluebycol (res, i, "rut"),
                             PQvaluebycol (res, i, "dv"), NULL);
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
@@ -151,7 +153,7 @@ ListarProveedores (void)
 
   for (i = 0; i < tuples; i++)
     {
-      str_axu = g_strconcat(PQvaluebycol(res, i, "rut"), "-", PQvaluebycol(res, i, "dv"), NULL);
+      str_axu = g_strconcat(PQvaluebycol(res, i, "rut"), PQvaluebycol(res, i, "dv"), NULL);
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
                           0, str_axu,
@@ -187,7 +189,8 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
   PGresult *res;
   GtkTreeIter iter;
   gchar *rut_proveedor;
-  gchar **aux, *q;
+  gchar *aux, *q;
+  gint largo;
 
   tree_view = gtk_tree_selection_get_tree_view(selection);
   store = GTK_LIST_STORE(gtk_tree_view_get_model(tree_view));
@@ -199,15 +202,17 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
                       0, &rut_proveedor,
                       -1);
 
-  aux = g_strsplit(rut_proveedor, "-", 0);
+  largo = strlen (rut_proveedor);
+  aux = g_strndup (rut_proveedor, largo-1);
 
   /* consulta de sql que llama a funcion select_proveedor, que dado el id de
      este devuelve la informacion del mismo*/
   
-  q = g_strdup_printf ("SELECT * FROM select_proveedor(%s)", aux[0]);
+  q = g_strdup_printf ("SELECT * FROM select_proveedor(%s)", aux);
   res = EjecutarSQL (q);
   g_free (q);
-  g_strfreev(aux);
+  g_free (aux);
+  //g_strfreev(aux);
 
   if ((res == NULL) || (PQntuples (res) == 0))
     return;
@@ -215,9 +220,9 @@ LlenarDatosProveedor (GtkTreeSelection *selection,
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
   gtk_entry_set_text (GTK_ENTRY (widget), PQvaluebycol (res, 0, "nombre"));
 
-  q = g_strconcat(PQvaluebycol (res, 0, "rut"), "-", PQvaluebycol(res, 0, "dv"), NULL);
+  q = g_strconcat(PQvaluebycol (res, 0, "rut"), PQvaluebycol (res, 0, "dv"), NULL);  
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
-  gtk_label_set_text (GTK_LABEL (widget), q);
+  gtk_label_set_text (GTK_LABEL (widget), formato_rut (q));
   g_free (q);
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_addr"));
@@ -480,8 +485,8 @@ ModificarProveedor (void)
   gchar *giro_c;
   gchar *lap_rep_c;
 
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_prov_rut"));
-  rut_c = g_strdup(gtk_label_get_text (GTK_LABEL (widget)));
+  widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_prov_rut"));
+  rut_c = CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget))));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_prov_name"));
   nombre_c = g_strdup(gtk_entry_get_text (GTK_ENTRY (widget)));
@@ -563,6 +568,7 @@ proveedores_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proveedores_tree), column);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)0, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,

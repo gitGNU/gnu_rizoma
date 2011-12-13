@@ -171,7 +171,65 @@ control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel
     default:
       break;
     }
+}
 
+
+gchar *
+formato_rut (gchar *rut)
+{
+  gboolean primero;
+  gint largo, contador;
+  gchar *rut_format;
+
+  largo = strlen (rut);
+  primero = FALSE;
+  contador = 0;
+
+  do {
+    if (primero == FALSE) {
+      rut_format = g_strdup_printf ("-%c", rut[largo-1]);
+      primero = TRUE;
+    } 
+    else {
+      if (contador == 3) {
+	rut_format = g_strdup_printf ("%c.%s", rut[largo-1], rut_format);
+	contador = 0;
+      } 
+      else {
+	rut_format = g_strdup_printf ("%c%s", rut[largo-1], rut_format);
+      }
+      contador++;
+    }
+    largo--;	    
+  } while (largo > 0);
+
+  return rut_format;
+}
+
+void
+control_rut (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel *model,
+	     GtkTreeIter *iter, gpointer user_data)
+{
+  gint column = (gint) user_data;
+  gchar buf[20];
+  GType column_type = gtk_tree_model_get_column_type (model, column);
+
+  switch (column_type)
+    {
+    case G_TYPE_STRING:
+      {
+        gchar *rut, *rut_format;
+
+        gtk_tree_model_get (model, iter, column, &rut, -1);
+	rut_format = formato_rut (rut);
+
+        g_snprintf (buf, sizeof (buf), "%s", rut_format);
+        g_object_set (renderer, "text", buf, NULL);
+      }
+      break;
+    default:
+      break;
+    }
 }
 
 /**
@@ -535,7 +593,6 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
  * @param texto, text to cut
  * @param index, initiation number index to cut.
  */
-
 gchar *
 invested_strndup (const gchar *texto, gint index)
 {
@@ -545,14 +602,12 @@ invested_strndup (const gchar *texto, gint index)
   return texto_local;
 }
 
-
 /**
  * Returns the treeview length that you specified
  *
  * @param GtkTreeView treeview: The treeview point
  * @return gint length: the treeview length
  */
-
 gint
 get_treeview_length (GtkTreeView *treeview)
 {

@@ -66,7 +66,7 @@ FillUsers (void)
   gchar *entrada, *salida;
   gchar *q;
 
-  res = EjecutarSQL ("SELECT id, rut||'-'||dv, nombre, apell_p, apell_m "
+  res = EjecutarSQL ("SELECT id, rut, dv, nombre, apell_p, apell_m "
                      "FROM select_usuario() as "
                      "(id int,rut int4, dv varchar(1),usuario varchar(30),"
                      "passwd varchar(400),nombre varchar(75),"
@@ -117,7 +117,8 @@ FillUsers (void)
           gtk_list_store_append (store, &iter);
           gtk_list_store_set (store, &iter,
                               0, PQvaluebycol (res, i, "id"),
-                              1, PQgetvalue (res, i, 1), //rut
+                              1, g_strconcat (PQvaluebycol (res, i, "rut"),
+					      PQvaluebycol (res, i, "dv"), NULL),
                               2, PQvaluebycol (res, i, "nombre"),
                               3, PQvaluebycol (res, i, "apell_p"),
                               4, PQvaluebycol (res, i, "apell_m"),
@@ -236,8 +237,9 @@ user_box ()
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_min_width (column, 80);
-  gtk_tree_view_column_set_max_width (column, 80);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_max_width (column, 90);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)1, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
