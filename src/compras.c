@@ -173,6 +173,183 @@ edit_cell (GtkCellRendererText *cellrenderertext,
   gtk_tree_path_free (path);
 }
 
+/**
+ * This callback is triggered when a cell on 
+ * 'tree_view_pending_request_detail' is edited. (editable-event)
+ * @param cell
+ * @param path_string
+ * @param new_size
+ * @param data -> A GtkListStore
+ */
+void
+on_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *cantity, gpointer data)
+{
+  // Treeview detalle de la compra
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  
+  // Treeview de la compra
+  GtkTreeModel *store_pending_request;
+  GtkTreeSelection *selection;
+
+  // Variables para recoger información
+  gchar *codigo;
+  gchar *q;
+  gint id_compra;
+  gdouble new_cantity;
+  gdouble joined_cantity;
+
+  PGresult *res;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /*Obtiene datos del treeview compra*/
+  store_pending_request = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
+  
+  /* obtiene el iter para poder obtener y setear datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+ 
+  //Se obtiene el codigo del producto y la cantidad ingresada
+  gtk_tree_model_get (model, &iter,
+                      0, &codigo,
+		      4, &joined_cantity,
+                      -1);
+
+  
+  /*Valida y Obtiene el precio nuevo*/
+  if (!is_numeric (cantity))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "tree_view_pending_requests")),
+		"La cantidad debe ser un valor numérico");
+      return;
+    }
+
+  new_cantity = strtod (PUT (cantity), (char **)NULL);
+  
+  if (new_cantity < joined_cantity)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "tree_view_pending_requests")),
+		"La cantidad solicitada debe ser mayor a la cantidad ya ingresada");
+      return;
+    }
+  
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      2, new_cantity,
+		      -1);
+
+  //Se obtiene el id de la compra
+  gtk_tree_selection_get_selected (selection, NULL, &iter);
+  gtk_tree_model_get (store_pending_request, &iter,
+                      0, &id_compra,
+                      -1);
+
+  //Se modifica el valor en compra
+  q = g_strdup_printf ("SELECT barcode "
+		       "FROM codigo_corto_to_barcode('%s')",
+		       codigo);
+  res = EjecutarSQL(q);
+  codigo = g_strdup (PQvaluebycol (res, 0, "barcode"));
+
+  q = g_strdup_printf ("UPDATE compra_detalle cd "
+		       "SET cantidad = %s "
+		       "WHERE cd.barcode_product = %s "
+		       "AND cd.id_compra = %d",
+		       CUT (g_strdup_printf ("%.3f", new_cantity)),
+		       codigo, id_compra);
+  EjecutarSQL(q);
+
+  IngresoDetalle (selection, NULL);
+}
+
+
+/**
+ * This callback is triggered when a cell on 
+ * 'tree_view_pending_request_detail' is edited. (editable-event)
+ * @param cell
+ * @param path_string
+ * @param new_size
+ * @param data -> A GtkListStore
+ */
+void
+on_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *ingress_price, gpointer data)
+{
+  // Treeview detalle de la compra
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  
+  // Treeview de la compra
+  GtkTreeModel *store_pending_request;
+  GtkTreeSelection *selection;
+
+  // Variables para recoger información
+  gchar *codigo;
+  gchar *q;
+  gint id_compra;
+  gdouble new_price;
+
+  PGresult *res;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /*Obtiene datos del treeview compra*/
+  store_pending_request = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
+
+  
+  /*Valida y Obtiene el precio nuevo*/
+  if (!is_numeric (ingress_price))
+    {
+      ErrorMSG (GTK_WIDGET (model), "Costo unitario debe ser un valor numérico");
+      return;
+    }
+
+  new_price = strtod (PUT (ingress_price), (char **)NULL);
+
+  /* obtiene el iter para poder obtener y setear datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      2, new_price,
+		      -1);
+
+  //Se obtiene el codigo del producto
+  gtk_tree_model_get (model, &iter,
+                      0, &codigo,
+                      -1);
+
+  //Se obtiene el id de la compra
+  gtk_tree_selection_get_selected (selection, NULL, &iter);
+  gtk_tree_model_get (store_pending_request, &iter,
+                      0, &id_compra,
+                      -1);
+
+  //Se modifica el valor en compra
+  q = g_strdup_printf ("SELECT barcode "
+		       "FROM codigo_corto_to_barcode('%s')",
+		       codigo);
+  res = EjecutarSQL(q);
+  codigo = g_strdup (PQvaluebycol (res, 0, "barcode"));
+
+  q = g_strdup_printf ("UPDATE compra_detalle cd "
+		       "SET precio = %s "
+		       "WHERE cd.barcode_product = %s "
+		       "AND cd.id_compra = %d",
+		       CUT (g_strdup_printf ("%.3f", new_price)),
+		       codigo, id_compra);
+  EjecutarSQL(q);
+
+  IngresoDetalle (selection, NULL);
+}
+
 
 /**
  * Build "wnd_compras" - rizoma-compras's window
@@ -505,7 +682,11 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (renderer,"editable", TRUE, NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited",
+		    G_CALLBACK (on_buy_price_cell_renderer_edited), (gpointer)store);
   column = gtk_tree_view_column_new_with_attributes ("Costo Unit.", renderer,
                                                      "text", 2,
                                                      "foreground", 6,
@@ -518,6 +699,9 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (renderer,"editable", TRUE, NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited",
+		    G_CALLBACK (on_buy_cantity_cell_renderer_edited), (gpointer)store);
   column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer,
                                                      "text", 3,
                                                      "foreground", 6,
@@ -1207,7 +1391,7 @@ Save (GtkWidget *widget, gpointer data)
 
   // TODO: Revisar el Otros, porque en la base de datos se guardan 0
   // TODO: Una vez que el entry solo pueda recibir valores numéricos se puede borrar esta condición
-  if (HaveCharacters(contenido))
+  if (!is_numeric (contenido))
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_edit_prod_content")),"Debe ingresar un valor numérico");
       return;
@@ -3359,10 +3543,18 @@ FillProveedorData (gchar *rut, gboolean guias)
 void
 CalcularTotales (void)
 {
+  GtkTreeView *treeview;
+  GtkTreeSelection *selection;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
   Productos *products = compra->header;
 
   gdouble total_neto = 0, total_iva = 0, total_otros = 0, total = 0;
   gdouble iva, otros;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests"));
+  model = gtk_tree_view_get_model (treeview);
 
   do
     {
@@ -3395,6 +3587,12 @@ CalcularTotales (void)
                       PutPoints (g_strdup_printf ("%lu", lround (total_otros))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total")),
                       PutPoints (g_strdup_printf ("%li", lround (total))));
+  
+  selection = gtk_tree_view_get_selection (treeview);
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter))
+    gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+			3, PutPoints (g_strdup_printf ("%li", lround (total_neto))),
+			-1);
 }
 
 
@@ -3608,14 +3806,14 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
 
   rut_proveedor = GetDataByOne (g_strdup_printf ("SELECT rut_proveedor FROM compra WHERE id=%d", id));
 
-  if (validate_string ("[a-zA-Z ]", monto) || validate_string ("[a-zA-Z ]", n_documento))
+  if (HaveCharacters (monto) || HaveCharacters (n_documento))
     {
       ErrorMSG (GTK_WIDGET (entry_amount), "El formulario contiene caracteres invalidos.");
       return;
     }
 
   if (CheckDocumentData (wnd, invoice, rut_proveedor, id, n_documento, monto, date) == FALSE) return;
-
+  // CONTINUAR ...
   IngresarCompra (invoice, atoi (n_documento), monto, date);
 
   gtk_widget_hide (wnd);
@@ -3857,7 +4055,7 @@ on_button_add_product_list_clicked (GtkButton *button, gpointer data)
   unidades_text = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))));
   unidades = strtod (PUT(unidades_text), (char **)NULL);
 
-  if (unidades <= 0 || HaveCharacters (unidades_text))
+  if (unidades <= 0 || !is_numeric (unidades_text))
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount")),
                 "Ingrese una cantidad válida de unidades");
@@ -4177,7 +4375,6 @@ create_new_merchandise (gchar *tipo)
 
   gtk_widget_show_all (ventana);
 }
-
 
 /**
  * This callback is triggered when a cell on 
@@ -6426,7 +6623,6 @@ ClearFactData (void)
 void
 on_entry_invoice_provider_activate (GtkEntry *entry, gpointer data)
 {
-
   //on_entry_srch_provider_activate(entry);
   wnd_search_provider (entry, data);
 }
@@ -6711,7 +6907,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_code), "Código corto debe ser menor a 7 caracteres");
   else if (strcmp (barcode, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Debe Ingresar un Codigo de Barras");
-  else if (HaveCharacters(barcode))
+  else if (HaveCharacters (barcode))
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
   else if (strlen (barcode) > 18)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
@@ -6723,7 +6919,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_brand), "Debe Ingresar al Marca del producto");
   else if (strcmp (contenido, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_cont), "Debe Ingresar el Contenido del producto");
-  else if (HaveCharacters(contenido))
+  else if (!is_numeric (contenido))
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
@@ -6849,13 +7045,13 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_cont), "Debe ingresar el Contenido la materia prima");
   else if (strcmp (costo, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_buy_price), "Debe ingresar el costo neto de la materia prima");
-  else if (HaveCharacters (costo))
+  else if (!is_numeric (costo))
     ErrorMSG (GTK_WIDGET (entry_buy_price), "Costo (neto) debe ser un valor numérico");
   else if (strcmp (cantidad, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_cantity), "Debe ingresar la cantidad a comprar");
-  else if (HaveCharacters (cantidad))
+  else if (!is_numeric (cantidad))
     ErrorMSG (GTK_WIDGET (entry_cantity), "Cantidad debe ser un valor numérico");
-  else if (HaveCharacters (contenido))
+  else if (!is_numeric (contenido))
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
@@ -7010,12 +7206,12 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
   else if (strcmp (precio, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_sell_price), "Debe ingresar el precio de venta de la mercadería derivada");
   else if (HaveCharacters (precio))
-    ErrorMSG (GTK_WIDGET (entry_sell_price), "Precio venta ser un valor numérico");
+    ErrorMSG (GTK_WIDGET (entry_sell_price), "Precio venta debe ser un valor numérico");
   else if (strcmp (cantidad, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_cantity), "Debe ingresar la cantidad a comprar");
-  else if (HaveCharacters (cantidad))
+  else if (!is_numeric (cantidad))
     ErrorMSG (GTK_WIDGET (entry_cantity), "Cantidad debe ser un valor numérico");
-  else if (HaveCharacters (contenido))
+  else if (!is_numeric (contenido))
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {

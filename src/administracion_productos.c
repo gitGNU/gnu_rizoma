@@ -235,7 +235,7 @@ void CalculateTempValues (GtkEntry *entry, gpointer user_data)
     Comprueba si hay texto antes del parseo, de no haber nada setea un 0
     se puede cambiar cuando los entry solo permitan el ingreso de números*/
 
-  if (HaveCharacters (txt_margen) || HaveCharacters (txt_precio_final))
+  if (!is_numeric (txt_margen) || HaveCharacters (txt_precio_final))
     return;
 
   //TODO: Las siguientes 3 condiciones deben ser parte de la mascara anti-caracteres -
@@ -385,9 +385,9 @@ GuardarModificacionesProducto (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_informerca_cantmayorist"));
   cantidad_mayorista = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget))));
 
-  if (g_str_equal (dias_stock, "") || HaveCharacters (dias_stock))
+  if (g_str_equal (dias_stock, "") || !is_numeric (dias_stock))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_minstock")), "Debe setear stock minimo");
-  else if (g_str_equal (margen, "") || HaveCharacters (margen))
+  else if (g_str_equal (margen, "") || !is_numeric (margen))
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_infomerca_percentmargin")), "Debe poner un valor de margen para el producto");
   else if (mayorista == TRUE && cantidad_mayorista < 2)
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_informerca_cantmayorist")), "Cantidad mayorista debe ser mayor a 1");

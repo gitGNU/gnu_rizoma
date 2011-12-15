@@ -373,7 +373,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 	  cantC = strtok (NULL, str); /*Texto cantidad (unidades)*/
 	  
 	  if (barcode == NULL || pcompC == NULL || precioC == NULL || cantC == NULL ||
-	      HaveCharacters(pcompC) || HaveCharacters(precioC) || HaveCharacters(cantC))
+	      !is_numeric (pcompC) || HaveCharacters (precioC) || !is_numeric (cantC))
 	    {
 	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_inconsistencia")));
 	      return;

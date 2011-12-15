@@ -46,11 +46,24 @@ gboolean
 HaveCharacters (gchar *string)
 {
   gint i, len = strlen (string);
+  
+  for (i = 0; i < len; i++)
+    if (g_ascii_isdigit (string[i]) == FALSE)
+      return TRUE;
+
+  return FALSE;
+}
+
+
+gboolean
+is_numeric (gchar *string)
+{
+  gint i, len = strlen (string);
   gint points = 0;
 
   // Si solamente es un '.' o ',' se toma como texto
-  if (len == 1 && (string[0] == '.' || string[0] == ',' || string[0] == '-'))
-    return TRUE;
+  if (len == 1 && (string[0] == '.' || string[0] == ','))
+    return FALSE;
 
   //Si tiene un caracter distinto a un numero, '.' o ',' y además
   //hay más de un '.' o ',' se considera texto
@@ -60,18 +73,16 @@ HaveCharacters (gchar *string)
 	points++;
       
       if (points > 1)
-	return TRUE;
+	return FALSE;
 
-      if (string[i] == '-' && i != 0)
-	return TRUE;
-
-      if (g_ascii_isdigit (string[i]) == FALSE && 
-	  string[i] != ',' && string[i] != '.' && string[i] != '-')
-        return TRUE;
+      if (g_ascii_isdigit (string[i]) == FALSE &&
+	  string[i] != ',' && string[i] != '.')
+        return FALSE;
     }
 
-  return FALSE;
+  return TRUE;
 }
+
 
 void
 SendCursorTo (GtkWidget *widget, gpointer data)
@@ -736,8 +747,8 @@ only_numberd_filter (GtkEditable *editable,
   gchar *result, *texto_actual;
   
   texto_actual = g_strdup (gtk_entry_get_text (GTK_ENTRY (editable)));
-  texto_actual = g_strdup_printf ("%s%s", texto_actual, new_text);
-  if (HaveCharacters (texto_actual)) // se debe concatenar el texto completo
+  texto_actual = g_strconcat (texto_actual, new_text, NULL);
+  if (!is_numeric (texto_actual))
     {
       new_text_length = new_text_length-1;
       result = g_strndup (new_text, new_text_length);

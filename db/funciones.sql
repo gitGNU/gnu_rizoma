@@ -3164,13 +3164,13 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
        	 	FROM producto p
 
 	 	-- Las compras ingresadas hechas hasta la fecha determinada	
-	 	LEFT JOIN (SELECT SUM(cd.cantidad_ingresada) AS cantidad_ingresada, cd.barcode_product AS barcode
-		          	  FROM compra_detalle cd				       
-       		     	          INNER JOIN compra c
-       		     	          ON c.id = cd.id_compra
+	 	LEFT JOIN (SELECT SUM(fcd.cantidad) AS cantidad_ingresada, fcd.barcode AS barcode
+		          	  FROM factura_compra_detalle fcd				       
+       		     	          INNER JOIN factura_compra fc
+       		     	          ON fc.id = fcd.id_factura_compra
 
-       		     	          WHERE c.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-                     	          AND cd.cantidad_ingresada > 0
+       		     	          WHERE fc.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+                     	          AND fcd.cantidad > 0
                      	          GROUP BY barcode) AS cantidad_ingresada
                 ON p.barcode = cantidad_ingresada.barcode
 			    

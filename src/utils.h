@@ -36,6 +36,8 @@ void SetToggleMode (GtkToggleButton *widget, gpointer data);
 
 gboolean HaveCharacters (gchar *string);
 
+gboolean is_numeric (gchar *string);
+
 void SendCursorTo (GtkWidget *widget, gpointer data);
 
 gchar * PutPoints (gchar *number);
