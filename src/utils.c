@@ -200,13 +200,11 @@ formato_rut (gchar *rut)
     if (primero == FALSE) {
       rut_format = g_strdup_printf ("-%c", rut[largo-1]);
       primero = TRUE;
-    } 
-    else {
+    } else {
       if (contador == 3) {
 	rut_format = g_strdup_printf ("%c.%s", rut[largo-1], rut_format);
 	contador = 0;
-      } 
-      else {
+      } else {
 	rut_format = g_strdup_printf ("%c%s", rut[largo-1], rut_format);
       }
       contador++;
@@ -588,11 +586,11 @@ select_back_deleted_row (gchar *treeViewName, gint deletedRowPosition)
   GtkTreeView *tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, treeViewName));
 
   if (deletedRowPosition > 0)
-      gtk_tree_selection_select_path (gtk_tree_view_get_selection(tree),
-				      gtk_tree_path_new_from_string(g_strdup_printf("%d", deletedRowPosition - 1)));
+    gtk_tree_selection_select_path (gtk_tree_view_get_selection(tree),
+				    gtk_tree_path_new_from_string(g_strdup_printf("%d", deletedRowPosition - 1)));
   else
     gtk_tree_selection_select_path (gtk_tree_view_get_selection(tree),
-				      gtk_tree_path_new_from_string(g_strdup_printf("%d", deletedRowPosition)));
+				    gtk_tree_path_new_from_string(g_strdup_printf("%d", deletedRowPosition)));
   /* Si se elimina el último elemento de la lista que se seleccione el último disponible */
 }
 

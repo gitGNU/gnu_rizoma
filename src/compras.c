@@ -3706,6 +3706,15 @@ CheckMontoIngreso (GtkWidget *btn_ok, gint total, gint total_doc)
 void
 AskIngreso (void)
 {
+  GtkWidget *treeview;
+  treeview = GTK_WIDGET (builder_get (builder, "tree_view_pending_requests"));
+  if (get_treeview_length (GTK_TREE_VIEW (treeview)) < 1)
+    {
+      ErrorMSG (treeview, "No existen ingresos pendientes. \n"
+		          "Debe ingresar uno o más pedidos a comprar");
+      return;
+    }
+
   GtkWindow *wnd_ingress = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_buy"));
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "button_ok_ingress")));
@@ -6287,6 +6296,7 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 		       "date_part ('hour', c.fecha) AS hour, "
 		       "date_part ('minute', c.fecha) AS minute, "
 		       "c.rut_proveedor, "
+		       "(SELECT dv FROM proveedor WHERE rut = c.rut_proveedor) AS dv_proveedor, "
 		       "(SELECT nombre FROM proveedor WHERE rut = c.rut_proveedor) AS nombre_proveedor, "
 		       "(SELECT SUM (cantidad * precio) "
 		            "FROM factura_compra_detalle fcd "
@@ -6348,7 +6358,8 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 					      PQvaluebycol (res, i, "minute")),
 			  2, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
 			  3, PQvaluebycol (res, i, "nombre_proveedor"),
-			  4, PQvaluebycol (res, i, "rut_proveedor"),
+			  4, g_strconcat (PQvaluebycol (res, i, "rut_proveedor"),
+					  PQvaluebycol (res, i, "dv_proveedor"), NULL),
 			  -1);
     }
 
@@ -9067,7 +9078,7 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
 			  -1);
 
       gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_name")), nombre_proveedor);
-      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_rut")), rut_proveedor);
+      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_nullify_buy_provider_rut")), formato_rut (rut_proveedor));
 
       q = g_strdup_printf ("SELECT fc.id, fc.num_factura, fc.pagada, fc.id_compra, "
 			   "date_part ('year', fc.fecha) AS f_year, "
@@ -9079,8 +9090,8 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
 			   "date_part ('day', fc.fecha_pago) AS fp_day, "
 
 			   "(SELECT SUM (cantidad * precio) "
-		                   "FROM factura_compra_detalle fcd "
-		                   "WHERE fcd.id_factura_compra = fc.id) AS monto "
+			   "        FROM factura_compra_detalle fcd "
+			   "        WHERE fcd.id_factura_compra = fc.id) AS monto "
 
 			   "FROM factura_compra fc "
 			   "WHERE fc.id_compra = %d", id_compra);
@@ -9138,7 +9149,7 @@ on_btn_nullify_buy_ok_clicked (GtkButton *button, gpointer user_data)
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == FALSE)
     {
-      AlertMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy")), 
+      AlertMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy")),
 		"Debe seleccionar la compra que desea anular");
       return;
     }
@@ -9260,7 +9271,7 @@ nullify_buy_win(void)
 					  G_TYPE_INT);   // ID Factura Compra
 
       gtk_tree_view_set_model(treeview_invoice, GTK_TREE_MODEL(store_invoice));
-
+      
       selection_invoice = gtk_tree_view_get_selection (treeview_invoice);
       gtk_tree_selection_set_mode (selection_invoice, GTK_SELECTION_SINGLE);
       g_signal_connect (G_OBJECT(selection_invoice), "changed",
@@ -9338,7 +9349,7 @@ nullify_buy_win(void)
                                           G_TYPE_INT);   //id_factura_compra
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
-      gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_NONE);
+      //gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_NONE);
 
       //barcode
       renderer = gtk_cell_renderer_text_new();
