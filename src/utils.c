@@ -805,3 +805,102 @@ only_number_filer_on_container (GtkContainer *container)
 
   g_list_free (list);
 }
+
+
+/**
+ * Sum all column data from treeview specified
+ *
+ * @param: Treeview from get the column
+ * @param: Column from which data are collected to sum
+ * @param: Tipo de columna
+ */
+gdouble
+sum_treeview_column (GtkTreeView *treeview, gint column, GType type)
+{
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+ 
+  gdouble sum;
+  gboolean valid;
+
+  gint number_i;
+  gdouble number_d;
+
+  void *number;
+
+  model = gtk_tree_view_get_model (treeview);
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+
+  number_i = number_d = sum = 0;
+
+  if (type == G_TYPE_INT) number = &number_i;
+  else if (type == G_TYPE_DOUBLE) number = &number_d;
+  else return 0;
+
+  //Se obtiene el valor de la columna 'column' para sumarlo incrementalmente
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  column, number, //(type == G_TYPE_INT) ? &number_i : &number_d;
+			  -1);
+      sum += (type == G_TYPE_INT) ? (gdouble)number_i : number_d;
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+
+  return sum;
+}
+
+
+/**
+ * Compare data from colum specified with 'data_to_compare'
+ *
+ * @param: Treeview from get the column
+ * @param: Column number with which 'data_to_compare' will be compared
+ * @param: Tipo de columna
+ */
+gboolean
+compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *data_to_compare)
+{
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+ 
+  gboolean valid;
+
+  gint data_i;
+  gdouble data_d;
+  gchar *data_t;
+  void *data_get;
+
+  model = gtk_tree_view_get_model (treeview);
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+
+  if (type == G_TYPE_INT) data_get = &data_i;
+  else if (type == G_TYPE_DOUBLE) data_get = &data_d;
+  else if (type == G_TYPE_STRING) data_get = &data_t;
+  else return FALSE;
+
+  //Se obtiene el valor de la columna 'column' para compararlo con 'data_to_compare'
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  column, (type == G_TYPE_STRING) ? &data_get : data_get,
+			  -1);
+
+      if (type == G_TYPE_INT) {
+	if ((gint *)data_get == (gint *)data_to_compare)
+	  return TRUE;
+
+      } else if (type == G_TYPE_DOUBLE) {
+	if ((gdouble *)data_get == (gdouble *)data_to_compare)
+	  return TRUE;
+
+      } else if (type == G_TYPE_STRING) {
+	if (g_str_equal ((gchar *)data_get, (gchar *)data_to_compare))
+	  return TRUE;
+      }
+
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+
+  return FALSE;
+}

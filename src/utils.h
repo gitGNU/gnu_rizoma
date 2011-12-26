@@ -82,4 +82,8 @@ void control_rut (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeMode
                   GtkTreeIter *iter, gpointer user_data);
 gchar * formato_rut (gchar *rut);
 
+gdouble sum_treeview_column (GtkTreeView *treeview, gint column, GType type);
+
+gboolean compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *data_to_compare);
+
 #endif

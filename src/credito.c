@@ -322,7 +322,6 @@ clientes_box ()
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "btn_admin_edit_client"));
       gtk_widget_hide (widget);
 
-
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "btn_admin_add_client"));
       gtk_widget_hide (widget);
 
@@ -1410,6 +1409,7 @@ ModificarCliente (void)
   gchar *credito;
   gchar *rut_ver, *giro;
   gchar *rut;
+  gchar *rut_split;
   gint rut_n;
 
   treeview = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_clients"));
@@ -1422,8 +1422,8 @@ ModificarCliente (void)
                           0, &rut,
                           -1);
 
-      rut = g_strndup (rut, strlen (rut)-1);
-      rut_n = atoi (rut);
+      rut_split = g_strndup (rut, strlen (rut)-1);
+      rut_n = atoi (rut_split);
 
       q = g_strdup_printf ("select nombre, apell_p, apell_m, telefono, direccion, credito, dv, giro "
                            "FROM cliente where rut=%d", rut_n);
@@ -1746,7 +1746,7 @@ facturar_cheque_restaurant (void)
            g_free(q);
          }
        else
-         AlertMSG (creditos->rut, "El Rut no es valido!!");
+         AlertMSG (widget, "El Rut no es valido!!");
      }
  }
 

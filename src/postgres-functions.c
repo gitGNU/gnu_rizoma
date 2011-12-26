@@ -3759,3 +3759,28 @@ codigo_disponible (gchar *code)
 
   return FALSE;
 }
+
+
+gdouble
+get_last_buy_price (gchar *barcode)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT cd.precio AS costo "
+		       "FROM compra c INNER JOIN compra_detalle cd "
+		       "ON c.id = cd.id_compra "
+		       "INNER JOIN producto p "
+		       "ON cd.barcode_product = p.barcode "
+		       "WHERE c.anulada = false "
+		       "AND c.anulada_pi = false " 
+		       "AND p.barcode = '%s' " 
+		       "AND cd.anulado = false "
+		       "ORDER BY c.fecha DESC", barcode);
+  res = EjecutarSQL (q);
+
+  if ((res != NULL) && (PQntuples (res) > 0))
+    return strtod (PUT(PQvaluebycol (res, 0, "costo")), (char **)NULL);
+  else
+    return 0;
+}

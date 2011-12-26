@@ -314,4 +314,6 @@ PGresult *getProductsByProvider (gchar *rut);
 
 PGresult * get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas);
 
+gdouble get_last_buy_price (gchar *barcode);
+
 #endif

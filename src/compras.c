@@ -178,7 +178,7 @@ edit_cell (GtkCellRendererText *cellrenderertext,
  * 'tree_view_pending_request_detail' is edited. (editable-event)
  * @param cell
  * @param path_string
- * @param new_size
+ * @param new_cantity
  * @param data -> A GtkListStore
  */
 void
@@ -272,7 +272,7 @@ on_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_stri
  * 'tree_view_pending_request_detail' is edited. (editable-event)
  * @param cell
  * @param path_string
- * @param new_size
+ * @param new_price
  * @param data -> A GtkListStore
  */
 void
@@ -303,7 +303,6 @@ on_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string
   store_pending_request = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_pending_requests")));
 
-  
   /*Valida y Obtiene el precio nuevo*/
   if (!is_numeric (ingress_price))
     {
@@ -352,6 +351,596 @@ on_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string
 
 
 /**
+ * This function hide "wnd_nullify_buy" window and clean
+ * the Prods list
+ *
+ * @param: widget
+ * @param: data
+ */
+void
+on_wnd_nullify_buy_close (GtkWidget *widget, gpointer data)
+{
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_nullify_buy")));
+  //Si existe algo en la estructura "lista_mod_prod" se limpia
+  clean_lista_mod_prod ();
+}
+
+/**
+ * This callback is triggered when a cell on 
+ * 'treeview_nullify_buy_invoice_details' when
+ * the cantity is edited. (editable-event)
+ *
+ * @param cell
+ * @param path_string
+ * @param new_cantity
+ * @param data -> A GtkListStore
+ */
+void
+on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *cantity, gpointer data)
+{
+  //Treeview detalle de la compra
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  
+  //Variables para recoger información
+  gint total;
+  gint tipo;
+  gchar *barcode;
+  gchar *color;
+  gdouble new_cantity;
+  gdouble previous_cantity;
+  gdouble cost;
+  gboolean original;
+
+  /*Original es FALSE hasta que se demuetre lo contrario*/
+  original = FALSE;
+
+  /*Tipo es MOD hasta que se demuestre los contrario*/
+  tipo = MOD;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /*Obtiene el iter para poder obtener y setear datos del treeview*/
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  //Se obtiene el codigo del producto y la cantidad ingresada
+  gtk_tree_model_get (model, &iter,
+		      0, &barcode,
+                      2, &previous_cantity,
+  		      3, &cost,
+                      -1);
+  
+  /*Valida y Obtiene el precio nuevo*/
+  if (!is_numeric (cantity))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy_invoice_details")),
+		"La cantidad debe ser un valor numérico");
+      return;
+    }
+
+  new_cantity = strtod (PUT (cantity), (char **)NULL);
+
+  if (new_cantity <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy_invoice_details")),
+		"La cantidad debe ser mayor a cero");
+      return;
+    }
+
+  if (new_cantity != previous_cantity)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), TRUE);
+  else
+    return;
+  
+  /*Se agrega a la lista de los productos modificados*/  
+
+  //Se verifica si ya existe en la lista
+  if (lista_mod_prod->header != NULL)
+    lista_mod_prod->prods = buscar_prod (lista_mod_prod->header, barcode);
+  else
+    lista_mod_prod->prods = NULL;
+
+  //Si no existe en la lista se agrega y se inicializa
+  if (lista_mod_prod->prods == NULL) //PEEEEE TODO: Limpiar lista al cambiar de compra o factura
+    {
+      add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->cantidad_original = previous_cantity; /*Se guarda cantidad original*/
+      lista_mod_prod->prods->prod->cantidad_nueva = new_cantity; /*Se guarda la nueva cantidad*/
+      lista_mod_prod->prods->prod->accion = MOD; /*Indica que se modificará este producto en la BD (enum action)*/
+      original = FALSE;
+    } /*Si el producto existe pero se le modifica el costo por 1era vez*/
+  else if (lista_mod_prod->prods->prod->cantidad_nueva == 0)
+    {
+      lista_mod_prod->prods->prod->cantidad_original = previous_cantity; /*Se guarda la cantidad priginal*/
+      lista_mod_prod->prods->prod->cantidad_nueva = new_cantity; /*Se guarda la nueva cantidad*/
+      original = FALSE;
+    }
+  else //Si estaba en la lista y se modifica el costo por enésima vez (incluyendo productos agregados)
+    {  //Si el costo nuevo es igual al original
+      if (new_cantity == lista_mod_prod->prods->prod->cantidad_original)
+	{
+	  lista_mod_prod->prods->prod->cantidad_nueva = 0;
+	  
+	  //Si no hay modificaciones en costo
+	  if (lista_mod_prod->prods->prod->costo_nuevo == 0)
+	    {
+	      drop_prod_to_mod_list (barcode);
+	      original = TRUE;
+	    }
+
+	  if (cantidad_total_prods (lista_mod_prod->header) == 0) //Si no quedan productos en la lista
+	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);
+	} 
+      else //De lo contrario se modifica (Los productos agregados siempre llegaran aquí)
+	{ 
+	  lista_mod_prod->prods->prod->cantidad_nueva = new_cantity;
+	  original = FALSE;
+	  tipo = lista_mod_prod->prods->prod->accion;
+	}
+    }
+
+  /*color*/
+  if (original == TRUE)
+    color = g_strdup ("Black");
+  else
+    {
+      if (tipo == MOD)
+	color = g_strdup ("Red");
+      else if (tipo == ADD)
+	color = g_strdup ("Blue");
+    }
+
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      2, new_cantity,                 //cantidad
+		      4, lround (new_cantity * cost), //subtotal
+		      7, color,
+		      8, TRUE,
+		      -1);
+
+  //Se recalcula el costo total de la factura seleccionada
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
+  total = lround (sum_treeview_column (treeview, 4, G_TYPE_INT));
+  
+  //Se actualiza el nuevo costo en el treeview de la factura
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      4, total,
+                      -1);
+
+  //Se recalcula el costo total de la compra
+  total = lround (sum_treeview_column (treeview, 4, G_TYPE_INT));
+
+  //Se actualiza el nuevo costo en el treeview de la compra
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      2, total,
+                      -1);
+}
+
+/**
+ * This callback is triggered when a cell on 
+ * 'treeview_nullify_buy_invoice_details' when
+ * the cantity is edited. (editable-event)
+ *
+ * @param cell
+ * @param path_string
+ * @param new_price
+ * @param data -> A GtkListStore
+ */
+void
+on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *cost, gpointer data)
+{
+  // Treeview detalle de la compra
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  
+  // Variables para recoger información
+  gint total;
+  gint tipo;
+  gchar *barcode;
+  gchar *color;
+  gdouble new_cost;
+  gdouble previous_cost;
+  gdouble cantity;
+  gboolean original;
+
+  /*Original es FALSE hasta que se demuetre lo contrario*/
+  original = FALSE;
+  
+  /*Tipo es MOD hasta que se demuestre los contrario*/
+  tipo = MOD;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /* obtiene el iter para poder obtener y setear datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+ 
+  //Se obtiene el el precio original
+  gtk_tree_model_get (model, &iter,
+		      0, &barcode,
+		      2, &cantity,
+  		      3, &previous_cost,
+                      -1);
+  
+  /*Valida y Obtiene el precio nuevo*/
+  if (!is_numeric (cost))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy_invoice_details")),
+		"El precio de compra debe ser un valor numérico");
+      return;
+    }
+
+  new_cost = strtod (PUT (cost), (char **)NULL);  
+  
+  if (new_cost <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy_invoice_details")),
+		"El costo debe ser mayor a cero");
+      return;
+    }
+
+  //Si asegura que continúe solo si se cambió el costo
+  if (new_cost != previous_cost)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), TRUE);
+  else
+    return;
+  
+  /*Se agrega a la lista de los productos modificados*/  
+
+  //Se verifica si ya existe en la lista
+  if (lista_mod_prod->header != NULL)
+    lista_mod_prod->prods = buscar_prod (lista_mod_prod->header, barcode);
+  else
+    lista_mod_prod->prods = NULL;  
+
+  //Si no existe en la lista se agrega y se inicializa
+  if (lista_mod_prod->prods == NULL) //PEEEEE
+    {
+      add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->costo_original = previous_cost; /*Se guarda el costo original*/
+      lista_mod_prod->prods->prod->costo_nuevo = new_cost; /*Se guarda el nuevo costo*/
+      lista_mod_prod->prods->prod->accion = MOD; /*Indica que se modificará este producto en la BD (enum action)*/
+      original = FALSE;
+    } /*Si el producto existe pero se le modifica el costo por 1era vez*/
+  else if (lista_mod_prod->prods->prod->costo_original == 0)
+    {
+      lista_mod_prod->prods->prod->costo_original = previous_cost; /*Se guarda el costo original*/
+      lista_mod_prod->prods->prod->costo_nuevo = new_cost; /*Se guarda el nuevo costo*/
+      original = FALSE;
+    }
+  else //Si estaba en la lista y se modifica el costo por enésima vez (incluyendo productos agregados)
+    {  //Si el costo nuevo es igual al original
+      if (new_cost == lista_mod_prod->prods->prod->costo_original)
+	{	  
+	  lista_mod_prod->prods->prod->costo_nuevo = 0;
+	  
+	  //Si no hay modificaciones en cantidad
+	  if (lista_mod_prod->prods->prod->cantidad_nueva == 0)
+	    {
+	      drop_prod_to_mod_list (barcode);
+	      original = TRUE;
+	    }
+
+	  if (cantidad_total_prods (lista_mod_prod->header) == 0) //Si no quedan productos en la lista
+	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);          
+	} 
+      else //De lo contrario se modifica (Los productos agregados siempre llegaran aquí)
+	{ 
+	  lista_mod_prod->prods->prod->costo_nuevo = new_cost;
+	  original = FALSE;
+	  tipo = lista_mod_prod->prods->prod->accion;
+	}
+    }
+
+  /*color*/
+  if (original == TRUE)
+    color = g_strdup ("Black");
+  else
+    {
+      if (tipo == MOD)
+	color = g_strdup ("Red");
+      else if (tipo == ADD)
+	color = g_strdup ("Blue");
+    }
+
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      3, new_cost,                    //costo
+		      4, lround (new_cost * cantity), //subtotal
+		      7, color,
+		      8, TRUE,
+		      -1);
+
+  //Se recalcula el costo total de la factura seleccionada
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
+  total = lround (sum_treeview_column (treeview, 4, G_TYPE_INT));
+  
+  //Se actualiza el nuevo costo en el treeview de la factura
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      4, total,
+                      -1);
+
+  //Se recalcula el costo total de la compra
+  total = lround (sum_treeview_column (treeview, 4, G_TYPE_INT));
+
+  //Se actualiza el nuevo costo en el treeview de la compra
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      2, total,
+                      -1);
+}
+
+
+/**
+ * show window "wnd_new_prod_on_buy" when satisfied the
+ * conditions
+ *
+ * @param: button
+ * @param: data
+ */
+void
+on_btn_add_buy_prod_clicked (GtkButton *button, gpointer data)
+{
+  if (get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"))) > 0)
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_prod_on_buy")));
+  else
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_nullify_buy_id")), 
+	      "Primero debe buscar una compra y seleccionar una factura");
+
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_prod_on_buy")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_prod_on_buy_barcode")));
+}
+
+
+/**
+ *
+ *
+ *
+ */
+void
+on_btn_save_mod_buy_clicked (GtkButton *button, gpointer data)
+{
+  //brp
+}
+
+
+/**
+ *
+ *
+ */
+void
+on_btn_prod_on_buy_cancel_clicked (GtkButton *button, gpointer data)
+{
+  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_new_prod_on_buy")));
+}
+
+
+/**
+ *
+ *
+ *
+ */
+void
+on_btn_add_prod_on_buy_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeIter iter;
+
+  gdouble costo;
+  gchar *barcode;
+  gint id_buy;
+  gint id_invoice;
+
+  PGresult *res;
+
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_prod_on_buy_barcode"))));
+
+  if (g_str_equal (barcode, ""))
+    return;
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT barcode "
+				      "FROM producto "
+				      "WHERE barcode = %s "
+				      "OR codigo_corto = '%s'", barcode, barcode));
+
+  if (res == NULL || PQntuples (res) <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_prod_on_buy_barcode")), 
+		"No existe un producto con ese codigo corto o de barras");
+      return;
+    }
+
+  barcode = PQvaluebycol (res, 0, "barcode");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_prod_on_buy_barcode")), barcode);
+
+  /*Comprueba si ya esta en el treeview*/
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  if (compare_treeview_column (treeview, 0, G_TYPE_STRING, barcode))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_prod_on_buy_barcode")), 
+		"Ya existe un producto con ese codigo corto o de barras en la compra");
+      return;
+    }
+
+  /*Se agrega a la lista de los productos modificados*/  
+  //Se verifica si ya existe en la lista
+  if (lista_mod_prod->header != NULL)
+    lista_mod_prod->prods = buscar_prod (lista_mod_prod->header, barcode);
+  else
+    lista_mod_prod->prods = NULL;  
+
+  //Si no existe en la lista se agrega y se inicializa
+  if (lista_mod_prod->prods == NULL) //PEEEEE
+    {
+      costo = get_last_buy_price (barcode);
+      add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->costo_nuevo = costo;
+      lista_mod_prod->prods->prod->cantidad_nueva = 1;
+      lista_mod_prod->prods->prod->accion = ADD;
+    }
+  else
+    {
+      //Error
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_prod_on_buy_barcode")), 
+		"El producto ya existe en la lista");
+      return;
+    }
+
+
+  /*Se 'selecciona' la primera fila de este treeview*/
+  if (!gtk_tree_model_get_iter_first (model, &iter))
+    {
+      return;
+    }
+
+  /*Se obtiene el id de compra y facturas de esta seleccion*/
+  gtk_tree_model_get (model, &iter,
+		      5, &id_buy,
+  		      6, &id_invoice,
+                      -1);
+
+  /*Agregar al treeview*/
+  gtk_list_store_append (store, &iter);
+  gtk_list_store_set (store, &iter,
+		      0, lista_mod_prod->prods->prod->barcode,
+		      1, lista_mod_prod->prods->prod->descripcion,
+		      2, lista_mod_prod->prods->prod->cantidad_nueva,
+		      3, lista_mod_prod->prods->prod->costo_nuevo,
+		      4, lround (lista_mod_prod->prods->prod->costo_nuevo * lista_mod_prod->prods->prod->cantidad_nueva),
+		      5, id_buy,
+		      6, id_invoice,
+		      7, "Blue",
+		      8, TRUE,
+		      -1);
+
+  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_new_prod_on_buy")));
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), TRUE);
+}
+
+/**
+ *
+ *
+ *
+ */
+void 
+on_entry_prod_on_buy_barcode_activate (GtkEntry *entry, gpointer data)
+{
+  gchar *barcode;
+  PGresult *res;
+
+  barcode = g_strdup (gtk_entry_get_text (entry));
+  res = EjecutarSQL (g_strdup_printf ("SELECT barcode "
+				      "FROM producto "
+				      "WHERE barcode = %s "
+				      "OR codigo_corto = '%s'", barcode, barcode));
+
+  if (res != NULL && PQntuples (res) > 0)
+    {
+      barcode = PQvaluebycol (res, 0, "barcode");
+
+      /*Comprueba si ya esta en el treeview*/
+      //asdasd
+
+      gtk_entry_set_text (entry, barcode);
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_add_prod_on_buy")));
+    }
+  else
+    ErrorMSG (GTK_WIDGET (entry), "No existe un producto con ese codigo corto de barras");
+}
+
+
+
+/**
+ * Remove products from "treeview_nullify_buy_invoice_details"
+ * and add them to Prods list with "DEL" flag.
+ *
+ * @param: button
+ * @param: data
+ */
+void
+on_btn_rmv_buy_prod_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
+
+  gchar *barcode;
+  gdouble cantity;
+  gdouble cost;
+  gint position;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  if (gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter))
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &barcode,
+			  2, &cantity,
+			  3, &cost,
+			  -1);
+
+      //Se verifica si ya existe en la lista
+      if (lista_mod_prod->header != NULL)
+	lista_mod_prod->prods = buscar_prod (lista_mod_prod->header, barcode);
+      else
+	lista_mod_prod->prods = NULL;
+
+      //Si no existe en la lista se agrega y se inicializa
+      if (lista_mod_prod->prods == NULL) //PEEEEE
+	{
+	  add_to_mod_prod_list (barcode, FALSE);
+	  lista_mod_prod->prods->prod->costo_original = cost;
+	  lista_mod_prod->prods->prod->cantidad_original = cantity;
+	  lista_mod_prod->prods->prod->accion = DEL;
+	}
+      else if (lista_mod_prod->prods->prod->accion != DEL)
+	//Si existe y es ADD o MOD se quita de la lista
+	rmv_prod_from_prod_list (barcode, lista_mod_prod->prods->prod->lugar);
+      else if (lista_mod_prod->prods->prod->accion == DEL)
+	printf ("Se agrega el producto %s para DEL que ya existe con dicha accion\n",
+		barcode);
+
+      position = atoi (gtk_tree_model_get_string_from_iter (model, &iter));
+      gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
+      select_back_deleted_row ("treeview_nullify_buy_invoice_details", position);
+
+      if (cantidad_total_prods (lista_mod_prod->header) == 0) //Si no quedan productos en la lista
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);
+      else
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), TRUE);
+    }  
+}
+
+
+/**
  * Build "wnd_compras" - rizoma-compras's window
  * initiallizes and show all its components
  * @param void
@@ -386,6 +975,12 @@ compras_win (void)
   compra->current = NULL;
 
   compra->documentos = NULL;
+
+  //Estructura para la modificación de compras ingresadas
+  lista_mod_prod = (ListaModProd *) g_malloc (sizeof (ListaModProd));
+  lista_mod_prod->header = NULL;
+  lista_mod_prod->prods = NULL;
+  lista_mod_prod->check = NULL;
 
   builder = gtk_builder_new ();
 
@@ -1083,7 +1678,7 @@ compras_win (void)
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), 9);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_cantmayorist")), 4);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_pricemayorist")), 9);
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_minstock")), 6);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_informerca_dstock")), 6);
 
   //Anulación de compras solo puede ser efectuada por el administrador
   if (user_data->user_id != 1)
@@ -1188,7 +1783,6 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	  PQclear (res);
 	  return;
 	}
-
 
       ShowProductHistory ();
 
@@ -2389,8 +2983,10 @@ ShowProductHistory (void)
       "ON c.id = cd.id_compra "
       "INNER JOIN producto p "
       "ON cd.barcode_product = p.barcode "
-      "WHERE p.barcode='%s' "
-      "AND cd.anulado='f' "
+      "WHERE c.anulada = false "
+      "AND c.anulada_pi = false "
+      "AND p.barcode = '%s' "
+      "AND cd.anulado = false "
       "ORDER BY c.fecha DESC", barcode, barcode));
 
   tuples = PQntuples (res);
@@ -3065,7 +3661,7 @@ on_btn_nullify_buy_clicked (void)
                           0, &id_compra,
                           -1);
       AnularCompraDB (id_compra);
-      InsertarCompras ();
+      InsertarCompras ();      
     }
 }
 
@@ -3152,7 +3748,7 @@ CleanStatusProduct (gint option)
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), "");
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
       return;
-    }  
+    }
 
   gtk_list_store_clear (store);
 
@@ -3161,7 +3757,7 @@ CleanStatusProduct (gint option)
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
+  //gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
 
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
@@ -3991,7 +4587,7 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 }
 
 void
-on_entry_buy_price_activate (GtkEntry *entry, gpointer  user_data)
+on_entry_buy_price_activate (GtkEntry *entry, gpointer user_data)
 {
   if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_buy_gain"))) == FALSE &&
       gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == FALSE)
@@ -6364,6 +6960,9 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
     }
 
   PQclear (res);
+
+  //Si existe algo en la estructura "lista_mod_prod" se limpia
+  clean_lista_mod_prod ();
 }
 
 
@@ -7604,7 +8203,7 @@ AddToProductsListTraspaso (void)
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
+  //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -7670,7 +8269,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
+      //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -7951,7 +8550,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
+      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -8030,7 +8629,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
+      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
@@ -9033,8 +9632,8 @@ on_selection_nullify_buy_invoice_change (GtkTreeSelection *selection, gpointer d
 	  gtk_list_store_set (store, &iter,
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, PQvaluebycol (res, i, "descripcion"),
-			      2, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-			      3, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      2, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			      3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL),
 			      4, atoi (g_strdup (PQvaluebycol (res, i, "subtotal"))),
 			      5, id_compra,
 			      6, id_factura_compra,
@@ -9043,6 +9642,9 @@ on_selection_nullify_buy_invoice_change (GtkTreeSelection *selection, gpointer d
       
       PQclear (res);
     }
+
+  //Se limpian las posibles modificaciones en la edición de compra
+  clean_lista_mod_prod ();
 }
 
 /**
@@ -9122,6 +9724,9 @@ on_selection_nullify_buy_change (GtkTreeSelection *selection, gpointer data)
       
       PQclear (res);
     }
+
+  //Se limpian las posibles modificaciones en la edición de compra
+  clean_lista_mod_prod ();
 }
 
 /**
@@ -9176,6 +9781,9 @@ on_btn_nullify_buy_ok_clicked (GtkButton *button, gpointer user_data)
     }
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_nullify_buy")));
+
+  //Se limpian las posibles modificaciones en la edición de compra
+  clean_lista_mod_prod ();
 }
 
 /**
@@ -9339,14 +9947,16 @@ nullify_buy_win(void)
   store_details = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_details));
   if (store_details == NULL)
     {
-      store_details = gtk_list_store_new (7,
+      store_details = gtk_list_store_new (9,
                                           G_TYPE_STRING, //barcode
                                           G_TYPE_STRING, //description
                                           G_TYPE_DOUBLE, //cantity
-                                          G_TYPE_INT,    //price
+                                          G_TYPE_DOUBLE, //price
                                           G_TYPE_INT,    //subtotal
                                           G_TYPE_INT,    //Id_compra
-                                          G_TYPE_INT);   //id_factura_compra
+                                          G_TYPE_INT,    //id_factura_compra
+					  G_TYPE_STRING,
+					  G_TYPE_BOOLEAN);
 
       gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
       //gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_NONE);
@@ -9355,6 +9965,8 @@ nullify_buy_win(void)
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Cod. Barras", renderer,
                                                         "text", 0,
+							"foreground", 7,
+							"foreground-set", 8,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -9366,6 +9978,8 @@ nullify_buy_win(void)
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Descripcion", renderer,
                                                         "text", 1,
+							"foreground", 7,
+							"foreground-set", 8,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -9375,8 +9989,13 @@ nullify_buy_win(void)
 
       //cantity
       renderer = gtk_cell_renderer_text_new();
+      g_object_set (renderer,"editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+      G_CALLBACK (on_mod_buy_cantity_cell_renderer_edited), (gpointer)store_details);
       column = gtk_tree_view_column_new_with_attributes("Cantidad", renderer,
                                                         "text", 2,
+							"foreground", 7,
+							"foreground-set", 8,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -9385,10 +10004,15 @@ nullify_buy_win(void)
       gtk_tree_view_column_set_resizable (column, FALSE);
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
-      //price
+      //buy price (cost) 
       renderer = gtk_cell_renderer_text_new();
+      g_object_set (renderer,"editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_mod_buy_price_cell_renderer_edited), (gpointer)store_details);
       column = gtk_tree_view_column_new_with_attributes("Costo", renderer,
                                                         "text", 3,
+							"foreground", 7,
+							"foreground-set", 8,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -9401,6 +10025,8 @@ nullify_buy_win(void)
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Subtotal", renderer,
                                                         "text", 4,
+							"foreground", 7,
+							"foreground-set", 8,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -9414,7 +10040,6 @@ nullify_buy_win(void)
   clean_container (GTK_CONTAINER (widget));
   gtk_widget_show_all (widget);
 }
-
 
 /**
  * This is a callback from button 'btn_nullify_buy_pi'

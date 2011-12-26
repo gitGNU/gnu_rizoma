@@ -668,3 +668,249 @@ LookCanjeable (Productos *header)
 
   return FALSE;
 }
+
+
+/*Lista de productos de una factura a modificar*/
+
+Prods *
+create_prod (gchar *barcode, gboolean con_costo)
+{
+  Prods *new = NULL;
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT barcode, descripcion "
+		       "FROM producto "
+                       "WHERE barcode = %s "
+		       "OR codigo_corto = '%s'",
+                       barcode, barcode);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  new = (Prods *) g_malloc (sizeof (Prods));
+  new->prod = (Prod *) g_malloc (sizeof (Prod));
+
+  new->prod->barcode = g_strdup (PQvaluebycol (res, 0, "barcode"));
+  new->prod->descripcion = g_strdup (PQvaluebycol (res, 0, "descripcion"));
+
+  new->prod->costo_original = 0;
+  new->prod->costo_nuevo = 0;
+  new->prod->cantidad_original = 0;
+  new->prod->cantidad_nueva = 0;
+
+  if (con_costo)
+    new->prod->costo_nuevo = get_last_buy_price (barcode);
+  
+  return new;
+}
+
+/**
+ * Add prods to list 
+ *
+ * @param: code = The barcode or short code
+ * @param: cant = The cantity with start 
+ */
+gint
+add_to_mod_prod_list (gchar *code, gboolean con_costo)
+{
+  Prods *new = NULL;
+
+  if (lista_mod_prod->header == NULL)
+    {
+      new = create_prod (code, con_costo);
+      lista_mod_prod->header = new;
+
+      lista_mod_prod->prods = new;
+
+      new->back = NULL;
+      new->next = lista_mod_prod->header;
+
+      new->prod->lugar = 1;
+    }
+  else
+    {
+      Prods *end = lista_mod_prod->header;
+
+      new = create_prod (code, con_costo);
+
+      while (end->next != lista_mod_prod->header)
+        end = end->next;
+
+      new->back = end;
+
+      end->next = new;
+
+      new->next = lista_mod_prod->header;
+
+      lista_mod_prod->prods = new;
+
+      new->prod->lugar = new->back->prod->lugar+1;
+    }
+
+  return 0;
+}
+
+
+Prods *
+buscar_prod (Prods *header, gchar *barcode)
+{
+  Prods *find = header;
+
+  if (header == NULL)
+    return NULL;
+
+  do
+    {
+      if (strcmp (find->prod->barcode, barcode) == 0)
+        return find;
+      else
+        find = find->next;
+    }
+  while (find != header);
+
+  return NULL;
+}
+
+
+void
+free_prods (Prods *prods)
+{
+    g_free (prods->prod);
+    g_free (prods);
+}
+
+
+void
+drop_prod_to_mod_list (gchar *barcode)
+{
+  Prods *find = lista_mod_prod->header;
+  Prods *end = lista_mod_prod->header;
+
+  while (strcmp (find->prod->barcode, barcode) != 0)
+    find = find->next;
+
+  while (end->next != lista_mod_prod->header)
+    end = end->next;
+
+  if (find == lista_mod_prod->header && lista_mod_prod->header->next == lista_mod_prod->header)
+    {
+      free_prods (find);
+
+      lista_mod_prod->header = NULL;
+      lista_mod_prod->prods = NULL;
+    }
+  else if (find->back == NULL)
+    {
+      lista_mod_prod->header = find->next;
+      end->next = lista_mod_prod->header;
+      lista_mod_prod->header->back = NULL;
+
+      free_prods (find);
+    }
+  else if (find == end)
+    {
+      find->back->next = lista_mod_prod->header;
+
+      free_prods (find);
+    }
+  else
+    {
+      find->back->next = find->next;
+      find->next->back = find->back;
+
+      free_prods (find);
+    }
+
+  return;
+}
+
+gint
+clean_lista_mod_prod (void)
+{
+  Prods *alter = lista_mod_prod->header;
+  Prods *to_free;
+
+  if (lista_mod_prod->header == NULL)
+    return 0;
+
+  do {
+    to_free = alter;
+    alter = alter->next;
+    free_prods (to_free);
+  } while (alter != lista_mod_prod->header);
+
+  lista_mod_prod->header = NULL;
+  lista_mod_prod->prods = NULL;
+  lista_mod_prod->check = NULL;
+
+  return 0;
+}
+
+gint
+cantidad_total_prods (Prods *header)
+{
+  Prods *cal = header;
+  int total = 0;
+
+  if (cal == NULL)
+    return total;
+
+  do {
+    total++;
+    cal = cal->next;
+  } while (cal != header);
+
+  return total;
+}
+
+
+gint
+rmv_prod_from_prod_list (gchar *codigo, gint position)
+{
+  Prods *find = lista_mod_prod->header;
+  Prods *end = lista_mod_prod->header;
+
+  /*
+    Must be re-write it, to fix and prevent any kind of error
+  */
+
+  while (strcmp (find->prod->barcode, codigo) != 0)
+    find = find->next;
+
+  while (end->next != lista_mod_prod->header)
+    end = end->next;
+
+  if (find == lista_mod_prod->header && 
+      lista_mod_prod->header->next == lista_mod_prod->header)
+    {
+      free_prods (find);
+
+      lista_mod_prod->header = NULL;
+      lista_mod_prod->prods = NULL;
+    }
+  else if (find->back == NULL)
+    {
+      lista_mod_prod->header = find->next;
+      lista_mod_prod->header->back = NULL;
+      end->next = lista_mod_prod->header;
+
+      free_prods (find);
+    }
+  else if (find == end)
+    {
+      find->back->next = lista_mod_prod->header;
+      free_prods (find);
+    }
+  else
+    {
+      find->back->next = find->next;
+      find->next->back = find->back;
+
+      free_prods (find);
+    }
+
+  lista_mod_prod->prods = lista_mod_prod->header;
+
+  return 0;
+}

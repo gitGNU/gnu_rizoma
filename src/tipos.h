@@ -39,6 +39,8 @@ enum sell_type {SIMPLE, FACTURA, GUIA, VENTA};
 
 enum pay_way {CASH, CREDITO, CHEQUE_RESTAURANT, MIXTO, CHEQUE, TARJETA}; //CHEQUE_RESTAURANT = No Afecto Impuesto
 
+enum action {ADD, MOD, DEL};
+
 typedef struct _main_box
 {
   GtkWidget *main_box;
@@ -383,11 +385,45 @@ typedef struct _ingreso_producto
   GtkWidget *precio_entry_edit;
 
   GtkTreeSelection *selection;
-
 }
 IngresoProducto;
 
 IngresoProducto *ingreso;
+
+/*Para almacenar los cambios de una factura
+  o compra ya ingresada*/
+typedef struct _prod
+{
+  gchar *barcode;
+  gchar *descripcion;
+  gdouble costo_original;
+  gdouble costo_nuevo;
+  gdouble cantidad_original;
+  gdouble cantidad_nueva;
+  gint accion;
+  gint lugar;
+}
+Prod;
+
+/*Lista de productos a modificar*/
+typedef struct _prods
+{
+  struct _prods *back;
+  Prod *prod;
+  struct _prods *next;
+}
+Prods;
+
+typedef struct _lista_mod_prod
+{
+  Prods *header;
+  Prods *check;
+  Prods *prods;
+}
+ListaModProd;
+
+ListaModProd *lista_mod_prod;
+
 
 typedef struct _ventas_stats
 {

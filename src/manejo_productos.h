@@ -65,4 +65,20 @@ gdouble CalcularTotalProporcionNoAfecta (Productos *header);
 
 Productos * CreateNew (gchar *barcode, gdouble cantidad);
 
+Prods * create_prod (gchar *barcode, gboolean con_costo);
+
+gint add_to_mod_prod_list (gchar *code, gboolean con_costo);
+
+Prods * buscar_prod (Prods *header, gchar *barcode);
+
+void free_prods (Prods *prods);
+
+void drop_prod_to_mod_list (gchar *barcode);
+
+gint clean_lista_mod_prod (void);
+
+gint cantidad_total_prods (Prods *header);
+
+gint rmv_prod_from_prod_list (gchar *codigo, gint position);
+
 #endif
