@@ -4861,8 +4861,8 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         case 1:
 	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
 	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
-	  GtkComboBox *combo  = GTK_COMBO_BOX (builder_get (builder, "cmb_family_filter"));
-	  GtkTreeModel *modelo  = GTK_LIST_STORE (gtk_combo_box_get_model(combo));
+	  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmb_family_filter"));
+	  GtkTreeModel *modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));
 	  GtkTreeIter iter;
 	  gint familia;
 	  gtk_combo_box_get_active_iter (combo, &iter);

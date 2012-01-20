@@ -193,6 +193,130 @@ search_client (GtkWidget *widget, gpointer data)
   gtk_widget_show_all (aux_widget);
 }
 
+/**
+ *
+ *
+ */
+void
+search_client_abono (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *aux_widget;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+  GtkListStore *store=NULL;
+  GtkTreeIter iter;
+  gchar *string;
+  PGresult *res;
+  gint tuples, i;
+  gchar *enable;
+  gchar *q;
+
+  if (GTK_IS_ENTRY (widget))
+    string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
+  else if (data != NULL && GTK_IS_ENTRY ((GtkWidget *) data))
+    string = g_strdup (gtk_entry_get_text (GTK_ENTRY((GtkWidget *) data)));
+  else
+    string = "";
+
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_search_client_abono")));
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_search_client_abono")), string);
+
+  //ANTES: SELECT rut::varchar || '-' || dv, nombre || ' ' || apell_p, telefono, credito_enable, direccion
+  q = g_strdup_printf ("SELECT rut, dv, nombre || ' ' || apell_p || ' ' || apell_m AS name, telefono, credito_enable, direccion "
+                       "FROM cliente WHERE activo = 't' AND (lower(nombre) LIKE lower('%s%%') OR "
+                       "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%') OR "
+                       "rut::varchar like ('%s%%'))",
+                       string, string, string, string);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  tuples = PQntuples (res);
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sca"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
+
+  if (store == NULL)
+    {
+      if (user_data->user_id == 1) // De ser admin adquiere la visibilidad de la columna credito
+	{
+	  store = gtk_list_store_new (4,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING,
+				      G_TYPE_BOOLEAN);
+	} else {
+	  store = gtk_list_store_new (3,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING,
+				      G_TYPE_STRING);
+      }
+
+      gtk_tree_view_set_model (GTK_TREE_VIEW(aux_widget),
+                               GTK_TREE_MODEL(store));
+
+      //Rut
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
+                                                         "text", 0,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)0, NULL);
+
+      //nombre
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Nombre", renderer,
+                                                         "text", 1,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+
+      //telefono
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Telefono", renderer,
+                                                         "text", 2,
+                                                         NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+
+      //credito
+      if (user_data->user_id == 1)
+	{
+	  renderer = gtk_cell_renderer_toggle_new ();
+	  column = gtk_tree_view_column_new_with_attributes ("Credito", renderer,
+							     "active", 3,
+							     NULL);
+	  gtk_tree_view_append_column (GTK_TREE_VIEW(aux_widget), column);
+	}
+    }
+
+  gtk_list_store_clear (store);
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+
+      if (user_data->user_id == 1)
+        {
+          enable = PQvaluebycol (res, i, "credito_enable");
+          gtk_list_store_set (store, &iter,
+                              0, g_strconcat (PQvaluebycol (res, i, "rut"),
+					      PQvaluebycol (res, i, "dv"), NULL),
+                              1, PQvaluebycol (res, i, "name"),
+                              2, PQvaluebycol (res, i, "telefono"),
+                              3, strcmp (enable, "t") ? FALSE : TRUE,
+                              -1);
+        }
+      else
+        gtk_list_store_set (store, &iter,
+                            0, g_strconcat (PQvaluebycol (res, i, "rut"), 
+					    PQvaluebycol (res, i, "dv"), NULL),
+                            1, PQvaluebycol (res, i, "name"),
+                            2, PQvaluebycol (res, i, "telefono"),
+                            -1);
+    }
+
+  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_search_client_abono"));
+  gtk_widget_show_all (aux_widget);
+}
+
 void
 clientes_box ()
 {
@@ -545,6 +669,321 @@ clientes_box ()
   setup_print_menu();
 
 }
+
+/**
+ *
+ */
+void
+on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *aux;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+  gchar *rut, *dv;
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sca"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(aux));
+
+  if (!(gtk_tree_selection_get_selected (selection, NULL, &iter)))
+    {
+      aux = GTK_WIDGET (builder_get (builder, "wnd_search_client_abono"));
+      AlertMSG (aux, "Debe seleccionar un cliente");
+      return;
+    }
+
+  gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
+                      0, &rut,
+                      -1);
+
+  aux = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_search_client_abono"));
+  gtk_widget_hide (aux);
+
+  dv = invested_strndup (rut, strlen (rut)-1);
+  rut = g_strndup (rut, strlen (rut)-1);
+  
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_client_abono")), rut);
+
+  //Se habilitan las fechas
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_date_begin")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_date_begin")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_date_end")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_date_end")), TRUE);
+
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_search_abonos")));
+}
+
+
+/**
+ *
+ */
+void 
+on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
+{
+  gchar *q, *rut_cliente;
+  PGresult *res;
+  gint tuples, i;
+
+  gchar *id_venta, *abono;
+
+  GtkListStore *store;
+  GtkTreeView *treeview;
+  GtkTreeIter iter;
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_abonos_client"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  tuples = i = 0;
+  rut_cliente = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_client_abono"))));
+
+  if (DataExist (g_strdup_printf ("SELECT rut FROM cliente WHERE rut = %s", rut_cliente)))
+    q = g_strdup_printf ("SELECT * FROM info_abonos(%s)", rut_cliente);
+  else
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_client_abono")),
+		g_strdup_printf ("No existe un cliente con rut %s", rut_cliente));
+      return;
+    }
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  tuples = PQntuples (res);
+  gtk_list_store_clear (store);
+
+  for (i = 0; i < tuples; i++)
+    {
+      id_venta = g_strdup (PQvaluebycol (res, i, "out_id_venta"));
+      abono = g_strdup (PQvaluebycol (res, i, "out_abono"));
+      
+      if (g_str_equal (id_venta, "0")) id_venta = g_strdup_printf ("--");
+      if (g_str_equal (abono, "0")) abono = g_strdup_printf ("--");
+      
+      if (tuples != i+1) //Para que no muestre la última fila (El Totalizador)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, id_venta,
+			      1, g_strdup (PQvaluebycol (res, i, "out_fecha")),
+			      2, atoi (PQvaluebycol (res, i, "out_monto_deuda")),
+			      3, PutPoints (abono),
+			      4, atoi (PQvaluebycol (res, i, "out_deuda_total")),
+			      -1);
+	}
+      g_free (id_venta);
+      g_free (abono);
+    }
+
+}
+
+
+/**
+ * PEEEEEEEE
+ */
+void
+abonos_box ()
+{
+  //GtkWidget *widget;
+  GtkWidget *tree;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
+  GtkTreeSelection *selection;
+  GtkListStore *store;
+  //GtkListStore *ventas;
+  GtkListStore *ventas_details;
+
+
+  ////////////// Abonos
+  store = gtk_list_store_new (5,
+                              G_TYPE_STRING, //Fecha
+                              G_TYPE_STRING, //id_venta
+                              G_TYPE_INT,    //Monto Deuda
+                              G_TYPE_STRING, //Abono
+                              G_TYPE_INT);   //Deuda Total
+
+  tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_abonos_client"));
+  gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
+  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
+
+  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+                    G_CALLBACK (ChangeDetalle), NULL);
+
+  //Id Venta
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Id.venta", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 1.0);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  //gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)1, NULL);
+
+
+  //Fecha
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  
+  //Monto Deuda
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Deuda", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
+
+  
+  //Abono
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Abono", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  //gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+
+  //Deuda Total 
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Deuda Total", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
+
+  /* client_list->tree = GTK_TREE_VIEW (tree); */
+  /* client_list->title = "Lista de clientes"; */
+  /* client_list->date_string = NULL; */
+  /* client_list->cols[0].name = "Codigo"; */
+  /* client_list->cols[0].num = 0; */
+  /* client_list->cols[1].name = "Nombre"; */
+  /* client_list->cols[1].num = 1; */
+  /* client_list->cols[2].name = "Telefono"; */
+  /* client_list->cols[2].num = 2; */
+  /* client_list->cols[3].name = "Cupo"; */
+  /* client_list->cols[3].num = 3; */
+  /* client_list->cols[4].name = "Deuda"; */
+  /* client_list->cols[4].num = 4; */
+  /* client_list->cols[5].name = "Saldo"; */
+  /* client_list->cols[5].num = 5; */
+  /* client_list->cols[6].name = NULL; */
+
+
+  ////////////////sales
+  ventas_details = gtk_list_store_new (6,
+                                       G_TYPE_STRING,
+                                       G_TYPE_STRING,
+                                       G_TYPE_STRING,
+                                       G_TYPE_DOUBLE,
+                                       G_TYPE_STRING,
+                                       G_TYPE_STRING);
+
+  tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_detalle_deudas"));
+  gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(ventas_details));
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 0,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_min_width (column, 100);
+  gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 200);
+  gtk_tree_view_column_set_max_width (column, 200);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_min_width (column, 130);
+  gtk_tree_view_column_set_max_width (column, 130);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  /* We fill the struct to print the last two tree views */
+
+  /* client_detail->son->tree = GTK_TREE_VIEW (tree); */
+  /* client_detail->son->cols[0].name = "Codigo"; */
+  /* client_detail->son->cols[0].num = 0; */
+  /* client_detail->son->cols[1].name = "Producto"; */
+  /* client_detail->son->cols[1].num = 1; */
+  /* client_detail->son->cols[2].name = "Marca"; */
+  /* client_detail->son->cols[2].num = 2; */
+  /* client_detail->son->cols[3].name = "Cantidad"; */
+  /* client_detail->son->cols[3].num = 3; */
+  /* client_detail->son->cols[4].name = "Unitario"; */
+  /* client_detail->son->cols[4].num = 4; */
+  /* client_detail->son->cols[5].name = "Total"; */
+  /* client_detail->son->cols[5].num = 5; */
+  /* client_detail->son->cols[6].name = NULL; */
+
+
+  /* g_signal_connect (G_OBJECT (button), "clicked", */
+  /*     G_CALLBACK (PrintTwoTree), (gpointer)client_detail); */
+
+  //setup_print_menu();
+}
+
 
 void
 emisores_box ()
@@ -1166,27 +1605,48 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
   GtkListStore *store;
   GtkListStore *store_detalle;
   GtkTreeIter iter;
-  gchar *q;
+  gchar *q, *treeview_name;
+  gchar *id_venta_char;
   gint id_venta, tuples;
   gint i;
+  gboolean numerico;
   PGresult *res;
+  void *data_get;
 
   treeview = gtk_tree_selection_get_tree_view(treeselection);
   store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  
+  //De acuerdo al treeview desde donde se llama, rellenará el store correspondiente
+  treeview_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (treeview)));
+  
+  if (g_str_equal (treeview_name, "treeview_sales")) {
+    widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_sale_details"));
+    numerico = TRUE;
+  } else {
+    widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_detalle_deudas"));
+    numerico = FALSE;
+  }
 
   if (gtk_tree_selection_get_selected (treeselection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-                          0, &id_venta,
+                          0, (numerico) ? &data_get : &data_get,
                           -1);
+      
+      if (numerico) 
+	id_venta = (gint)data_get;
+      else 
+	id_venta_char = (gchar *)data_get;
 
-      widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_sale_details"));
+      if (numerico == FALSE && g_str_equal (id_venta_char, "--"))
+	return;
+
       store_detalle = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
       gtk_list_store_clear (store_detalle);
 
       q = g_strdup_printf ("SELECT producto.codigo_corto, producto.descripcion, producto.marca, venta_detalle.cantidad, venta_detalle.precio "
                            "FROM venta_detalle inner join producto on producto.barcode=venta_detalle.barcode "
-                           "WHERE venta_detalle.id_venta=%d", id_venta);
+                           "WHERE venta_detalle.id_venta=%d", (numerico) ? id_venta : atoi(id_venta_char));
       res = EjecutarSQL (q);
       g_free(q);
 
