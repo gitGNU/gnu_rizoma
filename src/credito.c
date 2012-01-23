@@ -317,6 +317,15 @@ search_client_abono (GtkWidget *widget, gpointer data)
   gtk_widget_show_all (aux_widget);
 }
 
+/**
+ * To activate the "treeview_abono_sca" row
+ */
+void
+on_treeview_sca_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2, gpointer data)
+{
+  on_btn_accept_sca_clicked (NULL, NULL);
+}
+
 void
 clientes_box ()
 {
@@ -731,6 +740,17 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
   GtkTreeView *treeview;
   GtkTreeIter iter;
 
+  /*Variables de fecha*/
+  GDate *date_begin;
+  GDate *date_end;
+
+  const gchar *str_begin = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_begin")));
+  const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
+
+  /*Se inicializan los GDate para la obtención de fechas*/
+  date_begin = g_date_new ();
+  date_end = g_date_new ();
+
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_abonos_client"));
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
 
@@ -746,6 +766,35 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
       return;
     }
 
+
+  /*Se agrega el filtro de fechas a la consulta*/
+  if (!g_str_equal (str_begin, "") || !g_str_equal (str_end, "")) {
+
+    /*Solo fecha inicio*/
+    if (!g_str_equal (str_begin, "") && g_str_equal (str_end, "")) {
+      g_date_set_parse (date_begin, str_begin);
+      q = g_strdup_printf ("%s WHERE out_fecha >= to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD')", 
+			   q, g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin));
+    }
+
+    /*Solo fecha Termino*/
+    else if (!g_str_equal (str_end, "") && g_str_equal (str_begin, "")) {
+      g_date_set_parse (date_end, str_end);
+      q = g_strdup_printf ("%s WHERE out_fecha < to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') + '1 days'", 
+			   q, g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+    }
+
+    /*Ambas fechas*/
+    else if (!g_str_equal (str_end, "") && !g_str_equal (str_begin, "")) {
+      g_date_set_parse (date_begin, str_begin);
+      g_date_set_parse (date_end, str_end);
+      q = g_strdup_printf ("%s WHERE out_fecha >= to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') "
+			   "AND out_fecha < to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') + '1 days'", 
+			   q, g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+			   g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+    }
+  }
+
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -760,7 +809,8 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
       if (g_str_equal (id_venta, "0")) id_venta = g_strdup_printf ("--");
       if (g_str_equal (abono, "0")) abono = g_strdup_printf ("--");
       
-      if (tuples != i+1) //Para que no muestre la última fila (El Totalizador)
+      if (!g_str_equal (id_venta, "--") || //Para que no muestre el totalizador
+	  !g_str_equal (abono, "--")) 
 	{
 	  gtk_list_store_append (store, &iter);
 	  gtk_list_store_set (store, &iter,
@@ -779,7 +829,7 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
 
 
 /**
- * PEEEEEEEE
+ * Inicializa la pestaña "Abonos" del modulo "rizoma-admin"
  */
 void
 abonos_box ()
