@@ -317,15 +317,6 @@ search_client_abono (GtkWidget *widget, gpointer data)
   gtk_widget_show_all (aux_widget);
 }
 
-/**
- * To activate the "treeview_abono_sca" row
- */
-void
-on_treeview_sca_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2, gpointer data)
-{
-  on_btn_accept_sca_clicked (NULL, NULL);
-}
-
 void
 clientes_box ()
 {
@@ -725,6 +716,16 @@ on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
 
 
 /**
+ * To activate the "treeview_abono_sca" row
+ */
+void
+on_treeview_sca_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2, gpointer data)
+{
+  on_btn_accept_sca_clicked (NULL, NULL);
+}
+
+
+/**
  *
  */
 void 
@@ -867,8 +868,8 @@ abonos_box ()
                                                      "text", 0,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
-  gtk_tree_view_column_set_alignment (column, 1.0);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   //gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)1, NULL);
 
@@ -880,7 +881,7 @@ abonos_box ()
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   

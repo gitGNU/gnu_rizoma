@@ -3689,12 +3689,13 @@ BEGIN
 
    q1 := $S$ SELECT o_id AS id, o_rut_cliente AS rut_cliente, 
       	     	    o_monto_abonado AS monto_abonado, o_fecha_abono AS fecha_abono
-    	     FROM select_abonos ( $S$ || in_rut_cliente || $S$ ) $S$;
+    	     FROM select_abonos ( $S$ || in_rut_cliente || $S$ ) 
+	     ORDER BY o_fecha_abono ASC $S$;
 
    FOR l1 IN EXECUTE q1 LOOP
 
        q2 := $S$ SELECT id, monto, fecha 
-     	     	 FROM search_deudas_cliente ($S$ ||in_rut_cliente|| $S$, false)$S$;
+     	     	 FROM search_deudas_cliente ($S$ ||in_rut_cliente|| $S$, false) $S$;
 
        IF fecha_abono_anterior IS NULL THEN
 	  q2 := q2 || $S$ WHERE fecha < $S$ || quote_literal (l1.fecha_abono);
@@ -3704,6 +3705,8 @@ BEGIN
 	     	      	  AND fecha < $S$ || quote_literal (l1.fecha_abono);
 	  fecha_abono_anterior := l1.fecha_abono;
        END IF;	 
+
+       q2 := q2 || $S$ ORDER BY fecha ASC $S$;
 
        deuda_total := out_deuda_total;
        FOR l2 IN EXECUTE q2 LOOP
