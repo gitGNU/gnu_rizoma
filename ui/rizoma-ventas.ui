@@ -2016,7 +2016,7 @@
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">radio_btn_general</property>
-                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_code_detail_mp" swapped="yes"/>
+                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_int_code_detail_mp" swapped="yes"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -2053,7 +2053,7 @@
                             <property name="can_focus">True</property>
                             <property name="max_length">11</property>
                             <property name="invisible_char">•</property>
-                            <signal name="activate" handler="gtk_widget_grab_focus" object="entry_amount_mixed_pay" swapped="yes"/>
+                            <signal name="activate" handler="gtk_widget_grab_focus" object="entry_int_amount_mixed_pay" swapped="yes"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -2132,7 +2132,7 @@
                                 <property name="can_focus">True</property>
                                 <property name="max_length">11</property>
                                 <property name="invisible_char">•</property>
-                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_exp_date_mp" swapped="yes"/>
+                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_int_exp_date_mp" swapped="yes"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -2158,7 +2158,7 @@
                                 <property name="can_focus">True</property>
                                 <property name="max_length">6</property>
                                 <property name="invisible_char">•</property>
-                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_amount_detail_mp" swapped="yes"/>
+                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_int_amount_detail_mp" swapped="yes"/>
                               </object>
                               <packing>
                                 <property name="expand">True</property>

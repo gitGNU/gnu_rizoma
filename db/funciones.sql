@@ -3643,7 +3643,8 @@ DECLARE
 BEGIN
    q := $S$ SELECT id, rut_cliente, monto_abonado, fecha_abono
     	    FROM abono
-	    WHERE rut_cliente = $S$ || in_rut_cliente;
+	    WHERE rut_cliente = $S$ || in_rut_cliente || $S$ 
+	    ORDER BY fecha_abono ASC $S$;
 
    FOR l IN EXECUTE q LOOP
        o_id := l.id;
@@ -3664,7 +3665,7 @@ END; $$ LANGUAGE plpgsql;
 
 
 --
--- asdasdasd
+-- Busca todas las deudas y abonos de un cliente específico
 --
 CREATE OR REPLACE FUNCTION info_abonos (IN in_rut_cliente int4,
 					OUT out_fecha timestamp,
