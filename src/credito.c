@@ -48,6 +48,8 @@ Print *client_list;
 Print *client_detail;
 
 Print *emisores_list;
+
+Print *deudas_cliente;
 /////////
 
 /**
@@ -671,62 +673,11 @@ clientes_box ()
 }
 
 /**
+ * Realiza la búsqueda de las deudas y abonos de cliente seleccionado
+ * (signal-clicked) -> btn_search_abonos 
  *
- */
-void
-on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
-{
-  GtkWidget *aux;
-  GtkListStore *store;
-  GtkTreeSelection *selection;
-  GtkTreeIter iter;
-  gchar *rut, *dv;
-
-  aux = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sca"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
-  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(aux));
-
-  if (!(gtk_tree_selection_get_selected (selection, NULL, &iter)))
-    {
-      aux = GTK_WIDGET (builder_get (builder, "wnd_search_client_abono"));
-      AlertMSG (aux, "Debe seleccionar un cliente");
-      return;
-    }
-
-  gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
-                      0, &rut,
-                      -1);
-
-  aux = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_search_client_abono"));
-  gtk_widget_hide (aux);
-
-  dv = invested_strndup (rut, strlen (rut)-1);
-  rut = g_strndup (rut, strlen (rut)-1);
-  
-  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_client_abono")), rut);
-
-  //Se habilitan las fechas
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_date_begin")), TRUE);
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_date_begin")), TRUE);
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_date_end")), TRUE);
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_date_end")), TRUE);
-
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_search_abonos")));
-}
-
-
-/**
- * To activate the "treeview_abono_sca" row
- */
-void
-on_treeview_sca_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2, gpointer data)
-{
-  on_btn_accept_sca_clicked (NULL, NULL);
-}
-
-
-/**
- *
+ * @param: GtkButton *button
+ * @param: gpointer *data
  */
 void 
 on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
@@ -830,13 +781,107 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
 
 
 /**
+ * Obtiene el rut y nombre del cliente seleccionado
+ * y 'setea' los 'widgets' correspondientes.
+ *
+ * (signal-clicked) -> btn_accept_sca
+ *
+ * @param: GtkButton *button
+ * @param: gpointer *data
+ */
+void
+on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
+{
+  GtkWidget *aux;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+  gchar *rut, *dv, *nombre;
+
+  aux = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sca"));
+  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
+  selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(aux));
+
+  if (!(gtk_tree_selection_get_selected (selection, NULL, &iter)))
+    {
+      aux = GTK_WIDGET (builder_get (builder, "wnd_search_client_abono"));
+      AlertMSG (aux, "Debe seleccionar un cliente");
+      return;
+    }
+
+  gtk_tree_model_get (GTK_TREE_MODEL(store), &iter,
+                      0, &rut,
+		      1, &nombre,
+                      -1);
+
+  aux = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_search_client_abono"));
+  gtk_widget_hide (aux);
+
+  dv = invested_strndup (rut, strlen (rut)-1);
+  rut = g_strndup (rut, strlen (rut)-1);
+  
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_client_abono")), rut);
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_name_selected")), 
+			g_strdup_printf ("<b>%s</b>", nombre));
+
+  //Se habilitan las fechas
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_date_begin")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_date_begin")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_date_end")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_date_end")), TRUE);
+
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_date_begin")));
+  on_btn_search_abonos_clicked (GTK_BUTTON (builder_get (builder, "btn_search_abonos")), NULL);
+}
+
+
+/**
+ * Limpia los treeviews, entry, y label 
+ * correspondientes de la pestaña 'abonos'
+ *
+ * (signal-clicked) -> btn_clean_abonos
+ *
+ * @param: GtkButton *button
+ * @param: gpointer *data
+ */
+void
+on_btn_clean_abonos_clicked (GtkButton *button, gpointer data)
+{
+  GtkTreeView *tree;
+
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_client_abono")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_date_begin")), "");
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_date_end")), "");
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_name_selected")), "");
+
+  //Se limpian los treeviews
+  tree = GTK_TREE_VIEW (builder_get (builder, "treeview_abonos_client"));
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (tree)));
+  tree = GTK_TREE_VIEW (builder_get (builder, "treeview_detalle_deudas"));
+  gtk_list_store_clear (GTK_LIST_STORE (gtk_tree_view_get_model (tree)));
+
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_client_abono")));
+}
+
+/**
+ * To activate the "treeview_abono_sca" row
+ */
+void
+on_treeview_sca_row_activated (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2, gpointer data)
+{
+  on_btn_accept_sca_clicked (NULL, NULL);
+}
+
+
+/**
+ * Abono Box
  * Inicializa la pestaña "Abonos" del modulo "rizoma-admin"
  */
 void
 abonos_box ()
 {
   //GtkWidget *widget;
-  GtkWidget *tree;
+  GtkTreeView *tree;
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
   GtkTreeSelection *selection;
@@ -844,6 +889,8 @@ abonos_box ()
   //GtkListStore *ventas;
   GtkListStore *ventas_details;
 
+  deudas_cliente = (Print *) malloc (sizeof (Print));
+  deudas_cliente->son = (Print *) malloc (sizeof (Print));
 
   ////////////// Abonos
   store = gtk_list_store_new (5,
@@ -853,9 +900,9 @@ abonos_box ()
                               G_TYPE_STRING, //Abono
                               G_TYPE_INT);   //Deuda Total
 
-  tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_abonos_client"));
-  gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(store));
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
+  tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "treeview_abonos_client"));
+  gtk_tree_view_set_model (tree, GTK_TREE_MODEL (store));
+  selection = gtk_tree_view_get_selection (tree);
 
   gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
@@ -867,7 +914,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Id.venta", renderer,
                                                      "text", 0,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -879,7 +926,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Fecha", renderer,
                                                      "text", 1,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -890,7 +937,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Monto Deuda", renderer,
                                                      "text", 2,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -902,7 +949,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Abono", renderer,
                                                      "text", 3,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -914,30 +961,32 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Deuda Total", renderer,
                                                      "text", 4,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
 
-  /* client_list->tree = GTK_TREE_VIEW (tree); */
-  /* client_list->title = "Lista de clientes"; */
-  /* client_list->date_string = NULL; */
-  /* client_list->cols[0].name = "Codigo"; */
-  /* client_list->cols[0].num = 0; */
-  /* client_list->cols[1].name = "Nombre"; */
-  /* client_list->cols[1].num = 1; */
-  /* client_list->cols[2].name = "Telefono"; */
-  /* client_list->cols[2].num = 2; */
-  /* client_list->cols[3].name = "Cupo"; */
-  /* client_list->cols[3].num = 3; */
-  /* client_list->cols[4].name = "Deuda"; */
-  /* client_list->cols[4].num = 4; */
-  /* client_list->cols[5].name = "Saldo"; */
-  /* client_list->cols[5].num = 5; */
-  /* client_list->cols[6].name = NULL; */
+  // Deudas y abonos del cliente
+  deudas_cliente->tree = tree;
+  deudas_cliente->title = "Lista de Deudas y Abonos";
+  deudas_cliente->name = "Deduas y Abonos";
+  deudas_cliente->date_string = NULL;
+  deudas_cliente->cols[0].name = "Id Venta";
+  deudas_cliente->cols[0].num = 0;
+  deudas_cliente->cols[1].name = "Fecha";
+  deudas_cliente->cols[1].num = 1;
+  deudas_cliente->cols[2].name = "Monto Deuda";
+  deudas_cliente->cols[2].num = 2;
+  deudas_cliente->cols[3].name = "Abono";
+  deudas_cliente->cols[3].num = 3;
+  deudas_cliente->cols[4].name = "Deuda Total";
+  deudas_cliente->cols[4].num = 4;
+  deudas_cliente->cols[5].name = NULL;
 
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_print_payment_report")), "clicked",
+		    G_CALLBACK (PrintTree), (gpointer)deudas_cliente);
 
   ////////////////sales
   ventas_details = gtk_list_store_new (6,
@@ -948,14 +997,14 @@ abonos_box ()
                                        G_TYPE_STRING,
                                        G_TYPE_STRING);
 
-  tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_detalle_deudas"));
-  gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(ventas_details));
+  tree = GTK_TREE_VIEW (gtk_builder_get_object(builder, "treeview_detalle_deudas"));
+  gtk_tree_view_set_model (tree, GTK_TREE_MODEL(ventas_details));
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
                                                      "text", 0,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_min_width (column, 100);
@@ -966,7 +1015,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
                                                      "text", 1,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_min_width (column, 200);
@@ -976,7 +1025,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
                                                      "text", 2,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_min_width (column, 130);
@@ -987,7 +1036,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
                                                      "text", 3,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -997,7 +1046,7 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
                                                      "text", 4,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
@@ -1006,36 +1055,39 @@ abonos_box ()
   column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
                                                      "text", 5,
                                                      NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_append_column (tree, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   /* We fill the struct to print the last two tree views */
 
-  /* client_detail->son->tree = GTK_TREE_VIEW (tree); */
-  /* client_detail->son->cols[0].name = "Codigo"; */
-  /* client_detail->son->cols[0].num = 0; */
-  /* client_detail->son->cols[1].name = "Producto"; */
-  /* client_detail->son->cols[1].num = 1; */
-  /* client_detail->son->cols[2].name = "Marca"; */
-  /* client_detail->son->cols[2].num = 2; */
-  /* client_detail->son->cols[3].name = "Cantidad"; */
-  /* client_detail->son->cols[3].num = 3; */
-  /* client_detail->son->cols[4].name = "Unitario"; */
-  /* client_detail->son->cols[4].num = 4; */
-  /* client_detail->son->cols[5].name = "Total"; */
-  /* client_detail->son->cols[5].num = 5; */
-  /* client_detail->son->cols[6].name = NULL; */
+  deudas_cliente->son->tree = tree;
+  deudas_cliente->son->cols[0].name = "Codigo";
+  deudas_cliente->son->cols[0].num = 0;
+  deudas_cliente->son->cols[1].name = "Producto";
+  deudas_cliente->son->cols[1].num = 1;
+  deudas_cliente->son->cols[2].name = "Marca";
+  deudas_cliente->son->cols[2].num = 2;
+  deudas_cliente->son->cols[3].name = "Cantidad";
+  deudas_cliente->son->cols[3].num = 3;
+  deudas_cliente->son->cols[4].name = "Unitario";
+  deudas_cliente->son->cols[4].num = 4;
+  deudas_cliente->son->cols[5].name = "Total";
+  deudas_cliente->son->cols[5].num = 5;
+  deudas_cliente->son->cols[6].name = NULL;
 
-
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*     G_CALLBACK (PrintTwoTree), (gpointer)client_detail); */
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_print_payment_detail")), "clicked",
+		    G_CALLBACK (PrintTwoTree), (gpointer)deudas_cliente);
 
   //setup_print_menu();
 }
 
 
+/**
+ * Emisores box
+ * 
+ */
 void
 emisores_box ()
 {
