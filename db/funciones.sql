@@ -1286,7 +1286,7 @@ DECLARE
 	resultado INTEGER;
 BEGIN
 
-resultado := (SELECT SUM (monto) FROM search_deudas_cliente (rut_cliente));
+resultado := (SELECT SUM (monto) FROM search_deudas_cliente (rut_cliente, true));
 
 RETURN resultado;
 END; $$ LANGUAGE plpgsql;
@@ -3395,6 +3395,7 @@ END; $$ LANGUAGE plpgsql;
 -- las demás columnas con -1
 CREATE OR replace FUNCTION search_deudas_cliente (
        IN rut INT,
+       IN solo_no_pagadas boolean,
        OUT id INT,
        OUT monto INT,
        OUT maquina INT,
@@ -3412,13 +3413,22 @@ DECLARE
 BEGIN
 	--                       0      1             2            3       4       5
 	--TIPO PAGO EN RIZOMA (CASH, CREDITO, CHEQUE_RESTAURANT, MIXTO, CHEQUE, TARJETA)
-
-	query := $S$ SELECT v.id, v.monto, v.maquina, v.vendedor, v.fecha, v.tipo_venta, 
-	      	     	    pm.rut1, pm.rut2, pm.tipo_pago1, pm.tipo_pago2, pm.monto1, pm.monto2
-	      	     FROM venta v LEFT JOIN pago_mixto pm ON pm.id_sale = v.id
-		     WHERE v.id IN (SELECT id_venta FROM deuda WHERE rut_cliente=$S$||rut||$S$ AND pagada='f')
-		     AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
-		     ORDER BY v.id DESC $S$;
+	--
+	IF solo_no_pagadas = true THEN --Solo se listan las dedudas sin pago
+	   query := $S$ SELECT v.id, v.monto, v.maquina, v.vendedor, v.fecha, v.tipo_venta, 
+	      	     	       pm.rut1, pm.rut2, pm.tipo_pago1, pm.tipo_pago2, pm.monto1, pm.monto2
+	      	     	FROM venta v LEFT JOIN pago_mixto pm ON pm.id_sale = v.id
+		     	WHERE v.id IN (SELECT id_venta FROM deuda WHERE rut_cliente=$S$||rut||$S$ AND pagada='f')
+		     	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+		     	ORDER BY v.id DESC $S$;
+	ELSE --Se listan todas las deudas (incluso las ya pagadas)
+	   query := $S$ SELECT v.id, v.monto, v.maquina, v.vendedor, v.fecha, v.tipo_venta, 
+	      	     	       pm.rut1, pm.rut2, pm.tipo_pago1, pm.tipo_pago2, pm.monto1, pm.monto2
+	      	        FROM venta v LEFT JOIN pago_mixto pm ON pm.id_sale = v.id
+		     	WHERE v.id IN (SELECT id_venta FROM deuda WHERE rut_cliente=$S$||rut||$S$)
+		     	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+		     	ORDER BY v.id DESC $S$;
+	END IF;
 
         FOR l IN EXECUTE query loop
 	      	id = l.id;
@@ -3529,7 +3539,6 @@ begin
 	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
-
 
 --
 -- Actualiza el monto de la factura calculando los valores de su detalle
@@ -4030,3 +4039,107 @@ BEGIN
 
 RETURN;
 END; $$ language plpgsql;
+
+--
+-- function to help info_abonos
+--
+CREATE OR REPLACE FUNCTION select_abonos (IN in_rut_cliente int4,
+					  OUT o_id integer,
+					  OUT o_rut_cliente int4,
+					  OUT o_monto_abonado integer,
+					  OUT o_fecha_abono timestamp)
+RETURNS SETOF RECORD AS $$
+DECLARE
+   l record;
+   q varchar;
+
+BEGIN
+   q := $S$ SELECT id, rut_cliente, monto_abonado, fecha_abono
+    	    FROM abono
+	    WHERE rut_cliente = $S$ || in_rut_cliente || $S$ 
+	    ORDER BY fecha_abono ASC $S$;
+
+   FOR l IN EXECUTE q LOOP
+       o_id := l.id;
+       o_rut_cliente := l.rut_cliente;
+       o_monto_abonado := l.monto_abonado;
+       o_fecha_abono := l.fecha_abono;
+       RETURN NEXT;
+   END LOOP;
+   
+   o_id := 0;
+   o_rut_cliente := l.rut_cliente;
+   o_monto_abonado := 0;
+   o_fecha_abono := now();
+   RETURN NEXT;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+-- Busca todas las deudas y abonos de un cliente específico
+--
+CREATE OR REPLACE FUNCTION info_abonos (IN in_rut_cliente int4,
+					OUT out_fecha timestamp,
+					OUT out_id_venta integer,
+					OUT out_monto_deuda integer,
+					OUT out_abono integer,
+					OUT out_deuda_total integer)
+RETURNS SETOF RECORD AS $$
+DECLARE
+   l1 record;
+   q1 varchar;
+   l2 record;
+   q2 varchar;
+   deuda_total integer;
+   fecha_abono_anterior timestamp;
+
+BEGIN
+
+   deuda_total := 0;
+   out_deuda_total := 0;
+
+   q1 := $S$ SELECT o_id AS id, o_rut_cliente AS rut_cliente, 
+      	     	    o_monto_abonado AS monto_abonado, o_fecha_abono AS fecha_abono
+    	     FROM select_abonos ( $S$ || in_rut_cliente || $S$ ) 
+	     ORDER BY o_fecha_abono ASC $S$;
+
+   FOR l1 IN EXECUTE q1 LOOP
+
+       q2 := $S$ SELECT id, monto, fecha 
+     	     	 FROM search_deudas_cliente ($S$ ||in_rut_cliente|| $S$, false) $S$;
+
+       IF fecha_abono_anterior IS NULL THEN
+	  q2 := q2 || $S$ WHERE fecha < $S$ || quote_literal (l1.fecha_abono);
+	  fecha_abono_anterior := l1.fecha_abono;
+       ELSE
+          q2 := q2 || $S$ WHERE fecha > $S$ || quote_literal (fecha_abono_anterior) || $S$ 
+	     	      	  AND fecha < $S$ || quote_literal (l1.fecha_abono);
+	  fecha_abono_anterior := l1.fecha_abono;
+       END IF;	 
+
+       q2 := q2 || $S$ ORDER BY fecha ASC $S$;
+
+       deuda_total := out_deuda_total;
+       FOR l2 IN EXECUTE q2 LOOP
+       	   deuda_total := deuda_total + l2.monto;
+      	   out_fecha := l2.fecha;
+	   out_id_venta := l2.id;
+	   out_monto_deuda := l2.monto;
+	   out_abono := 0;
+	   out_deuda_total := deuda_total;
+           RETURN NEXT;
+       END LOOP;
+
+       out_fecha := l1.fecha_abono;
+       out_id_venta := 0;
+       out_monto_deuda := deuda_total;
+       out_abono := l1.monto_abonado;
+       out_deuda_total := deuda_total - l1.monto_abonado;
+
+       RETURN NEXT;
+   END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;

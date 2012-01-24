@@ -233,6 +233,7 @@ admin_win()
   clientes_box(); //clients tab
   emisores_box(); //clients tab
   stores_box(); //stores tab
+  abonos_box(); //abonos tab
   gtk_widget_show_all (admin_gui);
 }
 

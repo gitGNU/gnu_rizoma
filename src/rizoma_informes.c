@@ -24,7 +24,7 @@
 #include <gtk/gtk.h>
 #include <unistd.h>
 #include <glib.h>
-#include <pthread.h>
+/* #include <pthread.h> */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,7 +86,7 @@ ChangeVenta (void)
           gtk_list_store_set (store_detail, &iter,
                               0, g_strdup_printf ("%s %s %s %s", PQvaluebycol (res, i, "descripcion"),
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
-                                                  PQvaluebycol (res, i, "unidad")),			      
+                                                  PQvaluebycol (res, i, "unidad")),
                               1, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
                               2, atoi (PQvaluebycol (res, i, "precio")),
 			      3, atoi (g_strdup (PQvaluebycol (res, i, "iva"))),
@@ -148,10 +148,10 @@ ChangeDevolucion (void)
 
 
 /**
- * Es llamada por el evento "change" del treeview 
+ * Es llamada por el evento "change" del treeview
  * "treeview_sells_exempt_tax"
  *
- * Rellena el detalle de la venta exenta seleccionada en el 
+ * Rellena el detalle de la venta exenta seleccionada en el
  * treeview "treeview_sells_exempt_tax_details"
  *
  * @param: GtkTreeSelection treeselection
@@ -223,12 +223,12 @@ change_sell_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *stock
       gtk_tree_model_get (model, &iter,
                           0, &barcode_producto,
                           -1);
-      
+
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_deriv));
 
       res = ReturnDerivProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
 				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
-      
+
       tuples = PQntuples (res);
 
       for (i = 0; i < tuples; i++)
@@ -1207,7 +1207,7 @@ reports_win (void)
                               G_TYPE_INT,
                               G_TYPE_INT,
 			      G_TYPE_INT,
-			      G_TYPE_DOUBLE);  
+			      G_TYPE_DOUBLE);
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sell_rank_mp"));
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
@@ -2816,7 +2816,7 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  
+
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   exempt->son->tree = treeview;
@@ -2887,7 +2887,7 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  
+
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   /* End Sells (tax exempt) */
@@ -2900,7 +2900,7 @@ reports_win (void)
 					 rizoma_get_value ("SERVER_HOST")));
 
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
-  
+
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
@@ -2946,9 +2946,9 @@ main (int argc, char **argv)
 
 
   /* init threads */
-  g_thread_init(NULL);
+  /* g_thread_init(NULL); */
 
-  gdk_threads_init();
+  /* gdk_threads_init(); */
 
   gtk_init (&argc, &argv);
 
@@ -2997,9 +2997,9 @@ main (int argc, char **argv)
   gtk_widget_show_all ((GtkWidget *)login_window);
 
   /* enter the GTK main loop */
-  gdk_threads_enter();
+  /* gdk_threads_enter(); */
   gtk_main();
-  gdk_threads_leave();
+  /* gdk_threads_leave(); */
 
   return 0;
 }
@@ -3688,9 +3688,9 @@ return;
  * tree_view correspondiente.
  *
  */
-void 
+void
 fill_exempt_sells ()
-{  
+{
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder,"treeview_sells_exempt_tax"))));
   gchar *pago = NULL;
   gint tuples, i;
@@ -3757,8 +3757,8 @@ fill_exempt_sells ()
     }
 
 
-  /* Rellena la información de los cheques de restaurant en el lapso 
-     de tiempo determinado */  
+  /* Rellena la información de los cheques de restaurant en el lapso
+     de tiempo determinado */
   store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_ticket_amount"))));
   gtk_list_store_clear (store);
 
@@ -3768,7 +3768,7 @@ fill_exempt_sells ()
 		       "date_part ('year', v.fecha) AS fvta_year, "
 		       "date_part ('month', v.fecha) AS fvta_month, "
 		       "date_part ('day', v.fecha) AS fvta_day, "
-			   
+
 		       "date_part ('year', fecha_vencimiento) AS fvto_year, "
 		       "date_part ('month', fecha_vencimiento) AS fvto_month, "
 		       "date_part ('day', fecha_vencimiento) AS fvto_day "
@@ -3782,7 +3782,7 @@ fill_exempt_sells ()
   res = EjecutarSQL (q);
   tuples = PQntuples (res);
   ncheques = PutPoints (g_strdup_printf ("%d", tuples));
-      
+
   for (i = 0; i < tuples; i++)
     {
       gtk_list_store_append (store, &iter);
@@ -3803,15 +3803,15 @@ fill_exempt_sells ()
   //Numero de cheques
   gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_num_cheques")), ncheques);
   //Total ventas no afectas a impuesto
-  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_total_exempt_sell_amount")), 
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_total_exempt_sell_amount")),
 		      g_strconcat ("$ ",PutPoints (g_strdup_printf ("%d", monto_ventas_exentas)), NULL));
   //Total cheques
-  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_cheques_amount")), 
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_cheques_amount")),
 		      g_strconcat ("$ ",PutPoints (g_strdup_printf ("%d", monto_cheques)), NULL));
   //Total no afecto a impuesto
-  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_total_exempt_amount")), 
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_total_exempt_amount")),
 		      g_strconcat ("$ ",PutPoints (g_strdup_printf ("%d", monto_cheques+monto_ventas_exentas)), NULL));
-		      
+
 }
 
 
@@ -4830,8 +4830,8 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
     {
       const gchar *str_begin = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_begin")));
       const gchar *str_end = gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_date_end")));
-      pthread_t idPthread;
-      GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
+      /* pthread_t idPthread; */
+      /* GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar")); */
 
       date_begin = g_date_new ();
       date_end = g_date_new ();
@@ -4844,44 +4844,57 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
       switch (page_num)
         {
         case 0:
-	  idPthread = 0;
-	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
-	  flagProgress = avanzar_barra_progreso(progreso);
+	  /* idPthread = 0; */
+	  /* gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando .."); */
+	  /* flagProgress = avanzar_barra_progreso(progreso); */
 
           /* Informe de ventas */
           fill_sells_list();
           clean_container (GTK_CONTAINER
 			   (gtk_widget_get_parent (GTK_WIDGET (builder_get (builder, "lbl_sell_cash_amount")))));
 	  /* llama a la funcion fill_totals() en un nuevo thread(hilo)*/
-	  pthread_create(&idPthread, NULL, fill_totals, NULL);
-	  pthread_detach(idPthread);
+	  /* pthread_create(&idPthread, NULL, fill_totals, NULL); */
+	  /* pthread_detach(idPthread); */
+	  fill_totals();
           break;
 
         case 1:
 	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
 	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
-	  
+	  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmb_family_filter"));
+	  GtkTreeModel *modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));
+	  GtkTreeIter iter;
+	  gint familia;
+	  gtk_combo_box_get_active_iter (combo, &iter);
+
+	  gtk_tree_model_get (modelo, &iter,
+			      0, &familia,
+			      -1);
+
+
 	  if (sub_page_num == 0)
 	    {
-	      idPthread = 1;
-	      gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
-	      flagProgress = avanzar_barra_progreso(progreso);
-	      
+	      /* idPthread = 1; */
+	      /* gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando .."); */
+	      /* flagProgress = avanzar_barra_progreso(progreso); */
+
 	      /* Informe de ranking de ventas */
 	      /* llama a la funcion fill_products_rank() en un nuevo thread(hilo)*/
-	      pthread_create(&idPthread, NULL, fill_products_rank, NULL);
-	      pthread_detach(idPthread);
+	      /* pthread_create(&idPthread, NULL, fill_products_rank, NULL); */
+	      /* pthread_detach(idPthread); */
+	      fill_products_rank(familia);
 	    }
 	  else if (sub_page_num == 1)
 	    {
-	      idPthread = 1;
-	      gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
-	      flagProgress = avanzar_barra_progreso(progreso);
-	      
+	      /* idPthread = 2; */
+	      /* gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando .."); */
+	      /* flagProgress = avanzar_barra_progreso(progreso); */
+
 	      /* Informe de ranking de ventas */
 	      /* llama a la funcion fill_products_rank() en un nuevo thread(hilo)*/
-	      pthread_create(&idPthread, NULL, fill_products_rank_mp, NULL);
-	      pthread_detach(idPthread);
+	      /* pthread_create(&idPthread, NULL, fill_products_rank_mp, NULL); */
+	      /* pthread_detach(idPthread); */
+	      fill_products_rank_mp(familia);
 	    }
           break;
 
@@ -4895,15 +4908,16 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
           break;
 
         case 4:
-	  idPthread = 4;
-	  gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando ..");
-	  flagProgress = avanzar_barra_progreso(progreso);
+	  /* idPthread = 4; */
+	  /* gtk_progress_bar_set_text (GTK_PROGRESS_BAR(progreso), ".. Cargando .."); */
+	  /* flagProgress = avanzar_barra_progreso(progreso); */
 
           /* Informe de devolucion */
           fill_devolucion ();
           /* llama a la funcion fill_totals_dev() en un nuevo thread(hilo)*/
-	  pthread_create(&idPthread, NULL, fill_totals_dev, NULL);
-	  pthread_detach(idPthread);
+	  /* pthread_create(&idPthread, NULL, fill_totals_dev, NULL); */
+	  /* pthread_detach(idPthread); */
+	  fill_totals_dev();
           break;
 
 	case 6:
@@ -4921,7 +4935,7 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 	  /*Informe Exentos*/
 	  fill_exempt_sells ();
 	  break;
-	  
+
         default:
           break;
         }
@@ -4979,7 +4993,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   GtkNotebook *sub_notebook;
 
   if (page_num == 6 || page_num == 1)
-    {      
+    {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
 
@@ -5029,7 +5043,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 	{
 	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
 	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
-	  
+
 	  if (sub_page_num == 0) //Sell rank
 	    {
 	      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
@@ -5043,7 +5057,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 	}
     }
   else // Si (page_num != 6 || page_num != 1) Se ocultan los widget para filtrar familias
-    { 
+    {
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
     }
@@ -5124,9 +5138,9 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 	}
 
       gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
-    }  
+    }
   else // SI (page_num != 7) Se ocultan los widget para filtrar las tiendas
-    { 
+    {
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
     }
@@ -5310,7 +5324,7 @@ on_btn_apply_family_filter_clicked ()
 	(g_str_equal (store, "TODOS")) ? fill_products_rank_mp (0) : fill_products_rank_mp (familia);
     }
   else if (page_num == 6) //Cuadratura
-    (g_str_equal (store, "TODOS")) ? fill_cuadratura (0) : fill_cuadratura (familia);  
+    (g_str_equal (store, "TODOS")) ? fill_cuadratura (0) : fill_cuadratura (familia);
 }
 
 

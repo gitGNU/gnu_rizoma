@@ -596,6 +596,7 @@ void
 SelectivePrintTwoTree (GtkWidget *widget, gpointer data)
 {
   Print *print = (Print *) data;
+  GtkTreeSelection *selection_father = gtk_tree_view_get_selection (print->tree);
   GtkTreeModel *model_father = gtk_tree_view_get_model (print->tree);
   GtkTreeModel *model_son = gtk_tree_view_get_model (print->son->tree);
   GtkTreeIter iter_father, iter_son;
@@ -608,7 +609,7 @@ SelectivePrintTwoTree (GtkWidget *widget, gpointer data)
   gchar *file;
   FILE *fp;
 
-  if (gtk_tree_model_get_iter_first (model_father, &iter_father) == FALSE)
+  if (gtk_tree_selection_get_selected (selection_father, NULL, &iter_father) == FALSE)
     return;
 
   while (print->cols[father_cols].name != NULL)

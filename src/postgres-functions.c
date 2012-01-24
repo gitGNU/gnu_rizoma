@@ -928,7 +928,7 @@ DeudaTotalCliente (gint rut)
   gint deuda;
 
   res = EjecutarSQL (g_strdup_printf ("SELECT SUM (monto) as monto "
-				      "FROM search_deudas_cliente (%d)",
+				      "FROM search_deudas_cliente (%d, true)",
                                       rut));
 
   deuda = atoi (PQgetvalue (res, 0, 0));
@@ -946,7 +946,7 @@ SearchDeudasCliente (gint rut)
   q = g_strdup_printf ("SELECT id, monto, maquina, vendedor, tipo_venta, tipo_complementario, monto_complementario, "
 		       "date_part('day', fecha) AS day, date_part('month', fecha) AS month, date_part('year', fecha) AS year, "
                        "date_part('hour', fecha) AS hour, date_part('minute', fecha) AS minute, date_part ('second', fecha) AS second "
-		       "FROM search_deudas_cliente (%d) "
+		       "FROM search_deudas_cliente (%d, true) "
 		       "ORDER BY id DESC", rut);
   res = EjecutarSQL (q);
   g_free (q);
@@ -978,7 +978,7 @@ CancelarDeudas (gint abonar, gint rut)
   res = EjecutarSQL (q);
   g_free (q);
 
-  q = g_strdup_printf ("SELECT * FROM search_deudas_cliente (%d) "
+  q = g_strdup_printf ("SELECT * FROM search_deudas_cliente (%d, true) "
 		       "ORDER BY fecha asc", rut);
   res = EjecutarSQL (q);
   g_free (q);

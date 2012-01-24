@@ -75,4 +75,6 @@ void search_emisor (void);
 
 void emisores_box ();
 
+void abonos_box ();
+
 #endif
