@@ -392,7 +392,18 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 	  
           if ((DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode))))
             {
-              CompraAgregarALista (barcode, cant, precio, pcomp, margen,FALSE);
+	      //comprueba si ya esta en la lista
+	      if (compra->header_compra != NULL)
+		compra->current = SearchProductByBarcode (barcode, FALSE);
+	      else
+		compra->current = NULL;
+
+	      //Si no existe en la lista se agrega
+	      if (compra->current == NULL)
+		CompraAgregarALista (barcode, cant, precio, pcomp, margen, FALSE);
+	      else //de lo contrario solo agrega la cantidad
+		compra->current->cantidad += cant;
+
               string = g_strdup_printf (" El producto con barcode %s se ingreso correctamente \n", barcode);
               mark = gtk_text_buffer_get_insert(buffer);
               gtk_text_buffer_get_iter_at_offset (buffer, &iter, (gint) mark);

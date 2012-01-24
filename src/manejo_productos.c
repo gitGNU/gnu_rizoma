@@ -395,7 +395,7 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   gchar *q;
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
-                       "unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, "
+                       "unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, costo_promedio, "
                        "cantidad_mayor, mayorista FROM select_producto (%s)",
                        barcode);
   res = EjecutarSQL (q);
@@ -420,8 +420,9 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   new->product->iva = GetIVA (barcode);
   new->product->otros = GetOtros (barcode);
   new->product->precio = precio_final;
-  new->product->precio_neto = (double)precio_compra * ((double)(margen / 100) + 1);
-  new->product->precio_compra = precio_compra; //TODO: ver si elegir esto o fifo
+  new->product->precio_neto = (double)precio_compra * ((double)(margen / 100) + 1); //Precio venta neto
+  new->product->precio_compra = precio_compra;
+  new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
   new->product->ingresar = TRUE;
   new->product->perecible = strcmp (PQvaluebycol (res, 0, "perecibles"), "t") ? FALSE : TRUE;
   new->product->canjeable = strcmp (PQvaluebycol (res, 0, "canje"), "t") ? FALSE : TRUE;
@@ -693,6 +694,8 @@ create_prod (gchar *barcode, gboolean con_costo)
 
   new->prod->barcode = g_strdup (PQvaluebycol (res, 0, "barcode"));
   new->prod->descripcion = g_strdup (PQvaluebycol (res, 0, "descripcion"));
+
+  new->prod->id_factura_compra = 0;
 
   new->prod->costo_original = 0;
   new->prod->costo_nuevo = 0;

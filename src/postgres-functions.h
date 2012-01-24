@@ -310,10 +310,22 @@ void registrar_nueva_talla (gchar *codigo, gchar *talla);
 
 void registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto);
 
-PGresult *getProductsByProvider (gchar *rut);
+PGresult * getProductsByProvider (gchar *rut);
 
 PGresult * get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas);
 
 gdouble get_last_buy_price (gchar *barcode);
+
+gdouble get_last_buy_price_to_invoice (gchar *barcode, gint last_invoice_id);
+
+gdouble cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura_compra);
+
+gboolean mod_to_mod_on_buy (Prod *producto);
+
+gboolean mod_to_add_on_buy (Prod *producto);
+
+gboolean mod_to_del_on_buy (Prod *producto);
+
+gchar * codigo_corto_to_barcode (gchar *codigo_corto);
 
 #endif

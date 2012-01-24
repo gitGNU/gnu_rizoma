@@ -1542,16 +1542,17 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
   if (factura)
     {
       q = g_strdup_printf
-        ("INSERT INTO factura_compra_detalle (id, id_factura_compra, barcode, cantidad, precio, iva, otros) "
-         "VALUES (DEFAULT, %d, %s, %s, '%s', %ld, %ld)",
-         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)), lround (iva), lround (otros));
+        ("INSERT INTO factura_compra_detalle (id, id_factura_compra, barcode, cantidad, precio, iva, otros, costo_promedio) "
+         "VALUES (DEFAULT, %d, %s, %s, '%s', %ld, %ld, %s)",
+         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_compra)), 
+	 lround (iva), lround (otros), CUT (g_strdup_printf ("%.3f", product->fifo)));
     }
   else
     {
       q = g_strdup_printf
         ("INSERT INTO guias_compra_detalle (id, id_guias_compra, barcode, cantidad, precio, iva, otros) "
          "VALUES (DEFAULT, %d, %s, %s, '%s', %ld, %ld)",
-         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_neto)),lround (iva), lround (otros));
+         doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_compra)),lround (iva), lround (otros));
     }
 
   res = EjecutarSQL (q);
@@ -1599,6 +1600,7 @@ IngresarProducto (Producto *product, gint compra)
   */
 
   fifo = FiFo (product->barcode, compra);
+  product->fifo = fifo;
 
   if (product->otros != -1)
     imps = (gdouble) product->iva / 100 + (gdouble)product->otros / 100;
@@ -1746,25 +1748,24 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 {
   PGresult *res;
   Productos *header = products;
-  gdouble iva,precioPro, otros = 0;
+  gdouble iva, otros, iva_percent, otros_percent;
   gchar *iva_unit, *otros_unit;
-  gint margen;
   gchar *cantidad;
   gint precio, pago1, pago2, total_venta;
   gchar *q;
-  gdouble pre;
   gboolean is_imp1, is_imp2;
 
   //gdouble iva_promedio, otros_promedio;
-  gdouble impuestos;
+  gdouble impuestos, ganancia;
   gdouble proporcion_producto, neto;
   gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
 
   //Tipo de mercadería
   gchar *compuesta;
 
-  //contador
-  //gint i;
+  //Se inicializan los impuestos
+  iva = otros = 0;
+  iva_percent = otros_percent = 0;
 
   //Se obtiene el id del tipo 'compuesta' de mercadería
   compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
@@ -1774,11 +1775,9 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       total_venta = pago_mixto->total_a_pagar;
       pago1 = pago_mixto->monto_pago1;
       
-      /*
-	Se asegura que el pago sea justo puesto que en casos, como el segundo pago con
-	cheque de restaurant, puede haber un ingreso mayor al pago requerido, ese pago excesivo se
-        registra pero no participa del los calculos aquí requeridos 
-      */
+      /* Se asegura que el pago sea justo puesto que en casos, como el segundo pago con
+	 cheque de restaurant, puede haber un ingreso mayor al pago requerido, ese pago excesivo se
+         registra pero no participa del los calculos aquí requeridos */
       pago2 = total_venta - pago_mixto->monto_pago1;
 
       total_prod_afecto = CalcularSoloAfecto (products);
@@ -1797,77 +1796,20 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
 
-      iva = GetIVA (products->product->barcode);
-      otros = GetOtros (products->product->barcode);
-      iva = (gdouble) iva / 100;
-
-      if (otros != -1)
-        otros = (gdouble) otros / 100;
-
-      if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 &&
-          products->product->cantidad >= products->product->cantidad_mayorista &&
-          products->product->mayorista == TRUE)
-        {
-          if (otros == -1)
-            margen = (gdouble) ((products->product->precio_mayor / (gdouble)((iva + 1) * products->product->fifo)) - 1) * 100;
-          else
-            {
-              margen = (gdouble) products->product->precio_mayor / (gdouble)(iva + otros + 1);
-              margen = (gdouble) margen - products->product->fifo;
-              margen = (gdouble) (margen / products->product->fifo) * 100;
-            }
-        }
+      iva_percent = GetIVA (products->product->barcode);
+      otros_percent = GetOtros (products->product->barcode);
+      
+      if (iva_percent != -1 || iva_percent != 0)
+	iva_percent = (gdouble) iva_percent / 100;
       else
-        margen = products->product->margen;
+	iva_percent = 0;
 
-      precioPro = products->product->precio_compra;
-      /*
-        Si el costo promedio es -1, vuelve a preguntar el valor de costo
-        promedio, a traves de la funcion de postgres "informacion_producto"
+      if (otros_percent != -1 || otros_percent != 0)
+        otros_percent = (gdouble) otros_percent / 100;
+      else 
+	otros_percent = 0;
 
-       */
-      if (lround(precioPro) == -1)
-	    {
-	      q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
-	      res = EjecutarSQL (q);
-	      pre = strtod (PUT(PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
-	      iva = (gdouble) ((pre *((gdouble)margen /100 + 1))*
-		  products->product->cantidad) * (gdouble)products->product->iva / 100;
-	    }
-      /*
-	
-       */
-      else
-	    {
-	      iva = (gdouble) ((products->product->precio_compra * ((gdouble)margen /100 + 1))*
-			       products->product->cantidad) * (gdouble)products->product->iva / 100;
-	    }
-
-      if (products->product->otros != -1)
-        otros = (gdouble)((products->product->precio_compra * ((gdouble)margen /
-                                                               100 + 1)) *
-                          products->product->cantidad) * (gdouble)products->product->otros / 100;
-
-      //Se actualiza el stock del producto de acuerdo al tipo que éste sea
-      if (products->product->tipo == atoi (compuesta)) //Si el producto es compuesto se descuenta el stock de sus mercaderías madre
-	{
-	  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM update_stock_producto_compuesto (%s, %s)",
-					      products->product->barcode, cantidad));
-	}
-      else
-	{
-	  res = EjecutarSQL
-	    (g_strdup_printf
-	     ("UPDATE producto SET vendidos = vendidos+%s, stock=%s WHERE barcode='%s'",
-	      cantidad, CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
-	}
-
-
-      /*      res = EjecutarSQL (g_strdup_printf
-              ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
-              cantidad, products->product->barcode));
-      */
-
+      /*Obtiene el precio de venta del producto*/
       if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 &&
           products->product->cantidad >= products->product->cantidad_mayorista &&
           products->product->mayorista == TRUE)
@@ -1875,16 +1817,40 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       else
         precio = products->product->precio;
 
+      /*Se obtiene el IVA*/
+      if (iva_percent != 0)
+	iva = (precio / (iva_percent+otros_percent+1) * iva_percent) * products->product->cantidad;
+      else
+	iva = 0;
 
-      /* Se obtiene el iva y otros impuestos con . en vez de ,
-	 y de esa forma poder ingresarlos en la consulta SQL */
+      /*Se obtiene otros*/
+      if (otros_percent != 0)
+        otros = (precio / (iva_percent+otros_percent+1) * otros_percent) * products->product->cantidad;
+      else
+	otros = 0;
 
-      if (tipo_venta == CHEQUE_RESTAURANT) //Si se realizó solamene con cheque de restaurant
+      //Se actualiza el stock del producto de acuerdo al tipo que éste sea
+      if (products->product->tipo == atoi (compuesta)) //Si el producto es compuesto se descuenta el stock de sus mercaderías madre
+	res = EjecutarSQL (g_strdup_printf ("SELECT * FROM update_stock_producto_compuesto (%s, %s)",
+					    products->product->barcode, cantidad));
+      else
+	res = EjecutarSQL 
+	  (g_strdup_printf
+	   ("UPDATE producto SET vendidos = vendidos+%s, stock=%s WHERE barcode='%s'", cantidad, 
+	    CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), 
+	    products->product->barcode));
+
+
+      /*Pago de impuestos (pasados a texto)*/
+
+      //Si se realizó solamene con cheque de restaurant
+      if (tipo_venta == CHEQUE_RESTAURANT)
 	{
 	  iva_unit = g_strdup_printf ("0");
 	  otros_unit = g_strdup_printf ("0");
 	}
-      else if (tipo_venta == MIXTO) //Si se realizó de forma mixta
+      //Si se realizó de forma mixta
+      else if (tipo_venta == MIXTO)
 	{
 	  // Si ambos pagos son afecto a impuesto, no se hacen tratamientos especiales
 	  if (is_imp1 == TRUE && is_imp2 == TRUE)
@@ -1895,8 +1861,8 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	  //Si niguno es afecto a impuesto
 	  else if (is_imp1 == FALSE && is_imp2 == FALSE)
 	    {
-	      iva_unit = "0";
-	      otros_unit = "0";
+	      iva_unit = g_strdup_printf ("0");
+	      otros_unit = g_strdup_printf ("0");
 	    }
 	  //Si uno es afecto a impuesto y el otro no (y además el producto esta afecto a impuestos)
 	  else if (GetIVA (products->product->barcode) != -1)
@@ -1949,26 +1915,26 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 		      lround (monto_afecto), lround (monto_no_afecto), lround (monto_afecto + monto_no_afecto));
 
 	      //Se obtienen los impuestos del producto
-	      iva = GetIVA (products->product->barcode);
-	      if (iva != -1 || iva != 0)
-		iva = iva / 100;
-	      else
-		iva = 0;
+	      /* iva = GetIVA (products->product->barcode); */
+	      /* if (iva != -1 || iva != 0) */
+	      /* 	iva = iva / 100; */
+	      /* else */
+	      /* 	iva = 0; */
 
-	      otros = GetOtros (products->product->barcode);
-	      if (otros != -1 || otros != 0)
-		otros = otros / 100;
-	      else
-		otros = 0;
+	      /* otros = GetOtros (products->product->barcode); */
+	      /* if (otros != -1 || otros != 0) */
+	      /* 	otros = otros / 100; */
+	      /* else */
+	      /* otros = 0; */
 
-	      impuestos = (iva+otros+1);
+	      impuestos = (iva_percent+otros_percent+1);
 	      neto = monto_afecto / impuestos;
-	      iva = neto * iva;
-	      otros = neto * otros;
+	      iva = neto * iva_percent;
+	      otros = neto * otros_percent;
 
 	      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
 	      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
-		  
+	      
 	      impuestos = iva + otros;
 	    }
 	  else //Si es un pago mixto (con un pago afecto y el otro no), pero el producto no esta afecto a impuestos
@@ -1977,18 +1943,24 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	      otros_unit = g_strdup_printf ("0");
 	    }
 	}
-      else //cualquier tipo de pago afecto a impuesto
+      //cualquier tipo de pago afecto a impuesto
+      else 
 	{
 	  iva_unit = CUT (g_strdup_printf ("%.3f", iva));
 	  otros_unit = CUT (g_strdup_printf ("%.3f", otros));
 	}
 
+      ganancia = precio / (iva_percent + otros_percent + 1);
+      ganancia = ganancia - products->product->fifo;
+      ganancia = ganancia * products->product->cantidad;
+
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle */
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %d, %s)",
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %s, %d, %s)",
 			   id_venta, products->product->barcode, cantidad, precio,
 			   CUT (g_strdup_printf ("%.2f",products->product->fifo)),
-			   iva_unit, otros_unit, products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
+			   iva_unit, otros_unit, CUT (g_strdup_printf ("%.3f", ganancia)), 
+			   products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
 
       printf ("la consulta es %s\n", q);
       res = EjecutarSQL (q);
@@ -2241,10 +2213,12 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, g
   PGresult *res;
   gchar *q;
 
+  //"to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY')" //d_emision, m_emision, y_emision, 
+
   q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
-                       " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', %d, "
-                       "to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'), 0, 0, 0,'f', %d)",
-                       id_compra, rut_proveedor, n_doc, d_emision, m_emision, y_emision,
+                       " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', %d, "                       
+		       "now(), 0, 0, 0,'f', %d)",
+                       id_compra, rut_proveedor, n_doc,
                        total);
   res = EjecutarSQL (q);
   g_free (q);
@@ -2885,6 +2859,14 @@ AnularCompraDB (gint id_compra)
   res = EjecutarSQL (q);
   g_free (q);
 
+  // Se igualan la cantidad ingresada y la cantidad solicitada de aquellas que han tenido ingresos
+  q = g_strdup_printf ("UPDATE compra_detalle "
+		       "SET cantidad = cantidad_ingresada "
+		       "WHERE id_compra=%d "
+		       "AND candidad_ingresada > 0", id_compra);
+  res = EjecutarSQL (q);
+  g_free (q);
+  
   q = g_strdup_printf ("UPDATE compra_detalle SET anulado='t' WHERE id_compra=%d", id_compra);
   res = EjecutarSQL (q);
   g_free (q);
@@ -3760,7 +3742,11 @@ codigo_disponible (gchar *code)
   return FALSE;
 }
 
-
+/**
+ * 
+ * 
+ * 
+ */
 gdouble
 get_last_buy_price (gchar *barcode)
 {
@@ -3773,14 +3759,353 @@ get_last_buy_price (gchar *barcode)
 		       "INNER JOIN producto p "
 		       "ON cd.barcode_product = p.barcode "
 		       "WHERE c.anulada = false "
-		       "AND c.anulada_pi = false " 
-		       "AND p.barcode = '%s' " 
+		       "AND c.anulada_pi = false "
+		       "AND p.barcode = '%s' "
 		       "AND cd.anulado = false "
 		       "ORDER BY c.fecha DESC", barcode);
+
   res = EjecutarSQL (q);
 
   if ((res != NULL) && (PQntuples (res) > 0))
     return strtod (PUT(PQvaluebycol (res, 0, "costo")), (char **)NULL);
   else
     return 0;
+}
+
+
+/**
+ *
+ *
+ *
+ */
+gdouble
+get_last_buy_price_to_invoice (gchar *barcode, gint last_invoice_id)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT precio AS costo "
+		       "FROM compra c "
+		       "INNER JOIN factura_compra fc "
+		       "ON c.id = fc.id_compra "
+		       "INNER JOIN factura_compra_detalle fcd "
+		       "ON fc.id = fcd.id_factura_compra "
+		       "WHERE c.anulada_pi = false "
+		       "AND fcd.barcode = %s "
+		       "AND fc.id <= %d "
+		       "ORDER BY fc.fecha DESC",
+		       barcode, last_invoice_id);
+
+  res = EjecutarSQL (q);
+
+  if ((res != NULL) && (PQntuples (res) > 0))
+    return strtod (PUT(PQvaluebycol (res, 0, "costo")), (char **)NULL);
+  else
+    return 0;
+}
+
+/**
+ * Indica si es modificable la cantidad
+ *
+ *
+ * @return: gdouble: 1 si es posible, (-N) si no lo es. (N <= 0)
+ * (-N indica la cantidad minima necesaria para que sea modificable)
+ */
+gdouble
+cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura_compra)
+{
+  gint tuplas, i;
+  gdouble cantidad_original, cantidad_pre_compra, cantidad_min, resto;
+  gchar *query;
+  PGresult *res;
+    
+  query = g_strdup_printf ("SELECT cantidad "
+			   "FROM factura_compra_detalle fcd "
+			   "WHERE id_factura_compra = %d "
+			   "AND barcode = %s", id_factura_compra, barcode);
+  
+  res = EjecutarSQL (query);
+  g_free (query);
+  cantidad_original = strtod (PUT (PQvaluebycol (res, 0, "cantidad")), (char **)NULL);
+  
+
+  /* Si se busca disminuir la cantidad comprada
+     se debe comprobar que la cantidad logre justificar las transacciones futuras */
+  if (cantidad_original > 0 && (cantidad_original > cantidad_nueva))
+    {
+      if (cantidad_nueva <= 0)
+	return 0;
+
+      //Se obtiene la cantidad que se prentende disminuir de la cantidad original
+      resto = cantidad_original - cantidad_nueva;
+
+      /*Se obtiene la informacion de las compras posteriores a esta*/
+      query = g_strdup_printf ("SELECT cantidad_pre_compra AS cantidad "
+			       "FROM product_on_buy_invoice (%s) "
+			       "WHERE id_fc_out > %d "
+			       "OR id_fc_out = 0", barcode, id_factura_compra);
+
+      //Cantidad - (cantidad restada) debe ser >= a 0 en todas las compras siguientes
+      res = EjecutarSQL (query);
+      g_free (query);
+      tuplas = PQntuples (res);
+  
+      //Recorre todas las compras revisando el stock del producto entes de realizada cada una de ellas
+      for (i = 0; i < tuplas; i++)
+	{
+	  cantidad_pre_compra = strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL);
+
+	  /*Nota: cantidad_min es el máximo de unidades que se puede disminuir la compra
+	          del producto especificado
+	  */
+
+	  //Se obtiene el minimo de las cantidades
+	  if (i == 0 || cantidad_min > cantidad_pre_compra)
+	    cantidad_min = cantidad_pre_compra;
+	}
+      
+      // Si por X motivo cantidad_min es negativo, se retorna 0
+      if (cantidad_min <= 0)
+	return 0;
+
+      /* Si la cantidad a disminuir (resto) es mayor al stock minimo anterior a 
+	 una compra, se retorna el valor minimo (como un valor negativo) */      
+      else if (cantidad_min < resto)
+	return (cantidad_min * -1);
+
+      else //Se retorna 1 si es modificable
+	return 1;
+    }
+  
+  else if (cantidad_original > 0 
+	   && (cantidad_original < cantidad_nueva))
+    return 1;
+
+  else if (cantidad_original == cantidad_nueva)
+    return 1;
+
+  else // if (cantidad_original <= 0)
+    return 0;    
+}
+
+/**
+ *
+ *
+ *
+ *
+ */
+gboolean
+mod_to_mod_on_buy (Prod *producto)
+{
+  gchar *q;
+  PGresult *res;
+  gboolean entro;
+  
+  if (producto->accion != MOD)
+    return FALSE;
+
+  /*Se actualiza la cantidad en la tabla factura_compra_detalle*/
+  if ((producto->cantidad_original != producto->cantidad_nueva) &&
+      (producto->cantidad_original > 0 && producto->cantidad_nueva > 0))
+    {
+      q = g_strdup_printf ("UPDATE factura_compra_detalle "
+			   "SET cantidad = %s "
+			   "WHERE id_factura_compra = %d "
+			   "AND barcode = %s",
+			   CUT (g_strdup_printf ("%.3f", producto->cantidad_nueva)),
+			   producto->id_factura_compra,
+			   producto->barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      if (res == NULL)
+	return FALSE;
+      entro = TRUE;
+    }
+
+  /*Se actualiza costo en la tabla factura_compra_detalle*/
+  if ((producto->costo_original != producto->costo_nuevo) &&
+      (producto->costo_original > 0 && producto->costo_nuevo > 0))
+    {
+      q = g_strdup_printf ("UPDATE factura_compra_detalle "
+			   "SET precio = %s "
+			   "WHERE id_factura_compra = %d "
+			   "AND barcode = %s",
+			   CUT (g_strdup_printf ("%.3f", producto->costo_nuevo)),
+			   producto->id_factura_compra,
+			   producto->barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      if (res == NULL)
+	return FALSE;
+      entro = TRUE;
+    }
+
+  /*Se actualizan los promedios en las tablas correspondientes*/
+  if (entro == TRUE)
+    {
+      q = g_strdup_printf ("SELECT * FROM update_avg_cost (%s, %d)",
+			   producto->barcode,
+			   producto->id_factura_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      if (res == NULL)
+	return FALSE;
+    }
+  
+  return TRUE;
+}
+
+
+/**
+ *
+ *
+ *
+ *
+ */
+gboolean
+mod_to_add_on_buy (Prod *producto)
+{
+  gchar *q;
+  PGresult *res;
+  
+  if (producto->accion != ADD)
+    return FALSE;
+
+  /*Se ingresa un producto en factura_compra_detalle*/
+  if (producto->cantidad_nueva > 0 && producto->costo_nuevo > 0)
+    {
+      /*Los 3 últimos rellenará update_avg_cost*/
+      q = g_strdup_printf ("INSERT INTO factura_compra_detalle "
+			   "VALUES (DEFAULT, %d, %s, %s, %s, 0, 0, 0)",
+			   producto->id_factura_compra,
+			   producto->barcode,
+			   CUT (g_strdup_printf ("%.3f",producto->cantidad_nueva)),
+			   CUT (g_strdup_printf ("%.3f",producto->costo_nuevo)));
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      if (res == NULL)
+	return FALSE;
+
+      /*Se actualizan los promedios en las tablas correspondientes*/
+      q = g_strdup_printf ("SELECT * FROM update_avg_cost (%s, %d)",
+			   producto->barcode,
+			   producto->id_factura_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      if (res == NULL)
+	return FALSE;
+    }
+
+  return TRUE;
+}
+
+
+/**
+ *
+ *
+ *
+ *
+ */
+gboolean
+mod_to_del_on_buy (Prod *producto)
+{
+  gchar *q;
+  PGresult *res;
+  gint cantidad_productos;
+
+  if (producto->accion != DEL)
+    return FALSE;
+
+  /*Se elimina el producto de factura_compra_detalle*/
+  q = g_strdup_printf ("DELETE FROM factura_compra_detalle "
+		       "WHERE id_factura_compra = %d "
+		       "AND barcode = %s",
+		       producto->id_factura_compra,
+		       producto->barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
+  
+  if (res == NULL)
+    return FALSE;
+
+  /*cantidad ingresada en compra_detalle debe ser de 0*/
+  q = g_strdup_printf ("UPDATE compra_detalle "
+		       "SET cantidad_ingresada = 0 "
+		       "WHERE id_compra IN (SELECT id_compra FROM factura_compra WHERE id = %d) "
+		       "AND barcode_product = %s",
+		       producto->id_factura_compra,
+		       producto->barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
+  
+  if (res == NULL)
+    return FALSE;
+
+  /*Se obtiene la cantidad de productos que tiene la factura*/
+  q = g_strdup_printf ("SELECT COUNT (fcd.barcode) AS cantidad "
+		       "       FROM factura_compra_detalle fcd "
+		       "       INNER JOIN factura_compra fc "
+		       "       ON fcd.id_factura_compra = fc.id "
+		       "WHERE fc.id = %d",
+		       producto->id_factura_compra);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  cantidad_productos = atoi (PQvaluebycol (res, 0, "cantidad"));
+
+  /*Si ya no quedan más productos en esa factura, ésta se elimina*/
+  if (cantidad_productos == 0)
+    {
+      q = g_strdup_printf ("UPDATE compra SET anulada = true "
+			   "WHERE id IN (SELECT id_compra FROM factura_compra WHERE id = %d)",
+			   producto->id_factura_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      q = g_strdup_printf ("DELETE FROM factura_compra "
+			   "WHERE id = %d",
+			   producto->id_factura_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
+    }
+
+  //TODO: PEEE si el producto que elimine no tiene más compras, su costo_promedio es 0
+  /*Se actualizan los promedios en las tablas correspondientes*/
+  q = g_strdup_printf ("SELECT * FROM update_avg_cost (%s, %d)",
+		       producto->barcode,
+		       producto->id_factura_compra);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res == NULL)
+    return FALSE;
+
+  return TRUE;
+}
+
+
+/**
+ * Devuelve el barcode del producto del codigo_corto correpondiente
+ *
+ * @param: codigo_corto (gchar *): Codigo corto del producto.
+ *
+ */
+gchar *
+codigo_corto_to_barcode (gchar *codigo_corto)
+{
+  gchar *barcode;
+  gchar *q;
+  PGresult *res;
+
+  q = g_strdup_printf ("SELECT barcode "
+		       "FROM codigo_corto_to_barcode ('%s')", codigo_corto);
+
+  res = EjecutarSQL (q);
+  barcode = g_strdup (PQvaluebycol (res, 0, "barcode"));
+  return barcode;
 }

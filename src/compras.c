@@ -218,7 +218,6 @@ on_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_stri
                       0, &codigo,
 		      4, &joined_cantity,
                       -1);
-
   
   /*Valida y Obtiene el precio nuevo*/
   if (!is_numeric (cantity))
@@ -387,11 +386,14 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
   //Variables para recoger información
   gint total;
   gint tipo;
+  gint id_fc;
   gchar *barcode;
   gchar *color;
   gdouble new_cantity;
   gdouble previous_cantity;
+  gdouble original_cantity;
   gdouble cost;
+  gdouble modificable;
   gboolean original;
 
   /*Original es FALSE hasta que se demuetre lo contrario*/
@@ -412,6 +414,7 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
 		      0, &barcode,
                       2, &previous_cantity,
   		      3, &cost,
+		      6, &id_fc,
                       -1);
   
   /*Valida y Obtiene el precio nuevo*/
@@ -445,17 +448,21 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
     lista_mod_prod->prods = NULL;
 
   //Si no existe en la lista se agrega y se inicializa
-  if (lista_mod_prod->prods == NULL) //PEEEEE TODO: Limpiar lista al cambiar de compra o factura
+  if (lista_mod_prod->prods == NULL)
     {
       add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->id_factura_compra = id_fc;
       lista_mod_prod->prods->prod->cantidad_original = previous_cantity; /*Se guarda cantidad original*/
+      original_cantity = previous_cantity; /*Esta variable se usará para verificar si es modificable*/
       lista_mod_prod->prods->prod->cantidad_nueva = new_cantity; /*Se guarda la nueva cantidad*/
       lista_mod_prod->prods->prod->accion = MOD; /*Indica que se modificará este producto en la BD (enum action)*/
       original = FALSE;
     } /*Si el producto existe pero se le modifica el costo por 1era vez*/
   else if (lista_mod_prod->prods->prod->cantidad_nueva == 0)
     {
+      lista_mod_prod->prods->prod->id_factura_compra = id_fc;
       lista_mod_prod->prods->prod->cantidad_original = previous_cantity; /*Se guarda la cantidad priginal*/
+      original_cantity = previous_cantity; /*Esta variable se usará para verificar si es modificable*/
       lista_mod_prod->prods->prod->cantidad_nueva = new_cantity; /*Se guarda la nueva cantidad*/
       original = FALSE;
     }
@@ -468,6 +475,9 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
 	  //Si no hay modificaciones en costo
 	  if (lista_mod_prod->prods->prod->costo_nuevo == 0)
 	    {
+	      /*Esta variable se usará para verificar si es modificable*/
+	      original_cantity = lista_mod_prod->prods->prod->cantidad_original;
+
 	      drop_prod_to_mod_list (barcode);
 	      original = TRUE;
 	    }
@@ -477,10 +487,40 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
 	} 
       else //De lo contrario se modifica (Los productos agregados siempre llegaran aquí)
 	{ 
+	  lista_mod_prod->prods->prod->id_factura_compra = id_fc;
 	  lista_mod_prod->prods->prod->cantidad_nueva = new_cantity;
+	  original_cantity = lista_mod_prod->prods->prod->cantidad_original;
+
 	  original = FALSE;
 	  tipo = lista_mod_prod->prods->prod->accion;
 	}
+    }
+
+  /* SI se agregan unidades es modificable sin necesidad de realizar una comprobación
+     SINO Si el producto existe en esta factura se realiza una comprobación mas
+     De no existir en la factura es modificable pues no tiene datos historicos en esa factura
+  */
+  if (lista_mod_prod->prods->prod->cantidad_nueva >= lista_mod_prod->prods->prod->cantidad_original)
+    modificable = TRUE;  
+  else if (DataExist (g_strdup_printf ("SELECT barcode FROM factura_compra_detalle WHERE id_factura_compra = %d", id_fc)))
+    modificable = cantidad_es_modificable (barcode, new_cantity, id_fc);
+  else
+    modificable = TRUE;
+  
+  if (modificable <= 0 && (original_cantity != new_cantity))
+    {
+      if (modificable <= 0)
+	printf ("El producto %s de la factura %d devolvio modificable <= 0\n"
+		"con su stock original, revisar producto con cuadratura \n", barcode, id_fc);
+      
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);
+      drop_prod_to_mod_list (barcode);
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_nullify_buy_invoice_details")),
+		g_strdup_printf ("Debido a las transacciones realizadas sobre el producto %s en fechas \n"
+				 "posteriores a esta compra, la cantidad mínima debe ser: %.3f",
+				 barcode, (previous_cantity + modificable) ));
+      //NOTA: modificable es 0 o negativo, por lo tanto se restan o permanece igual
+      return;
     }
 
   /*color*/
@@ -550,6 +590,7 @@ on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_st
   // Variables para recoger información
   gint total;
   gint tipo;
+  gint id_fc;
   gchar *barcode;
   gchar *color;
   gdouble new_cost;
@@ -575,6 +616,7 @@ on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_st
 		      0, &barcode,
 		      2, &cantity,
   		      3, &previous_cost,
+		      6, &id_fc,
                       -1);
   
   /*Valida y Obtiene el precio nuevo*/
@@ -585,7 +627,7 @@ on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_st
       return;
     }
 
-  new_cost = strtod (PUT (cost), (char **)NULL);  
+  new_cost = strtod (PUT (cost), (char **)NULL);
   
   if (new_cost <= 0)
     {
@@ -612,6 +654,7 @@ on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_st
   if (lista_mod_prod->prods == NULL) //PEEEEE
     {
       add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->id_factura_compra = id_fc;
       lista_mod_prod->prods->prod->costo_original = previous_cost; /*Se guarda el costo original*/
       lista_mod_prod->prods->prod->costo_nuevo = new_cost; /*Se guarda el nuevo costo*/
       lista_mod_prod->prods->prod->accion = MOD; /*Indica que se modificará este producto en la BD (enum action)*/
@@ -619,6 +662,7 @@ on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_st
     } /*Si el producto existe pero se le modifica el costo por 1era vez*/
   else if (lista_mod_prod->prods->prod->costo_original == 0)
     {
+      lista_mod_prod->prods->prod->id_factura_compra = id_fc;
       lista_mod_prod->prods->prod->costo_original = previous_cost; /*Se guarda el costo original*/
       lista_mod_prod->prods->prod->costo_nuevo = new_cost; /*Se guarda el nuevo costo*/
       original = FALSE;
@@ -638,9 +682,10 @@ on_mod_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_st
 
 	  if (cantidad_total_prods (lista_mod_prod->header) == 0) //Si no quedan productos en la lista
 	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);          
-	} 
+	}
       else //De lo contrario se modifica (Los productos agregados siempre llegaran aquí)
 	{ 
+	  lista_mod_prod->prods->prod->id_factura_compra = id_fc;
 	  lista_mod_prod->prods->prod->costo_nuevo = new_cost;
 	  original = FALSE;
 	  tipo = lista_mod_prod->prods->prod->accion;
@@ -713,19 +758,6 @@ on_btn_add_buy_prod_clicked (GtkButton *button, gpointer data)
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_prod_on_buy_barcode")));
 }
 
-
-/**
- *
- *
- *
- */
-void
-on_btn_save_mod_buy_clicked (GtkButton *button, gpointer data)
-{
-  //brp
-}
-
-
 /**
  *
  *
@@ -789,6 +821,17 @@ on_btn_add_prod_on_buy_clicked (GtkButton *button, gpointer data)
       return;
     }
 
+  if (!gtk_tree_model_get_iter_first (model, &iter))
+    {
+      return;
+    }
+
+  /*Se obtiene el id de compra y facturas de esta seleccion*/
+  gtk_tree_model_get (model, &iter,
+		      5, &id_buy,
+  		      6, &id_invoice,
+                      -1);
+
   /*Se agrega a la lista de los productos modificados*/  
   //Se verifica si ya existe en la lista
   if (lista_mod_prod->header != NULL)
@@ -801,7 +844,10 @@ on_btn_add_prod_on_buy_clicked (GtkButton *button, gpointer data)
     {
       costo = get_last_buy_price (barcode);
       add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->id_factura_compra = id_invoice;
+      lista_mod_prod->prods->prod->costo_original = costo;
       lista_mod_prod->prods->prod->costo_nuevo = costo;
+      lista_mod_prod->prods->prod->cantidad_original = 1;
       lista_mod_prod->prods->prod->cantidad_nueva = 1;
       lista_mod_prod->prods->prod->accion = ADD;
     }
@@ -819,12 +865,6 @@ on_btn_add_prod_on_buy_clicked (GtkButton *button, gpointer data)
     {
       return;
     }
-
-  /*Se obtiene el id de compra y facturas de esta seleccion*/
-  gtk_tree_model_get (model, &iter,
-		      5, &id_buy,
-  		      6, &id_invoice,
-                      -1);
 
   /*Agregar al treeview*/
   gtk_list_store_append (store, &iter);
@@ -855,6 +895,7 @@ on_entry_prod_on_buy_barcode_activate (GtkEntry *entry, gpointer data)
 {
   gchar *barcode;
   PGresult *res;
+  GtkTreeView *treeview;
 
   barcode = g_strdup (gtk_entry_get_text (entry));
   res = EjecutarSQL (g_strdup_printf ("SELECT barcode "
@@ -867,7 +908,13 @@ on_entry_prod_on_buy_barcode_activate (GtkEntry *entry, gpointer data)
       barcode = PQvaluebycol (res, 0, "barcode");
 
       /*Comprueba si ya esta en el treeview*/
-      //asdasd
+      treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
+      if (compare_treeview_column (treeview, 0, G_TYPE_STRING, barcode))
+	{
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_prod_on_buy_barcode")), 
+		    "Ya existe un producto con ese codigo corto o de barras en la compra");
+	  return;
+	}
 
       gtk_entry_set_text (entry, barcode);
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_add_prod_on_buy")));
@@ -895,7 +942,7 @@ on_btn_rmv_buy_prod_clicked (GtkButton *button, gpointer data)
   gchar *barcode;
   gdouble cantity;
   gdouble cost;
-  gint position;
+  gint position, id_fc;
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_nullify_buy_invoice_details"));
   model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
@@ -905,6 +952,7 @@ on_btn_rmv_buy_prod_clicked (GtkButton *button, gpointer data)
 			  0, &barcode,
 			  2, &cantity,
 			  3, &cost,
+			  6, &id_fc,
 			  -1);
 
       //Se verifica si ya existe en la lista
@@ -917,13 +965,17 @@ on_btn_rmv_buy_prod_clicked (GtkButton *button, gpointer data)
       if (lista_mod_prod->prods == NULL) //PEEEEE
 	{
 	  add_to_mod_prod_list (barcode, FALSE);
+	  lista_mod_prod->prods->prod->id_factura_compra = id_fc;
 	  lista_mod_prod->prods->prod->costo_original = cost;
 	  lista_mod_prod->prods->prod->cantidad_original = cantity;
 	  lista_mod_prod->prods->prod->accion = DEL;
 	}
-      else if (lista_mod_prod->prods->prod->accion != DEL)
-	//Si existe y es ADD o MOD se quita de la lista
+      //Si existe y es ADD se quita de la lista
+      else if (lista_mod_prod->prods->prod->accion == ADD)
 	rmv_prod_from_prod_list (barcode, lista_mod_prod->prods->prod->lugar);
+      //Si existe y es MOD ahora se cambia a DEL
+      else if (lista_mod_prod->prods->prod->accion == MOD)
+	lista_mod_prod->prods->prod->accion = DEL;
       else if (lista_mod_prod->prods->prod->accion == DEL)
 	printf ("Se agrega el producto %s para DEL que ya existe con dicha accion\n",
 		barcode);
@@ -1021,13 +1073,14 @@ compras_win (void)
     gtk_window_fullscreen (GTK_WINDOW (compras_gui));
 
   /* History TreeView */
-  store = gtk_list_store_new (7,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_DOUBLE,  //Costo sin impuestos
-			      G_TYPE_DOUBLE,  //Costo con impuestos
+  store = gtk_list_store_new (8,
+                              G_TYPE_STRING, //Fecha
+                              G_TYPE_STRING, //Id compra
+                              G_TYPE_STRING, //Proveedor
+                              G_TYPE_DOUBLE, //cantidad solicitada
+			      G_TYPE_DOUBLE, //cantidad ingresada
+                              G_TYPE_DOUBLE, //Costo sin impuestos
+			      G_TYPE_DOUBLE, //Costo con impuestos
 			      G_TYPE_INT); //Total con impuestos
 
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "product_history_tree_view"));
@@ -1061,17 +1114,17 @@ compras_win (void)
   gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Solicitado", renderer,
                                                      "text", 3,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Costo Neto", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Ingresado", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1080,8 +1133,9 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
+
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Costo Bruto", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Neto", renderer,
                                                      "text", 5,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1091,7 +1145,7 @@ compras_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Total Bruto", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Bruto", renderer,
                                                      "text", 6,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1099,6 +1153,16 @@ compras_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Total Bruto", renderer,
+                                                     "text", 7,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
 
   /* End History TreeView */
@@ -1747,9 +1811,13 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
   if (g_str_equal( GetDataByOne (q), "t"))
     {
       g_free(q);
-      q = g_strdup_printf ("SELECT estado, tipo FROM producto where barcode = '%s'", barcode);
+      q = g_strdup_printf ("SELECT estado, tipo, barcode FROM producto where barcode = '%s'", barcode);
       res = EjecutarSQL(q);
       tipo = g_strdup (PQvaluebycol (res, 0, "tipo"));
+      
+      // Con esto se asegura que sea realmente el barcode (para evitar los ceros anterior al barcode)
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")),
+			  g_strdup (PQvaluebycol (res, 0, "barcode")));
 
       /*Para asegurarse de que el producto no haya sido inhabilitado (borrado) por el administrador*/
       if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
@@ -2972,21 +3040,23 @@ ShowProductHistory (void)
   gint i, tuples;
   gdouble precio = 0;
   gdouble cantidad = 0;
+  gdouble cantidad_ingresada = 0;
+  gdouble iva, otros;
+  iva = otros = 0;
 
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT (SELECT nombre FROM proveedor WHERE rut=c.rut_proveedor) AS proveedor, "
-      "(SELECT precio FROM producto WHERE barcode = %s) AS precio_venta, "
-      "date_part('day', c.fecha) AS dia, date_part('month', c.fecha) AS mes, date_part('year', c.fecha) AS ano, "
-      "c.id, cd.iva, cd.otros_impuestos, cd.precio, cd.cantidad "
+      "       (SELECT precio FROM producto WHERE barcode = %s) AS precio_venta, "
+      "       date_part('day', c.fecha) AS dia, date_part('month', c.fecha) AS mes, date_part('year', c.fecha) AS ano, "
+      "       c.id, cd.iva, cd.otros_impuestos, cd.precio, cd.cantidad, cd.cantidad_ingresada "
       "FROM compra c INNER JOIN compra_detalle cd "
-      "ON c.id = cd.id_compra "
-      "INNER JOIN producto p "
-      "ON cd.barcode_product = p.barcode "
-      "WHERE c.anulada = false "
-      "AND c.anulada_pi = false "
-      "AND p.barcode = '%s' "
-      "AND cd.anulado = false "
+      "       ON c.id = cd.id_compra "
+      "       INNER JOIN producto p "
+      "       ON cd.barcode_product = p.barcode "
+      "WHERE  c.anulada_pi = false "
+      "       AND p.barcode = '%s' "
+      "       AND (cd.cantidad_ingresada > 0 OR c.anulada = false) "
       "ORDER BY c.fecha DESC", barcode, barcode));
 
   tuples = PQntuples (res);
@@ -2997,18 +3067,19 @@ ShowProductHistory (void)
 
   for (i = 0; i < tuples; i++)
     {
-      if (strcmp (PQvaluebycol (res, i, "iva"), "0") != 0)
-        {
-          precio = (strtod (PUT(PQvaluebycol (res, i, "precio")), (char **)NULL) + strtod (PUT(PQvaluebycol (res, i, "iva")), (char **)NULL)/
-		    strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL));
-        }
-      if (strcmp (PQvaluebycol (res, i, "otros_impuestos"), "0") != 0)
-        {
-          precio += (strtod (PUT(PQvaluebycol (res, i, "otros_impuestos")), (char **)NULL) /
-		     strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL));
-        }
+      iva = strtod (PUT(PQvaluebycol (res, i, "iva")), (char **)NULL); //IVA total ($)
+      otros = strtod (PUT(PQvaluebycol (res, i, "otros_impuestos")), (char **)NULL); //OTROS total ($)
+      precio = strtod (PUT(PQvaluebycol (res, i, "precio")), (char **)NULL);
+
+      if (iva > 0) //Si IVA no es 0 (en dinero)
+	precio = precio + (iva / strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL));
+
+      if (otros > 0) //Si otros_impuestos no es 0 (en dinero)
+	precio = precio + (otros / strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL));
+
 
       cantidad = strtod (PUT(PQvaluebycol (res, i, "cantidad")), (char **)NULL);
+      cantidad_ingresada = strtod (PUT(PQvaluebycol (res, i, "cantidad_ingresada")), (char **)NULL);
 
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
@@ -3017,9 +3088,10 @@ ShowProductHistory (void)
                           1, PQvaluebycol (res, i, "id"),
                           2, PQvaluebycol (res, i, "proveedor"),
                           3, cantidad,
-                          4, strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL),
-			  5, precio,
-			  6, lround (cantidad * precio),
+			  4, cantidad_ingresada,
+                          5, strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL),
+			  6, precio,
+			  7, lround (cantidad * precio),
                           -1);
 
     }
@@ -3646,7 +3718,10 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
     }
 }
 
-
+/**
+ * Anulacion de compras no ingresadas
+ * (se anula la petición de compra)
+ */
 void
 on_btn_nullify_buy_clicked (void)
 {
@@ -3661,7 +3736,7 @@ on_btn_nullify_buy_clicked (void)
                           0, &id_compra,
                           -1);
       AnularCompraDB (id_compra);
-      InsertarCompras ();      
+      InsertarCompras ();
     }
 }
 
@@ -3679,7 +3754,10 @@ on_btn_nullify_product_clicked (void)
 
   GtkTreeIter iter1, iter2;
   gint id_compra;
-  gchar *codigo_producto;
+  gint total_prod_anul;
+  gint total_prod_sol;
+  gdouble unidades_ingresadas;
+  gchar *codigo_producto, *barcode;
   gchar *q;
 
   if (gtk_tree_selection_get_selected (selection1, NULL, &iter1) &&
@@ -3692,13 +3770,50 @@ on_btn_nullify_product_clicked (void)
                           0, &codigo_producto,
                           -1);
 
+      barcode = codigo_corto_to_barcode (codigo_producto);
+
       //TODO: pasar esto a funciones de la base pero por el momento funciona
-      q = g_strdup_printf ("UPDATE compra_detalle SET anulado='t' WHERE barcode_product=(SELECT barcode FROM producto WHERE codigo_corto='%s') AND id_compra=%d", codigo_producto, id_compra);
+      q = g_strdup_printf ("SELECT COUNT(*) AS cantidad_prod_sol, "
+			   "       (SELECT COUNT(*) "
+			   "	       FROM compra_detalle "
+			   "	       WHERE anulado = true "
+			   "	       AND id_compra = %d) AS cantidad_prod_anul, "
+			   "       (SELECT cantidad_ingresada "
+			   "	       FROM compra_detalle "
+			   "	       WHERE barcode_product = %s "
+			   "	       AND id_compra = %d) AS unidades_ingresadas "
+			   "FROM compra_detalle "
+			   "WHERE id_compra = %d", id_compra, barcode, id_compra, id_compra);
       res = EjecutarSQL (q);
       g_free (q);
-      q = g_strdup_printf ("UPDATE compra SET anulada='t' WHERE id NOT IN (SELECT id_compra FROM compra_detalle WHERE id_compra=%d AND anulado='f') AND id=%d", id_compra, id_compra);
+
+      total_prod_sol = atoi (g_strdup (PQvaluebycol (res, 0, "cantidad_prod_sol")));
+      total_prod_anul = atoi (g_strdup (PQvaluebycol (res, 0, "cantidad_prod_anul")));
+      unidades_ingresadas = strtod (PUT (PQvaluebycol (res, 0, "unidades_ingresadas")), (char **)NULL);
+
+      //Se actualiza el estado del producto y de haber ingreso, se iguala con la cantidad pedida
+      q = g_strdup_printf ("UPDATE compra_detalle "
+			   "SET anulado='t' %s "
+			   "WHERE barcode_product = %s "
+			   "AND id_compra=%d", 
+			   (unidades_ingresadas > 0) ? 
+			   g_strdup_printf (", cantidad = %s", 
+					    CUT (g_strdup_printf ("%.3f", unidades_ingresadas))) : "",
+			   barcode, id_compra);
       res = EjecutarSQL (q);
       g_free (q);
+
+      //Si todos los productos pedidos estan anulados, se anula la compra
+      if (total_prod_sol == total_prod_anul)
+	{
+	  q = g_strdup_printf ("UPDATE compra SET anulada='t' "
+			       "WHERE id NOT IN (SELECT id_compra "
+			       "                 FROM compra_detalle "
+			       "                 WHERE id_compra=%d AND anulado='f') "
+			       "AND id=%d", id_compra, id_compra);
+	  res = EjecutarSQL (q);
+	  g_free (q);
+	}
 
       InsertarCompras ();
     }
@@ -6835,7 +6950,6 @@ on_btn_find_srch_provider_clicked (GtkEntry *entry, gpointer data)
 }
 
 
-
 /**
  * Is called by "btn_nullify_buy_search" (signal click).
  *
@@ -6899,11 +7013,10 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
 		            "INNER JOIN factura_compra fc "
 		            "ON fcd.id_factura_compra = fc.id "
 		            "AND fc.id_compra = c.id) AS monto "
-		       "FROM compra c INNER JOIN factura_compra fc "
+		       "FROM compra c "
+		       "INNER JOIN factura_compra fc "
 		       "ON c.id = fc.id_compra "
-		       "WHERE c.ingresada = 't' "
-		       "AND c.anulada = 'f' "
-		       "AND c.anulada_pi = 'f' ");
+		       "WHERE c.anulada_pi = 'f' ");
 
   /*Comprobando datos*/
   if (!g_str_equal(id_compra, ""))
@@ -6965,7 +7078,64 @@ on_btn_nullify_buy_search_clicked (GtkButton *button, gpointer user_data)
   clean_lista_mod_prod ();
 }
 
+/**
+ * Esta funcion guarda (efectúa) todos los cambios
+ * que se hayan realizado en la factura (detallados en lista_mod_prod)
+ * 
+ */
+void
+on_btn_save_mod_buy_clicked (GtkButton *button, gpointer data)
+{
+  //TODO: Ahora al momento de comprar, se debe guardar el costo_promedio
+  //      Anulacion de compras debe recalcular el costo_promedio de los productos
 
+  Prods *header;
+  Prods *actual;
+  gboolean error;
+
+  header = lista_mod_prod->header;
+  actual = lista_mod_prod->header;
+
+  if (header == NULL)
+    return;
+
+  error = FALSE;
+  do  /*Recorre los productos modificados y llama a 
+	una función dependiendo de la acción asignada*/
+    { //TODO: el error debe especificar el producto PEEEEEEE
+      if (actual->prod->accion == ADD) {
+	if (mod_to_add_on_buy (actual->prod) == FALSE) {
+	  error = TRUE;
+	}
+      } else if (actual->prod->accion == MOD) {
+	if (mod_to_mod_on_buy (actual->prod) == FALSE) {
+	  error = TRUE;
+	}
+      } else if (actual->prod->accion == DEL) {
+	if (mod_to_del_on_buy (actual->prod) == FALSE) {
+	  error = TRUE;
+	}
+      }
+      actual = actual->next;
+    } while (actual != header);
+
+  if (error == FALSE)
+    AlertMSG (GTK_WIDGET (builder_get (builder, "btn_nullify_buy_cancel")),
+	      "Se realizaron los cambios!");
+  else
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "btn_nullify_buy_cancel")),
+	      "No se logró efecutar la modificacion en compras");
+  
+  //clean_lista_mod_prod (); La funcion que busca limpia la lista
+  on_btn_nullify_buy_search_clicked (GTK_BUTTON (builder_get (builder, "btn_nullify_buy_search")), NULL);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);
+}
+
+
+/**
+ *
+ *
+ */
 void
 on_btn_ok_srch_provider_clicked (GtkTreeView *tree)
 {
@@ -9770,12 +9940,12 @@ on_btn_nullify_buy_ok_clicked (GtkButton *button, gpointer user_data)
   
   for (i = 0; i < tuples; i++)
     {
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), PQvaluebycol (res, i, "barcode"));
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PQvaluebycol (res, i, "costo"));
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, i, "precio"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), PQvaluebycol (res, i, "barcode_out"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PQvaluebycol (res, i, "costo_out"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, i, "precio_out"));
       calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
       
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), PQvaluebycol (res, i, "cantidad_anulada"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), PQvaluebycol (res, i, "cantidad_anulada_out"));
       
       AddToProductsList(); // Agrega los productos a la lista de compra
     }
@@ -9883,7 +10053,7 @@ nullify_buy_win(void)
       selection_invoice = gtk_tree_view_get_selection (treeview_invoice);
       gtk_tree_selection_set_mode (selection_invoice, GTK_SELECTION_SINGLE);
       g_signal_connect (G_OBJECT(selection_invoice), "changed",
-      G_CALLBACK (on_selection_nullify_buy_invoice_change), NULL);
+			G_CALLBACK (on_selection_nullify_buy_invoice_change), NULL);
 
       //ID
       renderer = gtk_cell_renderer_text_new();

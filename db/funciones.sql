@@ -1342,7 +1342,7 @@ declare
 begin
 		SELECT * INTO id_forma_pago FROM get_forma_pago_dias( dias_pago );
 
-		INSERT INTO compra(id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada ) VALUES (DEFAULT, NOW(), proveedor, n_pedido, id_forma_pago, 'f', 'f' );
+		INSERT INTO compra(id, fecha, rut_proveedor, pedido, forma_pago, ingresada, anulada ) VALUES (DEFAULT, NOW(), proveedor, n_pedido, id_forma_pago, 'f', 'f');
 
 		SELECT currval(  'compra_id_seq' ) INTO id_compra;
 
@@ -1779,6 +1779,7 @@ create or replace function registrar_venta_detalle(
        in in_fifo double precision,
        in in_iva double precision,
        in in_otros double precision,
+       in in_ganancia double precision,
        in in_tipo int4,
        in in_impuestos boolean)
 returns void as $$
@@ -1802,6 +1803,7 @@ begin
 				  fifo,
 				  iva,
 				  otros,
+				  ganancia,
 				  tipo,
 				  impuestos)
 	       	    VALUES(num_linea,
@@ -1812,6 +1814,7 @@ begin
 			   in_fifo,
 			   in_iva,
 			   in_otros, 
+			   in_ganancia,
 			   in_tipo,
 			   in_impuestos);
 
@@ -1958,6 +1961,8 @@ begin
 			   inner join compra_detalle on compra.id = compra_detalle.id_compra
 
 		      WHERE compra_detalle.cantidad_ingresada<compra_detalle.cantidad
+		      	    and compra.anulada='f'
+			    and compra.anulada_pi='f'
 			    and compra_detalle.anulado='f'
 
 		      GROUP BY compra.id, proveedor.nombre, compra.fecha
@@ -3138,7 +3143,8 @@ end;$$ language plpgsql;
 
 -- Obtiene la información de un producto en un día determinado
 create or replace function producto_en_fecha(
-       in fecha_inicio date,
+       in fecha_inicio timestamp,
+       in barcode_in bigint,
        out barcode varchar,
        out codigo_corto varchar,
        out descripcion varchar,
@@ -3247,9 +3253,14 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 			          GROUP BY barcode) AS traspaso_recibido
                 ON p.barcode = traspaso_recibido.barcode
                     	    
-                WHERE p.estado = true
-                GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
-                ORDER BY barcode $S$;
+                WHERE p.estado = true $S$;
+
+if barcode_in != 0 then
+    q := q || $S$ AND p.barcode = $S$ || barcode_in;
+end if;
+
+q := q || $S$ GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida
+              ORDER BY barcode $S$;
 
 for l in execute q loop
     barcode := l.barcode;
@@ -3275,7 +3286,7 @@ end; $$ language plpgsql;
 
 -- Entrega la informacion del producto desde la fecha otorgada hasta ahora
 create or replace function producto_en_periodo(
-       in fecha_inicio date,
+       in fecha_inicio timestamp,
        out barcode varchar,
        out codigo_corto varchar,
        out descripcion varchar,
@@ -3338,7 +3349,7 @@ q := $S$ SELECT stock1.barcode AS barcode,
        	 	-- stock_teorico
        	 	stock2.cantidad_fecha
        
-	 FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$ ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date + 1) || $S$ ) stock2
+	 FROM producto_en_fecha( $S$ || quote_literal(fecha_inicio) || $S$, 0 ) stock1 INNER JOIN producto_en_fecha( $S$ || quote_literal(current_date::timestamp + '1 days') || $S$, 0 ) stock2
        	 ON stock1.barcode = stock2.barcode $S$;
 
 FOR l IN EXECUTE q loop
@@ -3363,103 +3374,6 @@ END loop;
 return;
 end; $$ language plpgsql;
 
-
--- Anula una compra y devuelve el resultado
-create or replace function nullify_buy(
-       IN id_compra_in integer,
-       IN maquina integer,
-       OUT barcode varchar,
-       OUT cantidad double precision,
-       OUT cantidad_anulada double precision,
-       OUT nuevo_stock double precision,
-       OUT costo double precision,
-       OUT precio integer
-       )
-RETURNS setof record AS $$
-DECLARE
-id_compra_anulada integer;
-rut_proveedor_compra integer;
-query text;
-l record;
-BEGIN
-
--- Se obtiene el rut del proveedor correspondiente a la compra
-SELECT rut_proveedor INTO rut_proveedor_compra FROM compra WHERE id = id_compra_in;
-
--- Se inserta los datos de la compra en la tabla compra_anulada
-EXECUTE $S$ INSERT INTO compra_anulada (id_compra, fecha_anulacion, rut_proveedor, maquina)
-	    VALUES ($S$|| id_compra_in ||$S$, NOW(), $S$|| rut_proveedor_compra ||$S$,$S$|| maquina ||$S$ ) $S$;
-
--- Se obtiene el id de la compra_anulada
-SELECT id INTO id_compra_anulada FROM compra_anulada WHERE id_compra = id_compra_in;
-
--- Se ingresa nota de credito de ser necesario
-EXECUTE 'INSERT INTO nota_credito (fecha, num_factura, fecha_factura, rut_proveedor)
-	 SELECT NOW(), num_factura, fecha, rut_proveedor 
-	 FROM factura_compra
-	 WHERE pagada = true
-	 AND id_compra = '|| id_compra_in;
-
--- Se ingresa el detalle de nota de credito de ser necesario
-EXECUTE 'INSERT INTO nota_credito_detalle (id_nota_credito, barcode, costo, precio, cantidad)
-	 SELECT 
-	 	(SELECT id FROM nota_credito nc WHERE nc.num_factura = fc.num_factura) AS id_nota_credito,
-	 	fcd.barcode, fcd.precio AS costo, 
-	 	(SELECT precio FROM producto WHERE barcode = fcd.barcode) AS precio, 
-	 fcd.cantidad 
-	 FROM factura_compra_detalle fcd
-	 INNER JOIN factura_compra fc
-	 ON fc.id = fcd.id_factura_compra
-	 WHERE fc.pagada = true
-	 AND fc.id_compra = '|| id_compra_in;
-
--- Obtengo todos los productos correspondiente a la compra
-query := 'SELECT fc.id, fcd.barcode, precio AS costo, 
-          (SELECT precio FROM producto WHERE barcode = fcd.barcode) AS precio,
-	  (SELECT stock FROM producto WHERE barcode = fcd.barcode) AS stock_actual,
-	  (SELECT pagada FROM factura_compra WHERE id = fc.id) AS pagada,
-          SUM (cantidad) AS cantidad
-      	  FROM factura_compra_detalle fcd
-	  INNER JOIN factura_compra fc
-	  ON fcd.id_factura_compra = fc.id
-	  WHERE fc.id_compra = ' || id_compra_in ||
-	 'GROUP BY barcode, costo, precio, fc.id';
-
-FOR l IN EXECUTE query loop
-    --Registrando datos a retornar
-    barcode := l.barcode;
-    costo := l.costo;
-    precio := l.precio;
-
-    --La cantidad a anular no puede ser mayor al stock actual
-    IF l.stock_actual < l.cantidad THEN
-        cantidad_anulada := l.stock_actual;
-	nuevo_stock := 0;
-    ELSE
-	cantidad_anulada := l.cantidad;
-	nuevo_stock := l.stock_actual - l.cantidad;
-    END IF;
-
-    --Reajustar stock producto
-    UPDATE producto SET stock = nuevo_stock WHERE barcode = barcode;
-
-    --Colocar los productos en la tabla compra_anulada_detalle
-    EXECUTE 'INSERT INTO compra_anulada_detalle (id_compra_anulada, barcode, costo, precio, cantidad, cantidad_anulada)
-             VALUES ('||id_compra_anulada||','||barcode||','||costo||','||precio||','||l.cantidad||','||cantidad_anulada||')';
-
-    --Reajustar la cantidad del producto en nota_credito_detalle
-    -- en caso de que no se haya podido anular la cantidad completa (stock < cantidad)
-    
-    --Recalcular costo_promedio
-
-    RETURN NEXT;
-END loop;
-
---Actualizar anulada_pi en compra
-UPDATE compra SET anulada_pi = 't' WHERE id = id_compra_in;
-
-RETURN;
-END; $$ language plpgsql;
 
 --
 -- This funtion get true if date is valid
@@ -3615,3 +3529,504 @@ begin
 	END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+
+--
+-- Actualiza el monto de la factura calculando los valores de su detalle
+--
+CREATE OR REPLACE FUNCTION update_factura_compra_amount (IN id_factura_compra integer)
+RETURNS VOID AS $$
+BEGIN
+	UPDATE factura_compra 
+	SET monto = (SELECT SUM ((precio*cantidad)+iva+otros)
+	  	            FROM factura_compra_detalle fcd
+			    INNER JOIN factura_compra fc
+			    ON fcd.id_factura_compra = fc.id
+			    WHERE fc.id = id_factura_compra)
+	WHERE id = id_factura_compra;
+	
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+-- Actualiza la cantidad comprada (a partir de sus facturas)
+-- y recalcula el monto total de acuerdo a su detalle
+--
+CREATE OR REPLACE FUNCTION update_compra_detalle_amount (IN id_compra_in integer)
+RETURNS VOID AS $$
+
+DECLARE
+	q text;
+	l record;
+BEGIN
+	q := $S$ SELECT fc.id_compra, fcd.barcode, cd.barcode_product, fcd.precio, cd.cantidad_ingresada,
+       	     	 	SUM (fcd.cantidad) AS cantidad_total_factura_compra, cd.cantidad AS cantidad_pedida
+		 	FROM compra c
+			     INNER JOIN compra_detalle cd
+			     	   ON c.id = cd.id_compra
+			     INNER JOIN factura_compra fc
+			     	   ON fc.id_compra = c.id
+			     INNER JOIN factura_compra_detalle fcd
+			     	   ON fcd.id_factura_compra = fc.id
+			WHERE barcode = barcode_product
+			     AND c.id = $S$|| id_compra_in ||$S$
+			GROUP BY fc.id_compra, fcd.barcode, fcd.precio, cd.barcode_product, cd.cantidad_ingresada, cd.cantidad $S$;
+	
+	FOR l IN EXECUTE q LOOP
+	    -- Se actualiza la cantidad ingresada en compra_detalle
+	    UPDATE compra_detalle
+	    	   SET cantidad_ingresada = l.cantidad_total_factura_compra,
+		       precio = l.precio
+	    	   WHERE barcode_product = l.barcode
+		   AND id_compra = id_compra_in;
+
+            -- Si la cantidad pedida en compra es menor a la cantidad ingresada
+	    --IF l.cantidad_pedida < l.cantidad_total_factura_compra THEN
+
+	    -- Se igualan las cantidades (pedida y solicitada)
+	    UPDATE compra_detalle
+	           SET cantidad = l.cantidad_total_factura_compra
+		   WHERE barcode_product = l.barcode
+		   AND id_compra = id_compra_in;
+	    
+	    --END IF;	    
+
+	END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+-- Actualiza el monto de la venta tomando los valores de su detalle
+--
+CREATE OR REPLACE FUNCTION update_venta_amount (IN id_venta_in integer)
+RETURNS VOID AS $$
+BEGIN
+	UPDATE venta 
+	SET monto = (SELECT SUM (precio*cantidad) 
+                    	    FROM venta_detalle
+                    	    WHERE id_venta = id_venta_in)
+	WHERE id = id_venta_in;
+	
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+-- Actualiza los impuestos dentro del rango de fecha estipulado
+--
+CREATE OR REPLACE FUNCTION update_profits_on_date_range (IN fecha_inicio timestamp,
+       	  	  	   		      		 IN fecha_termino timestamp,
+							 IN barcode varchar,
+							 OUT barcode_out varchar,
+							 OUT costo_out double precision,
+							 OUT precio_out integer,
+							 OUT cantidad_out double precision,
+							 OUT ganancia_out double precision)
+RETURNS SETOF record AS $$
+
+DECLARE
+	q text;
+	l record;
+	iva_percent double precision;
+	otros_percent double precision;
+BEGIN
+	-- OBTIENE LAS VENTAS DEL PRODUCTO DETERMINADO EN EL RANGO DE FECHA ESPECIFICADO
+	q := $S$ SELECT v.id AS v_id, vd.id AS vd_id,
+	     	 	vd.barcode, vd.fifo AS costo, vd.precio, vd.cantidad, v.fecha
+		 FROM venta_detalle vd
+		 INNER JOIN venta v
+		 ON vd.id_venta = v.id
+		 WHERE fecha > $S$ || quote_literal (fecha_inicio) || $S$
+		 AND fecha < $S$ || quote_literal (fecha_termino) || $S$
+		 AND vd.barcode = $S$ || barcode;
+	
+        -- OBTIENE LOS IMPUESTOS
+        SELECT COALESCE(valor,0) INTO iva_percent FROM get_iva (barcode::BIGINT);
+        SELECT COALESCE(valor,0) INTO otros_percent FROM get_otro_impuesto (barcode::BIGINT);
+		
+	-- IMPUESTOS
+	IF iva_percent = -1 THEN
+	   iva_percent = 0;
+	ELSE
+	   iva_percent = iva_percent / 100;
+	END IF;
+
+        IF otros_percent = -1 THEN
+	   otros_percent = 0;
+	ELSE
+	   otros_percent = otros_percent / 100;
+	END IF;
+
+	-- RECORRE EL DETALLE DE LA VENTA
+	FOR l IN EXECUTE q LOOP
+                           --   (precio venta neto)                        - costo    * cantidad = ganancia total
+           ganancia_out = ( (l.precio / (iva_percent + otros_percent + 1)) - l.costo ) * l.cantidad;
+	   
+            -- ACTUALIZA LA GANANCIA
+	    UPDATE venta_detalle
+	    	   SET ganancia = ganancia_out
+	    	   WHERE id = l.vd_id
+	    	   AND id_venta = l.v_id;
+	    
+	    barcode_out = l.barcode;
+	    costo_out = l.costo;
+	    precio_out = l.precio;    
+	    cantidad_out = l.cantidad;
+	    RETURN NEXT;
+	END LOOP;
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Recalcula el costo promedio en las compras de un producto
+-- desde el id de compra especificado en adelante
+-- (Si es 0 recalcula todas las compras)
+CREATE OR REPLACE FUNCTION update_avg_cost (IN codigo_barras bigint,
+	                                    IN id_fcompra integer,
+					    OUT id_fcompra_r integer,
+					    OUT barcode_r bigint,
+					    OUT stock_r double precision,
+                                            OUT avg_cost_anterior_r double precision,
+					    OUT cantidad_ingresada_r double precision,
+					    OUT costo_compra_r double precision,
+					    OUT avg_cost_new_r double precision)
+RETURNS SETOF RECORD AS $$
+
+DECLARE
+    avg_cost double precision;
+    iva_local double precision;
+    otros_local double precision;
+    iva_percent double precision;
+    otros_percent double precision;
+    new_stock double precision;
+    q text;
+    q2 text;
+    l record;
+
+BEGIN
+
+    -- Se inicializa con un valor
+    avg_cost := 0;
+
+    iva_percent := get_iva (codigo_barras);
+    otros_percent := get_otro_impuesto (codigo_barras);
+
+    -- IVA
+    IF iva_percent = -1 OR iva_percent = 0 OR iva_percent IS NULL THEN
+       iva_percent := 0;
+    ELSE
+       iva_percent := iva_percent / 100;
+    END IF;
+    
+    -- OTROS
+    IF otros_percent = -1 OR otros_percent = 0 OR otros_percent IS NULL THEN
+       otros_percent := 0;
+    ELSE
+       otros_percent := otros_percent / 100;
+    END IF;
+
+    -- Se obtiene la información del producto y de la compra en que se adquirió
+    q := $S$ SELECT fcd.id AS id_fcd, fc.id AS id_fc, fc.id_compra AS id_c,
+      	     	    fcd.barcode, fcd.precio, fcd.cantidad, fc.fecha, fcd.costo_promedio,
+
+                    -- Se obtiene el stock que había de ese producto antes de comprarlo
+                    COALESCE ((SELECT cantidad_fecha
+			              FROM producto_en_fecha (fc.fecha, fcd.barcode))
+				      ,0) AS stock,
+
+	            -- Se obtiene la fecha de la compra siguiente
+		    COALESCE ((SELECT fecha
+			              FROM factura_compra 
+			              WHERE id = (SELECT MIN (fcdi.id_factura_compra)
+						         FROM factura_compra_detalle fcdi
+							 INNER JOIN factura_compra fci
+							       ON fci.id = fcdi.id_factura_compra
+							 INNER JOIN compra ci
+							       on ci.id = fci.id_compra
+							 WHERE fcdi.id_factura_compra > fc.id
+							 AND ci.anulada_pi = false
+							 AND fcdi.barcode = fcd.barcode)),NULL) AS next_date
+
+                    FROM factura_compra_detalle fcd
+			  INNER JOIN factura_compra fc
+			  ON fc.id = fcd.id_factura_compra
+			  INNER JOIN compra c
+			  ON c.id = fc.id_compra
+                    WHERE c.anulada_pi = FALSE
+			  AND fcd.barcode = $S$ || codigo_barras || $S$
+                          AND fc.id >= $S$ || id_fcompra || $S$
+                    ORDER BY fc.fecha ASC $S$;
+
+    FOR l IN EXECUTE q LOOP
+        -- Se obtiene el costo promedio de la compra anterior
+        avg_cost = (SELECT costo_promedio
+	            FROM factura_compra_detalle fcde
+	            WHERE fcde.id_factura_compra = (SELECT MAX (fcd.id_factura_compra)
+						    FROM factura_compra_detalle fcd
+						    INNER JOIN factura_compra fc
+						    	  ON fc.id = fcd.id_factura_compra
+						    INNER JOIN compra c
+						    	  ON c.id = fc.id_compra
+                                                    WHERE fcd.id_factura_compra < l.id_fc
+						    	  AND c.anulada_pi = FALSE
+                                                    	  AND fcd.barcode = l.barcode)
+	            AND fcde.barcode = l.barcode);
+
+	avg_cost = COALESCE (avg_cost,0);
+        avg_cost_anterior_r = avg_cost;
+        avg_cost = ((avg_cost*l.stock) + (l.precio*l.cantidad)) / (l.cantidad+l.stock);
+        avg_cost = ROUND (avg_cost::NUMERIC, 3);
+
+	-- Actualiza costo promedio en factura_compra_detalle
+        UPDATE factura_compra_detalle 
+               SET costo_promedio = avg_cost
+               WHERE id = l.id_fcd;
+
+	-- Actualiza los impuestos
+	-- IVA
+	iva_local = (l.precio * l.cantidad) * iva_percent;
+	UPDATE factura_compra_detalle 
+               SET iva = iva_local
+               WHERE id = l.id_fcd;
+	-- OTROS
+	otros_local = (l.precio * l.cantidad) * otros_percent;
+	UPDATE factura_compra_detalle 
+               SET otros = otros_local
+               WHERE id = l.id_fcd;
+
+	-- Recalcular monto total factura_compra
+	PERFORM update_factura_compra_amount (l.id_fc);
+
+	-- Actualiza las cantidades ingresadas en compra_detalle
+	PERFORM update_compra_detalle_amount (l.id_c);
+
+	-- Actualiza costo promedio en venta_detalle
+	q2 := $S$ UPDATE venta_detalle vd
+	       	  	 SET fifo = $S$ || avg_cost || $S$
+	       	  	 FROM venta v
+	      	  	 WHERE v.id = vd.id_venta
+	       	  	 AND vd.barcode = $S$ || l.barcode || $S$
+	       	  	 AND fecha > $S$ || quote_literal (l.fecha); --fecha de la compra donde se cambio el costo_promedio
+
+	-- Si next-date es null
+	IF l.next_date IS NULL THEN
+	   EXECUTE q2;
+	   --RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS
+	   PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
+	   	   				 now()::TIMESTAMP, 
+						 l.barcode::VARCHAR);
+	ELSE
+	   q2 := q2 || $S$ AND fecha < $S$ || quote_literal (l.next_date); --fecha de la proxima compra de ese producto
+	   EXECUTE q2;
+   	   --RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS
+	   PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
+	   	   				 quote_literal(l.next_date)::TIMESTAMP, 
+						 l.barcode::VARCHAR);
+	END IF;	
+
+        -- Se asignan los valores a retornar
+        id_fcompra_r = l.id_fc;
+	barcode_r = l.barcode;
+	stock_r = l.stock;
+        avg_cost_new_r = avg_cost;
+	cantidad_ingresada_r = l.cantidad;
+	costo_compra_r = l.precio;
+        RETURN NEXT;
+    END LOOP;
+
+    IF avg_cost >= 0 THEN
+       UPDATE producto
+       	      SET costo_promedio = avg_cost
+	      WHERE barcode = codigo_barras;
+    END IF;
+
+    SELECT cantidad_fecha INTO new_stock
+    FROM producto_en_fecha (now()::TIMESTAMP + '1 seconds', codigo_barras);
+
+    IF new_stock >= 0 THEN
+       UPDATE producto
+      	      SET stock = new_stock
+      	      WHERE barcode = codigo_barras;
+    END IF;
+
+    RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+-- Información de las compras en las que ha estado el producto especificado
+--
+CREATE OR REPLACE FUNCTION product_on_buy_invoice (IN barcode_in bigint,
+       	  	  	   			   OUT id_fc_out integer,
+					    	   OUT id_fcd_out integer,
+					    	   OUT fecha_out timestamp,
+						   OUT barcode_out bigint,
+					    	   OUT cantidad_pre_compra double precision,
+					    	   OUT cantidad_ingresada double precision)
+RETURNS SETOF RECORD AS $$
+
+DECLARE
+    q text;
+    l record;
+
+BEGIN
+    q := $S$ SELECT fc.id AS id_fc, fcd.id AS id_fcd, fecha, barcode, cantidad,
+      	     (SELECT cantidad_fecha
+	             FROM producto_en_fecha (fecha, fcd.barcode)) AS cantidad_pre
+	     FROM factura_compra fc
+	     INNER JOIN factura_compra_detalle fcd 
+	     ON fc.id = fcd.id_factura_compra 
+	     WHERE barcode = $S$ || barcode_in || $S$
+	     ORDER BY id_fc ASC $S$;
+
+    FOR l IN EXECUTE q LOOP
+    	id_fc_out := l.id_fc;
+	id_fcd_out := l.id_fcd;
+	fecha_out := l.fecha;
+	barcode_out := l.barcode;
+	cantidad_pre_compra := l.cantidad_pre;
+	cantidad_ingresada := l.cantidad;
+        RETURN NEXT;
+    END LOOP;
+    
+    --Retorno Final
+    id_fc_out := 0;
+    id_fcd_out := 0;
+    fecha_out := now();
+    barcode_out := barcode_in;
+    cantidad_pre_compra := (SELECT cantidad_fecha 
+    			    FROM producto_en_fecha (now()::TIMESTAMP,
+			    	 		    barcode_in));
+    cantidad_ingresada := 0;
+    RETURN NEXT;
+
+    RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+-- Anula una compra y devuelve el resultado
+--
+create or replace function nullify_buy (IN id_compra_in integer,
+       	  	  	   	        IN maquina_in integer,
+       					OUT barcode_out varchar,
+       					OUT cantidad_out double precision,
+       					OUT cantidad_anulada_out double precision,
+       					OUT nuevo_stock_out double precision,
+       					OUT costo_out double precision,
+       					OUT precio_out integer)
+RETURNS setof record AS $$
+DECLARE
+   id_nc integer;
+   id_c_anulada integer;
+   id_fc_anterior integer;
+   stock_actual double precision;
+
+   query text;
+   l record;
+BEGIN
+
+   -- Se inserta los datos de la compra en la tabla compra_anulada TODO: que guarde el id del usuario
+   EXECUTE 'INSERT INTO compra_anulada (id_compra, id_factura_compra, fecha_anulacion, rut_proveedor, maquina) 
+               	   SELECT id_compra, id, NOW(), rut_proveedor, '||maquina_in||'
+	 	          FROM factura_compra
+	 	      	  WHERE id_compra = '|| id_compra_in;
+
+   -- Se ingresa una nota de credito si la factura esta pagada
+   EXECUTE $S$ INSERT INTO nota_credito (fecha, id_factura_compra, fecha_factura, rut_proveedor)
+	   	      SELECT NOW(), id, fecha, rut_proveedor 
+	 	      	     FROM factura_compra
+	 	      	     WHERE pagada = true
+	 	      	     AND id_compra = $S$|| id_compra_in;
+
+   -- Obtengo todos los productos correspondiente a la compra
+   query := $S$ SELECT fc.id AS id_fc, fc.pagada, fcd.barcode, 
+   	    	       fcd.precio AS costo, fcd.cantidad,
+              	       (SELECT precio 
+		      	       FROM producto 
+			       WHERE barcode = fcd.barcode) AS precio
+      	     	FROM factura_compra_detalle fcd
+	  	     INNER JOIN factura_compra fc
+	  	     ON fcd.id_factura_compra = fc.id
+	        WHERE fc.id_compra = $S$ || id_compra_in;
+
+   FOR l IN EXECUTE query loop
+       -- Se Inicializan las variables
+       id_nc := 0;
+       -- Registrando datos a retornar
+       barcode_out := l.barcode;
+       costo_out := l.costo;
+       precio_out := l.precio;
+       cantidad_out := l.cantidad;
+       
+       -- Obtengo el stock actual de producto
+       SELECT stock INTO stock_actual FROM producto WHERE producto.barcode = l.barcode;
+
+       -- La cantidad a anular no puede ser mayor al stock actual
+       IF stock_actual < l.cantidad OR stock_actual = 0 THEN
+          cantidad_anulada_out := stock_actual;
+       	  nuevo_stock_out := 0;
+       ELSE
+          cantidad_anulada_out := l.cantidad;
+          nuevo_stock_out := stock_actual - l.cantidad;
+       END IF;
+
+       -- Reajustar stock producto (De esto se encargará update_avg_cost)
+       --EXECUTE 'UPDATE producto SET stock = '||nuevo_stock_out||' WHERE barcode = '||l.barcode;
+       RAISE NOTICE 'El stock de %, es: %', l.barcode, nuevo_stock_out;
+
+       -- Si se anuló una factura pagada se registra la información correspondiente en nota_credito
+       IF l.pagada = true THEN
+       	  SELECT id INTO id_nc FROM nota_credito WHERE id_factura_compra = l.id_fc;
+          -- Se ingresa el detalle de nota de credito si existe (nota credito se crea cuando se anula una factura pagada)
+	  IF cantidad_anulada_out > 0 AND (id_nc > 0 AND id_nc IS NOT NULL) THEN
+   	     EXECUTE 'INSERT INTO nota_credito_detalle (id_nota_credito, barcode, costo, precio, cantidad)
+	  	      VALUES ('||id_nc||','||l.barcode||','||l.costo||','||l.precio||','||cantidad_anulada_out||')';
+          END IF;
+       END IF;
+
+       -- Ingresa los productos en la tabla compra_anulada_detalle
+       IF cantidad_anulada_out > 0 THEN
+       	  SELECT id INTO id_c_anulada FROM compra_anulada WHERE id_factura_compra = l.id_fc;
+	  IF id_c_anulada > 0 AND id_c_anulada IS NOT NULL THEN
+       	     EXECUTE 'INSERT INTO compra_anulada_detalle (id_compra_anulada, barcode, costo, precio, cantidad, cantidad_anulada)
+                      VALUES ('||id_c_anulada||','||l.barcode||','||l.costo||','||l.precio||','||l.cantidad||','||cantidad_anulada_out||')';
+          END IF;
+       END IF;
+
+       RETURN NEXT;
+   END loop;
+
+   --Actualizar anulada_pi en compra
+   UPDATE compra SET anulada_pi = 't' WHERE id = id_compra_in;
+
+   --Recalcular costo_promedio
+   query := $S$ SELECT fc.id AS id_fc, fcd.barcode
+       	     	       FROM factura_compra fc
+		       INNER JOIN factura_compra_detalle fcd
+      		       	     ON fc.id = fcd.id_factura_compra
+      		       WHERE fc.id_compra = $S$ || id_compra_in;
+
+   FOR l IN EXECUTE query loop
+       -- Obtiene el id de la última factura anterior a esta compra
+       -- en donde estaba este producto
+       SELECT COALESCE (MAX (fcd.id_factura_compra), 0) INTO id_fc_anterior
+       FROM factura_compra_detalle fcd
+            INNER JOIN factura_compra fc
+	          ON fc.id = fcd.id_factura_compra
+	    INNER JOIN compra c
+	          ON c.id = fc.id_compra
+       WHERE fcd.id_factura_compra < l.id_fc
+       AND c.anulada_pi = FALSE
+       AND fcd.barcode = l.barcode;
+
+       PERFORM update_avg_cost (l.barcode, id_fc_anterior);
+       RAISE NOTICE 'Se ejecuta update_avg_cost (barcode: %, id_fc: %)', l.barcode, id_fc_anterior;
+   END LOOP;
+
+RETURN;
+END; $$ language plpgsql;

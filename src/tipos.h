@@ -396,10 +396,19 @@ typedef struct _prod
 {
   gchar *barcode;
   gchar *descripcion;
+
+  /*Datos de la compra a la que pertenece*/
+  //gint id_compra;
+  gchar *fecha_compra;
+  gint id_factura_compra;
+  //gint id_factura_detalle;
+
+  /*Costos y cantidades se inicializan en 0*/
   gdouble costo_original;
   gdouble costo_nuevo;
   gdouble cantidad_original;
   gdouble cantidad_nueva;
+
   gint accion;
   gint lugar;
 }

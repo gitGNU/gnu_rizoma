@@ -251,6 +251,7 @@ create table compra (
 create table compra_anulada (
   id                        serial not null primary key,
   id_compra		    int4 not null,
+  id_factura_compra	    int4 not null,
   fecha_anulacion	    timestamp,
   rut_proveedor             int4 not null,
   maquina              	    int4
@@ -270,7 +271,7 @@ create table compra_anulada_detalle (
 -- Nota Credito
 create table nota_credito (
  id   		    	    serial not null primary key,
- num_factura                int4,
+ id_factura_compra          int4,
  fecha 		    	    timestamp,
  fecha_factura	    	    timestamp,
  rut_proveedor       	    int4 not null
@@ -313,7 +314,8 @@ create table documentos_detalle (
   id_compra                 int4,
   barcode                   int8 not null,
   cantidad                  float8,
-  precio                    float8,
+  precio                    float8, --precio_compra
+  costo_promedio	    float8,
   fecha                     timestamp,
   factura                   bool not null,
   elaboracion               timestamp,
@@ -328,7 +330,8 @@ create table factura_compra_detalle (
   id_factura_compra         int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
-  precio                    float8,
+  precio                    float8, --precio_compra
+  costo_promedio	    float8,
   iva                       int4,
   otros                     int4,
   constraint pk_factura_compra_detalle primary key(id, id_factura_compra),
@@ -590,6 +593,7 @@ create table venta_detalle (
   cantidad                  float8,
   precio                    int4 not null,
   fifo                      float8 not null,
+  ganancia                  float8 not null,
   iva                       float8,
   otros                     float8,
   tipo			    int4,
