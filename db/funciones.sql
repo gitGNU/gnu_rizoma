@@ -336,7 +336,7 @@ BEGIN
 	   -- OBTENER EL STOCK DE SUS COMPONENTES Y VER PARA CUANTOS COMPUESTOS ALCANZAN
 	   FOR list IN EXECUTE query LOOP
 	       -- Calcula las unidades disponibles de la mercadería para este compuesto
-	       IF (list.tipo_comp_der = corriente_l OR list.tipo_comp_der = materia_prima_l) THEN
+	       IF (list.tipo_comp_der = corriente_l OR list.tipo_comp_der = derivada_l) THEN
 	       	  stock_l := (SELECT * FROM obtener_stock_desde_barcode (list.barcode_comp_der));
 	       	  unidades_l := TRUNC (stock_l / list.cantidad);
 	       END IF;	  

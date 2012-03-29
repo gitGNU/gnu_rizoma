@@ -2928,6 +2928,10 @@ SearchName (void)
     }
   else if (add_to_comp == TRUE)
     {
+      materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id "
+							   "FROM tipo_mercaderia "
+							   "WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+
       barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_comp_barcode"))));
       //TODO: Y de ningun producto que lo tenga a él mismo como componente
       q = g_strdup_printf ("%s WHERE barcode != %s "			  
