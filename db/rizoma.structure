@@ -503,8 +503,8 @@ create table componente_mc (
   id   	     		    serial not null,
   barcode_madre             bigint not null,
   tipo_madre		    int4,
-  barcode_derivado          bigint not null,
-  tipo_derivado		    int4,
+  barcode_comp_der          bigint not null,
+  tipo_comp_der		    int4,
   cant_mud                  float8, -- Cantidad de madre que usa el derivado	
   CONSTRAINT pk_componente_mc primary key (id)
 ) ;
@@ -603,16 +603,21 @@ create table venta_detalle (
 
 -- Venta_mercaderia_compuesta_detalle
 create table venta_mc_detalle (
-  id                        serial not null,
-  id_venta_detalle          int4 not null,
-  id_venta_vd               int4 not null,
-  barcode                   int8 not null,
-  cantidad                  float8,
+  id                        serial not null,  
+  id_venta_detalle          int4 not null, -- FK id (venta_detalle)
+  id_venta_vd          	    int4 not null, -- FK id_venta (venta_detalle)
+  id_mh		    	    int4[],        -- Un id array para identificar relacion madre-hijo
+  barcode_madre             int8 not null,
+  barcode_hijo              int8 not null,
+  cantidad                  float8 not null,
+  precio_proporcional	    float8 not null,
   precio                    int4 not null,
-  fifo                      float8 not null,
-  iva                       float8,
-  otros                     float8,
-  tipo			    int4,
+  costo_promedio            float8 not null,
+  ganancia                  float8 not null,
+  iva                       float8 not null,
+  otros                     float8 not null,
+  tipo_madre		    int4,
+  tipo_hijo		    int4,
   constraint pk_venta_mc_detalle primary key (id)
 ) ;
 
@@ -952,7 +957,7 @@ alter table componente_mc add constraint fk_componente_mc_madre_tipo_mercaderia
   foreign key (tipo_madre)
   references tipo_mercaderia (id) ;
 alter table componente_mc add constraint fk_componente_mc_derivado_tipo_mercaderia
-  foreign key (tipo_derivado)
+  foreign key (tipo_comp_der)
   references tipo_mercaderia (id) ;
 
 

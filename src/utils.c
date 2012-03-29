@@ -904,3 +904,172 @@ compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *d
 
   return FALSE;
 }
+
+
+/**
+ * Fill Taxes combobox
+ *
+ * @param: combo: Combobox to fill
+ * @param: id_seleccion: Item to select default
+ */
+void
+fill_combo_impuestos (GtkComboBox *combo, gint id_seleccion)
+{
+  GtkListStore *store;
+  PGresult *res;
+  GtkCellRenderer *cell;
+
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
+
+  /*Combobox impuestos*/
+  if (store == NULL)
+    {
+      store = gtk_list_store_new (3,
+				  G_TYPE_INT,    //0 id
+				  G_TYPE_STRING, //1 descripcion
+				  G_TYPE_DOUBLE);//2 monto
+
+      gtk_combo_box_set_model (combo, GTK_TREE_MODEL (store));
+
+      cell = gtk_cell_renderer_text_new ();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), cell, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), cell,
+				      "text", 1,
+				      NULL);  
+    }
+  else
+    gtk_list_store_clear (store);
+
+  res = EjecutarSQL ("SELECT * FROM select_otros_impuestos() ORDER BY id ASC");
+  if (res != NULL)
+    {
+      GtkTreeIter iter;
+      gint i, tuples, active;
+	  
+      i = tuples = active = 0;
+      tuples = PQntuples (res);
+      for (i = 0; i < tuples; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, atoi (PQvaluebycol (res, i, "id")),
+			      1, PQvaluebycol (res, i, "descripcion"),
+			      2, strtod (PUT (PQvaluebycol (res, i, "monto")), (char **)NULL),
+			      -1);
+	  if (atoi (PQvaluebycol (res, i, "id")) == id_seleccion) active = i;
+	}
+      
+      gtk_combo_box_set_active (combo, active != -1 ? active : 0);
+    }
+}
+
+/**
+ * Fill Unit Combobox
+ *
+ * @param: combo: Combobox to fill
+ * @param: id_seleccion: Item to select default
+ */
+void
+fill_combo_unidad (GtkComboBox *combo, gchar *nombre_unidad)
+{
+  GtkListStore *store;
+  PGresult *res;
+  GtkCellRenderer *cell;
+
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
+
+  /*Combobox Unidad*/
+  if (store == NULL)
+    {
+      store = gtk_list_store_new (2,
+				  G_TYPE_INT,
+				  G_TYPE_STRING);
+
+      gtk_combo_box_set_model (GTK_COMBO_BOX (combo), GTK_TREE_MODEL (store));
+
+      cell = gtk_cell_renderer_text_new ();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), cell, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), cell,
+				      "text", 1,
+				      NULL);
+    }
+  else
+    gtk_list_store_clear (store);
+
+  res = EjecutarSQL ("SELECT * FROM unidad_producto ORDER BY id ASC");
+  if (res != NULL)
+    {
+      GtkTreeIter iter;
+      gint i, tuples, active;
+
+      i = tuples = active = 0;
+      tuples = PQntuples (res);
+
+      for (i=0 ; i < tuples ; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, atoi (PQvaluebycol (res, i, "id")),
+			      1, PQvaluebycol (res, i, "descripcion"),
+			      -1);
+	  if (g_str_equal (PQvaluebycol (res, i, "descripcion"), nombre_unidad)) active = i;
+	}
+      gtk_combo_box_set_active (combo, !g_str_equal (nombre_unidad, "") ? active : 0);
+    }
+}
+
+/**
+ * Fill Family Combobox
+ *
+ * @param: combo: Combobox to fill
+ * @param: id_seleccion: Item to select default
+ */
+void
+fill_combo_familias (GtkComboBox *combo, gint id_seleccion)
+{
+  GtkListStore *store;
+  PGresult *res;
+  GtkCellRenderer *cell;
+
+  store = GTK_LIST_STORE (gtk_combo_box_get_model (combo));
+
+  /*Combobox familias*/
+  if(store == NULL)
+    {      
+      store = gtk_list_store_new (2,
+				  G_TYPE_INT,
+				  G_TYPE_STRING);
+
+      gtk_combo_box_set_model (GTK_COMBO_BOX (combo), GTK_TREE_MODEL (store));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT(combo), cell,
+				      "text", 1,
+				      NULL);
+    }
+  else
+    gtk_list_store_clear (store);
+
+  res = EjecutarSQL ("SELECT * FROM familias ORDER BY id ASC");
+  if (res != NULL)
+    {
+      GtkTreeIter iter;
+      gint i, tuples, active;
+      
+      i = tuples = active = 0;
+      tuples = PQntuples (res);
+      
+      for (i=0 ; i < tuples ; i++)
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, atoi (PQvaluebycol (res, i, "id")),
+			      1, PQvaluebycol (res, i, "nombre"),
+			      -1);
+	  if (atoi (PQvaluebycol (res, i, "id")) == id_seleccion) active = i;
+	}
+      gtk_combo_box_set_active (combo, active != -1 ? active : 0);
+    }
+}
+

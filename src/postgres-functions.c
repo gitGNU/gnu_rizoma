@@ -1761,14 +1761,14 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
 
   //Tipo de mercadería
-  gchar *compuesta;
+  gint corriente;
 
   //Se inicializan los impuestos
   iva = otros = 0;
   iva_percent = otros_percent = 0;
 
-  //Se obtiene el id del tipo 'compuesta' de mercadería
-  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
+  //Se obtiene el id del tipo mercadería (corriente)
+  corriente = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id")));
 
   if (tipo_venta == MIXTO)
     {
@@ -1829,19 +1829,17 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       else
 	otros = 0;
 
-      //Se actualiza el stock del producto de acuerdo al tipo que éste sea
-      if (products->product->tipo == atoi (compuesta)) //Si el producto es compuesto se descuenta el stock de sus mercaderías madre
-	res = EjecutarSQL (g_strdup_printf ("SELECT * FROM update_stock_producto_compuesto (%s, %s)",
-					    products->product->barcode, cantidad));
-      else
-	res = EjecutarSQL 
-	  (g_strdup_printf
-	   ("UPDATE producto SET vendidos = vendidos+%s, stock=%s WHERE barcode='%s'", cantidad, 
-	    CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), 
+      /*Se actualiza el stock del producto de acuerdo al tipo que éste sea*/
+      
+      //Si el producto es un producto corriente se descuenta su stock con normalidad
+      if (products->product->tipo == corriente)
+	res = EjecutarSQL  //               TODO: Es necesario vendidos?? 
+	  (g_strdup_printf // UPDATE producto SET vendidos=vendidos+%s, stock=stock-%s WHERE barcode='%s'
+	   ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'",
+	    CUT (g_strdup_printf ("%.3f", products->product->cantidad)),
 	    products->product->barcode));
 
-
-      /*Pago de impuestos (pasados a texto)*/
+      /*Pago de impuestos (pasados a gchar *)*/
 
       //Si se realizó solamene con cheque de restaurant
       if (tipo_venta == CHEQUE_RESTAURANT)
@@ -1955,7 +1953,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       ganancia = ganancia * products->product->cantidad;
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
-	 precio,fifo,iva,otros) en la tabla venta_detalle */
+	 precio,fifo,iva,otros) en la tabla venta_detalle y venta_mc_detalle */
       q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %s, %d, %s)",
 			   id_venta, products->product->barcode, cantidad, precio,
 			   CUT (g_strdup_printf ("%.2f",products->product->fifo)),
@@ -1965,16 +1963,6 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       printf ("la consulta es %s\n", q);
       res = EjecutarSQL (q);
       g_free (q);
-
-      //Si el producto es compuesto, se registran sus componentes
-      if (products->product->tipo == atoi (compuesta))
-	{
-	  q = g_strdup_printf ("select registrar_venta_mc_detalle(%d, %s, %s, %d, %s, %s)", 
-			       id_venta, products->product->barcode, cantidad, 
-			       precio, iva_unit, otros_unit);
-	  res = EjecutarSQL (q);
-	  g_free (q);
-	}
 
       products = products->next;
     }
@@ -2629,10 +2617,11 @@ gchar *
 InversionTotalStock (void)
 {
   PGresult *res;
-  gchar *compuesta; //TODO: mas adelante esto se diferenciará derivados de compuestos
+  gchar *corriente, *materia_prima;
 
-  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
-  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (costo_promedio * stock)),0) FROM producto WHERE tipo != %s", compuesta));
+  corriente = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id"));
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (costo_promedio * stock)),0) FROM producto WHERE tipo = %s OR tipo = %s", corriente, materia_prima));
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -2644,10 +2633,11 @@ gchar *
 ValorTotalStock (void)
 {
   PGresult *res;
-  gchar *discreta;
+  gchar *corriente, *materia_prima;
 
-  discreta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DISCRETA'"), 0, "id"));
-  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (precio * stock)),0) FROM producto WHERE tipo = %s", discreta));
+  corriente = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id"));
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+  res = EjecutarSQL (g_strdup_printf ("SELECT COALESCE(round (SUM (precio * stock)),0) FROM producto WHERE tipo = %s OR tipo = %s", corriente, materia_prima));
 
   if (res != NULL)
     return PQgetvalue (res, 0, 0);
@@ -3465,7 +3455,7 @@ get_product_information (gchar *barcode, gchar *codigo_corto, gchar *columnas)
   if (!g_str_equal (barcode, ""))
     res = EjecutarSQL (g_strdup_printf ("SELECT %s FROM informacion_producto (%s, '')", columnas, barcode));
   else if (!g_str_equal (codigo_corto, ""))
-    res = EjecutarSQL (g_strdup_printf ("SELECT %s FROM informacion_producto (%s, '')", columnas, codigo_corto));
+    res = EjecutarSQL (g_strdup_printf ("SELECT %s FROM informacion_producto (0, '%s')", columnas, codigo_corto));
 
   if (res == NULL)
     {
@@ -3594,28 +3584,28 @@ registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto)
  *
  * @param : gchar *barcode_madre
  * @param : gint tipo_madre
- * @param : gchar *barcode_derivado
- * @param : gint tipo_derivado
+ * @param : gchar *barcode_comp_der
+ * @param : gint tipo_comp_der
  * @param : gdouble cant_mud : Cantidad de madre que usa el derivado
  */
 gboolean
 asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
-			  gchar *barcode_derivado, gint tipo_derivado,
+			  gchar *barcode_comp_der, gint tipo_comp_der,
 			  gdouble cant_mud)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("INSERT INTO componente_mc (barcode_madre, tipo_madre, barcode_derivado, tipo_derivado, cant_mud) "
-		                          "VALUES (     %s,           %d,           %s,              %d,         %s  ) ", 
-		       barcode_madre, tipo_madre, barcode_derivado, tipo_derivado, CUT (g_strdup_printf ("%.3f", cant_mud)));
+  q = g_strdup_printf ("INSERT INTO componente_mc (id, barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) "
+		                          "VALUES (DEFAULT,   %s,         %d,            %s,              %d,         %s   ) ", 
+		       barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, CUT (g_strdup_printf ("%.3f", cant_mud)));
   res = EjecutarSQL(q);
   g_free(q);
 
   if (res == NULL)
     return FALSE;
 
-  printf ("Se asoció %s con %s", barcode_madre, barcode_derivado);
+  printf ("Se asoció %s con %s", barcode_madre, barcode_comp_der);
   return TRUE;
 }
 
@@ -4108,4 +4098,34 @@ codigo_corto_to_barcode (gchar *codigo_corto)
   res = EjecutarSQL (q);
   barcode = g_strdup (PQvaluebycol (res, 0, "barcode"));
   return barcode;
+}
+
+
+/**
+ * Obtiene todos los componentes del producto
+ * compuesto con el barcode especificado
+ *
+ * @param: barcode producto compuesto
+ * @return: PGresult resultado de la busqueda
+ */
+PGresult *
+get_componentes_compuesto (gchar *barcode)
+{
+  PGresult *res;
+  gchar *q;
+
+  // barcode_madre = (Mercadería compuesta), barcode_comp_der = (Mercadería que compone a la madre)
+  q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_comp_der AS barcode, cmc.tipo_comp_der AS tipo, "
+		       "(SELECT codigo_corto FROM producto WHERE barcode = cmc.barcode_comp_der) AS codigo, "
+		       "(SELECT marca FROM producto WHERE barcode = cmc.barcode_comp_der) AS marca, "
+		       "(SELECT descripcion FROM producto WHERE barcode = cmc.barcode_comp_der) AS descripcion, "
+		       "(SELECT precio FROM producto WHERE barcode = cmc.barcode_comp_der) AS precio, "
+		       "(SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_comp_der)) AS costo_promedio "
+		       "FROM componente_mc cmc "
+		       "WHERE cmc.barcode_madre = '%s' "
+		       "AND (SELECT estado FROM producto WHERE barcode = cmc.barcode_comp_der) = true",
+		       barcode);
+
+  res = EjecutarSQL (q);
+  return res;
 }

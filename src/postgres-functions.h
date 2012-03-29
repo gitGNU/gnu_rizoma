@@ -283,8 +283,8 @@ gboolean SaveProductsDevolucion (Productos *products, gint id_devolucion);
 
 gboolean SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_traspaso);
 
-gboolean asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre, gchar *barcode_derivado, 
-                                   gint tipo_derivado, gdouble cant_mud);
+gboolean asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre, gchar *barcode_comp_der, 
+                                   gint tipo_comp_der, gdouble cant_mud);
 
 gchar * sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght);
 
@@ -327,5 +327,7 @@ gboolean mod_to_add_on_buy (Prod *producto);
 gboolean mod_to_del_on_buy (Prod *producto);
 
 gchar * codigo_corto_to_barcode (gchar *codigo_corto);
+
+PGresult * get_componentes_compuesto (gchar *barcode);
 
 #endif

@@ -272,7 +272,7 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
   gtk_tree_path_free (path);
 
   gtk_tree_model_get (model, &iter,
-                      12, &stock_teorico,
+                      13, &stock_teorico,
                       -1);
 
   if (stock_fisicoNum > stock_teorico)
@@ -290,13 +290,13 @@ on_real_stock_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_strin
     }
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-		      13, stock_fisicoNum,
+		      14, stock_fisicoNum,
 		      -1);
 
   gdouble diferenciaNum = stock_teorico - stock_fisicoNum;
 
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-		      14, diferenciaNum,
+		      15, diferenciaNum,
 		      -1);
 
   if (diferenciaNum != 0)
@@ -332,9 +332,9 @@ on_btn_save_cuadratura_clicked()
       // Obtengo los valores del treeview --
       gtk_tree_model_get (model, &iter,
 			  0, &codigo_corto,
-                          12, &stock_teorico,
-                          13, &stock_fisico,
-			  14, &diferencia,
+                          13, &stock_teorico,
+                          14, &stock_fisico,
+			  15, &diferencia,
                           -1);
 
       printf("%f %f %s\n", stock_teorico, stock_fisico, codigo_corto);
@@ -1771,7 +1771,7 @@ reports_win (void)
     Start Cuadratura
    */
 
-  store = gtk_list_store_new (15,
+  store = gtk_list_store_new (16,
 			      G_TYPE_STRING, // 0, Codigo Corto
                               G_TYPE_STRING, // 1, Descripción Mercadería
 			      G_TYPE_STRING, // 2, Marca
@@ -1780,15 +1780,15 @@ reports_win (void)
 			      G_TYPE_DOUBLE, // 5, Anulaciones de Compras
                               G_TYPE_DOUBLE, // 6, Ventas
 			      G_TYPE_DOUBLE, // 7, Anulaciones de Ventas
-                              G_TYPE_DOUBLE, // 8, Devoluciones
-			      G_TYPE_DOUBLE, // 9, Mermas
-			      G_TYPE_DOUBLE, // 10, Enviados
-			      G_TYPE_DOUBLE, // 11, Recibidos
-			      G_TYPE_DOUBLE, // 12, Stock teorico
-			      G_TYPE_DOUBLE, // 13, Stock Físico
-			      G_TYPE_DOUBLE, // 14, Diferencia
+			      G_TYPE_DOUBLE, // 8, Insumido (vendido - anulado)
+                              G_TYPE_DOUBLE, // 9, Devoluciones
+			      G_TYPE_DOUBLE, // 10, Mermas
+			      G_TYPE_DOUBLE, // 11, Enviados
+			      G_TYPE_DOUBLE, // 12, Recibidos
+			      G_TYPE_DOUBLE, // 13, Stock teorico
+			      G_TYPE_DOUBLE, // 14, Stock Físico
+			      G_TYPE_DOUBLE, // 15, Diferencia
                               -1);
-
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_cuadratura"));
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
@@ -1884,9 +1884,8 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)7, NULL);
 
-
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Devoluciones", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Insumido", renderer,
 						     "text", 8,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1898,7 +1897,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Mermas", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Devoluciones", renderer,
 						     "text", 9,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1908,8 +1907,9 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)9, NULL);
 
+
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Enviados", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Mermas", renderer,
 						     "text", 10,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1919,9 +1919,8 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)10, NULL);
 
-
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Recibidos", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Enviados", renderer,
 						     "text", 11,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1933,7 +1932,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Stock teórico", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Recibidos", renderer,
 						     "text", 12,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1945,12 +1944,7 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  g_object_set (renderer,
-		"editable", TRUE,
-		NULL);
-  g_signal_connect (G_OBJECT (renderer), "edited",
-		    G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
-  column = gtk_tree_view_column_new_with_attributes ("Stock físico", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Stock teórico", renderer,
 						     "text", 13,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -1962,16 +1956,33 @@ reports_win (void)
 
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Diferencia", renderer,
+  g_object_set (renderer,
+		"editable", TRUE,
+		NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited",
+		    G_CALLBACK (on_real_stock_cell_renderer_edited), (gpointer)store);
+  column = gtk_tree_view_column_new_with_attributes ("Stock físico", renderer,
 						     "text", 14,
 						     NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 14);
-  gtk_tree_view_column_set_min_width (column, 90);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)14, NULL);
+
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Diferencia", renderer,
+						     "text", 15,
+						     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 15);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)15, NULL);
 
 
   cuadratura->tree = treeview;
@@ -1985,18 +1996,18 @@ reports_win (void)
   cuadratura->cols[5].name = "Compras Anuladas";
   cuadratura->cols[6].name = "Ventas";
   cuadratura->cols[7].name = "Ventas Anuladas";
-  cuadratura->cols[8].name = "Devoluciones";
-  cuadratura->cols[9].name = "Mermas";
-  cuadratura->cols[10].name = "Envios";
-  cuadratura->cols[11].name = "Recibidos";
-  cuadratura->cols[12].name = "Stock Teórico";
-  cuadratura->cols[13].name = "Stock Físico";
-  cuadratura->cols[14].name = "Diferencia";
-  cuadratura->cols[15].name = NULL;
+  cuadratura->cols[8].name = "Insumido";
+  cuadratura->cols[9].name = "Devoluciones";
+  cuadratura->cols[10].name = "Mermas";
+  cuadratura->cols[11].name = "Envios";
+  cuadratura->cols[12].name = "Recibidos";
+  cuadratura->cols[13].name = "Stock Teórico";
+  cuadratura->cols[14].name = "Stock Físico";
+  cuadratura->cols[15].name = "Diferencia";
+  cuadratura->cols[16].name = NULL;
 
   g_signal_connect (builder_get (builder, "btn_print_cuadratura"), "clicked",
                     G_CALLBACK (PrintTree), (gpointer)cuadratura);
-
 
   // El botón guardar inicia "deshabilitado"
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_cuadratura")), FALSE);
@@ -4327,9 +4338,7 @@ fill_provider ()
  * Es llamado por on_btn_get_stat_clicked ()
  *
  * Obtiene la información de cuadratura y la depliega en en treeview "tree_view_cuadratura"
- *
  */
-
 void
 fill_cuadratura (gint familia)
 {
@@ -4346,7 +4355,7 @@ fill_cuadratura (gint familia)
   else
     filtro_familia = g_strdup_printf("WHERE familia = %d", familia);
 
-  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, familia, stock_inicial, compras_periodo, anulaciones_c_periodo, ventas_periodo, anulaciones_periodo, devoluciones_periodo, mermas_periodo, enviados_periodo, recibidos_periodo, stock_teorico "
+  sql = g_strdup_printf ( "SELECT codigo_corto, descripcion, marca, familia, stock_inicial, compras_periodo, anulaciones_c_periodo, ventas_periodo, anulaciones_periodo, insumidos_periodo, devoluciones_periodo, mermas_periodo, enviados_periodo, recibidos_periodo, stock_teorico "
 			  "FROM producto_en_periodo('%.4d-%.2d-%.2d') %s",
 			  g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
 			  filtro_familia);
@@ -4369,13 +4378,14 @@ fill_cuadratura (gint familia)
 			  5, strtod(PUT(PQvaluebycol (res, i, "anulaciones_c_periodo")),(char **)NULL),
                           6, strtod(PUT(PQvaluebycol (res, i, "ventas_periodo")),(char **)NULL),
 			  7, strtod(PUT(PQvaluebycol (res, i, "anulaciones_periodo")),(char **)NULL),
-                          8, strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(char **)NULL),
-			  9, strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(char **)NULL),
-			  10, strtod(PUT(PQvaluebycol (res, i, "enviados_periodo")),(char **)NULL),
-			  11, strtod(PUT(PQvaluebycol (res, i, "recibidos_periodo")),(char **)NULL),
-			  12, strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(char **)NULL),
+			  8, strtod(PUT(PQvaluebycol (res, i, "insumidos_periodo")),(char **)NULL),
+                          9, strtod(PUT(PQvaluebycol (res, i, "devoluciones_periodo")),(char **)NULL),
+			  10, strtod(PUT(PQvaluebycol (res, i, "mermas_periodo")),(char **)NULL),
+			  11, strtod(PUT(PQvaluebycol (res, i, "enviados_periodo")),(char **)NULL),
+			  12, strtod(PUT(PQvaluebycol (res, i, "recibidos_periodo")),(char **)NULL),
 			  13, strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(char **)NULL),
-			  //14, 0,
+			  14, strtod(PUT(PQvaluebycol (res, i, "stock_teorico")),(char **)NULL),
+			  //15, 0,
 			  -1);
     }
 }
