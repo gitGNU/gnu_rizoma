@@ -763,6 +763,7 @@ on_btn_add_buy_prod_clicked (GtkButton *button, gpointer data)
 /**
  * Callback from "btn_add_prod_on_buy" Button
  * (signal click)
+ * Add a product to list to mod the invoice
  *
  * Añade el producto deleccionado a la lista de productos
  * que serán añadidos a la factura.
@@ -4037,7 +4038,7 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
     {
       if (strcmp (n_documento, "") == 0 || atoi (n_documento) <= 0)
         {
-          ErrorMSG (wnd, "Debe Obligatoriamente ingresar el numero del documento");
+          ErrorMSG (wnd, "Ingrese un número de documento válido (debe ser numérico)");
           return FALSE;
         }
       else if (strcmp (monto, "") == 0 || atoi (monto) <= 0)
@@ -4584,6 +4585,14 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
   g_list_free (list);
 
   n_documento = g_strdup (gtk_entry_get_text (entry_n));
+  if (n_documento == NULL || HaveCharacters (n_documento))
+    {
+      ErrorMSG (GTK_WIDGET (entry_n), 
+		"Ingrese un número de factura válido (debe ser numérico)");
+      return;
+    }
+
+
   monto = g_strdup (gtk_entry_get_text (entry_amount));
 
   if (entry_amount == NULL || entry_date == NULL || entry_n == NULL)
@@ -6535,6 +6544,11 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data)
       if (factura)
         {
           GtkWindow *wnd_invoice = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
+
+	  // Para que acepte solo numeros //TODO: Hacer esto más limpio...
+	  g_signal_connect (G_OBJECT (builder_get (builder, "entry_ingress_factura_n")), "insert-text",
+			    G_CALLBACK (only_numberi_filter), NULL);
+
           clean_container (GTK_CONTAINER (wnd_invoice));
 
           entry = GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"));
