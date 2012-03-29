@@ -1910,7 +1910,7 @@ begin
 	
 	-- Si es una mercadería compuesta, se registrará todo su detalle en venta_mc_detalle
 	IF (in_tipo = compuesta_l) THEN
-	   PERFORM registrar_detalle_compuesto (in_id_venta::int4, id_venta_detalle_l::int4, in_barcode::bigint,
+	   PERFORM registrar_detalle_compuesto (in_id_venta::int4, num_linea::int4, in_barcode::bigint,
 			                        ARRAY[0,0]::int[], 0::double precision, in_precio::double precision, in_cantidad::double precision);
 
 	-- Si es una derivada se registrará su detalle en venta_mc_detalle
@@ -1921,7 +1921,7 @@ begin
 	   INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
 				       	 precio_proporcional, precio, costo_promedio, ganancia, iva, otros,
 				       	 tipo_madre, tipo_hijo)
-	   VALUES (DEFAULT, id_venta_detalle_l, in_id_venta, ARRAY[0,1]::int[], barcode_madre_l, in_barcode, in_cantidad, 
+	   VALUES (DEFAULT, num_linea, in_id_venta, ARRAY[0,1]::int[], barcode_madre_l, in_barcode, in_cantidad, 
 	           precio_proporcional_l, in_precio, in_fifo, in_ganancia, in_iva, in_otros,
 		   materia_prima_l, in_tipo);
 
