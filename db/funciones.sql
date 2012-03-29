@@ -294,7 +294,8 @@ BEGIN
 	   stock_l := (SELECT (SELECT stock 
 	   	      	       FROM producto WHERE barcode = barcode_madre)
 		       FROM componente_mc 
-		       WHERE barcode_comp_der = codigo_barras);
+		       WHERE barcode_comp_der = codigo_barras
+		       AND tipo_madre = materia_prima_l);
 
 	   cant_mud_l := (SELECT cant_mud FROM componente_mc 
 			  	 WHERE barcode_comp_der = codigo_barras
