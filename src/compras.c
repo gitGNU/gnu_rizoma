@@ -1930,7 +1930,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       else if (g_str_equal (tipo, compuesta))
 	{
 	  //El costo el producto compuesto a partir de sus componentes
-	  gdouble costo_total;
+	  //gdouble costo_total;
 	  //costo_total = GetDataByOne (g_strdup_printf (""));
 	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), "0");
 
@@ -2425,6 +2425,8 @@ BuyWindow (void)
   /*  PGresult *res;
       gint tuples, i;
   */
+  
+  /*
   GtkWidget *hbox;
   GtkWidget *vbox;
   GtkWidget *label;
@@ -2548,54 +2550,75 @@ BuyWindow (void)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scroll),
                                   GTK_POLICY_AUTOMATIC,
                                   GTK_POLICY_AUTOMATIC);
-  gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 3);
+  gtk_box_pack_start (GTK_BOX (vbox), scroll, FALSE, FALSE, 3);*/
 
-  compra->store_prov = gtk_list_store_new (2,
-                                           G_TYPE_STRING,
-                                           G_TYPE_STRING);
+  GtkTreeView *treeview;
+  GtkListStore *store;
+  GtkTreeSelection *selection;
+  GtkTreeIter iter;
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
 
-  compra->tree_prov = gtk_tree_view_new_with_model (GTK_TREE_MODEL (compra->store_prov));
-  gtk_container_add (GTK_CONTAINER (scroll), compra->tree_prov);
-  gtk_widget_show (compra->tree_prov);
 
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (compra->tree_prov));
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_prov"));
+  if (gtk_tree_view_get_model (treeview) == NULL)
+    {
+      store = gtk_list_store_new (2,
+				  G_TYPE_STRING,
+				  G_TYPE_STRING);
+  
+      gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
 
-  gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
+      selection = gtk_tree_view_get_selection (treeview);
+      gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
-  g_signal_connect (G_OBJECT (selection), "changed",
-                    G_CALLBACK (Seleccionado), NULL);
+      g_signal_connect (G_OBJECT (selection), "changed",
+			G_CALLBACK (Seleccionado), NULL);
 
-  g_signal_connect (G_OBJECT (compra->tree_prov), "row-activated",
-                    G_CALLBACK (MoveCursor), (gpointer) compra->buy_window);
+      /* Definido desde glade
+	 g_signal_connect (G_OBJECT (treeview), "row-activated",
+	 G_CALLBACK (gtk_widget_grab_focus), (gpointer) builder_get (builder, "entry_nota_pedido"));*/
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
-                                                     "text", 0,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_prov), column);
-  //gtk_tree_view_column_set_min_width (column, 75);
-  //gtk_tree_view_column_set_max_width (column, 75);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)0, NULL);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Rut", renderer,
+							 "text", 0,
+							 NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      //gtk_tree_view_column_set_min_width (column, 75);
+      //gtk_tree_view_column_set_max_width (column, 75);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_rut, (gpointer)0, NULL);
 
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
-                                                     "text", 1,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (compra->tree_prov), column);
-  gtk_tree_view_column_set_min_width (column, 200);
-  gtk_tree_view_column_set_max_width (column, 200);
-  gtk_tree_view_column_set_resizable (column, FALSE);
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Proveedor", renderer,
+							 "text", 1,
+							 NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
+      gtk_tree_view_column_set_min_width (column, 200);
+      gtk_tree_view_column_set_max_width (column, 200);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+    }
+  else
+    {
+      store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+      selection = gtk_tree_view_get_selection (treeview);
+    }
 
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_provider_data")));
   FillProveedores ();
 
-  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (compra->store_prov), &iter) == FALSE)
-    gtk_window_set_focus (GTK_WINDOW (compra->buy_window), button_add);
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (store), &iter) == TRUE)
+    {      
+      //gtk_widget_grab_focus (GTK_WIDGET (treeview));
+      gtk_tree_selection_select_path (selection, gtk_tree_path_new_from_string ("0"));
+      gtk_window_set_focus (GTK_WINDOW (builder_get (builder, "wnd_provider_data")), GTK_WIDGET (treeview));      
+    }    
+  else
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_add_provider")));
+  
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_provider_data")));
 
-  gtk_tree_selection_select_path (selection,
-                                  gtk_tree_path_new_from_string ("0"));
-
-  gtk_window_set_focus (GTK_WINDOW (compra->buy_window), compra->tree_prov);
+  //gtk_window_set_focus (GTK_WINDOW (compra->buy_window), treeview);
 } // void BuyWindow (void)
 
 
@@ -3079,9 +3102,13 @@ SearchByName (void)
 void
 Comprar (GtkWidget *widget, gpointer data)
 {
-  gchar *rut = CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (compra->rut_label))));
-  gchar *nota = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->nota_entry)));
-  gint dias_pago = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (entry_plazo))));
+  GtkWidget *widget_aux;
+  widget_aux = GTK_WIDGET (builder_get (builder, "lbl_provider_rut"));
+  gchar *rut = CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget_aux))));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_nota_pedido"));
+  gchar *nota = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_pay_days"));
+  gint dias_pago = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux))));
 
   rut = g_strndup (rut, strlen (rut)-2);
 
@@ -3093,11 +3120,13 @@ Comprar (GtkWidget *widget, gpointer data)
     {
       AgregarCompra (rut, nota, dias_pago);
 
-      CloseBuyWindow ();
+      //CloseBuyWindow ();
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder,"wnd_provider_data")));
 
       ClearAllCompraData ();
 
-      CleanStatusProduct (0);
+      // Es llamada por ClearAllCompraData
+      //CleanStatusProduct (0);
 
       compra->header_compra = NULL;
       compra->products_compra = NULL;
@@ -3198,13 +3227,9 @@ void
 ClearAllCompraData (void)
 {
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"))));
-
   gtk_list_store_clear (store);
-
   CleanStatusProduct (0);
-
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "\t\t\t");
-
 }
 
 
@@ -3387,6 +3412,9 @@ FillProveedores (void)
 {
   PGresult *res;
   gint tuples, i;
+  GtkTreeModel *model;
+  GtkListStore *store;
+  GtkTreeView *treeview;
 
   GtkTreeIter iter;
 
@@ -3404,19 +3432,34 @@ FillProveedores (void)
     return;
 
   tuples = PQntuples (res);
-
-  gtk_list_store_clear (compra->store_prov);
+  
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_prov"));
+  model = gtk_tree_view_get_model (treeview);
+  store = GTK_LIST_STORE (model);
+  gtk_list_store_clear (store);
 
   /* aqui se agregan los proveedores al tree view*/
   for (i = 0; i < tuples; i++)
     {
-      gtk_list_store_append (compra->store_prov, &iter);
-      gtk_list_store_set (compra->store_prov, &iter,
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
                           0, g_strconcat (PQvaluebycol(res, i, "rut"),
 					  PQvaluebycol(res, i, "dv"), NULL),
                           1, PQvaluebycol(res, i, "nombre"),
                           -1);
     }
+
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (store), &iter) == TRUE)
+    {      
+      //gtk_widget_grab_focus (GTK_WIDGET (treeview));
+      gtk_window_set_focus (GTK_WINDOW (builder_get (builder, "wnd_provider_data")), 
+			    GTK_WIDGET (treeview));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (treeview),
+				      gtk_tree_path_new_from_string ("0"));
+    }
+  else
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_add_provider")));
+
 }
 
 
@@ -3432,11 +3475,13 @@ FillProveedores (void)
 void
 CloseAddProveedorWindow (GtkWidget *button, gpointer data)
 {
-  GtkWidget *window = (GtkWidget *)data;
+  //GtkWidget *window = (GtkWidget *)data;
+  //gtk_widget_destroy (window);
 
-  gtk_widget_destroy (window);
-
-  gtk_window_set_focus (GTK_WINDOW (compra->buy_window), compra->tree_prov);
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_provider")));
+  //gtk_window_set_focus (GTK_WINDOW (compra->buy_window), compra->tree_prov);
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "treeview_prov")));
+  FillProveedores ();
 }
 
 
@@ -3454,17 +3499,29 @@ CloseAddProveedorWindow (GtkWidget *button, gpointer data)
 void
 AddProveedor (GtkWidget *widget, gpointer data)
 {
-  gchar *rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->rut_add)));
-  gchar *rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->rut_ver)));
-  gchar *nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->nombre_add)));
-  gchar *direccion = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->direccion_add)));
-  gchar *ciudad = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->ciudad_add)));
-  gchar *comuna = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->comuna_add)));
-  gchar *telefono = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->telefono_add)));
-  gchar *email = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->email_add)));
-  gchar *web = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->web_add)));
-  gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
-  gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
+  GtkWidget *widget_aux;
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_rut"));
+  gchar *rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_dv"));
+  gchar *rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_nombre"));
+  gchar *nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_direccion"));
+  gchar *direccion = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_ciudad"));
+  gchar *ciudad = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_comuna"));
+  gchar *comuna = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_telefono"));
+  gchar *telefono = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_email"));
+  gchar *email = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_web"));
+  gchar *web = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_contacto"));
+  gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_giro"));
+  gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
 
   if (strcmp (rut, "") == 0)
     {
@@ -3521,8 +3578,8 @@ AddProveedor (GtkWidget *widget, gpointer data)
       return;
     }
 
-  CloseAddProveedorWindow (NULL, data);
-
+  //CloseAddProveedorWindow (NULL, data);
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_provider")));
 
   AddProveedorToDB (g_strdup_printf ("%s-%s", rut, rut_ver),
                     nombre,
@@ -3540,245 +3597,17 @@ AddProveedor (GtkWidget *widget, gpointer data)
 
 
 /**
- * Es llamada por la funcion "AddProveedor()".
  *
  * Esta funcion visualiza la ventana para agregar un proveedor y agrega dos señales
  *
  * @param widget the widget that emited the signal
- * @param data the user data
- *
  */
 void
-AddProveedorWindow (GtkWidget *widget, gpointer user_data)
+AddProveedorWindow (GtkButton *button)
 {
-  GtkWidget *window;
-
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-
-  GtkWidget *button;
-  GtkWidget *label;
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER_ALWAYS);
-  //  gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (compra->buy_window));
-  gtk_widget_show (window);
-  gtk_window_present (GTK_WINDOW (window));
-
-  vbox = gtk_vbox_new (FALSE, 3);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (window), vbox);
-
-  /*
-    Cajas
-  */
-
-  /*
-    Rut Proveedor
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Rut: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->rut_ver = gtk_entry_new_with_max_length (1);
-  gtk_widget_set_size_request (compra->rut_ver, 20, -1);
-  gtk_widget_show (compra->rut_ver);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->rut_ver, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("-");
-  gtk_widget_show (label);
-  gtk_box_pack_end (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->rut_add = gtk_entry_new_with_max_length (10);
-  gtk_widget_set_size_request (compra->rut_add, 75, -1);
-  gtk_widget_show (compra->rut_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->rut_add, FALSE, FALSE, 3);
-
-  gtk_window_set_focus (GTK_WINDOW (window), compra->rut_add);
-
-  /*
-    Nombre
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("*Nombre: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->nombre_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->nombre_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->nombre_add, FALSE, FALSE, 3);
-
-  /*
-    Direccion
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("*Direccion: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->direccion_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->direccion_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->direccion_add, FALSE, FALSE, 3);
-
-  /*
-    Ciudad
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("*Ciudad: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->ciudad_add = gtk_entry_new_with_max_length (100);
-  gtk_widget_show (compra->ciudad_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->ciudad_add, FALSE, FALSE, 3);
-
-
-  /*
-    Comuna
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("*Comuna: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->comuna_add = gtk_entry_new_with_max_length (20);
-  gtk_widget_show (compra->comuna_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->comuna_add, FALSE, FALSE, 3);
-
-  /*
-    Telefono
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("*Telefono: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->telefono_add = gtk_entry_new_with_max_length (20);
-  gtk_widget_show (compra->telefono_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->telefono_add, FALSE, FALSE, 3);
-
-  /*
-    E-Mail
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("E-Mail: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->email_add = gtk_entry_new_with_max_length (300);
-  gtk_widget_show (compra->email_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->email_add, FALSE, FALSE, 3);
-
-  /*
-    Web
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Web: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->web_add = gtk_entry_new_with_max_length (300);
-  gtk_widget_show (compra->web_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->web_add, FALSE, FALSE, 3);
-
-  /*
-    Contacto
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("Contacto: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->contacto_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->contacto_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->contacto_add, FALSE, FALSE, 3);
-
-  /*
-    Giro
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  label = gtk_label_new ("*Giro: ");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
-
-  compra->giro_add = gtk_entry_new_with_max_length (200);
-  gtk_widget_show (compra->giro_add);
-  gtk_box_pack_end (GTK_BOX (hbox), compra->giro_add, FALSE, FALSE, 3);
-
-  /*
-    Fin Cajas
-  */
-
-  /*
-    Mensaje Inferior
-  */
-  label = gtk_label_new ("Los datos con * son obligatorios");
-  gtk_widget_show (label);
-  gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 3);
-
-  /*
-    Fin
-  */
-
-  hbox = gtk_hbox_new (FALSE, 3);
-  gtk_widget_show (hbox);
-  gtk_box_pack_end (GTK_BOX (vbox), hbox, FALSE, FALSE, 3);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_ADD);
-  gtk_widget_show (button);
-  gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (AddProveedor), (gpointer)window);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_widget_show (button);
-  gtk_box_pack_start (GTK_BOX (hbox), button, FALSE, FALSE, 3);
-
-  g_signal_connect (G_OBJECT (button), "clicked",
-                    G_CALLBACK (CloseAddProveedorWindow), (gpointer)window);
-} // void AddProveedorWindow (GtkWidget *widget, gpointer user_data)
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_new_provider")));
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_new_provider")));
+}
 
 
 void
@@ -3788,10 +3617,11 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
   gchar *rut, *rut_completo;
   PGresult *res;
   gchar *q;
-
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_prov"))));
+  
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
-      gtk_tree_model_get (GTK_TREE_MODEL (compra->store_prov), &iter,
+      gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           0, &rut_completo,
                           -1);
       rut = g_strndup (rut_completo, strlen (rut_completo)-1);
@@ -3799,10 +3629,10 @@ Seleccionado (GtkTreeSelection *selection, gpointer data)
       res = EjecutarSQL (q);
       g_free (q);
 
-      gtk_label_set_text (GTK_LABEL (compra->rut_label), //PQvaluebycol( res, 0, "rut"));
+      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_provider_rut")), //PQvaluebycol( res, 0, "rut"));
 			  formato_rut (rut_completo));
-      gtk_label_set_text (GTK_LABEL (compra->nombre_label),
-                          PQvaluebycol( res, 0, "nombre"));
+      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_provider_name")),
+                          PQvaluebycol (res, 0, "nombre"));
     }
 }
 

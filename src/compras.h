@@ -64,7 +64,8 @@ void AddFoundProduct (void);
 
 void AddProveedor (GtkWidget *widget, gpointer data);
 
-void AddProveedorWindow (GtkWidget *widget, gpointer user_data);
+//void AddProveedorWindow (GtkWidget *widget, gpointer user_data);
+void AddProveedorWindow (GtkButton *button);
 
 void Seleccionado (GtkTreeSelection *selection, gpointer data);
 
