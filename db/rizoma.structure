@@ -809,8 +809,11 @@ alter table venta_detalle add constraint fk_venta_detalle_tipo
 alter table venta_mc_detalle add constraint fk_venta_mc_detalle_venta_detalle
   foreign key (id_venta_detalle, id_venta_vd)
   references venta_detalle (id, id_venta)  ;
-alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo
-  foreign key (tipo)
+alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo_madre
+  foreign key (tipo_madre)
+  references tipo_mercaderia (id)  ;
+alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo_hijo
+  foreign key (tipo_hijo)
   references tipo_mercaderia (id)  ;
 alter table producto_recibido add constraint fk_productos_recibidos_productos
   foreign key (barcode)

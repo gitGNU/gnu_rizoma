@@ -60,4 +60,6 @@ gint caja_get_last_amount (void);
 
 gint ArqueoCaja (void);
 
+void CloseCajaWin (void);
+
 #endif

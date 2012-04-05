@@ -2,6 +2,44 @@
 <interface>
   <requires lib="gtk+" version="2.20"/>
   <!-- interface-naming-policy toplevel-contextual -->
+  <object class="GtkMessageDialog" id="dialog_cash_box_closed">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="transient_for">wnd_sell</property>
+    <property name="message_type">warning</property>
+    <property name="buttons">yes-no</property>
+    <property name="text" translatable="yes">La caja ha sido cerrada</property>
+    <property name="secondary_text" translatable="yes">¿Desea abrir una nueva caja y continuar ahora?</property>
+    <signal name="response" handler="on_dialog_cash_box_closed_response" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox17">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area17">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkMessageDialog" id="dialog_cash_box_opened">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -11,8 +49,8 @@
     <property name="transient_for">wnd_sell</property>
     <property name="message_type">warning</property>
     <property name="buttons">yes-no</property>
-    <property name="text">La caja  no ha sido cerrada</property>
-    <property name="secondary_text">¿Desea cerrar la caja ahora? La aplicación será cerrada una vez que la caja sea cerrada</property>
+    <property name="text">La caja no ha sido cerrada</property>
+    <property name="secondary_text">¿Desea cerrar la caja ahora?</property>
     <signal name="response" handler="on_dialog_cash_box_opened_response" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox3">
@@ -1265,7 +1303,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button15">
+              <object class="GtkButton" id="btn_egresar_dinero">
                 <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

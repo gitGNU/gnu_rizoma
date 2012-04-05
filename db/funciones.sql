@@ -904,14 +904,14 @@ BEGIN
    INTO monto_pci
    FROM producto WHERE impuestos = TRUE
    AND tipo = corriente
-   AND tipo = materia_prima;
+   OR tipo = materia_prima;
 
    -- Productos sin impuestos
    SELECT (SELECT SUM((precio - costo_promedio) * stock)) 
    INTO monto_psi
    FROM producto WHERE impuestos = FALSE
    AND tipo = corriente
-   AND tipo = materia_prima;
+   OR tipo = materia_prima;
    
    -- Contribucion total stock
    monto_contribucion := COALESCE(monto_pci,0) + COALESCE(monto_psi,0);

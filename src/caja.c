@@ -24,7 +24,7 @@
 #include<gtk/gtk.h>
 #include<stdlib.h>
 #include<string.h>
-#include<tipos.h>
+#include"tipos.h"
 
 #include"postgres-functions.h"
 
@@ -33,6 +33,7 @@
 #include"caja.h"
 #include"utils.h"
 #include"vale.h"
+
 
 
 GtkWidget *calendar_win;
@@ -56,6 +57,9 @@ GtkWidget *total_caja;
 GtkWidget *combo_egreso;
 GtkWidget *combo_ingreso;
 
+/* FLAGS */
+gboolean con_cierre; //Indica si se realiza un ingreso o egreso de caja con cierre
+
 
 /**
  * Es llamada por la funcion EgresarDinero.
@@ -74,7 +78,7 @@ ReturnSaldoCaja (void)
 
   res = EjecutarSQL ("select * from get_arqueo_caja(-1)");
 
-  if (res != NULL && PQntuples (res) != 0)
+  if (res != NULL && PQntuples (res) > 0)
     caja = atoi (PQgetvalue(res, 0, 0));
   else
     caja = 0;
@@ -100,6 +104,11 @@ CloseVentanaIngreso(void)
 
   wid = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_ingreso"));
   gtk_widget_hide(wid);
+
+ if (con_cierre == TRUE)
+   {
+     con_cierre = FALSE;
+   }
 }
 
 /**
@@ -124,7 +133,7 @@ IngresarDinero (GtkWidget *widget, gpointer data)
   gint monto;
   gint motivo;
   gchar *motivo_texto;
-  
+
   /*De estar habilitada caja, se asegura que ésta se encuentre 
     abierta al momento de vender*/
   
@@ -155,9 +164,21 @@ IngresarDinero (GtkWidget *widget, gpointer data)
     }
 
   if (Ingreso (monto, motivo, user_data->user_id))
-    {      
-      CloseVentanaIngreso ();
+    {            
       print_cash_box_info (get_last_cash_box_id (), monto, 0, motivo_texto);
+
+      if (con_cierre == TRUE)
+	{
+	  if (CerrarCaja(ReturnSaldoCaja()))
+	    {
+	      con_cierre = FALSE;
+	      gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_closed")));
+	    }
+	  else
+	    ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
+	}
+
+      CloseVentanaIngreso ();
     }
   else
     {
@@ -227,17 +248,16 @@ VentanaIngreso (gint monto)
 }
 
 /**
- * Es llamada cuando el boton "btn_egresarDinero" es presionado (signal
- * click).
+ * Es llamada cuando el boton "btn_egresar_dinero" es presionado 
+ * (signal click).
  *
- * Esta funcion carga el monto que se egreso y luego a llama a la funcion
+ * Esta funcion carga el monto que de egreso y luego a llama a la funcion
  * Egreso que realiza el egreso y el motivo
  *
  * @param button the button
  * @param user_data the user data
  *
  */
-
 void
 EgresarDinero (GtkWidget *widget, gpointer data)
 {
@@ -245,12 +265,15 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   gint active;
   gint monto;
   gint motivo;
+  gint saldo_en_caja;
   gchar *motivo_texto;
 
   GtkTreeModel *model;
   GtkTreeIter iter;
   
-  
+  /*Saldo en caja*/
+  saldo_en_caja = ReturnSaldoCaja ();
+
   /*De estar habilitada caja, se asegura que ésta se encuentre 
     abierta al momento de vender*/
   
@@ -264,15 +287,12 @@ EgresarDinero (GtkWidget *widget, gpointer data)
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_caja_out_motiv"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (aux_widget));
 
-  if (monto == 0)
-    ErrorMSG (aux_widget, "No pueden haber egresos de $0");
-  else if (active == -1)
-    ErrorMSG (aux_widget, "Debe Seleccionar un tipo de egreso");
-  
-
-  else if (monto > ReturnSaldoCaja ())
-    ErrorMSG (aux_widget, "No se puede retirar más dinero del que hay en caja" );
-
+  if (active == -1)
+    ErrorMSG (aux_widget, "Debe seleccionar un tipo de egreso");
+  else if (monto <= 0)
+    ErrorMSG (aux_widget, "No pueden haber egresos de monto $0 o menor");
+  else if (monto > saldo_en_caja)
+    ErrorMSG (aux_widget, "No se puede retirar más dinero del que hay en caja");
   else
     {
       model = gtk_combo_box_get_model (GTK_COMBO_BOX (aux_widget));
@@ -284,9 +304,21 @@ EgresarDinero (GtkWidget *widget, gpointer data)
                           -1);
 
       if (Egresar (monto, motivo, user_data->user_id))
-	{	  
-	  CloseVentanaEgreso();
+	{	  	  
 	  print_cash_box_info (get_last_cash_box_id (), 0, monto, motivo_texto);
+
+	  if (con_cierre == TRUE)
+	    {
+	      if (CerrarCaja(ReturnSaldoCaja()))
+		{
+		  con_cierre = FALSE;
+		  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_closed")));
+		}
+	      else
+		ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
+	    }
+
+	  CloseVentanaEgreso();
 	}
       else
         ErrorMSG(aux_widget, "No fue posible ingresar el egreso de dinero de la caja");
@@ -311,6 +343,11 @@ CloseVentanaEgreso (void)
 
   wid = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_egreso"));
   gtk_widget_hide(wid);
+
+  if (con_cierre == TRUE)
+   {
+     con_cierre = FALSE;
+   }
 }
 
 
@@ -494,7 +531,6 @@ check_caja (void)
 
 /**
  * Closes the dialog that close the caja
- *
  */
 void
 CloseCajaWin (void)
@@ -605,7 +641,6 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   gint must_have;
   gint real_have;
   gint end_amount;
-  gboolean res;
 
   //Lo que deberia tener
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
@@ -619,28 +654,32 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
   end_amount = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
-  if (must_have > end_amount) //Si hay menos dinero del que debería
+  /*(En los casos donde hay más o menos dinero, se debe preguntar el motivo)*/  
+  if (end_amount < must_have) //Si hay menos dinero del que debería
     {
-      Egresar (must_have - end_amount, 2, user_data->user_id); //motivo 2: Pérdida
-      res = CerrarCaja (end_amount);
-    }
+      con_cierre = TRUE; //FLAG
+      CloseCajaWin ();
+      VentanaEgreso(must_have - end_amount);
+    }   
   else if (end_amount > must_have) //Si hay más dinero del que debería
     {
-      Ingreso (end_amount - must_have, 2, user_data->user_id); //motivo 2: Exceso de caja
-      res = CerrarCaja (end_amount);
+      con_cierre = TRUE; //FLAG
+      CloseCajaWin ();
+      VentanaIngreso (end_amount - must_have);
     }
   else if (end_amount == must_have) //Si está el dinero que debería
-    res = CerrarCaja(end_amount);
-  
-  if (res)
-    {      
-      CloseCajaWin ();
-      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
-      gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);
-      print_cash_box_info (get_last_cash_box_id (), 0, 0, NULL);
+    {
+      if (CerrarCaja(end_amount))
+	{      
+	  CloseCajaWin ();
+	  /*aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+	    gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);*/
+	  print_cash_box_info (get_last_cash_box_id (), 0, 0, NULL);
+	  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_closed")));
+	}
+      else
+	ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
     }
-  else
-    ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
 }
 
 /**

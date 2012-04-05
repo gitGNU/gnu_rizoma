@@ -4495,7 +4495,36 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   close_nullify_sale_dialog ();
 }
 
+/**
+ * Es llamado por 'dialog_cash_box_opened', para abrir una nueva caja
+ * o cerrar la apliación.
+ */
+void
+on_dialog_cash_box_closed_response (GtkDialog *dialog, gint response_id, gpointer user_data)
+{
+  GtkWidget *aux_widget;
 
+    switch (response_id)
+    {
+      /*Si quiere abrir una nueva caja y continuar*/
+    case -8:
+      open_caja (FALSE);
+      break;
+    case -9:
+      aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+      gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);
+      break;
+    default:
+      break;
+    }
+
+  gtk_widget_hide (GTK_WIDGET (dialog));
+}
+
+/**
+ * Es llamado por 'dialog_cash_box_opened', para cerrar una caja o 
+ * continuar con la que esta abierta.
+ */
 void
 on_dialog_cash_box_opened_response (GtkDialog *dialog, gint response_id, gpointer user_data)
 {

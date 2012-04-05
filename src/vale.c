@@ -519,7 +519,7 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
 
 
 /**
- * Esta funciÃ³n abre la gaveta
+ * Esta función abre la gaveta
  */
 void
 abrirGaveta(void)
