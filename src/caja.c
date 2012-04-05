@@ -239,6 +239,7 @@ VentanaIngreso (gint monto)
                          -1);
     }
 
+  gtk_combo_box_set_active (GTK_COMBO_BOX(aux_widget), 0);
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_in_amount"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), g_strdup_printf("%d", monto));
   gtk_widget_grab_focus(aux_widget);
@@ -395,7 +396,7 @@ VentanaEgreso (gint monto)
 
   gtk_list_store_clear(store);
   
-  /*ObtenciÃ³n del Id de 'nulidad de venta' */
+  /*Obtención del Id de 'nulidad de venta' */
   resId = EjecutarSQL ("SELECT id FROM tipo_egreso WHERE descrip='Nulidad de Venta'");
   nulVenId = atoi (PUT(PQvaluebycol(resId, 0, "id")));
 
@@ -412,6 +413,7 @@ VentanaEgreso (gint monto)
 	}
     }
 
+  gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_out_amount"));
   gtk_entry_set_text(GTK_ENTRY(aux_widget), g_strdup_printf("%d", monto));
   gtk_widget_grab_focus(aux_widget);
