@@ -1748,11 +1748,20 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 {
   PGresult *res;
   Productos *header = products;
+  gchar *q;
+
+  //Datos Venta
+  gint monto_venta;
+  gint monto_descuento;
+
+  //Datos Producto
   gdouble iva, otros, iva_percent, otros_percent;
   gchar *iva_unit, *otros_unit;
-  gchar *cantidad;
-  gint precio, pago1, pago2, total_venta;
-  gchar *q;
+  gchar *cantidad;  
+  gdouble precio;
+
+  //Para el pago mixto
+  gint pago1, pago2, total_venta;
   gboolean is_imp1, is_imp2;
 
   //gdouble iva_promedio, otros_promedio;
@@ -1766,6 +1775,10 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   //Se inicializan los impuestos
   iva = otros = 0;
   iva_percent = otros_percent = 0;
+
+  //Se obtiene el monto pagado y el posible descuento
+  monto_venta = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto FROM venta WHERE id = %d", id_venta)), 0,"monto")));
+  monto_descuento = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT descuento FROM venta WHERE id = %d", id_venta)), 0,"monto")));
 
   //Se obtiene el id del tipo mercadería (corriente)
   corriente = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id")));
@@ -1816,6 +1829,13 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
         precio = products->product->precio_mayor;
       else
         precio = products->product->precio;
+
+
+      /*Se obtiene el precio proporcional en caso de haber un descuento en el monto total de la venta*/
+      if (monto_descuento > 0) // subtotal - (descuento proporcional)
+	precio = ((products->product->cantidad * precio) - 
+		  (monto_descuento * ( (products->product->cantidad * precio) / 
+				       (monto_venta + monto_descuento))));
 
       /*Se obtiene el IVA*/
       if (iva_percent != 0)
@@ -1954,9 +1974,10 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle y venta_mc_detalle */
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %d, %s, %s, %s, %s, %d, %s)",
-			   id_venta, products->product->barcode, cantidad, precio,
-			   CUT (g_strdup_printf ("%.2f",products->product->fifo)),
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %s, %s, %s, %s, %s, %d, %s)",
+			   id_venta, products->product->barcode, cantidad, 
+			   CUT (g_strdup_printf ("%.3f", precio)),
+			   CUT (g_strdup_printf ("%.3f",products->product->fifo)),
 			   iva_unit, otros_unit, CUT (g_strdup_printf ("%.3f", ganancia)), 
 			   products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
 
@@ -2020,6 +2041,35 @@ ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
 }
 
 PGresult *
+ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+{
+  PGresult *res;
+  gchar *q, *family_filter;
+
+  if (family == 0)
+    family_filter = g_strdup ("");
+  else
+    family_filter = g_strdup_printf("WHERE familia = %d", family);
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_ventas_mc (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
+/**
+ *
+ *
+ */
+PGresult *
 ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
 {
   PGresult *res;
@@ -2027,6 +2077,30 @@ ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to
 
   q = g_strdup_printf
     ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
+/**
+ *
+ *
+ */
+PGresult *
+ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_ventas_comp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
      from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
 
   res = EjecutarSQL (q);

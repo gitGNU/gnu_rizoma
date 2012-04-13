@@ -2355,60 +2355,106 @@ return resultado;
 
 end; $$ language plpgsql;
 
-create or replace function ranking_ventas(
-       in starts date,
-       in ends date,
-       out barcode varchar,
-       out descripcion varchar,
-       out marca varchar,
-       out contenido varchar,
-       out unidad varchar,
-       out familia integer,
-       out amount double precision,
-       out sold_amount double precision,
-       out costo double precision,
-       out contrib double precision,
-       out impuestos boolean
-       )
-returns setof record as $$
-declare
-q text;
-l record;
-begin
 
-q := $S$ SELECT producto.barcode as barcode,
-     	      producto.descripcion as descripcion,
-       	      producto.marca as marca,
-	      producto.contenido as contenido,
-	      producto.unidad as unidad,
-	      producto.familia as familia,
-	      producto.impuestos as impuestos,
-	      SUM (venta_detalle.cantidad) as amount,
-	      SUM (((venta_detalle.cantidad*venta_detalle.precio)-(venta.descuento*((venta_detalle.cantidad*venta_detalle.precio)/(venta.monto+venta.descuento))))::integer/*-(venta_detalle.iva+venta_detalle.otros)::integer*/) as sold_amount,
-	      SUM (venta_detalle.cantidad*venta_detalle.fifo) as costo,
-       	      SUM ((venta_detalle.precio*cantidad)-((iva+venta_detalle.otros)+(fifo*cantidad))) as contrib
-      FROM venta, venta_detalle inner join producto on venta_detalle.barcode = producto.barcode
-      where venta_detalle.id_venta=venta.id and fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-      AND venta.id NOT IN (SELECT id_sale FROM venta_anulada) GROUP BY venta_detalle.barcode,1,2,3,4,5,6,7
+---
+-- Se obtienen los detalles de cada venta 
+-- (agrupados por producto) para el ranking de ventas. 
+---
+CREATE OR REPLACE FUNCTION ranking_ventas (IN starts date,
+       	  	  	   		   IN ends date,
+       					   OUT barcode varchar,
+       					   OUT descripcion varchar,
+       					   OUT marca varchar,
+       					   OUT contenido varchar,
+       					   OUT unidad varchar,
+       					   OUT familia integer,
+       					   OUT amount double precision,
+       					   OUT sold_amount double precision,
+       					   OUT costo double precision,
+       					   OUT contrib double precision,
+       					   OUT impuestos boolean)
+RETURNS SETOF RECORD AS $$
+DECLARE
+  q text;
+  l record;
+
+  corriente_l int4;
+  derivada_l int4;
+BEGIN
+
+  SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+
+  -- Se crea una tabla temporal con el detalle de la venta simple
+  CREATE TEMPORARY TABLE venta_detalle_completa AS
+  SELECT vd.barcode AS barcode_l,
+  	 SUM (vd.cantidad) AS amount_l,
+	 SUM (vd.cantidad * vd.precio) AS sold_amount_l, -- SubTotal
+	 SUM (vd.cantidad * vd.fifo) AS costo_l,
+	 SUM ((vd.precio * vd.cantidad) - ((vd.iva+vd.otros) + (vd.fifo * vd.cantidad))) AS contrib_l
+	 --SUM (vd.ganancia) AS contrib -- habilitar cuando este la modificación de facturas funcione perfectamente
+  FROM venta v
+       INNER JOIN venta_detalle vd
+       ON vd.id_venta = v.id
+  WHERE (vd.tipo = corriente_l OR vd.tipo = derivada_l)
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+  GROUP BY vd.barcode;
+
+  -- Incluye en la tabla temporal venta_detalle_completa el detalle de los componentes de una merc. compleja
+  INSERT INTO venta_detalle_completa
+  SELECT vmcd.barcode_hijo AS barcode_l,
+  	 SUM (vmcd.cantidad) AS amount_l,
+	 SUM (vmcd.cantidad * vmcd.precio) AS sold_amount_l, -- SubTotal
+	 SUM (vmcd.cantidad * vmcd.costo_promedio) AS costo_l,
+	 SUM ((vmcd.precio * vmcd.cantidad) - ((vmcd.iva+vmcd.otros) + (vmcd.costo_promedio * vmcd.cantidad))) AS contrib_l
+  FROM venta v
+       INNER JOIN venta_mc_detalle vmcd
+       ON vmcd.id_venta_vd = v.id
+  WHERE (vmcd.tipo_hijo = corriente_l OR vmcd.tipo_hijo = derivada_l)
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+  GROUP BY vmcd.barcode_hijo;
+
+  q := $S$ 
+     SELECT producto.barcode AS barcode,
+     	    producto.descripcion AS descripcion,
+       	    producto.marca AS marca,
+	    producto.contenido AS contenido,
+	    producto.unidad AS unidad,
+	    producto.familia AS familia,
+	    producto.impuestos AS impuestos,
+	    SUM (vdc.amount_l) AS amount,
+	    SUM (vdc.sold_amount_l) AS sold_amount,
+	    SUM (vdc.costo_l) AS costo,
+       	    SUM (vdc.contrib_l) AS contrib
+      FROM venta_detalle_completa vdc
+      	   INNER JOIN producto 
+	   ON vdc.barcode_l = producto.barcode
+      GROUP BY vdc.barcode_l,1,2,3,4,5,6,7
       ORDER BY producto.descripcion ASC $S$;
 
-for l in execute q loop
-    barcode := l.barcode;
-    descripcion := l.descripcion;
-    marca := l.marca;
-    contenido := l.contenido;
-    unidad := l.unidad;
-    familia := l.familia;
-    amount := l.amount;
-    sold_amount := l.sold_amount;
-    costo := l.costo;
-    contrib := l.contrib;
-    impuestos := l.impuestos;
-    return next;
-end loop;
+  FOR l IN EXECUTE q LOOP
+      barcode := l.barcode;
+      descripcion := l.descripcion;
+      marca := l.marca;
+      contenido := l.contenido;
+      unidad := l.unidad;
+      familia := l.familia;
+      amount := l.amount;
+      sold_amount := l.sold_amount;
+      costo := l.costo;
+      contrib := l.contrib;
+      impuestos := l.impuestos;
+      RETURN NEXT;
+  END LOOP;
 
-return;
-end; $$ language plpgsql;
+  -- Se elimina la tabla temporal
+  DROP TABLE venta_detalle_completa;
+
+RETURN;
+END; $$ language plpgsql;
+
 
 --
 -- Ranking de ventas de ventas de las materias primas
@@ -2520,6 +2566,149 @@ RETURN;
 END; $$ LANGUAGE plpgsql;
 
 
+---
+-- Ranking de ventas de los componentes de un producto compuesto
+-- (ventas indirectas).
+---
+CREATE OR REPLACE FUNCTION ranking_ventas_comp (IN starts date,
+       	  	  	   		      	IN ends date,
+						IN barcode_mp varchar,
+					      	OUT barcode varchar,
+					      	OUT descripcion varchar,
+					      	OUT marca varchar,
+					      	OUT contenido varchar,
+					      	OUT unidad varchar,
+					      	OUT cantidad double precision,
+					      	OUT monto_vendido double precision,
+					      	OUT costo double precision,
+					      	OUT contribucion double precision)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+	-------------
+	derivada_l int4;  -- id tipo derivado
+	corriente_l int4; -- id tipo corriente
+	-------------
+BEGIN
+	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+
+	q := $S$ 
+	     WITH RECURSIVE compuesta (id_venta, barcode_madre, id_mh, tipo_madre, 
+	     	  	    	       barcode_hijo, tipo_hijo, cantidad, 
+				       precio, costo_promedio, iva, otros, ganancia) AS 
+      	      	(
+		   SELECT id_venta_vd, barcode_madre, id_mh, tipo_madre, 
+			  barcode_hijo, tipo_hijo, cantidad, 
+			  precio_proporcional, costo_promedio, iva, otros, ganancia
+       		   FROM venta_mc_detalle
+			INNER JOIN venta v
+			ON venta_mc_detalle.id_venta_vd = v.id
+		   WHERE barcode_madre = $S$ || barcode_mp || $S$
+			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+        	   UNION ALL
+        	   SELECT vmcd.id_venta_vd, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
+		      	  vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad,
+			  vmcd.precio_proporcional, vmcd.costo_promedio, vmcd.iva, vmcd.otros, vmcd.ganancia
+              	   FROM venta_mc_detalle vmcd, compuesta
+       		   WHERE vmcd.barcode_madre = compuesta.barcode_hijo AND
+			 vmcd.id_venta_vd = compuesta.id_venta AND
+			 vmcd.id_mh[1] = compuesta.id_mh[2]
+      		)
+		SELECT producto.barcode AS barcode,
+     	    	       producto.descripcion AS descripcion,
+       	    	       producto.marca AS marca,
+	    	       producto.contenido AS contenido,
+	    	       producto.unidad AS unidad,
+	    	       producto.familia AS familia,
+	    	       producto.impuestos AS impuestos,
+	    	       SUM (c.cantidad) AS cantidad,
+	    	       SUM (c.precio*c.cantidad) AS monto_vendido,
+	    	       SUM (c.costo_promedio*c.cantidad) AS costo,
+       	    	       SUM (c.ganancia) AS contribucion
+      	        FROM compuesta c
+      	   	     INNER JOIN producto 
+	   	     	   ON c.barcode_hijo = producto.barcode
+	             WHERE c.tipo_hijo = $S$ ||derivada_l|| $S$
+		     	   OR c.tipo_hijo = $S$ ||corriente_l|| $S$
+      		     GROUP BY c.barcode_hijo,1,2,3,4,5,6,7
+      		     ORDER BY producto.descripcion ASC $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+    	    cantidad := l.cantidad;
+    	    monto_vendido := l.monto_vendido;
+    	    costo := l.costo;
+    	    contribucion := l.contribucion;
+    	    RETURN NEXT;
+        END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Ranking de ventas de ventas de las mercaderías compuestas
+-- (ventas indirectas).
+---
+CREATE OR REPLACE FUNCTION ranking_ventas_mc (IN starts date,
+       	  	  	   		      IN ends date,
+					      OUT barcode varchar,
+					      OUT descripcion varchar,
+					      OUT marca varchar,
+					      OUT contenido varchar,
+					      OUT unidad varchar,
+					      OUT cantidad double precision,
+					      OUT monto_vendido double precision,
+					      OUT costo double precision,
+					      OUT contribucion double precision,
+					      OUT familia integer)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+	compuesta_l int4;
+BEGIN
+	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
+		        SUM (vd.cantidad) AS cantidad,
+			SUM ((vd.cantidad*vd.precio)-(v.descuento*((vd.cantidad*vd.precio)/(v.monto+v.descuento)))) AS monto_vendido,
+			SUM (vd.cantidad*vd.fifo) AS costo,
+       			SUM ((vd.precio*vd.cantidad)-((vd.iva+vd.otros)+(vd.fifo*vd.cantidad))) AS contribucion
+		 FROM venta_detalle vd
+		 INNER JOIN venta v
+		 ON v.id = vd.id_venta
+		 INNER JOIN producto p
+		 ON p.barcode = vd.barcode
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<$S$ || quote_literal(ends) || $S$
+		 AND vd.tipo=$S$ || compuesta_l || $S$
+		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+	    familia := l.familia;
+    	    cantidad := l.cantidad;
+    	    monto_vendido := l.monto_vendido;
+    	    costo := l.costo;
+    	    contribucion := l.contribucion;
+    	    RETURN NEXT;
+        END LOOP;
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+--
+--
+--
 create or replace function get_guide_detail(
 		IN id_guia integer,
                 IN rut_proveedor integer,
@@ -3782,7 +3971,7 @@ BEGIN
 		       (SELECT valor FROM get_otro_impuesto (c.barcode_comp_der))/100 AS otros
       		FROM compuesta c
 		ORDER BY id_mh[2] ASC;
-	   -- Se elimina la secuencia temporal	
+	   -- Se elimina la secuencia temporal
 	   DROP SEQUENCE id_mh_seq;
 	ELSE
 	   costo_l := costo_madre_in;
@@ -3854,6 +4043,7 @@ BEGIN
 	    RETURN NEXT;
 	END LOOP;
 
+	-- TODO: Se deben actualizar los datos de la mercadería madre en venta_detalle
 	IF (id_mh_in[1] = 0 AND id_mh_in[2] = 0) THEN
 	   DROP TABLE arbol_componentes;	
 	END IF;

@@ -591,7 +591,7 @@ create table venta_detalle (
   id_venta                  int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
-  precio                    int4 not null,
+  precio                    float8 not null, -- Cuando hay descuentos se obtiene un precio proporcional
   fifo                      float8 not null,
   ganancia                  float8 not null,
   iva                       float8,
