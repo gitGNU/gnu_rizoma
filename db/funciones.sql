@@ -1854,7 +1854,7 @@ create or replace function registrar_venta_detalle(
        in in_id_venta int,
        in in_barcode bigint,
        in in_cantidad double precision,
-       in in_precio int,
+       in in_precio double precision,
        in in_fifo double precision,
        in in_iva double precision,
        in in_otros double precision,
@@ -3929,6 +3929,7 @@ DECLARE
 	compuesta_l int4; -- id tipo compuesto
 	derivada_l int4;  -- id tipo derivado
 	corriente_l int4; -- id tipo corriente
+	materia_prima_l int4; -- id tipo materia prima
 	--------------------------
 	-- Datos mercadería madre
 	costo_l double precision;
@@ -3941,6 +3942,7 @@ BEGIN
 	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
 	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
 	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+	SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
 
 	IF (id_mh_in[1] = 0 AND id_mh_in[2] = 0) THEN
 	   -- Obtengo el costo de madre
@@ -4032,7 +4034,7 @@ BEGIN
 
 	       --Se actualiza el stock del producto TODO: se debe registrar la materia prima?? en ese caso usar la secuencia
 	       IF (l.tipo_comp_der = derivada_l) THEN
-	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der);
+	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der AND tipo_madre = materia_prima_l);
 	       ELSIF (l.tipo_comp_der = corriente_l) THEN
 		  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
 	       END IF;
@@ -4043,9 +4045,42 @@ BEGIN
 	    RETURN NEXT;
 	END LOOP;
 
-	-- TODO: Se deben actualizar los datos de la mercadería madre en venta_detalle
+	-- Una vez terminado todo el ciclo (y la recursividad)
+	-- se realizan los últimos ajustes
 	IF (id_mh_in[1] = 0 AND id_mh_in[2] = 0) THEN
-	   DROP TABLE arbol_componentes;	
+	   -- Se obtiene la suma de los impuestos y ganancia todos los componentes
+	   SELECT (SUM (iva)) INTO iva_madre
+	   FROM venta_mc_detalle
+	   WHERE id_venta_vd = id_venta_in
+	   	 AND id_venta_detalle = id_venta_detalle_in
+		 AND tipo_hijo != compuesta_l
+		 AND tipo_hijo != materia_prima_l;
+
+	   SELECT (SUM (otros)) INTO otros_madre
+	   FROM venta_mc_detalle
+	   WHERE id_venta_vd = id_venta_in
+	   	 AND id_venta_detalle = id_venta_detalle_in
+		 AND tipo_hijo != compuesta_l
+		 AND tipo_hijo != materia_prima_l;
+
+	   SELECT (SUM (ganancia)) INTO ganancia_madre
+	   FROM venta_mc_detalle
+	   WHERE id_venta_vd = id_venta_in
+	   	 AND id_venta_detalle = id_venta_detalle_in
+		 AND tipo_hijo != compuesta_l
+		 AND tipo_hijo != materia_prima_l;
+
+	   -- Se actualizan los impuestos y ganancia de la mercadería
+	   -- compuesta en venta detalle
+	   UPDATE venta_detalle
+	   	  SET iva = iva_madre,
+		      otros = otros_madre,
+		      ganancia = ganancia_madre
+	   WHERE id_venta = id_venta_in
+	   	 AND id = id_venta_detalle_in;
+
+           -- Se elimina la tabla temporal arbol_componentes
+	   DROP TABLE arbol_componentes;
 	END IF;
 RETURN;
 END; $$ LANGUAGE plpgsql;

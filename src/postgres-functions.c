@@ -1777,8 +1777,8 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   iva_percent = otros_percent = 0;
 
   //Se obtiene el monto pagado y el posible descuento
-  monto_venta = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto FROM venta WHERE id = %d", id_venta)), 0,"monto")));
-  monto_descuento = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT descuento FROM venta WHERE id = %d", id_venta)), 0,"monto")));
+  monto_venta = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto FROM venta WHERE id = %d", id_venta)), 0, "monto")));
+  monto_descuento = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT descuento FROM venta WHERE id = %d", id_venta)), 0, "descuento")));
 
   //Se obtiene el id del tipo mercadería (corriente)
   corriente = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id")));
