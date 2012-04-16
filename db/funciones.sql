@@ -2653,8 +2653,7 @@ END; $$ LANGUAGE plpgsql;
 
 
 ---
--- Ranking de ventas de ventas de las mercaderías compuestas
--- (ventas indirectas).
+-- Ranking de ventas de las mercaderías compuestas
 ---
 CREATE OR REPLACE FUNCTION ranking_ventas_mc (IN starts date,
        	  	  	   		      IN ends date,
@@ -3936,7 +3935,9 @@ DECLARE
 	precio_proporcional_l double precision;
 	iva_madre double precision;
 	otros_madre double precision;
-	ganancia_madre double precision;	
+	ganancia_madre double precision;
+	-- Mercaderia hija temporal (materia prima)
+	barcode_mp bigint;
 	--------------------------
 BEGIN
 	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
@@ -3972,9 +3973,7 @@ BEGIN
 		       (SELECT valor FROM get_iva (c.barcode_comp_der))/100 AS iva,
 		       (SELECT valor FROM get_otro_impuesto (c.barcode_comp_der))/100 AS otros
       		FROM compuesta c
-		ORDER BY id_mh[2] ASC;
-	   -- Se elimina la secuencia temporal
-	   DROP SEQUENCE id_mh_seq;
+		ORDER BY id_mh[2] ASC;	   
 	ELSE
 	   costo_l := costo_madre_in;
 	END IF;
@@ -4034,6 +4033,20 @@ BEGIN
 
 	       --Se actualiza el stock del producto TODO: se debe registrar la materia prima?? en ese caso usar la secuencia
 	       IF (l.tipo_comp_der = derivada_l) THEN
+	       	  -- Se obtiene el barcode de la mercadería de la cual nace este "derivado"
+	       	  SELECT barcode_madre INTO barcode_mp
+		  FROM componente_mc
+		  WHERE barcode_comp_der = l.barcode_comp_der
+		  AND tipo_madre = materia_prima_l;
+
+		  -- Se registra la información de la materia prima correspondiente a este derivado
+		  INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo,
+		  	      		        cantidad, precio_proporcional, precio, costo_promedio, ganancia, 
+						iva, otros, tipo_madre, tipo_hijo)
+	          VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')], 
+		  	  l.barcode_comp_der, barcode_mp, l.cant_mud * cantidad_in, precio_proporcional_l, 
+			  l.precio_hijo, l.costo_hijo, ganancia_out, iva_out, otros_out, l.tipo_comp_der, materia_prima_l);
+
 	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der AND tipo_madre = materia_prima_l);
 	       ELSIF (l.tipo_comp_der = corriente_l) THEN
 		  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
@@ -4081,6 +4094,8 @@ BEGIN
 
            -- Se elimina la tabla temporal arbol_componentes
 	   DROP TABLE arbol_componentes;
+	   -- Se elimina la secuencia temporal
+	   DROP SEQUENCE id_mh_seq;
 	END IF;
 RETURN;
 END; $$ LANGUAGE plpgsql;
