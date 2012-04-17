@@ -3954,7 +3954,7 @@ BEGIN
 	   CREATE TEMPORARY TABLE arbol_componentes AS
 	   WITH RECURSIVE compuesta (barcode_madre, id_mh, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
       	      	(
-		   SELECT barcode_madre, 
+		   SELECT barcode_madre,
 		   	  ARRAY[0, nextval('id_mh_seq')] AS id_mh,
 			  tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
        		   FROM componente_mc WHERE barcode_madre = barcode_madre_in
@@ -3973,7 +3973,7 @@ BEGIN
 		       (SELECT valor FROM get_iva (c.barcode_comp_der))/100 AS iva,
 		       (SELECT valor FROM get_otro_impuesto (c.barcode_comp_der))/100 AS otros
       		FROM compuesta c
-		ORDER BY id_mh[2] ASC;	   
+		ORDER BY id_mh[2] ASC;
 	ELSE
 	   costo_l := costo_madre_in;
 	END IF;
@@ -3982,9 +3982,9 @@ BEGIN
 	     	 WHERE id_mh[1] = $S$ || id_mh_in[2] || $S$
 		 ORDER BY id_mh[2] $S$;
 
-	FOR l IN EXECUTE q LOOP	    	    
+	FOR l IN EXECUTE q LOOP
 	    -- Si es una mercadería compuesta entra en ella
-	    IF (l.tipo_comp_der = 3) THEN
+	    IF (l.tipo_comp_der = compuesta_l) THEN
 	       -- PRECIO PROPORCIONAL (costo_hijo/costo_madre) * precio_proporcional_madre
 	       precio_proporcional_l := (l.costo_hijo/costo_l) * precio_proporcional_in;
 
