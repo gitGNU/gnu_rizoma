@@ -2897,9 +2897,29 @@ AddFoundProduct (void)
 	{
 	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
 	  add_to_comp_list (barcode);
-	  add_to_comp = FALSE;
+	  
+	  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "btn_asoc_comp"))) == FALSE)
+	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_asoc_comp")), TRUE);
 	}
     }
+
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_buscador")));
+}
+
+/**
+ * Callback from "btn_close_wnd_buscador" Button
+ * (signal click) and "wnd_buscador" (signal delete-event).
+ *
+ * Close and clean the "wnd_buscador" window.
+ *
+ * @param: button
+ * @param: user_data
+ */
+void
+on_btn_close_wnd_buscador_clicked (GtkButton *button, gpointer user_data)
+{
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_buscador")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
 }
 
 
@@ -2958,7 +2978,8 @@ SearchName (void)
       barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_comp_barcode"))));
       //TODO: Y de ningun producto que lo tenga a él mismo como componente
       q = g_strdup_printf ("%s WHERE barcode != %s "			  
-			   "AND tipo != %s", q, barcode, materia_prima);
+			   "AND tipo != %s "
+			   "AND costo_promedio > 0", q, barcode, materia_prima);
     }
 
   res = EjecutarSQL (q);
@@ -3092,8 +3113,6 @@ SearchByName (void)
   if ( ! g_str_equal (string, ""))
     {
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buscar")), string);
-
-      // Si se esta agregando un derivado, se busca la materia prima a la cual pertenece      
       SearchName ();
     }
 } // void SearchByName (void)
@@ -7918,25 +7937,6 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
 
 
 /**
- * Abre la ventana para buscar productos
- * y agregarlos a la lista de componentes
- * para un producto compuesto.
- *
- * @param void
- */
-void
-on_btn_add_comp_clicked (void)
-{
-  add_to_comp = TRUE;
-
-  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "btn_asoc_comp"))) == FALSE)
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_asoc_comp")), TRUE);
-
-  SearchByName ();
-}
-
-
-/**
  * Callback to edit cantity on 'treeview_components'
  * (editable-event)
  *
@@ -7955,6 +7955,9 @@ on_cantidad_compuesta_renderer_edited (GtkCellRendererText *cell, gchar *path_st
 
   gdouble cantidad;
   gdouble costo;
+  gchar *barcode;
+  gchar *fraccion;
+  gchar *descripcion;
 
   /*Obtiene el modelo del treeview compra detalle*/
   model = GTK_TREE_MODEL (data);
@@ -7962,7 +7965,6 @@ on_cantidad_compuesta_renderer_edited (GtkCellRendererText *cell, gchar *path_st
 
   /* obtiene el iter para poder obtener y setear datos del treeview */
   gtk_tree_model_get_iter (model, &iter, path);
-
 
   if (!is_numeric (new_cantity))
     {
@@ -7982,8 +7984,20 @@ on_cantidad_compuesta_renderer_edited (GtkCellRendererText *cell, gchar *path_st
 
   // Se obtiene el costo de producto
   gtk_tree_model_get (model, &iter,
+		      0, &barcode,
+		      2, &descripcion,
 		      3, &costo,
 		      -1);
+
+  // Se asegura que no se ingresen valores decimales para productos no fraccionarios
+  fraccion = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT fraccion FROM producto WHERE barcode = %s", barcode)), 0, "fraccion");
+  if (!g_str_equal (fraccion, "t")) 
+    {
+      cantidad = (cantidad < 1) ? 1 : lround (cantidad);
+      statusbar_push (GTK_STATUSBAR (builder_get (builder, "statusbar_asoc_comp")), 
+		      g_strdup_printf ("El producto %s no es fraccional, la cantidad ha sido redondeada", descripcion), 
+		      5000);
+    }
 
   // Se setean los datos modificados en el treeview
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
@@ -8000,7 +8014,18 @@ on_cantidad_compuesta_renderer_edited (GtkCellRendererText *cell, gchar *path_st
   return;
 }
 
-
+/**
+ * Callback from "btn_cancel_asoc_comp" Button
+ * (signal click) and "wnd_asoc_comp" (signal delete-event).
+ *
+ * Hide the "wnd_asoc_comp" windows and set the add_to_comp FLAG to FALSE.
+ */
+void
+close_wnd_asoc_comp (void)
+{
+  add_to_comp = FALSE;
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_asoc_comp")));
+}
 
 /**
  * Show and inicialize the 'wnd_asoc_comp' window
@@ -8018,6 +8043,7 @@ show_wnd_asoc_comp (void)
   gint tuples, i;
   gdouble costo_promedio, costo_total, cantidad;
 
+  add_to_comp = TRUE;
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_components"));
 
   if (gtk_tree_view_get_model (treeview) == NULL)
@@ -8111,8 +8137,8 @@ show_wnd_asoc_comp (void)
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, g_strdup (PQvaluebycol (res, i, "codigo")),
 			      2, g_strdup_printf ("%s %s",
-						  PQvaluebycol (res, i, "marca"),
-						  PQvaluebycol (res, i, "descripcion")),
+						  PQvaluebycol (res, i, "descripcion"),
+						  PQvaluebycol (res, i, "marca")),
 			      3, costo_promedio,
 			      4, cantidad,
 			      5, costo_promedio * cantidad,
@@ -8128,6 +8154,8 @@ show_wnd_asoc_comp (void)
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_int_sell_price_comp")), 
 		      GetDataByOne (g_strdup_printf ("SELECT precio FROM producto WHERE barcode = %s", barcode)));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_asoc_comp")));
+
+  on_button_clear_clicked (NULL, NULL);
 }
 
 

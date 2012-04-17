@@ -632,7 +632,7 @@
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
-    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
+    <signal name="delete-event" handler="close_wnd_asoc_comp" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1_asoc_comp">
         <property name="visible">True</property>
@@ -949,7 +949,7 @@
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="on_btn_add_comp_clicked" swapped="no"/>
+                        <signal name="clicked" handler="SearchByName" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1025,9 +1025,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHButtonBox" id="hbuttonbox3_asoc_comp">
+          <object class="GtkHBox" id="hbox_asoc_comp">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">5</property>
             <child>
               <object class="GtkButton" id="btn_cancel_asoc_comp">
                 <property name="label">gtk-cancel</property>
@@ -1036,7 +1037,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="gtk_widget_hide" object="wnd_asoc_comp" swapped="yes"/>
+                <signal name="clicked" handler="close_wnd_asoc_comp" swapped="yes"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1045,11 +1046,21 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkStatusbar" id="statusbar_asoc_comp">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="spacing">2</property>
+                <property name="has_resize_grip">False</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="btn_asoc_comp">
-                <property name="label" translatable="yes">A_sociar</property>
+                <property name="label" translatable="yes">As_ociar</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -1060,6 +1071,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
+                <property name="pack_type">end</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -1067,6 +1079,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">2</property>
             <property name="position">3</property>
           </packing>
         </child>
@@ -1202,7 +1215,7 @@
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <child>
-              <object class="GtkButton" id="button23">
+              <object class="GtkButton" id="btn_close_wnd_buscador">
                 <property name="label" context="yes">gtk-close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1211,7 +1224,7 @@
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
-                <signal name="clicked" handler="gtk_widget_hide" object="wnd_buscador" swapped="yes"/>
+                <signal name="clicked" handler="on_btn_close_wnd_buscador_clicked" swapped="yes"/>
                 <signal name="clicked" handler="clean_container" object="wnd_buscador" swapped="yes"/>
               </object>
               <packing>
