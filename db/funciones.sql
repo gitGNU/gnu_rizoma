@@ -2479,21 +2479,24 @@ DECLARE
 	materia_prima_l int4;
 BEGIN
 	SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
-	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
+	q := $S$ SELECT CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
+	     	 	     WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
+			END AS barcode,
+	     	 	p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
 		        SUM (vmcd.cantidad) AS cantidad,
-			SUM ((vmcd.cantidad*vmcd.precio)-(v.descuento*((vmcd.cantidad*vmcd.precio)/(v.monto+v.descuento)))) AS monto_vendido,
+			SUM (vmcd.cantidad*vmcd.precio) AS monto_vendido,
 			SUM (vmcd.cantidad*vmcd.costo_promedio) AS costo,
        			SUM ((vmcd.precio*vmcd.cantidad)-((vmcd.iva+vmcd.otros)+(vmcd.costo_promedio*vmcd.cantidad))) AS contribucion
 		 FROM venta_mc_detalle vmcd
-		 INNER JOIN venta_detalle vd
-		 ON vd.id_venta = vmcd.id_venta_vd
-		 AND vd.id = vmcd.id_venta_detalle
-		 INNER JOIN venta v
-		 ON v.id = vd.id_venta
-		 INNER JOIN producto p
-		 ON p.barcode = vmcd.barcode_madre
+		      INNER JOIN venta v
+		      	    ON v.id = vmcd.id_venta_vd
+		      INNER JOIN producto p
+		      	    ON p.barcode = CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
+	     	 	       		   	WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
+					   END
 		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-		 AND vmcd.tipo_hijo = $S$ || materia_prima_l || $S$ 
+		       AND (vmcd.tipo_hijo = $S$||materia_prima_l||$S$ OR vmcd.tipo_madre = $S$||materia_prima_l||$S$)
+		       AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
 		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
 
       	FOR l IN EXECUTE q loop
@@ -2531,36 +2534,80 @@ CREATE OR REPLACE FUNCTION ranking_ventas_deriv (IN starts date,
 					      	 OUT contribucion double precision)
 RETURNS SETOF RECORD AS $$
 DECLARE
-	q text;
-	l record;
+  q text;
+  l record;
+  --------------
+  derivada_l int4;  -- id tipo derivado
+  --------------
 BEGIN
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
 
-	q := $S$ SELECT p.barcode, p.descripcion, p.marca, p.contenido, p.unidad,
-		        SUM (vd.cantidad) AS cantidad,
-			SUM ((vd.cantidad*vd.precio)-(v.descuento*((vd.cantidad*vd.precio)/(v.monto+v.descuento)))) AS monto_vendido,
-			SUM (vd.cantidad*vd.fifo) AS costo,
-       			SUM ((vd.precio*vd.cantidad)-((vd.iva+vd.otros)+(vd.fifo*vd.cantidad))) AS contribucion
-		 FROM venta_detalle vd
-		 INNER JOIN venta v
-		 ON v.id = vd.id_venta
-		 INNER JOIN producto p
-		 ON p.barcode = vd.barcode
-		 WHERE vd.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre = $S$ || barcode_mp || $S$)
-		 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-		 GROUP BY 1,2,3,4,5 ORDER BY p.descripcion ASC $S$;
+  -- Se crea una tabla temporal con el detalle de la venta simple
+  CREATE TEMPORARY TABLE venta_derivados_completa AS
+  SELECT vd.barcode AS barcode_l,
+  	 SUM (vd.cantidad) AS amount_l,
+	 SUM (vd.cantidad * vd.precio) AS sold_amount_l, -- SubTotal
+	 SUM (vd.cantidad * vd.fifo) AS costo_l,
+	 SUM ((vd.precio * vd.cantidad) - ((vd.iva+vd.otros) + (vd.fifo * vd.cantidad))) AS contrib_l
+	 --SUM (vd.ganancia) AS contrib -- TODO: habilitar cuando este la modificación de facturas funcione perfectamente
+  FROM venta v
+       INNER JOIN venta_detalle vd
+       ON vd.id_venta = v.id
+  WHERE vd.tipo = derivada_l
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+	AND vd.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre=barcode_mp::bigint)
+  GROUP BY vd.barcode;
 
-      	FOR l IN EXECUTE q loop
-	    barcode := l.barcode;
-            descripcion := l.descripcion;
-	    marca := l.marca;
-    	    contenido := l.contenido;
-    	    unidad := l.unidad;
-    	    cantidad := l.cantidad;
-    	    monto_vendido := l.monto_vendido;
-    	    costo := l.costo;
-    	    contribucion := l.contribucion;
-    	    RETURN NEXT;
-        END LOOP;
+  -- Incluye en la tabla temporal venta_derivados_completa el detalle de los componentes de una merc. compleja
+  INSERT INTO venta_derivados_completa
+  SELECT vmcd.barcode_hijo AS barcode_l,
+  	 SUM (vmcd.cantidad) AS amount_l,
+	 SUM (vmcd.cantidad * vmcd.precio) AS sold_amount_l, -- SubTotal
+	 SUM (vmcd.cantidad * vmcd.costo_promedio) AS costo_l,
+	 SUM ((vmcd.precio * vmcd.cantidad) - ((vmcd.iva+vmcd.otros) + (vmcd.costo_promedio * vmcd.cantidad))) AS contrib_l
+  FROM venta v
+       INNER JOIN venta_mc_detalle vmcd
+       ON vmcd.id_venta_vd = v.id
+  WHERE vmcd.tipo_hijo = derivada_l
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+	AND vmcd.barcode_hijo IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre = barcode_mp::bigint)
+  GROUP BY vmcd.barcode_hijo;
+
+  q := $S$ 
+     SELECT producto.barcode AS barcode,
+     	    producto.descripcion AS descripcion,
+       	    producto.marca AS marca,
+	    producto.contenido AS contenido,
+	    producto.unidad AS unidad,
+	    producto.familia AS familia,
+	    producto.impuestos AS impuestos,
+	    SUM (vdc.amount_l) AS cantidad,
+	    SUM (vdc.sold_amount_l) AS monto_vendido,
+	    SUM (vdc.costo_l) AS costo,
+       	    SUM (vdc.contrib_l) AS contribucion
+      FROM venta_derivados_completa vdc
+      	   INNER JOIN producto 
+	   ON vdc.barcode_l = producto.barcode
+      GROUP BY vdc.barcode_l,1,2,3,4,5,6,7
+      ORDER BY producto.descripcion ASC $S$;
+
+  FOR l IN EXECUTE q loop
+      barcode := l.barcode;
+      descripcion := l.descripcion;
+      marca := l.marca;
+      contenido := l.contenido;
+      unidad := l.unidad;
+      cantidad := l.cantidad;
+      monto_vendido := l.monto_vendido;
+      costo := l.costo;
+      contribucion := l.contribucion;
+      RETURN NEXT;
+  END LOOP;
+
+  -- Se elimina la tabla temporal
+  DROP TABLE venta_derivados_completa;
 
 RETURN;
 END; $$ LANGUAGE plpgsql;
