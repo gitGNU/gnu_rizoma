@@ -2920,6 +2920,10 @@ on_btn_close_wnd_buscador_clicked (GtkButton *button, gpointer user_data)
 {
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_buscador")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
+
+  /*Si la FLAG add_deriv es TRUE*/
+  if (add_deriv == TRUE)
+    add_deriv = FALSE;
 }
 
 
@@ -8028,6 +8032,20 @@ close_wnd_asoc_comp (void)
 }
 
 /**
+ * Callback from "btn_cancel_comp_deriv" Button
+ * (signal click) and "wnd_comp_deriv" (signal delete-event).
+ *
+ * Hide the "wnd_comp_deriv" windows and set the add_to_comp FLAG to FALSE.
+ */
+void
+close_wnd_comp_deriv (void)
+{
+  add_deriv = FALSE;
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_comp_deriv")));
+}
+
+
+/**
  * Show and inicialize the 'wnd_asoc_comp' window
  */
 void
@@ -8390,6 +8408,7 @@ on_btn_assoc_comp_deriv_clicked (GtkButton *button, gpointer user_data)
   //gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
 
+  add_deriv = FALSE;
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_comp_deriv")));
 }
 
