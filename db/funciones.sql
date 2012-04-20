@@ -4264,13 +4264,13 @@ BEGIN
         SELECT COALESCE(valor,0) INTO otros_percent FROM get_otro_impuesto (barcode::BIGINT);
 		
 	-- IMPUESTOS
-	IF iva_percent = -1 THEN
+	IF iva_percent = 0 THEN
 	   iva_percent = 0;
 	ELSE
 	   iva_percent = iva_percent / 100;
 	END IF;
 
-        IF otros_percent = -1 THEN
+        IF otros_percent = 0 THEN
 	   otros_percent = 0;
 	ELSE
 	   otros_percent = otros_percent / 100;

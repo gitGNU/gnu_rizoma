@@ -217,7 +217,7 @@ CalcularSoloAfecto (Productos *header)
 
   do
     {
-      if (GetIVA (cal->product->barcode) != -1)
+      if (GetIVA (cal->product->barcode) != 0)
 	{
 	  if (cal->product->mayorista == FALSE && cal->product->cantidad < cal->product->cantidad_mayorista)
 	    total += (gdouble)(cal->product->precio * cal->product->cantidad);
@@ -245,7 +245,7 @@ CalcularSoloNoAfecto (Productos *header)
 
   do
     {
-      if (GetIVA (cal->product->barcode) == -1)
+      if (GetIVA (cal->product->barcode) == 0)
 	{
 	  if (cal->product->mayorista == FALSE && cal->product->cantidad < cal->product->cantidad_mayorista)
 	    total += (gdouble)(cal->product->precio * cal->product->cantidad);
@@ -274,7 +274,7 @@ CalcularTotalProporcionAfecta (Productos *header)
 
   do
     { //La proporcion afecta la tienen solo los productos con impuestos
-      if (GetIVA (cal->product->barcode) != -1)
+      if (GetIVA (cal->product->barcode) != 0)
 	total += (gdouble)(cal->product->proporcion_afecta_imp);
 
       cal = cal->next;
@@ -296,7 +296,7 @@ CalcularTotalProporcionNoAfecta (Productos *header)
 
   do
     { //La proporcion no afecta la tienen solo los productos con impuestos
-      if (GetIVA (cal->product->barcode) != -1)	
+      if (GetIVA (cal->product->barcode) != 0)	
 	total += (gdouble)(cal->product->proporcion_no_afecta_imp);
       
       cal = cal->next;

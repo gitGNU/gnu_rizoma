@@ -851,32 +851,32 @@ FillFields(GtkTreeSelection *selection, gpointer data)
       else
         mermaporc = 0;
 
-      if (iva != -1)
+      if (iva != 0)
 	iva = (gdouble)iva / 100;
       else
-	iva = -1;
+	iva = 0;
 
-      if (otros != 0 && otros != -1)
+      if (otros != 0 && otros != 0)
 	otros = (gdouble)otros / 100;
       else
-	otros = -1;
+	otros = 0;
 
       /*Calcula la contribucion unitaria y los impuestos*/
-      if (otros == -1 && iva != -1)
+      if (otros == 0 && iva != 0)
 	{
 	  contri_unit = ((precio / (iva + 1)) - costo_promedio); //Contribución unitaria
 
 	  iva_unit   = lround ((costo_promedio + contri_unit) * iva);
 	  otros_unit = 0;
 	}
-      else if (iva != -1 && otros != -1)
+      else if (iva != 0 && otros != 0)
         {
 	  contri_unit = ((precio / (iva + otros + 1)) - costo_promedio); //Contribución unitaria
 
 	  iva_unit   = lround ((costo_promedio + contri_unit ) * iva);
 	  otros_unit = lround ((costo_promedio + contri_unit) * otros);
         }
-      else if (iva == -1 && otros == -1)
+      else if (iva == 0 && otros == 0)
 	{
 	  contri_unit = precio - costo_promedio; //Contribución unitaria
 
@@ -1402,7 +1402,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
   tuples = PQntuples (res);
 
-  if (GetIVA (barcode) != -1)
+  if (GetIVA (barcode) != 0)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), FALSE);

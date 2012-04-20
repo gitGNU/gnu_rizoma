@@ -2124,14 +2124,12 @@ CalcularPrecioFinal (void)
 
   printf ("Opcion: %s\n", opcion);
 
-  if (iva != -1)
+  if (iva != 0)
     iva = (gdouble)iva / 100 + 1;
-  else
-    iva = -1;
 
   // TODO: Revisión (Concenso de la variable)
   if (otros == 0)
-    otros = -1;
+    otros = 0;
 
   /*
     IVA = 1,19;
@@ -2157,11 +2155,11 @@ CalcularPrecioFinal (void)
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
       //Si tiene solo IVA
-      if (otros == -1 && iva != -1  && g_str_equal (opcion, "Costo neto"))
+      if (otros == 0 && iva != 0  && g_str_equal (opcion, "Costo neto"))
         precio = (gdouble) ((gdouble)(precio_final / iva) / (gdouble) (ganancia + 100)) * 100;
 
       //Si tiene ambos impuestos
-      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
+      else if (iva != 0 && otros != 0 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -2171,7 +2169,7 @@ CalcularPrecioFinal (void)
         }
 
       //Si no tiene impuestos
-      else if ((iva == -1 && otros == -1) || g_str_equal (opcion, "Costo bruto"))
+      else if ((iva == 0 && otros == 0) || g_str_equal (opcion, "Costo bruto"))
 	precio = (gdouble) (precio_final / (gdouble) (ganancia + 100)) * 100;
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")),
@@ -2184,11 +2182,11 @@ CalcularPrecioFinal (void)
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
       //Si solo tiene IVA
-      if (otros == -1 && iva != -1 && g_str_equal (opcion, "Costo neto"))
+      if (otros == 0 && iva != 0 && g_str_equal (opcion, "Costo neto"))
         porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
 
       //Si tiene ambos impuestos
-      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
+      else if (iva != 0 && otros != 0 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -2199,7 +2197,7 @@ CalcularPrecioFinal (void)
         }
 
       //Si no tiene impuestos
-      else if ((iva == -1 && otros == -1) || g_str_equal (opcion, "Costo bruto"))
+      else if ((iva == 0 && otros == 0) || g_str_equal (opcion, "Costo bruto"))
         porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
 
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")),
@@ -2212,11 +2210,11 @@ CalcularPrecioFinal (void)
       calcular = 1; // FLAG - Permite saber que se ha realizado un cálculo.
 
       //Si solo tiene IVA
-      if (otros == -1 && iva != -1 && g_str_equal (opcion, "Costo neto"))
+      if (otros == 0 && iva != 0 && g_str_equal (opcion, "Costo neto"))
         precio = (gdouble) ((gdouble)(ingresa * (gdouble)(ganancia + 100)) * iva) / 100;
 
       //Si tiene ambos impuestos
-      else if (iva != -1 && otros != -1 && g_str_equal (opcion, "Costo neto"))
+      else if (iva != 0 && otros != 0 && g_str_equal (opcion, "Costo neto"))
         {
           iva = (gdouble) iva - 1;
           otros = (gdouble) otros / 100;
@@ -2227,7 +2225,7 @@ CalcularPrecioFinal (void)
         }
 
       //Si no tiene impuestos
-      else if ((iva == -1 && otros == -1) || g_str_equal (opcion, "Costo bruto"))
+      else if ((iva == 0 && otros == 0) || g_str_equal (opcion, "Costo bruto"))
         precio = (gdouble)(ingresa * (gdouble)(ganancia + 100)) / 100;
 
       if (ganancia == 0)
@@ -2288,9 +2286,9 @@ AddToProductsList (void)
       iva = GetIVA (barcode);  
       otros = GetOtros (barcode);
       
-      if (iva != -1)
+      if (iva != 0)
 	iva = (gdouble)iva/100;
-      if (otros != -1)
+      if (otros != 0)
 	otros = (gdouble)otros/100;      
      
       total_imp = iva + otros + 1;      
@@ -2916,14 +2914,15 @@ AddFoundProduct (void)
  * @param: user_data
  */
 void
-on_btn_close_wnd_buscador_clicked (GtkButton *button, gpointer user_data)
+close_wnd_buscador (GtkButton *button, gpointer user_data)
 {
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_buscador")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
 
   /*Si la FLAG add_deriv es TRUE*/
   if (add_deriv == TRUE)
     add_deriv = FALSE;
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_buscador")));
 }
 
 
@@ -4220,10 +4219,10 @@ CalcularTotales (void)
 
       total_neto += total;
 
-      if (iva != -1)
+      if (iva != 0)
 	total_iva += lround (total * (gdouble) iva / 100);
 
-      if (otros != -1)
+      if (otros != 0)
 	total_otros += lround (total * (gdouble) otros / 100);
 
       products = products->next;
@@ -4934,8 +4933,9 @@ create_new_merchandise (gchar *tipo)
 void
 create_new_compuesta (void)
 {
-  GtkWidget *ventana, *barcode_w, *codigo_corto_w, *descripcion_w;
-  GtkComboBox *cmb_family;
+  GtkWidget *ventana, *barcode_w, *codigo_corto_w, *descripcion_w, *marca_w, 
+    *contenido_w, *radio_fraccion_no;
+  GtkComboBox *cmb_family, *cmb_unit;
   gchar *barcode, *cod_corto;
 
   //Ventana
@@ -4946,15 +4946,27 @@ create_new_compuesta (void)
   barcode_w = GTK_WIDGET (builder_get (builder, "entry_new_comp_barcode"));
   codigo_corto_w = GTK_WIDGET (builder_get (builder, "entry_new_comp_code"));
   descripcion_w = GTK_WIDGET (builder_get (builder, "entry_new_comp_desc"));
+  marca_w = GTK_WIDGET (builder_get (builder, "entry_new_comp_brand"));
+  contenido_w = GTK_WIDGET (builder_get (builder, "entry_new_comp_cont"));
 
   //Rellenar Familia
   cmb_family = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_comp_family"));
   fill_combo_familias (cmb_family, 0);
-  
+  //Rellenar Cantidad
+  cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_comp_unit"));
+  fill_combo_unidad (cmb_unit, "");
+
+  //Radio Buttons
+  radio_fraccion_no = GTK_WIDGET (builder_get (builder, "radio_btn_comp_fractional_no"));
+
   //Ventana creacion de productos
   gtk_entry_set_max_length (GTK_ENTRY (barcode_w), 18);
   gtk_entry_set_max_length (GTK_ENTRY (codigo_corto_w), 16);
   gtk_entry_set_max_length (GTK_ENTRY (descripcion_w), 25);
+  gtk_entry_set_max_length (GTK_ENTRY (marca_w), 20);
+  gtk_entry_set_max_length (GTK_ENTRY (contenido_w), 10);
+
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radio_fraccion_no), TRUE);
 
   //Contenido
   barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
@@ -5200,7 +5212,8 @@ show_new_unidad_win_clicked (GtkButton *button, gpointer user_data)
   //Se ocultan todos los botones guardar
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amd"))); //En agregar mercadería corriente (discreta)
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amp"))); //En agregar materia prima
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc"))); //En agregar mercadería compuesta
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc"))); //En Agregar MerCadería derivada
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amcc"))); //En Agregar MerCadería Compuesta
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_save_unidad_em"))); //En editar mercadería
 
@@ -5211,6 +5224,8 @@ show_new_unidad_win_clicked (GtkButton *button, gpointer user_data)
     gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amp")));
   else if (g_str_equal (nombre_boton, "btn_new_mcd_unidad")) //Ventana nueva mercadería derivada
     gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amc")));
+  else if (g_str_equal (nombre_boton, "btn_new_mcc_unidad")) //Ventana nueva mercadería compuesta
+    gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_amcc")));
 
   else if (g_str_equal (nombre_boton, "btn_edit_unidad")) //Ventana editar mercadería (el que sea)
     gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_save_unidad_em")));
@@ -6302,6 +6317,13 @@ save_new_unit (GtkButton *button, gpointer user_data)
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_new_mcd_unit"));
       btn = GTK_BUTTON (gtk_builder_get_object(builder, "btn_new_mcd_unidad"));
+    }
+  else if (strcmp (nombre_boton, "btn_save_unidad_amcc") == 0) //compuesta
+    {
+      parent = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_new_compuesta"));
+      gtk_window_set_transient_for (win, parent);
+      combo = GTK_COMBO_BOX (gtk_builder_get_object (builder, "cmb_new_comp_unit"));
+      btn = GTK_BUTTON (gtk_builder_get_object (builder, "btn_new_mcc_unidad"));
     }
   else if (strcmp (nombre_boton, "btn_save_unidad_em") == 0) //Editar Mercadería (cualquiera)
     {
@@ -7691,7 +7713,7 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
   else if (strcmp (description, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
-    ErrorMSG (GTK_WIDGET (entry_brand), "Debe ingresar al Marca de la materia prima");
+    ErrorMSG (GTK_WIDGET (entry_brand), "Debe ingresar la Marca de la materia prima");
   else if (strcmp (contenido, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_cont), "Debe ingresar el Contenido la materia prima");
   else if (strcmp (costo, "") == 0)
@@ -8194,12 +8216,21 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
   GtkEntry *entry_code = GTK_ENTRY (builder_get (builder, "entry_new_comp_code"));
   GtkEntry *entry_barcode = GTK_ENTRY (builder_get (builder, "entry_new_comp_barcode"));
   GtkEntry *entry_desc = GTK_ENTRY (builder_get (builder, "entry_new_comp_desc"));
+  GtkEntry *entry_brand = GTK_ENTRY (builder_get (builder, "entry_new_comp_brand"));
+  GtkEntry *entry_cont = GTK_ENTRY (builder_get (builder, "entry_new_comp_cont"));
 
   GtkComboBox *combo_family = GTK_COMBO_BOX (builder_get (builder, "cmb_new_comp_family"));
+  GtkComboBox *combo_unit = GTK_COMBO_BOX (builder_get (builder, "cmb_new_comp_unit"));
+
+  gboolean fraccion = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, 
+										    "radio_btn_comp_fractional_yes")));
   
   gchar *codigo = g_strdup (gtk_entry_get_text (entry_code));
   gchar *barcode = g_strdup (gtk_entry_get_text (entry_barcode));
   gchar *description = g_strdup (gtk_entry_get_text (entry_desc));
+  gchar *marca = g_strdup (gtk_entry_get_text (entry_brand));
+  gchar *contenido = g_strdup (gtk_entry_get_text (entry_cont));
+  gchar *unidad;
   gint familia;
 
   gchar *tipo;
@@ -8218,6 +8249,12 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
   else if (g_str_equal (description, ""))
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
+  else if (strcmp (marca, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_brand), "Debe ingresar la Marca de la mercadería compuesta");
+  else if (strcmp (contenido, "") == 0)
+    ErrorMSG (GTK_WIDGET (entry_cont), "Debe ingresar el Contenido la mercadería compuesta");
+  else if (!is_numeric (contenido))
+    ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
       if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
@@ -8250,11 +8287,19 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
 			  0, &familia,
 			  -1);
 
+      /*Unidad*/
+      model = gtk_combo_box_get_model (combo_unit);
+      gtk_combo_box_get_active_iter (combo_unit, &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  1, &unidad,
+			  -1);
+
       //Tipo producto (COMPUESTA)
       tipo = PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id");
       
       //Crear producto - Codigo, barcode, descripcion, marca, contenido, unidad, impuestos, otros, familia, perecible, fraccion, tipo
-      if (!AddNewProductToDB (codigo, barcode, description, "", "1", "UN", TRUE, 0, familia, FALSE, FALSE, atoi (tipo)))
+      if (!AddNewProductToDB (codigo, barcode, description, marca, CUT (contenido), unidad, TRUE, 0, familia, FALSE, fraccion, atoi (tipo)))
 	return;
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_new_compuesta")));    
@@ -9945,30 +9990,25 @@ calcularPorcentajeGanancia (void)
   gdouble otros = GetOtros (barcode);
 
   /*------ Se calcula el porcentaje de ganancia ------*/
-  if (iva != -1)
-    iva = (gdouble)iva / 100 + 1;
-  else
-    iva = -1;
+  if (iva != 0)
+    iva = iva / 100;
 
   // TODO: Revisión (Concenso de la variable)
-  if (otros == 0)
-    otros = -1;
+  if (otros != 0)
+    otros = otros / 100;
 
   /* -- Profit porcent ("ganancia") is calculated here -- */
-  if (otros == -1 && iva != -1 )
-    porcentaje = (gdouble) ((precio_final / (gdouble)(iva * ingresa)) -1) * 100;
+  if (otros == 0 && iva != 0)
+    porcentaje = (((precio_final / (iva+1)) - ingresa) / ingresa) * 100;
 
-  else if (iva != -1 && otros != -1 )
+  else if (iva != 0 && otros != 0 )
     {
-      iva = (gdouble) iva - 1;
-      otros = (gdouble) otros / 100;
-
       precio = (gdouble) precio_final / (gdouble)(iva + otros + 1);
       ganancia = (gdouble) precio - ingresa;
       porcentaje = (gdouble)(ganancia / ingresa) * 100;
     }
-  else if (iva == -1 && otros == -1 )
-    porcentaje = (gdouble) ((precio_final / ingresa) - 1) * 100;
+  else if (iva == 0 && otros == 0 )
+    porcentaje = (gdouble) ((precio_final - ingresa) / ingresa) * 100;
 
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")),
 		      g_strdup_printf ("%ld", lround (porcentaje)));

@@ -1463,14 +1463,14 @@ SaveBuyProducts (Productos *header, gint id_compra)
 
   do
     {
-      if (products->product->iva != -1)
+      if (products->product->iva != 0)
         iva = (gdouble) (products->product->precio_compra *
                          products->product->cantidad) *
           (gdouble)products->product->iva / 100;
       else
 	iva = 0;
 
-      if (products->product->otros != -1)
+      if (products->product->otros != 0)
         otros = (gdouble) (products->product->precio_compra *
                            products->product->cantidad) *
           (gdouble)products->product->otros / 100;
@@ -1524,13 +1524,13 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
   gchar *q;
   gdouble iva = 0, otros = 0;
 
-  if (product->iva != -1)
+  if (product->iva != 0)
     iva = (gdouble) (product->precio_compra * product->cantidad) *
       (gdouble)product->iva / 100;
   else
     iva = 0;
 
-  if (product->otros != -1)
+  if (product->otros != 0)
     otros = (gdouble) (product->precio_compra * product->cantidad) *
       (gdouble)product->otros / 100;
   else
@@ -1602,7 +1602,7 @@ IngresarProducto (Producto *product, gint compra)
   fifo = FiFo (product->barcode, compra);
   product->fifo = fifo;
 
-  if (product->otros != -1)
+  if (product->otros != 0)
     imps = (gdouble) product->iva / 100 + (gdouble)product->otros / 100;
   else
     imps = (gdouble) product->iva / 100;
@@ -1883,7 +1883,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	      otros_unit = g_strdup_printf ("0");
 	    }
 	  //Si uno es afecto a impuesto y el otro no (y además el producto esta afecto a impuestos)
-	  else if (GetIVA (products->product->barcode) != -1)
+	  else if (GetIVA (products->product->barcode) != 0)
 	    { //TODO: Calcular solo con el total_afecto
 
 	      if (is_imp1 == FALSE && is_imp2 == TRUE)
@@ -2365,7 +2365,7 @@ GetIVA (gchar *barcode)
   if (tuples != 0)
     return strtod (PUT(PQvaluebycol (res, 0, "valor")), (char **)NULL);
   else
-    return -1;
+    return 0;
 }
 
 gdouble
@@ -2381,7 +2381,7 @@ GetOtros (gchar *barcode)
   if (tuples != 0)
     return strtod (PUT(PQvaluebycol (res, 0, "valor")), (char **)NULL);
   else
-    return -1;
+    return 0;
 }
 
 gint
@@ -2397,7 +2397,7 @@ GetOtrosIndex (gchar *barcode)
   if (tuples != 0)
     return atoi (PQgetvalue (res, 0, 0));
   else
-    return -1;
+    return 0;
 }
 
 gchar *
@@ -3679,7 +3679,7 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
   if (res == NULL)
     return FALSE;
 
-  printf ("Se asoció %s con %s", barcode_madre, barcode_comp_der);
+  printf ("Se asoció %s con %s\n", barcode_madre, barcode_comp_der);
   return TRUE;
 }
 
