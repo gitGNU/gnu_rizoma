@@ -5717,6 +5717,7 @@
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1_choise_edit_mc">
         <property name="visible">True</property>
@@ -5741,12 +5742,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="hbox1_choise_edit_mp">
+          <object class="GtkHBox" id="hbox1_choise_edit_mc">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkButton" id="btn_cancel_choise_edit_mp">
+              <object class="GtkButton" id="btn_cancel_choise_edit_mc">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -5783,6 +5784,8 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="ModificarProducto" object="entry_buy_barcode" swapped="yes"/>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_edit_compuesta" swapped="yes"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -5794,205 +5797,6 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="wnd_edit_compuesta1">
-    <property name="can_focus">False</property>
-    <property name="border_width">5</property>
-    <property name="title" translatable="yes" context="yes">POS Rizoma: Editar Producto</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="transient_for">wnd_compras</property>
-    <child>
-      <object class="GtkVBox" id="vbox15_edit_comp">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkTable" id="table3_edit_compuesta">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="n_rows">4</property>
-            <property name="n_columns">2</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <object class="GtkEntry" id="entry_edit_comp_desc">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">●</property>
-                <property name="invisible_char_set">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_edit_comp_barcode">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">●</property>
-                <property name="invisible_char_set">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_edit_comp_code">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">●</property>
-                <property name="invisible_char_set">True</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label38_edit_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes" context="yes">Descripción</property>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label37_edit_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes" context="yes">Código de Barras</property>
-              </object>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label36_edit_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes" context="yes">Código Simple</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label1_edit_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Familia</property>
-              </object>
-              <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox1_edit_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkComboBox" id="cmb_edit_comp_family">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="btn_new_emcc_family">
-                    <property name="label">gtk-add</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="use_stock">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHSeparator" id="hseparator1_edit_comp">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHButtonBox" id="hbuttonbox13_edit_comp">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkButton" id="btn_cancel_edit_comp">
-                <property name="label" context="yes">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_edit_comp">
-                <property name="label" context="yes">gtk-save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -7127,20 +6931,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry_edit_prod_content">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_edit_prod_price" swapped="yes"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-                <property name="x_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="entry_edit_prod_brand">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -7215,18 +7005,6 @@
                 <property name="label" translatable="yes">Contenido</property>
               </object>
               <packing>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-                <property name="x_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label40">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Unidad</property>
-              </object>
-              <packing>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
                 <property name="x_options">GTK_FILL</property>
@@ -7279,45 +7057,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkHBox" id="hbox1102">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkComboBox" id="cmb_box_edit_product_unit">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="btn_edit_unidad">
-                    <property name="label">gtk-add</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="show_new_unidad_win_clicked" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel" id="label1_mod_product">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -7365,6 +7104,71 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">11</property>
                 <property name="bottom_attach">12</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label40">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Unidad</property>
+              </object>
+              <packing>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+                <property name="x_options">GTK_FILL</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_edit_prod_content">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_edit_prod_price" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+                <property name="x_options">GTK_FILL</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox1102">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkComboBox" id="cmb_box_edit_product_unit">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_edit_unidad">
+                    <property name="label">gtk-add</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="show_new_unidad_win_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
               </packing>
             </child>
           </object>
@@ -8355,6 +8159,23 @@
             </child>
             <child>
               <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_family_emc">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_family" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">6</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="btn_save_family_amcc">
@@ -10487,6 +10308,23 @@
             </child>
             <child>
               <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_save_unidad_emc">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="save_new_unit" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="btn_save_unidad_em">

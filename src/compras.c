@@ -6221,7 +6221,6 @@ save_new_unit (GtkButton *button, gpointer user_data)
     }
   else if (strcmp (nombre_boton, "btn_save_unidad_em") == 0) //Editar Mercadería (cualquiera)
     {
-      printf("entre en el de la ventana mod_product\n");
       parent = GTK_WINDOW (gtk_builder_get_object(builder, "wnd_mod_product"));
       gtk_window_set_transient_for(win, parent);
       combo = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_edit_product_unit"));
@@ -7386,7 +7385,6 @@ on_partial_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, 
                               CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
           gtk_editable_select_region (GTK_EDITABLE (builder_get (builder, "entry_ingress_partial_guide_amount")), 0, -1);
         }
-
     }
   else
     {

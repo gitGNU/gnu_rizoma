@@ -1316,7 +1316,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   GtkWidget *widget;
   GtkComboBox *cmb_unit, *cmb_family, *combo_imp;
 
-  gchar *q, *unit, *materia_prima;
+  gchar *q, *unit, *materia_prima, *compuesta;
   gchar *barcode;
   gint otros_index;
 
@@ -1324,6 +1324,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   gint tuples, familia_id;
 
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
+  compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
 
   if (GTK_IS_ENTRY (widget_barcode))
     {
@@ -1368,10 +1369,25 @@ ModificarProducto (GtkWidget *widget_barcode)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_edit_prod_price"));
   gtk_entry_set_text(GTK_ENTRY(widget), PQvaluebycol (res, 0, "precio"));
   
+  /*Si es materia prima*/
   if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), materia_prima))
     gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), FALSE);
   else
     gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), TRUE);
+
+  /*Si es mercadería compuesta*/
+  if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), compuesta))
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_fraccionaria")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_perecible")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbbox_edit_prod_extratax")), FALSE);
+    }
+  else
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_fraccionaria")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_perecible")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbbox_edit_prod_extratax")), TRUE);
+    }
 
   /*Unidades*/
   cmb_unit = GTK_COMBO_BOX (gtk_builder_get_object(builder, "cmb_box_edit_product_unit"));
@@ -1415,3 +1431,4 @@ ModificarProducto (GtkWidget *widget_barcode)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_product"));
   gtk_widget_show_all(widget);
 }
+
