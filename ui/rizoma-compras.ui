@@ -985,6 +985,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>
+                        <signal name="activate" handler="gtk_widget_grab_focus" object="btn_asoc_comp" swapped="yes"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -1141,7 +1142,7 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="layout_style">edge</property>
                 <child>
-                  <object class="GtkButton" id="button2">
+                  <object class="GtkButton" id="btn_search_merchandise">
                     <property name="label" context="yes">gtk-find</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1149,6 +1150,7 @@
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
+                    <signal name="clicked" handler="SearchName" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1371,7 +1373,8 @@
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
-    <signal name="delete-event" handler="close_wnd_comp_deriv" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
+    <signal name="delete-event" handler="clean_container" object="wnd_comp_deriv" swapped="yes"/>
     <child>
       <object class="GtkVBox" id="vbox1_comp_deriv">
         <property name="visible">True</property>
@@ -1430,17 +1433,9 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow1_comp_deriv">
+                  <object class="GtkLabel" id="lbl_descripcion_mp">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
-                    <child>
-                      <object class="GtkTreeView" id="treeview_mother">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                      </object>
-                    </child>
+                    <property name="can_focus">False</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1449,41 +1444,68 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHButtonBox" id="hbuttonbox1_comp_deriv">
+                  <object class="GtkTable" id="table1_comp_deriv">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="n_rows">2</property>
+                    <property name="n_columns">2</property>
                     <child>
-                      <object class="GtkButton" id="btn_remove_mother">
-                        <property name="label">gtk-remove</property>
+                      <object class="GtkLabel" id="lbl_barcode_mp">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="use_stock">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">0</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="btn_add_mother">
-                        <property name="label">gtk-add</property>
+                      <object class="GtkLabel" id="lbl_codigo_mp">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="use_stock">True</property>
+                        <property name="can_focus">False</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">2</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <object class="GtkAlignment" id="alignment1_comp_deriv">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                        <property name="xscale">0</property>
+                        <property name="yscale">0</property>
+                        <child>
+                          <object class="GtkLabel" id="label3_codigo_mp">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Codigo Corto : </property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="top_attach">1</property>
+                        <property name="bottom_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkAlignment" id="alignment2_comp_deriv">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
+                        <property name="xscale">0</property>
+                        <property name="yscale">0</property>
+                        <child>
+                          <object class="GtkLabel" id="label2_barcode_mp">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Barcode : </property>
+                          </object>
+                        </child>
+                      </object>
                     </child>
                   </object>
                   <packing>
@@ -1500,7 +1522,7 @@
                       <object class="GtkLabel" id="label3_comp_deriv">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Costo Total :&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Costo: &lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -1510,7 +1532,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="lbl_subtotal_mother_price">
+                      <object class="GtkLabel" id="lbl_mother_price">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                       </object>
@@ -1691,7 +1713,8 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="close_wnd_comp_deriv" swapped="no"/>
+                <signal name="clicked" handler="gtk_widget_hide" object="wnd_comp_deriv" swapped="yes"/>
+                <signal name="clicked" handler="clean_container" object="wnd_comp_deriv" swapped="yes"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -7913,7 +7936,7 @@
           <object class="GtkTable" id="table3_new_compuesta">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">8</property>
+            <property name="n_rows">7</property>
             <property name="n_columns">2</property>
             <property name="homogeneous">True</property>
             <child>
@@ -7986,56 +8009,6 @@
               </object>
             </child>
             <child>
-              <object class="GtkLabel" id="label35_new_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Familia</property>
-              </object>
-              <packing>
-                <property name="top_attach">7</property>
-                <property name="bottom_attach">8</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox1_add_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkComboBox" id="cmb_new_comp_family">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="btn_new_amcc_family">
-                    <property name="label">gtk-add</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_btn_new_family_clicked" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">7</property>
-                <property name="bottom_attach">8</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel" id="label39_new_comp">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -8069,17 +8042,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label42_new_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Fraccion</property>
-              </object>
-              <packing>
-                <property name="top_attach">6</property>
-                <property name="bottom_attach">7</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="entry_new_comp_brand">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -8103,50 +8065,6 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">4</property>
                 <property name="bottom_attach">5</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox2_new_comp">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkRadioButton" id="radio_btn_comp_fractional_yes">
-                    <property name="label" translatable="yes" context="yes">Si</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">radio_btn_comp_fractional_no</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="radio_btn_comp_fractional_no">
-                    <property name="label" translatable="yes" context="yes">No</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">6</property>
-                <property name="bottom_attach">7</property>
               </packing>
             </child>
             <child>
@@ -8186,6 +8104,56 @@
                 <property name="right_attach">2</property>
                 <property name="top_attach">5</property>
                 <property name="bottom_attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label35_new_comp">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Familia</property>
+              </object>
+              <packing>
+                <property name="top_attach">6</property>
+                <property name="bottom_attach">7</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox1_add_comp">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkComboBox" id="cmb_new_comp_family">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_new_amcc_family">
+                    <property name="label">gtk-add</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_new_family_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">6</property>
+                <property name="bottom_attach">7</property>
               </packing>
             </child>
           </object>
@@ -8423,6 +8391,7 @@
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_comp_deriv</property>
     <signal name="delete-event" handler="gtk_widget_hide" object="wnd_new_mcd" swapped="yes"/>
+    <signal name="delete-event" handler="clean_container" object="wnd_new_mcd" swapped="yes"/>
     <child>
       <object class="GtkVBox" id="vbox15_mcd">
         <property name="visible">True</property>
@@ -8889,169 +8858,6 @@
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">2</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="wnd_new_merchandise">
-    <property name="width_request">600</property>
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Creación de mercadería</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="transient_for">wnd_compras</property>
-    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
-    <child>
-      <object class="GtkHBox" id="hbox2_nm_selection">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkTable" id="table1_nm_selection">
-            <property name="width_request">250</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="n_rows">5</property>
-            <property name="n_columns">3</property>
-            <property name="column_spacing">20</property>
-            <property name="row_spacing">20</property>
-            <child>
-              <object class="GtkButton" id="btn_new_product">
-                <property name="label" translatable="yes">Mercadería corriente</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="new_merchandise" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_new_deriv">
-                <property name="label" translatable="yes">Mercadería derivada</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="on_btn_new_deriv_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_new_compuesta">
-                <property name="label" translatable="yes">Mercadería Compuesta</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="new_merchandise" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkAlignment" id="alignment1_nm_selection">
-            <property name="width_request">350</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="top_padding">12</property>
-            <property name="bottom_padding">12</property>
-            <property name="left_padding">12</property>
-            <property name="right_padding">12</property>
-            <child>
-              <object class="GtkFrame" id="frame1_nm_selection">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment2_nm_selection">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                    <child>
-                      <object class="GtkLabel" id="lbl_merchandise_description">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Seleccione una opción&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                        <property name="justify">center</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="label4_frame_1_nm">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">&lt;b&gt;Descripción&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -10072,30 +9878,13 @@
             <property name="width_request">250</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">5</property>
+            <property name="n_rows">6</property>
             <property name="n_columns">3</property>
             <property name="column_spacing">20</property>
             <property name="row_spacing">20</property>
             <child>
-              <object class="GtkButton" id="btn_make_product">
+              <object class="GtkButton" id="btn_new_product">
                 <property name="label" translatable="yes">Crear Mercadería</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="gtk_widget_hide" object="wnd_new_products_selection" swapped="yes"/>
-                <signal name="clicked" handler="gtk_widget_show" object="wnd_new_merchandise" swapped="yes"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_new_mp">
-                <property name="label" translatable="yes">Crear Materia Prima</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -10105,8 +9894,8 @@
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
               </packing>
             </child>
             <child>
@@ -10123,6 +9912,44 @@
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_new_mp">
+                <property name="label" translatable="yes">Crear Materia Prima</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="new_merchandise" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_new_offer">
+                <property name="label" translatable="yes">Crear Oferta</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="new_merchandise" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
