@@ -8300,6 +8300,7 @@ on_btn_assoc_comp_deriv_clicked (GtkButton *button, gpointer user_data)
   //Se habilita el botón de compra (cuando se crea la materia prima)
   //gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_comp_deriv")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_comp_deriv")));
 }
 
