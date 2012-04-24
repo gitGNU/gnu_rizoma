@@ -8161,21 +8161,7 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="btn_save_family_emc">
-                <property name="label">gtk-save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="save_new_family" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">6</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
               <object class="GtkButton" id="btn_save_family_amcc">
@@ -10310,21 +10296,7 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="btn_save_unidad_emc">
-                <property name="label">gtk-save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="save_new_unit" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">2</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
               <object class="GtkButton" id="btn_save_unidad_em">

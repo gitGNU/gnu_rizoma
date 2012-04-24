@@ -5782,7 +5782,7 @@ on_ntbk_sells_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gu
     {
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mc")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank")));      
     }
   else if (page_num == 1) //Sell rank MP
     {

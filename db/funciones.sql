@@ -38,46 +38,93 @@ end if;
 return prod_vendidos;
 end; $$ language plpgsql;
 
+---
 -- return the avg of ventas day
---
-create or replace function select_ventas_dia (
-       in codbar bigint)
-returns double precision as $$
-declare
-        oldest date;
-        last_month date;
-        passed_days interval;
-	total double precision;
-begin
+---
+CREATE OR REPLACE FUNCTION select_ventas_dia (IN codbar bigint)
+RETURNS double precision AS $$
+DECLARE
+  oldest date;
+  oldest_vd date;
+  oldest_vmcd date;
+  last_month date;
+  passed_days interval;
+  total double precision;
+  subtotal double precision;
 
-last_month = now() - interval '1 month';
+BEGIN
+  last_month = now() - interval '1 month';    
 
-select date_trunc ('day', fecha ) into oldest from venta, venta_detalle where venta.id=id_venta and barcode=codbar and venta.fecha>=last_month order by fecha asc limit 1;
+  -- Se selecciona la fecha de venta (en venta_detalle) más antigua dentro del último mes
+  SELECT date_trunc ('day', fecha) INTO oldest_vd
+  FROM venta, venta_detalle 
+  WHERE venta.id=id_venta 
+        AND barcode=codbar
+        AND venta.fecha>=last_month
+  ORDER BY fecha ASC LIMIT 1;
+  -- Se asegura que la fecha no sea null (si es que no se ha vendido el producto)
+  IF oldest_vd IS NULL THEN
+     oldest_vd := date_trunc ('day', now());
+  END IF;
 
-passed_days = date_trunc ('day', now()) - oldest;
+  -- Se selecciona la fecha de venta (en venta_mc_detalle) más antigua dentro del último mes
+  SELECT date_trunc ('day', fecha) INTO oldest_vmcd
+  FROM venta, venta_mc_detalle 
+  WHERE venta.id=id_venta_vd 
+        AND barcode_hijo=codbar
+        AND venta.fecha>=last_month
+  ORDER BY fecha ASC LIMIT 1;
+  -- Se asegura que la fecha no sea null (si es que no se ha vendido el producto)
+  IF oldest_vmcd IS NULL THEN
+     oldest_vmcd := date_trunc ('day', now());
+  END IF;
 
-IF passed_days < interval '1 days' THEN
-   passed_days = interval '1 days';
-END IF;
+  -- Se elije la fecha más antigua
+  IF oldest_vd < oldest_vmcd THEN
+     oldest := oldest_vd;
+  ELSE
+     oldest := oldest_vmcd;
+  END IF;
 
-IF passed_days = interval '30 days' THEN
-select (sum (cantidad)/30) into total from venta_detalle, venta
-       where venta.fecha >= last_month
-       and barcode=codbar
-       and venta.id=id_venta;
-ELSE
-select (sum (cantidad)/(date_part ('day', passed_days))) into total from venta_detalle, venta
-       where venta.fecha >= last_month
-       and barcode=codbar
-       and venta.id=id_venta;
-END IF;
+  passed_days = date_trunc ('day', now()) - oldest;
 
-IF total = 0 THEN
-   total = 1;
-END IF;
+  IF passed_days < interval '1 days' THEN
+     passed_days = interval '1 days';
+  END IF;
 
-return total;
-end; $$ language plpgsql;
+  -- Cantidad en venta_detalle
+  SELECT (SUM (cantidad)) INTO subtotal 
+  FROM venta_detalle, venta
+  WHERE venta.fecha >= last_month
+       AND barcode=codbar
+       AND venta.id=id_venta;
+
+  total := COALESCE (subtotal, 0);
+  --RAISE NOTICE '----> subt1: %, tot1: %', subtotal, total;
+
+  -- Cantidad en venta_mc_detalle
+  SELECT (SUM (cantidad)) INTO subtotal 
+  FROM venta_mc_detalle, venta
+  WHERE venta.fecha >= last_month
+       AND barcode_hijo=codbar
+       AND venta.id=id_venta_vd;    
+  
+  total := total + COALESCE (subtotal,0);
+  --RAISE NOTICE '----> subt2: %, tot2: %', subtotal, total;
+
+  -- Se calcula el promedio de acuerdo a los días pasados
+  IF passed_days = interval '30 days' THEN
+     total := (total / 30);
+  ELSE
+     total := (total / date_part('day', passed_days));
+  END IF;
+
+  IF total = 0 THEN
+     total := 1;
+  END IF;
+
+RETURN total;
+END; $$ LANGUAGE plpgsql;
 
 
 -- revisa si hay devoluciones de un producto dado
@@ -565,8 +612,8 @@ query := $S$ SELECT *,
 		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day,		    
 		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
-		    select_merma (producto.barcode) as unidades_merma, dias_stock,
-		    select_ventas_dia(producto.barcode) as ventas_dia
+		    select_merma (producto.barcode) AS unidades_merma, dias_stock,
+		    select_ventas_dia(producto.barcode) AS ventas_dia
 		FROM producto WHERE $S$;
 
 -- check if must use the barcode or the short code

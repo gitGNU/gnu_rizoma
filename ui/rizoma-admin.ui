@@ -617,15 +617,14 @@
                     <property name="can_focus">False</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkButton" id="button2">
-                        <property name="label">gtk-delete</property>
+                      <object class="GtkButton" id="button5">
+                        <property name="label">gtk-add</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Borrar el Usuario seleccionado</property>
                         <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="AskDelete" swapped="no"/>
+                        <signal name="clicked" handler="AddSellerWin" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -635,14 +634,15 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button5">
-                        <property name="label">gtk-add</property>
+                      <object class="GtkButton" id="button2">
+                        <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Borrar el Usuario seleccionado</property>
                         <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
-                        <signal name="clicked" handler="AddSellerWin" swapped="no"/>
+                        <signal name="clicked" handler="AskDelete" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -3278,7 +3278,7 @@
               <object class="GtkLabel" id="label234">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Limite de Credito</property>
+                <property name="label" translatable="yes">*Limite de Credito</property>
               </object>
               <packing>
                 <property name="top_attach">7</property>
