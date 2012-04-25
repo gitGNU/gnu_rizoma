@@ -1771,6 +1771,7 @@
             <property name="can_focus">False</property>
             <property name="show_border">False</property>
             <signal name="switch-page" handler="on_buy_notebook_switch_page" swapped="no"/>
+            <signal name="switch-page" handler="update_labels_total_merchandise" after="yes" swapped="no"/>
             <child>
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
@@ -5899,6 +5900,7 @@
   </object>
   <object class="GtkWindow" id="wnd_ingress_buy">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">POS Rizoma: Seleccion ingreso</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
@@ -6247,6 +6249,7 @@
               <object class="GtkEntry" id="entry_ingress_factura_amount">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="editable">False</property>
                 <signal name="activate" handler="on_entry_ingress_factura_amount_activate" object="btn_ok_ingress_invoice" swapped="yes"/>
               </object>
               <packing>
@@ -8161,9 +8164,6 @@
               <placeholder/>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkButton" id="btn_save_family_amcc">
                 <property name="label">gtk-save</property>
                 <property name="visible">True</property>
@@ -8179,6 +8179,9 @@
                 <property name="pack_type">end</property>
                 <property name="position">6</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -10296,9 +10299,6 @@
               <placeholder/>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkButton" id="btn_save_unidad_em">
                 <property name="label">gtk-save</property>
                 <property name="can_focus">True</property>
@@ -10382,6 +10382,9 @@
                 <property name="pack_type">end</property>
                 <property name="position">6</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>

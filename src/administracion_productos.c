@@ -442,6 +442,33 @@ GuardarModificacionesProducto (void)
 
 
 /**
+ * Actualiza los valores de los label totalizadores
+ * de valorizado de stock, valorizado de venta y contribución proyectada
+ * en la pestaña "Mercadería" de rizoma-compras
+ *
+ */
+void 
+update_labels_total_merchandise (void)
+{
+  //stock valorizado
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_stock_valorizado")),
+                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
+                                         PutPoints (InversionTotalStock ())));
+
+  //valorizado de venta
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_valorizado_venta")),
+                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
+                                         PutPoints (ValorTotalStock ())));
+
+  //contribucion proyectada
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_contrib_proyectada")),
+                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
+                                         PutPoints (ContriTotalStock ())));
+
+}
+
+
+/**
  * This function initialize the 'Mercaderia' tab.
  *
  * It must be called from the startup of the application, because this
@@ -462,20 +489,8 @@ admini_box ()
 
   print = (Print *) malloc (sizeof (Print));
 
-  //stock valorizado
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_stock_valorizado")),
-                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
-                                         PutPoints (InversionTotalStock ())));
+  update_labels_total_merchandise ();
 
-  //valorizado de venta
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_valorizado_venta")),
-                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
-                                         PutPoints (ValorTotalStock ())));
-
-  //contribucion proyectada
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_merca_contrib_proyectada")),
-                        g_strdup_printf ("<span foreground=\"blue\"><b>$ %s</b></span>",
-                                         PutPoints (ContriTotalStock ())));
   //products list
   store = gtk_list_store_new (11,
                               G_TYPE_STRING,  //0 shortcode
@@ -1122,6 +1137,8 @@ BuscarProductosParaListar (void)
   GtkTreeIter iter;
   GtkWidget *widget;
   GtkListStore *store;
+
+  update_labels_total_merchandise ();
 
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
   widget = GTK_WIDGET(gtk_builder_get_object (builder,"find_product_entry"));

@@ -311,10 +311,10 @@ on_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string
 
   new_price = strtod (PUT (ingress_price), (char **)NULL);
 
-  /* obtiene el iter para poder obtener y setear datos del treeview */
+  /*obtiene el iter para poder obtener y setear datos del treeview*/
   gtk_tree_model_get_iter (model, &iter, path);
 
-  // Se setean los datos modificados en el treeview
+  //Se setean los datos modificados en el treeview
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      2, new_price,
 		      -1);
@@ -3811,7 +3811,8 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
         {
           if (DataExist (g_strdup_printf ("SELECT num_factura FROM factura_compra WHERE rut_proveedor='%s' AND num_factura=%s", rut_proveedor, n_documento)) == TRUE)
             {
-              ErrorMSG (wnd, g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
+              ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_n")), 
+			g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
               return FALSE;
             }
           return TRUE;
@@ -4546,6 +4547,7 @@ on_buy_notebook_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       clean_container (GTK_CONTAINER (gtk_builder_get_object (builder, "vbox_guide_invoice")));
       break;
     case 4: //mercaderia tab
+      //update_labels_total_merchandise ();
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "find_product_entry"));
       gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
       gtk_widget_grab_focus(widget);
@@ -6328,8 +6330,9 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data)
           /* Suggested amount */
           gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount")),
                               CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
-          gtk_editable_select_region (GTK_EDITABLE (builder_get (builder, "entry_ingress_factura_amount")), 0, -1);
-
+          //gtk_editable_select_region (GTK_EDITABLE (builder_get (builder, "entry_ingress_factura_amount")), 0, -1);
+	  
+	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_n")));
           gtk_widget_show_all (GTK_WIDGET (wnd_invoice));
         }
       else
