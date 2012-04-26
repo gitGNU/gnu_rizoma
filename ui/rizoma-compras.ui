@@ -1727,7 +1727,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_assoc_comp_deriv">
-                <property name="label" translatable="yes">A_sociar</property>
+                <property name="label" translatable="yes">As_ociar</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

@@ -165,8 +165,6 @@ SpecialChar (gchar *string)
 PGresult *
 EjecutarSQL (gchar *sentencia)
 {
-
-
   PGresult *res;
   ConnStatusType status;
   ExecStatusType status_res;

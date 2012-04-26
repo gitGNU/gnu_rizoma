@@ -4018,7 +4018,7 @@ nullify_sale_win (void)
                                                         NULL);
       gtk_tree_view_append_column (treeview_sales, column);
 
-      //date
+      //Date
       renderer = gtk_cell_renderer_text_new();
       column = gtk_tree_view_column_new_with_attributes("Fecha", renderer,
                                                         "text", 1,
@@ -4041,7 +4041,6 @@ nullify_sale_win (void)
     }
 
   gtk_list_store_clear(store_sales);
-
 
   treeview_details = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale_details"));
 
@@ -4448,7 +4447,8 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
       CleanEntryAndLabelData ();
       ListClean ();
 
-      q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d)", sale_id);
+      /*Se llama a get_sale_detail con 'FALSE' para que entregue la venta tal cual como se hizo*/
+      q = g_strdup_printf ("SELECT * FROM get_sale_detail (%d, FALSE)", sale_id);
       res = EjecutarSQL (q);
       g_free (q);
 

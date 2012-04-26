@@ -2740,8 +2740,8 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
 			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
 			      1, g_strdup (PQvaluebycol (res, i, "codigo")),
 			      2, g_strdup_printf ("%s %s",
-						  PQvaluebycol (res, i, "marca"),
-						  PQvaluebycol (res, i, "descripcion")),
+						  PQvaluebycol (res, i, "descripcion"),
+						  PQvaluebycol (res, i, "marca")),
 			      3, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
 			      4, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad_mud"))), (char **)NULL),
 			      -1);
@@ -8283,7 +8283,7 @@ on_btn_assoc_comp_deriv_clicked (GtkButton *button, gpointer user_data)
     {
       gtk_tree_model_get (model, &iter,
 			  0, &barcode_deriv[i],
-			  3, &cant_mud[i],
+			  4, &cant_mud[i],
 			  -1);
 
       //TODO: el treeview debe tener el barcode, para no realizar una búsqueda en la bd por cada iteración
