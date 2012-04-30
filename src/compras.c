@@ -2778,9 +2778,9 @@ add_to_comp_list (gchar *barcode)
       gtk_list_store_set (store, &iter, 
 			  0, barcode,
 			  1, g_strdup (PQvaluebycol (res, 0, "codigo_corto")),
-			  2, g_strdup_printf ("%s %s",
-					      PQvaluebycol (res, 0, "marca"),
-					      PQvaluebycol (res, 0, "descripcion")),
+			  2, g_strdup_printf ("%s %s",					      
+					      PQvaluebycol (res, 0, "descripcion"),
+					      PQvaluebycol (res, 0, "marca")),
 			  3, strtod (PUT (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))), (char **)NULL),
 			  4, strtod (PUT (g_strdup ("1")), (char **)NULL),
 			  5, strtod (PUT (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))), (char **)NULL),
@@ -8384,9 +8384,11 @@ on_btn_asoc_comp_clicked (GtkButton *button, gpointer user_data)
 				barcode_componentes[i], tipo_componentes[i],
 				cant_mud[i]);
 
-
+  // Se setea la bandera de asociación de compuestos a FALSE
+  add_to_comp = FALSE;
+  //Se coloca el foco en el widget correspondiente y se cierra la ventana de asociación
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_asoc_comp")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_asoc_comp")));  
 }
 
 
@@ -8399,7 +8401,7 @@ on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
   GtkTreeIter iter;
   gint position;
 
-  gchar *barcode;
+  gchar *barcode_hijo, *barcode_madre;
   gchar *q;
   
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_deriv"));
@@ -8409,11 +8411,13 @@ on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-                          0, &barcode,
+                          0, &barcode_hijo,
                           -1);
       
-      q = g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode);
-      EjecutarSQL (q);
+      barcode_madre = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_barcode_mp"))));
+
+      /*Se desasocian las meraderías*/
+      desasociar_madre_hijo (barcode_madre, barcode_hijo);
 
       position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);
@@ -8430,17 +8434,30 @@ on_btn_remove_comp_clicked (void)
 {
   GtkTreeView *treeview;
   GtkListStore *store;
-  GtkTreeSelection *selection;
+  GtkTreeModel *model;
+  GtkTreeSelection *selection;  
   GtkTreeIter iter;
   gint position;
   gdouble costo_total;
+  gchar *barcode_hijo;
+  gchar *barcode_madre;
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_components"));
   selection = gtk_tree_view_get_selection (treeview);
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
+      gtk_tree_model_get (model, &iter,
+			  0, &barcode_hijo,
+			  -1);
+
+      barcode_madre = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_comp_barcode"))));
+
+      /*Se desasocian las meraderías*/
+      desasociar_madre_hijo (barcode_madre, barcode_hijo);
+
       position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);
       select_back_deleted_row ("treeview_components", position);

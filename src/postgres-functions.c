@@ -1847,18 +1847,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       else
 	otros = 0;
 
-      /*Se actualiza el stock del producto de acuerdo al tipo que éste sea*/
-      
-      //Si el producto es un producto corriente se descuenta su stock con normalidad
-      if (products->product->tipo == corriente)
-	res = EjecutarSQL  //               TODO: Es necesario vendidos?? 
-	  (g_strdup_printf // UPDATE producto SET vendidos=vendidos+%s, stock=stock-%s WHERE barcode='%s'
-	   ("UPDATE producto SET stock=stock-%s WHERE barcode='%s'",
-	    CUT (g_strdup_printf ("%.3f", products->product->cantidad)),
-	    products->product->barcode));
-
       /*Pago de impuestos (pasados a gchar *)*/
-
       //Si se realizó solamene con cheque de restaurant
       if (tipo_venta == CHEQUE_RESTAURANT)
 	{
@@ -3261,7 +3250,7 @@ SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gb
   gint traspaso_id;
   gchar *q;
 
-  q = g_strdup_printf( "SELECT inserted_id FROM registrar_traspaso( %s, %d, %d, %d) ",
+  q = g_strdup_printf ("SELECT inserted_id FROM registrar_traspaso( %s, %d, %d, %d)",
                        CUT (g_strdup_printf ("%.3f", total)), origen, destino, vendedor);
   traspaso_id = atoi (GetDataByOne (q));
   g_free (q);
@@ -3278,60 +3267,30 @@ SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gb
  *
  * @param products puntero que apunta a los valores del producto que se va vender
  * @param id_traspaso es el id del traspaso  que se esta realizando
- * @param tipo_traspaso: 1 si es un traspaso de enviar 0  si es un trapaso de recibir
+ * @param traspaso_envio: 1 si es un traspaso de enviar 0  si es un trapaso de recibir
  * @return 1 si se realizo correctamente la operacion 0 si hay error
  */
 
 gboolean
-SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_traspaso)
+SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean traspaso_envio)
 {
   PGresult *res;
   Productos *header = products;
-  //gdouble iva, otros = 0;
-  //gint margen;
   gchar *cantidad;
-  //gdouble precio;
   gchar *q;
   gdouble pre;
 
-  do
+  do //TODOOOOO: revisar que funcione
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
-      if (tipo_traspaso == TRUE)
-        {
-          res = EjecutarSQL
-            (g_strdup_printf
-             ("UPDATE producto SET stock=%s WHERE barcode='%s'",
-              CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) - products->product->cantidad)), products->product->barcode));
 
-          /*      res = EjecutarSQL (g_strdup_printf
-                  ("UPDATE productos SET stock=stock-%s WHERE barcode='%s'",
-                  cantidad, products->product->barcode));
-          */
-        }
-      else
-        {
-          res = EjecutarSQL
-            (g_strdup_printf
-             ("UPDATE producto SET stock=%s WHERE barcode='%s'",
-              CUT (g_strdup_printf ("%.3f", (gdouble)GetCurrentStock (products->product->barcode) + products->product->cantidad)), products->product->barcode));
-        }
-
-      //precio = products->product->precio_compra; //TODO: Venta guarda el costo promedio en fifo y compra en precio_compra, se debe corregir eso.
-
-      //if (lround(precio) == -1)
-      //{
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
       pre = strtod (PUT (PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
 
-      q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s)",
+      q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s, %s)",
                            id_traspaso, products->product->barcode, cantidad,
-			   CUT (g_strdup_printf ("%.2f", pre)));
-      //}
-      //else
-      //   q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %d)",
-      //                     id_traspaso, products->product->barcode, cantidad, precio);
+			   CUT (g_strdup_printf ("%.2f", pre)), (traspaso_envio)?"TRUE":"FALSE");
 
       res = EjecutarSQL (q);
       g_free (q);
@@ -3679,6 +3638,50 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
 
   printf ("Se asoció %s con %s\n", barcode_madre, barcode_comp_der);
   return TRUE;
+}
+
+
+/**
+ * This function detaches the specified goods 
+ * 
+ * @param: gchar * barcode_madre
+ * @param: gchar * barcode_hijo
+ */
+gboolean
+desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der)
+{
+  PGresult *res;
+  gchar *q;
+  gint id_derivado;
+  
+  /*Se obtiene el id de la mercadería derivada*/
+  id_derivado = atoi (PQvaluebycol (EjecutarSQL 
+				    (g_strdup ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA'")), 
+				    0, "id"));
+
+  q = g_strdup_printf ("DELETE FROM componente_mc WHERE barcode_madre = %s AND barcode_comp_der = %s RETURNING tipo_comp_der",
+		       barcode_madre, barcode_comp_der);
+
+  res = EjecutarSQL(q);
+  g_free(q);
+
+  if (res == NULL)
+    return FALSE;
+
+  printf ("Se desasoció %s con %s\n", barcode_madre, barcode_comp_der);
+  return TRUE;
+
+  //Si la mercadería es derivada, se debe "deshabilitar"
+  if (atoi (g_strdup (PQvaluebycol (res, 0, "tipo_comp_der"))) == id_derivado)
+    res = EjecutarSQL (g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode_comp_der));
+
+  if (res == NULL)
+    return FALSE;
+
+  printf ("Se des-habilitó el producto %s\n", barcode_comp_der);
+  return TRUE;
+
+
 }
 
 

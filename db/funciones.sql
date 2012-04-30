@@ -386,7 +386,7 @@ BEGIN
 	       IF (list.tipo_comp_der = corriente_l OR list.tipo_comp_der = derivada_l) THEN
 	       	  stock_l := (SELECT * FROM obtener_stock_desde_barcode (list.barcode_comp_der));
 	       	  unidades_l := TRUNC (stock_l / list.cantidad);
-	       END IF;	  
+	       END IF;
 	       
 	       -- Elige la cantidad menor como su stock
 	       IF (contador_l = 0 OR menor_l > unidades_l) THEN
@@ -532,11 +532,12 @@ BEGIN
 	-- PROCEDIMIENTOS SEGÚN EL TIPO DE LA MERCADERIA
 	-- SI ES DERIVADA
 	IF (tipo_l = derivada_l) THEN
-	   SELECT MAX((SELECT costo_promedio * cant_mud
-	   	  	      FROM producto 
-			      WHERE barcode = barcode_madre)) INTO costo_l
+	   SELECT (SELECT costo_promedio * cant_mud
+	   	   FROM producto 
+		   WHERE barcode = barcode_madre) INTO costo_l
 	   FROM componente_mc cmc
-	   WHERE cmc.barcode_comp_der = codigo_barras;
+	   WHERE cmc.barcode_comp_der = codigo_barras
+	   AND cmc.tipo_madre = materia_prima_l;
 
 	-- SI ES COMPUESTA
 	ELSIF (tipo_l = compuesta_l) THEN
@@ -1901,6 +1902,185 @@ BEGIN
 	return;
 END; $$ language plpgsql;
 
+---
+-- Aumenta el stock de la mercadería en la cantidad especificada, según su tipo
+-- (si es compuesta aumenta el stock de sus componentes, si es derivada aumenta el de su materia prima)
+---
+CREATE OR replace function aumentar_stock_desde_barcode (barcode_in bigint,
+       	  	  	   			         cantidad_in double precision)
+RETURNS void AS $$
+DECLARE
+   -----------------
+   cantidad_mp double precision;
+   -----------------
+   derivada_l int4;
+   compuesta_l int4;
+   corriente_l int4;
+   materia_prima_l int4;
+   -----------------
+   tipo_l int4;
+   -----------------
+   q text;
+   l record;
+   -----------------
+BEGIN
+   -- Se obtienen los id de los tipo de mercaderías
+   SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+   SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+   SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+   SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+   
+   -- Se obtiene el tipo de producto
+   SELECT tipo INTO tipo_l FROM producto WHERE barcode = barcode_in;
+
+   -- De acuerdo al tipo de mercadería
+   -- Si es compuesta
+   IF (tipo_l = compuesta_l) THEN
+      CREATE TEMPORARY TABLE componentes_compuesto AS
+      WITH RECURSIVE compuesta (barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+         (
+	  SELECT barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
+       	  FROM componente_mc WHERE barcode_madre = barcode_in
+          UNION ALL
+          SELECT componente_mc.barcode_madre, componente_mc.tipo_madre,
+	         componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+           	 componente_mc.cant_mud * compuesta.cant_mud
+          FROM componente_mc, compuesta
+       	  WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+      	 )
+      	 SELECT c.barcode_comp_der AS barcode, c.tipo_comp_der AS tipo, c.cant_mud AS cantidad
+	 FROM compuesta c
+	 WHERE c.tipo_comp_der != compuesta_l;
+
+	 q := $S$SELECT * FROM componentes_compuesto$S$;
+
+	 -- Se aumenta el stock de los componentes de la mercadería compuesta
+	 FOR l IN EXECUTE q LOOP
+	     IF (l.tipo = derivada_l) THEN
+	        cantidad_mp := (SELECT cant_mud FROM componente_mc 
+			        WHERE barcode_comp_der = l.barcode
+			        AND tipo_madre = materia_prima_l);
+
+	     	UPDATE producto
+		SET stock = stock + (l.cantidad * cantidad_in * cantidad_mp)
+		WHERE barcode = (SELECT barcode_madre 
+		 	      	 FROM componente_mc 
+				 WHERE barcode_comp_der = l.barcode
+				 AND tipo_madre = materia_prima_l);
+	     ELSEIF (l.tipo = materia_prima_l OR l.tipo = corriente_l) THEN
+      	        UPDATE producto SET stock = stock + (l.cantidad * cantidad_in) WHERE barcode = l.barcode;
+	     END IF;
+	 END LOOP;	 
+	 -- Se elimina la tabla temporal
+  	 DROP TABLE componentes_compuesto;
+
+   -- Si es derivada
+   ELSEIF (tipo_l = derivada_l) THEN
+      UPDATE producto SET stock = stock + cantidad_in
+      WHERE barcode = (SELECT barcode_madre FROM componente_mc 
+		       WHERE barcode_comp_der = barcode_in AND tipo_madre = materia_prima_l);
+
+   -- Si es corriente o materia prima
+   ELSEIF (tipo_l = materia_prima_l OR tipo_l = corriente_l) THEN
+      UPDATE producto SET stock = stock + cantidad_in WHERE barcode = barcode_in;
+   END IF;
+
+RETURN;
+END; $$ language plpgsql;
+
+
+---
+-- Disminuye el stock de la mercadería en la cantidad especificada, según su tipo
+-- (si es compuesta disminuye el stock de sus componentes, si es derivada disminuye 
+--  el de su materia prima)
+---
+CREATE OR replace function disminuir_stock_desde_barcode (barcode_in bigint,
+       	  	  	   				  cantidad_in double precision)
+RETURNS void AS $$
+DECLARE
+   -----------------
+   cantidad_mp double precision;
+   -----------------
+   derivada_l int4;
+   compuesta_l int4;
+   corriente_l int4;
+   materia_prima_l int4;
+   -----------------
+   tipo_l int4;
+   -----------------
+   q text;
+   l record;
+   -----------------
+BEGIN
+   -- Se obtienen los id de los tipo de mercaderías
+   SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+   SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+   SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+   SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+   
+   -- Se obtiene el tipo de producto
+   SELECT tipo INTO tipo_l FROM producto WHERE barcode = barcode_in;
+
+   -- De acuerdo al tipo de mercadería
+   -- Si es compuesta
+   IF (tipo_l = compuesta_l) THEN
+      CREATE TEMPORARY TABLE componentes_compuesto AS
+      WITH RECURSIVE compuesta (barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+         (
+	  SELECT barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
+       	  FROM componente_mc WHERE barcode_madre = barcode_in
+          UNION ALL
+          SELECT componente_mc.barcode_madre, componente_mc.tipo_madre,
+	         componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+           	 componente_mc.cant_mud * compuesta.cant_mud
+          FROM componente_mc, compuesta
+       	  WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+      	 )
+      	 SELECT c.barcode_comp_der AS barcode, c.tipo_comp_der AS tipo, c.cant_mud AS cantidad
+	 FROM compuesta c
+	 WHERE c.tipo_comp_der != compuesta_l;
+
+	 q := $S$SELECT * FROM componentes_compuesto$S$;
+
+	 -- Se disminuye el stock de los componentes de la mercadería compuesta
+	 FOR l IN EXECUTE q LOOP
+	     IF (l.tipo = derivada_l) THEN
+	        cantidad_mp := (SELECT cant_mud FROM componente_mc 
+			        WHERE barcode_comp_der = l.barcode
+			        AND tipo_madre = materia_prima_l);
+
+	     	UPDATE producto
+		SET stock = stock - (l.cantidad * cantidad_in * cantidad_mp) 
+		WHERE barcode = (SELECT barcode_madre 
+		 	      	 FROM componente_mc 
+				 WHERE barcode_comp_der = l.barcode
+				 AND tipo_madre = materia_prima_l);
+	     ELSEIF (l.tipo = materia_prima_l OR l.tipo = corriente_l) THEN
+      	        UPDATE producto SET stock = stock - (l.cantidad * cantidad_in) WHERE barcode = l.barcode;
+	     END IF;
+	 END LOOP;	 
+	 -- Se elimina la tabla temporal
+  	 DROP TABLE componentes_compuesto;
+
+   -- Si es derivada
+   ELSEIF (tipo_l = derivada_l) THEN
+      cantidad_mp := (SELECT cant_mud FROM componente_mc 
+		      WHERE barcode_comp_der = l.barcode
+		      AND tipo_madre = materia_prima_l);
+
+      UPDATE producto SET stock = stock - (cantidad_in * cantidad_mp)
+      WHERE barcode = (SELECT barcode_madre FROM componente_mc 
+		       WHERE barcode_comp_der = barcode_in AND tipo_madre = materia_prima_l);
+
+   -- Si es corriente o materia prima
+   ELSEIF (tipo_l = materia_prima_l OR tipo_l = corriente_l) THEN
+      UPDATE producto SET stock = stock - cantidad_in WHERE barcode = barcode_in;
+   END IF;
+
+RETURN;
+END; $$ language plpgsql;
+
+
 --registra el detalle de una venta
 create or replace function registrar_venta_detalle(
        in in_id_venta int,
@@ -1922,12 +2102,16 @@ declare
    compuesta_l int4;
    derivada_l int4;
    materia_prima_l int4;
+   corriente_l int4;
    ----
    barcode_madre_l bigint;
    precio_l int4;
+   costo_mp double precision;
+   ----
 begin
 	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
-	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';	
+	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
 
 	-- Es necesario esto?, mejor usar DEFAULT como id_venta_detalle
 	aux := (select count(*) from venta_detalle where id_venta = in_id_venta);	
@@ -1956,13 +2140,13 @@ begin
 			   in_precio,
 			   in_fifo,
 			   in_iva,
-			   in_otros, 
+			   in_otros,
 			   in_ganancia,
 			   in_tipo,
 			   in_impuestos) returning id into id_venta_detalle_l;
 	
 	-- Si es una mercadería compuesta, se registrará todo su detalle en venta_mc_detalle
-	IF (in_tipo = compuesta_l) THEN
+	IF (in_tipo = compuesta_l) THEN -- NOTA:registrar_detalle_compuesto actualiza el stock de sus componentes por si solo
 	   PERFORM registrar_detalle_compuesto (in_id_venta::int4, num_linea::int4, in_barcode::bigint,
 			                        ARRAY[0,0]::int[], 0::double precision, in_precio::double precision, in_cantidad::double precision);
 
@@ -1971,16 +2155,23 @@ begin
 	   SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
 	   SELECT barcode_madre INTO barcode_madre_l FROM componente_mc WHERE barcode_comp_der = in_barcode;
 	   SELECT precio INTO precio_l FROM producto WHERE barcode = in_barcode;
+	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = in_barcode;
 
 	   INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
 				       	 precio_proporcional, precio, costo_promedio, ganancia, iva, otros,
 				       	 tipo_madre, tipo_hijo)
 	   VALUES (DEFAULT, num_linea, in_id_venta, ARRAY[0,1]::int[], barcode_madre_l, in_barcode, in_cantidad, 
-	           in_precio, precio_l, in_fifo, in_ganancia, in_iva, in_otros,
+	           in_precio, precio_l, costo_mp, in_ganancia, in_iva, in_otros,
 		   materia_prima_l, in_tipo);
 
-	END IF;				
-
+	   -- Actualiza el stock (lo disminuye segun lo vendido) de la mercadería derivada (de su materia prima)
+	   PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
+	
+	-- Si es mercadería corriente
+	ELSIF (in_tipo = corriente_l) THEN
+	   -- Actualiza el stock de la mercadería corriente (lo disminuye segun lo vendido)
+	   PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
+	END IF;
 end;$$ language plpgsql;
 
 
@@ -2510,10 +2701,10 @@ RETURN;
 END; $$ language plpgsql;
 
 
---
+---
 -- Ranking de ventas de ventas de las materias primas
 -- (ventas indirectas).
---
+---
 CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
        	  	  	   		      IN ends date,       					      
 					      OUT barcode varchar,
@@ -3684,19 +3875,42 @@ BEGIN
 
 	SELECT currval( 'traspaso_id_seq' ) INTO inserted_id;
 
-	return;
-	END; $$ language plpgsql;
+return;
+END; $$ language plpgsql;
 
+
+---
+-- Registra el detalle del traspaso de mercaderías
+-- y actualiza el stock aumentandolo o disminuyéndolo según el caso
+---
 create or replace function registrar_traspaso_detalle(
        in in_id_traspaso int,
        in in_barcode bigint,
        in in_cantidad double precision,
-       in in_precio double precision)
+       in in_precio double precision, 
+       in in_traspaso_envio boolean) -- si es TRUE es envío; FALSO recibe
 returns void as $$
 declare
-aux int;
-num_linea int;
+   aux int;
+   num_linea int;
+   ----
+   compuesta_l int4;
+   derivada_l int4;
+   materia_prima_l int4;
+   corriente_l int4;
+   ----
+   tipo_l int4;
+   barcode_madre_l bigint;
+   costo_mp double precision;
+   ----
 begin
+	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+	SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+
+	SELECT tipo INTO tipo_l FROM producto WHERE barcode = in_barcode;
+
 	aux := (select count(*) from traspaso_detalle where id_traspaso = in_id_traspaso);
 
 	if aux = 0 then
@@ -3705,6 +3919,7 @@ begin
 	   num_linea := (select max(id) from traspaso_detalle where id_traspaso = in_id_traspaso);
 	   num_linea := num_linea + 1;
 	end if;
+
 	INSERT INTO traspaso_detalle(id,
 	       	    		  id_traspaso,
 				  barcode,
@@ -3716,7 +3931,159 @@ begin
 			   in_cantidad,
 			   in_precio);
 
+       	-- Si es una mercadería compuesta, se registrará todo su detalle en traspaso_mc_detalle
+	IF (tipo_l = compuesta_l) THEN -- NOTA:registrar_detalle_compuesto actualiza el stock de sus componentes por si solo
+   	   -- (envia o recibe, aumenta o disminuye según el tipo de traspaso)
+	   PERFORM registrar_traspaso_compuesto (in_id_traspaso::int4, num_linea::int4, in_barcode::bigint,
+			                       	 in_cantidad::double precision, in_traspaso_envio);
+
+	-- Si es una derivada se registrará su detalle en venta_mc_detalle
+	ELSIF (tipo_l = derivada_l) THEN	   
+	   SELECT barcode_madre INTO barcode_madre_l FROM componente_mc WHERE barcode_comp_der = in_barcode;
+	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = in_barcode;
+
+	   INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle_in, id_mh, barcode_madre, barcode_hijo,
+				       	    tipo_madre, tipo_hijo, cantidad, costo_promedio)
+	   VALUES (DEFAULT, in_id_traspaso, num_linea, ARRAY[0,1]::int[], barcode_madre_l, in_barcode,
+		   materia_prima_l, tipo_l, in_cantidad, costo_mp);
+
+	   -- Actualiza el stock (lo disminuye o aumenta segun el traspaso) de la mercadería derivada (de su materia prima)
+	   IF (in_traspaso_envio = TRUE) THEN -- se disminuye el stock porque se envía
+	      PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
+	   ELSE -- se aumenta el stock porque se recibe
+	      PERFORM aumentar_stock_desde_barcode (in_barcode, in_cantidad);
+	   END IF;
+	
+	-- Si es mercadería corriente
+	ELSIF (tipo_l = corriente_l OR tipo_l = materia_prima_l) THEN
+	   IF (in_traspaso_envio = TRUE) THEN -- se disminuye el stock porque se envía
+	      PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
+	   ELSE -- se aumenta el stock porque se recibe
+	      PERFORM aumentar_stock_desde_barcode (in_barcode, in_cantidad);
+	   END IF;
+	END IF;
+	
 end;$$ language plpgsql;
+
+
+---
+-- Registra el detalle del traspaso de un compuesto
+---
+CREATE OR REPLACE FUNCTION registrar_traspaso_compuesto (IN id_traspaso_in int4,
+       	  	  	   				 IN id_traspaso_detalle_in int4,
+       	  	  	   				 IN barcode_madre_in bigint,
+							 IN cantidad_in double precision,
+							 IN traspaso_envio_in boolean) -- cantidad madre
+RETURNS void AS $$
+
+DECLARE
+	-- Consulta inicial
+	q text;
+	l record;
+	--------------------------
+	-- Subconsulta (recursiva)
+	q2 text;
+	l2 record;
+	--------------------------
+	compuesta_l int4; -- id tipo compuesto
+	derivada_l int4;  -- id tipo derivado
+	corriente_l int4; -- id tipo corriente
+	materia_prima_l int4; -- id tipo materia prima
+	--------------------------	
+	-- Mercaderia hija temporal (materia prima)
+	barcode_mp bigint;
+	cantidad_mp double precision;
+	costo_mp double precision;
+	--------------------------
+BEGIN
+	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+	SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+
+	-- Creo una secuencia temporal para crear un id único para cada producto
+	CREATE SEQUENCE id_mh_seq START 1;
+	-- Se realiza la consulta recursiva y el resultado se almacena en una tabla temporal
+	CREATE TEMPORARY TABLE arbol_componentes AS
+	WITH RECURSIVE compuesta (barcode_madre, id_mh, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+      	 (
+	   SELECT barcode_madre,
+	   	  ARRAY[0, nextval('id_mh_seq')] AS id_mh,
+		  tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
+       	   FROM componente_mc WHERE barcode_madre = barcode_madre_in
+           UNION ALL
+           SELECT componente_mc.barcode_madre,
+	   	  ARRAY[id_mh[2], nextval('id_mh_seq')],
+		  componente_mc.tipo_madre,
+	      	  componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+              	  componente_mc.cant_mud * compuesta.cant_mud
+           FROM componente_mc, compuesta
+       	   WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+      	)
+	SELECT c.barcode_madre, c.id_mh, c.tipo_madre, c.barcode_comp_der, c.tipo_comp_der, c.cant_mud,
+	       (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_comp_der)) AS costo_hijo
+      	FROM compuesta c
+	ORDER BY id_mh[2] ASC;
+	
+	q := $S$ SELECT * FROM arbol_componentes$S$;
+
+	-- Se registra el detalle de compuesto (y subcompuestos) y se actualiza su stock
+	FOR l IN EXECUTE q LOOP
+       	    INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_madre, barcode_hijo,
+	    	   			     tipo_madre, tipo_hijo, cantidad, costo_promedio)
+	    VALUES (DEFAULT, id_traspaso_in, id_traspaso_detalle_in, l.id_mh, l.barcode_madre, l.barcode_comp_der,
+	    	    l.tipo_madre, l.tipo_comp_der, l.cant_mud * cantidad_in, l.costo_hijo);
+
+	    -- Si es un derivado (se registra la materia prima a la que pertenece y actualiza el stock)
+	    IF (l.tipo_comp_der = derivada_l) THEN
+	      -- Se obtiene el barcode de la mercadería de la cual nace este "derivado"
+	      SELECT barcode_madre INTO barcode_mp
+	      FROM componente_mc
+	      WHERE barcode_comp_der = l.barcode_comp_der
+	      AND tipo_madre = materia_prima_l;
+
+	      -- Se obtiene la relacion entre materia prima y la derivada
+	      SELECT cant_mud INTO cantidad_mp
+	      FROM componente_mc 
+	      WHERE barcode_comp_der = l.barcode_comp_der
+	      AND tipo_madre = materia_prima_l;
+
+	      -- Se obtiene el costo_promedio de la materia prima
+	      SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
+
+	      -- Se registra la información de la materia prima correspondiente a este derivado
+       	      INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_madre, barcode_hijo,
+	    	   			       tipo_madre, tipo_hijo, cantidad, costo_promedio)
+	      VALUES (DEFAULT, id_traspaso_in, id_traspaso_detalle_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')], 
+	      	      l.barcode_comp_der, barcode_mp, l.tipo_comp_der, materia_prima_l, 
+		      l.cant_mud * cantidad_in * cantidad_mp, costo_mp);
+
+	      -- Se actuaiza el stock
+	      IF (traspaso_envio_in = TRUE) THEN -- se disminuye el stock porque se envía
+	      	 UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der AND tipo_madre = materia_prima_l);	 
+	      ELSE -- se aumenta el stock porque se recibe
+	      	 UPDATE producto SET stock=stock+(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der AND tipo_madre = materia_prima_l);	 
+	      END IF;
+	    
+	    -- Si es una mercadería corriente se actualiza su stock	    
+	    ELSIF (l.tipo_comp_der = corriente_l) THEN
+	      -- Se actuaiza el stock
+	      IF (traspaso_envio_in = TRUE) THEN -- se disminuye el stock porque se envía
+	      	 UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
+	      ELSE -- se aumenta el stock porque se recibe
+	      	 UPDATE producto SET stock=stock+(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
+	      END IF;
+		  
+	    END IF;
+	END LOOP;
+
+        -- Se elimina la tabla temporal arbol_componentes
+   	DROP TABLE arbol_componentes;
+	-- Se elimina la secuencia temporal
+	DROP SEQUENCE id_mh_seq;
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
 
 
 -- Obtiene la información de un producto en un día determinado
@@ -4069,8 +4436,9 @@ BEGIN
 RETURN;
 END; $$ LANGUAGE plpgsql;
 
-
--- Reorganiza la presentación de los componentes de un compuesto
+---
+-- Ingresa el detalle del compuesto en la tabla venta_mc_detalle
+---
 CREATE OR REPLACE FUNCTION registrar_detalle_compuesto (IN id_venta_in int4,
        	  	  	   				IN id_venta_detalle_in int4,
        	  	  	   				IN barcode_madre_in bigint,
@@ -4106,6 +4474,8 @@ DECLARE
 	ganancia_madre double precision;
 	-- Mercaderia hija temporal (materia prima)
 	barcode_mp bigint;
+	cantidad_mp double precision;
+	costo_mp double precision;
 	--------------------------
 BEGIN
 	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
@@ -4199,7 +4569,7 @@ BEGIN
 	    	       precio_proporcional_l, l.precio_hijo, l.costo_hijo, ganancia_out, iva_out, otros_out,
 		       l.tipo_madre, l.tipo_comp_der);
 
-	       --Se actualiza el stock del producto TODO: se debe registrar la materia prima?? en ese caso usar la secuencia
+	       --Se actualiza el stock del producto
 	       IF (l.tipo_comp_der = derivada_l) THEN
 	       	  -- Se obtiene el barcode de la mercadería de la cual nace este "derivado"
 	       	  SELECT barcode_madre INTO barcode_mp
@@ -4207,15 +4577,24 @@ BEGIN
 		  WHERE barcode_comp_der = l.barcode_comp_der
 		  AND tipo_madre = materia_prima_l;
 
+		  -- Se obtiene la relacion entre materia prima y la derivada
+		  SELECT cant_mud INTO cantidad_mp
+		  FROM componente_mc 
+		  WHERE barcode_comp_der = l.barcode_comp_der
+		  AND tipo_madre = materia_prima_l;
+
+		  -- Se obtiene el costo_promedio de la materia prima
+		  SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
+
 		  -- Se registra la información de la materia prima correspondiente a este derivado
 		  INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo,
 		  	      		        cantidad, precio_proporcional, precio, costo_promedio, ganancia, 
 						iva, otros, tipo_madre, tipo_hijo)
 	          VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')], 
-		  	  l.barcode_comp_der, barcode_mp, l.cant_mud * cantidad_in, precio_proporcional_l, 
-			  l.precio_hijo, l.costo_hijo, ganancia_out, iva_out, otros_out, l.tipo_comp_der, materia_prima_l);
+		  	  l.barcode_comp_der, barcode_mp, l.cant_mud * cantidad_in * cantidad_mp, precio_proporcional_l, 
+			  l.precio_hijo, costo_mp, ganancia_out, iva_out, otros_out, l.tipo_comp_der, materia_prima_l);
 
-	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der AND tipo_madre = materia_prima_l);
+	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=(SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der=l.barcode_comp_der AND tipo_madre = materia_prima_l);
 	       ELSIF (l.tipo_comp_der = corriente_l) THEN
 		  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
 	       END IF;

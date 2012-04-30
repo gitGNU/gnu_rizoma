@@ -79,6 +79,7 @@ drop table if exists tipo_ingreso cascade;
 drop table if exists tipo_merma cascade;
 drop table if exists traspaso cascade;
 drop table if exists traspaso_detalle cascade;
+drop table if exists traspaso_mc_detalle cascade;
 drop table if exists unidad_producto;
 drop table if exists users cascade;
 drop table if exists venta cascade;
@@ -606,7 +607,7 @@ create table venta_mc_detalle (
   id                        serial not null,  
   id_venta_detalle          int4 not null, -- FK id (venta_detalle)
   id_venta_vd          	    int4 not null, -- FK id_venta (venta_detalle)
-  id_mh		    	    int4[],        -- Un id array para identificar relacion madre-hijo
+  id_mh	    	    	    int4[],        -- Un id array para identificar relacion madre-hijo
   barcode_madre             int8 not null,
   barcode_hijo              int8 not null,
   cantidad                  float8 not null,
@@ -688,8 +689,23 @@ create table traspaso_detalle (
   id_traspaso               int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,
-  precio                    float8 not null,
+  precio                    float8 not null, --precio costo
   constraint pk_traspaso_detalle primary key (id,id_traspaso)
+) ;
+
+-- Traspaso_mc_detalle
+create table traspaso_mc_detalle (
+  id                        serial not null,
+  id_traspaso               int4 not null,
+  id_traspaso_detalle       int4 not null,
+  id_mh	    	    	    int4[],
+  barcode_madre             int8 not null,
+  barcode_hijo              int8 not null,
+  tipo_madre		    int4 not null,
+  tipo_hijo		    int4 not null,
+  cantidad                  float8 not null,
+  costo_promedio            float8 not null,
+  CONSTRAINT pk_traspaso_mc_detalle primary key (id)
 ) ;
 
 -- Users
@@ -703,7 +719,7 @@ create table users (
   apell_p                   varchar(75) not null,
   apell_m                   varchar(75),
   fecha_ingreso             timestamp,
-  "level"                   int2,
+  level                     int2,
   constraint pk_users primary key (id)
 ) ;
 
