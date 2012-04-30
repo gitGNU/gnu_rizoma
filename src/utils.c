@@ -907,6 +907,63 @@ compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *d
 
 
 /**
+ * Compare data from colum specified with 'data_to_compare'
+ * and return the row matched position.
+ *
+ * @param: Treeview from get the column
+ * @param: Column number with which 'data_to_compare' will be compared
+ * @param: Tipo de columna
+ * @return: Iter matched
+ */
+gboolean
+get_treeview_column_matched (GtkTreeView *treeview, gint column, GType type, void *data_to_compare, GtkTreeIter *iter_ext)
+{
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+ 
+  gboolean valid;
+
+  gint data_i;
+  gdouble data_d;
+  gchar *data_t;
+  void *data_get;
+
+  model = gtk_tree_view_get_model (treeview);
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+
+  if (type == G_TYPE_INT) data_get = &data_i;
+  else if (type == G_TYPE_DOUBLE) data_get = &data_d;
+  else if (type == G_TYPE_STRING) data_get = &data_t;
+  else return FALSE;
+
+  //Se obtiene el valor de la columna 'column' para compararlo con 'data_to_compare'
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  column, (type == G_TYPE_STRING) ? &data_get : data_get,
+			  -1);
+
+      if (type == G_TYPE_INT) {
+	if ((gint *)data_get == (gint *)data_to_compare)
+	  {*iter_ext = iter; return TRUE;}
+
+      } else if (type == G_TYPE_DOUBLE) {
+	if ((gdouble *)data_get == (gdouble *)data_to_compare)
+	  {*iter_ext = iter; return TRUE;}
+
+      } else if (type == G_TYPE_STRING) {
+	if (g_str_equal ((gchar *)data_get, (gchar *)data_to_compare))
+	  {*iter_ext = iter; return TRUE;}
+      }
+
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+
+  return FALSE;
+}
+
+
+/**
  * Fill Taxes combobox
  *
  * @param: combo: Combobox to fill

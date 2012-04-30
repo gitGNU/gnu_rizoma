@@ -86,6 +86,8 @@ gdouble sum_treeview_column (GtkTreeView *treeview, gint column, GType type);
 
 gboolean compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *data_to_compare);
 
+gboolean get_treeview_column_matched (GtkTreeView *treeview, gint column, GType type, void *data_to_compare, GtkTreeIter *iter_ext);
+
 void fill_combo_impuestos (GtkComboBox *combo, gint id_seleccion);
 
 void fill_combo_unidad (GtkComboBox *combo, gchar *nombre_unidad);

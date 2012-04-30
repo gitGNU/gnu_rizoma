@@ -2767,25 +2767,44 @@ add_to_comp_list (gchar *barcode)
   PGresult *res;
   GtkListStore *store;
   GtkTreeIter iter;
+  GtkTreeIter iter_p;
   gdouble costo_total;
+  gdouble cantidad_previa, costo;
   GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_components"));
 
   res = get_product_information (barcode, "", "codigo_corto, marca, descripcion, costo_promedio, tipo");
   store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
   if (res != NULL)
     {
-      gtk_list_store_append (store, &iter);
-      gtk_list_store_set (store, &iter, 
-			  0, barcode,
-			  1, g_strdup (PQvaluebycol (res, 0, "codigo_corto")),
-			  2, g_strdup_printf ("%s %s",					      
-					      PQvaluebycol (res, 0, "descripcion"),
-					      PQvaluebycol (res, 0, "marca")),
-			  3, strtod (PUT (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))), (char **)NULL),
-			  4, strtod (PUT (g_strdup ("1")), (char **)NULL),
-			  5, strtod (PUT (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))), (char **)NULL),
-			  6, atoi (g_strdup (PQvaluebycol (res, 0, "tipo"))),
-			  -1);
+      /* Averiguamos si la mercadería ya existe en el treeview */
+      // De existir solamente aumentamos la cantidad en uno
+      if (get_treeview_column_matched (treeview, 0, G_TYPE_STRING, (void *)barcode, &iter_p))
+	{
+	  gtk_tree_model_get (GTK_TREE_MODEL (store), &iter_p,
+			      3, &costo, //costo unitario
+			      4, &cantidad_previa,
+			      -1);
+
+	  gtk_list_store_set (store, &iter_p,
+			      4, cantidad_previa + 1, //nueva cantidad
+			      5, costo * (cantidad_previa + 1), //subtotal
+			      -1);
+	}
+      else //De no existir de agrega a la lista
+	{
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter, 
+			      0, barcode,
+			      1, g_strdup (PQvaluebycol (res, 0, "codigo_corto")),
+			      2, g_strdup_printf ("%s %s",					      
+						  PQvaluebycol (res, 0, "descripcion"),
+						  PQvaluebycol (res, 0, "marca")),
+			      3, strtod (PUT (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))), (char **)NULL),
+			      4, strtod (PUT (g_strdup ("1")), (char **)NULL),
+			      5, strtod (PUT (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))), (char **)NULL),
+			      6, atoi (g_strdup (PQvaluebycol (res, 0, "tipo"))),
+			      -1);
+	}
     }
 
   costo_total = sum_treeview_column (treeview, 3, G_TYPE_DOUBLE);
@@ -8402,7 +8421,6 @@ on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
   gint position;
 
   gchar *barcode_hijo, *barcode_madre;
-  gchar *q;
   
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_deriv"));
   selection = gtk_tree_view_get_selection (treeview);

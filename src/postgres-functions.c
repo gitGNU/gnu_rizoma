@@ -3680,8 +3680,6 @@ desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der)
 
   printf ("Se des-habilitó el producto %s\n", barcode_comp_der);
   return TRUE;
-
-
 }
 
 

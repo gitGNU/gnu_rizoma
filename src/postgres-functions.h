@@ -334,4 +334,6 @@ gchar * codigo_corto_to_barcode (gchar *codigo_corto);
 
 PGresult * get_componentes_compuesto (gchar *barcode);
 
+gboolean desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der);
+
 #endif
