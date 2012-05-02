@@ -2162,7 +2162,7 @@ begin
 	   SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
 	   SELECT barcode_madre INTO barcode_madre_l FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
 	   SELECT precio INTO precio_l FROM producto WHERE barcode = in_barcode;
-	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = in_barcode;
+	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_madre_l;
 	   SELECT cant_mud INTO cantidad_mp
 	   FROM componente_mc WHERE barcode_madre = barcode_madre_l AND barcode_comp_der = in_barcode;
 
@@ -4126,7 +4126,7 @@ begin
 	-- Si es una derivada se registrará su detalle en venta_mc_detalle
 	ELSIF (tipo_l = derivada_l) THEN	   
 	   SELECT barcode_madre INTO barcode_madre_l FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
-	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = in_barcode;
+	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_madre_l;
 	   SELECT cant_mud INTO cantidad_mp
 	   FROM componente_mc WHERE barcode_madre = barcode_madre_l AND barcode_comp_der = in_barcode;
 
