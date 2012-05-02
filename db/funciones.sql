@@ -675,13 +675,19 @@ create or replace function select_merma( IN barcode_in bigint,
 returns double precision as $$
 declare
    aux int;
+   derivada_l int4;
 BEGIN
 
-  aux := (SELECT count(*) FROM merma WHERE barcode = barcode_in);
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+
+  aux := (SELECT COALESCE (count(*), 0) FROM merma WHERE barcode = barcode_in);
+  aux := aux + (SELECT COALESCE (count(*), 0) FROM merma_mc_detalle WHERE barcode_hijo = barcode_in);
   IF aux = 0 THEN
      unidades_merma := 0;
   ELSE
-     unidades_merma := (SELECT sum(unidades) FROM merma WHERE barcode = barcode_in);
+     -- Las mermas de las mercaderías derivadas se registran en merma, y luego en merma_mc_detalle (detalle del padre)
+     unidades_merma := (SELECT COALESCE (sum(unidades), 0) FROM merma WHERE barcode = barcode_in AND tipo != derivada_l);
+     unidades_merma := unidades_merma + (SELECT COALESCE (sum(cantidad), 0) FROM merma_mc_detalle WHERE barcode_hijo = barcode_in);
   END IF;
 
 RETURN;

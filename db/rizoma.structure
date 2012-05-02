@@ -67,6 +67,7 @@ drop table if exists impuesto cascade;
 drop table if exists ingreso cascade;
 drop table if exists log cascade;
 drop table if exists merma cascade;
+drop table if exists merma_mc_detalle cascade;
 drop table if exists negocio cascade;
 drop table if exists numeros_documentos cascade;
 drop table if exists pagos cascade;
