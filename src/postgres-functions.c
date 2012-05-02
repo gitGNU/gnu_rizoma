@@ -2810,22 +2810,27 @@ PagarFactura (gint id_invoice)
     return FALSE;
 }
 
+
+/**
+ * Registra merma y ajusta el nuevo stock del producto
+ *
+ * @nuevo_stock: Es el nuevo stock del producto
+ * @motivo: La razón por la cual se ha disminuído su stock
+ * @barcode: El barcode del producto modificado
+ */
 void
-AjusteStock (gdouble cantidad, gint motivo, gchar *barcode)
+AjusteStock (gdouble nuevo_stock, gint motivo, gchar *barcode)
 {
   PGresult *res;
   gdouble stock = GetCurrentStock (barcode);
   gchar *q;
+  gdouble cantidad_merma;
 
-  if (cantidad >= 0 && cantidad <= stock)
+  if (nuevo_stock >= 0 && nuevo_stock <= stock)
     {
-      q = g_strdup_printf ("INSERT INTO merma VALUES (DEFAULT, '%s', %s, %d, now())",
-			   barcode, CUT (g_strdup_printf ("%.3f", stock - cantidad)), motivo);
-      res = EjecutarSQL (q);
-      g_free (q);
-
-      gchar *new = CUT (g_strdup_printf ("%.3f", cantidad));
-      q = g_strdup_printf ("UPDATE producto SET stock=%s WHERE barcode='%s'", new, barcode);
+      cantidad_merma = stock - nuevo_stock;
+      q = g_strdup_printf ("SELECT * FROM registrar_merma (%s, %s, %d)",
+			   barcode, CUT (g_strdup_printf ("%.3f", cantidad_merma)), motivo);
       res = EjecutarSQL (q);
       g_free (q);
     }
@@ -3611,13 +3616,14 @@ registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto)
 
 /**
  * This function save the association
- * between the mother and derived merchandise
+ * between the mother and (derived or components) merchandise
  *
  * @param : gchar *barcode_madre
  * @param : gint tipo_madre
  * @param : gchar *barcode_comp_der
  * @param : gint tipo_comp_der
  * @param : gdouble cant_mud : Cantidad de madre que usa el derivado
+ * @return: gboolean: TRUE si realizó algún cambio, FALSE si no realizó cambios
  */
 gboolean
 asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
@@ -3626,17 +3632,48 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
 {
   PGresult *res;
   gchar *q;
+  gdouble cant_mud_l;
 
-  q = g_strdup_printf ("INSERT INTO componente_mc (id, barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) "
-		                          "VALUES (DEFAULT,   %s,         %d,            %s,              %d,         %s   ) ", 
-		       barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, CUT (g_strdup_printf ("%.3f", cant_mud)));
+  // Se comprueba si ya existe la asociación
+  q = g_strdup_printf ("SELECT cant_mud FROM componente_mc "
+		       "WHERE barcode_madre = %s AND barcode_comp_der = %s", barcode_madre, barcode_comp_der);
   res = EjecutarSQL(q);
   g_free(q);
 
-  if (res == NULL)
-    return FALSE;
+  /*Si no existe la asociación*/
+  if (res == NULL || PQntuples (res) == 0)
+    {
+      q = g_strdup_printf ("INSERT INTO componente_mc (id, barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) "
+			                      "VALUES (DEFAULT,   %s,         %d,            %s,              %d,         %s   ) ", 
+			   barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, CUT (g_strdup_printf ("%.3f", cant_mud)));
+      res = EjecutarSQL(q);
+      g_free(q);
 
-  printf ("Se asoció %s con %s\n", barcode_madre, barcode_comp_der);
+      if (res == NULL)
+	return FALSE;
+      else
+	printf ("Se asoció %s con %s\n", barcode_madre, barcode_comp_der);
+    }
+  else
+    {
+      cant_mud_l = strtod (PUT (g_strdup (PQgetvalue (res, 0, 0))), (char **)NULL);
+      if (cant_mud_l != cant_mud && cant_mud > 0)
+	{
+	  q = g_strdup_printf ("UPDATE componente_mc SET cant_mud = %s "
+			       "WHERE barcode_madre = %s AND barcode_comp_der = %s",
+			       CUT (g_strdup_printf ("%.3f", cant_mud)), barcode_madre, barcode_comp_der);
+	  res = EjecutarSQL(q);
+	  g_free(q);
+
+	  if (res == NULL)
+	    return FALSE;
+	  else
+	    printf ("Se actualizó la cant_mud de %s con %s en %s\n", 
+		    barcode_madre, barcode_comp_der, CUT (g_strdup_printf ("%.3f", cant_mud)));
+	}
+      else
+	return FALSE;
+    }
   return TRUE;
 }
 
@@ -3669,16 +3706,15 @@ desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der)
     return FALSE;
 
   printf ("Se desasoció %s con %s\n", barcode_madre, barcode_comp_der);
-  return TRUE;
 
   //Si la mercadería es derivada, se debe "deshabilitar"
   if (atoi (g_strdup (PQvaluebycol (res, 0, "tipo_comp_der"))) == id_derivado)
-    res = EjecutarSQL (g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode_comp_der));
+    {
+      res = EjecutarSQL (g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode_comp_der));
+      if (res == NULL) return FALSE;
+      printf ("Se des-habilitó el producto %s\n", barcode_comp_der);
+    }
 
-  if (res == NULL)
-    return FALSE;
-
-  printf ("Se des-habilitó el producto %s\n", barcode_comp_der);
   return TRUE;
 }
 

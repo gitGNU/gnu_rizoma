@@ -8311,12 +8311,11 @@ on_btn_assoc_comp_deriv_clicked (GtkButton *button, gpointer user_data)
     }
   
   //Se ingresan de acuerdo a la asociación de mercaderías
-  for (i = 0; i<num_deriv; i++) //Si la mercadería no esta asociada a esta fuente con anterioridad
-    if (!DataExist (g_strdup_printf ("SELECT barcode_madre FROM componente_mc WHERE barcode_comp_der = %s", barcode_deriv[i])))
-      asociar_derivada_a_madre (barcode_mp, tipo_mp,
-				barcode_deriv[i], tipo_deriv,
-				cant_mud[i]);
-
+  for (i = 0; i<num_deriv; i++) //Se asocia o modifica la relación de acuerdo a lo realizado
+    asociar_derivada_a_madre (barcode_mp, tipo_mp,
+			      barcode_deriv[i], tipo_deriv,
+			      cant_mud[i]);
+  
   //Se habilita el botón de compra (cuando se crea la materia prima)
   //gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
@@ -8396,12 +8395,10 @@ on_btn_asoc_comp_clicked (GtkButton *button, gpointer user_data)
     }
   
   //Se ingresan de acuerdo a la asociación de mercadería
-  for (i = 0; i<num_componentes; i++) //Si la mercadería no esta asociada a esta fuente con anterioridad
-    if (!DataExist (g_strdup_printf ("SELECT barcode_comp_der FROM componente_mc "
-				     "WHERE barcode_madre = %s AND barcode_comp_der = %s", barcode_compuesto, barcode_componentes[i])))
-      asociar_derivada_a_madre (barcode_compuesto, tipo_compuesto,
-				barcode_componentes[i], tipo_componentes[i],
-				cant_mud[i]);
+  for (i = 0; i<num_componentes; i++) //Se asocia o modifica la relación de acuerdo a lo realizado
+    asociar_derivada_a_madre (barcode_compuesto, tipo_compuesto,
+			      barcode_componentes[i], tipo_componentes[i],
+			      cant_mud[i]);
 
   // Se setea la bandera de asociación de compuestos a FALSE
   add_to_comp = FALSE;

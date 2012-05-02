@@ -434,11 +434,26 @@ create table negocio (
 create table merma (
   id                        serial not null,
   barcode                   int8,
+  tipo			    int4, -- tipo de producto
   unidades                  float8,
   motivo                    int2,
   fecha 		    timestamp without time zone,
   constraint pk_merma primary key (id)
 ) ;
+
+-- Merma_mc_detalle 
+create table merma_mc_detalle (
+  id                        serial not null,
+  id_merma		    int4 not null,
+  id_mh                     int4[], -- Un id array para identificar relacion madre-hijo  
+  barcode_madre		    bigint,
+  barcode_hijo              bigint,
+  tipo_madre		    int4,
+  tipo_hijo		    int4,
+  cantidad                  float8,
+  constraint pk_merma_mc_detalle primary key (id)
+) ;
+
 
 -- Ingreso
 create table ingreso (
@@ -690,6 +705,7 @@ create table traspaso_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8 not null, --precio costo
+  tipo			    int4,
   constraint pk_traspaso_detalle primary key (id,id_traspaso)
 ) ;
 
