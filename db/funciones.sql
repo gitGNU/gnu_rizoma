@@ -2651,7 +2651,7 @@ BEGIN
   FROM venta v
        INNER JOIN venta_detalle vd
        ON vd.id_venta = v.id
-  WHERE (vd.tipo = corriente_l OR vd.tipo = derivada_l)
+  WHERE (vd.tipo = corriente_l) -- Solo las mercaderias corrientes, las derivadas de ven en venta_mc_detalle
   	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   GROUP BY vd.barcode;
@@ -2797,25 +2797,8 @@ DECLARE
 BEGIN
   SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
 
-  -- Se crea una tabla temporal con el detalle de la venta simple
+  -- Se crea una tabla temporal con el detalle de la venta de los derivados
   CREATE TEMPORARY TABLE venta_derivados_completa AS
-  SELECT vd.barcode AS barcode_l,
-  	 SUM (vd.cantidad) AS amount_l,
-	 SUM (vd.cantidad * vd.precio) AS sold_amount_l, -- SubTotal
-	 SUM (vd.cantidad * vd.fifo) AS costo_l,
-	 SUM ((vd.precio * vd.cantidad) - ((vd.iva+vd.otros) + (vd.fifo * vd.cantidad))) AS contrib_l
-	 --SUM (vd.ganancia) AS contrib -- TODO: habilitar cuando este la modificación de facturas funcione perfectamente
-  FROM venta v
-       INNER JOIN venta_detalle vd
-       ON vd.id_venta = v.id
-  WHERE vd.tipo = derivada_l
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
-  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
-	AND vd.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre=barcode_mp::bigint)
-  GROUP BY vd.barcode;
-
-  -- Incluye en la tabla temporal venta_derivados_completa el detalle de los componentes de una merc. compleja
-  INSERT INTO venta_derivados_completa
   SELECT vmcd.barcode_hijo AS barcode_l,
   	 SUM (vmcd.cantidad) AS amount_l,
 	 SUM (vmcd.cantidad * vmcd.precio) AS sold_amount_l, -- SubTotal
