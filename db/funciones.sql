@@ -2110,8 +2110,8 @@ declare
    materia_prima_l int4;
    corriente_l int4;
    ----
-   barcode_madre_l bigint;
-   precio_l int4;
+   barcode_mp bigint;
+   precio_mp int4;
    costo_mp double precision;
    cantidad_mp double precision;
    ----
@@ -2160,18 +2160,18 @@ begin
 	-- Si es una derivada se registrará su detalle en venta_mc_detalle
 	ELSIF (in_tipo = derivada_l) THEN
 	   SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
-	   SELECT barcode_madre INTO barcode_madre_l FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
-	   SELECT precio INTO precio_l FROM producto WHERE barcode = in_barcode;
-	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_madre_l;
+	   SELECT barcode_madre INTO barcode_mp FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
+	   SELECT precio INTO precio_mp FROM producto WHERE barcode = in_barcode;
+	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
 	   SELECT cant_mud INTO cantidad_mp
-	   FROM componente_mc WHERE barcode_madre = barcode_madre_l AND barcode_comp_der = in_barcode;
+	   FROM componente_mc WHERE barcode_madre = barcode_mp AND barcode_comp_der = in_barcode;
 
 	   INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
 				       	 precio_proporcional, precio, costo_promedio, ganancia, iva, otros,
 				       	 tipo_madre, tipo_hijo)
-	   VALUES (DEFAULT, num_linea, in_id_venta, ARRAY[0,1]::int[], barcode_madre_l, in_barcode, in_cantidad * cantidad_mp,
-	           in_precio, precio_l, costo_mp, in_ganancia, in_iva, in_otros,
-		   materia_prima_l, in_tipo);
+	   VALUES (DEFAULT, num_linea, in_id_venta, ARRAY[0,1]::int[], in_barcode, barcode_mp, in_cantidad * cantidad_mp,
+	           in_precio, precio_mp, costo_mp, in_ganancia, in_iva, in_otros,
+		   in_tipo, materia_prima_l);
 
 	   -- Actualiza el stock (lo disminuye segun lo vendido) de la mercadería derivada (de su materia prima)
 	   PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
@@ -2651,7 +2651,7 @@ BEGIN
   FROM venta v
        INNER JOIN venta_detalle vd
        ON vd.id_venta = v.id
-  WHERE (vd.tipo = corriente_l) -- Solo las mercaderias corrientes, las derivadas de ven en venta_mc_detalle
+  WHERE (vd.tipo = corriente_l OR vd.tipo = derivada_l)
   	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   GROUP BY vd.barcode;
@@ -2797,8 +2797,25 @@ DECLARE
 BEGIN
   SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
 
-  -- Se crea una tabla temporal con el detalle de la venta de los derivados
+  -- Se crea una tabla temporal con el detalle de la venta simple
   CREATE TEMPORARY TABLE venta_derivados_completa AS
+  SELECT vd.barcode AS barcode_l,
+  SUM (vd.cantidad) AS amount_l,
+  SUM (vd.cantidad * vd.precio) AS sold_amount_l, -- SubTotal
+  SUM (vd.cantidad * vd.fifo) AS costo_l,
+  SUM ((vd.precio * vd.cantidad) - ((vd.iva+vd.otros) + (vd.fifo * vd.cantidad))) AS contrib_l
+  --SUM (vd.ganancia) AS contrib -- TODO: habilitar cuando este la modificación de facturas funcione perfectamente
+  FROM venta v
+  INNER JOIN venta_detalle vd
+  ON vd.id_venta = v.id
+  WHERE vd.tipo = derivada_l
+  AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+  AND vd.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre=barcode_mp::bigint)
+  GROUP BY vd.barcode;
+
+  -- Incluye en la tabla temporal venta_derivados_completa el detalle de los componentes de una merc. compleja
+  INSERT INTO venta_derivados_completa
   SELECT vmcd.barcode_hijo AS barcode_l,
   	 SUM (vmcd.cantidad) AS amount_l,
 	 SUM (vmcd.cantidad * vmcd.precio) AS sold_amount_l, -- SubTotal
@@ -3904,8 +3921,8 @@ BEGIN
 
 	  INSERT INTO merma_mc_detalle (id, id_merma, id_mh, barcode_madre, barcode_hijo,
 			                tipo_madre, tipo_hijo, cantidad)
-	  VALUES (DEFAULT, id_merma_l, ARRAY[0,1]::int[], barcode_mp, barcode_in,
-		  materia_prima_l, tipo_l, unidades_in * cantidad_mp);
+	  VALUES (DEFAULT, id_merma_l, ARRAY[0,1]::int[], barcode_in, barcode_mp,
+		  tipo_l, materia_prima_l, unidades_in * cantidad_mp);
 
 	  -- Se disminuye su stock en la cantidad especificada          
 	  PERFORM disminuir_stock_desde_barcode (barcode_in, unidades_in);
@@ -4065,8 +4082,8 @@ declare
    corriente_l int4;
    ----
    tipo_l int4;
-   barcode_madre_l bigint;
    ----
+   barcode_mp bigint;
    costo_mp double precision;
    cantidad_mp double precision;
    ----
@@ -4108,15 +4125,15 @@ begin
 
 	-- Si es una derivada se registrará su detalle en venta_mc_detalle
 	ELSIF (tipo_l = derivada_l) THEN	   
-	   SELECT barcode_madre INTO barcode_madre_l FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
-	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_madre_l;
+	   SELECT barcode_madre INTO barcode_mp FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
+	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
 	   SELECT cant_mud INTO cantidad_mp
-	   FROM componente_mc WHERE barcode_madre = barcode_madre_l AND barcode_comp_der = in_barcode;
+	   FROM componente_mc WHERE barcode_madre = barcode_mp AND barcode_comp_der = in_barcode;
 
 	   INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle_in, id_mh, barcode_madre, barcode_hijo,
 				       	    tipo_madre, tipo_hijo, cantidad, costo_promedio)
-	   VALUES (DEFAULT, in_id_traspaso, num_linea, ARRAY[0,1]::int[], barcode_madre_l, in_barcode,
-		   materia_prima_l, tipo_l, in_cantidad * cantidad_mp, costo_mp);
+	   VALUES (DEFAULT, in_id_traspaso, num_linea, ARRAY[0,1]::int[], in_barcode, barcode_mp,
+		   tipo_l, materia_prima_l, in_cantidad * cantidad_mp, costo_mp);
 
 	   -- Actualiza el stock (lo disminuye o aumenta segun el traspaso) de la mercadería derivada (de su materia prima)
 	   IF (in_traspaso_envio = TRUE) THEN -- Se disminuye el stock porque se envía
