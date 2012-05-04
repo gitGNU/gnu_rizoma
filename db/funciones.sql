@@ -4130,7 +4130,7 @@ begin
 	   SELECT cant_mud INTO cantidad_mp
 	   FROM componente_mc WHERE barcode_madre = barcode_mp AND barcode_comp_der = in_barcode;
 
-	   INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle_in, id_mh, barcode_madre, barcode_hijo,
+	   INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_madre, barcode_hijo,
 				       	    tipo_madre, tipo_hijo, cantidad, costo_promedio)
 	   VALUES (DEFAULT, in_id_traspaso, num_linea, ARRAY[0,1]::int[], in_barcode, barcode_mp,
 		   tipo_l, materia_prima_l, in_cantidad * cantidad_mp, costo_mp);
