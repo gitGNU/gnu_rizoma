@@ -3369,7 +3369,7 @@ BEGIN
 	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
 
 	-- Condición para obtener la información de las mercaderías enviadas y/o recibidas
-	IF traspaso_envio = FALSE THEN
+	IF traspaso_envio = TRUE THEN
 	   filtro := 't.origen = 1';
 	ELSE
 	   filtro := 't.origen != 1';

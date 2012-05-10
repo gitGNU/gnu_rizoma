@@ -1008,9 +1008,15 @@ reports_win (void)
 
   GError *error = NULL;
 
+  /*Ranking ventas*/
   Print *ranking = (Print *) malloc (sizeof (Print));
   Print *ranking_mp = (Print *) malloc (sizeof (Print));
   Print *ranking_mc = (Print *) malloc (sizeof (Print));
+  /*Ranking traspasos*/
+  Print *ranking_traspaso = (Print *) malloc (sizeof (Print));
+  Print *ranking_traspaso_mp = (Print *) malloc (sizeof (Print));
+  Print *ranking_traspaso_mc = (Print *) malloc (sizeof (Print));
+  /*otros*/
   Print *cuadratura = (Print *) malloc (sizeof (Print));
   Print *proveedor = (Print *) malloc (sizeof (Print));
 
@@ -2834,9 +2840,6 @@ reports_win (void)
 
   selection = gtk_tree_view_get_selection (treeview);
 
-  /* g_signal_connect (G_OBJECT (selection), "changed", */
-  /*                   G_CALLBACK (change_sell_rank), NULL); */
-
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
                                                      "text", 1,
@@ -2908,20 +2911,20 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
-  /*ranking->tree = treeview;
-  ranking->title = "Ranking de Ventas";
-  ranking->date_string = NULL;
-  ranking->cols[0].name = "Barcode";
-  ranking->cols[1].name = "Producto";
-  ranking->cols[2].name = "Marca";
-  ranking->cols[3].name = "Contenido";
-  ranking->cols[4].name = "Unidad";
-  ranking->cols[5].name = "Cantidad";
-  ranking->cols[6].name = "Costo";
-  ranking->cols[7].name = NULL;*/
+  ranking_traspaso->tree = treeview;
+  ranking_traspaso->title = "Ranking de traspasos";
+  ranking_traspaso->date_string = NULL;
+  ranking_traspaso->cols[0].name = "Barcode";
+  ranking_traspaso->cols[1].name = "Producto";
+  ranking_traspaso->cols[2].name = "Marca";
+  ranking_traspaso->cols[3].name = "Contenido";
+  ranking_traspaso->cols[4].name = "Unidad";
+  ranking_traspaso->cols[5].name = "Cantidad";
+  ranking_traspaso->cols[6].name = "Costo";
+  ranking_traspaso->cols[7].name = NULL;
 
-  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+  g_signal_connect (builder_get (builder, "btn_print_transfer_rank"), "clicked",
+		    G_CALLBACK (PrintTree), (gpointer)ranking_traspaso);
 
 
   //Treeview Materias primas
@@ -3013,20 +3016,20 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
-  /*ranking->tree = treeview;
-  ranking->title = "Ranking de Ventas";
-  ranking->date_string = NULL;
-  ranking->cols[0].name = "Barcode";
-  ranking->cols[1].name = "Producto";
-  ranking->cols[2].name = "Marca";
-  ranking->cols[3].name = "Contenido";
-  ranking->cols[4].name = "Unidad";
-  ranking->cols[5].name = "Cantidad";
-  ranking->cols[6].name = "Costo";
-  ranking->cols[7].name = NULL;*/
+  ranking_traspaso_mp->tree = treeview;
+  ranking_traspaso_mp->title = "Ranking traspaso de materias primas";
+  ranking_traspaso_mp->date_string = NULL;
+  ranking_traspaso_mp->cols[0].name = "Barcode";
+  ranking_traspaso_mp->cols[1].name = "Producto";
+  ranking_traspaso_mp->cols[2].name = "Marca";
+  ranking_traspaso_mp->cols[3].name = "Contenido";
+  ranking_traspaso_mp->cols[4].name = "Unidad";
+  ranking_traspaso_mp->cols[5].name = "Cantidad";
+  ranking_traspaso_mp->cols[6].name = "Costo";
+  ranking_traspaso_mp->cols[7].name = NULL;
 
-  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+  g_signal_connect (builder_get (builder, "btn_print_transfer_rank_mp"), "clicked",
+		    G_CALLBACK (PrintTree), (gpointer)ranking_traspaso_mp);
 
   //Treeview Derivados
   store = gtk_list_store_new (7,
@@ -3042,9 +3045,6 @@ reports_win (void)
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
 
   selection = gtk_tree_view_get_selection (treeview);
-
-  /* g_signal_connect (G_OBJECT (selection), "changed", */
-  /*                   G_CALLBACK (change_sell_rank), NULL); */
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
@@ -3116,21 +3116,6 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
-
-  /*ranking->tree = treeview;
-  ranking->title = "Ranking de Ventas";
-  ranking->date_string = NULL;
-  ranking->cols[0].name = "Barcode";
-  ranking->cols[1].name = "Producto";
-  ranking->cols[2].name = "Marca";
-  ranking->cols[3].name = "Contenido";
-  ranking->cols[4].name = "Unidad";
-  ranking->cols[5].name = "Cantidad";
-  ranking->cols[6].name = "Costo";
-  ranking->cols[7].name = NULL;*/
-
-  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-    G_CALLBACK (PrintTree), (gpointer)ranking);*/
 
 
   //Treeview Mercaderias compuestas
@@ -3222,20 +3207,20 @@ reports_win (void)
 
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
-  /*ranking->tree = treeview;
-  ranking->title = "Ranking de Ventas";
-  ranking->date_string = NULL;
-  ranking->cols[0].name = "Barcode";
-  ranking->cols[1].name = "Producto";
-  ranking->cols[2].name = "Marca";
-  ranking->cols[3].name = "Contenido";
-  ranking->cols[4].name = "Unidad";
-  ranking->cols[5].name = "Cantidad";
-  ranking->cols[6].name = "Costo";
-  ranking->cols[7].name = NULL;*/
+    ranking_traspaso_mc->tree = treeview;
+  ranking_traspaso_mc->title = "Ranking traspaso de ofertas";
+  ranking_traspaso_mc->date_string = NULL;
+  ranking_traspaso_mc->cols[0].name = "Barcode";
+  ranking_traspaso_mc->cols[1].name = "Producto";
+  ranking_traspaso_mc->cols[2].name = "Marca";
+  ranking_traspaso_mc->cols[3].name = "Contenido";
+  ranking_traspaso_mc->cols[4].name = "Unidad";
+  ranking_traspaso_mc->cols[5].name = "Cantidad";
+  ranking_traspaso_mc->cols[6].name = "Costo";
+  ranking_traspaso_mc->cols[7].name = NULL;
 
-  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
-    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+  g_signal_connect (builder_get (builder, "btn_print_transfer_rank_mc"), "clicked",
+		    G_CALLBACK (PrintTree), (gpointer)ranking_traspaso_mc);
 
 
   //Treeview Mercaderias componentes
@@ -5122,6 +5107,10 @@ fill_transfer_rank (gboolean traspaso_envio)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
+  glong total_costo, costo;
+  
+  total_costo = 0;
+  costo = 0;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -5136,6 +5125,8 @@ fill_transfer_rank (gboolean traspaso_envio)
   /*visualiza los productos en el tree_view*/
   for (i = 0; i < tuples; i++)
     {
+      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
+      total_costo += costo;
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
 			  0, PQvaluebycol (res, i, "barcode"),
@@ -5144,9 +5135,13 @@ fill_transfer_rank (gboolean traspaso_envio)
                           3, PQvaluebycol (res, i, "contenido"),
                           4, PQvaluebycol (res, i, "unidad"),
                           5, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
-                          6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+                          6, costo,
                           -1);
     }
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_transfer_rank_cost")),
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
+                                         PutPoints (g_strdup_printf ("%ld", total_costo))));
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
 }
@@ -5169,6 +5164,10 @@ fill_transfer_rank_mp (gboolean traspaso_envio)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
+  glong total_costo, costo;
+
+  total_costo = 0;
+  costo = 0;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -5185,6 +5184,8 @@ fill_transfer_rank_mp (gboolean traspaso_envio)
 
   for (i = 0; i < tuples; i++)
     {
+      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
+      total_costo += costo;
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
 			  0, PQvaluebycol (res, i, "barcode"),
@@ -5193,9 +5194,13 @@ fill_transfer_rank_mp (gboolean traspaso_envio)
 			  3, g_strdup (PQvaluebycol (res, i, "contenido")),
 			  4, g_strdup (PQvaluebycol (res, i, "unidad")),
 			  5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-			  6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+			  6, costo,
 			  -1);
     }
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_transfer_rank_cost")),
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
+                                         PutPoints (g_strdup_printf ("%ld", total_costo))));
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
 }
@@ -5219,6 +5224,10 @@ fill_transfer_rank_mc (gboolean traspaso_envio)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
+  glong total_costo, costo;
+  
+  total_costo = 0;
+  costo = 0;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -5234,6 +5243,8 @@ fill_transfer_rank_mc (gboolean traspaso_envio)
   /* viualiza los productos en el tree_view*/
   for (i = 0; i < tuples; i++)
     {
+      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
+      total_costo += costo;
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
 			  0, PQvaluebycol (res, i, "barcode"),
@@ -5242,9 +5253,14 @@ fill_transfer_rank_mc (gboolean traspaso_envio)
 			  3, g_strdup (PQvaluebycol (res, i, "contenido")),
 			  4, g_strdup (PQvaluebycol (res, i, "unidad")),
 			  5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-			  6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+			  6, costo,
 			  -1);
     }
+
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_transfer_rank_cost")),
+                        g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
+                                         PutPoints (g_strdup_printf ("%ld", total_costo))));
+
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
 }
 
@@ -5312,6 +5328,7 @@ fill_products_rank (gint familia)
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
                                          PutPoints (PQvaluebycol (res, 0, "vendidos"))));
+
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
                                          PutPoints (PQvaluebycol (res, 0, "costo"))));
@@ -6294,6 +6311,9 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   PGresult *res;
   GtkNotebook *sub_notebook;
 
+
+  //NOTA: Cada página se preocupa SOLO de sus PROPIOS widgets (mostrarlos, rellenarlos y ocultarlos)
+  /*Paginas 1 y 6*/
   if (page_num == 6 || page_num == 1)
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
@@ -6358,7 +6378,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 	      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
 	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
 	    }
-	  else if (page_num == 2) //Sell rank MC
+	  else if (sub_page_num == 2) //Sell rank MC
 	    {
 	      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
 	      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
@@ -6386,7 +6406,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button3")), TRUE);
     }
 
-  /*Traspasos*/
+  /*Pagina 7. Traspasos*/
   if (page_num == 7)
     {
       // Se muestran los widget para filtrar las tiendas
@@ -6455,10 +6475,34 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
     }
 
+  /*Página 8. Ranking traspaso*/
   if (page_num == 8)
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_transfer_type")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_choose_transfer_type")));
+
+      // Botón imprimir en las subpestañas del ranking de ventas
+      sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_transfers_rank"));
+      sub_page_num = gtk_notebook_get_current_page (sub_notebook);
+
+      if (sub_page_num == 0) //Sell rank
+	{
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
+	  gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
+	}
+      else if (sub_page_num == 1) //Sell rank MP
+	{
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));	  
+	  gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
+	}
+      else if (sub_page_num == 2) //Sell rank MC
+	{
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
+	  gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
+	}
     }
   else if (page_num != 8)
     {
@@ -6675,5 +6719,35 @@ on_ntbk_sells_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gu
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank_mc")));
+    }
+}
+
+
+/**
+ * Is triggered by "switch-page" event on "ntbk_transfers_rank"
+ *
+ * This function aims update the pages information when
+ * to switch between them.
+ */
+void
+on_ntbk_transfers_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
+{
+  if (page_num == 0) //Sell rank
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
+    }
+  else if (page_num == 1) //Sell rank MP
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));	  
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
+    }
+  else if (page_num == 2) //Sell rank MC
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
     }
 }
