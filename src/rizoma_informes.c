@@ -5284,6 +5284,11 @@ fill_products_rank (gint familia)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
+  glong costo, vendido, contribucion,
+    costo_total, vendido_total, contribucion_total;
+  gdouble margen;
+
+  margen = costo = vendido = contribucion = costo_total = vendido_total = contribucion_total = 0;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -5298,6 +5303,14 @@ fill_products_rank (gint familia)
   /*visualiza los productos en el tree_view*/
   for (i = 0; i < tuples; i++)
     {
+      vendido = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "sold_amount"))), (char **)NULL));
+      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
+      contribucion = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contrib"))), (char **)NULL));
+      
+      vendido_total += vendido;
+      costo_total += costo;
+      contribucion_total += contribucion;
+
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
 			  0, PQvaluebycol (res, i, "barcode"),
@@ -5306,42 +5319,40 @@ fill_products_rank (gint familia)
                           3, atoi (PQvaluebycol (res, i, "contenido")),
                           4, PQvaluebycol (res, i, "unidad"),
                           5, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
-                          6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "sold_amount"))), (char **)NULL)),
-                          7, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
-                          8, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contrib"))), (char **)NULL)),
-                          9, ((strtod (PUT (g_strdup (PQvaluebycol (res, i, "contrib"))), (char **)NULL) /
-			       strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)) * 100),
+                          6, vendido,
+                          7, costo,
+                          8, contribucion,
+                          9, (gdouble)(((gdouble)contribucion / (gdouble)costo) * 100),
                           -1);
     }
 
+  /*res = EjecutarSQL
+    (g_strdup_printf ("SELECT round(sum(sold_amount)) as vendidos, round(sum(costo)) as costo, round(sum(contrib)) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 2) as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
+		      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+		      g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
+		      );
 
-    res = EjecutarSQL
-      (g_strdup_printf ("SELECT round(sum(sold_amount)) as vendidos, round(sum(costo)) as costo, round(sum(contrib)) as contrib, round(((sum(contrib) / sum(costo)) *100)::numeric , 2) as margen FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date)",
-                        g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                        g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
-       );
-
-  if (res == NULL) return;
+		      if (res == NULL) return;*/
 
   /* visualiza las sumas de los productos en sus respectivos labels */
-
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "vendidos"))));
+                                         PutPoints (g_strdup_printf ("%ld", vendido_total))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "costo"))));
+                                         PutPoints (g_strdup_printf ("%ld", costo_total))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_contrib")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "contrib"))));
+                                         PutPoints (g_strdup_printf ("%ld", contribucion_total))));
 
+  margen = (contribucion_total == 0 || costo_total == 0) ? 0 : ((gdouble)contribucion_total/(gdouble)costo_total)*100;
+  
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                         g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
-                                         PUT (PQvaluebycol (res, 0, "margen"))));
-
-
+                                         g_strdup_printf ("%.2f", margen )));
+  
   //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
@@ -5365,6 +5376,11 @@ fill_products_rank_mp (gint familia)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
+  glong costo, vendido, contribucion,
+    costo_total, vendido_total, contribucion_total;
+  gdouble margen;
+
+  margen = costo = vendido = contribucion = costo_total = vendido_total = contribucion_total = 0;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -5381,6 +5397,14 @@ fill_products_rank_mp (gint familia)
 
   for (i = 0; i < tuples; i++)
     {
+      vendido = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "monto_vendido"))), (char **)NULL));
+      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
+      contribucion = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL));
+      
+      vendido_total += vendido;
+      costo_total += costo;
+      contribucion_total += contribucion;
+
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
 			  0, PQvaluebycol (res, i, "barcode"),
@@ -5389,44 +5413,43 @@ fill_products_rank_mp (gint familia)
 			  3, g_strdup (PQvaluebycol (res, i, "contenido")),
 			  4, g_strdup (PQvaluebycol (res, i, "unidad")),
 			  5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-			  6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "monto_vendido"))), (char **)NULL)),
-			  7, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
-			  8, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL)),
-			  9, ((strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL) /
-			       strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)) * 100),
+			  6, vendido,
+                          7, costo,
+                          8, contribucion,
+                          9, (gdouble)(((gdouble)contribucion / (gdouble)costo) * 100),
 			  -1);
     }
 
-    res = EjecutarSQL
-      (g_strdup_printf ("SELECT ROUND (SUM (monto_vendido)) AS vendidos, "
-			"       ROUND (SUM (costo)) AS costo, "
-			"       ROUND (SUM (contribucion)) AS contrib, "
-			"       ROUND (((SUM (contribucion) / SUM (costo)) *100)::NUMERIC, 2) AS margen "
-			"FROM ranking_ventas_mp (TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE, "
-			"                        TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE)",
-                        g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                        g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
-       );
+  /*res = EjecutarSQL
+    (g_strdup_printf ("SELECT ROUND (SUM (monto_vendido)) AS vendidos, "
+		      "       ROUND (SUM (costo)) AS costo, "
+		      "       ROUND (SUM (contribucion)) AS contrib, "
+		      "       ROUND (((SUM (contribucion) / SUM (costo)) *100)::NUMERIC, 2) AS margen "
+		      "FROM ranking_ventas_mp (TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE, "
+		      "                        TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE)",
+		      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+		      g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
+     );
 
-  if (res == NULL) return;
+     if (res == NULL) return;*/
 
   /* visualiza las sumas de los productos en sus respectivos labels */
-
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "vendidos"))));
+                                         PutPoints (g_strdup_printf ("%ld", vendido_total))));
+
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "costo"))));
+                                         PutPoints (g_strdup_printf ("%ld", costo_total))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_contrib")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "contrib"))));
+                                         PutPoints (g_strdup_printf ("%ld", contribucion_total))));
 
+  margen = (contribucion_total == 0 || costo_total == 0) ? 0 : ((gdouble)contribucion_total/(gdouble)costo_total)*100;
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                         g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
-                                         PUT (PQvaluebycol (res, 0, "margen"))));
-
+                                         g_strdup_printf ("%.2f", margen )));
 
   //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
@@ -5452,6 +5475,11 @@ fill_products_rank_mc (gint familia)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
+  glong costo, vendido, contribucion,
+    costo_total, vendido_total, contribucion_total;
+  gdouble margen;
+
+  margen = costo = vendido = contribucion = costo_total = vendido_total = contribucion_total = 0;
 
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
@@ -5467,6 +5495,14 @@ fill_products_rank_mc (gint familia)
   /* viualiza los productos en el tree_view*/
   for (i = 0; i < tuples; i++)
     {
+      vendido = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "monto_vendido"))), (char **)NULL));
+      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
+      contribucion = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL));
+      
+      vendido_total += vendido;
+      costo_total += costo;
+      contribucion_total += contribucion;
+
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
 			  0, PQvaluebycol (res, i, "barcode"),
@@ -5475,44 +5511,43 @@ fill_products_rank_mc (gint familia)
 			  3, g_strdup (PQvaluebycol (res, i, "contenido")),
 			  4, g_strdup (PQvaluebycol (res, i, "unidad")),
 			  5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-			  6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "monto_vendido"))), (char **)NULL)),
-			  7, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
-			  8, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL)),
-			  9, ((strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL) /
-			       strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)) * 100),
+			  6, vendido,
+                          7, costo,
+                          8, contribucion,
+                          9, (gdouble)(((gdouble)contribucion / (gdouble)costo) * 100),
 			  -1);
     }
 
-    res = EjecutarSQL
-      (g_strdup_printf ("SELECT ROUND (SUM (monto_vendido)) AS vendidos, "
-			"       ROUND (SUM (costo)) AS costo, "
-			"       ROUND (SUM (contribucion)) AS contrib, "
-			"       ROUND (((SUM (contribucion) / SUM (costo)) *100)::NUMERIC, 2) AS margen "
-			"FROM ranking_ventas_mc (TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE, "
-			"                        TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE)",
-                        g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                        g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
-       );
+  /*res = EjecutarSQL
+    (g_strdup_printf ("SELECT ROUND (SUM (monto_vendido)) AS vendidos, "
+		      "       ROUND (SUM (costo)) AS costo, "
+		      "       ROUND (SUM (contribucion)) AS contrib, "
+		      "       ROUND (((SUM (contribucion) / SUM (costo)) *100)::NUMERIC, 2) AS margen "
+		      "FROM ranking_ventas_mc (TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE, "
+		      "                        TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY')::DATE)",
+		      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
+		      g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end))
+     );
 
-  if (res == NULL) return;
+  if (res == NULL) return;*/
 
   /* visualiza las sumas de los productos en sus respectivos labels */
-
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "vendidos"))));
+                                         PutPoints (g_strdup_printf ("%ld", vendido_total))));
+
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "costo"))));
+                                         PutPoints (g_strdup_printf ("%ld", costo_total))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_contrib")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (PQvaluebycol (res, 0, "contrib"))));
+                                         PutPoints (g_strdup_printf ("%ld", contribucion_total))));
 
+  margen = (contribucion_total == 0 || costo_total == 0) ? 0 : ((gdouble)contribucion_total/(gdouble)costo_total)*100;
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                         g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
-                                         PUT (PQvaluebycol (res, 0, "margen"))));
-
+					 g_strdup_printf ("%.2f", margen )));
 
   //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
@@ -6732,20 +6767,40 @@ on_ntbk_sells_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gu
 void
 on_ntbk_transfers_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint page_num, gpointer user_data)
 {
+  GtkComboBox *combo;
+  GtkTreeModel *modelo;
+  GtkTreeIter iter;
+
+  combo = GTK_COMBO_BOX (builder_get (builder, "cmb_transfer_type"));
+  modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));
+
+  gboolean traspaso_envio;
+  gtk_combo_box_get_active_iter (combo, &iter);
+
+  gtk_tree_model_get (modelo, &iter,
+		      0, &traspaso_envio,
+		      -1);
+
   if (page_num == 0) //Sell rank
     {
+      fill_transfer_rank(traspaso_envio);
+
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
     }
   else if (page_num == 1) //Sell rank MP
     {
+      fill_transfer_rank_mp(traspaso_envio);
+
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));	  
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
     }
   else if (page_num == 2) //Sell rank MC
     {
+      fill_transfer_rank_mc(traspaso_envio);
+
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
