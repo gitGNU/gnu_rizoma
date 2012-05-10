@@ -1979,6 +1979,83 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   return TRUE;
 }
 
+/*--------- TRANSFER RANK START -------------------*/
+
+PGresult *
+ReturnTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio)
+{
+  PGresult *res;
+  gchar *q, *traspaso_envio_q;
+
+  if (traspaso_envio == TRUE)
+    traspaso_envio_q = g_strdup ("'t'");
+  else
+    traspaso_envio_q = g_strdup("'f'");
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_traspaso (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, traspaso_envio_q);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+PGresult *
+ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio)
+{
+  PGresult *res;
+  gchar *q, *traspaso_envio_q;
+
+  if (traspaso_envio == TRUE)
+    traspaso_envio_q = g_strdup ("'t'");
+  else
+    traspaso_envio_q = g_strdup ("'f'");
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_traspaso_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, traspaso_envio_q);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+PGresult *
+ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio)
+{
+  PGresult *res;
+  gchar *q, *traspaso_envio_q;
+
+  if (traspaso_envio == TRUE)
+    traspaso_envio_q = g_strdup ("'t'");
+  else
+    traspaso_envio_q = g_strdup ("'f'");
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_traspaso_mc (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, traspaso_envio_q);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+/*-------- TRANSFER RANK END ----------------*/
+
+
 PGresult *
 ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
 {
@@ -2051,6 +2128,57 @@ ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
     return NULL;
 }
 
+
+/*----------- TRANSFER RANK ON CHANGE ROW START ---------------*/
+
+/**
+ *
+ *
+ */
+PGresult *
+ReturnDerivTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_traspaso_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
+/**
+ *
+ *
+ */
+PGresult *
+ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf
+    ("SELECT * FROM ranking_traspaso_comp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
+     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+/*----------- TRANSFER RANK ON CHANGE ROW END -----------------*/
 
 /**
  *

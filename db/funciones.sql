@@ -2712,7 +2712,7 @@ END; $$ language plpgsql;
 
 
 ---
--- Ranking de ventas de ventas de las materias primas
+-- Ranking de ventas de las materias primas
 -- (ventas indirectas).
 ---
 CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
@@ -2874,7 +2874,7 @@ END; $$ LANGUAGE plpgsql;
 ---
 CREATE OR REPLACE FUNCTION ranking_ventas_comp (IN starts date,
        	  	  	   		      	IN ends date,
-						IN barcode_mp varchar,
+						IN barcode_mc varchar,
 					      	OUT barcode varchar,
 					      	OUT descripcion varchar,
 					      	OUT marca varchar,
@@ -2907,7 +2907,7 @@ BEGIN
        		   FROM venta_mc_detalle
 			INNER JOIN venta v
 			ON venta_mc_detalle.id_venta_vd = v.id
-		   WHERE barcode_madre = $S$ || barcode_mp || $S$
+		   WHERE barcode_madre = $S$ || barcode_mc || $S$
 			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
         	   UNION ALL
         	   SELECT vmcd.id_venta_vd, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
@@ -3006,6 +3006,403 @@ BEGIN
 RETURN;
 END; $$ LANGUAGE plpgsql;
 
+
+-- ---------------------------- RANKING TRASPASOS ----------
+
+---
+-- Se obtienen los detalles de cada traspaso 
+-- (agrupados por producto) para el ranking de traspasos. 
+--
+-- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
+--
+---
+CREATE OR REPLACE FUNCTION ranking_traspaso (IN starts date,
+       	  	  	   		     IN ends date,
+					     IN traspaso_envio boolean,
+       					     OUT barcode varchar,
+       					     OUT descripcion varchar,
+       					     OUT marca varchar,
+       					     OUT contenido varchar,
+       					     OUT unidad varchar,
+       					     OUT familia integer,
+       					     OUT amount double precision,
+       					     OUT costo double precision)
+RETURNS SETOF RECORD AS $$
+DECLARE
+  q text;
+  l record;
+  --------------
+  corriente_l int4;
+  derivada_l int4;
+  --------------
+  filtro text;
+  --------------
+BEGIN
+
+  SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+
+  -- Condición para obtener la información de las mercaderías enviadas y/o recibidas
+  IF traspaso_envio = TRUE THEN
+     filtro := 'tdc.origen_l = 1';
+  ELSE
+     filtro := 'tdc.origen_l != 1';
+  END IF;
+
+  -- Se crea una tabla temporal con el detalle de la venta simple
+  CREATE TEMPORARY TABLE traspaso_detalle_completa AS
+  SELECT td.barcode AS barcode_l,
+  	 t.origen AS origen_l,
+  	 SUM (td.cantidad) AS amount_l,
+	 SUM (td.cantidad * td.precio) AS costo_l -- SUM (Subtotal costo) = COSTO TOTAL
+  FROM traspaso t
+       INNER JOIN traspaso_detalle td
+       ON td.id_traspaso = t.id
+  WHERE (td.tipo = corriente_l OR td.tipo = derivada_l)
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  GROUP BY td.barcode, t.origen;
+
+  -- Incluye en la tabla temporal venta_detalle_completa el detalle de los componentes de una merc. compleja
+  INSERT INTO traspaso_detalle_completa
+  SELECT tmcd.barcode_hijo AS barcode_l,
+  	 t.origen AS origen_l,
+  	 SUM (tmcd.cantidad) AS amount_l,
+	 SUM (tmcd.cantidad * tmcd.costo_promedio) AS costo_l -- SUM (Subtotal costo) = COSTO TOTAL
+  FROM traspaso t
+       INNER JOIN traspaso_mc_detalle tmcd
+       ON tmcd.id_traspaso = t.id
+  WHERE (tmcd.tipo_hijo = corriente_l OR tmcd.tipo_hijo = derivada_l)
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  GROUP BY tmcd.barcode_hijo, t.origen;
+
+  q := $S$ 
+     SELECT producto.barcode AS barcode,
+     	    producto.descripcion AS descripcion,
+       	    producto.marca AS marca,
+	    producto.contenido AS contenido,
+	    producto.unidad AS unidad,
+	    producto.familia AS familia,
+	    producto.impuestos AS impuestos,
+	    SUM (tdc.amount_l) AS amount,
+	    SUM (tdc.costo_l) AS costo
+      FROM traspaso_detalle_completa tdc
+      	   INNER JOIN producto 
+	   ON tdc.barcode_l = producto.barcode
+      WHERE $S$||filtro||$S$
+      GROUP BY tdc.barcode_l,1,2,3,4,5,6,7
+      ORDER BY producto.descripcion ASC $S$;
+
+  FOR l IN EXECUTE q LOOP
+      barcode := l.barcode;
+      descripcion := l.descripcion;
+      marca := l.marca;
+      contenido := l.contenido;
+      unidad := l.unidad;
+      familia := l.familia;
+      amount := l.amount;
+      costo := l.costo;
+      RETURN NEXT;
+  END LOOP;
+
+  -- Se elimina la tabla temporal
+  DROP TABLE traspaso_detalle_completa;
+
+RETURN;
+END; $$ language plpgsql;
+
+
+---
+-- Ranking de traspasos de las materias primas
+-- (traspasos indirectos).
+--
+-- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
+---
+CREATE OR REPLACE FUNCTION ranking_traspaso_mp (IN starts date,
+       	  	  	   		        IN ends date,
+					        IN traspaso_envio boolean,
+					        OUT barcode varchar,
+					        OUT descripcion varchar,
+					        OUT marca varchar,
+					        OUT contenido varchar,
+					        OUT unidad varchar,
+					        OUT cantidad double precision,
+					        OUT costo double precision,
+					        OUT familia integer)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+	--------
+	materia_prima_l int4;
+	--------
+	filtro text;
+	--------
+BEGIN
+	SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+
+	-- Condición para obtener la información de las mercaderías enviadas y/o recibidas
+	IF traspaso_envio = TRUE THEN
+	   filtro := 't.origen = 1';
+	ELSE
+	   filtro := 't.origen != 1';
+	END IF;
+
+	q := $S$ SELECT CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
+	     	 	     WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
+			END AS barcode,
+	     	 	t.origen, p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
+		        SUM (tmcd.cantidad) AS cantidad,
+			SUM (tmcd.cantidad*tmcd.costo_promedio) AS costo
+		 FROM traspaso_mc_detalle tmcd
+		      INNER JOIN traspaso t
+		      	    ON t.id = tmcd.id_traspaso
+		      INNER JOIN producto p
+		      	    ON p.barcode = CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
+	     	 	       		   	WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
+					   END
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		       AND (tmcd.tipo_hijo = $S$||materia_prima_l||$S$ OR tmcd.tipo_madre = $S$||materia_prima_l||$S$)
+		       AND $S$ ||filtro|| $S$
+		 GROUP BY 1,2,3,4,5,6,7 ORDER BY p.descripcion ASC $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+	    familia := l.familia;
+    	    cantidad := l.cantidad;
+    	    costo := l.costo;
+    	    RETURN NEXT;
+        END LOOP;
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Ranking de traspaso de los productos derivados
+-- (traspasos indirectos).
+---
+CREATE OR REPLACE FUNCTION ranking_traspaso_deriv (IN starts date,
+       	  	  	   		      	   IN ends date,
+						   IN barcode_mp varchar,
+					      	   OUT barcode varchar,
+					      	   OUT descripcion varchar,
+					      	   OUT marca varchar,
+					      	   OUT contenido varchar,
+					      	   OUT unidad varchar,
+					      	   OUT cantidad double precision,
+					      	   OUT costo double precision)
+RETURNS SETOF RECORD AS $$
+DECLARE
+  q text;
+  l record;
+  --------------
+  derivada_l int4;  -- id tipo derivado
+  --------------
+BEGIN
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+
+  -- Se crea una tabla temporal con el detalle del traspaso simple
+  CREATE TEMPORARY TABLE traspaso_derivados_completa AS
+  SELECT td.barcode AS barcode_l,
+  	 SUM (td.cantidad) AS amount_l,
+  	 SUM (td.cantidad * td.precio) AS costo_l
+  FROM traspaso t
+       INNER JOIN traspaso_detalle td
+       ON td.id_traspaso = t.id
+  WHERE td.tipo = derivada_l
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  	AND td.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre=barcode_mp::bigint)
+  GROUP BY td.barcode;
+
+  -- Incluye en la tabla temporal traspaso_derivados_completa el detalle de los componentes de una merc. compleja
+  INSERT INTO traspaso_derivados_completa
+  SELECT tmcd.barcode_hijo AS barcode_l,
+  	 SUM (tmcd.cantidad) AS amount_l,
+	 SUM (tmcd.cantidad * tmcd.costo_promedio) AS costo_l
+  FROM traspaso t
+       INNER JOIN traspaso_mc_detalle tmcd
+       ON tmcd.id_traspaso = t.id
+  WHERE tmcd.tipo_hijo = derivada_l
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+	AND tmcd.barcode_hijo IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre = barcode_mp::bigint)
+  GROUP BY tmcd.barcode_hijo;
+
+  q := $S$ 
+     SELECT producto.barcode AS barcode,
+     	    producto.descripcion AS descripcion,
+       	    producto.marca AS marca,
+	    producto.contenido AS contenido,
+	    producto.unidad AS unidad,
+	    producto.familia AS familia,
+	    producto.impuestos AS impuestos,
+	    SUM (tdc.amount_l) AS cantidad,
+	    SUM (tdc.costo_l) AS costo
+      FROM traspaso_derivados_completa tdc
+      	   INNER JOIN producto 
+	   ON tdc.barcode_l = producto.barcode
+      GROUP BY tdc.barcode_l,1,2,3,4,5,6,7
+      ORDER BY producto.descripcion ASC $S$;
+
+  FOR l IN EXECUTE q loop
+      barcode := l.barcode;
+      descripcion := l.descripcion;
+      marca := l.marca;
+      contenido := l.contenido;
+      unidad := l.unidad;
+      cantidad := l.cantidad;
+      costo := l.costo;
+      RETURN NEXT;
+  END LOOP;
+
+  -- Se elimina la tabla temporal
+  DROP TABLE traspaso_derivados_completa;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Ranking de traspaso de los componentes de un producto compuesto
+-- (traspasos indirectos).
+---
+CREATE OR REPLACE FUNCTION ranking_traspaso_comp (IN starts date,
+       	  	  	   		      	  IN ends date,
+						  IN barcode_mc varchar,
+					      	  OUT barcode varchar,
+					      	  OUT descripcion varchar,
+					      	  OUT marca varchar,
+					      	  OUT contenido varchar,
+					      	  OUT unidad varchar,
+					      	  OUT cantidad double precision,
+					      	  OUT costo double precision)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+	-------------
+	derivada_l int4;  -- id tipo derivado
+	corriente_l int4; -- id tipo corriente
+	-------------
+BEGIN
+	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+
+	q := $S$ 
+	     WITH RECURSIVE compuesta (id_traspaso, barcode_madre, id_mh, tipo_madre,
+	     	  	    	       barcode_hijo, tipo_hijo, cantidad, costo_promedio) AS 
+      	      	(
+		   SELECT id_traspaso, barcode_madre, id_mh, tipo_madre,
+			  barcode_hijo, tipo_hijo, cantidad, costo_promedio
+       		   FROM traspaso_mc_detalle
+			INNER JOIN traspaso t
+			ON traspaso_mc_detalle.id_traspaso = t.id
+		   WHERE barcode_madre = $S$ || barcode_mc || $S$
+			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+        	   UNION ALL
+        	   SELECT tmcd.id_traspaso, tmcd.barcode_madre, tmcd.id_mh, tmcd.tipo_madre,
+		      	  tmcd.barcode_hijo, tmcd.tipo_hijo, tmcd.cantidad, tmcd.costo_promedio
+              	   FROM traspaso_mc_detalle tmcd, compuesta
+       		   WHERE tmcd.barcode_madre = compuesta.barcode_hijo AND
+			 tmcd.id_traspaso = compuesta.id_traspaso AND
+			 tmcd.id_mh[1] = compuesta.id_mh[2]
+      		)
+		SELECT producto.barcode AS barcode,
+     	    	       producto.descripcion AS descripcion,
+       	    	       producto.marca AS marca,
+	    	       producto.contenido AS contenido,
+	    	       producto.unidad AS unidad,
+	    	       producto.familia AS familia,
+	    	       producto.impuestos AS impuestos,	       
+	    	       SUM (c.cantidad) AS cantidad,
+	    	       SUM (c.costo_promedio*c.cantidad) AS costo
+      	        FROM compuesta c
+      	   	     INNER JOIN producto 
+	   	     	   ON c.barcode_hijo = producto.barcode
+	             WHERE c.tipo_hijo = $S$ ||derivada_l|| $S$
+		     	   OR c.tipo_hijo = $S$ ||corriente_l|| $S$
+      		     GROUP BY c.barcode_hijo,1,2,3,4,5,6,7
+      		     ORDER BY producto.descripcion ASC $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+    	    cantidad := l.cantidad;
+    	    costo := l.costo;
+    	    RETURN NEXT;
+        END LOOP;
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Ranking de traspaso de las mercaderías compuestas
+--
+-- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
+---
+CREATE OR REPLACE FUNCTION ranking_traspaso_mc (IN starts date,
+       	  	  	   		        IN ends date,
+						IN traspaso_envio boolean,
+					        OUT barcode varchar,
+					      	OUT descripcion varchar,
+					      	OUT marca varchar,
+					      	OUT contenido varchar,
+					      	OUT unidad varchar,
+					      	OUT cantidad double precision,
+					      	OUT costo double precision,
+					      	OUT familia integer)
+RETURNS SETOF RECORD AS $$
+DECLARE
+	q text;
+	l record;
+	-------------
+	compuesta_l int4;
+	-------------
+	filtro text;
+	-------------
+BEGIN
+	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+
+	-- Condición para obtener la información de las mercaderías enviadas y/o recibidas
+	IF traspaso_envio = FALSE THEN
+	   filtro := 't.origen = 1';
+	ELSE
+	   filtro := 't.origen != 1';
+	END IF;
+
+	q := $S$ SELECT p.barcode, t.origen, p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
+		        SUM (td.cantidad) AS cantidad,
+			SUM (td.cantidad*td.precio) AS costo
+		 FROM traspaso_detalle td
+		 INNER JOIN traspaso t
+		 ON t.id = td.id_traspaso
+		 INNER JOIN producto p
+		 ON p.barcode = td.barcode
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<$S$ || quote_literal(ends) || $S$
+		 AND td.tipo=$S$ || compuesta_l || $S$
+		 AND $S$||filtro|| $S$
+		 GROUP BY 1,2,3,4,5,6,7 ORDER BY p.descripcion ASC $S$;
+
+      	FOR l IN EXECUTE q loop
+	    barcode := l.barcode;
+            descripcion := l.descripcion;
+	    marca := l.marca;
+    	    contenido := l.contenido;
+    	    unidad := l.unidad;
+	    familia := l.familia;
+    	    cantidad := l.cantidad;
+    	    costo := l.costo;
+    	    RETURN NEXT;
+        END LOOP;
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+-- ---------------------------- END RANKING TRASPASOS ------
 
 --
 --

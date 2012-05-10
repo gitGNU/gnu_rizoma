@@ -45,7 +45,7 @@ PGresult *res_sells;
 gint contador, fin;
 GDate *date_begin;
 GDate *date_end;
-int flagProgress;
+//int flagProgress;
 
 /**
  * Es llamada cuando se presiona en el tree_view_sells (signal changed).
@@ -302,6 +302,102 @@ change_sell_rank_mc (GtkCellRendererText *cell, gchar *path_string, gchar *stock
     }
 }
 
+
+/*------------- TRANSFER RANK (CHANGE EVENT) START ----------------------*/
+
+/**
+ *
+ *
+ */
+void
+change_transfer_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *stock_fisico, gpointer data)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "treeview_mp_transfer_rank"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkListStore *store_sr_deriv = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_derivates_transfer_rank"))));
+  GtkTreeIter iter;
+  gchar *barcode_producto;
+  gint i, tuples;
+  PGresult *res;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &barcode_producto,
+                          -1);
+
+      gtk_list_store_clear (GTK_LIST_STORE (store_sr_deriv));
+
+      res = ReturnDerivTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+
+      tuples = PQntuples (res);
+
+      for (i = 0; i < tuples; i++)
+        {
+          gtk_list_store_append (store_sr_deriv, &iter);
+          gtk_list_store_set (store_sr_deriv, &iter,
+			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
+			      1, g_strdup (PQvaluebycol (res, i, "descripcion")),
+			      2, g_strdup (PQvaluebycol (res, i, "marca")),
+			      3, g_strdup (PQvaluebycol (res, i, "contenido")),
+			      4, g_strdup (PQvaluebycol (res, i, "unidad")),
+			      5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			      6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+                              -1);
+        }
+    }
+}
+
+
+/**
+ *
+ *
+ */
+void
+change_transfer_rank_mc (GtkCellRendererText *cell, gchar *path_string, gchar *stock_fisico, gpointer data)
+{
+  GtkTreeView *tree = GTK_TREE_VIEW (builder_get (builder, "treeview_offer_transfer_rank"));
+  GtkTreeModel *model = gtk_tree_view_get_model (tree);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection (tree);
+  GtkListStore *store_tr_comp = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_components_transfer_rank"))));
+  GtkTreeIter iter;
+  gchar *barcode_producto;
+  gint i, tuples;
+  PGresult *res;
+
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+                          0, &barcode_producto,
+                          -1);
+
+      gtk_list_store_clear (GTK_LIST_STORE (store_tr_comp));
+
+      res = ReturnCompTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+
+      tuples = PQntuples (res);
+
+      for (i = 0; i < tuples; i++)
+        {
+          gtk_list_store_append (store_tr_comp, &iter);
+          gtk_list_store_set (store_tr_comp, &iter,
+			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
+			      1, g_strdup (PQvaluebycol (res, i, "descripcion")),
+			      2, g_strdup (PQvaluebycol (res, i, "marca")),
+			      3, g_strdup (PQvaluebycol (res, i, "contenido")),
+			      4, g_strdup (PQvaluebycol (res, i, "unidad")),
+			      5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			      6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+                              -1);
+        }
+    }
+}
+
+
+/*------------- TRANSFER RANK (CHANGE EVENT) END ----------------------*/
 
 /**
  * Es llamada cuando se edita "stock físico" en el tree_view_cuadratura (signal edited).
@@ -784,6 +880,13 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 }
 
 
+/**
+ * This function fill the combobox with buy or sell status
+ * ('TODAS','VIGENTES', 'ANULADAS') to filter report.
+ *
+ * @param: gchar combobox_name : The combobox name to fill
+ *
+ */
 void
 fill_filter_nullify_cmbbox (gchar *combobox_name)
 {
@@ -832,6 +935,58 @@ fill_filter_nullify_cmbbox (gchar *combobox_name)
 
   gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
 }
+
+
+/**
+ * This function fill the combobox with transfer type
+ * ('ENVIADOS', 'RECIBIDOS') to filter transfer report.
+ *
+ * @param: gchar combobox_name : The combobox name to fill
+ *
+ */
+void
+fill_transfer_type_cmbbox (gchar *combobox_name)
+{
+  GtkWidget *combo;
+  GtkTreeIter iter;
+  GtkListStore *modelo;
+
+  combo = GTK_WIDGET (gtk_builder_get_object(builder, combobox_name));
+  modelo = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+
+  if (modelo == NULL)
+    {
+      GtkCellRenderer *cell;
+      modelo = gtk_list_store_new (2,
+				   G_TYPE_BOOLEAN,
+				   G_TYPE_STRING);
+
+      gtk_combo_box_set_model(GTK_COMBO_BOX(combo), GTK_TREE_MODEL(modelo));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT(combo), cell, TRUE);
+      gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(combo), cell,
+				     "text", 1,
+				     NULL);
+    }
+
+  gtk_list_store_clear(modelo);
+
+  gtk_list_store_append(modelo, &iter);
+  gtk_list_store_set(modelo, &iter,
+		     0, TRUE,
+		     1, "ENVIADOS",
+		     -1);
+
+  gtk_list_store_append(modelo, &iter);
+  gtk_list_store_set(modelo, &iter,
+		     0, FALSE,
+		     1, "RECIBIDOS",
+		     -1);
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+}
+
 
 /**
  * Es llamada por la funcion "check_passwd".
@@ -2661,6 +2816,541 @@ reports_win (void)
     END Informe Traspasos
    */
 
+  
+  /*
+    ----------- INFORME RANKING TRASPASOS ------------
+   */
+  store = gtk_list_store_new (7,
+			      G_TYPE_STRING,  //Barcode
+                              G_TYPE_STRING,  //Descripcion
+                              G_TYPE_STRING,  //Marca
+                              G_TYPE_STRING,  //Contenido
+                              G_TYPE_STRING,  //Unidad
+			      G_TYPE_DOUBLE,  //Cantidad
+                              G_TYPE_INT);    //Costo
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_general_transfer_rank"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  /* g_signal_connect (G_OBJECT (selection), "changed", */
+  /*                   G_CALLBACK (change_sell_rank), NULL); */
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Contenido", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_min_width (column, 40);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  /*ranking->tree = treeview;
+  ranking->title = "Ranking de Ventas";
+  ranking->date_string = NULL;
+  ranking->cols[0].name = "Barcode";
+  ranking->cols[1].name = "Producto";
+  ranking->cols[2].name = "Marca";
+  ranking->cols[3].name = "Contenido";
+  ranking->cols[4].name = "Unidad";
+  ranking->cols[5].name = "Cantidad";
+  ranking->cols[6].name = "Costo";
+  ranking->cols[7].name = NULL;*/
+
+  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+
+
+  //Treeview Materias primas
+  store = gtk_list_store_new (7,
+			      G_TYPE_STRING,  //Barcode
+                              G_TYPE_STRING,  //Descripcion
+                              G_TYPE_STRING,  //Marca
+                              G_TYPE_STRING,  //Contenido
+                              G_TYPE_STRING,  //Unidad
+			      G_TYPE_DOUBLE,  //Cantidad
+                              G_TYPE_INT);    //Costo
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_mp_transfer_rank"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+		    G_CALLBACK (change_transfer_rank_mp), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Contenido", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_min_width (column, 40);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  /*ranking->tree = treeview;
+  ranking->title = "Ranking de Ventas";
+  ranking->date_string = NULL;
+  ranking->cols[0].name = "Barcode";
+  ranking->cols[1].name = "Producto";
+  ranking->cols[2].name = "Marca";
+  ranking->cols[3].name = "Contenido";
+  ranking->cols[4].name = "Unidad";
+  ranking->cols[5].name = "Cantidad";
+  ranking->cols[6].name = "Costo";
+  ranking->cols[7].name = NULL;*/
+
+  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+
+  //Treeview Derivados
+  store = gtk_list_store_new (7,
+			      G_TYPE_STRING,  //Barcode
+                              G_TYPE_STRING,  //Descripcion
+                              G_TYPE_STRING,  //Marca
+                              G_TYPE_STRING,  //Contenido
+                              G_TYPE_STRING,  //Unidad
+			      G_TYPE_DOUBLE,  //Cantidad
+                              G_TYPE_INT);    //Costo
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_derivates_transfer_rank"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  /* g_signal_connect (G_OBJECT (selection), "changed", */
+  /*                   G_CALLBACK (change_sell_rank), NULL); */
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Contenido", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_min_width (column, 40);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  /*ranking->tree = treeview;
+  ranking->title = "Ranking de Ventas";
+  ranking->date_string = NULL;
+  ranking->cols[0].name = "Barcode";
+  ranking->cols[1].name = "Producto";
+  ranking->cols[2].name = "Marca";
+  ranking->cols[3].name = "Contenido";
+  ranking->cols[4].name = "Unidad";
+  ranking->cols[5].name = "Cantidad";
+  ranking->cols[6].name = "Costo";
+  ranking->cols[7].name = NULL;*/
+
+  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+
+
+  //Treeview Mercaderias compuestas
+  store = gtk_list_store_new (7,
+			      G_TYPE_STRING,  //Barcode
+                              G_TYPE_STRING,  //Descripcion
+                              G_TYPE_STRING,  //Marca
+                              G_TYPE_STRING,  //Contenido
+                              G_TYPE_STRING,  //Unidad
+			      G_TYPE_DOUBLE,  //Cantidad
+                              G_TYPE_INT);    //Costo
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_offer_transfer_rank"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  g_signal_connect (G_OBJECT (selection), "changed",
+		    G_CALLBACK (change_transfer_rank_mc), NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Contenido", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_min_width (column, 40);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  /*ranking->tree = treeview;
+  ranking->title = "Ranking de Ventas";
+  ranking->date_string = NULL;
+  ranking->cols[0].name = "Barcode";
+  ranking->cols[1].name = "Producto";
+  ranking->cols[2].name = "Marca";
+  ranking->cols[3].name = "Contenido";
+  ranking->cols[4].name = "Unidad";
+  ranking->cols[5].name = "Cantidad";
+  ranking->cols[6].name = "Costo";
+  ranking->cols[7].name = NULL;*/
+
+  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+
+
+  //Treeview Mercaderias componentes
+  store = gtk_list_store_new (7,
+			      G_TYPE_STRING,  //Barcode
+                              G_TYPE_STRING,  //Descripcion
+                              G_TYPE_STRING,  //Marca
+                              G_TYPE_STRING,  //Contenido
+                              G_TYPE_STRING,  //Unidad
+			      G_TYPE_DOUBLE,  //Cantidad
+                              G_TYPE_INT);    //Costo
+
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_components_transfer_rank"));
+  gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
+
+  selection = gtk_tree_view_get_selection (treeview);
+
+  /* g_signal_connect (G_OBJECT (selection), "changed", */
+  /*                   G_CALLBACK (change_sell_rank), NULL); */
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
+                                                     "text", 1,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 1);
+  gtk_tree_view_column_set_min_width (column, 160);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_expand (column, TRUE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Marca", renderer,
+                                                     "text", 2,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 2);
+  gtk_tree_view_column_set_min_width (column, 90);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Contenido", renderer,
+                                                     "text", 3,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 3);
+  gtk_tree_view_column_set_min_width (column, 60);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Unid.", renderer,
+                                                     "text", 4,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 4);
+  gtk_tree_view_column_set_min_width (column, 40);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 5);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo $", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_min_width (column, 50);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
+  /*ranking->tree = treeview;
+  ranking->title = "Ranking de Ventas";
+  ranking->date_string = NULL;
+  ranking->cols[0].name = "Barcode";
+  ranking->cols[1].name = "Producto";
+  ranking->cols[2].name = "Marca";
+  ranking->cols[3].name = "Contenido";
+  ranking->cols[4].name = "Unidad";
+  ranking->cols[5].name = "Cantidad";
+  ranking->cols[6].name = "Costo";
+  ranking->cols[7].name = NULL;*/
+
+  /*g_signal_connect (builder_get (builder, "btn_print_rank"), "clicked",
+    G_CALLBACK (PrintTree), (gpointer)ranking);*/
+
+
+
+  // TODOOOOOOO: Agregar los treeviews
+
+  /*
+    ---------- END INFORME RANKING TRASPASOS ------------
+   */
+
+
   /*
     START Informe Compras
    */
@@ -3241,13 +3931,17 @@ reports_win (void)
 
   gtk_widget_show_all (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_reports")));
 
+  // --- Se ocultan los widget de filtro de informes ---
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_family_filter")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_apply_family_filter")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_transfer_type")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_choose_transfer_type")));
 
   fill_filter_nullify_cmbbox ("cmb_buy_report");
   fill_filter_nullify_cmbbox ("cmb_sell_report");
+  fill_transfer_type_cmbbox ("cmb_transfer_type");
 
   // Se inicializan con la fecha actual
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_begin"), CurrentDate(1));
@@ -4216,7 +4910,6 @@ fill_devolucion ()
  * visualiza  a traves los labels  correspondientes.
  *
  */
-
 void
 *fill_totals_dev ()
 {
@@ -4255,7 +4948,7 @@ void
     }
 
 
-  gtk_timeout_remove (flagProgress);
+  //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
@@ -4401,7 +5094,7 @@ void
 					   PutPoints (g_strdup_printf ("%d",
 								       total_cash_discount / total_discount))));
 
-  gtk_timeout_remove (flagProgress);
+  //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
@@ -4409,6 +5102,153 @@ void
 
   return (NULL); //TODO: OJO con este retorno
 }
+
+/*---------------------------TRANSFER RANK START------------------*/
+/**
+ * Es llamada por la funcion "on_btn_get_stat_clicked()", si se escoge la
+ * opcion 1 del switch.
+ *
+ * Esta funcion a traves de una consulta sql retorna los productos transferidos
+ * pero rankeados y luego los visualiza en el tree_view correspondiente.
+ *
+ * @param: traspaso_envio = TRUE muestra los enviadose ELSE muestre los recibidos
+ *
+ */
+void
+fill_transfer_rank (gboolean traspaso_envio)
+{
+  GtkListStore *store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_general_transfer_rank"))));
+  GtkTreeIter iter;
+  PGresult *res;
+  gint i, tuples;
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
+  /* funcion que llama una funcion sql que retorna los productos vendidos y
+     los ordena por mas vendidos ademas de agregarle otros parametros */
+  res = ReturnTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+
+  tuples = PQntuples (res);
+
+  gtk_list_store_clear (store);
+
+  /*visualiza los productos en el tree_view*/
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, PQvaluebycol (res, i, "barcode"),
+                          1, PQvaluebycol (res, i, "descripcion"),
+                          2, PQvaluebycol (res, i, "marca"),
+                          3, PQvaluebycol (res, i, "contenido"),
+                          4, PQvaluebycol (res, i, "unidad"),
+                          5, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
+                          6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+                          -1);
+    }
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
+}
+
+/**
+ * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Traspasos' tab and 
+ * 'Materias Primas' subtab are selected.
+ *
+ * Fill the 'treeview_mp_transfer_rank' treeview with raw materials information.
+ *
+ * @param: traspaso_envio = TRUE muestra los enviadose ELSE muestre los recibidos
+ */
+void
+fill_transfer_rank_mp (gboolean traspaso_envio)
+{
+  GtkListStore *store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_mp_transfer_rank"))));
+  GtkListStore *deriv_store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_derivates_transfer_rank"))));
+  GtkTreeIter iter;
+  PGresult *res;
+  gint i, tuples;
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
+  /* funcion que llama una funcion sql que retorna los productos vendidos y
+     los ordena por mas vendidos ademas de agregarle otros parametros */
+  res = ReturnMpTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+
+  tuples = PQntuples (res);
+
+  gtk_list_store_clear (store);
+  gtk_list_store_clear (deriv_store);
+
+  /* viualiza los productos en el tree_view*/
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, PQvaluebycol (res, i, "barcode"),
+			  1, g_strdup (PQvaluebycol (res, i, "descripcion")),
+			  2, g_strdup (PQvaluebycol (res, i, "marca")),
+			  3, g_strdup (PQvaluebycol (res, i, "contenido")),
+			  4, g_strdup (PQvaluebycol (res, i, "unidad")),
+			  5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			  6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+			  -1);
+    }
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
+}
+
+
+/**
+ * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Traspaso' tab and 
+ * 'Ofertas' subtab are selected.
+ *
+ * Fill the 'treeview_offer_transfer_rank' treeview with 'complex merchandise' information.
+ *
+ * @param: traspaso_envio = TRUE muestra los enviadose ELSE muestre los recibidos
+ */
+void
+fill_transfer_rank_mc (gboolean traspaso_envio)
+{
+  GtkListStore *store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_offer_transfer_rank"))));
+  GtkListStore *comp_store =
+    GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "treeview_components_transfer_rank"))));
+  GtkTreeIter iter;
+  PGresult *res;
+  gint i, tuples;
+
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
+  /* funcion que llama una funcion sql que retorna los productos vendidos y
+     los ordena por mas vendidos ademas de agregarle otros parametros */
+  res = ReturnMcTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+
+  tuples = PQntuples (res);
+
+  gtk_list_store_clear (store);
+  gtk_list_store_clear (comp_store);
+
+  /* viualiza los productos en el tree_view*/
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, PQvaluebycol (res, i, "barcode"),
+			  1, g_strdup (PQvaluebycol (res, i, "descripcion")),
+			  2, g_strdup (PQvaluebycol (res, i, "marca")),
+			  3, g_strdup (PQvaluebycol (res, i, "contenido")),
+			  4, g_strdup (PQvaluebycol (res, i, "unidad")),
+			  5, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			  6, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL)),
+			  -1);
+    }
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
+}
+
+/*----------------------------TRANSFER RANK END-------------------*/
 
 
 /**
@@ -4485,12 +5325,11 @@ fill_products_rank (gint familia)
                                          PUT (PQvaluebycol (res, 0, "margen"))));
 
 
-  gtk_timeout_remove (flagProgress);
+  //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
   gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progreso), ".. Listo ..");
-
 }
 
 /**
@@ -4572,7 +5411,7 @@ fill_products_rank_mp (gint familia)
                                          PUT (PQvaluebycol (res, 0, "margen"))));
 
 
-  gtk_timeout_remove (flagProgress);
+  //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
@@ -4658,7 +5497,7 @@ fill_products_rank_mc (gint familia)
                                          PUT (PQvaluebycol (res, 0, "margen"))));
 
 
-  gtk_timeout_remove (flagProgress);
+  //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
   gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR (progreso), 0);
@@ -5167,7 +6006,7 @@ avanzar_barra_progreso (GtkWidget * progreso)
   GtkAdjustment *adj;
   adj = (GtkAdjustment *) gtk_adjustment_new (0, 1, 150, 0, 0, 0);
   gtk_progress_bar_new_with_adjustment (adj);
-  flagProgress = gtk_timeout_add (100, progress_timeout, progreso);
+  //flagProgress = gtk_timeout_add (100, progress_timeout, progreso);
 }
 
 
@@ -5245,6 +6084,10 @@ calcular_traspasos (void)
 void
 on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 {
+  GtkComboBox *combo;
+  GtkTreeModel *modelo;
+  GtkTreeIter iter;
+
   GtkNotebook *notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_reports"));
   gint page_num = gtk_notebook_get_current_page (notebook);
   GtkNotebook *sub_notebook;
@@ -5290,16 +6133,15 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
         case 1:
 	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
 	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
-	  GtkComboBox *combo = GTK_COMBO_BOX (builder_get (builder, "cmb_family_filter"));
-	  GtkTreeModel *modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));
-	  GtkTreeIter iter;
+	  combo = GTK_COMBO_BOX (builder_get (builder, "cmb_family_filter"));
+	  modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));	  
+	  
 	  gint familia;
 	  gtk_combo_box_get_active_iter (combo, &iter);
 
 	  gtk_tree_model_get (modelo, &iter,
 			      0, &familia,
 			      -1);
-
 
 	  if (sub_page_num == 0)
 	    {
@@ -5365,6 +6207,33 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 	  break;
 
 	case 8:
+	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_transfers_rank"));
+	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
+	  combo = GTK_COMBO_BOX (builder_get (builder, "cmb_transfer_type"));
+	  modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));
+
+	  gboolean traspaso_envio;
+	  gtk_combo_box_get_active_iter (combo, &iter);
+
+	  gtk_tree_model_get (modelo, &iter,
+			      0, &traspaso_envio,
+			      -1);
+
+	  if (sub_page_num == 0)
+	    {
+	      fill_transfer_rank(traspaso_envio);
+	    }
+	  else if (sub_page_num == 1)
+	    {
+	      fill_transfer_rank_mp(traspaso_envio);
+	    }
+	  else if (sub_page_num == 2)
+	    {
+	      fill_transfer_rank_mc(traspaso_envio);
+	    }
+	  break;
+
+	case 9:
 	  /*Informe Exentos*/
 	  fill_exempt_sells ();
 	  break;
@@ -5584,6 +6453,17 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
     {
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_stores")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
+    }
+
+  if (page_num == 8)
+    {
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmb_transfer_type")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_choose_transfer_type")));
+    }
+  else if (page_num != 8)
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmb_transfer_type")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_choose_transfer_type")));
     }
 }
 
