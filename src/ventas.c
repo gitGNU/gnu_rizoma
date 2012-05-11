@@ -5120,6 +5120,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   gint vendedor = user_data->user_id;
   /*gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
     (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));*/
+  gint id_traspaso;
 
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
@@ -5137,11 +5138,13 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
       gtk_tree_model_get (model, &iter,
                           0, &destino,
                           -1);
-      SaveTraspaso (TotalPrecioCompra(venta->header),
-                    ReturnBodegaID(ReturnNegocio()),
-                    vendedor,
-                    destino,
-                    TRUE);
+      id_traspaso = SaveTraspaso (TotalPrecioCompra(venta->header),
+				  ReturnBodegaID(ReturnNegocio()),
+				  vendedor,
+				  destino,
+				  TRUE);
+      
+      PrintValeTraspaso (compra->header_compra, id_traspaso, TRUE);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
 

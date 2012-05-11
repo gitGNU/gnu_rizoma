@@ -8943,6 +8943,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   gint active;
   gint vendedor = 1; //user_data->user_id;
   gdouble monto = CalcularTotalCompra (compra->header_compra);
+  gint id_traspaso;
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
@@ -8960,11 +8961,13 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 			  0, &destino,
 			  -1);
 
-      SaveTraspasoCompras (monto,
-			   ReturnBodegaID(ReturnNegocio()),
-			   vendedor,
-			   destino,
-			   TRUE);
+      id_traspaso = SaveTraspasoCompras (monto,
+					 ReturnBodegaID(ReturnNegocio()),
+					 vendedor,
+					 destino,
+					 TRUE);
+
+      PrintValeTraspaso (compra->header_compra, id_traspaso, TRUE);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
 
@@ -9022,6 +9025,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
   gint active;
   gint vendedor = 1; //user_data->user_id;
   gdouble monto = CalcularTotalCompra (compra->header_compra);
+  gint id_traspaso;
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
@@ -9039,11 +9043,13 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 			  0, &origen,
 			  -1);
 
-      SaveTraspasoCompras (monto,
-			   origen,
-			   vendedor,
-			   ReturnBodegaID(ReturnNegocio()),
-			   FALSE);
+      id_traspaso = SaveTraspasoCompras (monto,
+					 origen,
+					 vendedor,
+					 ReturnBodegaID(ReturnNegocio()),
+					 FALSE);
+
+      PrintValeTraspaso (compra->header_compra, id_traspaso, FALSE);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
 

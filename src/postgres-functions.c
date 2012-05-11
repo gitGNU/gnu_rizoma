@@ -3345,9 +3345,9 @@ SaveProductsDevolucion (Productos *products, gint id_devolucion)
  * @param total entero que contiene el precio total de los productos
  * devueltos al proveedor
  * @param rut es el rut del proveedor
- * @return 1 si se realizo correctamente la operacion 0 si hay error
+ * @return retorna el id de traspaso
  */
-gboolean
+gint
 SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
 {
   gint traspaso_id;
@@ -3360,7 +3360,7 @@ SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean 
 
   SaveProductsTraspaso (venta->header, traspaso_id, tipo_traspaso);
 
-  return TRUE;
+  return traspaso_id;
 }
 
 /**
@@ -3374,10 +3374,10 @@ SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean 
  * @param vendedor id del destino del traspaso
  * @param destino id del destino del traspaso
  * @param tipo_traspaso: 1 si es un traspaso de enviar 0  si es un trapaso de recibir
- * @return 1 si se realizo correctamente la operacion 0 si hay error
+ * @return Retorna el id de traspaso
  */
 
-gboolean
+gint
 SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso)
 {
   gint traspaso_id;
@@ -3389,7 +3389,7 @@ SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gb
   g_free (q);
 
   SaveProductsTraspaso (compra->header_compra, traspaso_id, tipo_traspaso);
-  return TRUE;
+  return traspaso_id;
 }
 
 /**
@@ -3413,7 +3413,7 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean traspaso_e
   gchar *q;
   gdouble pre;
 
-  do //TODOOOOO: revisar que funcione
+  do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
 

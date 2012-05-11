@@ -28,6 +28,7 @@ int PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint t
 void PrintValeContinuo (Productos *header, gint venta_id, gint boleta, gint total,
                         gint tipo_pago, gint tipo_documento, Productos *prod);
 void print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar *motivo);
+void PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio);
 void abrirGaveta (void);
 
 #endif

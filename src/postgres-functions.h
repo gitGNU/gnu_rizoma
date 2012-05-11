@@ -278,7 +278,7 @@ gint get_last_cash_box_id ();
 
 gdouble TotalPrecioCompra (Productos *products);
 
-gboolean SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
+gint SaveTraspasoCompras (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
 
 gboolean emisor_delete (gint id);
 
@@ -314,7 +314,7 @@ gint InsertIdTraspaso ();
 
 gint ReturnBodegaID (gchar *destino);
 
-gboolean SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
+gint SaveTraspaso (gdouble total, gint origen, gint vendedor, gint destino, gboolean tipo_traspaso);
 
 void registrar_nuevo_codigo (gchar *codigo);
 
