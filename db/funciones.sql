@@ -4718,7 +4718,7 @@ begin
 corriente := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'CORRIENTE');
 materia_prima := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA');
 
-q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_recibida
+q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida
        	 	FROM producto p
 
 	 	-- Las compras ingresadas hechas hasta la fecha determinada	
@@ -4804,6 +4804,17 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 			          GROUP BY barcode) AS traspaso_envio
                 ON p.barcode = traspaso_envio.barcode
 
+		-- Los traspasos enviados (a traves de un compuesto) hasta la fecha determinada
+		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_mc_detalle tmcd
+			 	  ON t.id = tmcd.id_traspaso
+
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen = 1
+			          GROUP BY barcode_hijo) AS traspaso_mc_envio
+                ON p.barcode = traspaso_mc_envio.barcode
+
 	        -- Los traspasos recibidos hasta la fecha determinada
        		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_recibida
        	     	                  FROM traspaso t
@@ -4814,6 +4825,17 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 				  AND t.origen != 1
 			          GROUP BY barcode) AS traspaso_recibido
                 ON p.barcode = traspaso_recibido.barcode
+
+		-- Los traspasos recibidos (a traves de un compuesto) hasta la fecha determinada
+       		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_mc_detalle tmcd
+			 	  ON t.id = tmcd.id_traspaso
+
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen != 1
+			          GROUP BY barcode) AS traspaso_mc_recibido
+                ON p.barcode = traspaso_mc_recibido.barcode
                     	    
                 WHERE p.estado = true 
 		AND (p.tipo = $S$ || corriente || $S$ 
@@ -4823,7 +4845,7 @@ if barcode_in != 0 then
     q := q || $S$ AND p.barcode = $S$ || barcode_in;
 end if;
 
-q := q || $S$ GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_recibida
+q := q || $S$ GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida
               ORDER BY barcode $S$;
 
 for l in execute q loop
@@ -4839,8 +4861,8 @@ for l in execute q loop
     cantidad_anulada := COALESCE(l.cantidad_anulada,0);
     cantidad_insumida := COALESCE(l.cantidad_vmcd,0);
     cantidad_devoluciones := COALESCE(l.cantidad_devolucion,0);
-    cantidad_envio := COALESCE(l.cantidad_envio,0);
-    cantidad_recibida := COALESCE(l.cantidad_recibida,0);
+    cantidad_envio := COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_mc_envio,0);
+    cantidad_recibida := COALESCE(l.cantidad_recibida,0) + COALESCE(l.cantidad_mc_recibida,0);
     cantidad_fecha := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_c_anuladas,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.cantidad_vmcd,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0) - COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_recibida,0);
     return next;
 end loop;
