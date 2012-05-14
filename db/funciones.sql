@@ -4718,7 +4718,7 @@ begin
 corriente := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'CORRIENTE');
 materia_prima := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA');
 
-q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida
+q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, unidades_merma_mcd, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida
        	 	FROM producto p
 
 	 	-- Las compras ingresadas hechas hasta la fecha determinada	
@@ -4783,6 +4783,16 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 			          GROUP BY barcode) AS merma
 	        ON p.barcode = merma.barcode
 
+		-- Las Mermas sufridas hasta la fecha determinada
+		LEFT JOIN (SELECT mmcd.barcode_hijo AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
+       	     	                  FROM merma m
+				  INNER JOIN merma_mc_detalle mmcd
+				  ON m.id = mmcd.id_merma
+
+		         	  WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode_hijo) AS merma_mcd
+	        ON p.barcode = merma_mcd.barcode
+
                 -- Las devoluciones hechas hasta la fecha determinada
        		LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
        	     	                  FROM devolucion d
@@ -4834,10 +4844,10 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 
 			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
 				  AND t.origen != 1
-			          GROUP BY barcode) AS traspaso_mc_recibido
+			          GROUP BY barcode_hijo) AS traspaso_mc_recibido
                 ON p.barcode = traspaso_mc_recibido.barcode
                     	    
-                WHERE p.estado = true 
+                WHERE p.estado = true
 		AND (p.tipo = $S$ || corriente || $S$ 
 		     OR p.tipo = $S$ || materia_prima || $S$ ) $S$ ;
 
@@ -4845,7 +4855,7 @@ if barcode_in != 0 then
     q := q || $S$ AND p.barcode = $S$ || barcode_in;
 end if;
 
-q := q || $S$ GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida
+q := q || $S$ GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, unidades_merma_mcd, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida
               ORDER BY barcode $S$;
 
 for l in execute q loop
@@ -4857,7 +4867,7 @@ for l in execute q loop
     cantidad_ingresada := COALESCE (l.cantidad_ingresada,0);
     cantidad_c_anuladas := COALESCE(l.cantidad_c_anuladas,0);
     cantidad_vendida := COALESCE(l.cantidad_vendida,0);
-    cantidad_merma := COALESCE(l.unidades_merma,0);
+    cantidad_merma := COALESCE(l.unidades_merma,0) + COALESCE(l.unidades_merma_mcd,0);
     cantidad_anulada := COALESCE(l.cantidad_anulada,0);
     cantidad_insumida := COALESCE(l.cantidad_vmcd,0);
     cantidad_devoluciones := COALESCE(l.cantidad_devolucion,0);
