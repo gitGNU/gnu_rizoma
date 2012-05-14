@@ -672,23 +672,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-create or replace function select_merma( IN barcode_in bigint,
-		OUT unidades_merma double precision )
+create or replace function select_merma(IN barcode_in bigint,
+		  	   		OUT unidades_merma double precision)
 returns double precision as $$
 declare
    aux int;
    derivada_l int4;
 BEGIN
-
-  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
-
   aux := (SELECT COALESCE (count(*), 0) FROM merma WHERE barcode = barcode_in);
   aux := aux + (SELECT COALESCE (count(*), 0) FROM merma_mc_detalle WHERE barcode_hijo = barcode_in);
   IF aux = 0 THEN
      unidades_merma := 0;
   ELSE
-     -- Las mermas de las mercaderías derivadas se registran en merma, y luego en merma_mc_detalle (detalle del padre)
-     unidades_merma := (SELECT COALESCE (sum(unidades), 0) FROM merma WHERE barcode = barcode_in AND tipo != derivada_l);
+     unidades_merma := (SELECT COALESCE (sum(unidades), 0) FROM merma WHERE barcode = barcode_in);
      unidades_merma := unidades_merma + (SELECT COALESCE (sum(cantidad), 0) FROM merma_mc_detalle WHERE barcode_hijo = barcode_in);
   END IF;
 
@@ -3711,24 +3707,6 @@ cash_payed_money := monto1 + monto2;
 return (monto_apertura + arqueo + cash_payed_money + ingresos - egresos);
 end; $$ language plpgsql;
 
-
-create or replace function select_merma( IN barcode_in bigint,
-		OUT unidades_merma double precision )
-returns double precision as $$
-declare
-   aux int;
-BEGIN
-
-  aux := (SELECT count(*) FROM merma WHERE barcode = barcode_in);
-  IF aux = 0 THEN
-     unidades_merma := 0;
-  ELSE
-     unidades_merma := (SELECT sum(unidades) FROM merma WHERE barcode = barcode_in);
-  END IF;
-
-RETURN;
-END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION informacion_producto_venta( IN codigo_barras bigint,
 		IN in_codigo_corto varchar(16),
