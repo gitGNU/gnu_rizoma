@@ -3304,8 +3304,9 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 {
   Productos *products = compra->header;
   gint id, doc;
-  gchar *rut_proveedor;
+  gchar *rut_proveedor, *nombre_proveedor;
   gchar *q;
+  PGresult *res;
   gint total_doc = atoi (monto);
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
   GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
@@ -3318,8 +3319,10 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
                       -1);
 
 
-  q = g_strdup_printf ("SELECT proveedor FROM get_proveedor_compra( %d )", id);
-  rut_proveedor = GetDataByOne (q);
+  q = g_strdup_printf ("SELECT * FROM get_proveedor_compra( %d )", id);
+  res = EjecutarSQL (q);
+  rut_proveedor = g_strdup (PQvaluebycol (res, 0, "rut_out"));
+  nombre_proveedor = g_strdup (PQvaluebycol (res, 0, "nombre_out"));
   g_free (q);
 
   if (invoice == TRUE)
@@ -3343,7 +3346,7 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 	} while (products != compra->header);
     }
 
-  PrintValeCompra (compra->header, id, n_document);
+  PrintValeCompra (compra->header, id, n_document, nombre_proveedor);
 
   CompraIngresada ();
 
@@ -8796,6 +8799,8 @@ DatosEnviar (void)
                          1, PQvaluebycol(res, i, "nombre"),
                          -1);
     }
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
 }
 
 
@@ -8858,6 +8863,8 @@ DatosRecibir (void)
                          1, PQvaluebycol(res, i, "nombre"),
                          -1);
     }
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
 }
 
 
@@ -8941,6 +8948,7 @@ void
 on_enviar_button_clicked (GtkButton *button, gpointer data)
 {
   gint destino;
+  gchar *nombre_origen, *nombre_destino;
   GtkTreeIter iter;
   GtkWidget *combo;
   GtkTreeModel *model;
@@ -8951,6 +8959,8 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  nombre_origen = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_origen"))));
 
   if (active == -1)
     {
@@ -8963,6 +8973,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 
       gtk_tree_model_get (model, &iter,
 			  0, &destino,
+			  1, &nombre_destino,
 			  -1);
 
       id_traspaso = SaveTraspasoCompras (monto,
@@ -8971,7 +8982,7 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 					 destino,
 					 TRUE);
 
-      PrintValeTraspaso (compra->header_compra, id_traspaso, TRUE);
+      PrintValeTraspaso (compra->header_compra, id_traspaso, TRUE, nombre_origen, nombre_destino);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
 
@@ -9023,6 +9034,7 @@ void
 on_recibir_button_clicked (GtkButton *button, gpointer data)
 {
   gint origen;
+  gchar *nombre_origen, *nombre_destino;
   GtkTreeIter iter;
   GtkWidget *combo;
   GtkTreeModel *model;
@@ -9033,6 +9045,8 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxOrigen"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  nombre_destino = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_destino"))));
 
   if (active == -1)
     {
@@ -9045,6 +9059,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 
       gtk_tree_model_get (model, &iter,
 			  0, &origen,
+			  1, &nombre_origen,
 			  -1);
 
       id_traspaso = SaveTraspasoCompras (monto,
@@ -9053,7 +9068,7 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 					 ReturnBodegaID(ReturnNegocio()),
 					 FALSE);
 
-      PrintValeTraspaso (compra->header_compra, id_traspaso, FALSE);
+      PrintValeTraspaso (compra->header_compra, id_traspaso, FALSE, nombre_origen, nombre_destino);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
 

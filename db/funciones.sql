@@ -2559,19 +2559,34 @@ end loop;
 return;
 end; $$ language plpgsql;
 
--- ??retorna del rut del proveedor para una compra dada
+-- retorna del rut del proveedor para una compra dada
 -- revisar si se puede satisfacer con alguna funcion anteriormente definida
 -- compras.c:4549, 7023
 create or replace function get_proveedor_compra(
 		IN id_compra integer,
-		OUT proveedor integer)
-returns integer as $$
-begin
+		OUT nombre_out varchar(100),
+		OUT rut_out integer,
+		OUT dv_out varchar(1))
+RETURNS SETOF RECORD AS $$
+DECLARE
+   l record;
+   q varchar;
+BEGIN
 
-		SELECT rut_proveedor INTO proveedor FROM compra WHERE id = id_compra;
-
+   -- Se obtienen los datos del proveedor a quien de le compro
+   q := $S$ SELECT rut, dv, nombre
+      	    FROM proveedor 
+   	    WHERE rut = (SELECT rut FROM compra WHERE id = $S$||id_compra||$S$)$S$;
+   
+   -- Se supone que siempre devolvera una fila...
+   FOR l IN EXECUTE q LOOP
+       nombre_out := l.nombre;
+       rut_out := l.rut;
+       dv_out := l.dv;
+       RETURN NEXT;
+   END LOOP;
+   
 RETURN;
-
 END; $$ language plpgsql;
 
 -- cancela una venta, en la tabla venta, columna canceled lo pone a TRUE

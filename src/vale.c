@@ -519,7 +519,7 @@ print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar 
 
 
 void
-PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio)
+PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio, gchar *origen, gchar *destino)
 {
   Productos *products = header;
   FILE *fp;
@@ -556,6 +556,8 @@ PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio)
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "\t TRASPASO DE MERCADERIA \n\n");
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+  fprintf (fp, "Origen: %s\n", origen);
+  fprintf (fp, "Destino: %s\n", destino);
   fprintf (fp, "Usuario: %s\n", user_data->user);
   fprintf (fp, "Id: %d - Tipo taspaso: %s\n", traspaso_id, tipo_traspaso);
   fprintf (fp, "==========================================\n\n");
@@ -578,7 +580,7 @@ PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio)
   if (impresora == TRUE)
     {
       fprintf (fp, "\n");
-      fprintf (fp, "Total Traspaso:          %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(total))), size1);
+      fprintf (fp, "Total Traspaso:       %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(total))), size1);
       fprintf (fp, "\n\n\n");
       fprintf (fp, "%s", cut); /* We cut the paper :) */
       fclose (fp);
@@ -592,7 +594,7 @@ PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio)
 
 
 void
-PrintValeCompra (Productos *header, gint compra_id, gint n_document)
+PrintValeCompra (Productos *header, gint compra_id, gint n_document, gchar *nombre_proveedor)
 {
   Productos *products = header;
   FILE *fp;
@@ -623,6 +625,7 @@ PrintValeCompra (Productos *header, gint compra_id, gint n_document)
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "\t INGRESO DE MERCADERIA \n\n");
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+  fprintf (fp, "Proveedor: %s\n", nombre_proveedor);
   fprintf (fp, "Usuario: %s\n", user_data->user);
   fprintf (fp, "Id Compra: %d - Num. Documento: %d\n", compra_id, n_document);
   fprintf (fp, "==========================================\n\n");
@@ -645,7 +648,7 @@ PrintValeCompra (Productos *header, gint compra_id, gint n_document)
   if (impresora == TRUE)
     {
       fprintf (fp, "\n");
-      fprintf (fp, "Total Ingresado:        %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(total))), size1);
+      fprintf (fp, "Total Ingresado:      %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(total))), size1);
       fprintf (fp, "\n\n\n");
       fprintf (fp, "%s", cut); /* We cut the paper :) */
       fclose (fp);
