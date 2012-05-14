@@ -554,6 +554,7 @@ PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio)
   fp = fopen (vale_file, "w+");
   fprintf (fp, "%s", start);
   fprintf (fp, "\t CONTROL INTERNO \n");
+  fprintf (fp, "\t TRASPASO DE MERCADERIA \n\n");
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
   fprintf (fp, "Usuario: %s\n", user_data->user);
   fprintf (fp, "Id: %d - Tipo taspaso: %s\n", traspaso_id, tipo_traspaso);
@@ -578,6 +579,73 @@ PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio)
     {
       fprintf (fp, "\n");
       fprintf (fp, "Total Traspaso:          %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(total))), size1);
+      fprintf (fp, "\n\n\n");
+      fprintf (fp, "%s", cut); /* We cut the paper :) */
+      fclose (fp);
+    }
+
+  for (i = 0; i < n_copy; i++) 
+    system (g_strdup_printf ("%s %s", print_command, vale_file));
+
+  system (g_strdup_printf ("rm %s", vale_file));
+}
+
+
+void
+PrintValeCompra (Productos *header, gint compra_id, gint n_document)
+{
+  Productos *products = header;
+  FILE *fp;
+
+  char *vale_dir = rizoma_get_value ("VALE_DIR");
+  char *vale_copy = rizoma_get_value ("VALE_COPY");
+  char *print_command = rizoma_get_value ("PRINT_COMMAND");
+  gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gboolean recibo_compra = rizoma_get_value_boolean ("RECIBO_COMPRA");
+
+  gchar *vale_file = g_strdup_printf ("%s/Vale%d.txt", vale_dir, compra_id);
+  gchar start[] = {0x1B, 0x40, 0x0};
+  gchar cut[] = {0x1B, 0x69, 0x0};
+  gchar size2[] = {0x1B, 0x45, 0x1, 0x0};
+  gchar size1[] = {0x1B, 0x45, 0x0, 0x0};
+  gint n_copy = atoi (vale_copy);
+
+  gdouble total;
+  gint i;
+
+  if (impresora == FALSE)
+    return;
+  if (recibo_compra == FALSE)
+    return;
+
+  fp = fopen (vale_file, "w+");
+  fprintf (fp, "%s", start);
+  fprintf (fp, "\t CONTROL INTERNO \n");
+  fprintf (fp, "\t INGRESO DE MERCADERIA \n\n");
+  fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+  fprintf (fp, "Usuario: %s\n", user_data->user);
+  fprintf (fp, "Id Compra: %d - Num. Documento: %d\n", compra_id, n_document);
+  fprintf (fp, "==========================================\n\n");
+
+  do {
+    fprintf (fp, "%s %s\nCant.: %.2f $%7s  $%7s\n",
+	     g_strndup (products->product->producto, 30),
+	     products->product->marca,
+	     products->product->cantidad,
+	     PutPoints (g_strdup_printf ("%ld",lround (products->product->fifo))),
+	     PutPoints (g_strdup_printf ("%ld",
+					 lround ((double)(products->product->cantidad * products->product->fifo)))));
+
+    total += (double)(products->product->cantidad * products->product->fifo);
+
+    products = products->next;
+  } while (products != header);
+
+  //impresora = rizoma_get_value_boolean ("IMPRESORA");
+  if (impresora == TRUE)
+    {
+      fprintf (fp, "\n");
+      fprintf (fp, "Total Ingresado:        %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(total))), size1);
       fprintf (fp, "\n\n\n");
       fprintf (fp, "%s", cut); /* We cut the paper :) */
       fclose (fp);

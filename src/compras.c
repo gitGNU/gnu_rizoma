@@ -47,6 +47,8 @@
 #include"config_file.h"
 #include"encriptar.h"
 #include"rizoma_errors.h"
+#include"vale.h"
+
 
 GtkBuilder *builder;
 
@@ -3341,9 +3343,11 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 	} while (products != compra->header);
     }
 
+  PrintValeCompra (compra->header, id, n_document);
+
   CompraIngresada ();
 
-  InsertarCompras ();
+  InsertarCompras ();  
 }
 
 

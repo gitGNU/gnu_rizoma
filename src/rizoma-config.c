@@ -118,6 +118,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "ROPA", "0");
   g_key_file_set_string (file, "RIZOMA", "RECIBO_MOV_CAJA", "0");
   g_key_file_set_string (file, "RIZOMA", "RECIBO_TRASPASO", "0");
+  g_key_file_set_string (file, "RIZOMA", "RECIBO_COMPRA", "0");
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
     {
