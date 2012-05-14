@@ -40,8 +40,10 @@ end; $$ language plpgsql;
 
 ---
 -- return the avg of ventas day
+-- (si no_cero es TRUE devuelve como valor mínimo 1)
 ---
-CREATE OR REPLACE FUNCTION select_ventas_dia (IN codbar bigint)
+CREATE OR REPLACE FUNCTION select_ventas_dia (IN codbar bigint,
+       	  	  	   		      IN no_cero boolean)
 RETURNS double precision AS $$
 DECLARE
   oldest date;
@@ -119,7 +121,7 @@ BEGIN
      total := (total / date_part('day', passed_days));
   END IF;
 
-  IF total = 0 THEN
+  IF total = 0 AND no_cero = TRUE THEN
      total := 1;
   END IF;
 
@@ -449,7 +451,7 @@ begin
 query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
 		    otros, familia, perecibles, margen_promedio, dias_stock,
-		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
 		    cantidad_mayor, mayorista, tipo
 		    FROM producto ORDER BY descripcion, marca$S$;
@@ -610,11 +612,11 @@ BEGIN
 
 query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
-		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day,		    
-		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
+		    (stock::float / select_ventas_dia(producto.barcode, TRUE)::float) AS stock_day,		    
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
 		    select_merma (producto.barcode) AS unidades_merma, dias_stock,
-		    select_ventas_dia(producto.barcode) AS ventas_dia
+		    select_ventas_dia(producto.barcode, FALSE) AS ventas_dia
 		FROM producto WHERE $S$;
 
 -- check if must use the barcode or the short code
@@ -760,7 +762,7 @@ begin
 query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
 		    otros, familia, perecibles, margen_promedio, 
-		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, dias_stock,
 		    cantidad_mayor, mayorista, tipo
              FROM producto WHERE estado = true AND (lower(descripcion) LIKE lower($S$
@@ -810,12 +812,11 @@ FOR list IN EXECUTE query LOOP
     precio_mayor := list.precio_mayor;
     cantidad_mayor := list.cantidad_mayor;
     mayorista := list.mayorista;
-    tipo := list.tipo;    
+    tipo := list.tipo;
     RETURN NEXT;
 END LOOP;
 
 RETURN;
-
 END; $$ language plpgsql;
 
 -- esta funcion es util para obtener los datos de un barcode dado
@@ -858,7 +859,7 @@ begin
 query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
       	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
 		    otros, familia, perecibles, margen_promedio,
-		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min,
+		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, dias_stock,
 		    cantidad_mayor, mayorista, tipo
              FROM producto WHERE barcode= $S$
@@ -2232,7 +2233,7 @@ begin
 	query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido, unidad, stock, costo_promedio,
 	      	     	    precio, vendidos, impuestos, otros, familia, perecibles,
 			    (SELECT nombre FROM tipo_mercaderia WHERE id = tipo) AS tipo_mercaderia,
-			    COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min, 
+			    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min, 
 			    margen_promedio, fraccion, canje, stock_pro, dias_stock,
 			    tasa_canje, precio_mayor, cantidad_mayor, mayorista, tipo FROM producto WHERE $S$;
 
@@ -3759,7 +3760,7 @@ corriente := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'CORRIENTE
 materia_prima := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA');
 
 query := $S$ SELECT *,
-		    (stock::float / select_ventas_dia(producto.barcode)::float) AS stock_day
+		    (stock::float / select_ventas_dia(producto.barcode, TRUE)::float) AS stock_day
 		FROM producto WHERE $S$;
 
 -- check if must use the barcode or the short code

@@ -2268,7 +2268,7 @@ GetMinStock (gchar *barcode)
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT COALESCE ((dias_stock * select_ventas_dia(producto.barcode)::float), 0) AS stock_min "
+  q = g_strdup_printf ("SELECT COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min "
 		       "FROM producto WHERE barcode='%s'",
                        barcode);
   res = EjecutarSQL (q);
@@ -3548,8 +3548,8 @@ PGresult *getProductsByProvider (gchar *rut)
   //TODO: Ojo con el MAX (id_compra), evaluar el uso de last_value  
   q = g_strdup_printf("SELECT DISTINCT p.barcode, p.codigo_corto, p.descripcion, p.marca, p.contenido, "
 		      "                p.unidad, p.precio, p.stock, p.dias_stock, p.fraccion, "
-		      "       (select_ventas_dia(p.barcode)::float) AS ventas_dia, "
-		      "       (stock::float / select_ventas_dia(p.barcode)::float) AS stock_day, "
+		      "       (select_ventas_dia(p.barcode, FALSE)::float) AS ventas_dia, "
+		      "       (stock::float / select_ventas_dia(p.barcode, TRUE)::float) AS stock_day, "
 		      "	      (SELECT precio "
 		      "	              FROM compra_detalle "
 		      "	              WHERE id_compra = (select MAX (id_compra) from compra_detalle where barcode_product= p.barcode) "

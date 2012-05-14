@@ -49,6 +49,7 @@
 #include"rizoma_errors.h"
 #include"proveedores.h"
 #include"caja.h"
+#include "vale.h"
 
 GtkBuilder *builder;
 
@@ -5026,6 +5027,7 @@ DatosEnviar (void)
     }
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "comboboxDestino")));
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
 }
 
 
@@ -5121,10 +5123,12 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
   /*gint monto = atoi (CutPoints (g_strdup (gtk_label_get_text
     (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));*/
   gint id_traspaso;
-
+  gchar *nombre_origen, *nombre_destino;
 
   combo = GTK_WIDGET (gtk_builder_get_object(builder, "comboboxDestino"));
   active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  nombre_origen = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_origen"))));
 
   /* Verifica si se selecciono un destino del combobox*/
   if (active == -1)
@@ -5137,14 +5141,16 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 
       gtk_tree_model_get (model, &iter,
                           0, &destino,
+			  1, &nombre_destino,
                           -1);
+
       id_traspaso = SaveTraspaso (TotalPrecioCompra(venta->header),
 				  ReturnBodegaID(ReturnNegocio()),
 				  vendedor,
 				  destino,
 				  TRUE);
       
-      PrintValeTraspaso (compra->header_compra, id_traspaso, TRUE);
+      PrintValeTraspaso (venta->header, id_traspaso, TRUE, nombre_origen, nombre_destino);
 
       gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
 
