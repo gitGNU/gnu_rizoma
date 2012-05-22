@@ -5767,20 +5767,6 @@ BEGIN
 	    cantidad_out := l.cantidad;
 	    RETURN NEXT;
 	END LOOP;
-
-
-	-- Se crea una tabla temporal donde se registraran todos los id_venta e id_venta_detalle
-	-- relacionado con el detalle del compuesto donde se encuentre este producto
-
-	-- OBTIENE LAS VENTAS (EN venta_mc_detalle) DEL PRODUCTO DETERMINADO EN EL RANGO DE FECHA ESPECIFICADO
-	CREATE TEMPORARY TABLE componente_en_venta AS
-	SELECT v.id AS v_id, vmcd.id_venta_detalle AS vd_id, v.descuento AS descuento
-	FROM venta_mc_detalle vmcd
-	     INNER JOIN venta v
-	     ON vmcd.id_venta_vd = v.id
-	WHERE v.fecha > fecha_inicio::TIMESTAMP
-	      AND v.fecha < fecha_termino::TIMESTAMP
-	      AND vmcd.barcode_hijo = barcode::BIGINT;
 RETURN;
 END; $$ LANGUAGE plpgsql;
 
@@ -5819,11 +5805,14 @@ DECLARE
     precio_proporcional_l double precision;
     costo_total_venta_l double precision;
     monto_venta_l integer;
+    next_date_l timestamp;
     id_ventas_l int4[];
     id_ventas2_l int4[];
     -----------    
 BEGIN
-
+    -- Se crea una tabla temporal donde se registraran todos los id_venta e id_venta_detalle
+    -- relacionado con el detalle del compuesto donde se encuentre este producto
+    CREATE TEMPORARY TABLE componente_en_venta (v_id int4, vd_id int4, descuento int2);
     -- Se inicializa con un valor
     avg_cost := 0;
 
@@ -5937,23 +5926,30 @@ BEGIN
 
 	-- Si next-date es null
 	IF l.next_date IS NULL THEN
-	   EXECUTE q2; -- Update venta_detalle
-	   EXECUTE q3; -- Update venta_mc_detalle
-	   
-	   -- RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS
-	   PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
-	   	   				 now()::TIMESTAMP, 
-						 l.barcode::VARCHAR);
+	   next_date_l := NOW()::timestamp;
 	ELSE
+	   next_date_l := l.next_date::timestamp;
 	   q2 := q2 || $S$ AND v.fecha < $S$ || quote_literal (l.next_date); --fecha de la proxima compra de ese producto
 	   q3 := q3|| $S$ AND v.fecha < $S$ || quote_literal (l.next_date); --fecha de la proxima compra de ese producto
-	   EXECUTE q2; -- Update venta_detalle
-	   EXECUTE q3; -- Update venta_mc_detalle
-   	   -- RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS (crea una tabla temporal con id de venta para actualizar venta_mc_detalle)
-	   PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
-	   	   				 quote_literal(l.next_date)::TIMESTAMP, 
-						 l.barcode::VARCHAR);
 	END IF;
+	
+	EXECUTE q2; -- Update venta_detalle
+	EXECUTE q3; -- Update venta_mc_detalle
+	   
+   	-- RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS (crea una tabla temporal con id de venta para actualizar venta_mc_detalle)
+	PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
+	   				      quote_literal(next_date_l)::TIMESTAMP, 
+					      l.barcode::VARCHAR);
+
+        -- Registra las ventas indirectas del producto en el rango de fecha especificado
+	INSERT INTO componente_en_venta (v_id, vd_id, descuento)
+	SELECT v.id AS v_id, vmcd.id_venta_detalle AS vd_id, v.descuento AS descuento
+	FROM venta_mc_detalle vmcd
+	     INNER JOIN venta v
+	     ON vmcd.id_venta_vd = v.id
+	WHERE v.fecha > l.fecha::TIMESTAMP
+	      AND v.fecha < next_date_l::TIMESTAMP
+	      AND vmcd.barcode_hijo = l.barcode::BIGINT;
 
         -- Se asignan los valores a retornar
         id_fcompra_r := l.id_fc;
@@ -5997,7 +5993,6 @@ BEGIN
 	   monto_venta_l := (SELECT monto FROM venta WHERE id = l.v_id);
 	   -- Se actualizan los precios proporcionales de las mercaderías en esta venta
 	   costo_total_venta_l := (SELECT SUM(fifo) FROM venta_detalle WHERE id_venta = l.v_id);
-
 
 	   -- Se seleccionan todos los productos esta venta para actualizar el precio proporcional, impuestos y ganancias
 	   q2 := $S$ SELECT id AS id_vd, id_venta AS id_v, barcode, fifo, tipo,
