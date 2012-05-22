@@ -5802,6 +5802,8 @@ DECLARE
     avg_cost double precision;
     new_stock double precision;
     -----------
+    compuesta_l int4;
+    -----------
     precio_proporcional_l double precision;
     costo_total_venta_l double precision;
     monto_venta_l integer;
@@ -5810,11 +5812,15 @@ DECLARE
     id_ventas2_l int4[];
     -----------    
 BEGIN
+    -- Se obtiene el id del tipo compuesto
+    SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
     -- Se crea una tabla temporal donde se registraran todos los id_venta e id_venta_detalle
     -- relacionado con el detalle del compuesto donde se encuentre este producto
     CREATE TEMPORARY TABLE componente_en_venta (v_id int4, vd_id int4, descuento int2);
     -- Se inicializa con un valor
     avg_cost := 0;
+    id_ventas_l := ARRAY[0];
+    id_ventas2_l := ARRAY[0];
 
     iva_percent := get_iva (codigo_barras);
     otros_percent := get_otro_impuesto (codigo_barras);
@@ -5969,19 +5975,18 @@ BEGIN
 
     FOR l IN EXECUTE q LOOP
     	-- Si esa venta tiene un descuento se debe recalcular el precio proporcional del compuesto
-	IF l.descuento > 0 AND NOT (id_ventas_l @> ARRAY[l.v_id]) THEN
-
+	IF l.descuento > 0 AND NOT (id_ventas_l @> ARRAY[l.v_id]) THEN	   
 	   --array_append (id_ventas_l, l.v_id); -- Se agrega el id de venta al array de id de ventas
 	   id_ventas_l := id_ventas_l || l.v_id;
 
 	   -- Se seleccionan todos los productos compuestos que participen de esta venta y que tengan
 	   -- un componente cuyo costo se haya modificado
-	   q2 := $S$ SELECT id AS id_vd, id_venta AS id_v
+	   q2 := $S$ SELECT id AS vd_id, id_venta AS v_id
 	      	     FROM venta_detalle		     
 		     WHERE id_venta = $S$||l.v_id||$S$
-		     AND id_venta_detalle IN (SELECT vd_id 
-		     	 		      FROM componente_en_venta
-					      WHERE v_id = $S$||l.v_id||$S$)
+		     AND id IN (SELECT vd_id 
+		     	       	FROM componente_en_venta
+				WHERE v_id = $S$||l.v_id||$S$)
 		     AND tipo = $S$||compuesta_l;
 
 	   FOR l2 IN EXECUTE q2 LOOP
@@ -5996,9 +6001,9 @@ BEGIN
 
 	   -- Se seleccionan todos los productos esta venta para actualizar el precio proporcional, impuestos y ganancias
 	   q2 := $S$ SELECT id AS id_vd, id_venta AS id_v, barcode, fifo, tipo,
-	      	     (SELECT valor FROM get_iva (barcode))/100 AS iva_percent,
-		     (SELECT valor FROM get_otro_impuesto (barcode))/100 AS otros_percent
-	      	     FROM venta_detalle		     
+	      	     	    (SELECT valor FROM get_iva (barcode))/100 AS iva_percent,
+		     	    (SELECT valor FROM get_otro_impuesto (barcode))/100 AS otros_percent
+	      	     FROM venta_detalle
 		     WHERE id_venta = $S$||l.v_id;
 
 	   FOR l2 IN EXECUTE q2 LOOP
