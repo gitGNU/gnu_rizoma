@@ -2913,7 +2913,7 @@ BEGIN
 	     	  	    	       barcode_hijo, tipo_hijo, cantidad, 
 				       precio, costo_promedio, iva, otros, ganancia) AS 
       	      	(
-		   SELECT id_venta_vd, barcode_madre, id_mh, tipo_madre, 
+		   SELECT id_venta_vd, barcode_madre, id_mh, tipo_madre,
 			  barcode_hijo, tipo_hijo, cantidad, 
 			  precio_proporcional, costo_promedio, iva, otros, ganancia
        		   FROM venta_mc_detalle
@@ -5145,11 +5145,14 @@ BEGIN
 								  ||l.costo_hijo||'::double precision,'
 								  ||precio_proporcional_l||'::double precision,'
 								  ||cantidad_in||'::double precision)';
+	       iva_madre := 0;
+	       otros_madre := 0;
+	       ganancia_madre := 0;
 	       FOR l2 IN EXECUTE q2 LOOP
 	       	   -- Sumo los impuestos y la ganancia de los hijos para setearselo al padre
-		   iva_madre := COALESCE (iva_madre, 0) + l2.iva_out;
-		   otros_madre := COALESCE (otros_madre, 0) + l2.otros_out;
-		   ganancia_madre := COALESCE (ganancia_madre, 0) + l2.ganancia_out;
+		   iva_madre := iva_madre + l2.iva_out;
+		   otros_madre := otros_madre + l2.otros_out;
+		   ganancia_madre := ganancia_madre + l2.ganancia_out;
 	       END LOOP;
 
 	       iva_out := iva_madre;
@@ -5212,7 +5215,7 @@ BEGIN
 	       END IF;
 	    END IF;
 	    
-	    tipo_out := l.tipo_comp_der;    
+	    tipo_out := l.tipo_comp_der;
 
 	    RETURN NEXT;
 	END LOOP;
@@ -5342,26 +5345,385 @@ RETURN;
 END; $$ LANGUAGE plpgsql;
 
 
---
--- Actualiza los impuestos dentro del rango de fecha estipulado
---
+---
+-- Funcion recursiva
+-- Actualiza los costos de las mercaderías compuestas en venta_mc_detalle
+-- y de la compuesta en venta_detalle (madre de las anteriores)
+-- pertenecientes al id de venta e id de venta detalle especificados.
+---
+CREATE OR REPLACE FUNCTION update_costo_promedio_detalle_compuesto (IN id_venta_in int4,
+       	  	  	   				   	    IN id_venta_detalle_in int4,
+							   	    IN id_mh_in int4[],  -- Debe ser ARRAY[0,0] !!!
+								    OUT costo_promedio_out double precision,
+								    OUT cantidad_out double precision)
+RETURNS SETOF record AS $$
+DECLARE
+  ------------
+  q text;
+  l record;
+  q2 text;
+  l2 record;
+  ------------
+  costo_compuesto_l double precision;
+  ------------
+  derivada_l int4;  -- id tipo derivado
+  corriente_l int4; -- id tipo corriente
+  compuesta_l int4; -- id tipo compuesta
+  materia_prima_l int4; -- id tipo Materia Prima
+  ------------
+BEGIN
+  SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+  SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+  SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+  
+  -- Si se entra a esta funcion por primera vez
+  IF id_mh_in[1] = 0 AND id_mh_in[2] = 0 THEN
+     -- Se crea una tabla temporal para priorizar el orden de las mercaderias
+     -- Con esto nos aseguraremos de recorrer las compuestas y derivadas antes que mp y corrientes
+     CREATE TEMPORARY TABLE prioridad_a (
+     	    tipo_id int4,
+	    orden int4
+     );
+     INSERT INTO prioridad_a VALUES (compuesta_l, 1);
+     INSERT INTO prioridad_a VALUES (derivada_l, 2);
+     INSERT INTO prioridad_a VALUES (materia_prima_l, 3);
+     INSERT INTO prioridad_a VALUES (corriente_l, 4);
+
+     -- Se crea una tabla temporal con todos los componentes de la mercadería compuesta a buscar
+     CREATE TEMPORARY TABLE arbol_componentes_a AS
+     WITH RECURSIVE compuesta (id, id_venta, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo, 
+     	  	    	       cantidad, costo_promedio) AS 
+       (
+         SELECT id, id_venta_vd, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo,
+	 	cantidad, costo_promedio
+       	 FROM venta_mc_detalle
+	 WHERE venta_mc_detalle.id_mh[1] = 0
+	       AND venta_mc_detalle.id_venta_vd = id_venta_in
+	       AND venta_mc_detalle.id_venta_detalle = id_venta_detalle_in
+         UNION ALL
+         SELECT vmcd.id, vmcd.id_venta_vd, vmcd.id_venta_detalle, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
+	 	vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad, vmcd.costo_promedio		
+         FROM venta_mc_detalle vmcd, compuesta
+       	 WHERE vmcd.barcode_madre = compuesta.barcode_hijo
+	       AND vmcd.id_venta_vd = compuesta.id_venta
+	       AND vmcd.id_venta_detalle = compuesta.id_venta_detalle
+	       AND vmcd.id_mh[1] = compuesta.id_mh[2]
+       )
+       SELECT *,
+       	      (SELECT valor FROM get_iva (c.barcode_hijo))/100 AS iva,
+	      (SELECT valor FROM get_otro_impuesto (c.barcode_hijo))/100 AS otros
+       FROM compuesta c;
+  END IF;
+
+  q := $S$ SELECT ac.*
+	   FROM arbol_componentes_a ac
+	   INNER JOIN prioridad_a pd
+	   	 ON ac.tipo_hijo = pd.tipo_id
+	   INNER JOIN producto po
+	   	 ON po.barcode = ac.barcode_hijo
+	   WHERE id_mh[1] = $S$||id_mh_in[2]||$S$
+	   ORDER BY pd.orden ASC $S$;
+
+  FOR l IN EXECUTE q LOOP
+      -- Si el hijo actual es compuesto (sera la proxima madre)
+      IF l.tipo_hijo = compuesta_l OR l.tipo_hijo = derivada_l THEN
+      	-- Se consulta así mismo y calcula el costo_promedio unitario del compuesto
+      	q2 := 'SELECT * FROM update_costo_promedio_detalle_compuesto ('||id_venta_in||',
+							              '||id_venta_detalle_in||',
+								       ARRAY['||l.id_mh[1]||','||l.id_mh[2]||']::int4[])';
+
+	costo_compuesto_l := 0;
+	FOR l2 IN EXECUTE q2 LOOP
+	    costo_compuesto_l := costo_compuesto_l + (l2.costo_promedio_out * l2.cantidad_out);
+	END LOOP;
+
+	costo_compuesto_l := costo_compuesto_l / l.cantidad;
+
+	--RAISE NOTICE 'v_id: %, vd_id: %, costo: %, id_mh: %', id_venta_in, id_venta_detalle_in, costo_compuesto_l, l.id_mh;
+
+	UPDATE venta_mc_detalle
+	       SET costo_promedio = costo_compuesto_l
+	WHERE id = l.id;
+
+	costo_promedio_out := costo_compuesto_l;
+	cantidad_out := l.cantidad;
+
+      ELSIF l.tipo_hijo = corriente_l OR l.tipo_hijo = materia_prima_l THEN
+        costo_promedio_out := l.costo_promedio;
+	cantidad_out := l.cantidad;
+      END IF;
+      
+      RETURN NEXT;
+  END LOOP;
+
+  
+
+  IF id_mh_in[1] = 0 AND id_mh_in[2] = 0 THEN
+     -- Se eliminan las tablas temporales 'arbol_componentes_a' y 'prioridad_a'
+     DROP TABLE arbol_componentes_a;
+     DROP TABLE prioridad_a;
+
+     -- Se actualiza el costo promedio (unitario) del compuesto en venta detalle
+     UPDATE venta_detalle
+	    SET fifo = ((SELECT SUM (costo_promedio * cantidad)
+	     	         FROM venta_mc_detalle
+		         WHERE id_venta_vd = id_venta_in
+		      	       AND id_venta_detalle = id_venta_detalle_in
+		     	       AND id_mh[1] = 0) / cantidad)
+     WHERE id_venta = id_venta_in
+     AND id = id_venta_detalle_in;
+  END IF;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Funcion recursiva TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+-- Actualiza las ganancias de los componentes y el compuesto de la venta especificada
+---
+CREATE OR REPLACE FUNCTION update_profits_detalle_compuesto (IN id_venta_in int4,
+       	  	  	   		      		     IN id_venta_detalle_in int4,
+							     IN id_mh_in int4[], -- Debe ser ARRAY[0,0] !!!
+							     IN precio_madre_in double precision, --Se llama con 0
+							     IN costo_madre_in double precision, --Se llama con 0
+							     OUT barcode_out varchar,
+							     OUT costo_out double precision,
+							     OUT precio_out double precision,
+							     OUT cantidad_out double precision,
+							     OUT ganancia_out double precision,
+							     OUT iva_out double precision,
+							     OUT otros_out double precision)
+RETURNS SETOF record AS $$
+DECLARE
+  ------------
+  q text;
+  l record;
+  q2 text;
+  l2 record;
+  ------------
+  precio_madre_l double precision;
+  costo_madre_l double precision;
+  ------------
+  derivada_l int4;  -- id tipo derivado
+  corriente_l int4; -- id tipo corriente
+  compuesta_l int4; -- id tipo compuesta
+  materia_prima_l int4; -- id tipo Materia Prima
+  ------------
+BEGIN
+  SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
+  SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+  SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
+  SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
+  
+  -- Si se entra a esta funcion por primera vez
+  IF id_mh_in[1] = 0 AND id_mh_in[2] = 0 THEN
+     -- Se actualizan los costos de todas las mercaderías
+     PERFORM update_costo_promedio_detalle_compuesto (id_venta_in, id_venta_detalle_in, id_mh_in);
+     -- Se crea una tabla temporal para priorizar el orden de las mercaderias
+     -- Con esto nos aseguraremos de recorrer las compuestas y derivadas antes que mp y corrientes
+     CREATE TEMPORARY TABLE prioridad_b (
+     	    tipo_id int4,
+	    orden int4
+     );
+     INSERT INTO prioridad_b VALUES (compuesta_l, 1);
+     INSERT INTO prioridad_b VALUES (derivada_l, 2);
+     INSERT INTO prioridad_b VALUES (materia_prima_l, 3);
+     INSERT INTO prioridad_b VALUES (corriente_l, 4);
+
+     -- Se crea una tabla temporal con todos los componentes de la mercadería compuesta a buscar
+     CREATE TEMPORARY TABLE arbol_componentes_b AS
+     WITH RECURSIVE compuesta (id, id_venta, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo, 
+     	  	    	       cantidad, costo_promedio) AS 
+       (
+         SELECT id, id_venta_vd, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo,
+	 	cantidad, costo_promedio
+       	 FROM venta_mc_detalle
+	 WHERE venta_mc_detalle.id_mh[1] = 0
+	       AND venta_mc_detalle.id_venta_vd = id_venta_in 
+	       AND venta_mc_detalle.id_venta_detalle = id_venta_detalle_in
+         UNION ALL
+         SELECT vmcd.id, vmcd.id_venta_vd, vmcd.id_venta_detalle, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
+	 	vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad, vmcd.costo_promedio		
+         FROM venta_mc_detalle vmcd, compuesta
+       	 WHERE vmcd.barcode_madre = compuesta.barcode_hijo
+	       AND vmcd.id_venta_vd = compuesta.id_venta
+	       AND vmcd.id_venta_detalle = compuesta.id_venta_detalle
+	       AND vmcd.id_mh[1] = compuesta.id_mh[2]
+       )
+       SELECT *,
+       	      (SELECT valor FROM get_iva (c.barcode_hijo))/100 AS iva_percent,
+	      (SELECT valor FROM get_otro_impuesto (c.barcode_hijo))/100 AS otros_percent
+       FROM compuesta c;
+  END IF;
+
+  q := $S$ SELECT ac.*
+	   FROM arbol_componentes_b ac
+	   INNER JOIN prioridad_b pd
+	   	 ON ac.tipo_hijo = pd.tipo_id
+	   INNER JOIN producto po
+	   	 ON po.barcode = ac.barcode_hijo
+	   WHERE id_mh[1] = $S$||id_mh_in[2]||$S$
+	   ORDER BY pd.orden ASC $S$;
+
+  -- Se obtiene el precio de la madre
+  IF id_mh_in[1] = 0 AND id_mh_in[2] = 0 THEN
+     costo_madre_l := (SELECT fifo FROM venta_detalle WHERE id = id_venta_detalle_in AND id_venta = id_venta_in);
+     precio_madre_l := (SELECT precio FROM venta_detalle WHERE id = id_venta_detalle_in AND id_venta = id_venta_in);
+  ELSE
+     costo_madre_l := costo_madre_in;
+     precio_madre_l := precio_madre_in;
+  END IF;
+
+  -- Se recorre el arbol de componentes
+  FOR l IN EXECUTE q LOOP      
+      -- Si el hijo actual es compuesto (sera la proxima madre)
+      IF l.tipo_hijo = compuesta_l OR l.tipo_hijo = derivada_l THEN
+	-- precio proporcional =  (proporcion del COSTO hijo con respecto a madre) * PRECIO madre
+        precio_out := (l.costo_promedio / costo_madre_l) * precio_madre_l;
+      	 
+      	-- Se consulta así mismo
+      	q2 := 'SELECT * FROM update_profits_detalle_compuesto ('||id_venta_in||',
+	      	  	   				       '||id_venta_detalle_in||',
+							       ARRAY['||l.id_mh[1]||','||l.id_mh[2]||']::int4[],
+							       '||precio_out||',
+							       '||l.costo_promedio||')';
+	  ganancia_out := 0;
+	  iva_out := 0;
+	  otros_out := 0;
+	FOR l2 IN EXECUTE q2 LOOP
+	  ganancia_out := ganancia_out + l2.ganancia_out;
+	  iva_out := iva_out + l2.iva_out;
+	  otros_out := otros_out + l2.otros_out;
+	END LOOP;
+
+	barcode_out := l.barcode_hijo;
+	costo_out := l.costo_promedio;
+	cantidad_out := l.cantidad;
+
+      ELSIF l.tipo_hijo = corriente_l OR l.tipo_hijo = materia_prima_l THEN
+
+      	-- precio proporcional =  (proporcion del COSTO hijo con respecto a madre) * PRECIO madre
+        precio_out := (l.costo_promedio / costo_madre_l) * precio_madre_l;
+
+        -- ganancia total =               precio venta neto               - costo             *  cantidad
+        ganancia_out := ((precio_out / (l.iva_percent + l.otros_percent + 1)) - l.costo_promedio) * l.cantidad;
+
+	-- Impuesto =            precio venta neto                     * impuesto         *  cantidad
+	iva_out :=   ((precio_out / (l.iva_percent + l.otros_percent + 1)) * l.iva_percent)   * l.cantidad;
+	otros_out := ((precio_out / (l.iva_percent + l.otros_percent + 1)) * l.otros_percent) * l.cantidad;
+	
+	barcode_out := l.barcode_hijo;
+	costo_out := l.costo_promedio;
+	cantidad_out := l.cantidad;
+      END IF;
+
+      -- Se actualiza la ganancia
+      UPDATE venta_mc_detalle
+       	     SET ganancia = ganancia_out
+      WHERE id = l.id;
+
+      -- Se actualiza el precio proporcional
+      UPDATE venta_mc_detalle
+             SET precio_proporcional = precio_out
+      WHERE id = l.id;
+
+      -- Se actualiza el IVA
+      UPDATE venta_mc_detalle
+             SET iva = iva_out
+      WHERE id = l.id;
+
+      -- Se actualiza OTROS impuestos
+      UPDATE venta_mc_detalle
+      	     SET otros = otros_out
+      WHERE id = l.id;
+
+      RETURN NEXT;
+  END LOOP;
+
+  -- Una vez finalizado todo
+  IF id_mh_in[1] = 0 AND id_mh_in[2] = 0 THEN
+      -- Se actualizan los datos del compuesto madre en venta_detalle
+      -- El costo se actualizo desde un inicio con la funcion 'PERFORM update_costo_promedio_detalle_compuesto'
+      -- El costo
+      -- UPDATE venta_detalle
+      -- 	 SET fifo = (SELECT SUM (costo_promedio * cantidad)
+      -- 	     	     FROM venta_mc_detalle
+      -- 		     WHERE id_venta_vd = id_venta_in
+      -- 		     AND id_venta_detalle = id_venta_detalle_in
+      -- 		     AND id_mh[1] = 0)
+      -- WHERE id_venta = id_venta_in
+      -- AND id = id_venta_detalle_in;
+
+      -- El iva
+      UPDATE venta_detalle
+	 SET iva = (SELECT SUM (iva)
+	     	    FROM venta_mc_detalle
+		    WHERE id_venta_vd = id_venta_in
+		    AND id_venta_detalle = id_venta_detalle_in
+		    AND id_mh[1] = 0)
+      WHERE id_venta = id_venta_in
+      AND id = id_venta_detalle_in;
+
+      -- otros impuestos
+      UPDATE venta_detalle
+	 SET otros = (SELECT SUM (otros)
+	     	      FROM venta_mc_detalle
+		      WHERE id_venta_vd = id_venta_in
+		      AND id_venta_detalle = id_venta_detalle_in
+		      AND id_mh[1] = 0)
+      WHERE id_venta = id_venta_in
+      AND id = id_venta_detalle_in;
+
+      -- ganancia
+      UPDATE venta_detalle
+	 SET ganancia = (SELECT SUM (ganancia)
+	     	         FROM venta_mc_detalle
+		    	 WHERE id_venta_vd = id_venta_in
+		    	 AND id_venta_detalle = id_venta_detalle_in
+		    	 AND id_mh[1] = 0)
+      WHERE id_venta = id_venta_in
+      AND id = id_venta_detalle_in;
+
+     -- Se eliminan las tablas temporales 'arbol_componentes' y 'prioridad'
+     DROP TABLE arbol_componentes_b;
+     DROP TABLE prioridad_b;
+  END IF;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Actualiza las ganancias dentro del rango de fecha estipulado
+-- NOTA: esta funcion crea una tabla 'componente_en_venta' (se debe borrar una vez usada)
+-- con los id de las ventas e id ventas detalles donde participa el producto especificado
+-- (dentro de venta_mc_detalle).
+---
 CREATE OR REPLACE FUNCTION update_profits_on_date_range (IN fecha_inicio timestamp,
        	  	  	   		      		 IN fecha_termino timestamp,
 							 IN barcode varchar,
 							 OUT barcode_out varchar,
 							 OUT costo_out double precision,
-							 OUT precio_out integer,
+							 OUT precio_out double precision,
 							 OUT cantidad_out double precision,
 							 OUT ganancia_out double precision)
 RETURNS SETOF record AS $$
 
 DECLARE
+	------------
 	q text;
 	l record;
 	iva_percent double precision;
 	otros_percent double precision;
+	------------
+	costo_padre_l double precision;
+	precio_padre_l double precision;
+	precio_proporcional_l double precision;
+	------------
 BEGIN
-	-- OBTIENE LAS VENTAS DEL PRODUCTO DETERMINADO EN EL RANGO DE FECHA ESPECIFICADO
+	-- OBTIENE LAS VENTAS (EN venta_detalle) DEL PRODUCTO DETERMINADO EN EL RANGO DE FECHA ESPECIFICADO
 	q := $S$ SELECT v.id AS v_id, vd.id AS vd_id,
 	     	 	vd.barcode, vd.fifo AS costo, vd.precio, vd.cantidad, v.fecha
 		 FROM venta_detalle vd
@@ -5377,18 +5739,18 @@ BEGIN
 		
 	-- IMPUESTOS
 	IF iva_percent = 0 THEN
-	   iva_percent = 0;
+	   iva_percent := 0;
 	ELSE
-	   iva_percent = iva_percent / 100;
+	   iva_percent := iva_percent / 100;
 	END IF;
 
         IF otros_percent = 0 THEN
-	   otros_percent = 0;
+	   otros_percent := 0;
 	ELSE
-	   otros_percent = otros_percent / 100;
+	   otros_percent := otros_percent / 100;
 	END IF;
 
-	-- RECORRE EL DETALLE DE LA VENTA
+	-- RECORRE EL DETALLE DE LA VENTA (venta_detalle)
 	FOR l IN EXECUTE q LOOP
                            --   (precio venta neto)                        - costo    * cantidad = ganancia total
            ganancia_out = ( (l.precio / (iva_percent + otros_percent + 1)) - l.costo ) * l.cantidad;
@@ -5399,12 +5761,26 @@ BEGIN
 	    	   WHERE id = l.vd_id
 	    	   AND id_venta = l.v_id;
 	    
-	    barcode_out = l.barcode;
-	    costo_out = l.costo;
-	    precio_out = l.precio;    
-	    cantidad_out = l.cantidad;
+	    barcode_out := l.barcode;
+	    costo_out := l.costo;
+	    precio_out := l.precio;    
+	    cantidad_out := l.cantidad;
 	    RETURN NEXT;
 	END LOOP;
+
+
+	-- Se crea una tabla temporal donde se registraran todos los id_venta e id_venta_detalle
+	-- relacionado con el detalle del compuesto donde se encuentre este producto
+
+	-- OBTIENE LAS VENTAS (EN venta_mc_detalle) DEL PRODUCTO DETERMINADO EN EL RANGO DE FECHA ESPECIFICADO
+	CREATE TEMPORARY TABLE componente_en_venta AS
+	SELECT v.id AS v_id, vmcd.id_venta_detalle AS vd_id, v.descuento AS descuento
+	FROM venta_mc_detalle vmcd
+	     INNER JOIN venta v
+	     ON vmcd.id_venta_vd = v.id
+	WHERE v.fecha > fecha_inicio::TIMESTAMP
+	      AND v.fecha < fecha_termino::TIMESTAMP
+	      AND vmcd.barcode_hijo = barcode::BIGINT;
 RETURN;
 END; $$ LANGUAGE plpgsql;
 
@@ -5425,16 +5801,27 @@ CREATE OR REPLACE FUNCTION update_avg_cost (IN codigo_barras bigint,
 RETURNS SETOF RECORD AS $$
 
 DECLARE
-    avg_cost double precision;
+    -----------
+    q text;
+    q2 text;
+    q3 text;
+    l record;    
+    l2 record;
+    -----------    
     iva_local double precision;
     otros_local double precision;
     iva_percent double precision;
     otros_percent double precision;
+    -----------
+    avg_cost double precision;
     new_stock double precision;
-    q text;
-    q2 text;
-    l record;
-
+    -----------
+    precio_proporcional_l double precision;
+    costo_total_venta_l double precision;
+    monto_venta_l integer;
+    id_ventas_l int4[];
+    id_ventas2_l int4[];
+    -----------    
 BEGIN
 
     -- Se inicializa con un valor
@@ -5538,33 +5925,128 @@ BEGIN
 	       	  	 FROM venta v
 	      	  	 WHERE v.id = vd.id_venta
 	       	  	 AND vd.barcode = $S$ || l.barcode || $S$
-	       	  	 AND fecha > $S$ || quote_literal (l.fecha); --fecha de la compra donde se cambio el costo_promedio
+	       	  	 AND v.fecha > $S$ || quote_literal (l.fecha); --fecha de la compra donde se cambio el costo_promedio
+
+	-- Actualiza costo promedio en venta_mc_detalle
+	q3 := $S$ UPDATE venta_mc_detalle vmcd
+	       	  	 SET costo_promedio = $S$ || avg_cost || $S$
+	       	  	 FROM venta v
+	      	  	 WHERE v.id = vmcd.id_venta_vd
+	       	  	 AND vmcd.barcode_hijo = $S$ || l.barcode || $S$
+	       	  	 AND v.fecha > $S$ || quote_literal (l.fecha); --fecha de la compra donde se cambio el costo_promedio
 
 	-- Si next-date es null
 	IF l.next_date IS NULL THEN
-	   EXECUTE q2;
-	   --RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS
+	   EXECUTE q2; -- Update venta_detalle
+	   EXECUTE q3; -- Update venta_mc_detalle
+	   
+	   -- RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS
 	   PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
 	   	   				 now()::TIMESTAMP, 
 						 l.barcode::VARCHAR);
 	ELSE
-	   q2 := q2 || $S$ AND fecha < $S$ || quote_literal (l.next_date); --fecha de la proxima compra de ese producto
-	   EXECUTE q2;
-   	   --RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS
+	   q2 := q2 || $S$ AND v.fecha < $S$ || quote_literal (l.next_date); --fecha de la proxima compra de ese producto
+	   q3 := q3|| $S$ AND v.fecha < $S$ || quote_literal (l.next_date); --fecha de la proxima compra de ese producto
+	   EXECUTE q2; -- Update venta_detalle
+	   EXECUTE q3; -- Update venta_mc_detalle
+   	   -- RECALCULA GANANCIAS DENTRO DEL RANGO DE FECHAS (crea una tabla temporal con id de venta para actualizar venta_mc_detalle)
 	   PERFORM update_profits_on_date_range (quote_literal(l.fecha)::TIMESTAMP, 
 	   	   				 quote_literal(l.next_date)::TIMESTAMP, 
 						 l.barcode::VARCHAR);
-	END IF;	
+	END IF;
 
         -- Se asignan los valores a retornar
-        id_fcompra_r = l.id_fc;
-	barcode_r = l.barcode;
-	stock_r = l.stock;
-        avg_cost_new_r = avg_cost;
-	cantidad_ingresada_r = l.cantidad;
-	costo_compra_r = l.precio;
+        id_fcompra_r := l.id_fc;
+	barcode_r := l.barcode;
+	stock_r := l.stock;
+        avg_cost_new_r := avg_cost;
+	cantidad_ingresada_r := l.cantidad;
+	costo_compra_r := l.precio;
         RETURN NEXT;
     END LOOP;
+    
+    -- Se actualizan los costos, ganancias, precio proporcional e impuestos en venta_mc_detalle
+    -- a partir de los id_venta e id_venta_detalle registrados en la tabla 'componente_en_venta'
+    q := $S$ SELECT v_id, vd_id, descuento
+      	     FROM componente_en_venta
+	     GROUP BY v_id, vd_id, descuento $S$;
+
+    FOR l IN EXECUTE q LOOP
+    	-- Si esa venta tiene un descuento se debe recalcular el precio proporcional del compuesto
+	IF l.descuento > 0 AND NOT (id_ventas_l @> ARRAY[l.v_id]) THEN
+
+	   --array_append (id_ventas_l, l.v_id); -- Se agrega el id de venta al array de id de ventas
+	   id_ventas_l := id_ventas_l || l.v_id;
+
+	   -- Se seleccionan todos los productos compuestos que participen de esta venta y que tengan
+	   -- un componente cuyo costo se haya modificado
+	   q2 := $S$ SELECT id AS id_vd, id_venta AS id_v
+	      	     FROM venta_detalle		     
+		     WHERE id_venta = $S$||l.v_id||$S$
+		     AND id_venta_detalle IN (SELECT vd_id 
+		     	 		      FROM componente_en_venta
+					      WHERE v_id = $S$||l.v_id||$S$)
+		     AND tipo = $S$||compuesta_l;
+
+	   FOR l2 IN EXECUTE q2 LOOP
+	       -- Se actualiza el costo del compuesto
+	       PERFORM update_costo_promedio_detalle_compuesto (l2.v_id, l2.vd_id, ARRAY[0,0]);
+	   END LOOP;
+
+	   -- Se obtiene el monto total de la venta
+	   monto_venta_l := (SELECT monto FROM venta WHERE id = l.v_id);
+	   -- Se actualizan los precios proporcionales de las mercaderías en esta venta
+	   costo_total_venta_l := (SELECT SUM(fifo) FROM venta_detalle WHERE id_venta = l.v_id);
+
+
+	   -- Se seleccionan todos los productos esta venta para actualizar el precio proporcional, impuestos y ganancias
+	   q2 := $S$ SELECT id AS id_vd, id_venta AS id_v, barcode, fifo, tipo,
+	      	     (SELECT valor FROM get_iva (barcode))/100 AS iva_percent,
+		     (SELECT valor FROM get_otro_impuesto (barcode))/100 AS otros_percent
+	      	     FROM venta_detalle		     
+		     WHERE id_venta = $S$||l.v_id;
+
+	   FOR l2 IN EXECUTE q2 LOOP
+	       precio_proporcional_l := (l2.fifo/costo_total_venta_l) * monto_venta_l;
+	   
+	       UPDATE venta_detalle
+	              SET precio = precio_proporcional_l
+	       WHERE id = l.vd_id
+	       AND id_venta = l.v_id;
+
+	       -- Se calculan y actualizan los impuestos y ganancias de las mercaderias que nos son compuestas
+	       IF l2.tipo != compuesta_l THEN
+	       	  -- IVA
+		  UPDATE venta_detalle
+	              SET iva = ((precio_proporcional_l / (l2.iva_percent+l2.otros_percent+1)) * l2.iva_percent)
+	       	  WHERE id = l.vd_id
+	       	  AND id_venta = l.v_id;
+
+		  -- OTROS
+	       	  UPDATE venta_detalle
+	              SET otros = ((precio_proporcional_l / (l2.iva_percent+l2.otros_percent+1)) * l2.otros_percent)
+	       	  WHERE id = l.vd_id
+	       	  AND id_venta = l.v_id;
+
+		  -- GANANCIA
+	       	  UPDATE venta_detalle
+	              SET ganancia = ((precio_proporcional_l / (l2.iva_percent+l2.otros_percent+1)) - l2.fifo)
+	          WHERE id = l.vd_id
+	       	  AND id_venta = l.v_id;
+	       END IF;
+	   END LOOP;	   	   
+	END IF;
+
+	-- Si no se ha actualizado esta venta con anterioridad
+	IF NOT (id_ventas2_l @> ARRAY[l.v_id]) THEN
+	    -- Se agrega el id de venta al array de id de ventas
+	   id_ventas2_l := id_ventas2_l || l.v_id;
+	   -- Al cambiar el costo total del compuesto afecta al nivel de participacion de cada componente y por ello sus precios proporcionales, impuestos y ganancias
+	   PERFORM update_profits_detalle_compuesto (l.v_id::int4, l.vd_id::int4, ARRAY[0,0]::int4[], 0::double precision, 0::double precision);
+	END IF;
+    END LOOP;
+    -- Se dropea la tabla temporal componente_en_venta creado por update_profits_on_date_range
+    DROP TABLE componente_en_venta;
 
     IF avg_cost >= 0 THEN
        UPDATE producto
@@ -5646,7 +6128,7 @@ create or replace function nullify_buy (IN id_compra_in integer,
        					OUT cantidad_anulada_out double precision,
        					OUT nuevo_stock_out double precision,
        					OUT costo_out double precision,
-       					OUT precio_out integer)
+       					OUT precio_out double precision)
 RETURNS setof record AS $$
 DECLARE
    id_nc integer;

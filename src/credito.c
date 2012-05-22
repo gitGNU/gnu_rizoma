@@ -2598,6 +2598,8 @@ on_btn_add_cm_clicked (GtkButton *button, gpointer user_data)
     AlertMSG (GTK_WIDGET(rs_w), "Debe ingresar una razón social");
   else if (strcmp (tel, "") == 0)
     AlertMSG (GTK_WIDGET(tel_w), "Debe ingresar un telefono");
+  else if (!is_numeric (tel))
+    AlertMSG (GTK_WIDGET(tel_w), "Telefono debe ser un valor numérico");
   else if (strcmp (dir, "") == 0)
     AlertMSG (GTK_WIDGET(dir_w), "Debe ingresar una dirección");
   else if (strcmp (comuna, "") == 0)
