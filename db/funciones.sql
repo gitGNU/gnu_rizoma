@@ -5809,7 +5809,6 @@ DECLARE
     monto_venta_l integer;
     next_date_l timestamp;
     id_ventas_l int4[];
-    id_ventas2_l int4[];
     -----------    
 BEGIN
     -- Se obtiene el id del tipo compuesto
@@ -5820,7 +5819,6 @@ BEGIN
     -- Se inicializa con un valor
     avg_cost := 0;
     id_ventas_l := ARRAY[0];
-    id_ventas2_l := ARRAY[0];
 
     iva_percent := get_iva (codigo_barras);
     otros_percent := get_otro_impuesto (codigo_barras);
@@ -6034,16 +6032,10 @@ BEGIN
 	          WHERE id = l.vd_id
 	       	  AND id_venta = l.v_id;
 	       END IF;
-	   END LOOP;	   	   
+	   END LOOP;
 	END IF;
 
-	-- Si no se ha actualizado esta venta con anterioridad
-	IF NOT (id_ventas2_l @> ARRAY[l.v_id]) THEN
-	    -- Se agrega el id de venta al array de id de ventas
-	   id_ventas2_l := id_ventas2_l || l.v_id;
-	   -- Al cambiar el costo total del compuesto afecta al nivel de participacion de cada componente y por ello sus precios proporcionales, impuestos y ganancias
-	   PERFORM update_profits_detalle_compuesto (l.v_id::int4, l.vd_id::int4, ARRAY[0,0]::int4[], 0::double precision, 0::double precision);
-	END IF;
+	PERFORM update_profits_detalle_compuesto (l.v_id::int4, l.vd_id::int4, ARRAY[0,0]::int4[], 0::double precision, 0::double precision);
     END LOOP;
     -- Se dropea la tabla temporal componente_en_venta creado por update_profits_on_date_range
     DROP TABLE componente_en_venta;
