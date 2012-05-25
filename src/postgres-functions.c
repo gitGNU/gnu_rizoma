@@ -1753,8 +1753,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gint monto_descuento;
 
   //Datos Producto
-  gdouble iva, otros, iva_percent, otros_percent;
-  gchar *iva_unit, *otros_unit;
+  gdouble iva, otros, iva_residual, otros_residual, iva_percent, otros_percent;
   gchar *cantidad;  
   gdouble precio;
 
@@ -1763,7 +1762,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gboolean is_imp1, is_imp2;
 
   //gdouble iva_promedio, otros_promedio;
-  gdouble impuestos, ganancia;
+  gdouble impuestos, ganancia, proporcion_iva, proporcion_otros;
   gdouble proporcion_producto, neto;
   gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
 
@@ -1851,8 +1850,10 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
       //Si se realizó solamene con cheque de restaurant
       if (tipo_venta == CHEQUE_RESTAURANT)
 	{
-	  iva_unit = g_strdup_printf ("0");
-	  otros_unit = g_strdup_printf ("0");
+	  iva_residual = 0;
+	  otros_residual = 0;
+	  proporcion_iva = 0;
+	  proporcion_otros = 0;
 	}
       //Si se realizó de forma mixta
       else if (tipo_venta == MIXTO)
@@ -1860,14 +1861,18 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	  // Si ambos pagos son afecto a impuesto, no se hacen tratamientos especiales
 	  if (is_imp1 == TRUE && is_imp2 == TRUE)
 	    {
-	      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
-	      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+	      iva_residual = iva;
+	      otros_residual = otros;
+	      proporcion_iva = 1;
+	      proporcion_otros = 1;
 	    }
 	  //Si niguno es afecto a impuesto
 	  else if (is_imp1 == FALSE && is_imp2 == FALSE)
 	    {
-	      iva_unit = g_strdup_printf ("0");
-	      otros_unit = g_strdup_printf ("0");
+	      iva_residual = 0;
+	      otros_residual = 0;
+	      proporcion_iva = 0;
+	      proporcion_otros = 0;
 	    }
 	  //Si uno es afecto a impuesto y el otro no (y además el producto esta afecto a impuestos)
 	  else if (GetIVA (products->product->barcode) != 0)
@@ -1934,25 +1939,29 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
 	      impuestos = (iva_percent+otros_percent+1);
 	      neto = monto_afecto / impuestos;
-	      iva = neto * iva_percent;
-	      otros = neto * otros_percent;
-
-	      iva_unit = CUT (g_strdup_printf ("%.3f", iva));
-	      otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+	      iva_residual = neto * iva_percent;
+	      otros_residual = neto * otros_percent;
 	      
-	      impuestos = iva + otros;
+	      //                        iva porpocional al monto afecto / iva normal // TODOOOOO
+	      proporcion_iva = (iva_residual / (precio/(iva_percent+otros_percent+1)*iva_percent*products->product->cantidad));
+	      proporcion_otros = (otros_residual / (precio/(iva_percent+otros_percent+1)*(otros_percent == 0 ? 1 : otros_percent)
+						    *products->product->cantidad));
 	    }
 	  else //Si es un pago mixto (con un pago afecto y el otro no), pero el producto no esta afecto a impuestos
 	    {
-	      iva_unit = g_strdup_printf ("0");
-	      otros_unit = g_strdup_printf ("0");
+	      iva_residual = 0;
+	      otros_residual = 0;
+	      proporcion_iva = 0;
+	      proporcion_otros = 0;
 	    }
 	}
       //cualquier tipo de pago afecto a impuesto
       else 
 	{
-	  iva_unit = CUT (g_strdup_printf ("%.3f", iva));
-	  otros_unit = CUT (g_strdup_printf ("%.3f", otros));
+	  iva_residual = iva;
+	  otros_residual = otros;
+	  proporcion_iva = 1;
+	  proporcion_otros = 1;
 	}
 
       ganancia = precio / (iva_percent + otros_percent + 1);
@@ -1961,12 +1970,18 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle y venta_mc_detalle */
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %s, %s, %s, %s, %s, %d, %s)",
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %s, %s, %s)",
 			   id_venta, products->product->barcode, cantidad, 
 			   CUT (g_strdup_printf ("%.3f", precio)),
 			   CUT (g_strdup_printf ("%.3f",products->product->fifo)),
-			   iva_unit, otros_unit, CUT (g_strdup_printf ("%.3f", ganancia)), 
-			   products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false");
+			   CUT (g_strdup_printf ("%.3f", iva)),
+			   CUT (g_strdup_printf ("%.3f", otros)),
+			   CUT (g_strdup_printf ("%.3f", iva_residual)),
+			   CUT (g_strdup_printf ("%.3f", otros_residual)),
+			   CUT (g_strdup_printf ("%.3f", ganancia)),
+			   products->product->tipo, (products->product->impuestos==TRUE) ? "true" : "false",
+			   CUT (g_strdup_printf ("%.5f", proporcion_iva)),
+			   CUT (g_strdup_printf ("%.5f", proporcion_otros)));
 
       printf ("la consulta es %s\n", q);
       res = EjecutarSQL (q);

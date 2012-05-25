@@ -613,8 +613,12 @@ create table venta_detalle (
   ganancia                  float8 not null,
   iva                       float8,
   otros                     float8,
+  iva_residual              float8,
+  otros_residual            float8,
   tipo			    int4,
   impuestos		    bool,
+  proporcion_iva	    float8,
+  proporcion_otros	    float8,
   constraint pk_venta_detalle primary key (id,id_venta)
 ) ;
 
@@ -633,8 +637,12 @@ create table venta_mc_detalle (
   ganancia                  float8 not null,
   iva                       float8 not null,
   otros                     float8 not null,
+  iva_residual              float8 not null,
+  otros_residual            float8 not null,
   tipo_madre		    int4,
   tipo_hijo		    int4,
+  proporcion_iva	    float8,
+  proporcion_otros	    float8,
   constraint pk_venta_mc_detalle primary key (id)
 ) ;
 
