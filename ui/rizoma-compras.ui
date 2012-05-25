@@ -49,7 +49,7 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes" context="yes">Enviar mercadería</property>
     <property name="modal">True</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-always</property>
     <property name="destroy_with_parent">True</property>
     <property name="transient_for">wnd_compras</property>
     <signal name="delete-event" handler="gtk_widget_hide" object="traspaso_enviar_win" swapped="yes"/>
@@ -262,7 +262,7 @@
     <property name="border_width">5</property>
     <property name="title" translatable="yes" context="yes">Recibir mercadería</property>
     <property name="modal">True</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-always</property>
     <property name="destroy_with_parent">True</property>
     <property name="transient_for">wnd_compras</property>
     <signal name="delete-event" handler="gtk_widget_hide" object="traspaso_recibir_win" swapped="yes"/>
@@ -1274,6 +1274,7 @@
   <object class="GtkWindow" id="wnd_cant_traspaso">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">POS Rizoma: Cantidad Traspaso</property>
+    <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
@@ -1293,8 +1294,8 @@
                 <property name="label" translatable="yes">Unids.</property>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">False</property>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="position">0</property>
               </packing>
             </child>
@@ -1327,7 +1328,7 @@
                     <signal name="clicked" handler="AddToProductsListTraspaso" swapped="no"/>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
+                    <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>

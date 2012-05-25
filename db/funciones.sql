@@ -5502,7 +5502,7 @@ END; $$ LANGUAGE plpgsql;
 
 
 ---
--- Funcion recursiva TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+-- Funcion recursiva
 -- Actualiza las ganancias de los componentes y el compuesto de la venta especificada
 ---
 CREATE OR REPLACE FUNCTION update_profits_detalle_compuesto (IN id_venta_in int4,
@@ -5979,7 +5979,7 @@ BEGIN
 
     FOR l IN EXECUTE q LOOP
     	-- Si esa venta tiene un descuento se debe recalcular el precio proporcional del compuesto
-	IF l.descuento > 0 AND NOT (id_ventas_l @> ARRAY[l.v_id]) THEN	   
+	IF l.descuento > 0 AND NOT (id_ventas_l @> ARRAY[l.v_id]) THEN
 	   --array_append (id_ventas_l, l.v_id); -- Se agrega el id de venta al array de id de ventas
 	   id_ventas_l := id_ventas_l || l.v_id;
 

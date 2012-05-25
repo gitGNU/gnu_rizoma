@@ -4368,14 +4368,16 @@ get_componentes_compuesto (gchar *barcode)
 
   // barcode_madre = (Mercadería compuesta), barcode_comp_der = (Mercadería que compone a la madre)
   q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_comp_der AS barcode, cmc.tipo_comp_der AS tipo, "
-		       "(SELECT codigo_corto FROM producto WHERE barcode = cmc.barcode_comp_der) AS codigo, "
-		       "(SELECT marca FROM producto WHERE barcode = cmc.barcode_comp_der) AS marca, "
-		       "(SELECT descripcion FROM producto WHERE barcode = cmc.barcode_comp_der) AS descripcion, "
-		       "(SELECT precio FROM producto WHERE barcode = cmc.barcode_comp_der) AS precio, "
-		       "(SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_comp_der)) AS costo_promedio "
-		       "FROM componente_mc cmc "
+		       "       prd.codigo_corto AS codigo, prd.marca, prd.descripcion, prd.precio, "
+		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_comp_der)) AS costo_promedio"
+		       "FROM ( "
+		       "       SELECT barcode, codigo_corto, marca, descripcion, precio, estado "
+		       "       FROM producto "
+		       "     ) AS prd "
+		       "INNER JOIN componente_mc cmc "
+		       "      on prd.barcode = cmc.barcode_comp_der "
 		       "WHERE cmc.barcode_madre = '%s' "
-		       "AND (SELECT estado FROM producto WHERE barcode = cmc.barcode_comp_der) = true",
+		       "      AND prd.estado = true",
 		       barcode);
 
   res = EjecutarSQL (q);

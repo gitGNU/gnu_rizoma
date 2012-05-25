@@ -2558,7 +2558,6 @@ BuyWindow (void)
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
 
-
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_prov"));
   if (gtk_tree_view_get_model (treeview) == NULL)
     {
@@ -2600,11 +2599,14 @@ BuyWindow (void)
   else
     {
       store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
-      selection = gtk_tree_view_get_selection (treeview);
     }
+
+  selection = gtk_tree_view_get_selection (treeview);
 
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_provider_data")));
   FillProveedores ();
+
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_provider_data")));
 
   if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (store), &iter) == TRUE)
     {      
@@ -2613,9 +2615,7 @@ BuyWindow (void)
       gtk_window_set_focus (GTK_WINDOW (builder_get (builder, "wnd_provider_data")), GTK_WIDGET (treeview));      
     }    
   else
-    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_add_provider")));
-  
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_provider_data")));
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_add_provider")));  
 
   //gtk_window_set_focus (GTK_WINDOW (compra->buy_window), treeview);
 } // void BuyWindow (void)
@@ -8556,6 +8556,8 @@ on_btn_remove_buy_product_clicked (void)
 	  g_free (rut_proveedor_global);
 	  rut_proveedor_global = NULL;
 	}
+
+      on_button_clear_clicked (NULL, NULL);
     }
 }
 
@@ -8634,31 +8636,38 @@ AddToProductsListTraspaso (void)
 
       CleanStatusProduct (0);
 
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
+      //Se selecciona el primer producto de la lista
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))),
+				      gtk_tree_path_new_from_string ("0"));
 
+      //Se devuelve el foco al entry_buy_barcode
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
     }
   else
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")), "El Producto debe tener precio mayor a 0");
     }
 
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
-  //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
+  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == TRUE)
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
+      //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
 
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
-  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
 
-  gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")));
-
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), TRUE);
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
+      gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")));
+      
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
+    }
 }
 
 
@@ -8728,6 +8737,7 @@ on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
 
       window = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso"));
       gtk_widget_show_all (window);
+      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount_trans")));
       return TRUE;
     }
   else

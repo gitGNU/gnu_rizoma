@@ -322,6 +322,54 @@ datos_box ()
   refresh_labels();
 }
 
+
+/**
+ * Callback connected to the search button (btn_srch_stores)
+ * and entry search stores (entry_srch_stores)
+ *
+ * @param button the button that emits the signal
+ * @param user_data the user data
+ */
+void
+on_btn_srch_stores_clicked (GtkButton *button, gpointer user_data)
+{
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_stores"))));
+  GtkTreeIter iter;
+  gint i, tuples;
+  PGresult *res;
+  char *sql, *store_name;
+  GtkWidget *aux_widget;
+
+  gtk_list_store_clear (store);
+
+  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_srch_stores"));
+  store_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
+
+  if ( g_str_equal(store_name, "") )
+    sql = g_strdup_printf ("SELECT id, nombre FROM bodega where estado = true "
+			   "AND nombre!=(SELECT nombre FROM negocio)");
+  else
+    sql = g_strdup_printf ("SELECT id, nombre FROM bodega where nombre LIKE upper('%s%%') "
+			   "AND estado = true "
+			   "AND nombre!=(SELECT nombre FROM negocio)", store_name);
+
+  res = EjecutarSQL (sql);
+  tuples = PQntuples (res);
+  g_free (sql);
+
+  if (res == NULL) return;
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, PQvaluebycol (res, i, "id"),
+			  1, PQvaluebycol (res, i, "nombre"),
+			  -1);
+    }
+}
+
+
 /**
  * Is called by btn_save_stores (clicked signal)
  *
@@ -354,8 +402,9 @@ on_btn_save_stores_clicked()
       valid = gtk_tree_model_iter_next (model, &iter);
     }
   
-// Disabling save stores button --
-gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_stores")), FALSE);
+  // Disabling save stores button --
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_stores")), FALSE);
+  on_btn_srch_stores_clicked (NULL, NULL);
 }
 
 /**
@@ -466,52 +515,6 @@ stores_box ()
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_save_stores")), FALSE);
 }
 
-/**
- * Callback connected to the search button (btn_srch_stores)
- * and entry search stores (entry_srch_stores)
- *
- * @param button the button that emits the signal
- * @param user_data the user data
- */
-void
-on_btn_srch_stores_clicked (GtkButton *button, gpointer user_data)
-{
-  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_stores"))));
-  GtkTreeIter iter;
-  gint i, tuples;
-  PGresult *res;
-  char *sql, *store_name;
-  GtkWidget *aux_widget;
-
-  gtk_list_store_clear (store);
-
-  aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_srch_stores"));
-  store_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (aux_widget)));
-
-  if ( g_str_equal(store_name, "") )
-    sql = g_strdup_printf ("SELECT id, nombre FROM bodega where estado = true "
-			   "AND nombre!=(SELECT nombre FROM negocio)");
-  else
-    sql = g_strdup_printf ("SELECT id, nombre FROM bodega where nombre LIKE upper('%s%%') "
-			   "AND estado = true "
-			   "AND nombre!=(SELECT nombre FROM negocio)", store_name);
-
-  res = EjecutarSQL (sql);
-  tuples = PQntuples (res);
-  g_free (sql);
-
-  if (res == NULL) return;
-
-  for (i = 0; i < tuples; i++)
-    {
-      gtk_list_store_append (store, &iter);
-      gtk_list_store_set (store, &iter,
-			  0, PQvaluebycol (res, i, "id"),
-			  1, PQvaluebycol (res, i, "nombre"),
-			  -1);
-    }
-}
-
 
 /**
  * Callback connected to the save button (btn_save_new_store)
@@ -554,6 +557,7 @@ on_btn_save_new_store_clicked (GtkButton *button, gpointer user_data)
 
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_new_store"));
   gtk_widget_hide (aux_widget);
+  on_btn_srch_stores_clicked (NULL, NULL);
 }
 
 /**
@@ -570,6 +574,7 @@ on_btn_add_stores_clicked (GtkButton *button, gpointer user_data)
   window = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_new_store"));
   clean_container (GTK_CONTAINER (window));
   gtk_widget_show (GTK_WIDGET (window));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_name_new_store")));
 }
 
 
