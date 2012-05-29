@@ -1013,3 +1013,4 @@ CREATE INDEX indx_venta_fecha ON venta USING btree (fecha);
 
 -- Alter sequence barcode
 ALTER SEQUENCE producto_barcode_seq RESTART WITH 1000000;
+
