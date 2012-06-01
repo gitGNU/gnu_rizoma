@@ -6097,7 +6097,8 @@ calcular_traspasos (void)
     return;
 
   enviado = PQvaluebycol (res, 0, "enviados");
-  enviado = g_strdup_printf ((!g_str_equal("", enviado)) ? " No hay productos enviados" : "%s", PUT(enviado));
+  enviado = g_strdup_printf (g_str_equal ("", enviado) ? " No hay productos enviados" : 
+			                                 "<span size=\"12000\" weight=\"bold\"> %s </span>", PutPoints(enviado));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
 
@@ -6124,7 +6125,8 @@ calcular_traspasos (void)
   recibido = PQvaluebycol (res, 0, "recibidos");
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
-                        g_strdup_printf ((g_str_equal("",recibido)) ? " No hay productos recibidos" : "%s", PUT(recibido)));
+                        g_strdup_printf (g_str_equal ("",recibido) ? " No hay productos recibidos" : 
+					                             "<span size=\"12000\" weight=\"bold\"> %s </span>", PutPoints (recibido)));
 }
 
 /**
@@ -6449,7 +6451,8 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_filter_stores")));
 
       // Se calculan los traspasos y se muestran
-      calcular_traspasos();
+      //fill_traspaso (NULL);
+      //calcular_traspasos();
 
       // Se inicia mostrando el botón para imprimir el informe de los envios
       // y oculta el de los recibidos
