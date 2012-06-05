@@ -2586,7 +2586,7 @@ BEGIN
    -- Se obtienen los datos del proveedor a quien de le compro
    q := $S$ SELECT rut, dv, nombre
       	    FROM proveedor 
-   	    WHERE rut = (SELECT rut FROM compra WHERE id = $S$||id_compra||$S$)$S$;
+   	    WHERE rut = (SELECT rut_proveedor FROM compra WHERE id = $S$||id_compra||$S$)$S$;
    
    -- Se supone que siempre devolvera una fila...
    FOR l IN EXECUTE q LOOP
