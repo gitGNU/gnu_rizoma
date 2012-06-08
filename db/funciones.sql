@@ -599,6 +599,7 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT unidades_merma double precision,
 		OUT stock_day double precision,
                 OUT total_vendido double precision,
+		OUT estado boolean,
 		OUT tipo int4)
 RETURNS SETOF record AS $$
 declare
@@ -612,7 +613,7 @@ BEGIN
 
 query := $S$ SELECT *,
       	     	    (SELECT SUM ((cantidad * precio) - (iva + otros + (fifo * cantidad))) FROM venta_detalle WHERE barcode=producto.barcode) as contrib_agregada,
-		    (stock::float / select_ventas_dia(producto.barcode, TRUE)::float) AS stock_day,		    
+		    (stock::float / select_ventas_dia(producto.barcode, TRUE)::float) AS stock_day,
 		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    (SELECT SUM ((cantidad * precio) - (iva + otros)) FROM venta_detalle WHERE barcode=producto.barcode) AS total_vendido,
 		    select_merma (producto.barcode) AS unidades_merma, dias_stock,
@@ -663,6 +664,7 @@ FOR datos IN EXECUTE query LOOP
     precio_mayor := datos.precio_mayor;
     cantidad_mayor := datos.cantidad_mayor;
     ventas_dia := datos.ventas_dia;
+    estado := datos.estado;
     tipo := datos.tipo;
     RETURN NEXT;
 END LOOP;

@@ -1271,99 +1271,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkWindow" id="wnd_cant_traspaso">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">POS Rizoma: Cantidad Traspaso</property>
-    <property name="resizable">False</property>
-    <property name="modal">True</property>
-    <property name="window_position">center-always</property>
-    <property name="transient_for">wnd_compras</property>
-    <signal name="delete-event" handler="gtk_widget_hide" object="wnd_cant_traspaso" swapped="yes"/>
-    <child>
-      <object class="GtkVBox" id="vbox24">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkHBox" id="hbox31">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkLabel" id="label78">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Unids.</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="entry_buy_amount_trans">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="width_chars">5</property>
-                <signal name="activate" handler="gtk_widget_grab_focus" object="button_add_product_list_trans" swapped="yes"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkHBox" id="hbox32">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="spacing">5</property>
-                <child>
-                  <object class="GtkButton" id="button_add_product_list_trans">
-                    <property name="label">gtk-add</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="AddToProductsListTraspaso" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="lbl_info">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkWindow" id="wnd_comp_deriv">
     <property name="width_request">700</property>
     <property name="height_request">300</property>
@@ -1783,10 +1690,69 @@
                     <property name="can_focus">False</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkLabel" id="label19">
+                      <object class="GtkFrame" id="frame4_compra">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Código de Barras</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkHBox" id="hbox8_compra">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkLabel" id="label19">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Código de Barras</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="entry_buy_barcode">
+                                <property name="width_request">200</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="invisible_char">●</property>
+                                <property name="activates_default">True</property>
+                                <property name="invisible_char_set">True</property>
+                                <signal name="activate" handler="on_entry_buy_barcode_activate" swapped="no"/>
+                                <signal name="activate" handler="gtk_widget_grab_focus" object="entry_buy_price" after="yes" swapped="yes"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="btn_search_product">
+                                <property name="label">gtk-find</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="use_stock">True</property>
+                                <signal name="clicked" handler="on_entry_buy_barcode_activate" object="entry_buy_barcode" swapped="yes"/>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label_frame4_compra">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1795,20 +1761,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="entry_buy_barcode">
-                        <property name="width_request">200</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="is_focus">True</property>
-                        <property name="activates_default">True</property>
-                        <signal name="activate" handler="on_entry_buy_barcode_activate" swapped="no"/>
-                        <signal name="activate" handler="gtk_widget_grab_focus" object="entry_buy_price" after="yes" swapped="yes"/>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                     <child>
                       <object class="GtkHButtonBox" id="hbuttonbox2">
@@ -1857,72 +1810,61 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="hbox29">
+                      <object class="GtkFrame" id="frame4_buy_mode">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">in</property>
                         <child>
-                          <object class="GtkButton" id="btn_suggest_buy">
-                            <property name="label" translatable="yes">Compra sugerida</property>
+                          <object class="GtkHBox" id="hbox29_buy_mode">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
-                            <signal name="clicked" handler="on_btn_suggest_buy_clicked" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="btn_traspaso">
-                            <property name="can_focus">True</property>
-                            <property name="has_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="no_show_all">True</property>
-                            <property name="use_action_appearance">False</property>
-                            <signal name="clicked" handler="on_wnd_cant_traspaso" swapped="no"/>
+                            <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkHBox" id="hbox30">
+                              <object class="GtkRadioButton" id="rdbutton_buy_mode">
+                                <property name="label" translatable="yes">M_odo Compra</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <child>
-                                  <object class="GtkImage" id="image1">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="stock">gtk-add</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="label27">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">_Añadir a Traspaso</property>
-                                    <property name="use_underline">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="use_underline">True</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="gtk_widget_grab_focus" object="entry_buy_barcode" swapped="yes"/>
                               </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="rdbutton_transfer_mode">
+                                <property name="label" translatable="yes">Modo _Traspaso</property>
+                                <property name="visible">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
+                                <property name="use_underline">True</property>
+                                <property name="draw_indicator">True</property>
+                                <property name="group">rdbutton_buy_mode</property>
+                                <signal name="toggled" handler="gtk_widget_grab_focus" object="entry_buy_barcode" swapped="yes"/>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
                           </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
                         </child>
-                        <child>
-                          <placeholder/>
+                        <child type="label">
+                          <object class="GtkLabel" id="label1_buy_mode">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Modo de operacion&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
                         </child>
                       </object>
                       <packing>
@@ -2473,17 +2415,91 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow2">
+                  <object class="GtkHBox" id="hbox8_buy_list">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
+                    <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkTreeView" id="tree_view_products_buy_list">
+                      <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="rules_hint">True</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <child>
+                          <object class="GtkTreeView" id="tree_view_products_buy_list">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="rules_hint">True</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame4_buy_functions">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0.5</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkVBox" id="vbox5_buy_list">
+                            <property name="width_request">195</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="btn_suggest_buy">
+                                <property name="label" translatable="yes">Compra sugerida</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
+                                <signal name="clicked" handler="on_btn_suggest_buy_clicked" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="btn_nullify_buy_pi">
+                                <property name="label" translatable="yes">Editar Compra</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="use_action_appearance">False</property>
+                                <accelerator key="F5" signal="clicked"/>
+                                <signal name="clicked" handler="on_btn_nullify_buy_pi_clicked" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label1_buy_functions">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Funciones sobre compras&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -2535,20 +2551,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="btn_nullify_buy_pi">
-                            <property name="label" translatable="yes">Editar Compra</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
-                            <accelerator key="F5" signal="clicked"/>
-                            <signal name="clicked" handler="on_btn_nullify_buy_pi_clicked" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">2</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                       </object>
                       <packing>

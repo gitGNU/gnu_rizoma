@@ -1062,11 +1062,10 @@ compras_win (void)
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso")));
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "rdbutton_transfer_mode")), TRUE);
 
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), FALSE);
     }
 
   // check if the window must be set to fullscreen
@@ -1724,6 +1723,8 @@ compras_win (void)
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "cmbPrecioCompra")), FALSE);
+
   //Compras - Mercadería
   //gtk_widget_set_sensitive (GTK_ENTRY (gtk_builder_get_object (builder, "btn_infomerca_save")), FALSE);
   //Compras - Mercadería - Editar Producto
@@ -1790,6 +1791,7 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
   gchar *q;
   gchar *codigo;
   gchar *tipo, *derivada, *materia_prima, *corriente, *compuesta;
+  gboolean modo_traspaso;
 
   //ID, tipos de mercaderías
   corriente = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id"));
@@ -1797,9 +1799,11 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
   compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
+  modo_traspaso = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "rdbutton_transfer_mode")));
+
   codigo = barcode;
-  q = g_strdup_printf ("select barcode "
-		       "from codigo_corto_to_barcode('%s')",
+  q = g_strdup_printf ("SELECT barcode "
+		       "FROM codigo_corto_to_barcode('%s')",
 		       barcode);
   res = EjecutarSQL(q);
 
@@ -1907,18 +1911,22 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
       //Enable entry sensitive (all when is discret merchancy, some when is raw material)
       //TODO: Buscar la forma de simplificar los sensitive
       
-      if (g_str_equal (tipo, materia_prima))
+      if (g_str_equal (tipo, materia_prima) && modo_traspaso == FALSE)
 	{
-	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "0");
-	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), "0");
+	  //gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "0");
+	  //gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), "0");
 
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE); //OJO
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_price")), TRUE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), FALSE);
+	  
+	  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
+	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
 	}
-      else if (g_str_equal (tipo, corriente))
+      else if (g_str_equal (tipo, corriente) && modo_traspaso == FALSE)
 	{
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE); //OJO
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);
@@ -1927,8 +1935,12 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), FALSE);
+
+	  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
+	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
 	}
-      else if (g_str_equal (tipo, compuesta))
+      else if (g_str_equal (tipo, compuesta) && modo_traspaso == FALSE)
 	{
 	  //El costo el producto compuesto a partir de sus componentes
 	  //gdouble costo_total;
@@ -1942,13 +1954,24 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), TRUE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
 	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), FALSE);
 	}
+      else if (modo_traspaso == TRUE)
+	{
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), FALSE);
 
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_new_product")), FALSE); //OJO
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")), FALSE);	  
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_gain")), FALSE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_sell_price")), FALSE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "edit_product_button")), TRUE); //OJO
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
 
-      // Se habilita el botón de traspaso
-      if (rizoma_get_value_boolean ("TRASPASO"))
-	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount")), TRUE);
+
+	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
+	}      
 
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
     } // if (g_str_equal( GetDataByOne (q), "t"))
@@ -2263,11 +2286,17 @@ AddToProductsList (void)
   gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
   Producto *check;
 
+  gboolean modo_traspaso = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "rdbutton_transfer_mode")));
+
   /*Se obtiene el tipo de la mercadería seleccionada*/
-  gchar *q = g_strdup_printf ("SELECT estado, tipo FROM producto where barcode = '%s'", barcode);
+  PGresult *res = get_product_information (barcode, "", "estado, tipo, stock");
+  
   gchar *materia_prima = g_strdup (PQvaluebycol 
-				   (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
-  gchar *tipo = g_strdup (PQvaluebycol (EjecutarSQL(q), 0, "tipo"));
+				   (EjecutarSQL ("SELECT id FROM tipo_mercaderia "
+						 "WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+
+  gchar *tipo = g_strdup (PQvaluebycol (res, 0, "tipo"));
+  gdouble stock = strtod (PUT (g_strdup (PQvaluebycol (res, 0, "stock"))), (char **)NULL);
     
   /*Se regulariza el precio de compra de acuerdo a si es neto o bruto*/
 
@@ -2290,7 +2319,7 @@ AddToProductsList (void)
       if (iva != 0)
 	iva = (gdouble)iva/100;
       if (otros != 0)
-	otros = (gdouble)otros/100;      
+	otros = (gdouble)otros/100;
      
       total_imp = iva + otros + 1;      
       precio_compra = precio_compra / total_imp;
@@ -2309,7 +2338,21 @@ AddToProductsList (void)
 
   cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))))), (char **)NULL);
 
-  
+  // EN MODO TRASPASO
+  if (modo_traspaso == TRUE)
+    {
+      GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"));
+      if (get_treeview_length(treeview) == 0)
+	{
+	  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), TRUE);
+	  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
+	}
+
+      // Si uno de los productos el stock es menor a la cantidad puesta, se deshabilita la opcion enviar
+      if (cantidad > stock)
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
+    }
+
   if (precio_compra != 0 && (g_str_equal (tipo, materia_prima) == TRUE || // Si es materia prima no necesita precio de venta
 			     (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0))
       && strcmp (barcode, "") != 0) //&& margen >= 0)
@@ -2368,7 +2411,10 @@ AddToProductsList (void)
       CleanStatusProduct (0);
 
       //TODO: Se setea el sensitive cada vez que se agrega un producto a la lista, se debe evaluar
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
+      if (modo_traspaso == TRUE)
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_buy")), FALSE);
+      else
+	gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
     }
@@ -3091,6 +3137,9 @@ Comprar (GtkWidget *widget, gpointer data)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), TRUE);
   
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
+
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
 }
 
 
@@ -3738,22 +3787,6 @@ CleanStatusProduct (gint option)
 
   gtk_list_store_clear (store);
 
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-  //gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
-
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_buy")));
-
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
-  gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
-
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_product_desc")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mark")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_unit")), "");
@@ -3784,10 +3817,18 @@ CleanStatusProduct (gint option)
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_calculate")), FALSE);
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_add_product_list")), FALSE);
 
-  if (rizoma_get_value_boolean ("TRASPASO"))
-    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), FALSE);
+  GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_products_buy_list"));
+  if (get_treeview_length (treeview) == 0)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
+
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_recibir")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_enviar")), FALSE);
+    }
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
+  
 
   calcular = 0;
 }
@@ -8540,7 +8581,6 @@ on_btn_remove_buy_product_clicked (void)
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
                             g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
                                              PutPoints (g_strdup_printf ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
-      tipo_traspaso = 1;
     }
 
   select_back_deleted_row("tree_view_products_buy_list", position);
@@ -8549,6 +8589,12 @@ on_btn_remove_buy_product_clicked (void)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_suggest_buy")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
+
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), TRUE);
+
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_recibir")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_enviar")), FALSE);
       
       //Se libera la variable global
       if (rut_proveedor_global != NULL)
@@ -8558,193 +8604,6 @@ on_btn_remove_buy_product_clicked (void)
 	}
 
       on_button_clear_clicked (NULL, NULL);
-    }
-}
-
-
-/**
- * Es llamada cuando el boton "button_add_product_list_trans" es presionado (signal click).
- *
- * Esta funcion agrega el prudcto a la lista (list) de productos y lo agrega
- * al treeView
- *
- */
-void
-AddToProductsListTraspaso (void)
-{
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
-  gdouble cantidad;
-  gdouble precio_compra = strtod (PUT (PQgetvalue (get_product_information (barcode, "", "costo_promedio"), 0, 0)), (char **)NULL);
-  gint margen = 1;
-  gint precio = atoi (PQgetvalue (get_product_information (barcode, "", "precio"), 0, 0));
-  Producto *check;
-
-  if (g_str_equal (barcode, ""))
-    return;
-
-  GtkListStore *store_history, *store_buy;
-
-  store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
-
-  cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans"))))), (char **)NULL);
-
-
-  if (precio_compra != 0 && (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0)
-      && strcmp (barcode, "") != 0)
-    {
-
-      if (compra->header_compra != NULL)
-        check = SearchProductByBarcode (barcode, FALSE);
-      else
-        check = NULL;
-
-      if (check == NULL)
-        {
-          if (CompraAgregarALista (barcode, cantidad, precio, precio_compra, margen, FALSE))
-            {
-              AddToTree ();
-            }
-          else
-            {
-              return;
-            }
-        }
-      else
-        {
-          check->cantidad += cantidad;
-
-          gtk_list_store_set (store_buy, &check->iter,
-                              2, check->cantidad,
-                              4, PutPoints (g_strdup_printf ("%li", lround ((gdouble)check->cantidad * check->precio_compra))),
-                              -1);
-        }
-
-      if (strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock"))))), 
-		  (char**)NULL) == 0)
-        {
-          gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
-          tipo_traspaso = 0;
-        }
-
-      gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_info"))," ");
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
-                            g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                             PutPoints (g_strdup_printf
-                                                        ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
-      store_history = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
-      gtk_list_store_clear (store_history);
-
-      CleanStatusProduct (0);
-
-      //Se selecciona el primer producto de la lista
-      gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))),
-				      gtk_tree_path_new_from_string ("0"));
-
-      //Se devuelve el foco al entry_buy_barcode
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-    }
-  else
-    {
-      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")), "El Producto debe tener precio mayor a 0");
-    }
-
-  if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder, "entry_sell_price"))) == TRUE)
-    {
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
-      //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
-
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
-
-      gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso")));
-      
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
-    }
-}
-
-
-/**
- * Es llamada cuando el boton "btn_traspaso" es presionado (signal click).
- *
- * Esta funcion visualiza la ventana "wnd_cant_traspaso" y carga los
- * respectivos datos de esta, ademas desaparecer la opcion de comprar(entrys,labels,buttons)
- *
- */
-gboolean
-on_wnd_cant_traspaso (GtkWidget *widget, gpointer user_data)
-{
-  GtkWidget *window;
-
-  gint barcode =atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")))));
-
-  if (barcode != 0)
-    {
-      if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) == 0
-          && tipo_traspaso == 0)
-        {
-          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_info")),
-                                g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                                 "Solo podra recibir un traspaso"));
-        }
-
-      if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) > 0
-          && tipo_traspaso == 0)
-        {
-          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_info")),
-                                g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                                 "Solo podra recibir un traspaso"));
-        }
-
-      if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) == 0
-          && tipo_traspaso == 1)
-        {
-          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_info")),
-                              "Este producto tiene 0 Stock, solo se puede recibir un traspaso");
-        }
-
-      if (atoi(gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")))) > 0
-          && tipo_traspaso == 1)
-        {
-          gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_info")),
-                              " ");
-        }
-
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label28")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label29")));
-      //gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1111")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_calculate")));
-
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label126")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
-
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "button_buy")));
-
-
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount_trans")), "1");
-
-      window = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_cant_traspaso"));
-      gtk_widget_show_all (window);
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_amount_trans")));
-      return TRUE;
-    }
-  else
-    {
-      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "Ingrese un producto");
-      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
-      return FALSE;
     }
 }
 
@@ -8994,36 +8853,18 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
 
       PrintValeTraspaso (compra->header_compra, id_traspaso, TRUE, nombre_origen, nombre_destino);
 
-      gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
-
-      gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "traspaso_enviar_win")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "traspaso_enviar_win")));
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
 
       ClearAllCompraData ();
-
-      CleanStatusProduct (0);
 
       compra->header_compra = NULL;
       compra->products_compra = NULL;
 
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "");
 
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
-
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
-
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "rdbutton_buy_mode")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
     } // else => if (active == -1)
@@ -9080,38 +8921,19 @@ on_recibir_button_clicked (GtkButton *button, gpointer data)
 
       PrintValeTraspaso (compra->header_compra, id_traspaso, FALSE, nombre_origen, nombre_destino);
 
-      gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
-
+      //gtk_widget_hide (gtk_widget_get_toplevel (GTK_WIDGET (button)));
       gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "traspaso_recibir_win")));
 
       gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_buy_barcode")));
 
       ClearAllCompraData ();
 
-      CleanStatusProduct (0);
-
       compra->header_compra = NULL;
       compra->products_compra = NULL;
 
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")), "");
 
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_sell_price")));
-
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_price")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_gain")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label28")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label29")));
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1111")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "cmbPrecioCompra")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_calculate")));
-
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "label126")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "entry_buy_amount")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "button_add_product_list")));
-
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
-
-      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "rdbutton_buy_mode")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
     } // else => if (active == -1)
