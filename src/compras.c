@@ -1171,12 +1171,15 @@ compras_win (void)
 
   /* Buying Products TreeView */
 
-  store = gtk_list_store_new (5,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING,
-                              G_TYPE_DOUBLE,
-                              G_TYPE_STRING,
-                              G_TYPE_STRING);
+  store = gtk_list_store_new (8,
+			      G_TYPE_STRING,   // Barcode
+                              G_TYPE_STRING,   // Codigo
+                              G_TYPE_STRING,   // Marca, Descripcion, Contenido y Unidad
+                              G_TYPE_DOUBLE,   // Cantidad
+			      G_TYPE_INT,      // Precio Unitario
+                              G_TYPE_DOUBLE,   // Costo Unitario
+                              G_TYPE_INT,      // Total
+			      G_TYPE_BOOLEAN); // Transferible (traspaso envio)
 
   if (compra->header_compra != NULL)
     {
@@ -1193,8 +1196,8 @@ compras_win (void)
   gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Codigo Producto", renderer,
-                                                     "text", 0,
+  column = gtk_tree_view_column_new_with_attributes ("Codigo", renderer,
+                                                     "text", 1,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1203,7 +1206,7 @@ compras_win (void)
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Producto", renderer,
-                                                     "text", 1,
+                                                     "text", 2,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1211,32 +1214,43 @@ compras_win (void)
   gtk_tree_view_column_set_expand (column, TRUE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Cant. Sol.", renderer,
-                                                     "text", 2,
-                                                     NULL);
-  gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_resizable (column, FALSE);
-
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
-
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("P. Unitario", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Cantidad", renderer,
                                                      "text", 3,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
-  gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Precio Unit.", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Costo Unit.", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("SubTotal", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
   /* End Buying Products TreeView*/
 
@@ -2296,7 +2310,7 @@ AddToProductsList (void)
 						 "WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   gchar *tipo = g_strdup (PQvaluebycol (res, 0, "tipo"));
-  gdouble stock = strtod (PUT (g_strdup (PQvaluebycol (res, 0, "stock"))), (char **)NULL);
+  //gdouble stock = strtod (PUT (g_strdup (PQvaluebycol (res, 0, "stock"))), (char **)NULL);
     
   /*Se regulariza el precio de compra de acuerdo a si es neto o bruto*/
 
@@ -2347,10 +2361,6 @@ AddToProductsList (void)
 	  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_recibir")), TRUE);
 	  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
 	}
-
-      // Si uno de los productos el stock es menor a la cantidad puesta, se deshabilita la opcion enviar
-      if (cantidad > stock)
-	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
     }
 
   if (precio_compra != 0 && (g_str_equal (tipo, materia_prima) == TRUE || // Si es materia prima no necesita precio de venta
@@ -2396,9 +2406,12 @@ AddToProductsList (void)
           check->cantidad += cantidad;
 
           gtk_list_store_set (store_buy, &check->iter,
-                              2, check->cantidad,
-                              4, PutPoints (g_strdup_printf ("%li", lround ((gdouble)check->cantidad * check->precio_compra))),
+                              3, check->cantidad,
+                              6, lround ((gdouble)check->cantidad * check->precio_compra),
                               -1);
+
+	  if (check->stock < check->cantidad)
+	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
         }
 
       gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
@@ -2431,19 +2444,28 @@ AddToTree (void)
 {
   GtkTreeIter iter;
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
+  gboolean enviable;
+
+  enviable = (compra->current->stock < compra->current->cantidad) ? FALSE : TRUE;
 
   gtk_list_store_insert_after (store, &iter, NULL);
   gtk_list_store_set (store, &iter,
-                      0, compra->current->codigo,
-                      1, g_strdup_printf ("%s %s %d %s", compra->current->producto,
+		      0, compra->current->barcode,
+                      1, compra->current->codigo,
+                      2, g_strdup_printf ("%s %s %d %s", compra->current->producto,
                                           compra->current->marca, compra->current->contenido,
                                           compra->current->unidad),
-                      2, compra->current->cantidad,
-                      3, PutPoints (g_strdup_printf ("%.2f", compra->current->precio_compra)),
-                      4, PutPoints (g_strdup_printf ("%li", lround ((gdouble) compra->current->cantidad * compra->current->precio_compra))),
+                      3, compra->current->cantidad,
+		      4, compra->current->precio,
+                      5, compra->current->precio_compra,
+                      6, lround ((gdouble) compra->current->cantidad * compra->current->precio_compra),
+		      7, enviable,
                       -1);
 
   compra->current->iter = iter;
+
+  if (enviable == FALSE)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
 }
 
 
@@ -3828,7 +3850,6 @@ CleanStatusProduct (gint option)
     }
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
-  
 
   calcular = 0;
 }
@@ -8571,7 +8592,7 @@ on_btn_remove_buy_product_clicked (void)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-                          0, &short_code,
+                          1, &short_code,
                           -1);
 
       DropBuyProduct (short_code);
@@ -8605,6 +8626,16 @@ on_btn_remove_buy_product_clicked (void)
 
       on_button_clear_clicked (NULL, NULL);
     }
+  else
+    {
+      gboolean modo_traspaso;
+      modo_traspaso = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "rdbutton_transfer_mode")));
+      //Si todos los productos son enviables y traspaso enviar esta deshabilitado, éste se habilita
+      if (modo_traspaso == TRUE && 
+	  !compare_treeview_column (treeview, 7, G_TYPE_BOOLEAN, (void *)FALSE))
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
+    }
+  
 }
 
 

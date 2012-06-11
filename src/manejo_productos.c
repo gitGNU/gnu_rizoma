@@ -394,8 +394,8 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, "
-                       "unidad, perecibles, canje, stock_pro, tasa_canje, precio_mayor, costo_promedio, "
+  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, "
+                       "perecibles, canje, stock, stock_pro, tasa_canje, precio_mayor, costo_promedio, "
                        "cantidad_mayor, mayorista FROM select_producto (%s)",
                        barcode);
   res = EjecutarSQL (q);
@@ -426,6 +426,7 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   new->product->ingresar = TRUE;
   new->product->perecible = strcmp (PQvaluebycol (res, 0, "perecibles"), "t") ? FALSE : TRUE;
   new->product->canjeable = strcmp (PQvaluebycol (res, 0, "canje"), "t") ? FALSE : TRUE;
+  new->product->stock = strtod (PUT(PQvaluebycol (res, 0, "stock")), (char **) NULL);
   new->product->stock_pro = strtod (PUT(PQvaluebycol (res, 0, "stock_pro")), (char **) NULL);
   new->product->tasa_canje = strtod (PUT(PQvaluebycol (res, 0, "tasa_canje")), (char **) NULL);
   /* Datos Mayoristas */

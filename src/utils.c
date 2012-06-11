@@ -868,6 +868,7 @@ compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *d
 
   gint data_i;
   gdouble data_d;
+  gboolean data_g;
   gchar *data_t;
   void *data_get;
 
@@ -876,6 +877,7 @@ compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *d
 
   if (type == G_TYPE_INT) data_get = &data_i;
   else if (type == G_TYPE_DOUBLE) data_get = &data_d;
+  else if (type == G_TYPE_BOOLEAN) data_get = &data_g;
   else if (type == G_TYPE_STRING) data_get = &data_t;
   else return FALSE;
 
@@ -892,6 +894,10 @@ compare_treeview_column (GtkTreeView *treeview, gint column, GType type, void *d
 
       } else if (type == G_TYPE_DOUBLE) {
 	if ((gdouble *)data_get == (gdouble *)data_to_compare)
+	  return TRUE;
+
+      } else if (type == G_TYPE_BOOLEAN) {
+	if ((gboolean *)data_get == (gboolean *)data_to_compare)
 	  return TRUE;
 
       } else if (type == G_TYPE_STRING) {

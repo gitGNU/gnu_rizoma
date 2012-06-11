@@ -60,6 +60,7 @@ typedef struct _product
   gdouble precio_neto;
   gdouble precio_compra;
   gdouble cantidad;
+  gdouble stock;
   gchar *unidad;
   gint contenido;
   gchar *barcode;
