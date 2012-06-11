@@ -2687,9 +2687,9 @@ BEGIN
   INSERT INTO venta_detalle_completa
   SELECT vmcd.barcode_hijo AS barcode_l,
   	 SUM (vmcd.cantidad) AS amount_l,
-	 SUM (vmcd.cantidad * vmcd.precio) AS sold_amount_l, -- SubTotal
+	 SUM (vmcd.cantidad * vmcd.precio_proporcional) AS sold_amount_l, -- SubTotal
 	 SUM (vmcd.cantidad * vmcd.costo_promedio) AS costo_l,
-	 SUM ((vmcd.precio * vmcd.cantidad) - ((vmcd.iva+vmcd.otros) + (vmcd.costo_promedio * vmcd.cantidad))) AS contrib_l
+	 SUM ((vmcd.precio_proporcional * vmcd.cantidad) - ((vmcd.iva+vmcd.otros) + (vmcd.costo_promedio * vmcd.cantidad))) AS contrib_l
   FROM venta v
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id

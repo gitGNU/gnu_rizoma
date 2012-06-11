@@ -5284,7 +5284,7 @@ fill_products_rank (gint familia)
   GtkTreeIter iter;
   PGresult *res;
   gint i, tuples;
-  glong costo, vendido, contribucion,
+  gdouble costo, vendido, contribucion,
     costo_total, vendido_total, contribucion_total;
   gdouble margen;
 
@@ -5303,9 +5303,9 @@ fill_products_rank (gint familia)
   /*visualiza los productos en el tree_view*/
   for (i = 0; i < tuples; i++)
     {
-      vendido = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "sold_amount"))), (char **)NULL));
-      costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
-      contribucion = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contrib"))), (char **)NULL));
+      vendido = strtod (PUT (g_strdup (PQvaluebycol (res, i, "sold_amount"))), (char **)NULL);
+      costo = strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL);
+      contribucion = strtod (PUT (g_strdup (PQvaluebycol (res, i, "contrib"))), (char **)NULL);
       
       vendido_total += vendido;
       costo_total += costo;
@@ -5319,9 +5319,9 @@ fill_products_rank (gint familia)
                           3, atoi (PQvaluebycol (res, i, "contenido")),
                           4, PQvaluebycol (res, i, "unidad"),
                           5, strtod (PUT(PQvaluebycol (res, i, "amount")), (char **)NULL),
-                          6, vendido,
-                          7, costo,
-                          8, contribucion,
+                          6, lround (vendido),
+                          7, lround (costo),
+                          8, lround (contribucion),
                           9, (gdouble)(((gdouble)contribucion / (gdouble)costo) * 100),
                           -1);
     }
@@ -5337,17 +5337,17 @@ fill_products_rank (gint familia)
   /* visualiza las sumas de los productos en sus respectivos labels */
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_sold")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (g_strdup_printf ("%ld", vendido_total))));
+                                         PutPoints (g_strdup_printf ("%ld", lround (vendido_total) ))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_cost")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (g_strdup_printf ("%ld", costo_total))));
+                                         PutPoints (g_strdup_printf ("%ld", lround (costo_total) ))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_contrib")),
                         g_strdup_printf ("<span size=\"x-large\">$ %s</span>",
-                                         PutPoints (g_strdup_printf ("%ld", contribucion_total))));
+                                         PutPoints (g_strdup_printf ("%ld", lround (contribucion_total) ))));
 
-  margen = (contribucion_total == 0 || costo_total == 0) ? 0 : ((gdouble)contribucion_total/(gdouble)costo_total)*100;
+  margen = (contribucion_total == 0 || costo_total == 0) ? 0 : (contribucion_total/costo_total)*100;
   
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                         g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
