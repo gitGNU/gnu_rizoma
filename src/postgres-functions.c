@@ -4371,7 +4371,7 @@ get_componentes_compuesto (gchar *barcode)
   // barcode_madre = (Mercadería compuesta), barcode_comp_der = (Mercadería que compone a la madre)
   q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_comp_der AS barcode, cmc.tipo_comp_der AS tipo, "
 		       "       prd.codigo_corto AS codigo, prd.marca, prd.descripcion, prd.precio, "
-		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_comp_der)) AS costo_promedio"
+		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_comp_der)) AS costo_promedio "
 		       "FROM ( "
 		       "       SELECT barcode, codigo_corto, marca, descripcion, precio, estado "
 		       "       FROM producto "

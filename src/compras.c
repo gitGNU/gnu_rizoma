@@ -2433,8 +2433,11 @@ AddToProductsList (void)
     }
   else
     {
-      CalcularPrecioFinal ();
-      AddToProductsList ();
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), 
+		g_strdup_printf ("El producto debe tener costo y precio para ser agregado a la lista de %s", 
+				 (modo_traspaso) ? "traspasos":"compras"));
+      //CalcularPrecioFinal ();
+      //AddToProductsList (); esto produciría un loop infinito
     }
 } // void AddToProductsList (void)
 
