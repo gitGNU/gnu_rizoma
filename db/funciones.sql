@@ -4475,8 +4475,10 @@ create or replace function registrar_traspaso_detalle(
        in in_id_traspaso int,
        in in_barcode bigint,
        in in_cantidad double precision,
-       in in_precio double precision, 
-       in in_traspaso_envio boolean) -- si es TRUE es envío; FALSO recibe
+       in in_costo double precision,
+       in in_precio int4,
+       in in_traspaso_envio boolean, -- si es TRUE es envío; FALSO recibe
+       in in_modificar_costo boolean) -- si se le modifica el costo al producto
 returns void as $$
 declare
    aux int;
@@ -4501,6 +4503,16 @@ begin
 
 	SELECT tipo INTO tipo_l FROM producto WHERE barcode = in_barcode;
 
+	-- Se modifica el costo en caso de ser necesario
+	IF in_modificar_costo = TRUE AND (tipo_l = corriente_l OR tipo_l = materia_prima_l) THEN
+	   UPDATE producto 
+	   	  SET costo_promedio = in_costo,
+		      precio = in_precio
+           WHERE barcode = in_barcode
+	   AND (costo_promedio = 0 OR costo_promedio IS NULL);
+	END IF;
+
+
 	aux := (select count(*) from traspaso_detalle where id_traspaso = in_id_traspaso);
 
 	if aux = 0 then
@@ -4514,14 +4526,18 @@ begin
 				      id_traspaso,
 				      barcode,
 				      cantidad,
-				      precio,
-				      tipo)
+				      precio, --costo del producto
+				      precio_venta,
+				      tipo,
+				      costo_modificado)
 	       VALUES (num_linea,
 		       in_id_traspaso,
 		       in_barcode,
 		       in_cantidad,
+		       in_costo,
 		       in_precio,
-		       tipo_l);
+		       tipo_l,
+		       in_modificar_costo);
 
        	-- Si es una mercadería compuesta, se registrará todo su detalle en traspaso_mc_detalle
 	IF (tipo_l = compuesta_l) THEN -- NOTA:registrar_traspaso_compuesto actualiza el stock de sus componentes por si solo

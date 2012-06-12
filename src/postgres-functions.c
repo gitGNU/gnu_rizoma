@@ -3426,7 +3426,7 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean traspaso_e
   Productos *header = products;
   gchar *cantidad;
   gchar *q;
-  gdouble pre;
+  gdouble costo;
 
   do
     {
@@ -3434,11 +3434,25 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean traspaso_e
 
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      pre = strtod (PUT (PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
-
-      q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s, %s)",
-                           id_traspaso, products->product->barcode, cantidad,
-			   CUT (g_strdup_printf ("%.2f", pre)), (traspaso_envio)?"TRUE":"FALSE");
+      costo = strtod (PUT (PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
+      
+      if (costo == (gdouble)0)
+	{
+	  costo = products->product->precio_compra;
+	  EjecutarSQL (q);
+	  
+	  q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s, %d, %s, 't')",
+			       id_traspaso, products->product->barcode, cantidad,
+			       CUT (g_strdup_printf ("%.2f", costo)), products->product->precio,
+			       (traspaso_envio)?"TRUE":"FALSE");
+	}
+      else
+	{
+	  q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s, %d, %s, 'f')",
+			       id_traspaso, products->product->barcode, cantidad,
+			       CUT (g_strdup_printf ("%.2f", costo)), products->product->precio,
+			       (traspaso_envio)?"TRUE":"FALSE");
+	}
 
       res = EjecutarSQL (q);
       g_free (q);

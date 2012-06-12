@@ -46,7 +46,7 @@ void SearchByName ();
 
 void Comprar (GtkWidget *widget, gpointer data);
 
-void ShowProductHistory (void);
+void ShowProductHistory (gchar *barcode);
 
 void ClearAllCompraData (void);
 

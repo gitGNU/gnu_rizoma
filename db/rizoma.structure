@@ -714,7 +714,9 @@ create table traspaso_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8 not null, --precio costo
+  precio_venta		    int4,
   tipo			    int4,
+  costo_modificado	    boolean, -- Indica si se le dió un costo para poder realizar el traspaso
   constraint pk_traspaso_detalle primary key (id,id_traspaso)
 ) ;
 

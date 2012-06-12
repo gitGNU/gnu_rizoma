@@ -5322,7 +5322,7 @@ fill_products_rank (gint familia)
                           6, lround (vendido),
                           7, lround (costo),
                           8, lround (contribucion),
-                          9, (gdouble)(((gdouble)contribucion / (gdouble)costo) * 100),
+                          9, ((contribucion / costo) * 100),
                           -1);
     }
 

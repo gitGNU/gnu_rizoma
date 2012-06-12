@@ -1333,7 +1333,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   GtkWidget *widget;
   GtkComboBox *cmb_unit, *cmb_family, *combo_imp;
 
-  gchar *q, *unit, *materia_prima, *compuesta;
+  gchar *q, *unit, *materia_prima, *compuesta, *derivada;
   gchar *barcode;
   gint otros_index;
 
@@ -1342,6 +1342,7 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
   compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
+  derivada = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA'"), 0, "id"));
 
   if (GTK_IS_ENTRY (widget_barcode))
     {
@@ -1393,17 +1394,22 @@ ModificarProducto (GtkWidget *widget_barcode)
     gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "entry_edit_prod_price")), TRUE);
 
   /*Si es mercadería compuesta*/
-  if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), compuesta))
+  if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), compuesta) ||
+      g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), derivada))
     {
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_fraccionaria")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_perecible")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbbox_edit_prod_extratax")), FALSE);
+
+      if (g_str_equal (g_strdup (PQvaluebycol (res, 0, "tipo")), compuesta))
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_iva")), FALSE);
     }
   else
     {
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_fraccionaria")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_perecible")), TRUE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "cmbbox_edit_prod_extratax")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "checkbtn_edit_prod_iva")), TRUE);
     }
 
   /*Unidades*/
