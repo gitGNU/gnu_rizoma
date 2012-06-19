@@ -119,6 +119,13 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "RECIBO_MOV_CAJA", "0");
   g_key_file_set_string (file, "RIZOMA", "RECIBO_TRASPASO", "0");
   g_key_file_set_string (file, "RIZOMA", "RECIBO_COMPRA", "0");
+  g_key_file_set_string (file, "RIZOMA", "BARCODE_FRAGMENTADO", "0");
+  g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_PRODUCTO_A", "1");
+  g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_PRODUCTO_B", "1");
+  g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_CANTIDAD_A", "1");
+  g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_CANTIDAD_B", "1");
+  g_key_file_set_string (file, "RIZOMA", "BAR_NUM_DECIMAL", "1");
+  
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))
     {

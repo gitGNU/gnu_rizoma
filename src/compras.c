@@ -54,7 +54,6 @@ GtkBuilder *builder;
 
 GtkWidget *entry_plazo;
 
-gint tipo_traspaso = 1;
 gint tipo_producto = 0; //El tipo de producto que se ha seleccionado en compra
 gint calcular = 0;
 
@@ -4865,7 +4864,7 @@ create_new_merchandise (gchar *tipo)
 	gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
 
       /* - Sugerencia de barcode - */
-      barcode = sugerir_codigo (barcode, 7, 18);
+      barcode = sugerir_codigo (barcode, 6, 18);
 
       //Se setea el campo del barcode con esta sugerencia
       gtk_entry_set_text (GTK_ENTRY (barcode_w), g_strdup (barcode));
@@ -4879,7 +4878,7 @@ create_new_merchandise (gchar *tipo)
 	{
 	  if (!codigo_disponible (barcode))
 	    {
-	      barcode = sugerir_codigo (barcode, 7, 18);
+	      barcode = sugerir_codigo (barcode, 6, 18);
 	      gtk_entry_set_text (GTK_ENTRY (barcode_w), barcode);
 	    }
 	  else
@@ -5007,7 +5006,7 @@ create_new_compuesta (void)
 	gtk_entry_set_text (GTK_ENTRY (codigo_corto_w), cod_corto);
 
       /* - Sugerencia de barcode - */
-      barcode = sugerir_codigo (barcode, 7, 18);
+      barcode = sugerir_codigo (barcode, 6, 18);
 
       //Se setea el campo del barcode con esta sugerencia
       gtk_entry_set_text (GTK_ENTRY (barcode_w), g_strdup (barcode));
@@ -7598,8 +7597,8 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
   else if (strlen (barcode) > 18)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
-  else if (strlen (barcode) < 7)
-    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
+  else if (strlen (barcode) < 6)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 6 dígitos como mínimo");
   else if (strcmp (description, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe Ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
@@ -7610,7 +7609,7 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE codigo_corto like '%s'", codigo)))
         {
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
@@ -7621,12 +7620,12 @@ on_btn_add_new_product_clicked (GtkButton *button, gpointer data)
           return;
         }
 
-      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
-      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
           return;
@@ -7722,8 +7721,8 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
   else if (strlen (barcode) > 18)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
-  else if (strlen (barcode) < 7)
-    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
+  else if (strlen (barcode) < 6)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 6 dígitos como mínimo");
   else if (strcmp (description, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
@@ -7742,7 +7741,7 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE codigo_corto like '%s'", codigo)))
         {
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
@@ -7753,12 +7752,12 @@ on_btn_add_new_mp_clicked (GtkButton *button, gpointer data)
           return;
         }
 
-      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
-      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
           return;
@@ -7892,8 +7891,8 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
   else if (strlen (barcode) > 18)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
-  else if (strlen (barcode) < 7)
-    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
+  else if (strlen (barcode) < 6)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 6 dígitos como mínimo");
   else if (strcmp (description, "") == 0)
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
@@ -7912,7 +7911,7 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE codigo_corto like '%s'", codigo)))
         {
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
@@ -7923,12 +7922,12 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
           return;
         }
 
-      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
-      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
           return;
@@ -8257,8 +8256,8 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser un valor numérico");
   else if (strlen (barcode) > 18)
     ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe ser menor a 18 caracteres");
-  else if (strlen (barcode) < 7)
-    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 7 dígitos como mínimo");
+  else if (strlen (barcode) < 6)
+    ErrorMSG (GTK_WIDGET (entry_barcode), "Código de barras debe tener 6 dígitos como mínimo");
   else if (g_str_equal (description, ""))
     ErrorMSG (GTK_WIDGET (entry_desc), "Debe ingresar una Descripción");
   else if (strcmp (marca, "") == 0)
@@ -8269,7 +8268,7 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM informacion_producto_venta(NULL, '%s')", codigo)))
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE codigo_corto like '%s')", codigo)))
         {
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
@@ -8280,12 +8279,12 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
           return;
         }
 
-      if (DataExist (g_strdup_printf ("SELECT barcode FROM informacion_producto_venta(%s, '')", barcode)))
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con el mismo codigo de barras");
           return;
         }
-      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", codigo)))
+      else if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE codigo_corto = '%s'", barcode)))
         {
           ErrorMSG (GTK_WIDGET (entry_barcode), "Ya existe un producto con este barcode de codigo corto");
           return;

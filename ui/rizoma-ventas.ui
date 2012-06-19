@@ -4433,7 +4433,7 @@
                         <property name="can_default">True</property>
                         <property name="has_default">True</property>
                         <property name="invisible_char">●</property>
-                        <signal name="activate" handler="SearchBarcodeProduct" swapped="no"/>
+                        <signal name="activate" handler="parse_barcode" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>

@@ -1136,3 +1136,73 @@ fill_combo_familias (GtkComboBox *combo, gint id_seleccion)
     }
 }
 
+
+/**
+ * This function copy the range index of string into
+ * other string.
+ *
+ * @param: String to store result
+ * @param: String from copy text
+ * @param: Initial index (to copy) of the string
+ * @param: End index (to copy) of the string
+ */
+void
+strdup_string_range (gchar *result, gchar *string, gint inicio, gint final)
+{
+  //Validacion inicial
+  if (inicio>final || string == NULL || strlen(string)<final ||
+      inicio<0 || final<0)
+    return;
+
+  /*El largo total de la cadena más el '\0' del final*/
+  gchar range_string[(final-inicio+2)];
+  gint i, j; 
+
+  i=j=0;
+  while (string[i] != '\0') {
+    if (i>=inicio && i<=final)
+      range_string[j++]=string[i];
+    if (i==final)
+      range_string[j]='\0';
+    i++;
+  }
+
+  strcpy (result, range_string);
+}
+
+
+/**
+ * This function copy the range index of string into
+ * other string.
+ *
+ * @param: String to store result
+ * @param: String from copy text
+ * @param: Initial index (to copy) of the string
+ * @param: End index (to copy) of the string
+ * @param: Number of decimal point
+ */
+void
+strdup_string_range_with_decimal (gchar *result, gchar *string, gint inicio, gint final, gint decimal)
+{
+  //Validacion inicial
+  if (inicio>final || string == NULL || strlen(string)<final || decimal>=final ||
+      inicio<0 || final<1 || decimal<1)
+    return;
+
+  /*El largo total de la cadena más el decimal ',' y '\0' del final*/
+  gchar range_string[(final-inicio+3)];
+  gint i, j; 
+
+  i=j=0;
+  while (string[i] != '\0') {
+    if (i>=inicio && i<=final)
+      range_string[j++]=string[i];
+    if (j==decimal)
+      range_string[j++]=',';
+    if (i==final)
+      range_string[j]='\0';
+    i++;
+  }
+
+  strcpy (result, range_string);
+}

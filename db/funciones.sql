@@ -3723,32 +3723,41 @@ return (monto_apertura + arqueo + cash_payed_money + ingresos - egresos);
 end; $$ language plpgsql;
 
 
-CREATE OR REPLACE FUNCTION informacion_producto_venta( IN codigo_barras bigint,
-		IN in_codigo_corto varchar(16),
-		OUT codigo_corto varchar(16),
-                OUT barcode bigint,
-		OUT descripcion varchar(50),
-		OUT marca varchar(35),
-		OUT contenido varchar(10),
-		OUT unidad varchar(10),
-		OUT stock double precision,
-		OUT precio integer,
-		OUT precio_mayor integer,
-		OUT cantidad_mayor integer,
-		OUT mayorista boolean,
-		OUT stock_day double precision,
-		OUT estado boolean,
-		OUT tipo integer)
+CREATE OR REPLACE FUNCTION informacion_producto_venta(IN in_codigo varchar(16),
+						      OUT codigo_corto varchar(16),
+                				      OUT barcode bigint,
+						      OUT descripcion varchar(50),
+						      OUT marca varchar(35),
+						      OUT contenido varchar(10),
+						      OUT unidad varchar(10),
+						      OUT stock double precision,
+						      OUT precio integer,
+						      OUT precio_mayor integer,
+						      OUT cantidad_mayor integer,
+						      OUT mayorista boolean,
+						      OUT stock_day double precision,
+						      OUT estado boolean,
+						      OUT tipo integer)
 RETURNS SETOF record AS $$
 declare
 	days double precision;
 	datos record;
 	query varchar;
-	codbar int8;
+	codigo varchar;
 	corriente int4;
 	materia_prima int4;
+	codigo_only_numeric boolean;
 BEGIN
 
+SELECT TRIM (in_codigo) INTO codigo;
+
+-- Comprueba si es un valor numerico
+SELECT CASE
+	WHEN LENGTH(SUBSTRING(codigo FROM '[0-9]+')) != LENGTH(codigo) THEN FALSE
+	ELSE TRUE
+       END INTO codigo_only_numeric;
+
+-- Id tipos de producto
 corriente := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'CORRIENTE');
 materia_prima := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA');
 
@@ -3757,10 +3766,10 @@ query := $S$ SELECT *,
 		FROM producto WHERE $S$;
 
 -- check if must use the barcode or the short code
-IF codigo_barras != 0 THEN
-   query := query || $S$ barcode=$S$ || codigo_barras;
+IF codigo_only_numeric = TRUE THEN
+   query := query||$S$ barcode=$S$||codigo||$S$ OR codigo_corto LIKE $S$||quote_literal(codigo);
 ELSE
-   query := query || $S$ codigo_corto=$S$ || quote_literal(in_codigo_corto);
+   query := query||$S$ codigo_corto=$S$||quote_literal(codigo);
 END IF;
 
 FOR datos IN EXECUTE query LOOP

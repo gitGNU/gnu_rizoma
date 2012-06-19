@@ -26,8 +26,6 @@
 
 void ventas_box (MainBox *module_box);
 
-gboolean SearchProductByCode (void);
-
 gboolean AgregarProducto (GtkButton *button, gpointer data);
 
 void EliminarProducto (GtkButton *button, gpointer data);
@@ -56,7 +54,7 @@ void WindowClientSelection (GtkWidget *widget, gpointer data);
 
 void SeleccionarCliente (GtkWidget *nothing, gpointer data);
 
-gint SearchBarcodeProduct (GtkWidget *widget, gpointer data);
+gint SearchSellProduct (GtkEntry *entry, gpointer data);
 
 void BuscarProducto (GtkWidget *widget, gpointer data);
 

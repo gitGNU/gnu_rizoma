@@ -94,4 +94,8 @@ void fill_combo_unidad (GtkComboBox *combo, gchar *nombre_unidad);
 
 void fill_combo_familias (GtkComboBox *combo, gint id_seleccion);
 
+void strdup_string_range (gchar *result, gchar *string, gint inicio, gint final);
+
+void strdup_string_range_with_decimal (gchar *result, gchar *string, gint inicio, gint final, gint decimal);
+
 #endif

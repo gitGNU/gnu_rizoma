@@ -233,7 +233,7 @@ CanjearProductoWin (GtkWidget *widget, gpointer data)
   gtk_widget_show (canje_entry);
 
   g_signal_connect (G_OBJECT (canje_entry), "activate",
-                    G_CALLBACK (SearchBarcodeProduct), (gpointer)FALSE);
+                    G_CALLBACK (SearchSellProduct), (gpointer)FALSE);
 
   gtk_window_set_focus (GTK_WINDOW (window), canje_entry);
 
@@ -785,114 +785,6 @@ ventas_win ()
 }
 
 gboolean
-SearchProductByCode (void)
-{
-  gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
-  gchar *materia_prima;
-  gdouble stock = 0;
-  PGresult *res;
-  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
-
-  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
-
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM informacion_producto_venta (0, '%s')", codigo));
-  //gtk_label_set_text (GTK_LABEL (builder_get (builder, "codigo_corto")), PQvaluebycol (res, 0, "codigo_corto"));
-
-  if (res != NULL && PQntuples (res) != 0)
-    {
-      if (PQntuples(res) > 1)
-        g_printerr("%s: the plpgsql function informacion_producto_venta(0,'%s') returned more than 1 tuple",
-                   G_STRFUNC, codigo);
-
-
-      // Si el producto es "Materia Prima" no se puede comercializar
-      if (g_str_equal (PQvaluebycol (res, 0, "tipo"), materia_prima) == TRUE)
-	{
-	  GtkWidget *aux_widget;
-	  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-	  gchar *str = g_strdup_printf("El código %s corresponde a una materia prima, no es comercializable", codigo);
-	  CleanSellLabels();
-	  AlertMSG (aux_widget, str);
-	  g_free (str);
-      
-	  return FALSE;
-	}
-
-      stock = strtod (PUT (PQvaluebycol (res, 0, "stock")), (char **)NULL);
-
-      // TODO: Crear una busqueda de productos que tengan estado t para barcode y codigo corto (para todo el programa)
-      if (strcmp (PQvaluebycol (res, 0, "estado"),"f") == 0)
-	{
-	  GtkWidget *aux_widget;
-          aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-          gchar *str = g_strdup_printf("El código %s fué invalidado por el administrador", codigo);
-	  CleanSellLabels();
-          AlertMSG (aux_widget, str);
-          g_free (str);
-
-          return FALSE;
-	}
-      else if (stock <= 0)
-        {
-          GtkWidget *aux_widget;
-          aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
-          gchar *str = g_strdup_printf("Stock insuficiente, el producto %s tiene 0 stock", codigo);
-	  CleanSellLabels();
-          AlertMSG (aux_widget, str);
-          g_free (str);
-
-          return FALSE;
-        }
-
-      mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
-
-      FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
-                       PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),PQvaluebycol (res, 0, "stock"),
-                       PQvaluebycol (res, 0, "stock_day"), PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
-                       PQvaluebycol (res, 0, "cantidad_mayor"), PQvaluebycol (res, 0, "codigo_corto"));
-
-      if (PQvaluebycol (res, 0, "precio") != 0)
-        {
-          if (venta_directa == 1)
-	    {
-	      if (VentaFraccion (PQvaluebycol (res, 0, "barcode")))
-		{
-		  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-		  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE);
-		}
-	      else
-		{
-		  AgregarProducto( NULL, NULL );
-		}
-          }
-	  else
-	    {
-	      gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-	      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), TRUE );
-	    }
-        }
-      else
-        gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
-
-      return TRUE;
-    } // if (res != NULL && PQntuples (res) != 0)
-  else
-    {
-      if (strcmp (codigo, "") != 0)
-        {
-          AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), g_strdup_printf
-                    ("No existe un producto con el código %s!!", codigo));
-          CleanSellLabels ();
-        }
-      else
-        {
-          CleanSellLabels ();
-        }
-      return FALSE;
-    }
-}
-
-gboolean
 AgregarProducto (GtkButton *button, gpointer data)
 {
   gchar *codigo = g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))));
@@ -1047,7 +939,7 @@ AgregarProducto (GtkButton *button, gpointer data)
 
 
 /*
- * Es llamada por las funciones SearchBarcodeProduct y SearchProductByCode.
+ * Es llamada por las funciones SearchSellProduct
  *
  * Esta funcion limpia las etiquetas (label) de los datos del producto
  *
@@ -1067,7 +959,7 @@ CleanSellLabels (void)
 }
 
 /*
- * Es llamada por las funciones SearchBarcodeProduct y SearchProductByCode.
+ * Es llamada por las funciones SearchSellProduct
  *
  * Esta funcion limpia las etiquetas (label) de los datos del producto
  *
@@ -1378,7 +1270,7 @@ AddProduct (void)
       gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")),
                           g_strdup_printf ("%d", value));
 
-      SearchProductByCode ();
+      SearchSellProduct (NULL, NULL);
 
       //      CloseProductsWindow ();
     }
@@ -1455,20 +1347,74 @@ ModifieBarcode (gchar *barcode)
     return g_strdup (barcode);
 }
 
-gint
-SearchBarcodeProduct (GtkWidget *widget, gpointer data)
+
+void
+parse_barcode (GtkEntry *entry, gpointer data)
 {
-  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-  gchar *materia_prima;
+  gboolean barcode_fragmentado = rizoma_get_value_boolean ("BARCODE_FRAGMENTADO");
 
-  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
-
-  if (barcode == NULL)
+  if (barcode_fragmentado == FALSE)
     {
-      GtkWidget *widgetEntry;
-      widgetEntry = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
-      barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (widgetEntry)));
+      SearchSellProduct (entry, data);
+      return;
     }
+
+  // Especificaciones para fragmentar barcode
+  gint bar_rango_producto_a = rizoma_get_value_int ("BAR_RANGO_PRODUCTO_A")-1;
+  gint bar_rango_producto_b = rizoma_get_value_int ("BAR_RANGO_PRODUCTO_B")-1;
+  gint bar_rango_cantidad_a = rizoma_get_value_int ("BAR_RANGO_CANTIDAD_A")-1;
+  gint bar_rango_cantidad_b = rizoma_get_value_int ("BAR_RANGO_CANTIDAD_B")-1;
+  gint bar_num_decimal = rizoma_get_value_int ("BAR_NUM_DECIMAL");
+
+  gint largo_barcode = bar_rango_producto_b - bar_rango_producto_a + 1;
+  gint largo_cantidad = bar_rango_cantidad_b - bar_rango_cantidad_a + 1;
+
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry)));
+  gchar barcode_split[largo_barcode+1]; //+1 '\0'
+  gchar cantidad[largo_cantidad+2]; //+2 ',' y '\0'
+
+  if (g_str_equal (barcode, "") || HaveCharacters (barcode) ||
+      DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s", barcode)))
+    {
+      SearchSellProduct (entry, data);
+    }
+  else if (strlen(barcode) == 13)
+    {
+      //Divide el barcode
+      //barcode_split = invested_strndup (g_strndup (barcode, 7), 1);
+      strdup_string_range (barcode_split, barcode, bar_rango_producto_a, bar_rango_producto_b);
+      strdup_string_range_with_decimal (cantidad, barcode, bar_rango_cantidad_a, bar_rango_cantidad_b, bar_num_decimal);
+      
+      //Divide Cantidad
+      if (DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode = %s", barcode_split)))
+	{
+	  //Setea el widget del barcode
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "barcode_entry")), barcode_split);
+	  //Setea el widget cantidad
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "cantidad_entry")), cantidad);
+	  //Llama a SearchSellProduct
+	  SearchSellProduct (entry, data);
+	}
+      else
+	SearchSellProduct (entry, data);
+    }
+  else
+    SearchSellProduct (entry, data);
+}
+
+
+gint
+SearchSellProduct (GtkEntry *entry, gpointer data)
+{
+  gchar *barcode;
+  gchar *materia_prima;
+  
+  if (entry == NULL)
+    barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry"))));
+  else
+    barcode = g_strdup (gtk_entry_get_text (entry));
+  
+  materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
 
   PGresult *res;
   gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
@@ -1483,20 +1429,9 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
       return 0;
     }
 
-  if (strlen (barcode) <= 6)
-    {
-      //TODO: La información no debería entregarse a través de widgets
-      if (g_str_equal (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto"))), ""))
-	gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), barcode);
+  gtk_entry_set_text (entry, barcode);
 
-      SearchProductByCode ();
-
-      return 0;
-    }
-
-  gtk_entry_set_text (GTK_ENTRY (widget), barcode);
-
-  q = g_strdup_printf ("SELECT * FROM informacion_producto_venta (%s,'')", barcode);
+  q = g_strdup_printf ("SELECT * FROM informacion_producto_venta ('%s')", barcode);
   res = EjecutarSQL(q);
   g_free(q);
 
@@ -1509,7 +1444,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
     {
       if (strcmp (barcode, "") != 0) // Si se ingresó algún código, significa que no existe el producto
         {
-          AlertMSG (widget, g_strdup_printf
+          AlertMSG (GTK_WIDGET (entry), g_strdup_printf
                     ("No existe un producto con el código de barras %s!!", barcode));
 
           if (ventas != FALSE)
@@ -1517,7 +1452,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
         }
       else if (GetCurrentStock (barcode) == 0) //Nota: Creo que jamás entrará aquí
 	{
-	  AlertMSG (widget, "No hay mercadería en Stock.\nDebe ingresar mercadería");
+	  AlertMSG (GTK_WIDGET (entry), "No hay mercadería en Stock.\nDebe ingresar mercadería");
 	  
 	  if (ventas != FALSE)
 	    CleanSellLabels ();
@@ -1534,7 +1469,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
   if (g_str_equal (PQvaluebycol (res, 0, "tipo"), materia_prima) == TRUE)
     {
       GtkWidget *aux_widget;
-      aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "ventas_gui"));
+      aux_widget = GTK_WIDGET (builder_get (builder, "ventas_gui"));
       gchar *str = g_strdup_printf("El código %s corresponde a una materia prima, no es comercializable", barcode);
       CleanSellLabels();
       AlertMSG (aux_widget, str);
@@ -1573,7 +1508,7 @@ SearchBarcodeProduct (GtkWidget *widget, gpointer data)
 
   mayorista = strcmp (PQvaluebycol( res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
-  FillProductSell (barcode, mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
+  FillProductSell (PQvaluebycol (res, 0, "barcode"), mayorista,  PQvaluebycol (res, 0, "marca"), PQvaluebycol (res, 0, "descripcion"),
                    PQvaluebycol (res, 0, "contenido"), PQvaluebycol (res, 0, "unidad"),
                    PQvaluebycol (res, 0, "stock"), PQvaluebycol (res, 0, "stock_day"),
                    PQvaluebycol (res, 0, "precio"), PQvaluebycol (res, 0, "precio_mayor"),
@@ -1871,7 +1806,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
           gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), barcode);
 
-          SearchBarcodeProduct (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), (gpointer)TRUE);
+          SearchSellProduct (GTK_ENTRY (builder_get (builder, "barcode_entry")), (gpointer)TRUE);
         }
       CloseBuscarWindow (NULL, (gpointer)TRUE);
     }
