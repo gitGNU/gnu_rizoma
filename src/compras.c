@@ -3878,7 +3878,11 @@ CleanStatusProduct (gint option)
   if (get_treeview_length (treeview) == 0)
     {
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
+
+      //Se habilita el modo traspaso si se inició rizoma con modo traspaso activado
+      if (gtk_widget_get_visible (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_recibir"))) &&
+	  rizoma_get_value_boolean ("TRASPASO"))
+	gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
 
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_recibir")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_enviar")), FALSE);
