@@ -492,13 +492,13 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
     case CREDITO:
       break;
     case CASH:
-      abrirGaveta ();
+      //abrirGaveta ();
       break;
     case CHEQUE_RESTAURANT:
       abrirGaveta ();
       break;
     case MIXTO:
-      abrirGaveta ();
+      //abrirGaveta ();
       break;
     }
 
