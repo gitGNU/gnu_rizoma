@@ -3922,12 +3922,13 @@ nullify_sale_win (void)
   GtkListStore *store_details;
 
   // Comprueba que caja está habilitada
-  if (rizoma_get_value_boolean ("CAJA") == 0)
+  // Se deben poder hacer enulaciones de venatas sin caja habilitada
+  /*if (rizoma_get_value_boolean ("CAJA") == 0)
     {      
       widget = GTK_WIDGET(gtk_builder_get_object(builder, "barcode_entry"));
       AlertMSG (widget, "Debe habilitar caja para realizar anulaciones de venta");
       return;
-    }
+      }*/
 
   treeview_sales = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_nullify_sale"));
   store_sales = GTK_LIST_STORE(gtk_tree_view_get_model(treeview_sales));
@@ -4368,9 +4369,10 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 	monto = atoi (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT monto2 FROM pago_mixto WHERE id_sale=%d", sale_id)), 0, "monto2"));
     }
 
-  /*Se comprueba que el monto de la venta sea menor al dinero en caja*/
-  if ((tipo_venta == CASH || (tipo_venta == MIXTO && (tipo_pago1 == CASH || tipo_pago2 == CASH)))
-      && monto > ArqueoCaja()) //Entra aquí si la venta fué en efectivo y no hay dinero para devolver
+  /*Se comprueba que el monto de la venta sea menor al dinero en caja*/ //TODO: Si no hay suficiente dinero, que devuelva lo que tiene
+  if ( (tipo_venta == CASH || (tipo_venta == MIXTO && (tipo_pago1 == CASH || tipo_pago2 == CASH)))
+       && rizoma_get_value_boolean ("CAJA") == TRUE //Si la caja esta habilitada se preocupa de ver el monto en caja
+       && monto > ArqueoCaja()) //Entra aquí si la venta fué en efectivo y no hay dinero para devolver
     {
       ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "treeview_nullify_sale")), 
 		"No existe monto suficiente en caja para anular esta venta");

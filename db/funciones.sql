@@ -2766,9 +2766,9 @@ BEGIN
 			END AS barcode,
 	     	 	p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
 		        SUM (vmcd.cantidad) AS cantidad,
-			SUM (vmcd.cantidad*vmcd.precio) AS monto_vendido,
+			SUM (vmcd.precio) AS monto_vendido,
 			SUM (vmcd.cantidad*vmcd.costo_promedio) AS costo,
-       			SUM ((vmcd.precio*vmcd.cantidad)-((vmcd.iva+vmcd.otros)+(vmcd.costo_promedio*vmcd.cantidad))) AS contribucion
+       			SUM ((vmcd.precio)-((vmcd.iva+vmcd.otros)+(vmcd.costo_promedio*vmcd.cantidad))) AS contribucion
 		 FROM venta_mc_detalle vmcd
 		      INNER JOIN venta v
 		      	    ON v.id = vmcd.id_venta_vd
@@ -3804,7 +3804,8 @@ $$ LANGUAGE plpgsql;
 -- nullify sale
 create or replace function nullify_sale (
        in salesman_id int,
-       in sale_id int)
+       in sale_id int,
+       in con_egreso boolean)
 returns boolean as $$
 declare
 	----------------------
@@ -3854,7 +3855,10 @@ begin
 	         sale_amount = monto_pago2;
 	      END IF;
 	   END IF;
-	   perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
+	   
+	   IF con_egreso = TRUE THEN -- Solo si 'con_egreso' = true, se saca dinero de caja
+	      perform insert_egreso (sale_amount, id_tipo_egreso, salesman_id);
+	   END IF;
 	END IF;
 
         insert into venta_anulada(id_sale, vendedor)
@@ -5840,6 +5844,8 @@ DECLARE
     otros_percent double precision;
     -----------
     avg_cost double precision;
+    cantidad_traspaso double precision;
+    fecha_traspaso timestamp;
     new_stock double precision;
     -----------
     compuesta_l int4;
@@ -5907,27 +5913,50 @@ BEGIN
                     WHERE c.anulada_pi = FALSE
 			  AND fcd.barcode = $S$ || codigo_barras || $S$
                           AND fc.id >= $S$ || id_fcompra || $S$
-                    ORDER BY fc.fecha ASC $S$;
+                    ORDER BY fc.id, fc.fecha ASC $S$;
 
     FOR l IN EXECUTE q LOOP
         -- Se obtiene el costo promedio de la compra anterior
-        avg_cost = (SELECT costo_promedio
-	            FROM factura_compra_detalle fcde
-	            WHERE fcde.id_factura_compra = (SELECT MAX (fcd.id_factura_compra)
-						    FROM factura_compra_detalle fcd
-						    INNER JOIN factura_compra fc
-						    	  ON fc.id = fcd.id_factura_compra
-						    INNER JOIN compra c
-						    	  ON c.id = fc.id_compra
-                                                    WHERE fcd.id_factura_compra < l.id_fc
-						    	  AND c.anulada_pi = FALSE
-                                                    	  AND fcd.barcode = l.barcode)
-	            AND fcde.barcode = l.barcode);
+        avg_cost := (SELECT costo_promedio
+	             FROM factura_compra_detalle fcde
+	             WHERE fcde.id_factura_compra = (SELECT MAX (fcd.id_factura_compra)
+						     FROM factura_compra_detalle fcd
+						     INNER JOIN factura_compra fc
+						    	   ON fc.id = fcd.id_factura_compra
+						     INNER JOIN compra c
+						    	   ON c.id = fc.id_compra
+                                                     WHERE fcd.id_factura_compra < l.id_fc
+						    	   AND c.anulada_pi = FALSE
+                                                    	   AND fcd.barcode = l.barcode)
+	             AND fcde.barcode = l.barcode);
 
-	avg_cost = COALESCE (avg_cost,0);
-        avg_cost_anterior_r = avg_cost;
-        avg_cost = ((avg_cost*l.stock) + (l.precio*l.cantidad)) / (l.cantidad+l.stock);
-        avg_cost = ROUND (avg_cost::NUMERIC, 3);
+	avg_cost := COALESCE (avg_cost,0);
+
+	-- Si no hay una compra anterior, se busca un traspaso que le haya dado un costo 
+	-- (traspaso de un producto sin compra previa)
+	IF avg_cost = 0 THEN
+	   SELECT INTO avg_cost, cantidad_traspaso, fecha_traspaso
+		       td.precio, td.cantidad, td.fecha
+	   FROM 
+	    (
+	      SELECT td.precio, td.cantidad, t.fecha
+	      FROM traspaso_detalle td
+	      INNER JOIN traspaso t
+	      	    ON t.id = td.id_traspaso
+	      WHERE costo_modificado = TRUE
+	      	    AND barcode = l.barcode
+	    ) td;
+	   
+	   avg_cost := COALESCE (avg_cost,0);
+	   avg_cost_anterior_r = avg_cost;
+	   avg_cost = ((avg_cost_anterior_r*cantidad_traspaso) + (l.precio*l.cantidad)) / (l.cantidad+l.stock);
+           avg_cost = ROUND (avg_cost::NUMERIC, 3);
+	ELSE
+	  avg_cost := COALESCE (avg_cost,0);
+	  avg_cost_anterior_r = avg_cost;
+          avg_cost = ((avg_cost_anterior_r*l.stock) + (l.precio*l.cantidad)) / (l.cantidad+l.stock);
+          avg_cost = ROUND (avg_cost::NUMERIC, 3);
+	END IF;
 	
 	iva_local = (l.precio * l.cantidad) * iva_percent;
 	otros_local = (l.precio * l.cantidad) * otros_percent;

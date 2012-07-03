@@ -3247,15 +3247,22 @@ nullify_sale (gint sale_id)
 {
   PGresult *res;
   gchar *q;
+  gboolean con_egreso;
 
   /*De estar habilitada caja, se asegura que ésta se encuentre
     abierta al momento de vender*/
 
   if (rizoma_get_value_boolean ("CAJA"))
-    if (check_caja()) // Se abre la caja en caso de que esté cerrada
-      open_caja (TRUE);
+    {
+      if (check_caja()) // Se abre la caja en caso de que esté cerrada
+	open_caja (TRUE);
+      con_egreso = TRUE;
+    }
+  else
+    con_egreso = FALSE;
 
-  q = g_strdup_printf("select * from nullify_sale(%d, %d)", user_data->user_id, sale_id);
+  q = g_strdup_printf("select * from nullify_sale(%d, %d, %s)", 
+		      user_data->user_id, sale_id, con_egreso ? "true" : "false");
 
   res = EjecutarSQL(q);
   g_free (q);
