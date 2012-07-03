@@ -5220,10 +5220,10 @@ BEGIN
 	       -- Se guardan los valores de la mercadería madre que corresponden
 	       INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
 				       	     precio_proporcional, precio, costo_promedio, ganancia, iva, otros, iva_residual, otros_residual,
-				       	     tipo_madre, tipo_hijo)
+				       	     tipo_madre, tipo_hijo, proporcion_iva, proporcion_otros)
 	       VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, l.id_mh, l.barcode_madre, l.barcode_comp_der, l.cant_mud * cantidad_in,
 	    	       precio_proporcional_l, l.precio_hijo, l.costo_hijo, ganancia_madre, iva_madre, otros_madre, iva_residual_madre, otros_residual_madre,
-		       l.tipo_madre, l.tipo_comp_der);
+		       l.tipo_madre, l.tipo_comp_der, proporcion_iva_in, proporcion_otros_in);
 
 	    ELSE --Si no es mercadería compuesta
 	       -- PRECIO PROPORCIONAL (costo_hijo/costo_madre) * precio_proporcional_madre
@@ -5240,10 +5240,10 @@ BEGIN
 
 	       INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
 				       	     precio_proporcional, precio, costo_promedio, ganancia, iva, otros, iva_residual, otros_residual,
-				       	     tipo_madre, tipo_hijo)
+				       	     tipo_madre, tipo_hijo, proporcion_iva, proporcion_otros)
 	       VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, l.id_mh, l.barcode_madre, l.barcode_comp_der, l.cant_mud * cantidad_in, 
 	    	       precio_proporcional_l, l.precio_hijo, l.costo_hijo, ganancia_out, iva_out, otros_out, iva_residual_out, otros_residual_out,
-		       l.tipo_madre, l.tipo_comp_der);
+		       l.tipo_madre, l.tipo_comp_der, proporcion_iva_in, proporcion_otros_in);
 
 	       --Se actualiza el stock del producto
 	       IF (l.tipo_comp_der = derivada_l) THEN
@@ -5265,11 +5265,12 @@ BEGIN
 		  -- Se registra la información de la materia prima correspondiente a este derivado
 		  INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo,
 		  	      		        cantidad, precio_proporcional, precio, costo_promedio, ganancia, 
-						iva, otros, iva_residual, otros_residual, tipo_madre, tipo_hijo)
+						iva, otros, iva_residual, otros_residual, tipo_madre, tipo_hijo, 
+						proporcion_iva, proporcion_otros)
 	          VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')],
 		  	  l.barcode_comp_der, barcode_mp, l.cant_mud * cantidad_in * cantidad_mp, precio_proporcional_l, 
 			  l.precio_hijo, costo_mp, ganancia_out, iva_out, otros_out, iva_residual_out, otros_residual_out, 
-			  l.tipo_comp_der, materia_prima_l);
+			  l.tipo_comp_der, materia_prima_l, proporcion_iva_in, proporcion_otros_in);
 
 	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=barcode_mp;
 	       ELSIF (l.tipo_comp_der = corriente_l) THEN
@@ -5681,6 +5682,9 @@ BEGIN
 	cantidad_out := l.cantidad;
       END IF;
 
+      --RAISE NOTICE 'id: % gan: %, pp: %, iva: %, otros: %, iva_r: %, otros_r: %', l.id, ganancia_out, precio_out, iva_out, otros_out,
+      --	    	   	    	   	   	     	       		      	  iva_residual_out, otros_residual_out;
+
       -- Se actualiza la ganancia, precio prop, iva, otros
       UPDATE venta_mc_detalle
        	     SET ganancia = ganancia_out,
@@ -5845,7 +5849,6 @@ DECLARE
     -----------
     avg_cost double precision;
     cantidad_traspaso double precision;
-    fecha_traspaso timestamp;
     new_stock double precision;
     -----------
     compuesta_l int4;
@@ -5935,8 +5938,8 @@ BEGIN
 	-- Si no hay una compra anterior, se busca un traspaso que le haya dado un costo 
 	-- (traspaso de un producto sin compra previa)
 	IF avg_cost = 0 THEN
-	   SELECT INTO avg_cost, cantidad_traspaso, fecha_traspaso
-		       td.precio, td.cantidad, td.fecha
+	   SELECT INTO avg_cost, cantidad_traspaso
+		       td.precio, td.cantidad
 	   FROM 
 	    (
 	      SELECT td.precio, td.cantidad, t.fecha
@@ -5948,6 +5951,7 @@ BEGIN
 	    ) td;
 	   
 	   avg_cost := COALESCE (avg_cost,0);
+	   cantidad_traspaso := COALESCE (cantidad_traspaso,0);
 	   avg_cost_anterior_r = avg_cost;
 	   avg_cost = ((avg_cost_anterior_r*cantidad_traspaso) + (l.precio*l.cantidad)) / (l.cantidad+l.stock);
            avg_cost = ROUND (avg_cost::NUMERIC, 3);

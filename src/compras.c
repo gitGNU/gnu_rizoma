@@ -5687,6 +5687,23 @@ on_color_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gc
 
 }
 
+
+/**
+ * Callback from 'btn_edit_transfers' (clicked-signal)
+ *
+ * Make and show the 'wnd_edit_transfers' window.
+ *
+ * @param: GtkButton *button (the button from trigger signal)
+ * @param: gpointer data (optional data)
+ */
+void
+on_btn_edit_transfers_clicked (GtkButton *button, gpointer data)
+{
+
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_edit_transfers")));
+}
+
+
 /**
  * Es llamada por la función "on_button_new_product_clicked"
  * cuando ROPA=1 en el .rizoma.
