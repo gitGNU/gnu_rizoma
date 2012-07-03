@@ -39,7 +39,9 @@
 int
 LaunchApp (const gchar *file)
 {
-  system (g_strdup_printf ("LANG=es_CL.UTF-8 gnumeric \"%s\" &", file));
+  gchar *spreadsheet_app;
+  spreadsheet_app = rizoma_get_value ("SPREADSHEET_APP");
+  system (g_strdup_printf ("LANG=es_CL.UTF-8 %s \"%s\" &", spreadsheet_app, file));
   return 0;
 }
 
