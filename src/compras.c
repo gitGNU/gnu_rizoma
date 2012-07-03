@@ -3164,14 +3164,6 @@ Comprar (GtkWidget *widget, gpointer data)
       g_free (rut_proveedor_global);
       rut_proveedor_global = NULL;
     }
-
-  //Se vuelve a habilitar el boton de compra sugerida
-  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), TRUE);
-  
-  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
-
-  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), TRUE);
-  gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
 }
 
 
@@ -3886,6 +3878,10 @@ CleanStatusProduct (gint option)
 
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_recibir")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_enviar")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
+
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_suggest_buy")), TRUE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_nullify_buy_pi")), TRUE);
     }
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_buy_barcode")));
@@ -8642,15 +8638,6 @@ on_btn_remove_buy_product_clicked (void)
 
   if (get_treeview_length(treeview) == 0)
     {
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_suggest_buy")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), FALSE);
-
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_transfer_mode")), TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "rdbutton_buy_mode")), TRUE);
-
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_recibir")), FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "btn_traspaso_enviar")), FALSE);
-      
       //Se libera la variable global
       if (rut_proveedor_global != NULL)
 	{
@@ -8669,7 +8656,6 @@ on_btn_remove_buy_product_clicked (void)
 	  !compare_treeview_column (treeview, 7, G_TYPE_BOOLEAN, (void *)FALSE))
 	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
     }
-  
 }
 
 
