@@ -392,17 +392,18 @@ IngresoProducto;
 IngresoProducto *ingreso;
 
 /*Para almacenar los cambios de una factura
-  o compra ya ingresada*/
+  o traspaso ya ingresados*/
 typedef struct _prod
 {
   gchar *barcode;
   gchar *descripcion;
 
-  /*Datos de la compra a la que pertenece*/
+  /*Datos de la compra o traspaso al que pertenece*/
   //gint id_compra;
   gchar *fecha_compra;
   gint id_factura_compra;
   //gint id_factura_detalle;
+  gint id_traspaso;
 
   /*Costos y cantidades se inicializan en 0*/
   gdouble costo_original;

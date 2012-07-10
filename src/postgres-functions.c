@@ -4070,20 +4070,26 @@ get_last_buy_price_to_invoice (gchar *barcode, gint last_invoice_id)
 }
 
 /**
- * Indica si es modificable la cantidad
- *
+ * Indica si la cantidad del producto de la factura que se pretende 
+ * modificar es editable, de lo contrario retorna la cantidad minima para
+ * que sea modificable (como número negativo).
+ * 
+ * @param: gchar *barcode = Codigo de barras del producto a revisar
+ * @param: gdouble cantidad_nueva = La nueva cantidad que se desea setear
+ * @param: gint id_factura_compra = El id de la factura compra cuyo detalle se desea modificar
  *
  * @return: gdouble: 1 si es posible, (-N) si no lo es. (N <= 0)
  * (-N indica la cantidad minima necesaria para que sea modificable)
  */
 gdouble
-cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura_compra)
+cantidad_compra_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura_compra)
 {
   gint tuplas, i;
-  gdouble cantidad_original, cantidad_pre_compra, cantidad_min, resto;
+  gdouble cantidad_original, cantidad_pre_ingreso, cantidad_min, resto;
   gchar *query;
   PGresult *res;
-    
+
+  /*Si se esta verificando una compra a modificar*/
   query = g_strdup_printf ("SELECT cantidad "
 			   "FROM factura_compra_detalle fcd "
 			   "WHERE id_factura_compra = %d "
@@ -4091,8 +4097,11 @@ cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura
   
   res = EjecutarSQL (query);
   g_free (query);
-  cantidad_original = strtod (PUT (PQvaluebycol (res, 0, "cantidad")), (char **)NULL);
-  
+
+  if (PQntuples (res) > 0)
+    cantidad_original = strtod (PUT (PQvaluebycol (res, 0, "cantidad")), (char **)NULL);
+  else /*Si no existe en la factura, quiere decir que es un producto que se esta agregando a ella*/
+    return 1;
 
   /* Si se busca disminuir la cantidad comprada
      se debe comprobar que la cantidad logre justificar las transacciones futuras */
@@ -4105,10 +4114,10 @@ cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura
       resto = cantidad_original - cantidad_nueva;
 
       /*Se obtiene la informacion de las compras posteriores a esta*/
-      query = g_strdup_printf ("SELECT cantidad_pre_compra AS cantidad "
-			       "FROM product_on_buy_invoice (%s) "
+      query = g_strdup_printf ("SELECT cantidad_pre_ingreso AS cantidad "
+			       "FROM product_on_ingress (%s) "
 			       "WHERE id_fc_out > %d "
-			       "OR id_fc_out = 0", barcode, id_factura_compra);
+			       "OR (id_fc_out = 0 AND id_t_out = 0)", barcode, id_factura_compra);
 
       //Cantidad - (cantidad restada) debe ser >= a 0 en todas las compras siguientes
       res = EjecutarSQL (query);
@@ -4118,15 +4127,15 @@ cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura
       //Recorre todas las compras revisando el stock del producto entes de realizada cada una de ellas
       for (i = 0; i < tuplas; i++)
 	{
-	  cantidad_pre_compra = strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL);
+	  cantidad_pre_ingreso = strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL);
 
 	  /*Nota: cantidad_min es el máximo de unidades que se puede disminuir la compra
 	          del producto especificado
 	  */
 
 	  //Se obtiene el minimo de las cantidades
-	  if (i == 0 || cantidad_min > cantidad_pre_compra)
-	    cantidad_min = cantidad_pre_compra;
+	  if (i == 0 || cantidad_min > cantidad_pre_ingreso)
+	    cantidad_min = cantidad_pre_ingreso;
 	}
       
       // Si por X motivo cantidad_min es negativo, se retorna 0
@@ -4152,6 +4161,92 @@ cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura
   else // if (cantidad_original <= 0)
     return 0;    
 }
+
+/**
+ * Indica si la cantidad del producto del traspaso que se pretende 
+ * modificar es editable.
+ * 
+ * @param: gchar *barcode = Codigo de barras del producto a revisar
+ * @param: gdouble cantidad_nueva = La nueva cantidad que se desea setear
+ * @param: gint id_factura_compra = El id de la factura compra cuyo detalle se desea modificar
+ *
+ * @return: gdouble: 1 si es posible, (-N) si no lo es. (N <= 0)
+ * (-N indica la cantidad minima necesaria para que sea modificable)
+ */
+gdouble
+cantidad_traspaso_es_modificable (gchar *barcode, gdouble cantidad_original, 
+				  gdouble cantidad_nueva, gint id_traspaso, int origen)
+{
+  gint tuplas, i;
+  gdouble cantidad_a_disminuir, cantidad_pre_ingreso, 
+          cantidad_min;
+  gchar *query, *fecha;
+  PGresult *res;
+
+  /*SI se recibió más cantidad o se envió menos cantidad es modificable*/
+  if ( (origen != 1 && cantidad_nueva > cantidad_original) ||
+       (origen == 1 && cantidad_nueva < cantidad_original)  )
+    return 1;
+
+  /*cantidad a disminuir*/
+
+  /*Si es una recepcion*/
+  if (origen != 1)
+    cantidad_a_disminuir = cantidad_original - cantidad_nueva;
+  else /*si es un envio*/
+    cantidad_a_disminuir = cantidad_nueva - cantidad_original;
+
+  /*Si se esta verificando una compra a modificar*/
+  query = g_strdup_printf ("SELECT fecha "
+			   "FROM traspaso "
+			   "WHERE id = %d ", id_traspaso);
+
+  res = EjecutarSQL (query);
+  g_free (query);
+
+  if (PQntuples (res) > 0)
+    fecha = g_strdup (PQvaluebycol (res, 0, "fecha"));
+  else
+    return 0;
+
+  /*Se obtiene la informacion de las compras posteriores a esta*/
+  query = g_strdup_printf ("SELECT cantidad_pre_ingreso AS cantidad "
+			   "FROM product_on_ingress (%s) "
+			   "WHERE id_fc_out > %d "
+			   "OR (id_fc_out = 0 AND id_t_out = 0)", barcode, id_traspaso);
+
+  //Cantidad - (cantidad restada) debe ser >= a 0 en todas las compras siguientes
+  res = EjecutarSQL (query);
+  g_free (query);
+  tuplas = PQntuples (res);
+  
+  //Recorre todas las compras revisando el stock del producto entes de realizada cada una de ellas
+  for (i = 0; i < tuplas; i++)
+    {
+      cantidad_pre_ingreso = strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL);
+
+      /*Nota: cantidad_min es el máximo de unidades que se puede disminuir la compra
+	del producto especificado
+      */
+
+      //Se obtiene el minimo de las cantidades
+      if (i == 0 || cantidad_min > cantidad_pre_ingreso)
+	cantidad_min = cantidad_pre_ingreso;
+    }
+      
+  // Si por X motivo cantidad_min es negativo, se retorna 0
+  if (cantidad_min <= 0)
+    return 0;
+
+  /* Si la cantidad a disminuir (resto) es mayor al stock minimo anterior a 
+     una compra, se retorna el valor minimo (como un valor negativo) */      
+  else if (cantidad_min < cantidad_a_disminuir)
+    return ((cantidad_original - cantidad_min) * -1);
+
+  else //Se retorna 1 si es modificable
+    return 1;
+}
+
 
 /**
  *
@@ -4352,6 +4447,93 @@ mod_to_del_on_buy (Prod *producto)
 
   return TRUE;
 }
+
+
+/**
+ *
+ * 
+ *
+ *
+ */
+gboolean
+mod_to_mod_on_transfer (Prod *producto)
+{
+  gchar *q;
+  PGresult *res;
+  gboolean entro;
+  gint id_factura_compra;
+  
+  if (producto->accion != MOD)
+    return FALSE;
+
+  /*Se actualiza la cantidad en la tabla factura_compra_detalle*/
+  if ((producto->cantidad_original != producto->cantidad_nueva) &&
+      (producto->cantidad_original > 0 && producto->cantidad_nueva > 0))
+    {
+      q = g_strdup_printf ("UPDATE traspaso_detalle "
+			   "SET cantidad = %s "
+			   "WHERE id_traspaso = %d "
+			   "AND barcode = %s",
+			   CUT (g_strdup_printf ("%.3f", producto->cantidad_nueva)),
+			   producto->id_factura_compra,
+			   producto->barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      if (res == NULL)
+	return FALSE;
+      entro = TRUE;
+    }
+
+  /*Se actualiza costo en la tabla factura_compra_detalle*/
+  if ((producto->costo_original != producto->costo_nuevo) &&
+      (producto->costo_original > 0 && producto->costo_nuevo > 0))
+    {
+      q = g_strdup_printf ("UPDATE traspaso_detalle "
+			   "SET precio = %s "
+			   "WHERE id_traspaso = %d "
+			   "AND barcode = %s",
+			   CUT (g_strdup_printf ("%.3f", producto->costo_nuevo)),
+			   producto->id_factura_compra,
+			   producto->barcode);
+      res = EjecutarSQL (q);
+      g_free (q);
+      
+      if (res == NULL)
+	return FALSE;
+      entro = TRUE;
+    }
+
+  /*Se actualizan los promedios en las tablas correspondientes*/
+  if (entro == TRUE)
+    {
+      q = g_strdup_printf ("SELECT COALESCE (MAX (fc.id ), 0) AS id "
+			   "FROM factura_compra fc "
+			   "INNER JOIN factura_compra_detalle fcd "
+			   "      ON fc.id = fcd.id_factura_compra "
+			   "WHERE fecha < (SELECT fecha "
+			   "	           FROM traspaso "
+			   "	           WHERE id = %d) "
+			   "AND fcd.barcode = %s", producto->id_traspaso, producto->barcode);
+      res = EjecutarSQL (q);
+      if (PQntuples (res) == 1)
+	id_factura_compra = atoi (PQvaluebycol (res, 0, "id"));
+      else
+	id_factura_compra = 0;
+
+      q = g_strdup_printf ("SELECT * FROM update_avg_cost (%s, %d)",
+			   producto->barcode,
+			   id_factura_compra);
+      res = EjecutarSQL (q);
+      g_free (q);
+
+      if (res == NULL)
+	return FALSE;
+    }
+  
+  return TRUE;
+}
+
 
 
 /**

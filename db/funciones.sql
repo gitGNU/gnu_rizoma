@@ -6121,13 +6121,15 @@ END; $$ LANGUAGE plpgsql;
 --
 -- Información de las compras en las que ha estado el producto especificado
 --
-CREATE OR REPLACE FUNCTION product_on_buy_invoice (IN barcode_in bigint,
-       	  	  	   			   OUT id_fc_out integer,
-					    	   OUT id_fcd_out integer,
-					    	   OUT fecha_out timestamp,
-						   OUT barcode_out bigint,
-					    	   OUT cantidad_pre_compra double precision,
-					    	   OUT cantidad_ingresada double precision)
+CREATE OR REPLACE FUNCTION product_on_ingress (IN barcode_in bigint,
+       	  	  	   		       OUT id_fc_out integer,
+					       OUT id_fcd_out integer,
+					       OUT id_t_out integer,
+					       OUT id_td_out integer,
+					       OUT fecha_out timestamp,
+					       OUT barcode_out bigint,
+					       OUT cantidad_pre_ingreso double precision,
+					       OUT cantidad_ingresada double precision)
 RETURNS SETOF RECORD AS $$
 
 DECLARE
@@ -6135,21 +6137,36 @@ DECLARE
     l record;
 
 BEGIN
-    q := $S$ SELECT fc.id AS id_fc, fcd.id AS id_fcd, fecha, barcode, cantidad,
-      	     (SELECT cantidad_fecha
-	             FROM producto_en_fecha (fecha, fcd.barcode)) AS cantidad_pre
-	     FROM factura_compra fc
-	     INNER JOIN factura_compra_detalle fcd 
-	     ON fc.id = fcd.id_factura_compra 
-	     WHERE barcode = $S$ || barcode_in || $S$
-	     ORDER BY id_fc ASC $S$;
+
+    CREATE TEMPORARY TABLE ingreso_producto AS
+    SELECT fc.id AS id_fc, fcd.id AS id_fcd, 0 AS id_t, 0 AS id_td, fecha, barcode, cantidad,
+      	   (SELECT cantidad_fecha FROM producto_en_fecha (fecha, fcd.barcode)) AS cantidad_pre
+    FROM factura_compra fc
+    INNER JOIN factura_compra_detalle fcd 
+    	  ON fc.id = fcd.id_factura_compra 
+    WHERE barcode = barcode_in
+    ORDER BY id_fc ASC;
+
+    INSERT INTO ingreso_producto
+    SELECT 0 AS id_fc, 0 AS id_fcd, t.id AS id_t, td.id AS id_td, fecha, barcode, cantidad,
+      	   (SELECT cantidad_fecha FROM producto_en_fecha (fecha, td.barcode)) AS cantidad_pre
+    FROM traspaso t
+    INNER JOIN traspaso_detalle td 
+    	  ON t.id = td.id_traspaso 
+    WHERE barcode = barcode_in
+    AND origen != 1 --Traspasos recibidos
+    ORDER BY id_t ASC;
+
+    q := $S$ SELECT * FROM ingreso_producto ORDER BY fecha ASC $S$;
 
     FOR l IN EXECUTE q LOOP
     	id_fc_out := l.id_fc;
 	id_fcd_out := l.id_fcd;
+	id_t_out := l.id_t;
+	id_td_out := l.id_td;
 	fecha_out := l.fecha;
 	barcode_out := l.barcode;
-	cantidad_pre_compra := l.cantidad_pre;
+	cantidad_pre_ingreso := l.cantidad_pre;
 	cantidad_ingresada := l.cantidad;
         RETURN NEXT;
     END LOOP;
@@ -6157,13 +6174,16 @@ BEGIN
     --Retorno Final
     id_fc_out := 0;
     id_fcd_out := 0;
+    id_t_out := 0;
+    id_td_out := 0;
     fecha_out := now();
     barcode_out := barcode_in;
-    cantidad_pre_compra := (SELECT cantidad_fecha 
-    			    FROM producto_en_fecha (now()::TIMESTAMP,
-			    	 		    barcode_in));
+    cantidad_pre_ingreso := (SELECT cantidad_fecha
+      	                     FROM producto_en_fecha (now()::TIMESTAMP, barcode_in));
     cantidad_ingresada := 0;
     RETURN NEXT;
+
+    DROP TABLE ingreso_producto;
 
     RETURN;
 END; $$ LANGUAGE plpgsql;

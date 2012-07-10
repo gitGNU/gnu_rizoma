@@ -332,7 +332,9 @@ gdouble get_last_buy_price (gchar *barcode);
 
 gdouble get_last_buy_price_to_invoice (gchar *barcode, gint last_invoice_id);
 
-gdouble cantidad_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura_compra);
+gdouble cantidad_compra_es_modificable (gchar *barcode, gdouble cantidad_nueva, gint id_factura_compra);
+
+gdouble cantidad_traspaso_es_modificable (gchar *barcode, gdouble cantidad_original, gdouble cantidad_nueva, gint id_traspaso, int origen);
 
 gboolean mod_to_mod_on_buy (Prod *producto);
 
@@ -345,5 +347,7 @@ gchar * codigo_corto_to_barcode (gchar *codigo_corto);
 PGresult * get_componentes_compuesto (gchar *barcode);
 
 gboolean desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der);
+
+gboolean mod_to_mod_on_transfer (Prod *producto);
 
 #endif

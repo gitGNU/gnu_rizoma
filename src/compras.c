@@ -367,6 +367,22 @@ on_wnd_nullify_buy_close (GtkWidget *widget, gpointer data)
 }
 
 /**
+ * This function hide "wnd_edit_transfers" window and clean
+ * the Prods list
+ *
+ * @param: widget
+ * @param: data
+ */
+void
+on_wnd_edit_transfers_close (GtkWidget *widget, gpointer data)
+{
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_edit_transfers")));
+  //Si existe algo en la estructura "lista_mod_prod" se limpia
+  clean_lista_mod_prod ();
+}
+
+
+/**
  * This callback is triggered when a cell on 
  * 'treeview_nullify_buy_invoice_details' when
  * the cantity is edited. (editable-event)
@@ -502,16 +518,18 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
      SINO Si el producto existe en esta factura se realiza una comprobación mas
      De no existir en la factura es modificable pues no tiene datos historicos en esa factura
   */
-  if (lista_mod_prod->prods->prod->cantidad_nueva >= lista_mod_prod->prods->prod->cantidad_original)
-    modificable = TRUE;  
+  if (new_cantity > original_cantity)
+    modificable = 1;  
   else if (DataExist (g_strdup_printf ("SELECT barcode FROM factura_compra_detalle WHERE id_factura_compra = %d", id_fc)))
-    modificable = cantidad_es_modificable (barcode, new_cantity, id_fc);
+    modificable = cantidad_compra_es_modificable (barcode, new_cantity, id_fc);
   else
-    modificable = TRUE;
+    modificable = 1;
   
-  if (modificable <= 0 && (original_cantity != new_cantity))
+  /* Si modificable es <= 0, quiere decir que 'cantidad_compra_es_modificable' devolvió ese valor 
+     y por lo tanto no es modificable*/
+  if (modificable <= 0)
     {
-      if (modificable <= 0)
+      if (modificable <= 0 && new_cantity == original_cantity)
 	printf ("El producto %s de la factura %d devolvio modificable <= 0\n"
 		"con su stock original, revisar producto con cuadratura \n", barcode, id_fc);
       
@@ -5689,6 +5707,477 @@ on_color_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gc
 
 
 /**
+ * Rellena el detalle del traspaso correspondiente a al
+ * traspaso seleccionado
+ */
+void
+on_selection_transfer_et_change (GtkTreeSelection *selection, gpointer data)
+{
+  GtkTreeView *treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_detail_et"));
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+
+  GtkTreeModel *model = gtk_tree_view_get_model (gtk_tree_selection_get_tree_view (selection));
+  GtkTreeIter iter;
+
+  gint i, tuples, id_traspaso;
+  gchar *q, *color;
+  PGresult *res;
+
+  gint tipo_compuesto, tipo_deriv, tipo_producto;
+
+  /*tipo de mercaderia*/
+  tipo_compuesto = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id")));
+  tipo_deriv = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA'"), 0, "id")));
+
+  gtk_list_store_clear (store);
+  if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
+    {
+      gtk_tree_model_get (model, &iter,
+			  0, &id_traspaso,
+			  -1);
+
+      q = g_strdup_printf ("SELECT td.barcode, td.cantidad, td.precio, td.costo_modificado, t.origen, "
+			   "       ROUND (td.cantidad * td.precio) AS subtotal, p.descripcion, p.tipo "
+			   "FROM traspaso t "
+			   "INNER JOIN traspaso_detalle td "
+			   "ON t.id = td.id_traspaso "
+			   "INNER JOIN (SELECT barcode, descripcion, tipo FROM producto) AS p "
+			   "ON p.barcode = td.barcode "
+			   "WHERE t.id = %d", id_traspaso);
+      
+      res = EjecutarSQL (q);
+      g_free (q);
+      tuples = PQntuples (res);
+      
+      for (i = 0; i < tuples; i++)
+	{
+	  tipo_producto = atoi (g_strdup (PQvaluebycol (res, i, "tipo")));
+	  if (tipo_producto == tipo_compuesto || tipo_producto == tipo_deriv)
+	    color = "#535353";
+	  else
+	    color = g_str_equal (PQvaluebycol (res, i, "costo_modificado"), "t") ? "#62932c" : "Black";
+
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter,
+			      0, g_strdup (PQvaluebycol (res, i, "barcode")),
+			      1, g_strdup (PQvaluebycol (res, i, "descripcion")),
+			      2, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
+			      3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL),
+			      4, atoi (g_strdup (PQvaluebycol (res, i, "subtotal"))),
+			      5, tipo_producto,
+			      6, id_traspaso,
+			      7, atoi (g_strdup (PQvaluebycol (res, i, "origen"))),
+			      8, g_str_equal (g_strdup (PQvaluebycol (res, i, "costo_modificado")), "t") ? TRUE : FALSE,
+			      9, color,
+			      10, TRUE,
+			      -1);
+	}
+      
+      PQclear (res);
+    }
+}
+
+
+/**
+ * This callback is triggered when a cell on 
+ * 'treeview_transfers_detail_et' when
+ * the cantity is edited. (editable-event)
+ *
+ * @param cell
+ * @param path_string
+ * @param new_price
+ * @param data -> A GtkListStore
+ */
+void
+on_mod_et_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *cost, gpointer data)
+{
+  //Treeview detalle de la compra
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  
+  //Variables para recoger información
+  gint total;
+  gint tipo;
+  gint id_traspaso;
+  gchar *barcode;
+  gchar *color;
+  gdouble new_cost;
+  gdouble previous_cost;
+  gdouble cantity;
+  gboolean original;
+  gboolean costo_editable;
+
+  /*Original es FALSE hasta que se demuetre lo contrario*/
+  original = FALSE;
+  
+  /*Tipo es MOD hasta que se demuestre los contrario*/
+  tipo = MOD;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /*obtiene el iter para poder obtener y setear datos del treeview*/
+  gtk_tree_model_get_iter (model, &iter, path);
+ 
+  //Se obtiene el el precio original
+  gtk_tree_model_get (model, &iter,
+		      0, &barcode,
+		      2, &cantity,
+  		      3, &previous_cost,
+		      6, &id_traspaso,
+		      8, &costo_editable,
+                      -1);
+  
+  /*Valida y Obtiene el costo nuevo*/
+  if (!costo_editable)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		"Solo se puede modificar el costo de aquellos productos\n"
+		"que obtuvieron su costo a través del traspaso seleccionado\n"
+		"(aquellos resaltados con el color 'verde').");
+      return;
+    }
+
+  if (!is_numeric (cost))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		"El precio de compra debe ser un valor numérico");
+      return;
+    }
+
+  new_cost = strtod (PUT (cost), (char **)NULL);
+  
+  if (new_cost <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		"El costo debe ser mayor a cero");
+      return;
+    }
+
+  //Si asegura que continúe solo si se cambió el costo
+  if (new_cost != previous_cost)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_et")), TRUE);
+  else
+    return;
+  
+  /*Se agrega a la lista de los productos modificados*/  
+
+  //Se verifica si ya existe en la lista
+  if (lista_mod_prod->header != NULL)
+    lista_mod_prod->prods = buscar_prod (lista_mod_prod->header, barcode);
+  else
+    lista_mod_prod->prods = NULL;
+
+  //Si no existe en la lista se agrega y se inicializa
+  if (lista_mod_prod->prods == NULL) //PEEEEE
+    {
+      add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->id_traspaso = id_traspaso;
+      lista_mod_prod->prods->prod->costo_original = previous_cost; /*Se guarda el costo original*/
+      lista_mod_prod->prods->prod->costo_nuevo = new_cost; /*Se guarda el nuevo costo*/
+      lista_mod_prod->prods->prod->accion = MOD; /*Indica que se modificará este producto en la BD (enum action)*/
+      original = FALSE;
+    } /*Si el producto existe pero se le modifica el costo por 1era vez*/
+  else if (lista_mod_prod->prods->prod->costo_original == 0)
+    {
+      lista_mod_prod->prods->prod->id_traspaso = id_traspaso;
+      lista_mod_prod->prods->prod->costo_original = previous_cost; /*Se guarda el costo original*/
+      lista_mod_prod->prods->prod->costo_nuevo = new_cost; /*Se guarda el nuevo costo*/
+      original = FALSE;
+    }
+  else //Si estaba en la lista y se modifica el costo por enésima vez (incluyendo productos agregados)
+    {  //Si el costo nuevo es igual al original
+      if (new_cost == lista_mod_prod->prods->prod->costo_original)
+	{	  
+	  lista_mod_prod->prods->prod->costo_nuevo = 0;
+	  
+	  //Si no hay modificaciones en cantidad
+	  if (lista_mod_prod->prods->prod->cantidad_nueva == 0)
+	    {
+	      drop_prod_to_mod_list (barcode);
+	      original = TRUE;
+	    }
+
+	  if (cantidad_total_prods (lista_mod_prod->header) == 0) //Si no quedan productos en la lista
+	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_et")), FALSE);
+	}
+      else //De lo contrario se modifica (Los productos agregados siempre llegaran aquí)
+	{
+	  lista_mod_prod->prods->prod->id_factura_compra = id_traspaso;
+	  lista_mod_prod->prods->prod->costo_nuevo = new_cost;
+	  original = FALSE;
+	  tipo = lista_mod_prod->prods->prod->accion;
+	}
+    }
+
+  /*color*/
+  if (original == TRUE)
+    {
+      if (costo_editable)
+	color = g_strdup ("#62932c");
+      else
+	color = g_strdup ("Black");
+    }
+  else
+    {
+      if (tipo == MOD)
+	color = g_strdup ("Red");
+      else if (tipo == ADD)
+	color = g_strdup ("Blue");
+    }
+
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      3, new_cost,                    //costo
+		      4, lround (new_cost * cantity), //subtotal
+		      9, color,
+		      10, TRUE,
+		      -1);
+
+  //Se recalcula el costo total de la factura seleccionada
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_detail_et"));
+  total = lround (sum_treeview_column (treeview, 4, G_TYPE_INT));
+  
+  //Se actualiza el nuevo costo en el treeview de la factura
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_et"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      5, total,
+                      -1);
+}
+
+
+/**
+ * This callback is triggered when a cell on 
+ * 'treeview_nullify_buy_invoice_details' when
+ * the cantity is edited. (editable-event)
+ *
+ * @param cell
+ * @param path_string
+ * @param new_cantity
+ * @param data -> A GtkListStore
+ */
+void
+on_mod_et_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *cantity, gpointer data)
+{
+  //Treeview detalle de la compra
+  GtkTreeView *treeview;
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+  
+  //Variables para recoger información
+  gint total;
+  gint tipo;
+  gint id_traspaso;
+  gchar *barcode;
+  gchar *color, *ea, *ec; /*color, etiqueta apertura, etiqueta cierre*/
+  gdouble new_cantity;
+  gdouble previous_cantity;
+  gdouble original_cantity;
+  gdouble cost;
+  gdouble modificable;
+  gboolean costo_editable;
+  gboolean original;
+  gint origen;
+  gint tipo_compuesto, tipo_deriv, tipo_producto;
+
+  /*tipo de mercaderia*/
+  tipo_compuesto = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id")));
+  tipo_deriv = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA'"), 0, "id")));
+
+
+  /*Original es FALSE hasta que se demuetre lo contrario*/
+  original = FALSE;
+
+  /*Tipo es MOD hasta que se demuestre los contrario*/
+  tipo = MOD;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /*Obtiene el iter para poder obtener y setear datos del treeview*/
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  //Se obtiene el codigo del producto y la cantidad ingresada
+  gtk_tree_model_get (model, &iter,
+		      0, &barcode,
+                      2, &previous_cantity,
+  		      3, &cost,
+		      5, &tipo_producto,
+		      6, &id_traspaso,
+		      7, &origen,
+		      8, &costo_editable,
+                      -1);
+  
+  /*Valida el tipo de producto*/
+  if (tipo_producto == tipo_compuesto || tipo_producto == tipo_deriv)
+    {
+      ea = "<span color = '#535353'>";
+      ec = "</span>";
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		g_strdup_printf ("No se puede modificar la cantidad de los productos "
+				 "%s compuestos u ofertas %s o %s derivados %s", ea, ec, ea, ec));
+      return;
+    }
+
+  /*Valida y Obtiene el precio nuevo*/
+  if (!is_numeric (cantity))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		"La cantidad debe ser un valor numérico");
+      return;
+    }
+
+  new_cantity = strtod (PUT (cantity), (char **)NULL);
+
+  if (new_cantity <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		"La cantidad debe ser mayor a cero");
+      return;
+    }
+
+  if (new_cantity != previous_cantity)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_et")), TRUE);
+  else
+    return;
+  
+  /*Se agrega a la lista de los productos modificados*/  
+
+  //Se verifica si ya existe en la lista
+  if (lista_mod_prod->header != NULL)
+    lista_mod_prod->prods = buscar_prod (lista_mod_prod->header, barcode);
+  else
+    lista_mod_prod->prods = NULL;
+
+  //Si no existe en la lista se agrega y se inicializa
+  if (lista_mod_prod->prods == NULL)
+    {
+      add_to_mod_prod_list (barcode, FALSE);
+      lista_mod_prod->prods->prod->id_traspaso = id_traspaso;
+      lista_mod_prod->prods->prod->cantidad_original = previous_cantity; /*Se guarda cantidad original*/
+      original_cantity = previous_cantity; /*Esta variable se usará para verificar si es modificable*/
+      lista_mod_prod->prods->prod->cantidad_nueva = new_cantity; /*Se guarda la nueva cantidad*/
+      lista_mod_prod->prods->prod->accion = MOD; /*Indica que se modificará este producto en la BD (enum action)*/
+      original = FALSE;
+    } /*Si el producto existe pero se le modifica el costo por 1era vez*/
+  else if (lista_mod_prod->prods->prod->cantidad_nueva == 0)
+    {
+      lista_mod_prod->prods->prod->id_traspaso = id_traspaso;
+      lista_mod_prod->prods->prod->cantidad_original = previous_cantity; /*Se guarda la cantidad priginal*/
+      original_cantity = previous_cantity; /*Esta variable se usará para verificar si es modificable*/
+      lista_mod_prod->prods->prod->cantidad_nueva = new_cantity; /*Se guarda la nueva cantidad*/
+      original = FALSE;
+    }
+  else //Si estaba en la lista y se modifica el costo por enésima vez (incluyendo productos agregados)
+    {  //Si el costo nuevo es igual al original
+      if (new_cantity == lista_mod_prod->prods->prod->cantidad_original)
+	{
+	  lista_mod_prod->prods->prod->cantidad_nueva = 0;
+	  
+	  //Si no hay modificaciones en costo
+	  if (lista_mod_prod->prods->prod->costo_nuevo == 0)
+	    {
+	      /*Esta variable se usará para verificar si es modificable*/
+	      original_cantity = lista_mod_prod->prods->prod->cantidad_original;
+
+	      drop_prod_to_mod_list (barcode);
+	      original = TRUE;
+	    }
+
+	  if (cantidad_total_prods (lista_mod_prod->header) == 0) //Si no quedan productos en la lista
+	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_et")), FALSE);
+	} 
+      else //De lo contrario se modifica (Los productos agregados siempre llegaran aquí)
+	{ 
+	  lista_mod_prod->prods->prod->id_traspaso = id_traspaso;
+	  lista_mod_prod->prods->prod->cantidad_nueva = new_cantity;
+	  original_cantity = lista_mod_prod->prods->prod->cantidad_original;
+
+	  original = FALSE;
+	  tipo = lista_mod_prod->prods->prod->accion;
+	}
+    }
+
+  /* SI se recibió más cantidad o se envió menos cantidad es modificable
+     SINO se comprueba que la "diminución" del stock no genere un stock negativo en alguna transacción futura
+     (Si se agregan productos a traspaso tener en cuanta si es un envío o una recepción)
+  */
+  if ( (origen != 1 && new_cantity > original_cantity) || (origen == 1 && new_cantity < original_cantity) )
+    modificable = 1;
+  else if (DataExist (g_strdup_printf ("SELECT barcode FROM traspaso_detalle WHERE id_traspaso = %d", id_traspaso)))
+    modificable = cantidad_traspaso_es_modificable (barcode, original_cantity, new_cantity, id_traspaso, origen);
+  else
+    modificable = 0;
+  
+  /* Si modificable es <= 0, quiere decir que 'cantidad_traspaso_es_modificable' devolvió ese valor 
+     y por lo tanto no es modificable*/
+  if (modificable <= 0)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);
+      drop_prod_to_mod_list (barcode);
+
+      if (origen == 1)
+	ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		  g_strdup_printf ("Debido a las transacciones realizadas sobre el producto %s en fechas \n"
+				   "posteriores a este traspaso, se pueden enviar maximo: %.3f unidades",
+				   barcode, (original_cantity + modificable*-1) ));
+      else 
+	ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_transfers_detail_et")),
+		  g_strdup_printf ("Debido a las transacciones realizadas sobre el producto %s en fechas \n"
+				   "posteriores a este traspaso, se pueden recibir como minimo: %.3f unidades",
+				   barcode, (modificable*-1) ));
+
+      //NOTA: modificable es 0 o negativo, por lo tanto se restan o permanece igual
+      return;
+    }
+
+  /*color*/
+  if (original == TRUE)
+    {
+      if (costo_editable)
+	color = g_strdup ("#62932c");
+      else
+	color = g_strdup ("Black");
+    }
+  else
+    {
+      if (tipo == MOD)
+	color = g_strdup ("Red");
+      else if (tipo == ADD)
+	color = g_strdup ("Blue");
+    }
+
+  // Se setean los datos modificados en el treeview
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      2, new_cantity,                 //cantidad
+		      4, lround (new_cantity * cost), //subtotal
+		      9, color,
+		      10, TRUE,
+		      -1);
+
+  //Se recalcula el costo total de la factura seleccionada
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_detail_et"));
+  total = lround (sum_treeview_column (treeview, 4, G_TYPE_INT));
+  
+  //Se actualiza el nuevo costo en el treeview de la factura
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_et"));
+  model = gtk_tree_view_get_model (GTK_TREE_VIEW (treeview));
+  gtk_tree_selection_get_selected (gtk_tree_view_get_selection (treeview), NULL, &iter);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+                      5, total,
+                      -1);
+}
+
+/**
  * Callback from 'btn_edit_transfers' (clicked-signal)
  *
  * Make and show the 'wnd_edit_transfers' window.
@@ -5699,8 +6188,470 @@ on_color_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gc
 void
 on_btn_edit_transfers_clicked (GtkButton *button, gpointer data)
 {
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
 
+  GtkTreeView *treeview_transfer;
+  GtkListStore *store_transfer;
+  GtkTreeSelection *selection_transfer;
+
+  GtkTreeView *treeview_details;
+  GtkListStore *store_details;
+
+  // TreeView Facturas
+  treeview_transfer = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_et"));
+  store_transfer = GTK_LIST_STORE (gtk_tree_view_get_model (treeview_transfer));
+  if (store_transfer == NULL)
+    {
+      store_transfer = gtk_list_store_new (8,
+					   G_TYPE_INT,     // ID Traspaso
+					   G_TYPE_STRING,  // Fecha Traspaso
+					   G_TYPE_STRING,  // Local Origen Traspaso
+					   G_TYPE_STRING,  // Local Destino Traspaso
+					   G_TYPE_STRING,  // Tipo Traspaso
+					   G_TYPE_INT,     // Monto Traspaso
+					   G_TYPE_INT,     // ID Origen
+					   G_TYPE_INT);    // ID Destino
+
+      gtk_tree_view_set_model (treeview_transfer, GTK_TREE_MODEL (store_transfer));
+      
+      selection_transfer = gtk_tree_view_get_selection (treeview_transfer);
+      gtk_tree_selection_set_mode (selection_transfer, GTK_SELECTION_SINGLE);
+      g_signal_connect (G_OBJECT (selection_transfer), "changed",
+			G_CALLBACK (on_selection_transfer_et_change), NULL);
+
+      //ID
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("ID Traspaso", renderer,
+                                                        "text", 0,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_transfer, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 0);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Fecha Traspaso
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Fecha Traspaso", renderer,
+                                                        "text", 1,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_transfer, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 1);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Local Origen
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Origen", renderer,
+                                                        "text", 2,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_transfer, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 2);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Local Destino
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Destino", renderer,
+                                                        "text", 3,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_transfer, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 3);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Tipo Traspaso
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Tipo traspaso", renderer,
+                                                        "text", 4,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_transfer, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 4);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //Monto total
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Monto Total", renderer,
+                                                        "text", 5,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_transfer, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 5);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+    }
+
+  //TreeView Detalle Factura
+  treeview_details = GTK_TREE_VIEW (builder_get (builder, "treeview_transfers_detail_et"));
+  store_details = GTK_LIST_STORE (gtk_tree_view_get_model (treeview_details));
+  if (store_details == NULL)
+    {
+      store_details = gtk_list_store_new (11,
+                                          G_TYPE_STRING, //barcode
+                                          G_TYPE_STRING, //description
+                                          G_TYPE_DOUBLE, //cantity
+                                          G_TYPE_DOUBLE, //costo
+                                          G_TYPE_INT,    //subtotal
+					  G_TYPE_INT,    //tipo producto
+                                          G_TYPE_INT,      //id traspaso
+					  G_TYPE_INT,      //ID Origen
+					  G_TYPE_BOOLEAN,  //modificable
+					  G_TYPE_STRING,
+					  G_TYPE_BOOLEAN);
+
+      gtk_tree_view_set_model(treeview_details, GTK_TREE_MODEL(store_details));
+      //gtk_tree_selection_set_mode (gtk_tree_view_get_selection (treeview_details), GTK_SELECTION_NONE);
+
+      //barcode
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Cod. Barras", renderer,
+                                                        "text", 0,
+							"foreground", 9,
+							"foreground-set", 10,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 0);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //description
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Descripcion", renderer,
+                                                        "text", 1,
+							"foreground", 9,
+							"foreground-set", 10,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 1);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+
+      //cantity
+      renderer = gtk_cell_renderer_text_new();
+      g_object_set (renderer,"editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_mod_et_cantity_cell_renderer_edited), (gpointer)store_details);
+
+      column = gtk_tree_view_column_new_with_attributes("Cantidad", renderer,
+                                                        "text", 2,
+							"foreground", 9,
+							"foreground-set", 10,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 2);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
+
+      //buy price (cost) 
+      renderer = gtk_cell_renderer_text_new();
+
+      g_object_set (renderer,"editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_mod_et_buy_price_cell_renderer_edited), (gpointer)store_details);
+
+      column = gtk_tree_view_column_new_with_attributes("Costo", renderer,
+                                                        "text", 3,
+							"foreground", 9,
+							"foreground-set", 10,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 3);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+      //subtotal
+      renderer = gtk_cell_renderer_text_new();
+      column = gtk_tree_view_column_new_with_attributes("Subtotal", renderer,
+                                                        "text", 4,
+							"foreground", 9,
+							"foreground-set", 10,
+                                                        NULL);
+      gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+      gtk_tree_view_column_set_sort_column_id (column, 4);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+    }
+
+  /*Combobox sucursales traspaso*/
+  GtkWidget *combo_sucursal;
+  //GtkWidget *combo_sucursal_edit;
+  GtkWidget *combo_traspaso;
+  GtkListStore *modelo_sucursal;
+  //GtkListStore *modelo_sucursal_edit;
+  GtkListStore *modelo_traspaso;
+
+  GtkTreeIter iter;
+  gint tuples,i;
+  PGresult *res;
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT id, nombre "
+				      "FROM bodega "
+				      "WHERE estado = true"));
+  tuples = PQntuples (res);
+
+  combo_sucursal = GTK_WIDGET (builder_get (builder, "cmb_store_et"));
+  modelo_sucursal = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (combo_sucursal)));
+
+  if (modelo_sucursal == NULL)
+    {
+      GtkCellRenderer *cell;
+      modelo_sucursal = gtk_list_store_new (2,
+					    G_TYPE_INT,
+					    G_TYPE_STRING);
+
+      gtk_combo_box_set_model (GTK_COMBO_BOX (combo_sucursal), GTK_TREE_MODEL (modelo_sucursal));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_sucursal), cell, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_sucursal), cell,
+				      "text", 1,
+				      NULL);
+    }
+
+  gtk_list_store_clear (modelo_sucursal);
+
+  gtk_list_store_append (modelo_sucursal, &iter);
+  gtk_list_store_set (modelo_sucursal, &iter,
+		      0, 0,
+		      1, "TODOS",
+		      -1);
+
+  for (i=0 ; i < tuples ; i++)
+    {
+      gtk_list_store_append (modelo_sucursal, &iter);
+      gtk_list_store_set (modelo_sucursal, &iter,
+			  0, atoi (PQvaluebycol (res, i, "id")),
+			  1, PQvaluebycol (res, i, "nombre"),
+			  -1);
+    }
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo_sucursal), 0);
+
+  /*tipo traspaso*/
+  combo_traspaso = GTK_WIDGET (builder_get (builder, "cmb_transfer_type_et"));
+  modelo_traspaso = GTK_LIST_STORE (gtk_combo_box_get_model (GTK_COMBO_BOX (combo_traspaso)));
+
+  if (modelo_traspaso == NULL)
+    {
+      GtkCellRenderer *cell;
+      modelo_traspaso = gtk_list_store_new (1,
+  					    G_TYPE_STRING);
+
+      gtk_combo_box_set_model (GTK_COMBO_BOX (combo_traspaso), GTK_TREE_MODEL (modelo_traspaso));
+
+      cell = gtk_cell_renderer_text_new();
+      gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_traspaso), cell, TRUE);
+      gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_traspaso), cell,
+  				      "text", 0,
+  				      NULL);
+    }
+
+  gtk_list_store_clear (modelo_traspaso);
+
+  gtk_list_store_append (modelo_traspaso, &iter);
+  gtk_list_store_set (modelo_traspaso, &iter,
+  		      0, "TODOS",
+  		      -1);
+
+  gtk_list_store_append (modelo_traspaso, &iter);
+  gtk_list_store_set (modelo_traspaso, &iter,
+  		      0, "ENVIADO",
+  		      -1);
+  
+  gtk_list_store_append (modelo_traspaso, &iter);
+  gtk_list_store_set (modelo_traspaso, &iter,
+  		      0, "RECIBIDO",
+  		      -1);
+
+  gtk_combo_box_set_active (GTK_COMBO_BOX (combo_traspaso), 0);
+
+
+  //TODO:
+  clean_container (GTK_CONTAINER (GTK_WIDGET (builder_get (builder, "wnd_edit_transfers"))));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_edit_transfers")));
+}
+
+void
+on_btn_edit_transfer_search_clicked (GtkButton *button, gpointer data)
+{
+  /*treeview*/
+  GtkTreeView *treeview;
+  GtkListStore *store;
+
+  /*combobox*/
+  GtkWidget *combo;
+  GtkTreeModel *model;
+  gint active;
+  gint id_sucursal;
+  gchar *tipo_traspaso;
+
+  GtkTreeIter iter;
+
+  /*Formulario  busqueda*/
+  GDate *date_aux;
+  gchar *barcode, *fecha;
+  
+  /*Obteniendo campos de búsqueda*/
+  barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_barcode_et"))));
+  fecha = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_nullify_buy_date"))));
+
+  /*fecha*/
+  date_aux = g_date_new ();
+  if (!g_str_equal (fecha, ""))
+    {
+      g_date_set_parse (date_aux, fecha);
+      fecha = g_strdup_printf("%d-%d-%d",
+			      g_date_get_year (date_aux),
+			      g_date_get_month (date_aux),
+			      g_date_get_day (date_aux));
+    }
+
+  /*Filtro sucursal*/
+  combo = GTK_WIDGET (builder_get (builder, "cmb_store_et"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+  /*Se obtiene la sucursal elegida*/
+  if (active != -1)
+    {
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &id_sucursal,
+                          -1);
+    }
+
+  /*tipo traspaso*/
+  combo = GTK_WIDGET (builder_get (builder, "cmb_transfer_type_et"));
+  active = gtk_combo_box_get_active (GTK_COMBO_BOX (combo));
+
+
+  /*Se obtiene el tipo de trapaso elegido*/
+  if (active != -1)
+    {
+      model = gtk_combo_box_get_model (GTK_COMBO_BOX (combo));
+      gtk_combo_box_get_active_iter (GTK_COMBO_BOX (combo), &iter);
+
+      gtk_tree_model_get (model, &iter,
+			  0, &tipo_traspaso,
+                          -1);
+    }
+
+  /*Limpiando Treeview*/
+  treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_transfers_et"));
+  store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
+  gtk_list_store_clear (store);
+
+  gchar *q;
+  PGresult *res;
+  gint tuples, i;
+
+  q = g_strdup_printf ("SELECT t.id, t.monto, t.origen, t.destino, t.vendedor, "
+		       "TO_CHAR(fecha,'YYYY-MM-DD') AS fecha, " //YYYY-MM-DD HH24:MI
+		       "CASE WHEN (t.origen = 1) THEN 'ENVIADO' ELSE 'RECIBIDO' END AS tipo_traspaso, "
+		       "(SELECT nombre FROM bodega WHERE id = t.origen) AS nombre_origen, "
+		       "(SELECT nombre FROM bodega WHERE id = t.destino) AS nombre_destino "
+		       "FROM traspaso t "
+		       "INNER JOIN traspaso_detalle td "
+		       "ON t.id = td.id_traspaso");
+
+  /*Condiciones agregadas*/
+  if (!g_str_equal (barcode, "") || g_date_valid (date_aux) || 
+      id_sucursal != 0 || !g_str_equal (tipo_traspaso, "TODOS"))
+    {
+      q = g_strdup_printf ("%s WHERE t.origen IS NOT NULL",q);
+
+      if (!g_str_equal (barcode, ""))
+	q = g_strdup_printf (" %s AND td.barcode = %s",q, barcode);
+
+      if (g_date_valid (date_aux))
+	q = g_strdup_printf (" %s AND c.fecha BETWEEN '%s' AND '%s + 1 days'", q, fecha, fecha);
+
+      if (id_sucursal != 0)
+	q = g_strdup_printf (" %s AND (origen = %d OR destino = %d)", q, id_sucursal, id_sucursal);
+
+      if (!g_str_equal (tipo_traspaso, "TODOS"))
+	q = g_strdup_printf (" %s AND origen %s 1", q, g_str_equal (tipo_traspaso, "ENVIADO") ? "=": "!=");
+    }
+
+  //Se ejecuta la consulta construida
+  res = EjecutarSQL (q);
+  g_free (q);  
+  tuples = PQntuples (res);
+
+  for (i = 0; i < tuples; i++)
+    {
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter,
+			  0, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
+			  1, g_strdup (PQvaluebycol (res, i, "fecha")),
+			  2, g_strdup (PQvaluebycol (res, i, "nombre_origen")),
+			  3, g_strdup (PQvaluebycol (res, i, "nombre_destino")),
+			  4, g_strdup (PQvaluebycol (res, i, "tipo_traspaso")),
+			  5, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
+			  6, atoi (g_strdup (PQvaluebycol (res, i, "origen"))),
+			  7, atoi (g_strdup (PQvaluebycol (res, i, "destino"))),
+			  -1);
+    }
+
+  PQclear (res);
+
+  //Si existe algo en la estructura "lista_mod_prod" se limpia
+  clean_lista_mod_prod ();
+}
+
+
+/**
+* Esta funcion guarda (efectúa) todos los cambios
+* que se hayan realizado en el traspaso (detallados en lista_mod_prod)
+*/
+void
+on_btn_save_et_clicked (GtkButton *button, gpointer data)
+{
+  Prods *header;
+  Prods *actual;
+  gboolean error;
+
+  header = lista_mod_prod->header;
+  actual = lista_mod_prod->header;
+
+  if (header == NULL)
+    return;
+
+  error = FALSE;
+  do
+    {
+      if (actual->prod->accion == MOD)
+	if (mod_to_mod_on_transfer (actual->prod) == FALSE) 
+	  error = TRUE;
+      actual = actual->next;
+    } while (actual != header);
+
+  if (error == FALSE)
+    AlertMSG (GTK_WIDGET (builder_get (builder, "btn_edit_transfer_cancel")),
+	      "Se realizaron los cambios!");
+  else
+    ErrorMSG (GTK_WIDGET (builder_get (builder, "btn_edit_transfer_cancel")),
+	      "No se logró efecutar la modificacion en traspaso");
+  
+  //clean_lista_mod_prod (); La funcion que busca limpia la lista
+  on_btn_edit_transfer_search_clicked (GTK_BUTTON (builder_get (builder, "btn_edit_transfer_search")), NULL);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_save_mod_buy")), FALSE);
 }
 
 
