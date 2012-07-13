@@ -188,7 +188,9 @@ create table factura_compra (
   valor_iva                 int4,
   descuento                 int4,
   pagada                    bool,
-  monto                     int4,
+  monto                     int4, -- monto total de los productos
+  costo_neto_tranasporte    double precision,
+  iva_transporte	    double precision,
   fecha_pago                timestamp,
   forma_pago                int4,
   constraint pk_factura_compra primary key (id)

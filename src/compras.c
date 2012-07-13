@@ -1014,6 +1014,50 @@ on_btn_rmv_buy_prod_clicked (GtkButton *button, gpointer data)
 
 
 /**
+ * This function calculate the amount entered vs
+ * the total and shows the difference in the 
+ * corresponding label.
+ * Also enable the corresponding widgets.
+ *
+ * @param: GtkEditable *editable
+ * @param: gchar *new_text
+ * @param: gint new_text_length
+ * @param: gint *position
+ * @param: gpointer user_data
+ */
+void
+calculate_shipping_amount (GtkEditable *editable,
+			   gchar *new_text,
+			   gint new_text_length,
+			   gint *position,
+			   gpointer user_data)
+{
+  gchar *total_invoice_text;
+  gint total_invoice;
+  gint sub_total_productos = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_products_invoice_amount")))));
+  gint resto;
+  
+  total_invoice_text = g_strdup_printf ("%s%s", gtk_entry_get_text (GTK_ENTRY (editable)), new_text);
+  total_invoice = atoi (total_invoice_text);
+  resto = total_invoice - sub_total_productos;
+
+  if (resto < 0)
+    {
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "subtotal_shipping_invoice")),
+			    g_strdup_printf ("<span color =\"red\">%s</span> ",
+					     PutPoints (g_strdup_printf ("%d", resto))));
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ok_ingress_invoice")), FALSE);
+    }
+  else
+    {
+      gtk_label_set_text (GTK_LABEL (builder_get (builder, "subtotal_shipping_invoice")),
+			  g_strdup_printf ("%s", PutPoints (g_strdup_printf ("%d", resto))));
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_ok_ingress_invoice")), TRUE);
+    }
+}
+
+
+/**
  * Build "wnd_compras" - rizoma-compras's window
  * initiallizes and show all its components
  * @param void
@@ -1813,8 +1857,14 @@ compras_win (void)
   g_signal_connect (G_OBJECT (builder_get (builder, "btn_make_service")), "leave-notify-event",
   		    G_CALLBACK (show_default), NULL);
 
+
+  // Conectando la señal 'insert-text' para calcular diferencia con el monto total
+  g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_total_invoice")), "changed",
+		    G_CALLBACK (calculate_shipping_amount), NULL);
+
   //TODO: Que se use esta funcion para todas las ventanas
   only_number_filer_on_container (GTK_CONTAINER (builder_get (builder, "wnd_asoc_comp")));
+  only_number_filer_on_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_invoice")));
   gtk_widget_show_all (compras_gui);
 } // compras_win (void)
 
@@ -3391,14 +3441,14 @@ IngresoDetalle (GtkTreeSelection *selection, gpointer data)
 
 
 void
-IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
+IngresarCompra (gboolean invoice, gint n_document, gchar *monto, gint costo_bruto_transporte, GDate *date)
 {
   Productos *products = compra->header;
   gint id, doc;
   gchar *rut_proveedor, *nombre_proveedor;
   gchar *q;
   PGresult *res;
-  gint total_doc = atoi (monto);
+  gint total_productos = atoi (monto);
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests")));
   GtkListStore *store_pending_request = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_pending_requests"))));
   GtkTreeIter iter;
@@ -3418,11 +3468,11 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date)
 
   if (invoice == TRUE)
     {
-      doc = IngresarFactura (n_document, id, rut_proveedor, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), 0);
+      doc = IngresarFactura (n_document, id, rut_proveedor, total_productos, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), 0, costo_bruto_transporte);
     }
   else
     {
-      doc = IngresarGuia (n_document, id, total_doc, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date));
+      doc = IngresarGuia (n_document, id, g_date_get_day (date), g_date_get_month (date), g_date_get_year (date));
     }
 
   if (products != NULL)
@@ -3953,7 +4003,7 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
         {
           if (DataExist (g_strdup_printf ("SELECT num_factura FROM factura_compra WHERE rut_proveedor='%s' AND num_factura=%s", rut_proveedor, n_documento)) == TRUE)
             {
-              ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_n")), 
+              ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_ingress_factura_n")), 
 			g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
               return FALSE;
             }
@@ -4446,6 +4496,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
 
   GList *list = gtk_container_get_children (GTK_CONTAINER (wnd));
   gint nth;
+  gint costo_bruto_transporte;
   gchar *widget_name = NULL;
 
   GtkEntry *entry_n = NULL;
@@ -4528,9 +4579,14 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
       return;
     }
 
+  if (g_str_equal (gtk_buildable_get_name (GTK_BUILDABLE (wnd)), "wnd_ingress_invoice"))
+    costo_bruto_transporte = strtod (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "subtotal_shipping_invoice"))))), (char **)NULL);
+  else
+    costo_bruto_transporte = 0;
+
   if (CheckDocumentData (wnd, invoice, rut_proveedor, id, n_documento, monto, date) == FALSE) return;
   // CONTINUAR ...
-  IngresarCompra (invoice, atoi (n_documento), monto, date);
+  IngresarCompra (invoice, atoi (n_documento), monto, costo_bruto_transporte, date);
 
   gtk_widget_hide (wnd);
 }
@@ -7406,19 +7462,25 @@ on_button_ok_ingress_clicked (GtkButton *button, gpointer data)
           GtkWindow *wnd_invoice = GTK_WINDOW (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
 
 	  // Para que acepte solo numeros //TODO: Hacer esto más limpio...
-	  g_signal_connect (G_OBJECT (builder_get (builder, "entry_ingress_factura_n")), "insert-text",
+	  g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_ingress_factura_n")), "insert-text",
 			    G_CALLBACK (only_numberi_filter), NULL);
 
           clean_container (GTK_CONTAINER (wnd_invoice));
 
           entry = GTK_ENTRY (builder_get (builder, "entry_ingress_factura_date"));
 
-          /* Suggested amount */
-          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_ingress_factura_amount")),
-                              CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
+	  /*Total invoice amount*/
+          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_products_invoice_amount")),
+			      CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_pending_total"))))));
           //gtk_editable_select_region (GTK_EDITABLE (builder_get (builder, "entry_ingress_factura_amount")), 0, -1);
-	  
-	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_ingress_factura_n")));
+
+	  gtk_label_set_text (GTK_LABEL (builder_get (builder, "subtotal_shipping_invoice")), "0") ;
+
+	  /* Suggested amount */
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_int_total_invoice")),
+			      CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_pending_total"))))));
+
+	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_int_ingress_factura_n")));
           gtk_widget_show_all (GTK_WIDGET (wnd_invoice));
         }
       else
@@ -7689,14 +7751,14 @@ on_wnd_compras_delete_event (GtkWidget *widget, GdkEvent *event, gpointer user_d
 }
 
 
-void
-on_entry_ingress_factura_amount_activate (GtkWidget *btn_ok)
-{
-  gint total = atoi (CutPoints(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total"))))));
-  gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_factura_amount")))));
+/* void */
+/* on_entry_ingress_factura_amount_activate (GtkWidget *btn_ok) */
+/* { */
+/*   gint total = atoi (CutPoints(g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total")))))); */
+/*   gint total_doc = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_ingress_factura_amount"))))); */
 
-  CheckMontoIngreso (btn_ok, total, total_doc);
-}
+/*   CheckMontoIngreso (btn_ok, total, total_doc); */
+/* } */
 
 
 void
@@ -8236,7 +8298,7 @@ on_btn_guide_invoice_ok_clicked (void)
       return;
     }
 
-  factura = IngresarFactura (n_fact, 0, rut, atoi (monto), g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), atoi (guia));
+  factura = IngresarFactura (n_fact, 0, rut, atoi (monto), g_date_get_day (date), g_date_get_month (date), g_date_get_year (date), atoi (guia), 0);
 
 
   gtk_tree_model_get_iter_first (model, &iter);

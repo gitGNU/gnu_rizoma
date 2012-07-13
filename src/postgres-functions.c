@@ -2400,25 +2400,42 @@ ReturnProveedor (gint id_compra)
 }
 
 gint
-IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, gint d_emision, gint m_emision, gint y_emision, gint guia)
+IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total_productos, gint d_emision, gint m_emision, gint y_emision, gint guia, gint costo_bruto_transporte)
 {
   PGresult *res;
   gchar *q;
+  gdouble costo_neto_transporte;
+  gdouble monto_iva_transporte;
+  gdouble iva;
+  
+  if (costo_bruto_transporte > 0)
+    {
+      iva = (gdouble) atoi (PQvaluebycol (EjecutarSQL ("SELECT monto FROM impuesto WHERE id = 1"), 0,"monto")); // X%
+      iva = (iva / 100); // 0.X
+      costo_neto_transporte = costo_bruto_transporte / (iva+1); //Bruto / 1.X
+      monto_iva_transporte = costo_bruto_transporte - costo_neto_transporte;
+    }
+  else
+    {
+      costo_neto_transporte = 0;
+      monto_iva_transporte = 0;
+    }
 
   //"to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY')" //d_emision, m_emision, y_emision, 
 
-  q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto,"
-                       " valor_iva, descuento, pagada, monto) VALUES (DEFAULT, %d, '%s', %d, "                       
-		       "now(), 0, 0, 0,'f', %d)",
-                       id_compra, rut_proveedor, n_doc,
-                       total);
+  q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto, "
+                       "valor_iva, descuento, pagada, monto, costo_neto_transporte, iva_transporte) "
+		       "VALUES (DEFAULT, %d, '%s', %d, now(), 0, 0, 0,'f', %d, %s, %s)",
+                       id_compra, rut_proveedor, n_doc, total_productos, 
+		       CUT (g_strdup_printf ("%.3f", costo_neto_transporte)),
+		       CUT (g_strdup_printf ("%.3f", monto_iva_transporte)));
   res = EjecutarSQL (q);
   g_free (q);
 
   if (id_compra != 0)
     {
-      q = g_strdup_printf ("UPDATE factura_compra SET forma_pago=(SELECT compra.forma_pago FROM compra WHERE id=%d)"
-                           " WHERE id_compra=%d", id_compra, id_compra);
+      q = g_strdup_printf ("UPDATE factura_compra SET forma_pago=(SELECT compra.forma_pago FROM compra WHERE id=%d) "
+                           "WHERE id_compra=%d", id_compra, id_compra);
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -2448,7 +2465,7 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total, g
 }
 
 gint
-IngresarGuia (gint n_doc, gint id_compra, gint total, gint d_emision, gint m_emision, gint y_emision)
+IngresarGuia (gint n_doc, gint id_compra, gint d_emision, gint m_emision, gint y_emision)
 {
   PGresult *res;
 

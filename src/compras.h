@@ -54,7 +54,7 @@ void InsertarCompras (void);
 
 void IngresoDetalle (GtkTreeSelection *selection, gpointer data);
 
-void IngresarCompra (gboolean invoice, gint n_document, gchar *monto, GDate *date);
+void IngresarCompra (gboolean invoice, gint n_document, gchar *monto, gint costo_bruto_transporte, GDate *date);
 
 void SelectProveedores (GtkWidget *widget, gpointer data);
 

@@ -101,7 +101,7 @@ ErrorMSG (GtkWidget *widget, gchar *motivo)
     gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 3);
 
     label = gtk_label_new (motivo);
-    gtk_label_set_use_markup (label, TRUE);
+    gtk_label_set_use_markup (GTK_LABEL(label), TRUE);
     gtk_widget_show (label);
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 3);
 
