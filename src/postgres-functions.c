@@ -1541,7 +1541,7 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
     {
       q = g_strdup_printf
         ("INSERT INTO factura_compra_detalle (id, id_factura_compra, barcode, cantidad, precio, iva, otros, costo_promedio) "
-         "VALUES (DEFAULT, %d, %s, %s, '%s', %ld, %ld, %s)",
+         "VALUES (DEFAULT, %d, %s, %s, %s, %ld, %ld, %s)",
          doc, product->barcode, cantidad, CUT (g_strdup_printf ("%.2f", product->precio_compra)), 
 	 lround (iva), lround (otros), CUT (g_strdup_printf ("%.3f", product->fifo)));
     }
