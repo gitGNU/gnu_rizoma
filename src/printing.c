@@ -826,6 +826,7 @@ print_cash_box_selected ( void )
 					     + atoi (PQvaluebycol (res, 0, "nullify_sell"))
 					     + atoi (PQvaluebycol (res, 0, "current_expenses"))
 					     + atoi (PQvaluebycol (res, 0, "bottle_return"))
+					     + atoi (PQvaluebycol (res, 0, "cash_close_outcome"))
 					     ));
 
   //Obtiene el monto en caja
@@ -839,6 +840,7 @@ print_cash_box_selected ( void )
 					   - atoi (PQvaluebycol (res, 0, "nullify_sell"))
 					   - atoi (PQvaluebycol (res, 0, "current_expenses"))
 					   - atoi (PQvaluebycol (res, 0, "bottle_return"))
+					   - atoi (PQvaluebycol (res, 0, "cash_close_outcome"))
 					   ));
 
   //Se crea el archivo
@@ -877,15 +879,16 @@ print_cash_box_selected ( void )
   fprintf (fp, "  %s \n\n", total_ingreso);
 
   fprintf (fp, "  EGRESOS: \n");
-  fprintf (fp, "  \"Retiros\", \"Ventas Anuladas\", \"Gastos Corrientes\", \"Devolucion Envase\", \"Perdida\", \"Sub-total egresos\" \n");
+  fprintf (fp, "  \"Retiros\", \"Ventas Anuladas\", \"Gastos Corrientes\", \"Devolucion Envase\", \"Perdida\", \"Retiro al cierre\", \"Sub-total egresos\" \n");
   fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_outcome")));
   fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "nullify_sell")));
   fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "current_expenses")));
   fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "bottle_return")));
   fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_loss_money")));
+  fprintf (fp, "  %s,", PutPoints (PQvaluebycol (res, 0, "cash_close_outcome")));
   fprintf (fp, "  %s \n\n", total_egreso);
 
-  fprintf (fp, "  ,,,,,Saldo en caja:\n ,,,,, %s \n", monto_caja);
+  fprintf (fp, "  ,,,,,,Saldo en caja:\n ,,,,,, %s \n", monto_caja);
 
   //Finaliza el archivo
   fclose (fp);

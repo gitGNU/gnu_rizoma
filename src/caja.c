@@ -607,27 +607,68 @@ CerrarCajaWin (void)
 {
   GtkWidget *widget;
   gint amount_must_have;
+  gint monto_base_caja;
+  gint egreso_cierre;
+  gint proxima_apertura;
 
+  monto_base_caja = rizoma_get_value_int ("MONTO_BASE_CAJA");
   amount_must_have = ArqueoCaja();
 
-  widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
-  gtk_label_set_text(GTK_LABEL(widget), g_strdup_printf("%d", amount_must_have));
-  g_object_set_data(G_OBJECT(widget), "must-have", (gpointer)amount_must_have);
+  if (amount_must_have > monto_base_caja)
+    egreso_cierre = amount_must_have - monto_base_caja;
+  else
+    egreso_cierre = 0;
 
+  proxima_apertura = (egreso_cierre == 0) ? amount_must_have : monto_base_caja;
+
+  /*Se setean los labels con la información correspondiente*/
+
+  /*Monto que debería haber en caja*/
+  widget = GTK_WIDGET (builder_get (builder, "lbl_caja_close_must_have"));
+  gtk_label_set_markup (GTK_LABEL (widget), 
+			g_strdup_printf ("<b>$ %s</b>", PutPoints (g_strdup_printf ("%d", amount_must_have))));
+  g_object_set_data(G_OBJECT (widget), "must-have", (gpointer)amount_must_have);
+  
+  /*Monto que se retirará de caja*/
+  widget = GTK_WIDGET (builder_get (builder, "lbl_cash_out"));
+  gtk_label_set_markup (GTK_LABEL (widget), 
+			g_strdup_printf ("<b>$ %s</b>", PutPoints (g_strdup_printf ("%d", egreso_cierre))));
+
+  /*Monto con el cual se iniciará la siguiente caja*/
+  widget = GTK_WIDGET (builder_get (builder, "lbl_initial_cash"));
+  gtk_label_set_markup (GTK_LABEL (widget), 
+			g_strdup_printf ("<b>$ %s</b>", PutPoints (g_strdup_printf ("%d", proxima_apertura))));
+
+
+  /*Diferencia de caja - se calcula dependiendo de lo que se ingrese en el siguiente widget*/
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_lost"));
   gtk_label_set_text(GTK_LABEL(widget), "");
+  gtk_widget_hide (widget);
 
+  /*Monto con el que se cierra caja*/
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
   gtk_entry_set_max_length (GTK_ENTRY(widget), 9);
   gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
   gtk_editable_select_region (GTK_EDITABLE(widget), 0, -1);
   gtk_widget_grab_focus(widget);
+  gtk_widget_hide (widget);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
-  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));  
+  gtk_entry_set_text(GTK_ENTRY(widget), g_strdup_printf("%d", amount_must_have));
+  gtk_widget_hide (widget);
+
+  /*Se ocultas los widgets restantes*/
+  widget = GTK_WIDGET (builder_get (builder, "label59"));
+  gtk_widget_hide (widget);
+
+  widget = GTK_WIDGET (builder_get (builder, "label60"));
+  gtk_widget_hide (widget);
+
+  widget = GTK_WIDGET (builder_get (builder, "label62"));
+  gtk_widget_hide (widget);
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_caja_close"));
-  gtk_widget_show_all(widget);
+  gtk_widget_show (widget);
 }
 
 /**

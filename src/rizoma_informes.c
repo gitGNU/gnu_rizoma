@@ -1966,12 +1966,13 @@ reports_win (void)
   /*---------------------------------------------------------------------------*/
 
   /* Cash Box */
-  store = gtk_list_store_new (5,
+  store = gtk_list_store_new (6,
                               G_TYPE_INT,
                               G_TYPE_STRING,
                               G_TYPE_INT,
                               G_TYPE_STRING,
-                              G_TYPE_INT);
+                              G_TYPE_INT,
+			      G_TYPE_INT);
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "tree_view_cash_box_lists"));
   gtk_tree_view_set_model (treeview, GTK_TREE_MODEL (store));
@@ -2007,6 +2008,7 @@ reports_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Fecha Cierre", renderer,
@@ -2018,13 +2020,24 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Monto Cierre", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Retiro al cierre", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Monto Cierre", renderer,
+                                                     "text", 5,
+                                                     NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   /* End Cash Box */
 
@@ -5611,6 +5624,7 @@ fill_cash_box_list ()
                           2, atoi (PQvaluebycol (res, i, "inicio")),
                           3, PQvaluebycol (res, i, "fecha_termino"),
                           4, atoi (PQvaluebycol (res, i, "monto_pre_cierre")),
+			  5, atoi (PQvaluebycol (res, i, "termino")),
                           -1);
     }
 }
