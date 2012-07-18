@@ -538,12 +538,15 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkTable" id="table1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="border_width">15</property>
                         <property name="n_rows">5</property>
                         <property name="n_columns">6</property>
+                        <property name="column_spacing">20</property>
                         <child>
                           <object class="GtkLabel" id="lbl_sell_average">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -556,6 +559,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_credit_average">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -568,6 +572,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_cash_average">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -578,6 +583,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_total_n">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -590,6 +596,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_credit_n">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -602,6 +609,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_total_amount">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -614,6 +622,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_cash_n">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -624,6 +633,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_credit_amount">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -636,6 +646,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_cash_amount">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -646,7 +657,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label22">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Promedio Ventas</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -660,7 +672,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label21">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Promedio Ventas Crédito</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -674,7 +687,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label20">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Promedio Ventas Contado</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -686,7 +700,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label19">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Nº Ventas</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -700,7 +715,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label18">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Nº Ventas Crédito</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -714,7 +730,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label17">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Ventas&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Nº Ventas Contado</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -726,7 +743,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label16">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Total&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Total Ventas</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -738,7 +756,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label14">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Ventas Contado&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Ventas Contado</property>
                             <property name="use_markup">True</property>
                           </object>
                         </child>
@@ -746,7 +765,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label23">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Descuento&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Descuento</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -758,7 +778,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label25">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Promedio&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Promedio Descuentos</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -772,6 +793,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_discount">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -784,6 +806,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_discount_n">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -796,6 +819,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_sell_discount_avarage">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -808,7 +832,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label24">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Nº Descuentos&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Nº Descuentos</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -822,7 +847,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label15">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Ventas Crédito&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Ventas Crédito</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -834,7 +860,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label61_iva">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;IVA&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">IVA</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -846,6 +873,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_total_iva">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -858,7 +886,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label63_otros">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Otros&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Otros Impuestos</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -872,6 +901,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_total_otros">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">3</property>
@@ -884,7 +914,8 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="label65_total_impuestos">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">&lt;b&gt;Total Impuestos&lt;/b&gt;</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Total Impuestos</property>
                             <property name="use_markup">True</property>
                           </object>
                           <packing>
@@ -898,6 +929,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkLabel" id="lbl_total_impuestos">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
                           </object>
                           <packing>
                             <property name="left_attach">5</property>
@@ -2131,7 +2163,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="xalign">1</property>
-                        <property name="label" translatable="yes">&lt;span size="xx-large"&gt;&lt;b&gt;Total:&lt;/b&gt;&lt;/span&gt;</property>
+                        <property name="label" translatable="yes">&lt;span size="xx-large"&gt;&lt;b&gt;Total en caja:&lt;/b&gt;&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>

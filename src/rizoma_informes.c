@@ -4985,6 +4985,11 @@ void
   gint total_iva;
   gint total_otros;
 
+  gint sell_average;
+  gint discount_average;
+  gint credit_average;
+  gint total_cash_average;
+
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
 
   /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
@@ -5002,7 +5007,7 @@ void
   /* Consulta que retorna el numero de ventas con descuento y la suma total
      con descuento en un intervalo de tiempo */
   res = EjecutarSQL
-    (g_strdup_printf ("select * from sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
+    (g_strdup_printf ("SELECT * FROM sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
                       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
                       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
 
@@ -5027,75 +5032,78 @@ void
 
   /*Taxes*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_iva")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_iva))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_otros")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_otros))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_impuestos")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_iva + total_otros))));
 
   /*Cash sell*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_amount")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_sell))));
 
-  if (total_cash_sell != 0)
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_n")),
-                          g_strdup_printf ("<span>%s</span>",
-                                           PutPoints (g_strdup_printf ("%d", total_cash))));
+  //if (total_cash_sell != 0)
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_n")),
+			g_strdup_printf ("<span weight='bold'>%s</span>",
+					 PutPoints (g_strdup_printf ("%d", total_cash))));
 
-  if (total_cash_sell != 0)
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_average")),
-                          g_strdup_printf ("<span>$%s</span>",
-                                           PutPoints (g_strdup_printf ("%d", total_cash_sell / total_cash))));
+  total_cash_average = (total_cash_sell == 0 || total_cash == 0) ? 0 : total_cash_sell / total_cash;
+  //if (total_cash_sell != 0)
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_cash_average")),
+			g_strdup_printf ("<span weight='bold'>%s</span>",
+					 PutPoints (g_strdup_printf ("%d", total_cash_average))));
 
   /*Credit sell*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_credit_amount")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_credit_sell))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_credit_n")),
-                        g_strdup_printf ("<span>%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_credit))));
 
-  if (total_credit_sell != 0)
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_credit_average")),
-                          g_strdup_printf ("<span>$%s</span>",
-                                           PutPoints (g_strdup_printf ("%d", total_credit_sell / total_credit))));
+  credit_average = (total_credit_sell == 0 || total_credit == 0) ? 0 : total_credit_sell / total_credit;
+  //if (total_credit_sell != 0)
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_credit_average")),
+			g_strdup_printf ("<span weight='bold'>%s</span>",
+					 PutPoints (g_strdup_printf ("%d", credit_average))));
 
   /*Total sell*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_total_amount")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_sell))));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_total_n")),
-                        g_strdup_printf ("<span>%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d",total_ventas))));
 
-  if (total_ventas != 0)
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_average")),
-                          g_strdup_printf ("<span>$%s</span>",
-                                           PutPoints (g_strdup_printf ("%d", total_sell / total_ventas))));
+  sell_average = (total_sell == 0 || total_ventas == 0) ? 0 : total_sell / total_ventas;
+  //if (total_ventas != 0)
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_average")),
+			g_strdup_printf ("<span weight='bold'>%s</span>",
+					 PutPoints (g_strdup_printf ("%d", sell_average))));
 
   /*Discounts*/
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount")),
-                        g_strdup_printf ("<span>$%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_cash_discount))));
 
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_n")),
-                        g_strdup_printf ("<span>%s</span>",
+                        g_strdup_printf ("<span weight='bold'>%s</span>",
                                          PutPoints (g_strdup_printf ("%d", total_discount))));
 
-  if (total_cash_discount != 0)
-    gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_avarage")),
-			  g_strdup_printf ("<span>$%s</span>",
-					   PutPoints (g_strdup_printf ("%d",
-								       total_cash_discount / total_discount))));
+  discount_average = (total_cash_discount == 0 || total_discount == 0) ? 0 : total_cash_discount / total_discount;
+  //if (total_cash_discount != 0)
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_sell_discount_avarage")),
+			g_strdup_printf ("<span weight='bold'>%s</span>",
+					 PutPoints (g_strdup_printf ("%d", discount_average))));
 
   //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);

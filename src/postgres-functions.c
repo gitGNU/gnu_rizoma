@@ -780,10 +780,13 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
 
   res = EjecutarSQL
     (g_strdup_printf
-     ("SELECT SUM((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), "
-      "count (*) FROM venta WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-      "fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND ((tipo_venta)=%d OR (tipo_venta)=%d) "
-      "AND venta.id NOT IN ( select id_sale from venta_anulada)",
+     ("SELECT COALESCE (SUM ((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), 0), "
+      "       COALESCE (count (*), 0) "
+      "FROM venta "
+      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND fecha<to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "AND ((tipo_venta)=%d OR (tipo_venta)=%d) "
+      "AND venta.id NOT IN (SELECT id_sale FROM venta_anulada)",
       from_day, from_month, from_year, to_day+1, to_month, to_year, CREDITO, TARJETA));
 
   if (res == NULL)
@@ -836,10 +839,11 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
   PGresult *res;
 
   res = EjecutarSQL (g_strdup_printf
-                     ("SELECT round(sum(vd.precio * vd.cantidad -descuento)),count(Distinct(v.id)) "
-                      "FROM venta v,venta_detalle vd "
-                      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                      "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+                     ("SELECT COALESCE (ROUND(SUM(vd.precio * vd.cantidad - descuento)), 0), "
+		      "       COALESCE (COUNT(DISTINCT(v.id)), 0) "
+                      "FROM venta v, venta_detalle vd "
+                      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
+                      "AND fecha<to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
                       "AND  v.id NOT IN (select id_sale from venta_anulada)",
                       from_day, from_month, from_year, to_day+1, to_month, to_year));
 
