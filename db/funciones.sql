@@ -3964,8 +3964,8 @@ begin
         where e.id_caja = cash_box_id
 	and te.descrip = 'Retiro por cierre';
 
-        if cash_outcome is null then
-                cash_outcome := 0;
+        if cash_close_outcome is null then
+                cash_close_outcome := 0;
         end if;
 
 
