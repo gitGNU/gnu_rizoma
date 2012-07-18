@@ -2030,7 +2030,7 @@ reports_win (void)
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Monto Cierre", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Saldo Cierre", renderer,
                                                      "text", 5,
                                                      NULL);
   gtk_tree_view_append_column (treeview, column);
