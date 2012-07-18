@@ -126,6 +126,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_CANTIDAD_A", "1");
   g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_CANTIDAD_B", "1");
   g_key_file_set_string (file, "RIZOMA", "BAR_NUM_DECIMAL", "1");
+  g_key_file_set_string (file, "RIZOMA", "MONTO_BASE_CAJA", "0");  
   
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))

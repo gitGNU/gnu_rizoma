@@ -643,6 +643,8 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   gint must_have;
   gint real_have;
   gint end_amount;
+  gint monto_base_caja=rizoma_get_value_int ("MONTO_BASE_CAJA");
+  gint motivo;
 
   //Lo que deberia tener
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "lbl_caja_close_must_have"));
@@ -657,31 +659,37 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
   end_amount = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
   /*(En los casos donde hay más o menos dinero, se debe preguntar el motivo)*/  
-  if (end_amount < must_have) //Si hay menos dinero del que debería
-    {
-      con_cierre = TRUE; //FLAG
+  /* if (end_amount < must_have) //Si hay menos dinero del que debería */
+  /*   { */
+  /*     con_cierre = TRUE; //FLAG */
+  /*     CloseCajaWin (); */
+  /*     VentanaEgreso(must_have - end_amount); */
+  /*   }    */
+  /* else if (end_amount > must_have) //Si hay más dinero del que debería */
+  /*   { */
+  /*     con_cierre = TRUE; //FLAG */
+  /*     CloseCajaWin (); */
+  /*     VentanaIngreso (end_amount - must_have); */
+  /*   } */
+  /* else if (end_amount == must_have) //Si está el dinero que debería */
+  /*   { */
+
+  motivo = atoi (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_egreso WHERE descrip='Retiro por cierre'"), 0, "id"));
+  if (must_have > monto_base_caja)
+    //Se deja en caja el monto base
+    Egresar (must_have-monto_base_caja, motivo, user_data->user_id);
+
+  if (CerrarCaja(ReturnSaldoCaja()))
+    {      
       CloseCajaWin ();
-      VentanaEgreso(must_have - end_amount);
-    }   
-  else if (end_amount > must_have) //Si hay más dinero del que debería
-    {
-      con_cierre = TRUE; //FLAG
-      CloseCajaWin ();
-      VentanaIngreso (end_amount - must_have);
+      /*aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
+	gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);*/
+      print_cash_box_info (get_last_cash_box_id (), 0, 0, NULL);
+      gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_closed")));
     }
-  else if (end_amount == must_have) //Si está el dinero que debería
-    {
-      if (CerrarCaja(end_amount))
-	{      
-	  CloseCajaWin ();
-	  /*aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "quit_message"));
-	    gtk_dialog_response (GTK_DIALOG(aux_widget), GTK_RESPONSE_YES);*/
-	  print_cash_box_info (get_last_cash_box_id (), 0, 0, NULL);
-	  gtk_widget_show_all (GTK_WIDGET (builder_get (builder, "dialog_cash_box_closed")));
-	}
-      else
-	ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
-    }
+  else
+    ErrorMSG (aux_widget, "No se pudo cerrar la caja apropiadamente\nPor favor intente nuevamente");
+  //}
 }
 
 /**

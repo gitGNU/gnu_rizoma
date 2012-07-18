@@ -3890,7 +3890,8 @@ create or replace function cash_box_report (
         out cash_payed_money integer,
 	out cash_loss_money integer,
 	out bottle_return integer,
-	out bottle_deposit integer
+	out bottle_deposit integer,
+	out cash_close_outcome integer
 	)
 returns setof record as $$
 declare
@@ -3955,6 +3956,18 @@ begin
         if cash_outcome is null then
                 cash_outcome := 0;
         end if;
+
+	select sum (monto) into cash_close_outcome
+        from egreso e 
+	inner join tipo_egreso te
+	on e.tipo = te.id
+        where e.id_caja = cash_box_id
+	and te.descrip = 'Retiro por cierre';
+
+        if cash_outcome is null then
+                cash_outcome := 0;
+        end if;
+
 
 	select sum (monto) into nullify_sell
         from egreso e 

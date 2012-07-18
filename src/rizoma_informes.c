@@ -605,6 +605,9 @@ fill_caja_data (void)
 
 	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_bottle_return")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "bottle_return"))));
+	  
+	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_close_out")),
+                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_close_outcome"))));
 
           /* if (strcmp (PQvaluebycol (res, 0, 6), "") != 0) */
           /*   gtk_label_set_markup (GTK_LABEL (gastos_corrientes), */
@@ -624,6 +627,7 @@ fill_caja_data (void)
 				   + atoi (PQvaluebycol (res, 0, "nullify_sell"))
 				   + atoi (PQvaluebycol (res, 0, "current_expenses"))
 				   + atoi (PQvaluebycol (res, 0, "bottle_return"))
+				   + atoi (PQvaluebycol (res, 0, "cash_close_outcome"))
                                    ))));
 
           gtk_label_set_markup
@@ -642,6 +646,7 @@ fill_caja_data (void)
 				- atoi (PQvaluebycol (res, 0, "nullify_sell"))
 				- atoi (PQvaluebycol (res, 0, "current_expenses"))
 				- atoi (PQvaluebycol (res, 0, "bottle_return"))
+				- atoi (PQvaluebycol (res, 0, "cash_close_outcome"))
 				))));
         }
     }

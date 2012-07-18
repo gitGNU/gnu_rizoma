@@ -34,6 +34,7 @@ INSERT INTO tipo_egreso VALUES (DEFAULT, 'Perdida', 't');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Gastos Corrientes', 't');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Devolucion envases', 't');
 INSERT INTO tipo_egreso VALUES (DEFAULT, 'Nulidad de Venta', 'f');
+INSERT INTO tipo_egreso VALUES (DEFAULT, 'Retiro por cierre', 'f');
 
 INSERT INTO tipo_mercaderia VALUES (DEFAULT, 'Corriente');
 INSERT INTO tipo_mercaderia VALUES (DEFAULT, 'Materia Prima');
