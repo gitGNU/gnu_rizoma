@@ -914,11 +914,9 @@ RutExist (const gchar *rut)
 gint
 InsertDeuda (gint id_venta, gint rut, gint vendedor)
 {
-  PGresult *res;
-
-  res = EjecutarSQL (g_strdup_printf ("INSERT INTO deuda (id_venta, rut_cliente, vendedor) "
-                                      "VALUES (%d, %d, %d)",
-                                      id_venta, rut, vendedor));
+  EjecutarSQL (g_strdup_printf ("INSERT INTO deuda (id_venta, rut_cliente, vendedor) "
+				"VALUES (%d, %d, %d)",
+				id_venta, rut, vendedor));
 
   return 0;
 }
@@ -1247,12 +1245,11 @@ ReturnUserExist (gchar *user)
 void
 ChangeEnableCredit (gboolean status, gint rut)
 {
-  PGresult *res;
   gchar *q;
 
   q = g_strdup_printf ("UPDATE cliente SET credito_enable='%d' WHERE rut=%d",
                        (gint) status, rut);
-  res = EjecutarSQL (q);
+  EjecutarSQL (q);
   g_free (q);
 }
 
@@ -1273,12 +1270,10 @@ ClientDelete (gint rut)
 gboolean
 emisor_delete (gint id)
 {
-  PGresult *res = NULL;
-
   //La consulta comprueba si hay facturas que no esten facturadas ni pagadas que pertenezcan al proveedor especificado
   if (!DataExist (g_strdup_printf ("SELECT * FROM cheque_rest WHERE id_emisor = %d AND facturado = 'f' AND pagado = 'f'", id)))
     {
-      res = EjecutarSQL (g_strdup_printf ("UPDATE emisor_cheque SET activo = 'f' WHERE id=%d", id));
+      EjecutarSQL (g_strdup_printf ("UPDATE emisor_cheque SET activo = 'f' WHERE id=%d", id));
       return TRUE;
     }
   else
@@ -1289,12 +1284,10 @@ emisor_delete (gint id)
 gboolean
 fact_cheque_rest (gint id)
 {
-  PGresult *res = NULL;
-
   //La consulta comprueba si hay facturas que no esten facturadas ni pagadas que pertenezcan al proveedor especificado
   if (!DataExist (g_strdup_printf ("SELECT * FROM cheque_rest WHERE id = %d AND facturado = 't'", id)))
     {
-      res = EjecutarSQL (g_strdup_printf ("UPDATE cheque_rest SET facturado = 't' WHERE id=%d", id));
+      EjecutarSQL (g_strdup_printf ("UPDATE cheque_rest SET facturado = 't' WHERE id=%d", id));
       return TRUE;
     }
   else
@@ -1457,7 +1450,6 @@ void
 SaveBuyProducts (Productos *header, gint id_compra)
 {
   Productos *products = header;
-  PGresult *res;
   gdouble iva = 0, otros = 0;
   gchar *cantidad;
   gchar *precio_compra;
@@ -1489,7 +1481,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
                           products->product->precio, products->product->barcode,
                           products->product->margen, lround (iva),
                           lround (otros));
-      res = EjecutarSQL(q);
+      EjecutarSQL(q);
 
       g_free(precio_compra);
       g_free(cantidad);
@@ -1638,16 +1630,12 @@ gboolean
 DiscountStock (Productos *header)
 {
   Productos *products = header;
-  gint stock;
   PGresult *res;
   gchar *cantidad;
 
   do
     {
       cantidad = CUT (g_strdup_printf ("%.2f", products->product->cantidad));
-
-      stock = atoi (GetDataByOne (g_strdup_printf ("SELECT stock FROM select_producto(%s)",
-                                                   products->product->barcode)));
 
       res = EjecutarSQL (g_strdup_printf ("UPDATE productos SET stock=stock-%s WHERE barcode=%s",
                                           cantidad, products->product->barcode));
@@ -1748,7 +1736,7 @@ FiFo (gchar *barcode, gint compra)
 gboolean
 SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 {
-  PGresult *res;
+  //PGresult *res;
   Productos *header = products;
   gchar *q;
 
@@ -1771,7 +1759,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
 
   //Tipo de mercadería
-  gint corriente;
+  //gint corriente;
 
   //Se inicializan los impuestos
   iva = otros = 0;
@@ -1782,7 +1770,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
   monto_descuento = atoi (g_strdup (PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT descuento FROM venta WHERE id = %d", id_venta)), 0, "descuento")));
 
   //Se obtiene el id del tipo mercadería (corriente)
-  corriente = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id")));
+  //corriente = atoi (g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE'"), 0, "id")));
 
   if (tipo_venta == MIXTO)
     {
@@ -1988,7 +1976,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 			   CUT (g_strdup_printf ("%.5f", proporcion_otros)));
 
       printf ("la consulta es %s\n", q);
-      res = EjecutarSQL (q);
+      EjecutarSQL (q);
       g_free (q);
 
       products = products->next;
@@ -2274,9 +2262,7 @@ AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gc
 gboolean
 SetProductosIngresados (void)
 {
-  PGresult *res;
-
-  res = EjecutarSQL ("UPDATE compra_detalle SET ingresado='t' WHERE cantidad_ingresada=cantidad");
+  EjecutarSQL ("UPDATE compra_detalle SET ingresado='t' WHERE cantidad_ingresada=cantidad");
 
   return TRUE;
 }
@@ -2797,7 +2783,7 @@ InversionAgregada (gchar *barcode)
 {
   PGresult *res;
   gdouble stock = 0.0;
-  gint i, tuples;
+  gint i;
   gdouble vendidos = strtod (PUT(GetDataByOne (g_strdup_printf ("SELECT vendidos FROM producto WHERE barcode='%s'",
 								barcode))), (char **)NULL);
   gint suma = 0;
@@ -2816,8 +2802,6 @@ InversionAgregada (gchar *barcode)
 
   if (res == NULL)
     return 0;
-
-  tuples = PQntuples (res);
 
   for (i = 0; stock < vendidos; i++)
     {
@@ -2896,14 +2880,13 @@ SetModificacionesProducto (gchar *barcode, gchar *dias_stock, gchar *margen, gch
                            gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
                            gint cantidad_mayorista)
 {
-  PGresult *res;
   gchar *q;
 
   q = g_strdup_printf ("UPDATE producto SET dias_stock=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
                        "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
                        dias_stock, CUT(margen), new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
                        (gint)mayorista, barcode);
-  res = EjecutarSQL (q);
+  EjecutarSQL (q);
   g_free (q);
 }
 
@@ -2985,7 +2968,6 @@ PagarFactura (gint id_invoice)
 void
 AjusteStock (gdouble nuevo_stock, gint motivo, gchar *barcode)
 {
-  PGresult *res;
   gdouble stock = GetCurrentStock (barcode);
   gchar *q;
   gdouble cantidad_merma;
@@ -2995,7 +2977,7 @@ AjusteStock (gdouble nuevo_stock, gint motivo, gchar *barcode)
       cantidad_merma = stock - nuevo_stock;
       q = g_strdup_printf ("SELECT * FROM registrar_merma (%s, %s, %d)",
 			   barcode, CUT (g_strdup_printf ("%.3f", cantidad_merma)), motivo);
-      res = EjecutarSQL (q);
+      EjecutarSQL (q);
       g_free (q);
     }
   else
@@ -3166,7 +3148,6 @@ SetModificacionesProveedor (gchar *rut, gchar *nombre, gchar *direccion, gchar *
                             gchar *ciudad, gchar *fono, gchar *web, gchar *contacto,
                             gchar *email, gchar *giro, gchar *lap_rep)
 {
-  PGresult *res;
   gchar *q;
   gchar **aux;
   gint lrep; // Lapso de reposicion
@@ -3181,7 +3162,7 @@ SetModificacionesProveedor (gchar *rut, gchar *nombre, gchar *direccion, gchar *
                        "comuna='%s', telefono='%s', email='%s', web='%s', contacto='%s', giro='%s', lapso_reposicion=%d "
                        "WHERE rut=%s", nombre, direccion, ciudad,
                        comuna, fono, email, web, contacto, giro, lrep, aux[0]);
-  res = EjecutarSQL (q);
+  EjecutarSQL (q);
   g_free (q);
   g_strfreev(aux);
 
@@ -4201,7 +4182,7 @@ cantidad_traspaso_es_modificable (gchar *barcode, gdouble cantidad_original,
   gint tuplas, i;
   gdouble cantidad_a_disminuir, cantidad_pre_ingreso, 
           cantidad_min;
-  gchar *query, *fecha;
+  gchar *query;
   PGresult *res;
 
   /*SI se recibió más cantidad o se envió menos cantidad es modificable*/
@@ -4225,9 +4206,7 @@ cantidad_traspaso_es_modificable (gchar *barcode, gdouble cantidad_original,
   res = EjecutarSQL (query);
   g_free (query);
 
-  if (PQntuples (res) > 0)
-    fecha = g_strdup (PQvaluebycol (res, 0, "fecha"));
-  else
+  if (PQntuples (res) <= 0)
     return 0;
 
   /*Se obtiene la informacion de las compras posteriores a esta*/

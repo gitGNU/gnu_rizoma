@@ -407,12 +407,12 @@ void
 statusbar_push (GtkStatusbar *statusbar, const gchar *text, guint duration)
 {
   guint *context_id;
-  guint message_id;
+  //guint message_id;
 
   context_id = g_malloc(sizeof(guint));
 
   *context_id = gtk_statusbar_get_context_id (GTK_STATUSBAR(statusbar), "rizoma-compras");
-  message_id = gtk_statusbar_push (statusbar, *context_id, text);
+  gtk_statusbar_push (statusbar, *context_id, text);
 
   g_object_set_data (G_OBJECT(statusbar), "context_id", context_id);
 

@@ -363,9 +363,9 @@ GuardarModificacionesProducto (void)
   precio_actual = PQvaluebycol
     (EjecutarSQL (g_strdup_printf ("SELECT precio FROM producto WHERE barcode = %s", barcode)), 0, "precio");
   if (!g_str_equal (new_venta, precio_actual))
-    CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), NULL);
-  else
     CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), NULL);
+  else
+    CalculateTempValues (GTK_ENTRY (builder_get (builder, "entry_informerca_price")), NULL);
 
   widget = GTK_WIDGET (builder_get (builder, "entry_informerca_price"));
   new_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
@@ -1338,7 +1338,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   gint otros_index;
 
   PGresult *res;
-  gint tuples, familia_id;
+  gint familia_id; //tuples
 
   materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA_PRIMA'"), 0, "id"));
   compuesta = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA'"), 0, "id"));
@@ -1439,7 +1439,7 @@ ModificarProducto (GtkWidget *widget_barcode)
   /*IVA*/
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
   res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
-  tuples = PQntuples (res);
+  //tuples = PQntuples (res);
 
   if (GetIVA (barcode) != 0)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), TRUE);

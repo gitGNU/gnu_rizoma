@@ -183,7 +183,7 @@ refresh_labels (void)
 void
 SaveDatosNegocio (GtkWidget *widget, gpointer data)
 {
-  PGresult *res, *res2;
+  PGresult *res;// *res2;
   GtkWidget *aux_widget;
   gchar **rut;
 
@@ -238,7 +238,7 @@ SaveDatosNegocio (GtkWidget *widget, gpointer data)
           "direccion='%s', comuna='%s', ciudad='%s', giro='%s', at='%s'", razon_social_value, atoi (rut[0]), rut[1], nombre_fantasia_value,
           fono_value, fax_value, direccion_value, comuna_value, ciudad_value, giro_value, at_value));
 
-      res2 = EjecutarSQL(g_strdup_printf ("UPDATE bodega SET nombre='%s' where id=1", nombre_fantasia_value));
+      EjecutarSQL(g_strdup_printf ("UPDATE bodega SET nombre='%s' where id=1", nombre_fantasia_value));
     }
 
   if (res != NULL)
@@ -383,7 +383,6 @@ on_btn_save_stores_clicked()
   GtkTreeIter iter;
   gboolean valid;
   gchar *id, *name, *q;
-  PGresult *res;
 
   valid = gtk_tree_model_get_iter_first (model, &iter);
   while (valid)
@@ -395,7 +394,7 @@ on_btn_save_stores_clicked()
                           -1);
       
       q = g_strdup_printf ("UPDATE bodega SET nombre=upper('%s') WHERE id=%s", name, id);
-      res = EjecutarSQL (q);
+      EjecutarSQL (q);
       g_free (q);
       
       // Iterates to the next row --
@@ -586,12 +585,12 @@ ask_delete_store (void)
 {
   GtkWidget *window;
   GtkWidget *tree;
-  GtkListStore *store;
+  //GtkListStore *store;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
 
   tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_stores"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  //store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
@@ -619,7 +618,6 @@ on_ask_delete_store_response (GtkDialog *dialog,
       GtkTreeIter iter;
 
       gchar *q, *id_bodega;
-      PGresult *res;
 
       if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
 	{
@@ -628,7 +626,7 @@ on_ask_delete_store_response (GtkDialog *dialog,
 			      -1);
 
 	  q = g_strdup_printf ("UPDATE bodega SET estado = false WHERE id = %s", id_bodega);
-	  res = EjecutarSQL (q);
+	  EjecutarSQL (q);
 	  g_free (q);
 	}
       

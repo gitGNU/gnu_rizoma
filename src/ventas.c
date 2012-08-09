@@ -315,7 +315,7 @@ SelectChequeDate (GtkToggleButton *widget, gpointer data)
   GtkWidget *vbox;
   GtkCalendar *calendar;
   GtkRequisition req;
-  gint h, w;
+  gint h; //w;
   gint x, y;
   gint button_y, button_x;
   gboolean toggle = gtk_toggle_button_get_active (widget);
@@ -326,7 +326,7 @@ SelectChequeDate (GtkToggleButton *widget, gpointer data)
 
       gtk_widget_size_request (GTK_WIDGET (widget), &req);
       h = req.height;
-      w = req.width;
+      //w = req.width;
 
       button_y = GTK_WIDGET (widget)->allocation.y;
       button_x = GTK_WIDGET (widget)->allocation.x;
@@ -1937,7 +1937,7 @@ CancelSell (GtkWidget *widget, gpointer data)
   GtkTreeIter iter;
   GtkTreeSelection *selection;
 
-  PGresult *res;
+  //PGresult *res;
 
   if (cancel == 1)
     {
@@ -1950,7 +1950,7 @@ CancelSell (GtkWidget *widget, gpointer data)
                               -1);
           gchar *q;
           q = g_strdup_printf ("select cancelar_venta(%s)", id_venta);
-          res = EjecutarSQL (q);
+          EjecutarSQL (q);
           g_free(id_venta);
           g_free(q);
           gtk_list_store_remove(venta->cancel_store,&iter);
@@ -3003,12 +3003,12 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   gchar *str_rut;
   gint rut;
   gint vendedor;
-  gint tipo_vendedor;
+  //gint tipo_vendedor;
   gint ticket;
   gint monto;
   gint maquina;
 
-  tipo_vendedor = rizoma_get_value_int ("VENDEDOR");
+  //tipo_vendedor = rizoma_get_value_int ("VENDEDOR");
 
   //amount
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "label_total"));
@@ -3107,7 +3107,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
 
   //Widgets de la segunda ventana
   GtkWidget *f_type_pay, *f_name, *f_rut, *f_amount, *f_code, *type_sell,
-    *s_name, *s_rut, *s_amount, *diferencia, *w_cr;
+    *s_name, *s_rut, *s_amount, *w_cr; //*diferencia
 
   //Se obtienen todos los widget
   f_type_pay = GTK_WIDGET (builder_get (builder, "lbl_mixed_pay_type"));
@@ -3118,7 +3118,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
   s_name = GTK_WIDGET (builder_get (builder, "lbl_name_mixed_pay_2"));
   s_rut = GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay_2"));
   s_amount = GTK_WIDGET (builder_get (builder, "entry_int_amount_mixed_pay2"));
-  diferencia = GTK_WIDGET (builder_get (builder, "lbl_diff_amount2"));
+  //diferencia = GTK_WIDGET (builder_get (builder, "lbl_diff_amount2"));
   w_cr = GTK_WIDGET (builder_get (builder, "radio_btn_cheques"));
   f_code = GTK_WIDGET (builder_get (builder, "entry_int_code_mixed_pay"));
 
@@ -3320,7 +3320,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   gchar *rut_cuenta1, *rut_cuenta2;
   gchar **str_splited;
   gint rut1, rut2;
-  gchar *dv1, *dv2;
+  gchar *dv1; //*dv2;
 
   gint maquina, vendedor;
   gint tipo_documento, ticket;
@@ -3370,7 +3370,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
       //Obtiene el rut sin dígito verificador
       str_splited = parse_rut (rut_cuenta2);
       rut2 = atoi (str_splited[0]);
-      dv2 = g_strdup (str_splited[1]);
+      //dv2 = g_strdup (str_splited[1]);
       g_free (str_splited);
 
       //verifica que el cliente tenga cupo disponible
@@ -3387,7 +3387,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
     {
       rut_cuenta2 = g_strdup_printf ("0");
       rut2 = 0;
-      dv2 = g_strdup_printf ("0");
+      //dv2 = g_strdup_printf ("0");
       tipo_pago2 = CASH;
       //afecto_impuesto2 = TRUE;
     }

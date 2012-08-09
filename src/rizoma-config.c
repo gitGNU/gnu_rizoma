@@ -69,7 +69,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
 {
   GKeyFile *file;
   gchar *rizoma_path;
-  gchar *ssl;
+  //gchar *ssl;
 
   rizoma_path = g_strconcat(g_getenv("HOME"), "/.rizoma", NULL);
 
@@ -83,7 +83,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
       g_key_file_set_string (file, "RIZOMA", "SERVER_HOST", "localhost");
       g_key_file_set_string (file, "RIZOMA", "PORT", pg_port);
 
-      ssl = pg_ssl ? "require" : "disable";
+      //ssl = pg_ssl ? "require" : "disable";
       g_key_file_set_string (file, "RIZOMA", "SSLMODE", "require");
     }
   else
@@ -94,7 +94,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
       g_key_file_set_string (file, "RIZOMA", "SERVER_HOST", server_host);
       g_key_file_set_string (file, "RIZOMA", "PORT", server_port);
 
-      ssl = server_ssl ? "require" : "disable";
+      //ssl = server_ssl ? "require" : "disable";
       g_key_file_set_string (file, "RIZOMA", "SSLMODE", "require");
     }
 
@@ -126,7 +126,8 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_CANTIDAD_A", "1");
   g_key_file_set_string (file, "RIZOMA", "BAR_RANGO_CANTIDAD_B", "1");
   g_key_file_set_string (file, "RIZOMA", "BAR_NUM_DECIMAL", "1");
-  g_key_file_set_string (file, "RIZOMA", "MONTO_BASE_CAJA", "0");  
+  g_key_file_set_string (file, "RIZOMA", "MONTO_BASE_CAJA", "0");
+  g_key_file_set_string (file, "RIZOMA", "MODO_INVENTARIO", "0");
   
 
   if (g_file_set_contents (rizoma_path, g_key_file_to_data (file, NULL, NULL), -1, NULL))

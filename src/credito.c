@@ -795,7 +795,7 @@ on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
   GtkListStore *store;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
-  gchar *rut, *dv, *nombre;
+  gchar *rut, *nombre; //*dv
 
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sca"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux)));
@@ -816,7 +816,7 @@ on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
   aux = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_search_client_abono"));
   gtk_widget_hide (aux);
 
-  dv = invested_strndup (rut, strlen (rut)-1);
+  //dv = invested_strndup (rut, strlen (rut)-1);
   rut = g_strndup (rut, strlen (rut)-1);
   
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_client_abono")), rut);
@@ -1970,7 +1970,7 @@ ModificarCliente (void)
   gchar *fono;
   gchar *direccion;
   gchar *credito;
-  gchar *rut_ver, *giro;
+  gchar *giro; //*rut_ver
   gchar *rut;
   gchar *rut_split;
   gint rut_n;
@@ -1999,7 +1999,7 @@ ModificarCliente (void)
       fono = PQvaluebycol(res, 0, "telefono");
       direccion = PQvaluebycol(res, 0, "direccion");
       credito = PQvaluebycol(res, 0, "credito");
-      rut_ver = PQvaluebycol(res, 0, "dv");
+      //rut_ver = PQvaluebycol(res, 0, "dv");
       giro = PQvaluebycol(res, 0, "giro");
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_name"));
@@ -2721,9 +2721,9 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
   gint id;
   gchar *rut, *dv, *rs, *tel, *dir, *comuna, *ciudad, *giro;
   GtkEntry *rut_w, *dv_w, *rs_w, *tel_w, *dir_w, *comuna_w, *ciudad_w, *giro_w;
-  GtkWidget *wnd;
+  //GtkWidget *wnd;
 
-  wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_check_manager"));
+  //wnd = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_mod_check_manager"));
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "statusbar"));
 
   rut_w = GTK_ENTRY (gtk_builder_get_object(builder, "entry_mod_cm_rut"));

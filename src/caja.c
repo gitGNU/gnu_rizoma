@@ -682,8 +682,8 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
 {
   GtkWidget *aux_widget;
   gint must_have;
-  gint real_have;
-  gint end_amount;
+  //gint real_have;
+  //gint end_amount;
   gint monto_base_caja=rizoma_get_value_int ("MONTO_BASE_CAJA");
   gint motivo;
 
@@ -693,11 +693,11 @@ CerrarLaCaja (GtkWidget *widget, gpointer data)
 
   //Lo que realmente tiene
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_have"));
-  real_have = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+  //real_have = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
   //El monto de cierre (Lo que realmente tiene pero filtrado)
   aux_widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_caja_close_amount"));
-  end_amount = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
+  //end_amount = atoi(gtk_entry_get_text(GTK_ENTRY(aux_widget)));
 
   /*(En los casos donde hay más o menos dinero, se debe preguntar el motivo)*/  
   /* if (end_amount < must_have) //Si hay menos dinero del que debería */

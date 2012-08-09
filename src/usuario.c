@@ -137,7 +137,6 @@ DeleteUser (GtkWidget *widget, gpointer data)
   GtkTreeSelection *selection;
   GtkTreeIter iter;
   gchar *id;
-  PGresult *res;
 
   tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
   store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
@@ -151,7 +150,7 @@ DeleteUser (GtkWidget *widget, gpointer data)
 
       if (strcmp (id, "1") != 0)
         {
-          res = EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
+          EjecutarSQL (g_strdup_printf ("select * from delete_user(%s)", id));
           FillUsers ();
         }
       else
@@ -179,12 +178,12 @@ AskDelete (void)
 {
   GtkWidget *window;
   GtkWidget *tree;
-  GtkListStore *store;
+  //GtkListStore *store;
   GtkTreeSelection *selection;
   GtkTreeIter iter;
 
   tree = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_users"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
+  //store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree)));
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
