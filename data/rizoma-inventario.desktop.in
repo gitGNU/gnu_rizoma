@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Rizoma Inventario
+GenericName=Punto de venta
+X-GNOME-FullName=POS Rizoma Inventario
+Comment=Módulo de inventario rapido de POS Rizoma
+Exec=rizoma-inventario
+Icon=administracion
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Office;
+Version=1.0

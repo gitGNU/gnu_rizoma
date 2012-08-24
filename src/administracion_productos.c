@@ -1438,7 +1438,7 @@ ModificarProducto (GtkWidget *widget_barcode)
 
   /*IVA*/
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "checkbtn_edit_prod_iva"));
-  res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
+  //res = EjecutarSQL (g_strdup_printf ("SELECT * FROM get_iva( %s )", barcode));
   //tuples = PQntuples (res);
 
   if (GetIVA (barcode) != 0)

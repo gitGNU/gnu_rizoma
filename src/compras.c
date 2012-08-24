@@ -1866,6 +1866,9 @@ compras_win (void)
   only_number_filer_on_container (GTK_CONTAINER (builder_get (builder, "wnd_asoc_comp")));
   only_number_filer_on_container (GTK_CONTAINER (builder_get (builder, "wnd_ingress_invoice")));
   gtk_widget_show_all (compras_gui);
+
+  poblar_pedido_temporal ();
+
 } // compras_win (void)
 
 
@@ -2387,6 +2390,123 @@ CalcularPrecioFinal (void)
 
 
 void
+AddToTree (void)
+{
+  GtkTreeIter iter;
+  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
+  gboolean enviable;
+
+  enviable = (compra->current->stock < compra->current->cantidad) ? FALSE : TRUE;
+
+  gtk_list_store_insert_after (store, &iter, NULL);
+  gtk_list_store_set (store, &iter,
+		      0, compra->current->barcode,
+                      1, compra->current->codigo,
+                      2, g_strdup_printf ("%s %s %d %s", compra->current->producto,
+                                          compra->current->marca, compra->current->contenido,
+                                          compra->current->unidad),
+                      3, compra->current->cantidad,
+		      4, compra->current->precio,
+                      5, compra->current->precio_compra,
+                      6, lround ((gdouble) compra->current->cantidad * compra->current->precio_compra),
+		      7, enviable,
+                      -1);
+
+  compra->current->iter = iter;
+
+  if (enviable == FALSE)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
+}
+
+
+void
+add_to_buy_struct (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint margen, gint precio)
+{
+  GtkListStore *store_buy;
+  store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
+
+  Producto *check;
+
+  if (compra->header_compra != NULL)
+    check = SearchProductByBarcode (barcode, FALSE);
+  else
+    check = NULL;
+
+  if (check == NULL)
+    {
+      if (CompraAgregarALista (barcode, cantidad, precio, precio_compra, margen, FALSE))
+	{
+	  AddToTree ();
+	}
+      else
+	{
+	  return;
+	}
+    }
+  else
+    {
+      //No se permite ingresar 2 costos o precios distintos al mismo producto en una misma instancia de compra
+      if (check->precio_compra != precio_compra)
+	{
+	  CleanStatusProduct (1);
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), 
+		    g_strdup_printf ("Ya ha ingresado este producto con $ %.3f de costo neto, si desea modificarlo \n"
+				     "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio_compra));
+	  return;
+	}
+      else if (check->precio != precio)
+	{
+	  CleanStatusProduct (1);
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_sell_price")), 
+		    g_strdup_printf ("Ya ha ingresado este producto con $ %d como precio de venta, si desea modificarlo \n"
+				     "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio));
+	  return;
+	}
+	  
+      check->cantidad += cantidad;
+
+      gtk_list_store_set (store_buy, &check->iter,
+			  3, check->cantidad,
+			  6, lround ((gdouble)check->cantidad * check->precio_compra),
+			  -1);
+
+      if (check->stock < check->cantidad)
+	gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
+    }
+
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
+			g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
+					 PutPoints (g_strdup_printf
+						    ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
+}
+
+
+void 
+poblar_pedido_temporal (void)
+{
+  PGresult *res;
+  gint i, tuples;
+
+  gchar *barcode; 
+  gdouble cantidad, precio_compra; 
+  gint margen, precio;
+
+  res = get_pedido_temporal ();
+  tuples = PQntuples (res);
+
+  for (i=0; i<tuples; i++)
+    {
+      barcode = g_strdup (PQvaluebycol (res, i, "barcode"));
+      cantidad = strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL);
+      precio_compra = strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo_promedio"))), (char **)NULL);
+      margen = atoi (g_strdup (PQvaluebycol (res, i, "margen")));
+      precio = atoi (g_strdup (PQvaluebycol (res, i, "precio")));
+
+      add_to_buy_struct (barcode, cantidad, precio_compra, margen, precio);
+    }
+}
+
+void
 AddToProductsList (void)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
@@ -2394,7 +2514,6 @@ AddToProductsList (void)
   gdouble precio_compra = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
   gint margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
   gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
-  Producto *check;
 
   gboolean modo_traspaso = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "rdbutton_transfer_mode")));
 
@@ -2442,9 +2561,7 @@ AddToProductsList (void)
       return;
     }
 
-  GtkListStore *store_history, *store_buy;
-
-  store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
+  GtkListStore *store_history;
 
   cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount"))))), (char **)NULL);
 
@@ -2463,57 +2580,9 @@ AddToProductsList (void)
 			     (strcmp (GetCurrentPrice (barcode), "0") == 0 || precio != 0))
       && strcmp (barcode, "") != 0) //&& margen >= 0)
     {
-      if (compra->header_compra != NULL)
-        check = SearchProductByBarcode (barcode, FALSE);
-      else
-        check = NULL;
-
-      if (check == NULL)
-        {
-          if (CompraAgregarALista (barcode, cantidad, precio, precio_compra, margen, FALSE))
-            {
-              AddToTree ();
-            }
-          else
-            {
-              return;
-            }
-        }
-      else
-        {
-	  //No se permite ingresar 2 costos o precios distintos al mismo producto en una misma instancia de compra
-	  if (check->precio_compra != precio_compra)
-	    {
-	      CleanStatusProduct (1);
-	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), 
-			g_strdup_printf ("Ya ha ingresado este producto con $ %.3f de costo neto, si desea modificarlo \n"
-					 "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio_compra));
-	      return;
-	    }
-	  else if (check->precio != precio)
-	    {
-	      CleanStatusProduct (1);
-	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_sell_price")), 
-			g_strdup_printf ("Ya ha ingresado este producto con $ %d como precio de venta, si desea modificarlo \n"
-					 "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio));
-	      return;
-	    }
-	  
-          check->cantidad += cantidad;
-
-          gtk_list_store_set (store_buy, &check->iter,
-                              3, check->cantidad,
-                              6, lround ((gdouble)check->cantidad * check->precio_compra),
-                              -1);
-
-	  if (check->stock < check->cantidad)
-	    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
-        }
-
-      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total_buy")),
-                            g_strdup_printf ("<span size=\"xx-large\"><b>%s</b></span>",
-                                             PutPoints (g_strdup_printf
-                                                        ("%li", lround (CalcularTotalCompra (compra->header_compra))))));
+      add_to_buy_struct (barcode, cantidad, precio_compra, margen, precio);
+      add_to_pedido_temporal (barcode, cantidad, precio_compra, margen, precio);
+      
       store_history = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "product_history_tree_view"))));
       gtk_list_store_clear (store_history);
 
@@ -2536,36 +2605,6 @@ AddToProductsList (void)
       //AddToProductsList (); esto produciría un loop infinito
     }
 } // void AddToProductsList (void)
-
-
-void
-AddToTree (void)
-{
-  GtkTreeIter iter;
-  GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
-  gboolean enviable;
-
-  enviable = (compra->current->stock < compra->current->cantidad) ? FALSE : TRUE;
-
-  gtk_list_store_insert_after (store, &iter, NULL);
-  gtk_list_store_set (store, &iter,
-		      0, compra->current->barcode,
-                      1, compra->current->codigo,
-                      2, g_strdup_printf ("%s %s %d %s", compra->current->producto,
-                                          compra->current->marca, compra->current->contenido,
-                                          compra->current->unidad),
-                      3, compra->current->cantidad,
-		      4, compra->current->precio,
-                      5, compra->current->precio_compra,
-                      6, lround ((gdouble) compra->current->cantidad * compra->current->precio_compra),
-		      7, enviable,
-                      -1);
-
-  compra->current->iter = iter;
-
-  if (enviable == FALSE)
-    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
-}
 
 
 void
@@ -3239,6 +3278,7 @@ Comprar (GtkWidget *widget, gpointer data)
       gtk_widget_hide (GTK_WIDGET (builder_get (builder,"wnd_provider_data")));
 
       ClearAllCompraData ();
+      clean_pedido_temporal ();
 
       // Es llamada por ClearAllCompraData
       //CleanStatusProduct (0);
@@ -9699,7 +9739,7 @@ on_btn_remove_buy_product_clicked (void)
   GtkTreeSelection *selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list")));
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list"))));
   GtkTreeIter iter;
-  gchar *short_code;
+  gchar *short_code, *barcode;
   gint position;
 
   if (get_treeview_length(treeview) == 0)
@@ -9708,10 +9748,12 @@ on_btn_remove_buy_product_clicked (void)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
+			  0, &barcode,
                           1, &short_code,
                           -1);
 
       DropBuyProduct (short_code);
+      del_to_pedido_temporal (barcode);
       position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);
 

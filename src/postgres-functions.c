@@ -1229,6 +1229,80 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
     }
 }
 
+
+gboolean
+add_to_pedido_temporal (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint margen, gint precio)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("INSERT INTO pedido_temporal (id, barcode, cantidad, costo_promedio, margen, precio) "
+                       "VALUES (DEFAULT, %s, %s, %s, %d, %d)",
+                       barcode, 
+		       CUT (g_strdup_printf ("%.3f", cantidad)), 
+		       CUT (g_strdup_printf ("%.3f", precio_compra)),
+		       margen, precio);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+gboolean
+del_to_pedido_temporal (gchar *barcode)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("DELETE FROM pedido_temporal WHERE barcode = %s", barcode);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+gboolean
+clean_pedido_temporal (void)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("DELETE FROM pedido_temporal");
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+PGresult *
+get_pedido_temporal (void)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT * FROM pedido_temporal");
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
+
 gboolean
 ReturnUserExist (gchar *user)
 {

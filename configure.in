@@ -50,4 +50,10 @@ AC_OUTPUT([Makefile
 	   m4/Makefile
 	   db/Makefile
 	   ui/Makefile
+	   data/rizoma-ventas.desktop
+	   data/rizoma-compras.desktop
+	   data/rizoma-admin.desktop
+	   data/rizoma-informes.desktop
+	   data/Makefile
+	   data/icons/Makefile
 	   ])

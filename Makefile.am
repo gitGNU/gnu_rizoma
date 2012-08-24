@@ -1,5 +1,4 @@
-
-SUBDIRS = src m4 db ui
+SUBDIRS = src m4 db ui data
 ACLOCAL_AMFLAGS = -I m4
 
 dist-hook:

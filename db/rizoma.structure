@@ -177,6 +177,17 @@ create table cheques (
   constraint pk_cheques primary key (id)
 ) ;
 
+-- pedido_temporal
+create table pedido_temporal (
+  id                        serial not null,
+  barcode                   bigint not null,
+  cantidad		    float8 not null,
+  costo_promedio	    float8 not null,
+  margen		    float8 not null,
+  precio		    int4 not null,
+  CONSTRAINT pk_pedido_temporal primary key (id)
+);
+
 -- Factura_compra
 create table factura_compra (
   id                        serial not null,

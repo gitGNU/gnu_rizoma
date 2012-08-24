@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Rizoma Compras
+GenericName=Punto de venta
+X-GNOME-FullName=POS Rizoma Compras
+Comment=Módulo de compra de POS Rizoma
+Exec=rizoma-compras
+Icon=compras
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Office;
+Version=1.0

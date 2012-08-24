@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Rizoma Ventas
+GenericName=Punto de venta
+X-GNOME-FullName=POS Rizoma Ventas
+Comment=Módulo de venta de POS Rizoma
+Exec=rizoma-ventas
+Icon=ventas
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Office;
+Version=1.0

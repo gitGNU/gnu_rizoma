@@ -39,3 +39,4 @@ src/rizoma-compras
 src/rizoma-inventario
 src/rizoma-informes
 doc/*
+data/*.desktop

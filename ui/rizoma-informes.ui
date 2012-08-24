@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.20"/>
-  <!-- interface-naming-policy toplevel-contextual -->
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -12,7 +11,6 @@
     <property name="width_request">800</property>
     <property name="can_focus">False</property>
     <property name="window_position">center-always</property>
-    <property name="icon_name">applications-office</property>
     <signal name="delete-event" handler="gtk_main_quit" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -46,6 +44,7 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="button2">
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -91,6 +90,7 @@
                     </child>
                     <child>
                       <object class="GtkButton" id="button3">
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -120,6 +120,7 @@
                 <child>
                   <object class="GtkButton" id="btn_get_stat">
                     <property name="label">gtk-execute</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -175,6 +176,7 @@
                 <child>
                   <object class="GtkButton" id="btn_apply_family_filter">
                     <property name="label" translatable="yes">Filtrar</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -191,6 +193,7 @@
                 <child>
                   <object class="GtkButton" id="btn_choose_transfer_type">
                     <property name="label" translatable="yes">Filtrar</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -207,6 +210,7 @@
                 <child>
                   <object class="GtkButton" id="btn_filter_stores">
                     <property name="label" translatable="yes">Filtrar</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -290,6 +294,7 @@
                             <child>
                               <object class="GtkButton" id="btn_primero">
                                 <property name="label">gtk-goto-first</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -307,6 +312,7 @@
                             <child>
                               <object class="GtkButton" id="btn_atras">
                                 <property name="label">gtk-go-back</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -324,6 +330,7 @@
                             <child>
                               <object class="GtkButton" id="btn_adelante">
                                 <property name="label">gtk-go-forward</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -341,6 +348,7 @@
                             <child>
                               <object class="GtkButton" id="btn_ultimo">
                                 <property name="label">gtk-goto-last</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
@@ -357,6 +365,7 @@
                             </child>
                             <child>
                               <object class="GtkToggleButton" id="togglebutton">
+                                <property name="use_action_appearance">False</property>
                                 <property name="width_request">120</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
@@ -494,8 +503,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkScrolledWindow" id="scrolledwindow1">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="tree_view_sells">
                             <property name="width_request">250</property>
@@ -503,6 +510,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="rules_hint">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection1"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -516,8 +526,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="tree_view_sell_detail">
                             <property name="width_request">450</property>
@@ -525,6 +533,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="rules_hint">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection2"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -952,6 +963,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_sells">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
@@ -1029,13 +1041,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="height_request">300</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="tree_view_sell_rank">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="rules_hint">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection3"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -1058,13 +1071,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow13_sell_rank_mp">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_sell_rank_mp">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="rules_hint">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection4"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -1078,13 +1092,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow13_sell_rank_deriv">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_sell_rank_deriv">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="rules_hint">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection5"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -1118,13 +1133,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow13_rank_mc">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_sell_rank_mc">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="reorderable">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection6"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -1138,13 +1154,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow16_rank_mc">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_sell_rank_comp">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="reorderable">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection7"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -1188,6 +1205,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_rank">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1203,6 +1221,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_rank_mp">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1218,6 +1237,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_rank_mc">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1568,13 +1588,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow13_buy">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_buy">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="reorderable">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection8"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1588,13 +1609,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow14">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_buy_invoice">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="reorderable">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection9"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1608,13 +1630,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow15">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_buy_invoice_details">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="reorderable">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection10"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1631,6 +1654,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkButton" id="btn_print_buy_products">
                         <property name="label">gtk-print</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -1686,13 +1710,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow4">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="tree_view_cash_box_lists">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="reorderable">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection11"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1805,6 +1830,48 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <property name="border_width">15</property>
                     <property name="n_rows">9</property>
                     <property name="n_columns">5</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_payed_money">
                         <property name="visible">True</property>
@@ -2175,51 +2242,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
                       <object class="GtkLabel" id="lbl_money_box_total">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -2232,6 +2254,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="bottom_attach">9</property>
                         <property name="y_padding">12</property>
                       </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
@@ -2247,6 +2272,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkButton" id="btn_print_cash">
                         <property name="label">gtk-print</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2304,8 +2330,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkScrolledWindow" id="scrolledwindow5">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="tree_view_devolucion">
                             <property name="width_request">250</property>
@@ -2313,6 +2337,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="reorderable">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection12"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -2326,8 +2353,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkScrolledWindow" id="scrolledwindow6">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="tree_view_devolucion_detalle">
                             <property name="width_request">450</property>
@@ -2335,6 +2360,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="reorderable">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection13"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -2425,6 +2453,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_devolucion">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -2481,13 +2510,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow7">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="tree_view_proveedores">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="reorderable">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection14"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -2504,6 +2534,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkButton" id="btn_print_providers">
                         <property name="label">gtk-print</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2553,13 +2584,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow8">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="tree_view_cuadratura">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="rules_hint">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection15"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -2576,6 +2608,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkButton" id="btn_print_cuadratura">
                         <property name="label">gtk-print</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2594,6 +2627,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkButton" id="btn_save_cuadratura">
                         <property name="label">gtk-save</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2672,13 +2706,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                               <object class="GtkScrolledWindow" id="scrolledwindow11">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="hscrollbar_policy">automatic</property>
-                                <property name="vscrollbar_policy">automatic</property>
                                 <child>
                                   <object class="GtkTreeView" id="tree_view_enviado">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="rules_hint">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection" id="treeview-selection16"/>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2692,13 +2727,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                               <object class="GtkScrolledWindow" id="scrolledwindow12">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="hscrollbar_policy">automatic</property>
-                                <property name="vscrollbar_policy">automatic</property>
                                 <child>
                                   <object class="GtkTreeView" id="tree_view_enviado_detalle">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="rules_hint">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection" id="treeview-selection17"/>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2728,13 +2764,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                               <object class="GtkScrolledWindow" id="scrolledwindow9">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="hscrollbar_policy">automatic</property>
-                                <property name="vscrollbar_policy">automatic</property>
                                 <child>
                                   <object class="GtkTreeView" id="tree_view_recibido">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="rules_hint">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection" id="treeview-selection18"/>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2748,13 +2785,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                               <object class="GtkScrolledWindow" id="scrolledwindow10">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="hscrollbar_policy">automatic</property>
-                                <property name="vscrollbar_policy">automatic</property>
                                 <child>
                                   <object class="GtkTreeView" id="tree_view_recibido_detalle">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="rules_hint">True</property>
+                                    <child internal-child="selection">
+                                      <object class="GtkTreeSelection" id="treeview-selection19"/>
+                                    </child>
                                   </object>
                                 </child>
                               </object>
@@ -2794,6 +2832,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_enviado">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -2821,6 +2860,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_recibido">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -2919,13 +2959,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                       <object class="GtkScrolledWindow" id="scrolledwindow13_gtr">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="treeview_general_transfer_rank">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="rules_hint">True</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection20"/>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -2948,13 +2989,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow16_mp_tr">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_mp_transfer_rank">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="rules_hint">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection21"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -2968,13 +3010,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow17_der_tr">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_derivates_transfer_rank">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="rules_hint">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection22"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -3008,13 +3051,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow21_offer_tr">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_offer_transfer_rank">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="rules_hint">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection23"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -3028,13 +3072,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                           <object class="GtkScrolledWindow" id="scrolledwindow22_comp_tr">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="hscrollbar_policy">automatic</property>
-                            <property name="vscrollbar_policy">automatic</property>
                             <child>
                               <object class="GtkTreeView" id="treeview_components_transfer_rank">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="rules_hint">True</property>
+                                <child internal-child="selection">
+                                  <object class="GtkTreeSelection" id="treeview-selection24"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -3078,6 +3123,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_transfer_rank">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -3093,6 +3139,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_transfer_rank_mp">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -3108,6 +3155,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <child>
                           <object class="GtkButton" id="btn_print_transfer_rank_mc">
                             <property name="label">gtk-print</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -3215,13 +3263,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow13_exempt">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_sells_exempt_tax">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="rules_hint">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection25"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -3235,13 +3284,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow16_exempt">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_sells_exempt_tax_details">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="rules_hint">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection26"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -3307,13 +3357,14 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                   <object class="GtkScrolledWindow" id="scrolledwindow17_exempt">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="hscrollbar_policy">automatic</property>
-                    <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_ticket_amount">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="rules_hint">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection27"/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -3450,6 +3501,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <object class="GtkButton" id="btn_print_exentos">
                         <property name="label">gtk-print</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -3508,6 +3560,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkButton" id="button1">
                 <property name="label">gtk-quit</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -3581,6 +3634,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkButton" id="btn_find_srch_provider">
                 <property name="label">gtk-find</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -3606,7 +3660,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="hscrollbar_policy">never</property>
-            <property name="vscrollbar_policy">automatic</property>
             <child>
               <object class="GtkTreeView" id="tree_view_srch_provider">
                 <property name="visible">True</property>
@@ -3614,6 +3667,9 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="rules_hint">True</property>
                 <signal name="row-activated" handler="on_btn_ok_srch_provider_clicked" object="tree_view_srch_provider" swapped="yes"/>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection" id="treeview-selection28"/>
+                </child>
               </object>
             </child>
           </object>
@@ -3630,6 +3686,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkButton" id="button20">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -3646,6 +3703,7 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
             <child>
               <object class="GtkButton" id="btn_ok_srch_provider">
                 <property name="label">gtk-ok</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

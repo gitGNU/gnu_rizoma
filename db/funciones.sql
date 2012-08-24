@@ -2404,13 +2404,13 @@ END; $$ LANGUAGE plpgsql;
 --
 -- retorna el porcentaje del iva de un producto (de no tener IVA retorna -1)
 --
-CREATE OR REPLACE FUNCTION get_iva (IN barcode bigint,
+CREATE OR REPLACE FUNCTION get_iva (IN barcode_in bigint,
 		  	   	    OUT valor double precision)
 RETURNS double precision AS $$
 BEGIN
 		SELECT impuesto.monto INTO valor 
 		FROM producto, impuesto 
-		WHERE producto.barcode=barcode 
+		WHERE producto.barcode=barcode_in
 		AND producto.impuestos='true' 
 		AND impuesto.id=1;
                        
@@ -2424,13 +2424,13 @@ END; $$ LANGUAGE plpgsql;
 --
 -- retorna el porcentaje de sus otros impuestos (aparte del iva) del producto
 --
-CREATE OR REPLACE FUNCTION get_otro_impuesto (IN barcode bigint,
+CREATE OR REPLACE FUNCTION get_otro_impuesto (IN barcode_in bigint,
 		  	   		      OUT valor double precision)
 RETURNS double precision AS $$
 BEGIN
 		SELECT impuesto.monto INTO valor 
 		FROM producto, impuesto 
-		WHERE producto.barcode = barcode 
+		WHERE producto.barcode = barcode_in
 		AND impuesto.id = producto.otros;
 
 		IF valor IS NULL THEN
@@ -5334,7 +5334,7 @@ END; $$ LANGUAGE plpgsql;
 --
 -- Actualiza el monto de la factura calculando los valores de su detalle
 --
-CREATE OR REPLACE FUNCTION update_factura_compra_amount (IN id_factura_compra integer)
+CREATE OR REPLACE FUNCTION update_factura_compra_amount (IN id_factura_compra_in integer)
 RETURNS VOID AS $$
 BEGIN
 	UPDATE factura_compra 
@@ -5342,8 +5342,8 @@ BEGIN
 	  	            FROM factura_compra_detalle fcd
 			    INNER JOIN factura_compra fc
 			    ON fcd.id_factura_compra = fc.id
-			    WHERE fc.id = id_factura_compra)
-	WHERE id = id_factura_compra;
+			    WHERE fc.id = id_factura_compra_in)
+	WHERE id = id_factura_compra_in;
 	
 RETURN;
 END; $$ LANGUAGE plpgsql;

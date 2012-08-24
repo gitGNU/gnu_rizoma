@@ -350,4 +350,12 @@ gboolean desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der);
 
 gboolean mod_to_mod_on_transfer (Prod *producto);
 
+gboolean add_to_pedido_temporal (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint margen, gint precio);
+
+gboolean del_to_pedido_temporal (gchar *barcode);
+
+gboolean clean_pedido_temporal (void);
+
+PGresult * get_pedido_temporal (void);
+
 #endif

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Rizoma Admin
+GenericName=Punto de venta
+X-GNOME-FullName=POS Rizoma Administracion
+Comment=Módulo de administración de POS Rizoma
+Exec=rizoma-admin
+Icon=administracion
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Office;
+Version=1.0

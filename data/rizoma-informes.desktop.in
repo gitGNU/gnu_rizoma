@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Rizoma Informes
+GenericName=Punto de venta
+X-GNOME-FullName=POS Rizoma Informes
+Comment=Módulo de informes de POS Rizoma
+Exec=rizoma-informes
+Icon=informes
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Office;
+Version=1.0

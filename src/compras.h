@@ -141,4 +141,6 @@ gboolean show_description (GtkWidget *widget, GdkEventCrossing *event, gpointer 
 
 gboolean show_default (GtkWidget *widget, GdkEventCrossing *event, gpointer user_data);
 
+void poblar_pedido_temporal (void);
+
 #endif
