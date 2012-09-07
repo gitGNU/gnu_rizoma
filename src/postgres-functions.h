@@ -73,7 +73,7 @@ gint GetTotalSell (guint from_year, guint from_month, guint from_day,
                    guint to_year, guint to_month, guint to_day, gint *total);
 
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-                       gchar *direccion, gchar *fono, gint credito, gchar *giro);
+                       gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean tipo);
 
 gboolean RutExist (const gchar *rut);
 
@@ -82,6 +82,8 @@ gint InsertDeuda (gint id_venta, gint rut, gint vendedor);
 gint DeudaTotalCliente (gint rut);
 
 PGresult * SearchDeudasCliente (gint rut);
+
+PGresult * search_deudas_guias_facturas_cliente (gint rut, gchar *filtro);
 
 gint CancelarDeudas (gint abonar, gint rut);
 
@@ -287,7 +289,9 @@ gboolean insert_emisores (gchar *rut, gchar *dv, gchar *razon_social, gchar *tel
 
 gboolean fact_cheque_rest (gint id);
 
-gint InsertNewDocument (gint sell_id, gint document_type, gint sell_type);
+gint InsertNewDocumentVoid (gint sell_id, gint document_type, gint sell_type, gchar *rut_cliente);
+
+gint InsertNewDocument (gint sell_id, gint document_type, gint sell_type, gchar *rut_cliente);
 
 gboolean InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble cantidad);
 
@@ -357,5 +361,11 @@ gboolean del_to_pedido_temporal (gchar *barcode);
 gboolean clean_pedido_temporal (void);
 
 PGresult * get_pedido_temporal (void);
+
+gint PagarDeuda (gchar *id_venta);
+
+gint pagar_factura (gint id_factura, gint id_venta);
+
+gint facturar_guia (gint id_factura, gint id_guia, gint monto_guia);
 
 #endif

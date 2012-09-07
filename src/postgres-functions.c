@@ -363,18 +363,33 @@ DeleteProduct (gchar *codigo)
 }
 
 gint
-InsertNewDocument (gint sell_id, gint document_type, gint sell_type)
+InsertNewDocument (gint sell_id, gint document_type, gint sell_type, gchar *rut_cliente)
 {
   PGresult *res;
+  gint total;
 
+  total = CalcularTotal (venta->header);
   res = EjecutarSQL (g_strdup_printf
-                     ("INSERT INTO documentos_emitidos (id_venta, tipo_documento, forma_pago, num_documento, fecha_emision)"
-                      "VALUES (%d, %d, %d, %d, NOW())", sell_id, document_type, sell_type, get_ticket_number (document_type) + 1));
-
-  res = EjecutarSQL ("SELECT last_value FROM documentos_emitidos_id_seq");
+                     ("INSERT INTO documentos_emitidos (id_venta, id_factura, monto, rut_cliente, tipo_documento, forma_pago, num_documento, fecha_emision)"
+                      "VALUES (%d, 0, %d, %s, %d, %d, %d, NOW()) RETURNING id", sell_id, total, rut_cliente, document_type, sell_type, get_ticket_number (document_type) + 1));
 
   if (res != NULL)
-    return atoi (PQgetvalue (res, 0, 0));
+    return atoi (PQvaluebycol (res, 0, "id"));
+  else
+    return -1;
+}
+
+
+gint
+InsertNewDocumentVoid (gint sell_id, gint document_type, gint sell_type, gchar *rut_cliente)
+{
+  PGresult *res;
+  res = EjecutarSQL (g_strdup_printf
+                     ("INSERT INTO documentos_emitidos (id_venta, id_factura, monto, rut_cliente, tipo_documento, forma_pago, num_documento, fecha_emision)"
+                      "VALUES (%d, 0, %d, %s, %d, %d, %d, NOW()) RETURNING id", sell_id, 0, rut_cliente, document_type, sell_type, get_ticket_number (document_type) + 1));
+
+  if (res != NULL)
+    return atoi (PQvaluebycol (res, 0, "id"));
   else
     return -1;
 }
@@ -476,9 +491,9 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
     {
       if (vale_continuo)
-	PrintValeContinuo (venta->header, venta_id, boleta, total, tipo_venta, tipo_documento, NULL);
+	PrintValeContinuo (venta->header, venta_id, rut, boleta, total, tipo_venta, tipo_documento, NULL);
       else
-	PrintVale (venta->header, venta_id, boleta, total, tipo_venta, tipo_documento);
+	PrintVale (venta->header, venta_id, rut, boleta, total, tipo_venta, tipo_documento);
     }
 
   // Abrir Gaveta
@@ -640,14 +655,16 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   switch (tipo_documento)
     {
     case FACTURA: //specific operations for invoice
-      if (rizoma_get_value_boolean ("PRINT_FACTURA")) //print the invoice
-        PrintDocument(tipo_documento, rut, total, id_documento, venta->header);
+      InsertNewDocument (venta_id, tipo_documento, tipo_venta, strtok (g_strdup (rut),"-"));
+      if (rizoma_get_value_boolean ("PRINT_FACTURA"))  //print the invoice
+	//PrintDocument(tipo_documento, rut, total, id_documento, venta->header);
       break;
 
     case SIMPLE: //specific operations for cash
       break;
 
     case GUIA: //specific operations for guide
+      InsertNewDocument (venta_id, tipo_documento, tipo_venta, strtok (g_strdup (rut),"-"));
       break;
 
     case VENTA:
@@ -857,14 +874,20 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
 
 gboolean
 InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-              gchar *direccion, gchar *fono, gint credito, gchar *giro)
+              gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean cliente_facturacion)
 {
   PGresult *res;
   gchar *q;
+  gchar *tipo;
 
-  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito) "
-                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d)",
-                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito);
+  if (cliente_facturacion == TRUE)
+    tipo = g_strdup ("factura");
+  else
+    tipo = g_strdup ("credito");
+
+  q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito, tipo) "
+                       "VALUES (%s, '%s', '%s', '%s', '%s', '%s', 0, '%s', '%s', %d, '%s')",
+                       rut, ver, nombres, paterno, materno, giro, direccion, fono, credito, tipo);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -954,6 +977,24 @@ SearchDeudasCliente (gint rut)
   return res;
 }
 
+PGresult *
+search_deudas_guias_facturas_cliente (gint rut, gchar *filtro)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT id_venta_out AS id_venta, id_documento_out AS id_documento, monto_out AS monto, "
+		       "       maquina_out AS maquina, vendedor_out AS vendedor, tipo_documento_out AS tipo_documento, "
+		       "       date_part('day', fecha_emision_out) AS day, date_part('month', fecha_emision_out) AS month, date_part('year', fecha_emision_out) AS year, "
+                       "       date_part('hour', fecha_emision_out) AS hour, date_part('minute', fecha_emision_out) AS minute, date_part ('second', fecha_emision_out) AS second "
+		       "FROM search_facturas_guias (%d, true, %d, %d, '%s'::varchar) ", rut, GUIA, FACTURA, filtro);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  return res;
+}
+
+
 gint
 PagarDeuda (gchar *id_venta)
 {
@@ -964,6 +1005,57 @@ PagarDeuda (gchar *id_venta)
 
   return 0;
 }
+
+gint
+pagar_factura (gint id_factura, gint id_venta)
+{
+  gchar *q;
+
+  // La factura y sus guias asociadas se marcan como pagadas
+  q = g_strdup_printf ("UPDATE documentos_emitidos SET pagado='t' "
+		       "WHERE id=%d OR id_factura=%d", id_factura, id_factura);
+  EjecutarSQL (q);
+  g_free (q);
+
+  //Revisa que todas las facturas asociadas a esa venta esten pagadas
+  if (id_venta != 0)
+    { //Se paga la deuda total de la venta si todos los documentos asociados a esa venta estan pagados
+      if (!DataExist (g_strdup_printf ("SELECT id FROM documentos_emitidos "
+				       "WHERE id_venta=%d AND pagado='f'", id_venta)))
+	PagarDeuda (g_strdup_printf ("%d", id_venta));
+    }
+  else
+    { /* Se paga la deuda total de la venta si todas las guias asociadas a esta factura estan pagadas
+	 y además cada venta asociada a esas guias tenga todos sus documentos como pagados. */
+      if (!DataExist (g_strdup_printf ("SELECT id FROM documentos_emitidos "
+				       "WHERE id_venta IN (SELECT id_venta FROM documentos_emitidos "
+				       "                   WHERE id_factura = %d) "
+				       "AND pagado='f'", id_factura)))
+	{
+	  q = g_strdup_printf ("UPDATE deuda SET pagada='t' "
+			       "WHERE id_venta IN (SELECT id_venta FROM documentos_emitidos "
+			       "                   WHERE id_factura = %d)", id_factura);
+	  EjecutarSQL (q);
+	}
+    }
+  return 0;
+}
+
+gint
+facturar_guia (gint id_factura, gint id_guia, gint monto_guia)
+{
+  // Se asocia la guia a la factura
+  EjecutarSQL (g_strdup_printf ("UPDATE documentos_emitidos "
+				"SET id_factura=%d "
+				"WHERE id=%d", id_factura, id_guia));
+
+  EjecutarSQL (g_strdup_printf ("UPDATE documentos_emitidos "
+				"SET monto=monto+%d "
+				"WHERE id=%d", monto_guia, id_factura));
+
+  return 0;
+}
+
 
 gint
 CancelarDeudas (gint abonar, gint rut)

@@ -1255,14 +1255,15 @@ create or replace function select_cliente(
        OUT abonado int4,
        OUT credito int4,
        OUT credito_enable boolean,
-       OUT activo boolean)
+       OUT activo boolean,
+       OUT tipo tc)
 returns setof record as $$
 declare
 	l record;
 	query varchar(255);
 begin
 query := 'select rut, dv, nombre, apell_p, apell_m, giro, direccion, telefono,
-      	 	  telefono_movil, mail, abonado, credito, credito_enable, activo
+      	 	  telefono_movil, mail, abonado, credito, credito_enable, activo, tipo
 		  FROM cliente';
 
 FOR l IN EXECUTE query LOOP
@@ -1280,6 +1281,7 @@ FOR l IN EXECUTE query LOOP
     credito = l.credito;
     credito_enable = l.credito_enable;
     activo = l.activo;
+    tipo = l.tipo;
     RETURN NEXT;
 END LOOP;
 
@@ -1796,7 +1798,7 @@ end loop;
 return;
 end; $$ language plpgsql;
 
--- retorna la Ãºltima linea de asistencia
+-- retorna la última linea de asistencia
 -- usuario.c:75
 create or replace function select_asistencia(
        in in_id_user int,
@@ -5103,6 +5105,96 @@ BEGIN
 
 RETURN;
 END; $$ LANGUAGE plpgsql;
+
+
+
+--
+--
+--
+CREATE OR replace FUNCTION search_facturas_guias (IN rut_cliente_in INT,
+						  IN solo_pendientes_in boolean,
+						  IN tipo_guia_in INT,
+						  IN tipo_factura_in INT,
+						  IN filtro_in VARCHAR,
+       						  OUT id_venta_out INT,
+						  OUT id_documento_out INT,
+						  OUT rut_cliente_out INT,
+       						  OUT monto_out INT,
+       						  OUT maquina_out INT,
+       						  OUT vendedor_out INT,
+       						  OUT tipo_documento_out INT,
+       						  OUT fecha_emision_out TIMESTAMP WITHOUT TIME ZONE)
+RETURNS setof record AS $$
+DECLARE
+        query TEXT;
+	l RECORD;
+BEGIN
+	--
+	--
+	--
+	IF solo_pendientes_in = TRUE THEN --Solo se listan las facturas sin pago y guias sin facturar
+   	   CREATE TEMPORARY TABLE facturas_guias AS
+	   	  SELECT de.id_venta, 0 AS maquina, 0 AS vendedor, de.id AS id_documento, 
+	          	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
+	   	  FROM documentos_emitidos de
+	   	  WHERE de.tipo_documento = tipo_factura_in
+	   	  AND de.pagado = FALSE
+		  AND id_venta NOT IN (SELECT id_sale FROM venta_anulada);
+
+		  INSERT INTO facturas_guias
+		  SELECT v.id AS id_venta, v.maquina, v.vendedor, de.id AS id_documento, 
+   	    	       	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
+	      	  FROM venta v INNER JOIN documentos_emitidos de
+		  ON v.id = de.id_venta
+		  WHERE de.tipo_documento = tipo_guia_in AND id_factura = 0
+		  AND v.id NOT IN (SELECT id_sale FROM venta_anulada);
+	ELSE --Se listan todas las deudas (incluso las ya pagadas)
+   	   CREATE TEMPORARY TABLE facturas_guias AS
+	   	  SELECT de.id_venta, 0 AS maquina, 0 AS vendedor, de.id AS id_documento, 
+	          	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
+	   	  FROM documentos_emitidos de
+	   	  WHERE de.tipo_documento = tipo_factura_in
+		  AND id_venta NOT IN (SELECT id_sale FROM venta_anulada);
+
+		  INSERT INTO facturas_guias
+		  SELECT v.id AS id_venta, v.maquina, v.vendedor, de.id AS id_documento, 
+   	    	       	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
+	      	  FROM venta v INNER JOIN documentos_emitidos de
+		  ON v.id = de.id_venta
+		  WHERE de.tipo_documento = tipo_guia_in
+		  AND v.id NOT IN (SELECT id_sale FROM venta_anulada);
+	END IF;
+
+	query := $S$ SELECT * FROM facturas_guias WHERE id_venta IS NOT NULL $S$;
+
+	IF rut_cliente_in != 0 THEN
+	   query := query || $S$ AND rut_cliente = $S$||rut_cliente_in;
+	END IF;
+
+	IF filtro_in != '' THEN
+	   query := query || $S$ AND $S$||filtro_in;
+	END IF;
+
+	query := query || $S$ ORDER BY id_venta DESC $S$;
+
+        FOR l IN EXECUTE query loop
+	      	id_venta_out = l.id_venta;
+		id_documento_out = l.id_documento;
+		rut_cliente_out = l.rut_cliente;
+		maquina_out = l.maquina;
+		vendedor_out = l.vendedor;
+		fecha_emision_out = l.fecha_emision;
+		tipo_documento_out = l.tipo_documento;
+		monto_out = l.monto;
+		RETURN NEXT;
+        END loop;
+
+	DROP TABLE facturas_guias;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
 
 ---
 -- Función recursiva (solo se llama a sí misma cuando se topa con una mercadería compuesta)

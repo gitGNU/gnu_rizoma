@@ -45,11 +45,17 @@ gint FillClientStore (GtkListStore *store);
 
 void DatosDeudor(GtkTreeSelection *treeselection, gpointer user_data);
 
+void datos_deuda_factura_guia (GtkTreeSelection *treeselection, gpointer user_data);
+
 void datos_cheques_restaurant (GtkTreeSelection *treeselection, gpointer user_data);
 
 void FillVentasDeudas (gint rut);
 
+void fill_deudas_facturas_guias (gint rut, gint tipo_documento_n);
+
 void ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data);
+
+void change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data);
 
 gint AbonarWindow (void);
 
@@ -76,5 +82,9 @@ void search_emisor (void);
 void emisores_box ();
 
 void abonos_box ();
+
+void guias_facturas_box ();
+
+void set_cliente_facturacion (gboolean cf);
 
 #endif

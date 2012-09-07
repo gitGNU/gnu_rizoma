@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkMessageDialog" id="msg_NoOK">
-    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
     <property name="modal">True</property>
@@ -15,17 +15,15 @@
     <property name="buttons">ok</property>
     <property name="text">No se Realizo el Inventario</property>
     <property name="secondary_text">Ningun producto se encuentra en la Base de datos</property>
-    <signal name="delete-event" handler="gtk_widget_hide" object="msg_NoOK" swapped="yes"/>
-    <signal name="response" handler="gtk_widget_hide" object="msg_NoOK" swapped="yes"/>
+    <signal name="response" handler="gtk_widget_hide" object="msg_NoOK"/>
+    <signal name="delete_event" handler="gtk_widget_hide" object="msg_NoOK"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox8">
+      <object class="GtkVBox" id="dialog-vbox8">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area8">
+          <object class="GtkHButtonBox" id="dialog-action_area8">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <placeholder/>
@@ -36,7 +34,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -45,7 +42,6 @@
     </child>
   </object>
   <object class="GtkMessageDialog" id="msg_OK">
-    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="type">popup</property>
     <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
@@ -56,16 +52,14 @@
     <property name="transient_for">wnd_inventario</property>
     <property name="buttons">ok</property>
     <property name="text">Se realizo Correctamente el Inventario</property>
-    <signal name="response" handler="gtk_widget_hide" object="msg_OK" swapped="yes"/>
+    <signal name="response" handler="gtk_widget_hide" object="msg_OK"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox4">
+      <object class="GtkVBox" id="dialog-vbox4">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area4">
+          <object class="GtkHButtonBox" id="dialog-action_area4">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <placeholder/>
@@ -76,7 +70,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -85,7 +78,6 @@
     </child>
   </object>
   <object class="GtkMessageDialog" id="msg_casiOK">
-    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
     <property name="modal">True</property>
@@ -97,17 +89,15 @@
     <property name="buttons">ok</property>
     <property name="text">Se realizo el Inventario</property>
     <property name="secondary_text">Pero algunos productos no estaban en la Base de datos</property>
-    <signal name="delete-event" handler="gtk_widget_hide" object="msg_casiOK" swapped="yes"/>
-    <signal name="response" handler="gtk_widget_hide" object="msg_casiOK" swapped="yes"/>
+    <signal name="response" handler="gtk_widget_hide" object="msg_casiOK"/>
+    <signal name="delete_event" handler="gtk_widget_hide" object="msg_casiOK"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox11">
+      <object class="GtkVBox" id="dialog-vbox11">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area11">
+          <object class="GtkHButtonBox" id="dialog-action_area11">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <placeholder/>
@@ -118,7 +108,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -127,7 +116,6 @@
     </child>
   </object>
   <object class="GtkMessageDialog" id="msg_error_file">
-    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="modal">True</property>
     <property name="type_hint">normal</property>
@@ -136,16 +124,14 @@
     <property name="message_type">error</property>
     <property name="buttons">close</property>
     <property name="text">No se pudo leer el archivo</property>
-    <signal name="response" handler="gtk_widget_hide" object="msg_error_file" swapped="yes"/>
+    <signal name="response" handler="gtk_widget_hide" object="msg_error_file"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox10">
+      <object class="GtkVBox" id="dialog-vbox10">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area10">
+          <object class="GtkHButtonBox" id="dialog-action_area10">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <placeholder/>
@@ -156,7 +142,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -165,7 +150,6 @@
     </child>
   </object>
   <object class="GtkMessageDialog" id="msg_inconsistencia">
-    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">RIZOMA INVENTARIO</property>
     <property name="modal">True</property>
@@ -176,18 +160,16 @@
     <property name="message_type">error</property>
     <property name="buttons">ok</property>
     <property name="text">Inconsistencia de datos</property>
-    <property name="secondary_text">Verifique la integridad de los datos del archivo de transacción</property>
-    <signal name="delete-event" handler="gtk_widget_hide" object="msg_inconsistencia" swapped="yes"/>
-    <signal name="response" handler="gtk_widget_hide" object="msg_inconsistencia" swapped="yes"/>
+    <property name="secondary_text">Verifique la integridad de los datos del archivo de transacci&#xF3;n</property>
+    <signal name="response" handler="gtk_widget_hide" object="msg_inconsistencia"/>
+    <signal name="delete_event" handler="gtk_widget_hide" object="msg_inconsistencia"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox12">
+      <object class="GtkVBox" id="dialog-vbox12">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area12">
+          <object class="GtkHButtonBox" id="dialog-action_area12">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <placeholder/>
@@ -198,7 +180,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -207,109 +188,147 @@
     </child>
   </object>
   <object class="GtkWindow" id="wnd_inventario">
-    <property name="can_focus">False</property>
     <property name="window_position">center-always</property>
     <property name="default_width">350</property>
     <property name="default_height">400</property>
-    <signal name="delete-event" handler="gtk_main_quit" swapped="no"/>
+    <signal name="delete_event" handler="gtk_main_quit"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkHBox" id="hbox2">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="spacing">3</property>
-            <child>
-              <object class="GtkLabel" id="label1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Seleccione un Inventario</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">8</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFileChooserButton" id="filechooserbutton1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="padding">7</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHBox" id="hbox1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkButton" id="btn_ejecutar_Inv">
-                <property name="label">gtk-execute</property>
-                <property name="use_action_appearance">False</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_btn_ejecutar_Inv" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow1">
+          <object class="GtkNotebook" id="notebook1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkTextView" id="textview1">
+              <object class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Creaci&#xF3;n mercaderia</property>
+              </object>
+              <packing>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox2">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkHBox" id="hbox2">
+                    <property name="visible">True</property>
+                    <property name="spacing">3</property>
+                    <child>
+                      <object class="GtkLabel" id="label4">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Seleccione un Inventario</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="padding">8</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFileChooserButton" id="filechooserbutton1">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="padding">7</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox1">
+                    <property name="visible">True</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btn_ejecutar_Inv">
+                        <property name="label">gtk-execute</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="on_btn_ejecutar_Inv"/>
+                      </object>
+                      <packing>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <object class="GtkTextView" id="textview1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="editable">False</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Ingreso Inventario</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+                <property name="tab_fill">False</property>
+              </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkHBox" id="hbox3">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
             <child>
               <placeholder/>
@@ -317,13 +336,11 @@
             <child>
               <object class="GtkButton" id="button1">
                 <property name="label">gtk-quit</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="gtk_main_quit" swapped="no"/>
+                <signal name="clicked" handler="gtk_main_quit"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -335,7 +352,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">3</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>

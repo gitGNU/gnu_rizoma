@@ -2749,7 +2749,7 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
   dv = invested_strndup (rut, strlen (rut)-1);
   rut = g_strndup (rut, strlen (rut)-1);
 
-  q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono from cliente where rut = %s", rut);
+  q = g_strdup_printf("SELECT nombre || ' ' || apell_p, direccion, telefono, giro from cliente where rut = %s", rut);
   res = EjecutarSQL(q);
   g_free (q);
   rut = g_strdup_printf ("%s-%s", rut, dv);
@@ -2781,6 +2781,29 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
       fill_credit_data(rut, PQgetvalue(res, 0, 0),
 		       PQvaluebycol (res, 0, "direccion"),
 		       PQvaluebycol (res, 0, "telefono"));
+    }
+  else if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_sale_invoice"))))
+    {
+      aux = GTK_WIDGET (builder_get (builder, "entry_invoice_rut"));
+      gtk_entry_set_text (GTK_ENTRY(aux), rut);
+
+      aux = GTK_WIDGET (builder_get (builder, "lbl_invoice_name"));
+      gtk_label_set_text(GTK_LABEL(aux), PQgetvalue (res, 0, 0));
+
+      aux = GTK_WIDGET (builder_get (builder, "lbl_invoice_giro"));
+      gtk_label_set_text(GTK_LABEL(aux), PQvaluebycol(res, 0, "giro"));
+  
+      aux = GTK_WIDGET (builder_get (builder, "lbl_direccion_factura"));
+      gtk_label_set_text(GTK_LABEL(aux), PQvaluebycol(res, 0, "giro"));
+
+      aux = GTK_WIDGET (builder_get (builder, "lbl_telefono_factura"));
+      gtk_label_set_text(GTK_LABEL(aux), PQvaluebycol(res, 0, "giro"));
+
+      aux = GTK_WIDGET (builder_get (builder, "btn_make_invoice"));
+      gtk_widget_set_sensitive(aux, TRUE);
+
+      aux = GTK_WIDGET (builder_get (builder, "btn_make_guide"));
+      gtk_widget_set_sensitive (aux, TRUE);
     }
 }
 
@@ -2858,10 +2881,12 @@ on_btn_cancel_invoice_clicked (GtkButton *button, gpointer data)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "entry_invoice_rut"));
   gtk_entry_set_text(GTK_ENTRY(widget), "");
-  gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
+  //gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_sale_invoice"));
+  clean_container (GTK_CONTAINER (widget));
   gtk_widget_hide(widget);
+  set_cliente_facturacion (FALSE);
 }
 
 /**
@@ -2954,6 +2979,7 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
 void
 on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
 {
+  /*
   GtkWidget *widget;
   PGresult *res;
   gchar *rut;
@@ -2971,7 +2997,8 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
       return;
     }
 
-  q = g_strdup_printf("select nombre, giro from cliente where rut = %s", rut_split[0]);
+  q = g_strdup_printf("SELECT nombre, giro, direccion, telefono "
+		      "FROM cliente WHERE rut = %s", rut_split[0]);
 
   res = EjecutarSQL(q);
   g_free (q);
@@ -2982,9 +3009,22 @@ on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_giro"));
   gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
+  
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_direccion_factura"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_telefono_factura"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
 
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_invoice"));
   gtk_widget_set_sensitive(widget, TRUE);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_guide"));
+  gtk_widget_set_sensitive(widget, TRUE);
+  */
+  
+  set_cliente_facturacion (TRUE);
+  search_client (GTK_WIDGET (entry), NULL);
 }
 
 
@@ -3008,10 +3048,15 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   gint monto;
   gint maquina;
 
+  gchar *button_name;
+  gint tipo_documento;
+
+  button_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (button)));
+
   //tipo_vendedor = rizoma_get_value_int ("VENDEDOR");
 
   //amount
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "label_total"));
+  widget = GTK_WIDGET (builder_get (builder, "label_total"));
   monto = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (widget)))));
 
   //maquina
@@ -3046,9 +3091,17 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  ticket = get_ticket_number (FACTURA);
 
-  SaveSell (monto, maquina, vendedor, CASH, str_rut, "0", ticket, FACTURA,
+  if (g_str_equal (button_name, "btn_make_invoice")) {
+    tipo_documento = FACTURA;
+    ticket = get_ticket_number (FACTURA);
+  }
+  else if (g_str_equal (button_name, "btn_make_guide")) {
+    tipo_documento = GUIA;
+    ticket = get_ticket_number (GUIA);
+  }
+
+  SaveSell (monto, maquina, vendedor, CREDITO, str_rut, "0", ticket, tipo_documento,
             NULL, FALSE, TRUE);
 
   //clean the interface
@@ -3066,6 +3119,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text(GTK_LABEL(widget), "");
 
   widget = GTK_WIDGET(gtk_builder_get_object (builder, "wnd_sale_invoice"));
+  clean_container (GTK_CONTAINER (widget));
   gtk_widget_hide (widget);
 
   //clean the main window
@@ -3080,7 +3134,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   gtk_label_set_text (GTK_LABEL(widget), "");
 
   ListClean ();
-
+  set_cliente_facturacion (FALSE);
 }
 
 

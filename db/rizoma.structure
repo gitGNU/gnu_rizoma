@@ -147,10 +147,14 @@ create table deuda (
 -- Documentos_emitidos
 create table documentos_emitidos (
   id                        serial not null,
-  id_venta		    int4 not null, -- not null se debe quitar para migrar bases antiguas
+  id_venta		    int4, -- Si es una factura, el id_venta = 0
+  id_factura		    int4, -- Si una guía, al ser facturado queda asociado a una factura en esta misma tabla (sino = 0)
+  rut_cliente		    int4,
   tipo_documento            int2,
   forma_pago                int2,
   num_documento             int4,
+  monto			    int4 default 0,
+  pagado		    bool default false,
   fecha_emision             timestamp,
   constraint pk_documentos_emitidos primary key (id)
 ) ;
@@ -302,6 +306,7 @@ create table nota_credito_detalle (
  cantidad 	    	    float8
 );
 
+CREATE TYPE tc AS ENUM ('credito', 'factura');
 -- Cliente
 create table cliente (
   rut                       int4 not null,
@@ -319,6 +324,7 @@ create table cliente (
   credito                   int4,
   credito_enable            bool,
   activo		    bool default 't',
+  tipo			    tc, -- (1 cliente credito, 2 cliente factura)
   constraint pk_cliente primary key (rut)
 ) ;
 

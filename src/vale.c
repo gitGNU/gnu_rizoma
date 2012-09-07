@@ -34,7 +34,7 @@
 #include"manejo_productos.h"
 
 void
-PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_pago, gint tipo_documento)
+PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gint total, gint tipo_pago, gint tipo_documento)
 {
   Productos *products = header;
   FILE *fp;
@@ -63,7 +63,7 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
       is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
     }
 
-  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago);
+  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, rut_cliente);
 
   if (boleta != -1)
     set_ticket_number (boleta, tipo_documento);
@@ -172,7 +172,7 @@ PrintVale (Productos *header, gint venta_id, gint boleta, gint total, gint tipo_
 
 
 void
-PrintValeContinuo (Productos *header, gint venta_id, gint boleta, 
+PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, 
 		   gint total, gint tipo_pago, gint tipo_documento, Productos *prod)
 {
   FILE *fp;
@@ -220,7 +220,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
       is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
     }
 
-  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago);
+  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, rut_cliente);
 
   if (boleta != -1)
     set_ticket_number (boleta, tipo_documento);  
@@ -381,7 +381,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gint boleta,
   if (products != header)
     {
       boleta = get_ticket_number (tipo_documento);
-      PrintValeContinuo (header, venta_id, boleta, total, tipo_pago, tipo_documento, products);
+      PrintValeContinuo (header, venta_id, rut_cliente, boleta, total, tipo_pago, tipo_documento, products);
     }
 }
 
