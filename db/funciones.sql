@@ -370,7 +370,7 @@ BEGIN
 		    (
 		     SELECT barcode_madre, barcode_comp_der, tipo_comp_der, cant_mud
 		     FROM componente_mc WHERE barcode_madre = $S$ || codigo_barras || $S$
-	 	     UNION ALL	 
+	 	     UNION ALL
 	 	     SELECT componente_mc.barcode_madre, componente_mc.barcode_comp_der, 
 		     	    componente_mc.tipo_comp_der,
 		    	    componente_mc.cant_mud * compuesta.cant_mud
@@ -5115,15 +5115,18 @@ CREATE OR replace FUNCTION search_facturas_guias (IN rut_cliente_in INT,
 						  IN solo_pendientes_in boolean,
 						  IN tipo_guia_in INT,
 						  IN tipo_factura_in INT,
+						  IN tipo_documento_in INT, -- Tipo documento a mostrar (0 = guias y facturas)
 						  IN filtro_in VARCHAR,
        						  OUT id_venta_out INT,
 						  OUT id_documento_out INT,
+						  OUT id_factura_out INT,
 						  OUT rut_cliente_out INT,
        						  OUT monto_out INT,
        						  OUT maquina_out INT,
        						  OUT vendedor_out INT,
        						  OUT tipo_documento_out INT,
-       						  OUT fecha_emision_out TIMESTAMP WITHOUT TIME ZONE)
+       						  OUT fecha_emision_out TIMESTAMP WITHOUT TIME ZONE, 
+						  OUT pagado_out BOOLEAN)
 RETURNS setof record AS $$
 DECLARE
         query TEXT;
@@ -5132,37 +5135,48 @@ BEGIN
 	--
 	--
 	--
-	IF solo_pendientes_in = TRUE THEN --Solo se listan las facturas sin pago y guias sin facturar
+	IF solo_pendientes_in = TRUE THEN --Solo se listan guias sin facturar y las facturas sin pago (con sus guias (facturadas) respectivas en caso de tenerlas)
    	   CREATE TEMPORARY TABLE facturas_guias AS
-	   	  SELECT de.id_venta, 0 AS maquina, 0 AS vendedor, de.id AS id_documento, 
-	          	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
-	   	  FROM documentos_emitidos de
-	   	  WHERE de.tipo_documento = tipo_factura_in
-	   	  AND de.pagado = FALSE
-		  AND id_venta NOT IN (SELECT id_sale FROM venta_anulada);
-
-		  INSERT INTO facturas_guias
-		  SELECT v.id AS id_venta, v.maquina, v.vendedor, de.id AS id_documento, 
-   	    	       	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
-	      	  FROM venta v INNER JOIN documentos_emitidos de
-		  ON v.id = de.id_venta
-		  WHERE de.tipo_documento = tipo_guia_in AND id_factura = 0
-		  AND v.id NOT IN (SELECT id_sale FROM venta_anulada);
+		  WITH RECURSIVE facturas (id_venta, maquina, vendedor, id_documento, id_factura, fecha_emision, tipo_documento, monto, rut_cliente, pagado) AS 
+		  (
+			SELECT COALESCE (de.id_venta,0) AS id_venta, COALESCE (maquina,0) AS maquina, 
+			       COALESCE(vendedor,0) AS vendedor, de.id AS id_documento, de.id_factura, 
+			       de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente, de.pagado
+	   	  	FROM documentos_emitidos de
+	          	LEFT JOIN venta v ON v.id = de.id_venta
+	   	  	WHERE (de.tipo_documento = tipo_factura_in OR (de.tipo_documento = tipo_guia_in AND id_factura = 0))
+	   	  	AND de.pagado = FALSE
+		  	AND id_venta NOT IN (SELECT id_sale FROM venta_anulada)
+		  	UNION ALL
+		        SELECT v.id AS id_venta, v.maquina, v.vendedor, de.id AS id_documento, de.id_factura,
+   	    	       	       de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente, de.pagado
+	      	  	FROM venta v INNER JOIN documentos_emitidos de
+		  	ON v.id = de.id_venta
+		  	INNER JOIN facturas
+		  	ON facturas.id_documento = de.id_factura
+		  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+		  )
+		  SELECT * FROM facturas;
 	ELSE --Se listan todas las deudas (incluso las ya pagadas)
    	   CREATE TEMPORARY TABLE facturas_guias AS
-	   	  SELECT de.id_venta, 0 AS maquina, 0 AS vendedor, de.id AS id_documento, 
-	          	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
-	   	  FROM documentos_emitidos de
-	   	  WHERE de.tipo_documento = tipo_factura_in
-		  AND id_venta NOT IN (SELECT id_sale FROM venta_anulada);
-
-		  INSERT INTO facturas_guias
-		  SELECT v.id AS id_venta, v.maquina, v.vendedor, de.id AS id_documento, 
-   	    	       	 de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente
-	      	  FROM venta v INNER JOIN documentos_emitidos de
-		  ON v.id = de.id_venta
-		  WHERE de.tipo_documento = tipo_guia_in
-		  AND v.id NOT IN (SELECT id_sale FROM venta_anulada);
+	   	  WITH RECURSIVE facturas (id_venta, maquina, vendedor, id_documento, id_factura, fecha_emision, tipo_documento, monto, rut_cliente, pagado) AS 
+		  (
+			SELECT COALESCE (de.id_venta,0) AS id_venta, COALESCE (maquina,0) AS maquina, 
+			       COALESCE(vendedor,0) AS vendedor, de.id AS id_documento, de.id_factura, 
+			       de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente, de.pagado
+	   	  	FROM documentos_emitidos de
+	          	LEFT JOIN venta v ON v.id = de.id_venta
+	   	  	WHERE id_venta NOT IN (SELECT id_sale FROM venta_anulada)
+		  	UNION ALL
+		        SELECT v.id AS id_venta, v.maquina, v.vendedor, de.id AS id_documento, de.id_factura,
+   	    	       	       de.fecha_emision, de.tipo_documento, de.monto, de.rut_cliente, de.pagado
+	      	  	FROM venta v INNER JOIN documentos_emitidos de
+		  	ON v.id = de.id_venta
+		  	INNER JOIN facturas
+		  	ON facturas.id_documento = de.id_factura
+		  	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
+		  )
+		  SELECT * FROM facturas;
 	END IF;
 
 	query := $S$ SELECT * FROM facturas_guias WHERE id_venta IS NOT NULL $S$;
@@ -5171,21 +5185,32 @@ BEGIN
 	   query := query || $S$ AND rut_cliente = $S$||rut_cliente_in;
 	END IF;
 
+	IF tipo_documento_in = tipo_factura_in THEN
+	   query := query || $S$ AND (tipo_documento = $S$||tipo_factura_in||$S$ OR id_factura != 0) $S$;
+	ELSIF tipo_documento_in = tipo_guia_in THEN
+	   query := query || $S$ AND tipo_documento = $S$||tipo_guia_in;
+	   IF solo_pendientes_in = TRUE THEN
+	      query := query || $S$ AND id_factura = 0 $S$;
+	   END IF;
+	END IF;
+
 	IF filtro_in != '' THEN
-	   query := query || $S$ AND $S$||filtro_in;
+	   query := query || $S$ AND ($S$||filtro_in||$S$)$S$;
 	END IF;
 
 	query := query || $S$ ORDER BY id_venta DESC $S$;
 
         FOR l IN EXECUTE query loop
-	      	id_venta_out = l.id_venta;
-		id_documento_out = l.id_documento;
-		rut_cliente_out = l.rut_cliente;
-		maquina_out = l.maquina;
-		vendedor_out = l.vendedor;
-		fecha_emision_out = l.fecha_emision;
-		tipo_documento_out = l.tipo_documento;
-		monto_out = l.monto;
+	      	id_venta_out := l.id_venta;
+		id_documento_out := l.id_documento;
+		id_factura_out := l.id_factura;
+		rut_cliente_out := l.rut_cliente;
+		maquina_out := l.maquina;
+		vendedor_out := l.vendedor;
+		fecha_emision_out := l.fecha_emision;
+		tipo_documento_out := l.tipo_documento;
+		monto_out := l.monto;
+		pagado_out := l.pagado;
 		RETURN NEXT;
         END loop;
 

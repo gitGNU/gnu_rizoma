@@ -53,7 +53,6 @@
 
 GtkBuilder *builder;
 
-GtkWidget *add_button;
 GtkWidget *vuelto_button;
 
 GtkWidget *calendar_window;
@@ -1519,20 +1518,12 @@ SearchSellProduct (GtkEntry *entry, gpointer data)
       if (venta_directa == 1)
 	{
 	  if (VentaFraccion (PQvaluebycol (res, 0, "barcode")))
-	    {
-	      gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-	      gtk_widget_set_sensitive (add_button, TRUE);
-	    }
+	    gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
 	  else
-	    {
-	      AgregarProducto( NULL, NULL );
-	    }
+	    AgregarProducto( NULL, NULL );
 	}
       else
-	{
-	  gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
-	  gtk_widget_set_sensitive( add_button, TRUE );
-	}
+	gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
     }
   else
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
@@ -3111,12 +3102,6 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
   gtk_widget_grab_focus (widget);
 
   gtk_list_store_clear(GTK_LIST_STORE(gtk_entry_completion_get_model(gtk_entry_get_completion(GTK_ENTRY(widget)))));
-
-  widget = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_entry_name"));
-  gtk_label_set_text(GTK_LABEL(widget), "");
-
-  widget = GTK_WIDGET(gtk_builder_get_object (builder, "lbl_entry_giro"));
-  gtk_label_set_text(GTK_LABEL(widget), "");
 
   widget = GTK_WIDGET(gtk_builder_get_object (builder, "wnd_sale_invoice"));
   clean_container (GTK_CONTAINER (widget));

@@ -83,7 +83,7 @@ gint DeudaTotalCliente (gint rut);
 
 PGresult * SearchDeudasCliente (gint rut);
 
-PGresult * search_deudas_guias_facturas_cliente (gint rut, gchar *filtro);
+PGresult * search_deudas_guias_facturas_cliente (gint rut, gchar *filtro, gint tipo_documento);
 
 gint CancelarDeudas (gint abonar, gint rut);
 

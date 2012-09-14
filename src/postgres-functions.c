@@ -978,16 +978,16 @@ SearchDeudasCliente (gint rut)
 }
 
 PGresult *
-search_deudas_guias_facturas_cliente (gint rut, gchar *filtro)
+search_deudas_guias_facturas_cliente (gint rut, gchar *filtro, gint tipo_documento)
 {
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT id_venta_out AS id_venta, id_documento_out AS id_documento, monto_out AS monto, "
+  q = g_strdup_printf ("SELECT id_venta_out AS id_venta, id_documento_out AS id_documento, monto_out AS monto, id_factura_out AS id_factura, "
 		       "       maquina_out AS maquina, vendedor_out AS vendedor, tipo_documento_out AS tipo_documento, "
 		       "       date_part('day', fecha_emision_out) AS day, date_part('month', fecha_emision_out) AS month, date_part('year', fecha_emision_out) AS year, "
                        "       date_part('hour', fecha_emision_out) AS hour, date_part('minute', fecha_emision_out) AS minute, date_part ('second', fecha_emision_out) AS second "
-		       "FROM search_facturas_guias (%d, true, %d, %d, '%s'::varchar) ", rut, GUIA, FACTURA, filtro);
+		       "FROM search_facturas_guias (%d, true, %d, %d, %d, '%s'::varchar) ", rut, GUIA, FACTURA, tipo_documento, filtro);
   res = EjecutarSQL (q);
   g_free (q);
 

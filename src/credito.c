@@ -716,7 +716,7 @@ ToggleGuiaSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer dat
   // Se cambia la seleccion del checkButton (solo si es guia)
   if (g_str_equal (tipo_documento, "GUIA"))
     enable = !(enable);
-  gtk_list_store_set (GTK_LIST_STORE(store), &iter,
+  gtk_tree_store_set ((GtkTreeStore*)store, &iter,
                       1, enable,
                       -1);
 
@@ -730,7 +730,7 @@ ToggleGuiaSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer dat
 			  2, &id_venta,
 			  -1);
       if (id_venta == id_venta_seleccionado && id_documento_seleccionado != id_documento)
-	gtk_list_store_set (GTK_LIST_STORE(store), &iter,
+	gtk_tree_store_set ((GtkTreeStore*)store, &iter,
 			    1, enable,
 			    -1);
       
@@ -766,7 +766,7 @@ guias_facturas_box ()
   GtkTreeViewColumn *column;
   GtkTreeSelection *selection;
   GtkListStore *store;
-  GtkListStore *ventas;
+  GtkTreeStore *ventas;
   GtkListStore *ventas_details;
 
   client_gf_list = (Print *) malloc (sizeof (Print));
@@ -869,7 +869,7 @@ guias_facturas_box ()
 
 
   ////////////////sales
-  ventas = gtk_list_store_new (8,
+  ventas = gtk_tree_store_new (8,
 			       G_TYPE_INT,      //ID documento
 			       G_TYPE_BOOLEAN,  //Elegir (Para facturar)
                                G_TYPE_INT,      //ID Venta
@@ -2078,10 +2078,9 @@ void
 datos_deuda_factura_guia (GtkTreeSelection *treeselection,
 			  gpointer user_data)
 {
-  GtkWidget *widget;
+  GObject *object;
   GtkTreeIter iter;
   GtkTreeView *treeview;
-  GtkListStore *store;
   gchar *rut;
   gint rut_n;
 
@@ -2121,13 +2120,13 @@ datos_deuda_factura_guia (GtkTreeSelection *treeselection,
       /* deuda = DeudaTotalCliente (rut); */
 
       //Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
-      widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_guia_factura"));
-      store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
-      gtk_list_store_clear (store);
+      treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_guia_factura"));
+      object = G_OBJECT (gtk_tree_view_get_model (treeview));
+      gtk_tree_store_clear ((GtkTreeStore*)object);
 
-      widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_gf_sale_detail"));
-      store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
-      gtk_list_store_clear (store);
+      treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_gf_sale_detail"));
+      object = G_OBJECT (gtk_tree_view_get_model (treeview));
+      gtk_list_store_clear (GTK_LIST_STORE (object));
 
       fill_deudas_facturas_guias (rut_n, tipo_documento);
     }
@@ -2264,42 +2263,70 @@ FillVentasDeudas (gint rut)
 void
 fill_deudas_facturas_guias (gint rut, gint tipo_documento_n)
 {
-  GtkWidget *widget;
-  GtkListStore *store;
-  gint i;
+  GtkTreeView *treeview;
+  GtkTreeModel *store;
+  gint i, j;
   gint tuples;
-  GtkTreeIter iter;
+  GtkTreeIter iter_hijo, iter_padre;
   PGresult *res;
-  gchar *tipo_documento, *filtro;
+  gchar *tipo_documento;
 
   if (tipo_documento_n == FACTURA)
     tipo_documento = g_strdup ("FACTURA");
   else if (tipo_documento_n == GUIA)
     tipo_documento = g_strdup ("GUIA");
-
-  filtro = g_strdup_printf ("tipo_documento = %d", tipo_documento_n);
-  res = search_deudas_guias_facturas_cliente (rut, filtro);
+  
+  res = search_deudas_guias_facturas_cliente (rut, "", tipo_documento_n);
   tuples = PQntuples (res);
 
-  widget = GTK_WIDGET (builder_get (builder, "treeview_guia_factura"));
-  store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
-  gtk_list_store_clear (store);
+  treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_guia_factura"));
+  store = gtk_tree_view_get_model (treeview);
+  gtk_tree_store_clear ((GtkTreeStore*)store);
 
   for (i = 0; i < tuples; i++)
     {
-      gtk_list_store_append (store, &iter);
-      gtk_list_store_set (store, &iter,
-			  0, atoi (PQvaluebycol (res, i, "id_documento")),
-			  1, FALSE,
-                          2, atoi (PQvaluebycol (res, i, "id_venta")),
-                          3, atoi (PQvaluebycol (res, i, "maquina")),
-                          4, PQvaluebycol (res, i, "vendedor"),
-                          5, g_strdup_printf ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQvaluebycol (res, i, "day")),
-					      atoi (PQvaluebycol (res, i, "month")), atoi (PQvaluebycol (res, i, "year")),
-					      atoi (PQvaluebycol (res, i, "hour")), atoi (PQvaluebycol (res, i, "minute"))),
-			  6, tipo_documento,
-                          7, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
-                          -1);
+      if ((tipo_documento_n == FACTURA && atoi (PQvaluebycol (res, i, "tipo_documento")) == FACTURA) ||
+	  tipo_documento_n == GUIA)
+	{
+	  gtk_tree_store_append ((GtkTreeStore*)store, &iter_padre, NULL);
+	  gtk_tree_store_set ((GtkTreeStore*)store, &iter_padre,
+			      0, atoi (PQvaluebycol (res, i, "id_documento")),
+			      1, FALSE,
+			      2, atoi (PQvaluebycol (res, i, "id_venta")),
+			      3, atoi (PQvaluebycol (res, i, "maquina")),
+			      4, PQvaluebycol (res, i, "vendedor"),
+			      5, g_strdup_printf ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQvaluebycol (res, i, "day")),
+						  atoi (PQvaluebycol (res, i, "month")), atoi (PQvaluebycol (res, i, "year")),
+						  atoi (PQvaluebycol (res, i, "hour")), atoi (PQvaluebycol (res, i, "minute"))),
+			      6, tipo_documento,
+			      7, atoi (g_strdup (PQvaluebycol (res, i, "monto"))),
+			      -1);
+
+	  if (tipo_documento_n == FACTURA && atoi (PQvaluebycol (res, i, "id_venta")) == 0)
+	    {
+	      for (j = 0; j < tuples; j++)
+		{
+		  if (atoi (PQvaluebycol (res, i, "id_documento")) == atoi (PQvaluebycol (res, j, "id_factura")))
+		    {
+		      gtk_tree_store_append ((GtkTreeStore*)store, &iter_hijo, &iter_padre);
+		      gtk_tree_store_set ((GtkTreeStore*)store, &iter_hijo,
+					  0, atoi (PQvaluebycol (res, j, "id_documento")),
+					  1, FALSE,
+					  2, atoi (PQvaluebycol (res, j, "id_venta")),
+					  3, atoi (PQvaluebycol (res, j, "maquina")),
+					  4, PQvaluebycol (res, j, "vendedor"),
+					  5, g_strdup_printf ("%.2d/%.2d/%.4d %.2d:%.2d", atoi (PQvaluebycol (res, j, "day")),
+							      atoi (PQvaluebycol (res, j, "month")), atoi (PQvaluebycol (res, j, "year")),
+							      atoi (PQvaluebycol (res, j, "hour")), atoi (PQvaluebycol (res, j, "minute"))),
+					  6, "GUIA",
+					  7, atoi (g_strdup (PQvaluebycol (res, j, "monto"))),
+					  -1);
+		    }
+		}
+	    }
+
+
+	}
     }
 }
 
@@ -2382,7 +2409,7 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
 {
   GtkWidget *widget;
   GtkTreeView *treeview;
-  GtkListStore *store;
+  GtkTreeStore *store;
   GtkListStore *store_detalle;
   GtkTreeIter iter;
   gchar *q, *tipo_documento;
@@ -2391,9 +2418,9 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
   PGresult *res;
 
   treeview = gtk_tree_selection_get_tree_view(treeselection);
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
+  store = GTK_TREE_STORE (gtk_tree_view_get_model(treeview));
   
-  widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_gf_sale_detail"));
+  widget = GTK_WIDGET (builder_get (builder, "treeview_gf_sale_detail"));
 
   if (gtk_tree_selection_get_selected (treeselection, NULL, &iter))
     {
@@ -2403,7 +2430,7 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
 			  6, &tipo_documento,
                           -1);
       
-      store_detalle = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
+      store_detalle = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
       gtk_list_store_clear (store_detalle);
 
       if (id_venta == 0)
@@ -3206,8 +3233,7 @@ void
 admin_search_client_gf (GtkButton *button)
 {
   GtkWidget *widget;
-  GtkWidget *aux_widget;
-  GtkListStore *store;
+  GObject *store;
   GtkTreeIter iter;
   gchar *string;
   gchar *q;
@@ -3230,23 +3256,23 @@ admin_search_client_gf (GtkButton *button)
   tuples = PQntuples (res);
 
   // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_guia_factura"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
-  gtk_list_store_clear (store);
+  widget = GTK_WIDGET (builder_get (builder, "treeview_guia_factura"));
+  store = G_OBJECT (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
+  gtk_tree_store_clear (GTK_TREE_STORE (store));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_gf_sale_detail"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
-  gtk_list_store_clear (store);
+  widget = GTK_WIDGET (builder_get (builder, "treeview_gf_sale_detail"));
+  store = G_OBJECT (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
+  gtk_list_store_clear (GTK_LIST_STORE (store));
 
-  aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_clients_gf"));
-  store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(aux_widget)));
-  gtk_list_store_clear (store);
+  widget = GTK_WIDGET (builder_get (builder, "treeview_clients_gf"));
+  store = G_OBJECT (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
+  gtk_list_store_clear (GTK_LIST_STORE (store));
 
   for (i = 0; i < tuples; i++)
     {
-      gtk_list_store_append (store, &iter);
+      gtk_list_store_append (GTK_LIST_STORE (store), &iter);
 
-      gtk_list_store_set (store, &iter,
+      gtk_list_store_set (GTK_LIST_STORE (store), &iter,
 			  0, g_strconcat (PQvaluebycol (res, i, "rut"),
 					  PQvaluebycol (res, i, "dv"), NULL),
 			  1, g_strdup (PQvaluebycol (res, i, "name")),
