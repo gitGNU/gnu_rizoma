@@ -137,9 +137,11 @@ FillProductSell (gchar *barcode,
                           g_strdup_printf ("<b>%.2f dia(s)</b>", strtod (PUT (stock_day), (char **)NULL)));
 
   //precio
-  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
+  /*gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
                         g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
-                                         PutPoints (precio)));
+			PutPoints (precio)));*/
+
+  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), precio);
 
   //precio de mayorista
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor")),
@@ -804,8 +806,8 @@ AgregarProducto (GtkButton *button, gpointer data)
       return FALSE;
     }
 
-  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "label_precio"));
-  if (g_str_equal ("0", CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL(aux_widget))))))
+  aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_precio"));
+  if (g_str_equal ("0", g_strdup (gtk_entry_get_text (GTK_ENTRY(aux_widget)))))
     {
       AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No se pueden vender productos con precio 0");
       CleanEntryAndLabelData ();
@@ -951,7 +953,7 @@ CleanSellLabels (void)
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), "");
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_precio")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")), "");
   //gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")), "1");
@@ -973,7 +975,7 @@ CleanEntryAndLabelData (void)
   gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad")), "");
-  gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")), "");
+  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_precio")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")), "");
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_stock")), "");
@@ -1140,7 +1142,7 @@ void
 AumentarCantidad (GtkEntry *entry, gpointer data)
 {
   gdouble cantidad = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))))), (char **)NULL);
-  gint precio = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))));
+  gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_precio")))));
   gint precio_mayor = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor"))))));
   gdouble cantidad_mayor = strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad"))))),
                                    (char **)NULL);
@@ -1784,13 +1786,18 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 	  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "product_label")), 
 				g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", product));
 
-          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
+          /*gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_precio")),
                                 g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
-                                                 PutPoints (g_strdup_printf ("%d", precio))));
-          gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
+				PutPoints (g_strdup_printf ("%d", precio))));*/
+
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), g_strdup_printf ("%d", precio));
+
+          /*gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
                                 g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%u", atoi (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))) *
-                                                                             atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))))));
+						 atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))))));*/
+
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), g_strdup_printf ("%d", precio * atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "cantidad_entry"))))));
 
 	  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")), 
 				g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", codigo));
