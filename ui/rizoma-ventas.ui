@@ -4334,7 +4334,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">7</property>
-                    <signal name="activate" handler="gtk_widget_grab_focus" object="cantidad_entry" swapped="yes"/>
+                    <signal name="activate" handler="on_entry_precio_activate" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>

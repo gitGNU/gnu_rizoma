@@ -1518,7 +1518,7 @@ SearchSellProduct (GtkEntry *entry, gpointer data)
 
   if (atoi (PQvaluebycol (res, 0, "precio")) != 0)
     {
-      if (venta_discrecional == 1 && venta_directa == 0)
+      if (venta_discrecional == 1)
 	gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_precio")));
       else if (venta_directa == 1)
 	{
@@ -1546,7 +1546,7 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 
   gtk_widget_hide (GTK_WIDGET (gtk_builder_get_object (builder, "ventas_buscar")));
 
-  if (add == TRUE && venta_discrecional == 1 && venta_directa == 0)
+  if (add == TRUE && venta_discrecional == 1)
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_precio")));
   else if (add == TRUE && venta_directa == 0)
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
@@ -1555,6 +1555,25 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
   else
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 }
+
+
+void
+on_entry_precio_activate (GtkEntry *entry, gpointer data)
+{
+  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
+  gboolean fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry")))));
+
+  if (venta_directa == 1)
+    {
+      if (fraccion == TRUE)
+	gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+      else
+	AgregarProducto( NULL, NULL );
+    }
+  else
+    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+}
+
 
 void
 BuscarProducto (GtkWidget *widget, gpointer data)
@@ -1810,9 +1829,12 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 
           gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry")), barcode);
 
+	  CloseBuscarWindow (NULL, (gpointer)TRUE);
+
           SearchSellProduct (GTK_ENTRY (builder_get (builder, "barcode_entry")), (gpointer)TRUE);
         }
-      CloseBuscarWindow (NULL, (gpointer)TRUE);
+      else
+	CloseBuscarWindow (NULL, (gpointer)TRUE);
     }
 }
 
