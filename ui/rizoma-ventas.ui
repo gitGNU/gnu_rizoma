@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkMessageDialog" id="dialog_cash_box_closed">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -13,12 +14,12 @@
     <property name="secondary_text">¿Desea abrir una nueva caja y continuar ahora?</property>
     <signal name="response" handler="on_dialog_cash_box_closed_response" swapped="no"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox17">
+      <object class="GtkVBox" id="dialog-vbox17">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area17">
+          <object class="GtkHButtonBox" id="dialog-action_area17">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -52,12 +53,12 @@
     <property name="secondary_text">¿Desea cerrar la caja ahora?</property>
     <signal name="response" handler="on_dialog_cash_box_opened_response" swapped="no"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox3">
+      <object class="GtkVBox" id="dialog-vbox3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area3">
+          <object class="GtkHButtonBox" id="dialog-action_area3">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -90,12 +91,12 @@
     <property name="text">El cliente sobrepasa su limite de crédito</property>
     <signal name="response" handler="gtk_widget_hide" object="msg_credit_out" swapped="yes"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox5">
+      <object class="GtkVBox" id="dialog-vbox5">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area5">
+          <object class="GtkHButtonBox" id="dialog-action_area5">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -131,16 +132,16 @@
     <property name="buttons">yes-no</property>
     <property name="text">¿Realmente desea salir?</property>
     <property name="secondary_text">Se perderá toda información no guardada</property>
-    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="response" handler="exit_response" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox1">
+      <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area1">
+          <object class="GtkHButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -788,9 +789,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="rules_hint">True</property>
                 <signal name="row-activated" handler="FillSellData" swapped="no"/>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection1"/>
-                </child>
               </object>
             </child>
           </object>
@@ -1676,9 +1674,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <signal name="row-activated" handler="on_treeview_clients_row_activated" swapped="no"/>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection2"/>
-                </child>
               </object>
             </child>
           </object>
@@ -2316,9 +2311,6 @@
                               <object class="GtkTreeView" id="treeview_mixed_pay">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <child internal-child="selection">
-                                  <object class="GtkTreeSelection" id="treeview-selection3"/>
-                                </child>
                               </object>
                             </child>
                           </object>
@@ -3160,9 +3152,6 @@
                   <object class="GtkTreeView" id="treeview_nullify_sale">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="treeview-selection4"/>
-                    </child>
                   </object>
                 </child>
               </object>
@@ -3180,9 +3169,6 @@
                   <object class="GtkTreeView" id="treeview_nullify_sale_details">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection" id="treeview-selection5"/>
-                    </child>
                   </object>
                 </child>
               </object>
@@ -4344,16 +4330,11 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
-                <child>
                   <object class="GtkEntry" id="entry_precio">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_cantidad" swapped="yes"/>
+                    <property name="width_chars">7</property>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="cantidad_entry" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -4361,6 +4342,12 @@
                     <property name="x_options"></property>
                     <property name="y_options"></property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -4889,9 +4876,6 @@
                 <property name="can_focus">False</property>
                 <property name="rules_hint">True</property>
                 <property name="search_column">0</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection6"/>
-                </child>
               </object>
             </child>
           </object>
@@ -5379,9 +5363,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="rules_hint">True</property>
                 <signal name="row-activated" handler="on_treeview_emisor_row_activated" swapped="no"/>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection7"/>
-                </child>
               </object>
             </child>
           </object>
@@ -5504,9 +5485,6 @@
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="rules_hint">True</property>
                 <signal name="row-activated" handler="on_btn_ok_srch_provider_clicked" object="tree_view_srch_provider" swapped="yes"/>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="treeview-selection8"/>
-                </child>
               </object>
             </child>
           </object>

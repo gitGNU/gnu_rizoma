@@ -1988,9 +1988,9 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
       /*Se obtiene el precio proporcional en caso de haber un descuento en el monto total de la venta*/
       if (monto_descuento > 0) // subtotal - (descuento proporcional)
-	precio = ((products->product->cantidad * precio) - 
-		  (monto_descuento * ( (products->product->cantidad * precio) / 
-				       (monto_venta + monto_descuento))));
+	precio = (((products->product->cantidad * precio) - 
+		   (monto_descuento * ( (products->product->cantidad * precio) / 
+					(monto_venta + monto_descuento)))) / products->product->cantidad);
 
       /*Se obtiene el IVA*/
       if (iva_percent != 0)
