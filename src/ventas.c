@@ -792,8 +792,11 @@ AgregarProducto (GtkButton *button, gpointer data)
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "barcode_entry"))));
   guint32 total;
   gint tipo;
+  gchar *precio_discrecional;
   gdouble stock = GetCurrentStock (barcode);
   gdouble cantidad;
+  gdouble ganancia_minima = strtod (PUT (rizoma_get_value ("GANANCIA_MINIMA")), (char **)NULL);
+  gdouble costo_neto, iva, otros;
   GtkTreeIter iter;
   GtkWidget *aux_widget;
 
@@ -854,13 +857,50 @@ AgregarProducto (GtkButton *button, gpointer data)
         {
           gint precio;
 
-          AgregarALista (codigo, barcode, cantidad);
+	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
+	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
+	       !HaveCharacters (precio_discrecional) )
+	    {
+	      precio = atoi (precio_discrecional);
+	      
+	      costo_neto = obtener_costo_promedio (barcode);
+	      ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
+	      costo_neto = costo_neto * ganancia_minima;
 
-          if (venta->products->product->cantidad_mayorista > 0 && venta->products->product->precio_mayor > 0 && venta->products->product->cantidad >= venta->products->product->cantidad_mayorista &&
-              venta->products->product->mayorista == TRUE)
-            precio = venta->products->product->precio_mayor;
-          else
-            precio = venta->products->product->precio;
+	      //Se obtienen los impuestos
+	      iva = GetIVA (barcode);
+	      iva = (iva > 0) ? iva / 100 : 0;
+	      otros = GetOtros (barcode);
+	      otros = (otros > 0) ? otros / 100 : 0;
+
+	      //Costo neto + impuestos
+	      costo_neto *= (1 + otros + iva);
+
+	      if (precio < costo_neto)
+		{
+		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_precio")), 
+			    g_strdup_printf ("El precio es inferior al mínimo permitido ($ %s)", 
+					     PutPoints (g_strdup_printf ("%ld", lround (costo_neto)))));
+		  return FALSE;
+		}
+
+	      AgregarALista (codigo, barcode, cantidad);
+
+	      //Se actualiza el valor en la estructura para el registro de venta
+	      if (venta->products->product->mayorista == TRUE)
+		venta->products->product->precio_mayor = precio;
+	      else
+		venta->products->product->precio = precio;
+	    }
+	  else
+	    {
+	      AgregarALista (codigo, barcode, cantidad);
+	      if (venta->products->product->cantidad_mayorista > 0 && venta->products->product->precio_mayor > 0 && venta->products->product->cantidad >= venta->products->product->cantidad_mayorista &&
+		  venta->products->product->mayorista == TRUE)
+		precio = venta->products->product->precio_mayor;
+	      else
+		precio = venta->products->product->precio;
+	    }
 
           /*
             Agregamos el producto al TreeView
@@ -893,15 +933,49 @@ AgregarProducto (GtkButton *button, gpointer data)
               return FALSE;
             }
 
-          venta->product_check->product->cantidad += cantidad;
+	  /*Se obtiene el precio de venta de acuerdo a si es discrecional o no*/
+	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
+	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
+	       !HaveCharacters (precio_discrecional) )
+	    {
+	      precio = atoi (precio_discrecional);
+	      
+	      costo_neto = venta->products->product->fifo;
+	      ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
+	      costo_neto = costo_neto * ganancia_minima;
 
-          if (venta->product_check->product->cantidad_mayorista > 0 && venta->product_check->product->precio_mayor > 0 && venta->product_check->product->cantidad >= venta->product_check->product->cantidad_mayorista &&
-              venta->product_check->product->mayorista == TRUE)
-            precio = venta->products->product->precio_mayor;
-          else
-            precio = venta->product_check->product->precio;
+	      //Se obtienen los impuestos
+	      iva = venta->products->product->iva;
+	      iva = (iva > 0) ? iva / 100 : 0;
+	      otros = venta->products->product->otros;
+	      otros = (otros > 0) ? otros / 100 : 0;
 
+	      //Costo neto + impuestos
+	      costo_neto *= (1 + otros + iva);
 
+	      if (precio < costo_neto)
+		{
+		  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_precio")), 
+			    g_strdup_printf ("El precio es inferior al mínimo permitido ($ %s)", 
+					     PutPoints (g_strdup_printf ("%ld", lround (costo_neto)))));
+		  return FALSE;
+		}
+
+	      if (venta->product_check->product->mayorista == TRUE)
+		venta->product_check->product->precio_mayor = precio;
+	      else
+		venta->product_check->product->precio = precio;
+	    }
+	  else
+	    {
+	      if (venta->product_check->product->cantidad_mayorista > 0 && venta->product_check->product->precio_mayor > 0 && venta->product_check->product->cantidad >= venta->product_check->product->cantidad_mayorista &&
+		  venta->product_check->product->mayorista == TRUE)
+		precio = venta->product_check->product->precio_mayor;
+	      else
+		precio = venta->product_check->product->precio;
+	    }
+
+	  venta->product_check->product->cantidad += cantidad;
           gtk_list_store_set (venta->store, &venta->product_check->product->iter,
                               2, g_strdup_printf ("%.3f", venta->product_check->product->cantidad),
                               3, precio,
@@ -909,7 +983,6 @@ AgregarProducto (GtkButton *button, gpointer data)
                                             ("%.0f", venta->product_check->product->cantidad *
                                              precio)),
                               -1);
-
         }
 
       //Se obtiene el tipo de mercaderia
@@ -1560,15 +1633,15 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 void
 on_entry_precio_activate (GtkEntry *entry, gpointer data)
 {
-  gint venta_directa = atoi(rizoma_get_value("VENTA_DIRECTA"));
+  gint venta_directa = atoi (rizoma_get_value ("VENTA_DIRECTA"));
   gboolean fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry")))));
 
   if (venta_directa == 1)
     {
       if (fraccion == TRUE)
-	gtk_widget_grab_focus( GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+	gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
       else
-	AgregarProducto( NULL, NULL );
+	AgregarProducto (NULL, NULL);
     }
   else
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));

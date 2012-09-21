@@ -212,7 +212,7 @@ gchar * GetOtrosName (gchar *barcode);
 
 gdouble GetNeto (gchar *barcode);
 
-gdouble GetFiFo (gchar *barcode);
+gdouble obtener_costo_promedio (gchar *barcode);
 
 gboolean CheckCompraIntegrity (gchar *compra);
 

@@ -2737,12 +2737,12 @@ GetNeto (gchar *barcode)
 }
 
 gdouble
-GetFiFo (gchar *barcode)
+obtener_costo_promedio (gchar *barcode)
 {
   PGresult *res;
   gint tuples;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT get_fifo(%s)", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT costo FROM obtener_costo_promedio_desde_barcode (%s)", barcode));
 
   tuples = PQntuples (res);
 
