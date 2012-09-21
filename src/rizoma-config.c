@@ -111,7 +111,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "VALE_SELECTIVO", "NO");
   g_key_file_set_string (file, "RIZOMA", "VALE_CONTINUO", "0");
   g_key_file_set_string (file, "RIZOMA", "LOGO", "");
-  g_key_file_set_string (file, "RIZOMA", "FULLSCREEN", "no");
+  g_key_file_set_string (file, "RIZOMA", "FULLSCREEN", "0");
   g_key_file_set_string (file, "RIZOMA", "CAJA", "0");
   g_key_file_set_string (file, "RIZOMA", "TRASPASO", "0");
   g_key_file_set_string (file, "RIZOMA", "SENCILLO_DIRECTO", "0");

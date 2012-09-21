@@ -4202,8 +4202,6 @@
             <property name="can_focus">False</property>
             <property name="n_rows">4</property>
             <property name="n_columns">3</property>
-            <property name="column_spacing">5</property>
-            <property name="row_spacing">5</property>
             <child>
               <object class="GtkTable" id="table1">
                 <property name="visible">True</property>
@@ -4216,6 +4214,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="xalign">0</property>
                   </object>
                   <packing>
                     <property name="left_attach">5</property>
@@ -4227,6 +4226,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="xalign">0</property>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -4240,6 +4240,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="xalign">0</property>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -4251,6 +4252,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="xalign">0</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -4263,6 +4265,7 @@
                   <object class="GtkLabel" id="label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="yalign">0</property>
                     <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Total:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
@@ -4277,6 +4280,7 @@
                   <object class="GtkLabel" id="label6">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
                     <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Cant. Mayorista:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
@@ -4293,6 +4297,7 @@
                   <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
                     <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Stock:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
@@ -4307,6 +4312,7 @@
                   <object class="GtkLabel" id="label8">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
                     <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt;Precio Mayor: &lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
@@ -4321,6 +4327,7 @@
                   <object class="GtkLabel" id="label9">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
                     <property name="label" translatable="yes" context="yes">&lt;span size="12000"&gt; Precio Unitario:&lt;/span&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
@@ -4334,6 +4341,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">7</property>
+                    <signal name="changed" handler="AumentarCantidad" swapped="no"/>
                     <signal name="activate" handler="on_entry_precio_activate" swapped="yes"/>
                   </object>
                   <packing>
@@ -4475,15 +4483,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkHSeparator" id="hseparator1_product">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox16">
@@ -4506,6 +4506,7 @@
                       <object class="GtkLabel" id="product_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="xalign">0</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -4682,15 +4683,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkHSeparator" id="hseparator1_cantidad">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox2">
@@ -4783,15 +4776,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkHSeparator" id="hseparator1_stock_min">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <object class="GtkHBox" id="hbox17">

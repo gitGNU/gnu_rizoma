@@ -125,8 +125,8 @@ FillProductSell (gchar *barcode,
   gtk_entry_set_text(GTK_ENTRY(widget), barcode);
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "product_label")),
-                      g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s  %s  %s %s</span>", 
-				       marca, descripcion, contenido, unidad));
+                      g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s\n%s %s %s</span>", 
+				       g_strndup (descripcion, 30), marca, contenido, unidad));
 
   if (strtod (PUT (stock), (char **)NULL) <= GetMinStock (barcode))
     gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_stockday")),
@@ -1220,6 +1220,8 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
   gdouble cantidad_mayor = strtod (PUT (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_mayor_cantidad"))))),
                                    (char **)NULL);
   guint32 subtotal;
+  
+  //gchar nombre_entry = gtk_buildable_get_name (GTK_BUILDABLE (entry));
 
   if (precio != 0 && ((mayorista == FALSE || cantidad < cantidad_mayor) ||
                       (mayorista == TRUE && (cantidad_mayor == 0 || precio_mayor == 0))))
@@ -1240,6 +1242,7 @@ AumentarCantidad (GtkEntry *entry, gpointer data)
                                                PutPoints (g_strdup_printf ("%u", subtotal))));
       }
 }
+
 
 void
 TipoVenta (GtkWidget *widget, gpointer data)

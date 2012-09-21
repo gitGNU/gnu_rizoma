@@ -1066,7 +1066,7 @@ void
 compras_win (void)
 {
   GtkWidget *compras_gui;
-  gchar *fullscreen_opt = NULL;
+  //gchar *fullscreen_opt = NULL;
 
   GtkListStore *store;
   GtkTreeView *treeview;
@@ -1131,9 +1131,9 @@ compras_win (void)
     }
 
   // check if the window must be set to fullscreen
-  fullscreen_opt = rizoma_get_value ("FULLSCREEN");
+  //fullscreen_opt = rizoma_get_value ("FULLSCREEN");
 
-  if ((fullscreen_opt != NULL) && (g_str_equal (fullscreen_opt, "YES")))
+  if (rizoma_get_value_boolean("FULLSCREEN"))
     gtk_window_fullscreen (GTK_WINDOW (compras_gui));
 
   /* History TreeView */
