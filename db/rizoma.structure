@@ -164,7 +164,7 @@ create table documentos_emitidos_detalle (
   id                        serial not null primary key,
   id_documento              int4 not null,
   barcode_product           int8 not null,
-  precio                    int4,
+  precio                    float8,
   cantidad                  float8
 ) ;
 
@@ -188,7 +188,7 @@ create table pedido_temporal (
   cantidad		    float8 not null,
   costo_promedio	    float8 not null,
   margen		    float8 not null,
-  precio		    int4 not null,
+  precio		    float8 not null,
   CONSTRAINT pk_pedido_temporal primary key (id)
 );
 
@@ -199,11 +199,11 @@ create table factura_compra (
   rut_proveedor             int4 not null,
   num_factura               int4,
   fecha                     timestamp,
-  valor_neto                int4,
-  valor_iva                 int4,
+  valor_neto                float8,
+  valor_iva                 float8,
   descuento                 int4,
   pagada                    bool,
-  monto                     int4, -- monto total de los productos
+  monto                     float8, -- monto total de los productos
   costo_neto_transporte     double precision,
   iva_transporte	    double precision,
   fecha_pago                timestamp,
@@ -227,7 +227,7 @@ create table devolucion_detalle (
   id_devolucion             int4 not null,
   barcode                   int8 not null,
   cantidad                  float8 not null,
-  precio                    int4 not null,
+  precio                    float8 not null,
   precio_compra		    float8 not null,
   constraint pk_devolucion_detalle primary key (id,id_devolucion)
 ) ;
@@ -282,7 +282,7 @@ create table compra_anulada_detalle (
   id_compra_anulada 	    int4 not null,
   barcode 		    int8 not null,
   costo   		    float8,
-  precio  		    int4,
+  precio  		    float8,
   cantidad 		    float8,
   cantidad_anulada 	    float8
 );
@@ -302,7 +302,7 @@ create table nota_credito_detalle (
  id_nota_credito     	    int4 not null,
  barcode 	    	    int8 not null,
  costo 		    	    float8,
- precio 		    int4,
+ precio 		    float8,
  cantidad 	    	    float8
 );
 
@@ -341,8 +341,8 @@ create table documentos_detalle (
   factura                   bool not null,
   elaboracion               timestamp,
   vencimiento               timestamp,
-  iva                       int4,
-  otros                     int4
+  iva                       float8,
+  otros                     float8
 ) ;
 
 -- Factura_detalle
@@ -353,8 +353,8 @@ create table factura_compra_detalle (
   cantidad                  float8,
   precio                    float8, --precio_compra
   costo_promedio	    float8,
-  iva                       int4,
-  otros                     int4,
+  iva                       float8,
+  otros                     float8,
   constraint pk_factura_compra_detalle primary key(id, id_factura_compra),
   constraint fk_factura_compra_detalle_factura foreign key(id_factura_compra) references factura_compra(id)
 ) ;
@@ -414,8 +414,8 @@ create table guias_compra_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8,
-  iva                       int4,
-  otros                     int4,
+  iva                       float8,
+  otros                     float8,
   constraint pk_guias_compra_detalle primary key(id, id_guias_compra),
   constraint fk_guias_compra_detalle_guias_compra foreign key(id_guias_compra) references guias_compra(id)
 ) ;
@@ -511,7 +511,7 @@ create table producto (
   contenido                 varchar(10),
   unidad                    varchar(10),
   stock                     float8 default 0,
-  precio                    int4,
+  precio                    float8,
   costo_promedio            float8,	-- antes fifo
   vendidos                  float8,
   impuestos                 bool,
@@ -524,8 +524,8 @@ create table producto (
   canje                     bool default false,
   stock_pro                 float8 default 0.0,
   tasa_canje                float8 default 1.0,
-  precio_mayor              int4,
-  cantidad_mayor            int4,
+  precio_mayor              float8,
+  cantidad_mayor            float8,
   mayorista                 bool default false,
   estado                    bool default true,
   tipo			    int4 default 1, -- 1 = mercadería discreta
@@ -608,13 +608,13 @@ create table compra_detalle (
   id_compra                 int4 not null,
   cantidad                  float8,
   precio                    float8 not null,
-  precio_venta              int4 not null,
+  precio_venta              float8 not null,
   cantidad_ingresada        float8,
-  descuento                 int2,
+  descuento                 int4,
   barcode_product           int8 not null,
-  margen                    int4,
-  iva                       int4,
-  otros_impuestos           int4,
+  margen                    float8,
+  iva                       float8,
+  otros_impuestos           float8,
   anulado                   bool default false,
   canjeado                  float8 default 0.0,
   constraint pk_compra_detalle primary key (id,id_compra)
@@ -651,7 +651,7 @@ create table venta_mc_detalle (
   barcode_hijo              int8 not null,
   cantidad                  float8 not null,
   precio_proporcional	    float8 not null,
-  precio                    int4 not null,
+  precio                    float8 not null,
   costo_promedio            float8 not null,
   ganancia                  float8 not null,
   iva                       float8 not null,
@@ -733,7 +733,7 @@ create table traspaso_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8 not null, --precio costo
-  precio_venta		    int4,
+  precio_venta		    float8,
   tipo			    int4,
   costo_modificado	    boolean, -- Indica si se le dió un costo para poder realizar el traspaso
   constraint pk_traspaso_detalle primary key (id,id_traspaso)

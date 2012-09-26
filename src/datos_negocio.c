@@ -65,7 +65,7 @@ refresh_labels (void)
   widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_admin_razon"));
   gtk_label_set_markup (GTK_LABEL (widget),
                         razon_social_value !=NULL ?
-                        "*RazÃ³n Social:":
+                        "*Razón Social:":
                         "<span color=\"red\">*Razón Social:</span>");
 
   //rut
@@ -260,7 +260,7 @@ get_datos (void)
   res = EjecutarSQL ("SELECT razon_social, rut, dv, nombre, fono, fax, direccion, comuna, ciudad, giro, at "
                      "FROM negocio");
 
-  if (PQntuples (res) != 1)
+  if (PQntuples (res) < 1)
     return -1;
 
   if (strcmp (PQvaluebycol (res, 0, "razon_social"), "") != 0)

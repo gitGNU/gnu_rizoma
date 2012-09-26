@@ -58,11 +58,11 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->marca = PQvaluebycol (res, 0, "marca");
   new->product->contenido = atoi (PQvaluebycol (res, 0, "contenido"));
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
-  new->product->precio = atoi (PQvaluebycol (res, 0, "precio"));
+  new->product->precio = strtod (PUT (PQvaluebycol (res, 0, "precio")), (char **)NULL);
   new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
   new->product->precio_compra = GetNeto (barcode);
-  new->product->iva = atoi (PQvaluebycol (res, 0, "impuesto_normal"));
-  new->product->otros = atoi (PQvaluebycol (res, 0, "impuesto_otro"));
+  new->product->iva = strtod (PUT (PQvaluebycol (res, 0, "impuesto_normal")), (char **)NULL);
+  new->product->otros = strtod (PUT (PQvaluebycol (res, 0, "impuesto_otro")), (char **)NULL);
   new->product->otros_id = atoi (PQvaluebycol (res, 0, "otros"));
   new->product->impuestos = g_str_equal (PQvaluebycol (res, 0, "impuestos"), "t") == TRUE ? TRUE : FALSE;
   new->product->fraccion = g_str_equal (PQvaluebycol (res, 0, "fraccion"), "t") == TRUE ? TRUE : FALSE;
@@ -72,8 +72,8 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **)NULL);
   new->product->tipo = atoi (PQvaluebycol (res, 0, "tipo"));
   /* Datos Mayoristas */
-  new->product->precio_mayor = atoi (PQvaluebycol (res, 0, "precio_mayor"));
-  new->product->cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));
+  new->product->precio_mayor = strtod (PUT (PQvaluebycol (res, 0, "precio_mayor")), (char **)NULL);
+  new->product->cantidad_mayorista = strtod (PUT (PQvaluebycol (res, 0, "cantidad_mayor")), (char **)NULL);
   new->product->mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
   return new;
@@ -388,7 +388,7 @@ CompraListClean (void)
 }
 
 Productos *
-CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble precio_compra, gint margen)
+CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble precio_compra, gdouble margen)
 {
   Productos *new = NULL;
   PGresult *res;
@@ -430,8 +430,8 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
   new->product->stock_pro = strtod (PUT(PQvaluebycol (res, 0, "stock_pro")), (char **) NULL);
   new->product->tasa_canje = strtod (PUT(PQvaluebycol (res, 0, "tasa_canje")), (char **) NULL);
   /* Datos Mayoristas */
-  new->product->precio_mayor = atoi (PQvaluebycol (res, 0, "precio_mayor"));
-  new->product->cantidad_mayorista = atoi (PQvaluebycol (res, 0, "cantidad_mayor"));
+  new->product->precio_mayor = strtod (PUT(PQvaluebycol (res, 0, "precio_mayor")), (char **) NULL);
+  new->product->cantidad_mayorista = strtod (PUT(PQvaluebycol (res, 0, "cantidad_mayor")), (char **) NULL);
   new->product->mayorista = atoi (PQvaluebycol (res, 0, "mayorista"));
 
   new->product->canjear = FALSE;
@@ -440,8 +440,8 @@ CompraCreateNew (gchar *barcode, double cantidad, gint precio_final, gdouble pre
 }
 
 gboolean
-CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdouble precio_compra,
-                     gint margen, gboolean ingreso)
+CompraAgregarALista (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble precio_compra,
+                     gdouble margen, gboolean ingreso)
 {
   Productos *new = NULL;
 

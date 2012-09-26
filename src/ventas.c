@@ -624,15 +624,15 @@ ventas_win ()
   /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
   /*                       g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE))); */
 
-  venta->store =  gtk_list_store_new (5,
-                                      G_TYPE_STRING,
-                                      G_TYPE_STRING,
-				      G_TYPE_STRING,
-				      G_TYPE_INT,
-                                      G_TYPE_STRING);
+  venta->store = gtk_list_store_new (5,
+				     G_TYPE_STRING,
+				     G_TYPE_STRING,
+				     G_TYPE_STRING,
+				     G_TYPE_DOUBLE,
+				     G_TYPE_INT);
   if (venta->header != NULL)
     {
-      gint precio;
+      gdouble precio;
       do
         {
 
@@ -652,7 +652,7 @@ ventas_win ()
 						  fill->product->unidad),
                               2, g_strdup_printf ("%.3f", fill->product->cantidad),
                               3, precio,
-                              4, PutPoints (g_strdup_printf ("%.0f", fill->product->cantidad * precio)),
+                              4, lround (fill->product->cantidad * precio),
                               -1);
           fill = fill->next;
         }
@@ -734,6 +734,7 @@ ventas_win ()
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_max_width (column, 100);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   if (venta->header != NULL)
     CalcularVentas (venta->header);
@@ -855,13 +856,13 @@ AgregarProducto (GtkButton *button, gpointer data)
 
       if (venta->product_check == NULL)
         {
-          gint precio;
+          gdouble precio;
 
 	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
-	       !HaveCharacters (precio_discrecional) )
+	       is_numeric (precio_discrecional) )
 	    {
-	      precio = atoi (precio_discrecional);
+	      precio = strtod (PUT (precio_discrecional),  (char **)NULL);
 	      
 	      costo_neto = obtener_costo_promedio (barcode);
 	      ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
@@ -915,15 +916,14 @@ AgregarProducto (GtkButton *button, gpointer data)
 						  venta->products->product->unidad),
                               2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
                               3, precio,
-                              4, PutPoints (g_strdup_printf
-                                            ("%.0f", venta->products->product->cantidad * precio)),
+                              4, lround (venta->products->product->cantidad * precio),
                               -1);
 
           venta->products->product->iter = iter;
         }
       else
         {
-          gint precio;
+          gdouble precio;
 
           if ((venta->product_check->product->cantidad + cantidad) > stock)
             {
@@ -936,9 +936,9 @@ AgregarProducto (GtkButton *button, gpointer data)
 	  /*Se obtiene el precio de venta de acuerdo a si es discrecional o no*/
 	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
-	       !HaveCharacters (precio_discrecional) )
+	       is_numeric (precio_discrecional) )
 	    {
-	      precio = atoi (precio_discrecional);
+	      precio = strtod (PUT (precio_discrecional),  (char **)NULL);
 	      
 	      costo_neto = venta->products->product->fifo;
 	      ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
@@ -979,9 +979,7 @@ AgregarProducto (GtkButton *button, gpointer data)
           gtk_list_store_set (venta->store, &venta->product_check->product->iter,
                               2, g_strdup_printf ("%.3f", venta->product_check->product->cantidad),
                               3, precio,
-                              4, PutPoints (g_strdup_printf
-                                            ("%.0f", venta->product_check->product->cantidad *
-                                             precio)),
+                              4, lround (venta->product_check->product->cantidad * precio),
                               -1);
         }
 
@@ -4560,8 +4558,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 						      venta->products->product->unidad),
                                   2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
                                   3, venta->products->product->precio,
-                                  4, PutPoints (g_strdup_printf
-                                                ("%.0f", venta->products->product->cantidad * venta->products->product->precio)),
+                                  4, lround (venta->products->product->cantidad * venta->products->product->precio),
                                   -1);
 
               venta->products->product->iter = iter;

@@ -26,6 +26,7 @@
 
 #include<string.h>
 #include<stdlib.h>
+#include<locale.h>
 
 #include "tipos.h"
 #include "postgres-functions.h"
@@ -98,9 +99,17 @@ gchar *
 PutPoints (gchar *number)
 {
   gchar *alt = g_malloc0 (15), *alt3 = g_malloc0 (15);
+  gchar *decimales, *l_number;
   int len;
-  gint points;
+  gint points = 0, position = 0;
   gint i, unidad = 0, point = 0;
+  
+  /*separador de miles, separador de decimales*/
+  gchar *sm, *sd;
+
+  struct lconv *locale  = localeconv ();
+  sd = locale->mon_decimal_point;
+  sm = locale->mon_thousands_sep;
 
   if (number == NULL)
     return "";
@@ -115,11 +124,33 @@ PutPoints (gchar *number)
   else
     points = (len / 3) - 1;
 
+  //Se buscan puntos decimales
+  for (i = len; i >= 0; i--)
+    if (number[i] == '.' || number[i] == ',')
+      {
+	point++;
+	position=i;
+      }
+  
+  //Si tiene mas de un '.' o ',' se retorna tal cual 
+  if (point > 1)
+    return number;
+
+  //Si es un decimal se retorna el entero con los puntos, la coma decimal y los decimales
+  if (point == 1)
+    {
+      decimales = invested_strndup (number, position+1);
+      l_number = PutPoints (g_strndup (number, position));
+      l_number = g_strconcat (l_number, sd, decimales, NULL);
+      return l_number;
+    }
+
+  //Si no hay puntos decimales que afecten, se le ponen puntos al entero
   for (i = len; i >= 0; i--)
     {
       if (unidad == 3 && point < points && number[i] != '.' && number[i] != ',')
         {
-          g_snprintf (alt, 15, ".%c%s", number[i], alt3);
+          g_snprintf (alt, 15, "%s%c%s", sm, number[i], alt3);
           unidad = 0;
           point++;
         }
@@ -158,7 +189,7 @@ control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel
                  GtkTreeIter *iter, gpointer user_data)
 {
   gint column = (gint) user_data;
-  gchar  buf[20];
+  gchar buf[20];
   GType column_type = gtk_tree_model_get_column_type (model, column);
 
   switch (column_type)
@@ -167,8 +198,8 @@ control_decimal (GtkTreeViewColumn *col, GtkCellRenderer *renderer, GtkTreeModel
       {
         gdouble number;
         gtk_tree_model_get(model, iter, column, &number, -1);
-        g_snprintf (buf, sizeof (buf), "%.3f", number);
-        g_object_set(renderer, "text", buf, NULL);
+        g_snprintf (buf, sizeof (buf), "%.2f", number);
+        g_object_set(renderer, "text", PutPoints (buf), NULL);
       }
       break;
     case G_TYPE_INT:

@@ -416,14 +416,14 @@ END; $$ language plpgsql;
 -- retorna TODOS los productos
 -- administracion_productos.c:1376
 -- NO RETORNA merma_unid
-create or replace function select_producto( OUT barcode int8,
+create or replace function select_producto (OUT barcode int8,
 					    OUT codigo_corto varchar(16),
 					    OUT marca varchar(35),
 					    OUT descripcion varchar(50),
 					    OUT contenido varchar(10),
 					    OUT unidad varchar(10),
 					    OUT stock float8,
-					    OUT precio int4,
+					    OUT precio double precision,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -437,8 +437,8 @@ create or replace function select_producto( OUT barcode int8,
 					    OUT canje bool,
 					    OUT stock_pro float8,
 					    OUT tasa_canje float8,
-					    OUT precio_mayor int4,
-					    OUT cantidad_mayor int4,
+					    OUT precio_mayor double precision,
+					    OUT cantidad_mayor double precision,
 					    OUT mayorista bool,
 					    OUT tipo int4)
 returns setof record as $$
@@ -581,7 +581,7 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT contenido varchar(10),
 		OUT unidad varchar(10),
 		OUT stock double precision,
-		OUT precio integer,
+		OUT precio double precision,
 		OUT costo_promedio double precision,
 		OUT stock_min double precision,
 		OUT dias_stock double precision,
@@ -593,8 +593,8 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT canje boolean,
 		OUT stock_pro double precision,
 		OUT tasa_canje double precision,
-		OUT precio_mayor integer,
-		OUT cantidad_mayor integer,
+		OUT precio_mayor double precision,
+		OUT cantidad_mayor double precision,
 		OUT mayorista boolean,
 		OUT unidades_merma double precision,
 		OUT stock_day double precision,
@@ -732,7 +732,7 @@ create or replace function buscar_productos(IN expresion varchar(255),
 					    OUT contenido varchar(10),
 					    OUT unidad varchar(10),
 					    OUT stock float8,
-					    OUT precio int4,
+					    OUT precio float8,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -746,8 +746,8 @@ create or replace function buscar_productos(IN expresion varchar(255),
 					    OUT canje bool,
 					    OUT stock_pro float8,
 					    OUT tasa_canje float8,
-					    OUT precio_mayor int4,
-					    OUT cantidad_mayor int4,
+					    OUT precio_mayor float8,
+					    OUT cantidad_mayor float8,
 					    OUT mayorista bool,
 					    OUT tipo int4)
 returns setof record as $$
@@ -829,7 +829,7 @@ create or replace function select_producto( IN prod_barcode int8,
 					    OUT contenido varchar(10),
 					    OUT unidad varchar(10),
 					    OUT stock float8,
-					    OUT precio int4,
+					    OUT precio double precision,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -843,8 +843,8 @@ create or replace function select_producto( IN prod_barcode int8,
 					    OUT canje bool,
 					    OUT stock_pro float8,
 					    OUT tasa_canje float8,
-					    OUT precio_mayor int4,
-					    OUT cantidad_mayor int4,
+					    OUT precio_mayor double precision,
+					    OUT cantidad_mayor double precision,
 					    OUT mayorista bool,
 					    OUT tipo int4)
 returns setof record as $$
@@ -1491,22 +1491,21 @@ end; $$ language plpgsql;
 -- inserta el detalle de una compra
 -- postgres-functions.c:808, 814
 -- SELECT * FROM insertar_detalle_compra(5646, 1.00::double precision, 191.00::double precision, 300, 0::double precision, 0::smallint, 7654321, 20, 36, 23);
-create or replace function insertar_detalle_compra(
-		IN id_compra_in integer,
-		IN cantidad double precision,
-		IN precio double precision,
-		IN precio_venta integer,
-		IN cantidad_ingresada double precision,
-		IN descuento smallint,
-		IN barcode_product bigint,
-		IN margen integer,
-		IN iva integer,
-		IN otros_impuestos integer)
-returns void as $$
-declare
+CREATE OR REPLACE FUNCTION insertar_detalle_compra (IN id_compra_in integer,
+		  	   			    IN cantidad double precision,
+						    IN precio double precision,
+						    IN precio_venta double precision,
+						    IN cantidad_ingresada double precision,
+						    IN descuento smallint,
+						    IN barcode_product bigint,
+						    IN margen double precision,
+						    IN iva double precision,
+						    IN otros_impuestos double precision)
+RETURNS void AS $$
+DECLARE
 	aux int;
 	q text;
-begin
+BEGIN
 -- se revisa si existe algun detalle ingresado con el id_compra dado
 aux = (select count(*) from compra_detalle where id_compra=id_compra_in);
 
@@ -1537,8 +1536,8 @@ q := $S$ UPDATE producto SET precio=$S$|| precio_venta ||$S$ WHERE barcode=$S$||
 
 execute q;
 
-return;
-end; $$ language plpgsql;
+RETURN;
+END; $$ LANGUAGE plpgsql;
 
 
 -- ??paga una factura
@@ -2202,36 +2201,36 @@ END;$$ LANGUAGE plpgsql;
 -- busca productos en base un patron con el formate de LIKE
 -- Si variable de entrada con_stock > 0, Productos para la venta
 -- Si no, son para visualizar en mercaderia 
-create or replace function buscar_producto(IN expresion varchar(255),
-	IN columnas varchar[],
-	IN usar_like boolean,
-        IN con_stock boolean,
-       	OUT barcode int8,
-	OUT codigo_corto varchar(16),
-	OUT marca varchar(35),
-	OUT descripcion varchar(50),
-	OUT contenido varchar(10),
-	OUT unidad varchar(10),
-	OUT stock float8,
-	OUT precio int4,
-	OUT costo_promedio float8,
-	OUT vendidos float8,
-	OUT impuestos bool,
-	OUT otros int4,
-	OUT familia int2,
-	OUT perecibles bool,
-	OUT stock_min float8,
-	OUT dias_stock float8,
-	OUT margen_promedio float8,
-	OUT fraccion bool,
-	OUT canje bool,
-	OUT stock_pro float8,
-	OUT tasa_canje float8,
-	OUT precio_mayor int4,
-	OUT cantidad_mayor int4,
-	OUT mayorista bool, 
-	OUT tipo_id int4,
-	OUT tipo_mer varchar(20))
+create or replace function buscar_producto (IN expresion varchar(255),
+	  	  	   		    IN columnas varchar[],
+					    IN usar_like boolean,
+        				    IN con_stock boolean,
+       					    OUT barcode int8,
+					    OUT codigo_corto varchar(16),
+					    OUT marca varchar(35),
+					    OUT descripcion varchar(50),
+					    OUT contenido varchar(10),
+					    OUT unidad varchar(10),
+					    OUT stock float8,
+					    OUT precio float8,
+					    OUT costo_promedio float8,
+					    OUT vendidos float8,
+					    OUT impuestos bool,
+					    OUT otros int4,
+					    OUT familia int2,
+					    OUT perecibles bool,
+					    OUT stock_min float8,
+					    OUT dias_stock float8,
+					    OUT margen_promedio float8,
+					    OUT fraccion bool,
+					    OUT canje bool,
+					    OUT stock_pro float8,
+					    OUT tasa_canje float8,
+					    OUT precio_mayor float8,
+					    OUT cantidad_mayor float8,
+					    OUT mayorista bool, 
+					    OUT tipo_id int4,
+					    OUT tipo_mer varchar(20))
 returns setof record as $$
 declare
 	list record;
@@ -2363,42 +2362,49 @@ end; $$ language plpgsql;
 
 --retorna el detalle de una compra 
 --
-create or replace function get_detalle_compra(
-		IN id_compra integer,
-		OUT codigo_corto varchar(16),
-		OUT descripcion varchar(50),
-		OUT marca varchar(35),
-		OUT contenido varchar(10),
-		OUT unidad varchar(10),
-		OUT precio double precision,
-		OUT cantidad double precision,
-		OUT cantidad_ingresada double precision,
-		OUT costo_ingresado bigint,
-		OUT barcode bigint,
-		OUT precio_venta integer,
-		OUT margen integer)
-returns setof record as $$
-declare
-		list record;
-		query text;
-begin
-		query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t1.precio, t1.cantidad, t1.cantidad_ingresada, (t1.precio * (t1.cantidad - t1.cantidad_ingresada))::bigint as costo_ingresado, t2.barcode, t1.precio_venta, t1.margen FROM compra_detalle AS t1, producto AS t2 WHERE t1.id_compra=$S$|| id_compra ||$S$ AND t2.barcode=t1.barcode_product AND t1.cantidad_ingresada<t1.cantidad AND t1.anulado='f'$S$;
+create or replace function get_detalle_compra (IN id_compra integer,
+		                               OUT codigo_corto varchar(16),
+					       OUT descripcion varchar(50),
+					       OUT marca varchar(35),
+					       OUT contenido varchar(10),
+					       OUT unidad varchar(10),
+					       OUT precio double precision,
+					       OUT cantidad double precision,
+					       OUT cantidad_ingresada double precision,
+					       OUT costo_ingresado bigint,
+					       OUT barcode bigint,
+					       OUT precio_venta double precision,
+					       OUT margen double precision)
+RETURNS setof record AS $$
+DECLARE
+	list record;
+	query text;
+BEGIN
+	query := $S$ SELECT t2.barcode, t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, 
+	                    t1.precio, t1.cantidad, t1.cantidad_ingresada, t1.precio_venta, t1.margen,
+			    (t1.precio * (t1.cantidad - t1.cantidad_ingresada))::bigint AS costo_ingresado
+		     FROM compra_detalle AS t1, 
+		          producto AS t2 
+		     WHERE t1.id_compra = $S$||id_compra||$S$ 
+		     AND t2.barcode = t1.barcode_product 
+		     AND t1.cantidad_ingresada < t1.cantidad 
+		     AND t1.anulado ='f' $S$;
 
-		FOR list IN EXECUTE query LOOP
-		codigo_corto := list.codigo_corto;
-		descripcion := list.descripcion;
-		marca := list.marca;
-		contenido := list.contenido;
-		unidad := list.unidad;
-		precio := list.precio;
-		cantidad := list.cantidad;
-		cantidad_ingresada := list.cantidad_ingresada;
-		costo_ingresado := list.costo_ingresado;
-		barcode := list.barcode;
-		precio_venta := list.precio_venta;
-		margen := list.margen;
-		RETURN NEXT;
-		END LOOP;
+	FOR list IN EXECUTE query LOOP
+	    codigo_corto := list.codigo_corto;
+	    descripcion := list.descripcion;
+	    marca := list.marca;
+	    contenido := list.contenido;
+	    unidad := list.unidad;
+	    precio := list.precio;
+	    cantidad := list.cantidad;
+	    cantidad_ingresada := list.cantidad_ingresada;
+	    costo_ingresado := list.costo_ingresado;
+	    barcode := list.barcode;
+	    precio_venta := list.precio_venta;
+	    margen := list.margen;
+	    RETURN NEXT;
+	END LOOP;
 
 END; $$ LANGUAGE plpgsql;
 
@@ -3444,7 +3450,7 @@ create or replace function get_guide_detail(
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
 		OUT unidad varchar(10),
-		OUT precio integer,
+		OUT precio double precision,
 		OUT cantidad double precision,
 		OUT precio_compra bigint,
 		OUT barcode bigint)
@@ -3498,106 +3504,114 @@ create or replace function get_invoice_detail(
 		OUT marca varchar(35),
 		OUT contenido varchar(10),
 		OUT unidad varchar(10),
-		OUT precio integer,
+		OUT precio double precision,
 		OUT cantidad double precision,
 		OUT precio_compra double precision,
 		OUT barcode bigint)
-returns setof record as $$
-declare
+RETURNS SETOF record AS $$
+DECLARE
         list record;
         query text;
-begin
-        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, t1.precio as precio_compra, t1.cantidad, t2.barcode FROM factura_compra_detalle AS t1, producto AS t2, factura_compra as t3 WHERE t1.barcode=t2.barcode and t1.id_factura_compra=t3.id and t3.id=$S$|| id_invoice;
+BEGIN
+        query := $S$ SELECT t2.codigo_corto, t2.descripcion, t2.marca, t2.contenido, t2.unidad, t2.precio as precio_venta, 
+	      	     	    t1.precio as precio_compra, t1.cantidad, t2.barcode 
+		     FROM factura_compra_detalle AS t1, producto AS t2, factura_compra as t3 
+		     WHERE t1.barcode=t2.barcode and t1.id_factura_compra=t3.id and t3.id=$S$|| id_invoice;
 
-		FOR list IN EXECUTE query LOOP
-		codigo_corto := list.codigo_corto;
-		descripcion := list.descripcion;
-		marca := list.marca;
-		contenido := list.contenido;
-		unidad := list.unidad;
-		precio := list.precio_venta;
-		cantidad := list.cantidad;
-		precio_compra := list.precio_compra;
-		barcode := list.barcode;
-		RETURN NEXT;
-		END LOOP;
+	FOR list IN EXECUTE query LOOP
+	    codigo_corto := list.codigo_corto;
+	    descripcion := list.descripcion;
+	    marca := list.marca;
+	    contenido := list.contenido;
+	    unidad := list.unidad;
+	    precio := list.precio_venta;
+	    cantidad := list.cantidad;
+	    precio_compra := list.precio_compra;
+	    barcode := list.barcode;
+	    RETURN NEXT;
+	END LOOP;
 END; $$ LANGUAGE plpgsql;
 
-create or replace function insert_egreso (
-       in in_monto int,
-       in in_tipo int,
-       in in_usuario int)
-returns int as $$
-declare
-	current_caja int;
-begin
-select last_value into current_caja from caja_id_seq;
 
-if (select fecha_termino from caja where id=current_caja) IS NOT NULL then
+
+CREATE OR REPLACE FUNCTION insert_egreso (
+       IN in_monto int,
+       IN in_tipo int,
+       IN in_usuario int)
+RETURNS int AS $$
+DECLARE
+	current_caja int;
+BEGIN
+
+SELECT last_value INTO current_caja FROM caja_id_seq;
+
+IF (SELECT fecha_termino FROM caja WHERE id=current_caja) IS NOT NULL then
    raise notice 'Adding an egreso to caja that is closed (%)', current_caja;
-end if;
+END IF;
 
-insert into egreso (monto, tipo, fecha, usuario, id_caja)
-       values (in_monto, in_tipo, now(), in_usuario, current_caja);
+INSERT INTO egreso (monto, tipo, fecha, usuario, id_caja)
+       VALUES (in_monto, in_tipo, now(), in_usuario, current_caja);
 
-return 0;
-end; $$ language plpgsql;
+RETURN 0;
+END; $$ LANGUAGE plpgsql;
 
-create or replace function insert_ingreso (
-       in in_monto int,
-       in in_tipo int,
-       in in_usuario int)
-returns int as $$
-declare
+
+CREATE OR REPLACE FUNCTION insert_ingreso (
+       IN in_monto int,
+       IN in_tipo int,
+       IN in_usuario int)
+RETURNS int AS $$
+DECLARE
 	current_caja int;
-begin
+BEGIN
 
-select max(id) into current_caja from caja;
+SELECT MAX(id) INTO current_caja FROM caja;
 
-if (select fecha_termino from caja where id=current_caja) IS NOT NULL then
-   raise notice 'Adding an ingreso to caja that is closed (%)', current_caja;
-end if;
+IF (SELECT fecha_termino FROM caja WHERE id=current_caja) IS NOT NULL then
+   RAISE NOTICE 'Adding an ingreso to caja that is closed (%)', current_caja;
+END IF;
 
-insert into ingreso (monto, tipo, fecha, usuario, id_caja)
-       values (in_monto, in_tipo, now(), in_usuario, current_caja);
+INSERT INTO ingreso (monto, tipo, fecha, usuario, id_caja)
+       VALUES (in_monto, in_tipo, now(), in_usuario, current_caja);
 
-return 0;
-end; $$ language plpgsql;
+RETURN 0;
+END; $$ LANGUAGE plpgsql;
 
-create or replace function is_caja_abierta ()
-returns boolean as $$
-declare
+
+CREATE OR REPLACE FUNCTION is_caja_abierta ()
+RETURNS boolean AS $$
+DECLARE
 	current_caja int;
 	fecha_ter timestamp;
-begin
+BEGIN
 
-select max(id) into current_caja from caja;
+	SELECT MAX(id) INTO current_caja FROM caja;
 
-if current_caja IS NULL then
-   return FALSE;
-end if;
+	IF current_caja IS NULL then
+	   return FALSE;
+	END IF;
 
-select fecha_termino into fecha_ter from caja where id=current_caja;
+	SELECT fecha_termino INTO fecha_ter FROM caja WHERE id=current_caja;
 
-if (fecha_ter is NULL) then
-   return TRUE;
-else
-   return FALSE;
-end if;
+	IF (fecha_ter IS NULL) THEN
+	   return TRUE;
+	ELSE
+	   return FALSE;
+	END IF;
 
-end; $$ language plpgsql;
+END; $$ LANGUAGE plpgsql;
 
-create or replace function trg_insert_caja()
-returns trigger as $$
-declare
+
+CREATE OR REPLACE FUNCTION trg_insert_caja()
+RETURNS TRIGGER AS $$
+DECLARE
 	last_sale bigint;
-begin
-select last_value into last_sale from venta_id_seq;
+BEGIN
+	SELECT LAST_VALUE INTO last_sale FROM venta_id_seq;
+	new.id_venta_inicio = last_sale;
+RETURN NEW;
+END; $$ LANGUAGE plpgsql;
 
-new.id_venta_inicio = last_sale;
-
-return new;
-end; $$ language plpgsql;
 
 create trigger trigger_insert_caja before insert
        on caja for each row
@@ -3733,9 +3747,9 @@ CREATE OR REPLACE FUNCTION informacion_producto_venta(IN in_codigo varchar(16),
 						      OUT contenido varchar(10),
 						      OUT unidad varchar(10),
 						      OUT stock double precision,
-						      OUT precio integer,
-						      OUT precio_mayor integer,
-						      OUT cantidad_mayor integer,
+						      OUT precio double precision,
+						      OUT precio_mayor double precision,
+						      OUT cantidad_mayor double precision,
 						      OUT mayorista boolean,
 						      OUT stock_day double precision,
 						      OUT estado boolean,
@@ -4499,16 +4513,16 @@ END; $$ language plpgsql;
 -- Registra el detalle del traspaso de mercaderías
 -- y actualiza el stock aumentandolo o disminuyéndolo según el caso
 ---
-create or replace function registrar_traspaso_detalle(
-       in in_id_traspaso int,
-       in in_barcode bigint,
-       in in_cantidad double precision,
-       in in_costo double precision,
-       in in_precio int4,
-       in in_traspaso_envio boolean, -- si es TRUE es envío; FALSO recibe
-       in in_modificar_costo boolean) -- si se le modifica el costo al producto
-returns void as $$
-declare
+CREATE OR REPLACE FUNCTION registrar_traspaso_detalle (
+       IN in_id_traspaso int,
+       IN in_barcode bigint,
+       IN in_cantidad double precision,
+       IN in_costo double precision,
+       IN in_precio double precision,
+       IN in_traspaso_envio boolean, -- si es TRUE es envío; FALSO recibe
+       IN in_modificar_costo boolean) -- si se le modifica el costo al producto
+RETURNS void AS $$
+DECLARE
    aux int;
    num_linea int;
    ----
@@ -4523,7 +4537,7 @@ declare
    costo_mp double precision;
    cantidad_mp double precision;
    ----
-begin
+BEGIN
 	SELECT id INTO compuesta_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'COMPUESTA';
 	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
 	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
@@ -4541,14 +4555,14 @@ begin
 	END IF;
 
 
-	aux := (select count(*) from traspaso_detalle where id_traspaso = in_id_traspaso);
+	aux := (SELECT COUNT(*) FROM traspaso_detalle WHERE id_traspaso = in_id_traspaso);
 
-	if aux = 0 then
+	IF aux = 0 THEN
 	   num_linea := 0;
-	else
-	   num_linea := (select max(id) from traspaso_detalle where id_traspaso = in_id_traspaso);
+	ELSE
+	   num_linea := (SELECT MAX(id) FROM traspaso_detalle WHERE id_traspaso = in_id_traspaso);
 	   num_linea := num_linea + 1;
-	end if;
+	END IF;
 
 	INSERT INTO traspaso_detalle (id,
 				      id_traspaso,
@@ -4601,7 +4615,7 @@ begin
 	   END IF;
 	END IF;
 	
-end;$$ language plpgsql;
+END;$$ LANGUAGE plpgsql;
 
 
 ---

@@ -76,7 +76,11 @@ ChangeVenta (void)
       /* consulta que arroja el detalle de una venta*/
       res = EjecutarSQL2
         (g_strdup_printf
-         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, round(vd.iva) AS iva, round(vd.otros) AS otros, round((cantidad * vd.precio)) AS monto FROM venta_detalle vd, producto WHERE producto.barcode=vd.barcode and id_venta=%d", idventa));
+         ("SELECT descripcion, marca, contenido, unidad, cantidad, vd.precio, "
+	  "       round(vd.iva) AS iva, round(vd.otros) AS otros, "
+	  "       round((cantidad * vd.precio)) AS monto "
+	  "FROM venta_detalle vd, producto "
+	  "WHERE producto.barcode=vd.barcode AND id_venta=%d", idventa));
 
       tuples = PQntuples (res);
 
@@ -88,7 +92,7 @@ ChangeVenta (void)
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
                                                   PQvaluebycol (res, i, "unidad")),
                               1, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-                              2, atoi (PQvaluebycol (res, i, "precio")),
+                              2, strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL),
 			      3, atoi (g_strdup (PQvaluebycol (res, i, "iva"))),
                               4, atoi (g_strdup (PQvaluebycol (res, i, "otros"))),
                               5, atoi (PQvaluebycol (res, i, "monto")),
@@ -198,7 +202,7 @@ fill_exempt_sells_details (GtkTreeSelection *treeselection, gpointer user_data)
                                                   PQvaluebycol (res, i, "marca"), PQvaluebycol (res, i, "contenido"),
                                                   PQvaluebycol (res, i, "unidad")),
                               2, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad"))), (char **)NULL),
-                              3, atoi (PQvaluebycol (res, i, "precio")),
+                              3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL),
                               4, atoi (PQvaluebycol (res, i, "monto")),
                               -1);
         }
@@ -779,7 +783,7 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
 			      1, PQvaluebycol (res, i, "descripcion"),
 			      2, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad_comprada"))), (char **)NULL),
 			      3, strtod (PUT(g_strdup (PQvaluebycol (res, i, "cantidad_anulada"))), (char **)NULL),
-			      4, strtod (g_strdup (PQvaluebycol (res, i, "costo")), (char **)NULL),
+			      4, strtod (PUT(g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL),
 			      5, atoi (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
 			      6, atoi ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ?
 				      "0" : PQvaluebycol (res, i, "monto_anulado")),
@@ -1162,7 +1166,7 @@ reports_win (void)
   store = gtk_list_store_new (6,
                               G_TYPE_STRING,  //Producto (marca, descripcion, contendo unidad)
                               G_TYPE_DOUBLE,  //Cantidad (vendida)
-                              G_TYPE_INT,     //Unitario (precio por unidad)
+                              G_TYPE_DOUBLE,     //Unitario (precio por unidad)
 			      G_TYPE_INT,     //IVA (en pesos)
 			      G_TYPE_INT,     //Otros impuestos (en pesos)
                               G_TYPE_INT);    //Sub-Total (precio unitario * cantidad)
@@ -3616,7 +3620,7 @@ reports_win (void)
 
   //price
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Precio", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Costo", renderer,
 						    "text", 4,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -3785,7 +3789,7 @@ reports_win (void)
 			      G_TYPE_STRING,  //Codigo_corto
                               G_TYPE_STRING,  //marca, descripcion, contenido, unidad
                               G_TYPE_DOUBLE,  //cantidad
-                              G_TYPE_INT,     //unitario
+                              G_TYPE_DOUBLE,  //unitario
                               G_TYPE_INT);    //total
 
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_sells_exempt_tax_details"));
@@ -6496,8 +6500,8 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       gint tuples,i;
       PGresult *res;
 
-      res = EjecutarSQL (g_strdup_printf ("SELECT id,nombre FROM bodega "
-					  "WHERE nombre!=(SELECT nombre FROM negocio) AND estado=true"));
+      res = EjecutarSQL (g_strdup_printf ("SELECT id, nombre FROM bodega "
+					  "WHERE nombre NOT IN (SELECT nombre FROM negocio) AND estado=true"));
       tuples = PQntuples (res);
 
       combo = GTK_WIDGET (gtk_builder_get_object(builder, "cmb_stores"));

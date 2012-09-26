@@ -1319,17 +1319,18 @@ AddNewSeller (gchar *rut, gchar *nombre, gchar *apell_p, gchar *apell_m,
 
 
 gboolean
-add_to_pedido_temporal (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint margen, gint precio)
+add_to_pedido_temporal (gchar *barcode, gdouble cantidad, gdouble precio_compra, gdouble margen, gdouble precio)
 {
   PGresult *res;
   gchar *q;
 
   q = g_strdup_printf ("INSERT INTO pedido_temporal (id, barcode, cantidad, costo_promedio, margen, precio) "
-                       "VALUES (DEFAULT, %s, %s, %s, %d, %d)",
+                       "VALUES (DEFAULT, %s, %s, %s, %s, %s)",
                        barcode, 
 		       CUT (g_strdup_printf ("%.3f", cantidad)), 
 		       CUT (g_strdup_printf ("%.3f", precio_compra)),
-		       margen, precio);
+		       CUT (g_strdup_printf ("%.3f", margen)), 
+		       CUT (g_strdup_printf ("%.3f", precio)));
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -1498,8 +1499,8 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   // Recalcular el porcentaje de ganancia a partir del precio final del producto
   // TODO: Unificar este cálculo, pues se realiza una y otra vez en distintas partes
   gdouble porcentaje;
-  gdouble costo_promedio = strtod (PUT(PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
-  gint precio_local = atoi (g_strdup (precio));
+  gdouble costo_promedio = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
+  gdouble precio_local = strtod (PUT (g_strdup (precio)), (char **)NULL);
 
   // Impuestos
   gdouble iva_local;
@@ -1558,11 +1559,11 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
     }
 
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion=UPPER('%s'),"
-                       "marca=UPPER('%s'), unidad=UPPER('%s'), contenido='%s', precio=%d, "
+                       "marca=UPPER('%s'), unidad=UPPER('%s'), contenido='%s', precio=%s, "
                        "impuestos='%d', otros=%d, familia=%d, "
                        "perecibles='%d', fraccion='%d', margen_promedio=%s WHERE barcode='%s'",
-                       codigo, SPE(description), SPE(marca), unidad, contenido, atoi (precio),
-                       iva, otros, familia, (gint)perecible, (gint)fraccion, CUT(g_strdup_printf ("%.2f", porcentaje)), barcode);
+                       codigo, SPE(description), SPE(marca), unidad, contenido, CUT (g_strdup_printf ("%.2f", precio_local)),
+                       iva, otros, familia, (gint)perecible, (gint)fraccion, CUT (g_strdup_printf ("%.2f", porcentaje)), barcode);
   res = EjecutarSQL(q);
   g_free(q);
 }
@@ -1614,7 +1615,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
   Productos *products = header;
   gdouble iva = 0, otros = 0;
   gchar *cantidad;
-  gchar *precio_compra;
+  gchar *precio_compra, *precio_venta, *margen;
   gchar *q;
 
   do
@@ -1635,13 +1636,15 @@ SaveBuyProducts (Productos *header, gint id_compra)
 
       cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
       precio_compra = g_strdup_printf ("%.2f", products->product->precio_compra);
+      precio_venta = g_strdup_printf ("%.2f", products->product->precio);
+      margen = g_strdup_printf ("%.2f", products->product->margen);
 
       q = g_strdup_printf("SELECT * FROM insertar_detalle_compra(%d, "
-                          "%s::double precision, %s::double precision, %d, "
-                          "0::double precision, 0::smallint, %s, %d, %ld, %ld)",
+                          "%s::double precision, %s::double precision, %s::double precision, "
+                          "0::double precision, 0::smallint, %s, %s, %ld, %ld)",
                           id_compra, CUT(cantidad), CUT (precio_compra),
-                          products->product->precio, products->product->barcode,
-                          products->product->margen, lround (iva),
+                          CUT (precio_venta), products->product->barcode,
+                          CUT (margen), lround (iva),
                           lround (otros));
       EjecutarSQL(q);
 
@@ -3039,15 +3042,15 @@ ContriTotalStock (void)
 
 void
 SetModificacionesProducto (gchar *barcode, gchar *dias_stock, gchar *margen, gchar *new_venta,
-                           gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
-                           gint cantidad_mayorista)
+                           gboolean canjeable, gint tasa, gboolean mayorista, gchar *precio_mayorista,
+                           gchar *cantidad_mayorista)
 {
   gchar *q;
 
   q = g_strdup_printf ("UPDATE producto SET dias_stock=%s, margen_promedio=%s, precio=%s, canje='%d', tasa_canje=%d, "
-                       "precio_mayor=%d, cantidad_mayor=%d, mayorista='%d' WHERE barcode='%s'",
-                       dias_stock, CUT(margen), new_venta, (gint)canjeable, tasa, precio_mayorista, cantidad_mayorista,
-                       (gint)mayorista, barcode);
+                       "precio_mayor=%s, cantidad_mayor=%s, mayorista='%d' WHERE barcode='%s'",
+                       dias_stock, CUT(margen), CUT (new_venta), (gint)canjeable, tasa, CUT (precio_mayorista), 
+		       CUT (cantidad_mayorista), (gint)mayorista, barcode);
   EjecutarSQL (q);
   g_free (q);
 }
@@ -3595,33 +3598,34 @@ SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean traspaso_e
 {
   PGresult *res;
   Productos *header = products;
-  gchar *cantidad;
+  gchar *cantidad, *precio_venta;
   gchar *q;
   gdouble costo;
 
   do
     {
       cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
+      precio_venta = CUT (g_strdup_printf ("%.2f", products->product->precio));
 
       q = g_strdup_printf ("select * from informacion_producto (%s, '')", products->product->barcode);
       res = EjecutarSQL (q);
-      costo = strtod (PUT (PQvaluebycol(res, 0, "costo_promedio")), (char **)NULL);
+      costo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
       
       if (costo == (gdouble)0)
 	{
 	  costo = products->product->precio_compra;
 	  EjecutarSQL (q);
 	  
-	  q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s, %d, %s, 't')",
+	  q = g_strdup_printf ("SELECT registrar_traspaso_detalle (%d, %s, %s, %s, %s, %s, 't')",
 			       id_traspaso, products->product->barcode, cantidad,
-			       CUT (g_strdup_printf ("%.2f", costo)), products->product->precio,
+			       CUT (g_strdup_printf ("%.2f", costo)), precio_venta,
 			       (traspaso_envio)?"TRUE":"FALSE");
 	}
       else
 	{
-	  q = g_strdup_printf ("select registrar_traspaso_detalle(%d, %s, %s, %s, %d, %s, 'f')",
+	  q = g_strdup_printf ("SELECT registrar_traspaso_detalle (%d, %s, %s, %s, %s, %s, 'f')",
 			       id_traspaso, products->product->barcode, cantidad,
-			       CUT (g_strdup_printf ("%.2f", costo)), products->product->precio,
+			       CUT (g_strdup_printf ("%.2f", costo)), precio_venta,
 			       (traspaso_envio)?"TRUE":"FALSE");
 	}
 

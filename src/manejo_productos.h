@@ -40,8 +40,8 @@ gint ListClean (void);
 
 gint CompraListClean (void);
 
-gboolean CompraAgregarALista (gchar *barcode, gdouble cantidad, gint precio_final, gdouble precio_compra,
-                          gint margen, gboolean ingreso);
+gboolean CompraAgregarALista (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble precio_compra,
+                              gdouble margen, gboolean ingreso);
 
 void DropBuyProduct (gchar *codigo);
 

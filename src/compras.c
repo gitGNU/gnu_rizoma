@@ -1238,7 +1238,7 @@ compras_win (void)
                               G_TYPE_STRING,   // Codigo
                               G_TYPE_STRING,   // Marca, Descripcion, Contenido y Unidad
                               G_TYPE_DOUBLE,   // Cantidad
-			      G_TYPE_INT,      // Precio Unitario
+			      G_TYPE_DOUBLE,   // Precio Unitario
                               G_TYPE_DOUBLE,   // Costo Unitario
                               G_TYPE_INT,      // Total
 			      G_TYPE_BOOLEAN); // Transferible (traspaso envio)
@@ -1323,7 +1323,7 @@ compras_win (void)
                               G_TYPE_INT,
                               G_TYPE_STRING,
                               G_TYPE_STRING,
-                              G_TYPE_STRING,
+                              G_TYPE_INT,
                               G_TYPE_STRING,
                               G_TYPE_BOOLEAN);
 
@@ -1370,7 +1370,7 @@ compras_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Precio Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Costo Total", renderer,
                                                      "text", 3,
                                                      "foreground", 4,
                                                      "foreground-set", 5,
@@ -1379,6 +1379,7 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
 
   /* End Pending Requests */
@@ -1391,7 +1392,7 @@ compras_win (void)
                               G_TYPE_DOUBLE,   //Costo unitario
                               G_TYPE_DOUBLE,   //cantidad solicitada
                               G_TYPE_DOUBLE,   //cantidad ingresada
-                              G_TYPE_STRING,   //sub-total
+                              G_TYPE_INT,      //sub-total
                               G_TYPE_STRING,
                               G_TYPE_BOOLEAN);
 
@@ -1473,6 +1474,7 @@ compras_win (void)
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   /* End Pending Request Detail */
 
@@ -2033,8 +2035,8 @@ SearchProductHistory (GtkEntry *entry, gchar *barcode)
 	}
       else if (g_str_equal (tipo, compuesta) || g_str_equal (tipo, derivada))
 	{
-	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), PQvaluebycol (res, 0, "costo_promedio"));
-	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), PQvaluebycol (res, 0, "precio"));
+	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_price")), PUT (PQvaluebycol (res, 0, "costo_promedio")));
+	  gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")), PUT (PQvaluebycol (res, 0, "precio")));
 	  
 	  if (modo_traspaso == FALSE)
 	    {
@@ -2244,8 +2246,8 @@ CalcularPrecioFinal (void)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
-  gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
-  gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
+  gdouble ganancia = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain"))))), (char **)NULL);
+  gdouble precio_final = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price"))))), (char **)NULL);
   gdouble precio;
   gdouble porcentaje;
   gdouble iva = GetIVA (barcode);
@@ -2369,7 +2371,7 @@ CalcularPrecioFinal (void)
         gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_buy_gain")), "0");
 
       gtk_entry_set_text (GTK_ENTRY (gtk_builder_get_object (builder, "entry_sell_price")),
-                          g_strdup_printf ("%ld", lround (precio)));
+                          g_strdup_printf ("%.2f", precio));
     }
   else
     ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_buy_price")), "Solo 2 campos deben ser llenados");
@@ -2420,10 +2422,10 @@ AddToTree (void)
 
 
 void
-add_to_buy_struct (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint margen, gint precio)
+add_to_buy_struct (gchar *barcode, gdouble cantidad, gdouble precio_compra, gdouble margen, gdouble precio)
 {
   GtkListStore *store_buy;
-  store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object( builder, "tree_view_products_buy_list"))));
+  store_buy = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "tree_view_products_buy_list"))));
 
   Producto *check;
 
@@ -2458,8 +2460,8 @@ add_to_buy_struct (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint
 	{
 	  CleanStatusProduct (1);
 	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_sell_price")), 
-		    g_strdup_printf ("Ya ha ingresado este producto con $ %d como precio de venta, si desea modificarlo \n"
-				     "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", check->precio));
+		    g_strdup_printf ("Ya ha ingresado este producto con $ %s como precio de venta, si desea modificarlo \n"
+				     "remuévalo de la lista e ingréselo nuevamente con sus valores correspondientes.", PutPoints (g_strdup_printf ("%.2f", check->precio))));
 	  return;
 	}
 	  
@@ -2512,8 +2514,8 @@ AddToProductsList (void)
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble cantidad;
   gdouble precio_compra = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
-  gint margen = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
-  gint precio = atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
+  gdouble margen = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain"))))), (char **)NULL);
+  gdouble precio = strtod (PUT(g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price"))))), (char **)NULL);
 
   gboolean modo_traspaso = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (builder_get (builder, "rdbutton_transfer_mode")));
 
@@ -3368,7 +3370,7 @@ ShowProductHistory (gchar *barcode)
   if (tuples > 0)
     {
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PUT (PQvaluebycol (res, 0, "precio")));
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, 0, "precio_venta"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PUT (PQvaluebycol (res, 0, "precio_venta")));
     }
 }
 
@@ -3416,8 +3418,8 @@ InsertarCompras (void)
                           0, id_compra,
                           1, g_strdup_printf ("%.2d/%.2d/%s", atoi (PQvaluebycol (res, i, "dia")),
                                               atoi (PQvaluebycol (res, i, "mes")), PQvaluebycol (res, i, "ano")),
-                          2, PQvaluebycol(res, i, "nombre"),
-                          3, PutPoints (g_strdup_printf ("%.0f", strtod (CUT(PQvaluebycol (res, i, "precio")), (char **)NULL))),
+                          2, PQvaluebycol (res, i, "nombre"),
+                          3, lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL)),
                           4, ReturnIncompletProducts (id_compra) ? "Red" : "Black",
                           5, TRUE,
                           -1);
@@ -3482,7 +3484,7 @@ IngresoDetalle (GtkTreeSelection *selection, gpointer data)
                               2, strtod (PUT (PQvaluebycol(res, i, "precio")), (char **)NULL),
                               3, sol,
                               4, ing,
-                              5, PutPoints (PQvaluebycol(res, i, "costo_ingresado")),
+                              5, atoi (g_strdup (PQvaluebycol (res, i, "costo_ingresado"))),
                               6, color ? "Red" : "Black",
                               7, TRUE,
                               -1);
@@ -4417,7 +4419,7 @@ CalcularTotales (void)
   selection = gtk_tree_view_get_selection (treeview);
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-			3, PutPoints (g_strdup_printf ("%li", lround (total_neto))),
+			3, lround (total_neto),
 			-1);
 }
 
@@ -4857,8 +4859,8 @@ on_button_calculate_clicked (GtkButton *button, gpointer data)
 {
   gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode"))));
   gdouble ingresa = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_price"))))), (char **)NULL);
-  gdouble ganancia = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain")))));
-  gdouble precio_final = (gdouble) atoi (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")))));
+  gdouble ganancia = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_buy_gain"))))), (char **)NULL);
+  gdouble precio_final = strtod (PUT (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_sell_price"))))), (char **)NULL);
 
   gchar *q = g_strdup_printf ("SELECT estado, tipo FROM producto where barcode = '%s'", barcode);
   gchar *materia_prima = g_strdup (PQvaluebycol 
@@ -10977,8 +10979,8 @@ addSugestedBuy (GtkButton *button, gpointer user_data)
 
 	  //Set Buy's Entries
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), barcode);
-	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), g_strdup_printf ("%f",costo));
-	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), g_strdup_printf ("%ld",lround (precio)));
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), g_strdup_printf ("%.2f",costo));
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), g_strdup_printf ("%.2f",precio));
 	  calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), g_strdup_printf ("%f",cantidad));
 
@@ -11237,8 +11239,8 @@ on_btn_nullify_buy_ok_clicked (GtkButton *button, gpointer user_data)
   for (i = 0; i < tuples; i++)
     {
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_barcode")), PQvaluebycol (res, i, "barcode_out"));
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PQvaluebycol (res, i, "costo_out"));
-      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PQvaluebycol (res, i, "precio_out"));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_price")), PUT (PQvaluebycol (res, i, "costo_out")));
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_sell_price")), PUT (PQvaluebycol (res, i, "precio_out")));
       calcularPorcentajeGanancia (); // Calcula el porcentaje de ganancia y lo agraga al entry
       
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), PQvaluebycol (res, i, "cantidad_anulada_out"));

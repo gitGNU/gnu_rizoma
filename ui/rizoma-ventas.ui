@@ -4208,7 +4208,6 @@
                 <property name="can_focus">False</property>
                 <property name="n_rows">2</property>
                 <property name="n_columns">6</property>
-                <property name="column_spacing">20</property>
                 <child>
                   <object class="GtkLabel" id="label_subtotal">
                     <property name="visible">True</property>

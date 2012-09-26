@@ -241,8 +241,8 @@ gchar * ValorTotalStock (void);
 gchar * ContriTotalStock (void);
 
 void SetModificacionesProducto (gchar *barcode, gchar *dias_stock, gchar *margen, gchar *new_venta,
-                                gboolean canjeable, gint tasa, gboolean mayorista, gint precio_mayorista,
-                                gint cantidad_mayorista);
+                                gboolean canjeable, gint tasa, gboolean mayorista, gchar *precio_mayorista,
+                                gchar *cantidad_mayorista);
 
 gboolean Egresar (gint monto, gint motivo, gint usuario);
 
@@ -354,7 +354,7 @@ gboolean desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der);
 
 gboolean mod_to_mod_on_transfer (Prod *producto);
 
-gboolean add_to_pedido_temporal (gchar *barcode, gdouble cantidad, gdouble precio_compra, gint margen, gint precio);
+gboolean add_to_pedido_temporal (gchar *barcode, gdouble cantidad, gdouble precio_compra, gdouble margen, gdouble precio);
 
 gboolean del_to_pedido_temporal (gchar *barcode);
 
