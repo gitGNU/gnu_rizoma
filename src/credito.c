@@ -977,13 +977,14 @@ guias_facturas_box ()
 
 
   //sale details
-  ventas_details = gtk_list_store_new (6,
+  ventas_details = gtk_list_store_new (7,
                                        G_TYPE_STRING,
                                        G_TYPE_STRING,
                                        G_TYPE_STRING,
                                        G_TYPE_DOUBLE,
-                                       G_TYPE_STRING,
-                                       G_TYPE_STRING);
+                                       G_TYPE_DOUBLE,
+				       G_TYPE_DOUBLE,
+                                       G_TYPE_INT);
 
   tree = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_gf_sale_detail"));
   gtk_tree_view_set_model(GTK_TREE_VIEW(tree), GTK_TREE_MODEL(ventas_details));
@@ -1031,22 +1032,34 @@ guias_facturas_box ()
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Unitario", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Precio Neto", renderer,
                                                      "text", 4,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+  column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
                                                      "text", 5,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Total", renderer,
+                                                     "text", 6,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
   /* We fill the struct to print the last two tree views */
 
@@ -1059,11 +1072,13 @@ guias_facturas_box ()
   client_gf_detail->son->cols[2].num = 2;
   client_gf_detail->son->cols[3].name = "Cantidad";
   client_gf_detail->son->cols[3].num = 3;
-  client_gf_detail->son->cols[4].name = "Unitario";
+  client_gf_detail->son->cols[4].name = "Precio Neto";
   client_gf_detail->son->cols[4].num = 4;
-  client_gf_detail->son->cols[5].name = "Total";
+  client_gf_detail->son->cols[5].name = "Precio";
   client_gf_detail->son->cols[5].num = 5;
-  client_gf_detail->son->cols[6].name = NULL;
+  client_gf_detail->son->cols[6].name = "Total";
+  client_gf_detail->son->cols[6].num = 6;
+  client_gf_detail->son->cols[7].name = NULL;
 
   /* g_signal_connect (G_OBJECT (button), "clicked", */
   /*     G_CALLBACK (PrintTwoTree), (gpointer)client_detail); */
@@ -2434,12 +2449,12 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
       gtk_list_store_clear (store_detalle);
 
       if (id_venta == 0)
-	q = g_strdup_printf ("SELECT producto.codigo_corto, producto.descripcion, producto.marca, venta_detalle.cantidad, venta_detalle.precio "
-			     "FROM venta_detalle inner join producto on producto.barcode=venta_detalle.barcode "
+	q = g_strdup_printf ("SELECT producto.codigo_corto, producto.descripcion, producto.marca, venta_detalle.cantidad, venta_detalle.precio_neto, venta_detalle.precio "
+			     "FROM venta_detalle INNER JOIN producto on producto.barcode=venta_detalle.barcode "
 			     "WHERE venta_detalle.id_venta IN (SELECT id_venta FROM documentos_emitidos WHERE id_factura = %d)", id_documento);
       else
-	q = g_strdup_printf ("SELECT producto.codigo_corto, producto.descripcion, producto.marca, venta_detalle.cantidad, venta_detalle.precio "
-			     "FROM venta_detalle inner join producto on producto.barcode=venta_detalle.barcode "
+	q = g_strdup_printf ("SELECT producto.codigo_corto, producto.descripcion, producto.marca, venta_detalle.cantidad, venta_detalle.precio_neto, venta_detalle.precio "
+			     "FROM venta_detalle INNER JOIN producto on producto.barcode=venta_detalle.barcode "
 			     "WHERE venta_detalle.id_venta=%d", id_venta);
 
       res = EjecutarSQL (q);
@@ -2454,10 +2469,11 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
                               0, PQgetvalue (res, i, 0),
                               1, PQgetvalue (res, i, 1),
                               2, PQgetvalue (res, i, 2),
-                              3, strtod (PUT (PQgetvalue (res, i, 3)),(char **)NULL),
-                              4, PutPoints (PQgetvalue (res, i, 4)),
-                              5, PutPoints (g_strdup_printf("%ld", lround (strtod (PUT (PQgetvalue (res, i, 3)), (char **)NULL) * 
-									  strtod (PUT (PQgetvalue (res, i, 4)), (char **)NULL)))),
+                              3, strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
+			      4, strtod (PUT (PQvaluebycol (res, i, "precio_neto")), (char **)NULL),
+			      5, strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL),
+                              6, lround (strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL) * 
+					 strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL)),
                               -1);
         }
     }

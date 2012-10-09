@@ -4795,7 +4795,7 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
             {
               AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), strtod (PUT (PQvaluebycol (res, i, "amount")), (char **)NULL));
 
-              venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
+              venta->products->product->precio = strtod (PUT (PQvaluebycol (res, i, "price")), (char **)NULL);
 	      iva = (gdouble)venta->products->product->iva / 100;
 	      otros = (gdouble)venta->products->product->otros / 100;
 	      venta->products->product->precio_neto = (venta->products->product->precio / (1 + otros + iva));
