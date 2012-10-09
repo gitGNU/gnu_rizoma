@@ -1080,8 +1080,8 @@ guias_facturas_box ()
   client_gf_detail->son->cols[6].num = 6;
   client_gf_detail->son->cols[7].name = NULL;
 
-  /* g_signal_connect (G_OBJECT (button), "clicked", */
-  /*     G_CALLBACK (PrintTwoTree), (gpointer)client_detail); */
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_print_gf")), "clicked",
+		    G_CALLBACK (PrintTwoTree), (gpointer)client_gf_detail);
 
   //setup_print_menu();
 
