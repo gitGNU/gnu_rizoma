@@ -4051,20 +4051,18 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
 
   g_date_set_dmy (date_buy, atoi (PQgetvalue( res, 0, 0)), atoi (PQgetvalue( res, 0, 1)), atoi (PQgetvalue( res, 0, 2)));
   
+  /*
   if (invoice)
     {
       if (g_date_compare (date_buy, date) > 0)
-        {
-          ErrorMSG (wnd, "La fecha de emision del documento no puede ser menor a la fecha de compra");
-        }
+         ErrorMSG (wnd, "La fecha de emision del documento no puede ser menor a la fecha de compra");
     }
   else
     {
       if (g_date_compare (date_buy, date) > 0 )
-        {
-          ErrorMSG (wnd, "La fecha de emision del documento no puede ser menor a la fecha de compra");
-        }
+         ErrorMSG (wnd, "La fecha de emision del documento no puede ser menor a la fecha de compra");
     }
+  */
 
   if (invoice)
     {
@@ -4641,7 +4639,7 @@ AskElabVenc (GtkWidget *wnd, gboolean invoice)
   g_date_set_parse (date, gtk_entry_get_text (entry_date));
   if (!g_date_valid (date))
     {
-      ErrorMSG (GTK_WIDGET (entry_date), "Debe ingresar una fecha de emision para el documento");
+      ErrorMSG (GTK_WIDGET (entry_date), "Debe ingresar la fecha de emisión del documento");
       return;
     }
 

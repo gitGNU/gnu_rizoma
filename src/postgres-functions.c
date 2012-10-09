@@ -2587,10 +2587,12 @@ IngresarFactura (gint n_doc, gint id_compra, gchar *rut_proveedor, gint total_pr
 
   //"to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY')" //d_emision, m_emision, y_emision, 
 
-  q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, valor_neto, "
+  q = g_strdup_printf ("INSERT INTO factura_compra (id, id_compra, rut_proveedor, num_factura, fecha, fecha_documento, valor_neto, "
                        "valor_iva, descuento, pagada, monto, costo_neto_transporte, iva_transporte) "
-		       "VALUES (DEFAULT, %d, '%s', %d, now(), 0, 0, 0,'f', %d, %s, %s)",
-                       id_compra, rut_proveedor, n_doc, total_productos, 
+		       "VALUES (DEFAULT, %d, '%s', %d, now(), to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'), "
+		       "        0, 0, 0,'f', %d, %s, %s)",
+                       id_compra, rut_proveedor, n_doc, d_emision, m_emision, y_emision,
+		       total_productos, 
 		       CUT (g_strdup_printf ("%.3f", costo_neto_transporte)),
 		       CUT (g_strdup_printf ("%.3f", monto_iva_transporte)));
   res = EjecutarSQL (q);

@@ -839,6 +839,10 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 			   "date_part ('month', fc.fecha) AS f_month, "
 			   "date_part ('day', fc.fecha) AS f_day, "
 
+			   "date_part ('year', fc.fecha_documento) AS fd_year, "
+			   "date_part ('month', fc.fecha_documento) AS fd_month, "
+			   "date_part ('day', fc.fecha_documento) AS fd_day, "
+
 			   "date_part ('year', fc.fecha_pago) AS fp_year, "
 			   "date_part ('month', fc.fecha_pago) AS fp_month, "
 			   "date_part ('day', fc.fecha_pago) AS fp_day, "
@@ -871,16 +875,20 @@ on_selection_buy_change (GtkTreeSelection *selection, gpointer data)
 						  PQvaluebycol (res, i, "f_day"),
 						  PQvaluebycol (res, i, "f_month"),
 						  PQvaluebycol (res, i, "f_year")),
-			      2, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "pagada"), "t")) ? "Si" : "No"),
-			      3, g_strdup_printf ("%s/%s/%s",
+			      2, g_strdup_printf ("%s/%s/%s",
+						  PQvaluebycol (res, i, "fd_day"),
+						  PQvaluebycol (res, i, "fd_month"),
+						  PQvaluebycol (res, i, "fd_year")),
+			      3, g_strdup_printf ("%s", (g_str_equal (PQvaluebycol (res, i, "pagada"), "t")) ? "Si" : "No"),
+			      4, g_strdup_printf ("%s/%s/%s",
 						  PQvaluebycol (res, i, "fp_day"),
 						  PQvaluebycol (res, i, "fp_month"),
 						  PQvaluebycol (res, i, "fp_year")),
-			      4, atoi (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
-			      5, atoi ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ?
+			      5, atoi (g_strdup (PQvaluebycol (res, i, "monto_compra"))),
+			      6, atoi ((g_str_equal (PQvaluebycol (res, i, "monto_anulado"),"")) ?
 				       "0" : PQvaluebycol (res, i, "monto_anulado")),
-			      6, id_compra,
-			      7, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
+			      7, id_compra,
+			      8, atoi (g_strdup (PQvaluebycol (res, i, "id"))),
 			      -1);
 	}
 
@@ -3393,7 +3401,7 @@ reports_win (void)
 
   //Date
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Fecha", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Fecha Pedido", renderer,
 						    "text", 1,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -3454,11 +3462,12 @@ reports_win (void)
   libro_compra->cols[5].name = NULL;
 
   //Facturas
-  store = gtk_list_store_new (8,
+  store = gtk_list_store_new (9,
 			      G_TYPE_INT,    // N° Factura
 			      G_TYPE_STRING, // Fecha Ingreso
 			      G_TYPE_STRING, // Pagada
 			      G_TYPE_STRING, // Fecha Pago
+			      G_TYPE_STRING, // Fecha Documento
 			      G_TYPE_INT,    // Buy amount
 			      G_TYPE_INT,    // Nullify amount
 			      G_TYPE_INT,    // ID Compra
@@ -3493,10 +3502,10 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
-
-  //Pagado
+  
+  //Fecha Documento
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Pagada", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Fecha Doc.", renderer,
 						    "text", 2,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -3505,9 +3514,9 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 2);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  //Fecha Pago
+  //Pagado
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Fecha Pago", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Pagada", renderer,
 						    "text", 3,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -3516,21 +3525,20 @@ reports_win (void)
   gtk_tree_view_column_set_sort_column_id (column, 3);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  //Buy amount
+  //Fecha Pago
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Monto Compra", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Fecha Pago", renderer,
 						    "text", 4,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
   gtk_tree_view_column_set_alignment (column, 0.5);
-  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 4);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
 
-  //Nullify amount
+  //Buy amount
   renderer = gtk_cell_renderer_text_new();
-  column = gtk_tree_view_column_new_with_attributes("Monto Anulado", renderer,
+  column = gtk_tree_view_column_new_with_attributes("Monto Compra", renderer,
 						    "text", 5,
 						    NULL);
   gtk_tree_view_append_column (treeview, column);
@@ -3540,19 +3548,33 @@ reports_win (void)
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
+  //Nullify amount
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Monto Anulado", renderer,
+						    "text", 6,
+						    NULL);
+  gtk_tree_view_append_column (treeview, column);
+  gtk_tree_view_column_set_alignment (column, 0.5);
+  g_object_set (G_OBJECT (renderer), "xalign", 1.0, NULL);
+  gtk_tree_view_column_set_sort_column_id (column, 6);
+  gtk_tree_view_column_set_resizable (column, FALSE);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
+
 
   libro_compra->son->tree = treeview;
   libro_compra->son->cols[0].name = "N° Factura";
   libro_compra->son->cols[0].num = 0;
   libro_compra->son->cols[1].name = "Fecha Ingreso";
   libro_compra->son->cols[1].num = 1;
-  libro_compra->son->cols[2].name = "Pagada";
+  libro_compra->son->cols[2].name = "Fecha Documento";
   libro_compra->son->cols[2].num = 2;
-  libro_compra->son->cols[3].name = "Fecha Pago";
+  libro_compra->son->cols[3].name = "Pagada";
   libro_compra->son->cols[3].num = 3;
-  libro_compra->son->cols[4].name = "Monto Anulado";
+  libro_compra->son->cols[4].name = "Fecha Pago";
   libro_compra->son->cols[4].num = 4;
-  libro_compra->son->cols[5].name = NULL;
+  libro_compra->son->cols[5].name = "Monto Anulado";
+  libro_compra->son->cols[5].num = 5;
+  libro_compra->son->cols[6].name = NULL;
 
 
   //Detalle Factura

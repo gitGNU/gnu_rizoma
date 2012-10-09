@@ -199,6 +199,7 @@ create table factura_compra (
   rut_proveedor             int4 not null,
   num_factura               int4,
   fecha                     timestamp,
+  fecha_documento           timestamp,
   valor_neto                float8,
   valor_iva                 float8,
   descuento                 int4,
