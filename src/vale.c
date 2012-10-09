@@ -52,9 +52,11 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
   gdouble siva = 0.0, civa = 0.0;
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gboolean emitir_documento = rizoma_get_value_boolean ("EMITIR_DOCUMENTO");
+  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
   gboolean is_imp1, is_imp2;
 
-  if (impresora == FALSE)
+  if (impresora == FALSE && emitir_documento == FALSE)
     return;
 
   if (tipo_pago == MIXTO)
@@ -83,7 +85,6 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
     else
       precio = products->product->precio;
 
-    gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
     if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
       {
 	if (g_str_has_suffix(products->product->producto,"@"))
@@ -124,10 +125,10 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
 
     products = products->next;
   } while (products != header);
-
-  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+  
   //impresora = rizoma_get_value_boolean ("IMPRESORA");
-  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
+  if ( ((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo && impresora == TRUE) || 
+       (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")) )
     {
       //Si el pago es con cheque de restaurant, o ambos son mapgos no afectos a impuestos
       if (tipo_pago == CHEQUE_RESTAURANT ||
@@ -162,7 +163,7 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
       fclose (fp);
     }
 
-  if (((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo) || 
+  if (((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo && impresora == TRUE) || 
       (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")))
     for (i = 0; i < n_copy; i++) 
       system(g_strdup_printf ("%s %s", print_command, vale_file));
@@ -197,6 +198,8 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
   gdouble prop_afecta = 0.0, prop_no_afecta = 0.0;
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gboolean emitir_documento = rizoma_get_value_boolean ("EMITIR_DOCUMENTO");
+  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
   gboolean continuar = TRUE;
   gboolean is_imp1, is_imp2;
   
@@ -211,7 +214,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
   else
     products = prod;
 
-  if (impresora == FALSE)
+  if (impresora == FALSE && emitir_documento == FALSE)
     return;
 
   if (tipo_pago == MIXTO)
@@ -244,7 +247,6 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
       else
 	precio = products->product->precio;
 
-      gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
       if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
 	{
 	  if (g_str_has_suffix(products->product->producto,"@"))
@@ -319,8 +321,8 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
 
   //fprintf (fp, "\n\n");
 
-  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
-  if (((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")) && hay_selectivo) || impresora == TRUE)
+  if ( ((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo && impresora == TRUE) || 
+       (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")) )
     {
       //Si el pago es con cheque de restaurant, o ambos son mapgos no afectos a impuestos
       if (tipo_pago == CHEQUE_RESTAURANT ||
@@ -370,8 +372,8 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
       fclose (fp);
     }
 
-  if (((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo) || 
-      (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")))
+  if ( ((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo && impresora == TRUE) || 
+       (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")) )
     for (i = 0; i < n_copy; i++) 
       system(g_strdup_printf ("%s %s", print_command, vale_file));
 
@@ -669,11 +671,13 @@ void
 abrirGaveta(void)
 {
   // Abriendo la caja
-  char *vale_dir = rizoma_get_value ("VALE_DIR");
-  gchar *abrirGaveta = g_strdup_printf ("%s/abrirGaveta.sh", vale_dir);
-  FILE *ac;
-  ac = fopen (abrirGaveta, "w+");
-  fprintf (ac, "echo \"300,3,8,1\" > %s", rizoma_get_value ("GAVETA_DEV"));
-  fclose (ac);
-  system (g_strdup_printf ("sh %s/abrirGaveta.sh", vale_dir));
+  /* char *vale_dir = rizoma_get_value ("VALE_DIR"); */
+  /* gchar *abrirGaveta = g_strdup_printf ("%s/abrirGaveta.sh", vale_dir); */
+  /* FILE *ac; */
+  /* ac = fopen (abrirGaveta, "w+"); */
+  /* fprintf (ac, "echo \"300,3,8,1\" > %s", rizoma_get_value ("GAVETA_DEV")); */
+  /* fclose (ac); */
+  /* system (g_strdup_printf ("sh %s/abrirGaveta.sh", vale_dir)); */
+
+  system (g_strdup_printf ("echo \"300,3,8,1\" > %s", rizoma_get_value ("GAVETA_DEV")));
 }

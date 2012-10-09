@@ -7867,7 +7867,7 @@ on_btn_ok_ingress_invoice_clicked (GtkWidget *widget, gpointer data)
   GtkWidget *wnd = GTK_WIDGET (gtk_builder_get_object (builder, "wnd_ingress_invoice"));
 
   AskElabVenc (wnd, TRUE);
-  gtk_widget_set_sensitive( GTK_WIDGET (gtk_builder_get_object (builder, "btn_ok_ingress_invoice")), FALSE);
+  //gtk_widget_set_sensitive( GTK_WIDGET (gtk_builder_get_object (builder, "btn_ok_ingress_invoice")), FALSE);
 }
 
 
