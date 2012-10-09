@@ -1501,6 +1501,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   gdouble porcentaje;
   gdouble costo_promedio = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL);
   gdouble precio_local = strtod (PUT (g_strdup (precio)), (char **)NULL);
+  gdouble precio_neto = precio_local; //Esto por defecto, se actualiza su valor dependiendo de si tiene impuesto
 
   // Impuestos
   gdouble iva_local;
@@ -1520,6 +1521,7 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 	{
 	  iva_local = (iva_local / 100) + 1;
 	  porcentaje = (gdouble) ((precio_local / (gdouble)(iva_local * costo_promedio)) -1) * 100;
+	  precio_neto = precio_local / iva_local;
 	}
       else
 	porcentaje = 0;
@@ -1541,8 +1543,8 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
 	  iva_local = (gdouble) (iva_local / 100);
 	  otros_local = (gdouble) (otros_local / 100);
 
-	  porcentaje = (gdouble) precio_local / (gdouble)(iva_local + otros_local + 1);
-	  porcentaje = (gdouble) porcentaje - costo_promedio;
+	  precio_neto = (gdouble) precio_local / (gdouble)(iva_local + otros_local + 1);
+	  porcentaje = (gdouble) precio_neto - costo_promedio;
 	  porcentaje = lround ((gdouble)(porcentaje / costo_promedio) * 100);
 	}
       else
@@ -1553,17 +1555,22 @@ SaveModifications (gchar *codigo, gchar *description, gchar *marca, gchar *unida
   else if (iva == FALSE && (otros == 0 || otros == -1))
     {
       if (costo_promedio != 0)
-	porcentaje = (gdouble) ((precio_local / costo_promedio) - 1) * 100;
+	{
+	  porcentaje = (gdouble) ((precio_local / costo_promedio) - 1) * 100;
+	  precio_neto = precio_local;
+	}
       else
 	porcentaje = 0;
     }
 
   q = g_strdup_printf ("UPDATE producto SET codigo_corto='%s', descripcion=UPPER('%s'),"
-                       "marca=UPPER('%s'), unidad=UPPER('%s'), contenido='%s', precio=%s, "
-                       "impuestos='%d', otros=%d, familia=%d, "
+                       "marca=UPPER('%s'), unidad=UPPER('%s'), contenido='%s', "
+                       "precio=%s, precio_neto=%s, impuestos='%d', otros=%d, familia=%d, "
                        "perecibles='%d', fraccion='%d', margen_promedio=%s WHERE barcode='%s'",
-                       codigo, SPE(description), SPE(marca), unidad, contenido, CUT (g_strdup_printf ("%.2f", precio_local)),
-                       iva, otros, familia, (gint)perecible, (gint)fraccion, CUT (g_strdup_printf ("%.2f", porcentaje)), barcode);
+                       codigo, SPE(description), SPE(marca), unidad, contenido,
+		       CUT (g_strdup_printf ("%.2f", precio_local)), CUT (g_strdup_printf ("%.2f", precio_neto)), 
+		       iva, otros, familia,
+		       (gint)perecible, (gint)fraccion, CUT (g_strdup_printf ("%.2f", porcentaje)), barcode);
   res = EjecutarSQL(q);
   g_free(q);
 }
@@ -1615,7 +1622,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
   Productos *products = header;
   gdouble iva = 0, otros = 0;
   gchar *cantidad;
-  gchar *precio_compra, *precio_venta, *margen;
+  gchar *costo, *precio, *precio_neto, *margen;
   gchar *q;
 
   do
@@ -1634,21 +1641,24 @@ SaveBuyProducts (Productos *header, gint id_compra)
       else
 	otros = 0;
 
+      precio_neto = g_strdup_printf ("%.2f", products->product->precio / 
+				     (products->product->otros/100 + products->product->iva/100 + 1));
+
       cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
-      precio_compra = g_strdup_printf ("%.2f", products->product->precio_compra);
-      precio_venta = g_strdup_printf ("%.2f", products->product->precio);
+      costo = g_strdup_printf ("%.2f", products->product->precio_compra);
+      precio = g_strdup_printf ("%.2f", products->product->precio);
       margen = g_strdup_printf ("%.2f", products->product->margen);
 
       q = g_strdup_printf("SELECT * FROM insertar_detalle_compra(%d, "
-                          "%s::double precision, %s::double precision, %s::double precision, "
+                          "%s::double precision, %s::double precision, %s::double precision, %s::double precision, "
                           "0::double precision, 0::smallint, %s, %s, %ld, %ld)",
-                          id_compra, CUT(cantidad), CUT (precio_compra),
-                          CUT (precio_venta), products->product->barcode,
+                          id_compra, CUT(cantidad), CUT (costo),
+                          CUT (precio), CUT (precio_neto), products->product->barcode,
                           CUT (margen), lround (iva),
                           lround (otros));
       EjecutarSQL(q);
 
-      g_free(precio_compra);
+      g_free(costo);
       g_free(cantidad);
       g_free(q);
 
@@ -1911,7 +1921,6 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
   //Datos Producto
   gdouble iva, otros, iva_residual, otros_residual, iva_percent, otros_percent;
-  gchar *cantidad;  
   gdouble precio;
 
   //Para el pago mixto
@@ -1920,7 +1929,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
   //gdouble iva_promedio, otros_promedio;
   gdouble impuestos, ganancia, proporcion_iva, proporcion_otros;
-  gdouble proporcion_producto, neto;
+  gdouble proporcion_producto, neto, precio_neto;
   gdouble monto_afecto, monto_no_afecto, total_prod_afecto, total_prod_no_afecto;
 
   //Tipo de mercadería
@@ -1961,8 +1970,6 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 
   do
     {
-      cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
-
       iva_percent = GetIVA (products->product->barcode);
       otros_percent = GetOtros (products->product->barcode);
       
@@ -2121,15 +2128,17 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	  proporcion_otros = 1;
 	}
 
-      ganancia = precio / (iva_percent + otros_percent + 1);
-      ganancia = ganancia - products->product->fifo;
+      precio_neto = precio / (iva_percent + otros_percent + 1);
+      ganancia = precio_neto - products->product->fifo;
       ganancia = ganancia * products->product->cantidad;
 
       /* Registra los productos con sus respectivos datos(barcode,cantidad,
 	 precio,fifo,iva,otros) en la tabla venta_detalle y venta_mc_detalle */
-      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %s, %s, %s)",
-			   id_venta, products->product->barcode, cantidad, 
+      q = g_strdup_printf ("select registrar_venta_detalle(%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %s, %s, %s)",
+			   id_venta, products->product->barcode,
+			   CUT (g_strdup_printf ("%.3f", products->product->cantidad)),
 			   CUT (g_strdup_printf ("%.3f", precio)),
+			   CUT (g_strdup_printf ("%.3f", precio_neto)),
 			   CUT (g_strdup_printf ("%.3f",products->product->fifo)),
 			   CUT (g_strdup_printf ("%.3f", iva)),
 			   CUT (g_strdup_printf ("%.3f", otros)),

@@ -512,6 +512,7 @@ create table producto (
   unidad                    varchar(10),
   stock                     float8 default 0,
   precio                    float8,
+  precio_neto               float8,     -- precio venta neto
   costo_promedio            float8,	-- antes fifo
   vendidos                  float8,
   impuestos                 bool,
@@ -609,6 +610,7 @@ create table compra_detalle (
   cantidad                  float8,
   precio                    float8 not null,
   precio_venta              float8 not null,
+  precio_neto		    float8 not null,
   cantidad_ingresada        float8,
   descuento                 int4,
   barcode_product           int8 not null,
@@ -628,6 +630,7 @@ create table venta_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8 not null, -- Cuando hay descuentos se obtiene un precio proporcional
+  precio_neto               float8 not null, -- Cuando hay descuentos se obtiene un precio_neto proporcional
   fifo                      float8 not null,
   ganancia                  float8 not null,
   iva                       float8,

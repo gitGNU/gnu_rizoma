@@ -535,6 +535,185 @@ CancelarTipo (GtkWidget *widget, gpointer data)
   closing_tipos = FALSE;
 }
 
+
+/**
+ *
+ *
+ */
+void
+on_precio_neto_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *precio_neto_t, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+
+  gchar *codigo, *barcode, *cant;
+  gdouble iva, otros;
+  gdouble precio_final, precio_neto, costo_neto, cantidad;
+  gint sub_neto, sub_total;
+  gdouble ganancia_minima = strtod (PUT (rizoma_get_value ("GANANCIA_MINIMA")), (char **)NULL);
+
+  //Verifica que sea un valor numérico
+  if (!is_numeric (precio_neto_t))
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "sell_products_list")),
+		"El precio neto debe ser un valor numérico");
+      return;
+    }
+
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
+
+  gtk_tree_model_get (model, &iter,
+		      0, &codigo, // Se obtiene el codigo del producto
+		      2, &cant,
+		      -1);
+
+  cantidad = strtod (PUT (cant),  (char **)NULL);
+
+  barcode = PQvaluebycol (EjecutarSQL (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", codigo)),
+			  0, "barcode");
+
+
+  precio_neto = strtod (PUT (precio_neto_t),  (char **)NULL);
+	      
+  costo_neto = obtener_costo_promedio (barcode);
+  ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
+  costo_neto = costo_neto * ganancia_minima;
+
+  //Se obtienen los impuestos
+  iva = GetIVA (barcode);
+  iva = (iva > 0) ? iva / 100 : 0;
+  otros = GetOtros (barcode);
+  otros = (otros > 0) ? otros / 100 : 0;
+
+  if (precio_neto < costo_neto)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "sell_products_list")),
+		g_strdup_printf ("El precio es inferior al mínimo permitido ($ %s)", 
+				 PutPoints (g_strdup_printf ("%ld", lround (costo_neto)))));
+      return;
+    }
+
+  precio_final = (precio_neto * (1 + otros + iva));
+  sub_neto = lround (precio_neto*cantidad);
+  sub_total = lround (precio_final*cantidad);
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      3, precio_neto,
+		      4, sub_neto,
+		      5, precio_final,
+		      6, sub_total,
+		      -1);
+
+  /*Se modifican los datos de la estructura*/
+  venta->product_check = BuscarPorCodigo (venta->header, codigo);
+  
+  if (venta->products->product->mayorista == TRUE)
+    venta->product_check->product->precio_mayor = precio_final;
+  else
+    venta->product_check->product->precio = precio_final;
+
+  venta->product_check->product->precio_neto = precio_neto;
+
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+			g_strdup_printf ("<span size=\"40000\">%s</span>",
+					 PutPoints (g_strdup_printf ("%ld", lround (CalcularTotal (venta->header))))));
+}
+
+
+/**
+ *
+ *
+ */
+void
+on_precio_final_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *precio_final_t, gpointer data)
+{
+  GtkTreeModel *model = GTK_TREE_MODEL (data);
+  GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
+  GtkTreeIter iter;
+
+  gchar *codigo, *barcode, *cant;
+  gdouble iva, otros;
+  gdouble precio_final, precio_neto, costo_neto, cantidad;
+  gint sub_neto, sub_total;
+  gdouble ganancia_minima = strtod (PUT (rizoma_get_value ("GANANCIA_MINIMA")), (char **)NULL);
+
+  //Verifica que sea un valor numérico
+  if (!is_numeric (precio_final_t))
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "sell_products_list")), 
+		"El precio neto debe ser un valor numérico");
+      return;
+    }
+
+
+  gtk_tree_model_get_iter (model, &iter, path);
+  gtk_tree_path_free (path);
+
+  gtk_tree_model_get (model, &iter,
+		      0, &codigo, // Se obtiene el codigo del producto
+		      2, &cant,
+		      -1);
+  
+  cantidad = strtod (PUT (cant),  (char **)NULL);
+
+  barcode = PQvaluebycol (EjecutarSQL
+			  (g_strdup_printf ("SELECT barcode FROM codigo_corto_to_barcode('%s')", codigo)),
+			  0, "barcode");
+
+  precio_final = strtod (PUT (precio_final_t),  (char **)NULL);
+	      
+  costo_neto = obtener_costo_promedio (barcode);
+  ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
+  costo_neto = costo_neto * ganancia_minima;
+
+  //Se obtienen los impuestos
+  iva = GetIVA (barcode);
+  iva = (iva > 0) ? iva / 100 : 0;
+  otros = GetOtros (barcode);
+  otros = (otros > 0) ? otros / 100 : 0;
+
+  //Costo neto + impuestos
+  costo_neto *= (1 + otros + iva);
+
+  if ((precio_final / (1 + otros + iva)) < costo_neto)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "sell_products_list")),
+		g_strdup_printf ("El precio es inferior al mínimo permitido ($ %s)", 
+				 PutPoints (g_strdup_printf ("%ld", lround (costo_neto)))));
+      return;
+    }
+
+  precio_neto = (precio_final / (1 + otros + iva));
+  sub_neto = lround ( (precio_neto*cantidad) );
+  sub_total = lround ( (precio_final*cantidad) );
+
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      3, precio_neto,
+		      4, sub_neto,
+		      5, precio_final,
+		      6, sub_total,
+		      -1);
+
+  
+  /*Se modifican los datos de la estructura*/
+  venta->product_check = BuscarPorCodigo (venta->header, codigo);
+  
+  if (venta->products->product->mayorista == TRUE)
+    venta->product_check->product->precio_mayor = precio_final;
+  else
+    venta->product_check->product->precio = precio_final;
+
+  venta->product_check->product->precio_neto = precio_neto;
+
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
+			g_strdup_printf ("<span size=\"40000\">%s</span>",
+					 PutPoints (g_strdup_printf ("%ld", lround (CalcularTotal (venta->header))))));
+}
+
+
 void
 ventas_win ()
 {
@@ -624,15 +803,17 @@ ventas_win ()
   /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
   /*                       g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE))); */
 
-  venta->store = gtk_list_store_new (5,
+  venta->store = gtk_list_store_new (7,
 				     G_TYPE_STRING,
 				     G_TYPE_STRING,
 				     G_TYPE_STRING,
 				     G_TYPE_DOUBLE,
+				     G_TYPE_INT,
+				     G_TYPE_DOUBLE,
 				     G_TYPE_INT);
   if (venta->header != NULL)
     {
-      gdouble precio;
+      gdouble precio, precio_neto;
       do
         {
 
@@ -641,6 +822,9 @@ ventas_win ()
             precio = fill->product->precio_mayor;
           else
             precio = fill->product->precio;
+
+	  precio_neto = precio / (fill->product->otros/100 + fill->product->iva/100 + 1);
+	  fill->product->precio_neto = precio_neto;
 
           gtk_list_store_insert_after (venta->store, &iter, NULL);
           gtk_list_store_set (venta->store, &iter,
@@ -651,8 +835,10 @@ ventas_win ()
 						  fill->product->contenido,
 						  fill->product->unidad),
                               2, g_strdup_printf ("%.3f", fill->product->cantidad),
-                              3, precio,
-                              4, lround (fill->product->cantidad * precio),
+			      3, precio_neto,
+                              4, lround (fill->product->cantidad * precio_neto),
+                              5, precio,
+                              6, lround (fill->product->cantidad * precio),
                               -1);
           fill = fill->next;
         }
@@ -715,26 +901,55 @@ ventas_win ()
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
+  if (rizoma_get_value_boolean ("MODO_GUIA_FACTURA"))
+    {
+      renderer = gtk_cell_renderer_text_new ();
+      g_object_set (renderer, "editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_precio_neto_sell_edited), (gpointer)venta->store);
+      column = gtk_tree_view_column_new_with_attributes ("Prec. Neto Un.", renderer,
+							 "text", 3,
+							 NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+
+
+      renderer = gtk_cell_renderer_text_new ();
+      column = gtk_tree_view_column_new_with_attributes ("Sub Total Neto", renderer,
+							 "text", 4,
+							 NULL);
+      gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
+      gtk_tree_view_column_set_alignment (column, 0.5);
+      g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
+      gtk_tree_view_column_set_resizable (column, FALSE);
+      gtk_tree_view_column_set_max_width (column, 100);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+    }
+
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (renderer, "editable", TRUE, NULL);
+  g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_precio_final_sell_edited), (gpointer)venta->store);
   column = gtk_tree_view_column_new_with_attributes ("Precio Uni.", renderer,
-                                                     "text", 3,
+                                                     "text", 5,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)5, NULL);
 
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Sub Total", renderer,
-                                                     "text", 4,
+                                                     "text", 6,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
   g_object_set (G_OBJECT (renderer), "xalign", 1.0, "font", "15", NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_max_width (column, 100);
-  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
+  gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)6, NULL);
 
   if (venta->header != NULL)
     CalcularVentas (venta->header);
@@ -856,11 +1071,12 @@ AgregarProducto (GtkButton *button, gpointer data)
 
       if (venta->product_check == NULL)
         {
-          gdouble precio;
+          gdouble precio, precio_neto;
 
 	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
-	       is_numeric (precio_discrecional) )
+	       is_numeric (precio_discrecional) && 
+	       venta->products->product->precio != strtod (PUT (precio_discrecional),(char **)NULL) )
 	    {
 	      precio = strtod (PUT (precio_discrecional),  (char **)NULL);
 	      
@@ -876,6 +1092,7 @@ AgregarProducto (GtkButton *button, gpointer data)
 
 	      //Costo neto + impuestos
 	      costo_neto *= (1 + otros + iva);
+	      precio_neto = precio / (1 + otros + iva);
 
 	      if (precio < costo_neto)
 		{
@@ -901,7 +1118,18 @@ AgregarProducto (GtkButton *button, gpointer data)
 		precio = venta->products->product->precio_mayor;
 	      else
 		precio = venta->products->product->precio;
+
+	      //Se obtienen los impuestos
+	      iva = GetIVA (barcode);
+	      iva = (iva > 0) ? iva / 100 : 0;
+	      otros = GetOtros (barcode);
+	      otros = (otros > 0) ? otros / 100 : 0;
+
+	      //precio venta sin impuetos
+	      precio_neto = precio / (1 + otros + iva);
 	    }
+
+	  venta->products->product->precio_neto = precio_neto;
 
           /*
             Agregamos el producto al TreeView
@@ -915,15 +1143,17 @@ AgregarProducto (GtkButton *button, gpointer data)
 						  venta->products->product->contenido,
 						  venta->products->product->unidad),
                               2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
-                              3, precio,
-                              4, lround (venta->products->product->cantidad * precio),
+                              3, precio_neto,
+                              4, lround (venta->products->product->cantidad * precio_neto),
+			      5, precio,
+                              6, lround (venta->products->product->cantidad * precio),
                               -1);
 
           venta->products->product->iter = iter;
         }
       else
         {
-          gdouble precio;
+          gdouble precio, precio_neto;
 
           if ((venta->product_check->product->cantidad + cantidad) > stock)
             {
@@ -936,7 +1166,8 @@ AgregarProducto (GtkButton *button, gpointer data)
 	  /*Se obtiene el precio de venta de acuerdo a si es discrecional o no*/
 	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
-	       is_numeric (precio_discrecional) )
+	       is_numeric (precio_discrecional) &&
+	       venta->products->product->precio != strtod (PUT (precio_discrecional),(char **)NULL))
 	    {
 	      precio = strtod (PUT (precio_discrecional),  (char **)NULL);
 	      
@@ -952,6 +1183,8 @@ AgregarProducto (GtkButton *button, gpointer data)
 
 	      //Costo neto + impuestos
 	      costo_neto *= (1 + otros + iva);
+	      //Precio neto (precio de venta sin iva)
+	      precio_neto = precio / (1 + otros + iva);
 
 	      if (precio < costo_neto)
 		{
@@ -973,13 +1206,26 @@ AgregarProducto (GtkButton *button, gpointer data)
 		precio = venta->product_check->product->precio_mayor;
 	      else
 		precio = venta->product_check->product->precio;
+
+	      //Se obtienen los impuestos
+	      iva = GetIVA (barcode);
+	      iva = (iva > 0) ? iva / 100 : 0;
+	      otros = GetOtros (barcode);
+	      otros = (otros > 0) ? otros / 100 : 0;
+
+	      //precio venta sin impuetos
+	      precio_neto = precio / (1 + otros + iva);
 	    }
+
+	  venta->product_check->product->precio_neto = precio_neto;
 
 	  venta->product_check->product->cantidad += cantidad;
           gtk_list_store_set (venta->store, &venta->product_check->product->iter,
                               2, g_strdup_printf ("%.3f", venta->product_check->product->cantidad),
-                              3, precio,
-                              4, lround (venta->product_check->product->cantidad * precio),
+                              3, precio_neto,
+                              4, lround (venta->product_check->product->cantidad * precio_neto),
+			      5, precio,
+                              6, lround (venta->product_check->product->cantidad * precio),
                               -1);
         }
 
@@ -4137,7 +4383,7 @@ nullify_sale_win (void)
                                           G_TYPE_INT,    //barcode
                                           G_TYPE_STRING, //description
                                           G_TYPE_DOUBLE, //cantity
-                                          G_TYPE_INT,    //price
+                                          G_TYPE_DOUBLE, //price
                                           G_TYPE_INT,    //subtotal
                                           G_TYPE_INT,    //id (detail)
                                           G_TYPE_INT);   //id_venta
@@ -4173,6 +4419,7 @@ nullify_sale_win (void)
                                                         "text", 3,
                                                         NULL);
       gtk_tree_view_append_column (treeview_details, column);
+      gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
       //subtotal
       renderer = gtk_cell_renderer_text_new();
@@ -4397,7 +4644,7 @@ on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer dat
                           0, atoi(PQvaluebycol(res, i, "barcode")),
                           1, PQvaluebycol(res, i, "descripcion"),
                           2, strtod(PUT(PQvaluebycol(res, i, "cantidad")), (char **)NULL),
-                          3, atoi(PQvaluebycol(res, i, "precio")),
+                          3, strtod(PUT(PQvaluebycol(res, i, "precio")), (char **)NULL),
                           4, atoi(PQvaluebycol(res, i, "subtotal")),
                           5, atoi(PQvaluebycol(res, i, "id")),
                           6, atoi(PQvaluebycol(res, i, "id_venta")),
@@ -4490,6 +4737,8 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
   gint monto;
   gint tipo_venta, tipo_pago1, tipo_pago2;
 
+  gdouble iva, otros;
+
   //gboolean is_credit_sell;
   
   PGresult *res;
@@ -4547,6 +4796,9 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
               AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), strtod (PUT (PQvaluebycol (res, i, "amount")), (char **)NULL));
 
               venta->products->product->precio = atoi (PQvaluebycol (res, i, "price"));
+	      iva = (gdouble)venta->products->product->iva / 100;
+	      otros = (gdouble)venta->products->product->otros / 100;
+	      venta->products->product->precio_neto = (venta->products->product->precio / (1 + otros + iva));
 
               gtk_list_store_insert_after (sell, &iter, NULL);
               gtk_list_store_set (sell, &iter,
@@ -4557,8 +4809,10 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
 						      venta->products->product->contenido,
 						      venta->products->product->unidad),
                                   2, g_strdup_printf ("%.3f", venta->products->product->cantidad),
-                                  3, venta->products->product->precio,
-                                  4, lround (venta->products->product->cantidad * venta->products->product->precio),
+				  3, venta->products->product->precio_neto,
+                                  4, lround (venta->products->product->cantidad * venta->products->product->precio_neto),
+                                  5, venta->products->product->precio,
+                                  6, lround (venta->products->product->cantidad * venta->products->product->precio),
                                   -1);
 
               venta->products->product->iter = iter;

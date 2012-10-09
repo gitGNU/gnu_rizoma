@@ -4080,7 +4080,9 @@ CheckDocumentData (GtkWidget *wnd, gboolean invoice, gchar *rut_proveedor, gint 
         }
       else
         {
-          if (DataExist (g_strdup_printf ("SELECT num_factura FROM factura_compra WHERE rut_proveedor='%s' AND num_factura=%s", rut_proveedor, n_documento)) == TRUE)
+          if (DataExist (g_strdup_printf ("SELECT num_factura FROM factura_compra "
+					  "WHERE rut_proveedor='%s' AND num_factura=%s "
+					  "AND id NOT IN (SELECT id_factura_compra FROM compra_anulada)", rut_proveedor, n_documento)) == TRUE)
             {
               ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_int_ingress_factura_n")), 
 			g_strdup_printf ("Ya existe la factura %s ingresada de este proveedor", n_documento));
@@ -5112,7 +5114,7 @@ create_new_merchandise (gchar *tipo)
   gtk_entry_set_max_length (GTK_ENTRY (barcode_w), 18);
   gtk_entry_set_max_length (GTK_ENTRY (codigo_corto_w), 16);
   gtk_entry_set_max_length (GTK_ENTRY (marca_w), 20);
-  gtk_entry_set_max_length (GTK_ENTRY (descripcion_w), 25);
+  gtk_entry_set_max_length (GTK_ENTRY (descripcion_w), 35);
   gtk_entry_set_max_length (GTK_ENTRY (contenido_w), 10);
 
   gtk_widget_show_all (ventana);

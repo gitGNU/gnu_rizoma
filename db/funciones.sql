@@ -424,6 +424,7 @@ create or replace function select_producto (OUT barcode int8,
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio double precision,
+					    OUT precio_neto double precision,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -449,7 +450,7 @@ declare
 	materia_prima int4;
 begin
 query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
-      	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
+      	     	    unidad, stock, precio, precio_neto, costo_promedio, vendidos, impuestos,
 		    otros, familia, perecibles, margen_promedio, dias_stock,
 		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor,
@@ -475,6 +476,7 @@ FOR list IN EXECUTE query LOOP
     END IF;
 
     precio := list.precio;
+    precio_neto := list.precio_neto;
 
     -- Si la mercadería es derivada, calcula su costo promedio a partir del costo de sus componentes
     IF list.tipo != corriente AND list.tipo != materia_prima THEN
@@ -582,6 +584,7 @@ CREATE OR REPLACE FUNCTION informacion_producto( IN codigo_barras bigint,
 		OUT unidad varchar(10),
 		OUT stock double precision,
 		OUT precio double precision,
+		OUT precio_neto double precision,
 		OUT costo_promedio double precision,
 		OUT stock_min double precision,
 		OUT dias_stock double precision,
@@ -645,6 +648,7 @@ FOR datos IN EXECUTE query LOOP
     END IF;
 
     precio := datos.precio;
+    precio_neto := datos.precio;
 
     -- Costo_promedio de los compuestos debería estar en el producto mismo?
     IF datos.tipo != corriente AND datos.tipo != materia_prima THEN
@@ -733,6 +737,7 @@ create or replace function buscar_productos(IN expresion varchar(255),
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio float8,
+					    OUT precio_neto float8,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -758,7 +763,7 @@ declare
 	materia_prima int4;
 begin
 query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido,
-      	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
+      	     	    unidad, stock, precio, precio_neto, costo_promedio, vendidos, impuestos,
 		    otros, familia, perecibles, margen_promedio, 
 		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, dias_stock,
@@ -787,6 +792,7 @@ FOR list IN EXECUTE query LOOP
     END IF;
 
     precio := list.precio;
+    precio_neto := list.precio_neto;
 
     -- Si la mercadería es derivada, calcula su costo promedio a partir del costo de sus componentes
     IF list.tipo != corriente AND list.tipo != materia_prima THEN
@@ -830,6 +836,7 @@ create or replace function select_producto( IN prod_barcode int8,
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio double precision,
+					    OUT precio_neto double precision,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -855,7 +862,7 @@ declare
 	materia_prima int4;
 begin
 query := $S$ SELECT codigo_corto, barcode, descripcion, marca, contenido,
-      	     	    unidad, stock, precio, costo_promedio, vendidos, impuestos,
+      	     	    unidad, stock, precio, precio_neto, costo_promedio, vendidos, impuestos,
 		    otros, familia, perecibles, margen_promedio,
 		    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min,
 		    fraccion, canje, stock_pro, tasa_canje, precio_mayor, dias_stock,
@@ -882,6 +889,7 @@ FOR list IN EXECUTE query LOOP
     END IF;
 
     precio := list.precio;
+    precio_neto := list.precio_neto;
 
     -- Si la mercadería es derivada, calcula su costo promedio a partir del costo de sus componentes
     IF list.tipo != corriente AND list.tipo != materia_prima THEN
@@ -1493,8 +1501,9 @@ end; $$ language plpgsql;
 -- SELECT * FROM insertar_detalle_compra(5646, 1.00::double precision, 191.00::double precision, 300, 0::double precision, 0::smallint, 7654321, 20, 36, 23);
 CREATE OR REPLACE FUNCTION insertar_detalle_compra (IN id_compra_in integer,
 		  	   			    IN cantidad double precision,
-						    IN precio double precision,
+						    IN costo double precision,
 						    IN precio_venta double precision,
+						    IN precio_neto double precision,
 						    IN cantidad_ingresada double precision,
 						    IN descuento smallint,
 						    IN barcode_product bigint,
@@ -1516,12 +1525,13 @@ else -- en caso contrario se saca el mayor id ingresado para el id_compra dado y
    aux := aux + 1;
 end if;
 
-q := $S$INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos) VALUES ($S$
+q := $S$INSERT INTO compra_detalle(id, id_compra, cantidad, precio, precio_venta, precio_neto, cantidad_ingresada, descuento, barcode_product, margen, iva, otros_impuestos) VALUES ($S$
   || aux || $S$,$S$
   || id_compra_in || $S$,$S$
   || cantidad || $S$,$S$
-  || precio || $S$,$S$
+  || costo || $S$,$S$
   || precio_venta || $S$,$S$
+  || precio_neto || $S$,$S$
   || cantidad_ingresada || $S$,$S$
   || descuento || $S$,$S$
   || barcode_product || $S$,$S$
@@ -2093,6 +2103,7 @@ create or replace function registrar_venta_detalle(
        in in_barcode bigint,
        in in_cantidad double precision,
        in in_precio double precision, --precio de venta (proporcional en caso de descuento)
+       in in_precio_neto double precision, --precio de venta neto (proporcional en caso de descuento)
        in in_fifo double precision,
        in in_iva double precision,
        in in_otros double precision,
@@ -2138,6 +2149,7 @@ begin
 				  barcode,
 				  cantidad,
 				  precio,
+				  precio_neto,
 				  fifo,
 				  iva,
 				  otros,
@@ -2153,6 +2165,7 @@ begin
 			   in_barcode,
 			   in_cantidad,
 			   in_precio,
+			   in_precio_neto,
 			   in_fifo,
 			   in_iva,
 			   in_otros,
@@ -2213,6 +2226,7 @@ create or replace function buscar_producto (IN expresion varchar(255),
 					    OUT unidad varchar(10),
 					    OUT stock float8,
 					    OUT precio float8,
+					    OUT precio_neto float8,
 					    OUT costo_promedio float8,
 					    OUT vendidos float8,
 					    OUT impuestos bool,
@@ -2243,7 +2257,7 @@ begin
 	materia_prima := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA');
 
 	query := $S$ SELECT barcode, codigo_corto, marca, descripcion, contenido, unidad, stock, costo_promedio,
-	      	     	    precio, vendidos, impuestos, otros, familia, perecibles,
+	      	     	    precio, precio_neto, vendidos, impuestos, otros, familia, perecibles,
 			    (SELECT nombre FROM tipo_mercaderia WHERE id = tipo) AS tipo_mercaderia,
 			    COALESCE ((dias_stock * select_ventas_dia(producto.barcode, TRUE)::float), 0) AS stock_min, 
 			    margen_promedio, fraccion, canje, stock_pro, dias_stock,
@@ -2286,6 +2300,7 @@ begin
             END IF;
 
 	    precio := list.precio;
+	    precio_neto := list.precio_neto;
 
 	    IF list.tipo != corriente AND list.tipo != materia_prima THEN
 		costo_promedio := (SELECT costo FROM obtener_costo_promedio_desde_barcode (barcode));
@@ -4126,7 +4141,7 @@ CREATE OR REPLACE FUNCTION get_sale_detail (IN sale_id int,
        	  	  	   		    IN solo_componentes boolean,
           	  	   		    OUT barcode bigint,
 					    OUT tipo int,
-        				    OUT price int,
+        				    OUT price double precision,
         				    OUT amount double precision)
 RETURNS SETOF record AS $$
 DECLARE
@@ -4138,7 +4153,7 @@ DECLARE
 	-----------------
 	corriente_l int4;     -- id tipo corriente
 	compuesta_l int4;     -- id compuesta
-	materia_prima_l int4; -- id tipo materia prima	
+	materia_prima_l int4; -- id tipo materia prima
 	derivada_l int4;      -- id tipo derivada
 BEGIN
 	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';

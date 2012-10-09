@@ -38,7 +38,7 @@ CreateNew (gchar *barcode, gdouble cantidad)
   gchar *q;
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, otros, familia, impuestos, fraccion, "
-                       "unidad, COALESCE(precio, 0) AS precio, margen_promedio, tipo, "
+                       "unidad, COALESCE(precio, 0) AS precio, COALESCE(precio_neto, 0) AS precio_neto, margen_promedio, tipo, "
 		       "(SELECT costo FROM obtener_costo_promedio_desde_barcode (%s)) AS costo_promedio, "
                        "(SELECT monto FROM impuesto WHERE id=1 AND producto.impuestos='t') as impuesto_normal, "
                        "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
@@ -59,6 +59,8 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->contenido = atoi (PQvaluebycol (res, 0, "contenido"));
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
   new->product->precio = strtod (PUT (PQvaluebycol (res, 0, "precio")), (char **)NULL);
+  new->product->precio_neto = strtod (PUT (PQvaluebycol (res, 0, "precio_neto")), (char **)NULL);
+  //new->product->precio_neto = new->product->precio / (new->product->iva/100 + new->product->otros/100 + 1)
   new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
   new->product->precio_compra = GetNeto (barcode);
   new->product->iva = strtod (PUT (PQvaluebycol (res, 0, "impuesto_normal")), (char **)NULL);
@@ -420,7 +422,7 @@ CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble
   new->product->iva = GetIVA (barcode);
   new->product->otros = GetOtros (barcode);
   new->product->precio = precio_final;
-  new->product->precio_neto = (double)precio_compra * ((double)(margen / 100) + 1); //Precio venta neto
+  new->product->precio_neto = precio_final / (new->product->iva/100 + new->product->otros/100 + 1); //Precio venta neto
   new->product->precio_compra = precio_compra;
   new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
   new->product->ingresar = TRUE;
