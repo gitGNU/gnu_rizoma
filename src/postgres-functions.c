@@ -760,6 +760,49 @@ exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
     return NULL;
 }
 
+
+PGresult *
+inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar *max_avg_sell, gchar *max_unid_sell)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT barcode, codigo_corto, (descripcion||' '||marca||' '||cont_un) AS descripcion, "
+		       "       stock_inicial, stock_teorico, "
+	               "       (ventas_periodo-anulaciones_periodo) AS unidades_vendidas, "
+		       "       ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) AS porcentaje_vendido, "
+		       "       (SELECT precio FROM producto WHERE producto.barcode = barcode) AS precio, "
+		       "       (SELECT * FROM obtener_costo_promedio_desde_barcode (barcode::bigint)) AS costo_promedio "
+		       "FROM producto_en_periodo ('%.4d-%.2d-%.2d') ",
+		       from_year, from_month, from_day);
+
+  /*Se aplica a la un filtro a la consulta*/
+  if (!g_str_equal (max_unid_sell, "") || !g_str_equal (max_avg_sell, ""))
+    {
+      q = g_strdup_printf ("%s WHERE ", q);
+      
+      if (!g_str_equal (max_unid_sell, "") && g_str_equal (max_avg_sell, ""))
+	q = g_strdup_printf ("%s (ventas_periodo-anulaciones_periodo) < %s", q, CUT(max_unid_sell));
+      else if (g_str_equal (max_unid_sell, "") && !g_str_equal (max_avg_sell, ""))
+	q = g_strdup_printf ("%s ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) < %s ", q, CUT(max_avg_sell));
+      else
+	q = g_strdup_printf ("%s ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) < %s "
+			     "OR (ventas_periodo-anulaciones_periodo) < %s", q, CUT(max_avg_sell), CUT(max_unid_sell));
+    }
+
+  /*Los datos se ordenan por su porcentaje de venta*/
+  q = g_strdup_printf ("%s "
+		       "ORDER BY ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) ASC", q);
+
+  res = EjecutarSQL (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
 gint
 GetTotalCashSell (guint from_year, guint from_month, guint from_day,
                   guint to_year, guint to_month, guint to_day, gint *total)

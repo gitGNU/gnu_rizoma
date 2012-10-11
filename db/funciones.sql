@@ -3550,7 +3550,7 @@ END; $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION insert_egreso (
-       IN in_monto int,
+       IN in_monto float8,
        IN in_tipo int,
        IN in_usuario int)
 RETURNS int AS $$
@@ -3843,7 +3843,7 @@ declare
         query text;
 	l record;
 	----------------------
-        sale_amount integer;
+        sale_amount float8;
         id_tipo_egreso integer;
 	----------------------
 	tipo_pago integer;
@@ -4761,6 +4761,7 @@ create or replace function producto_en_fecha(
        out codigo_corto varchar,
        out descripcion varchar,
        out marca varchar,
+       out cont_un varchar,
        out familia integer,
        out cantidad_ingresada double precision,
        out cantidad_c_anuladas double precision,
@@ -4928,7 +4929,8 @@ for l in execute q loop
     barcode := l.barcode;
     codigo_corto := l.codigo_corto;
     marca := l.marca;
-    descripcion := l.descripcion ||' '|| l.contenido ||' '|| l.unidad;
+    descripcion := l.descripcion;
+    cont_un := l.contenido ||' '|| l.unidad;
     familia := l.familia;
     cantidad_ingresada := COALESCE (l.cantidad_ingresada,0);
     cantidad_c_anuladas := COALESCE(l.cantidad_c_anuladas,0);
@@ -4954,6 +4956,7 @@ create or replace function producto_en_periodo(
        out codigo_corto varchar,
        out descripcion varchar,
        out marca varchar,
+       out cont_un varchar,
        out familia integer,
        out stock_inicial double precision,
        out compras_periodo double precision,
@@ -4976,9 +4979,10 @@ BEGIN
 
 q := $S$ SELECT stock1.barcode AS barcode,
 	        stock1.codigo_corto AS codigo_corto,
-       	 	stock1.marca AS marca,
-		stock1.familia AS familia,
        	 	stock1.descripcion AS descripcion,
+		stock1.marca AS marca,
+		stock1.cont_un AS cont_un,
+		stock1.familia AS familia,
 
 		-- Los mismos datos de distintas fechas --
        	 	-- stock inicial
@@ -5025,6 +5029,7 @@ FOR l IN EXECUTE q loop
     marca := l.marca;
     familia := l.familia;
     descripcion := l.descripcion;
+    cont_un := l.cont_un;
     stock_inicial := l.stock1_cantidad_fecha;  -- cantidad_fecha = stock con el que se inicio el día seleccionado (ESTE SE MANTIENE)
     compras_periodo := l.stock2_cantidad_ingresada - l.stock1_cantidad_ingresada;
     anulaciones_c_periodo := l.stock2_cantidad_c_anuladas - l.stock1_cantidad_c_anuladas;

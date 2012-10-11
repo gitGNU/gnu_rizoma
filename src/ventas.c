@@ -1075,8 +1075,7 @@ AgregarProducto (GtkButton *button, gpointer data)
 
 	  precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 	  if ( atoi (rizoma_get_value ("PRECIO_DISCRECIONAL")) == 1 && 
-	       is_numeric (precio_discrecional) && 
-	       venta->products->product->precio != strtod (PUT (precio_discrecional),(char **)NULL) )
+	       is_numeric (precio_discrecional) )
 	    {
 	      precio = strtod (PUT (precio_discrecional),  (char **)NULL);
 	      
