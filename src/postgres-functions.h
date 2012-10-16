@@ -83,6 +83,8 @@ gint InsertDeuda (gint id_venta, gint rut, gint vendedor);
 
 gint DeudaTotalCliente (gint rut);
 
+gboolean tiene_limite_credito (gint rut);
+
 PGresult * SearchDeudasCliente (gint rut);
 
 PGresult * search_deudas_guias_facturas_cliente (gint rut, gchar *filtro, gint tipo_documento);

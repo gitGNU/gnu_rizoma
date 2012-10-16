@@ -576,7 +576,7 @@ on_precio_neto_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar
 			  0, "barcode");
 
 
-  precio_neto = strtod (PUT (precio_neto_t),  (char **)NULL);
+  precio_neto = strtod (PUT (precio_neto_t), (char **)NULL);
 	      
   costo_neto = obtener_costo_promedio (barcode);
   ganancia_minima = (ganancia_minima > 0) ? (ganancia_minima/100)+1 : 1;
@@ -2978,7 +2978,8 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
+  if (tiene_limite_credito ( atoi (strtok (str_rut,"-")) ) &&
+      LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_credit_out")));
       return;
@@ -3429,7 +3430,8 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
+  if (tiene_limite_credito ( atoi (strtok (str_rut,"-")) ) &&
+      LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
       widget = gtk_widget_get_ancestor(GTK_WIDGET(button),GTK_TYPE_WINDOW);
       ErrorMSG (widget, "El cliente sobrepasa su limite de Credito");
@@ -3834,7 +3836,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   //Se registra la venta -- TODO: solo se le esta pasando el primer cliente, ver bien el asunto cuando es mixto
   SaveSell (total, maquina, vendedor, MIXTO, rut_cuenta1, "0", ticket, tipo_documento,
   	    NULL, FALSE, TRUE);
-      
+
   //Se cierra y limpia todo
   CleanEntryAndLabelData();
   ListClean (); //Se debe ejecutar antes de vaciar la lista de venta (la estructura)
@@ -3843,7 +3845,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
 			g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_ticket_number (SIMPLE)-1)); //antes get_last_sell_id ()
-      
+
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_mixed_pay_step2")));
 

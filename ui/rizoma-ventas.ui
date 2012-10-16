@@ -3233,6 +3233,165 @@
       </object>
     </child>
   </object>
+  <object class="GtkWindow" id="wnd_reserva">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">POS Rizoma Comercio: Realizar Pedido</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-always</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="transient_for">tipo_venta_win_venta</property>
+    <child>
+      <object class="GtkVBox" id="vbox6_reserva">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkTable" id="table7_reserva">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="n_rows">4</property>
+            <property name="n_columns">2</property>
+            <property name="column_spacing">5</property>
+            <property name="row_spacing">5</property>
+            <child>
+              <object class="GtkLabel" id="label31_reserva">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes" context="yes">Rut:</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label32_reserva">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes" context="yes">Nombre:</property>
+              </object>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label33_reserva">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes" context="yes">Dirección:</property>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label34_reserva">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes" context="yes">Fono:</property>
+              </object>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="lbl_reserva_client_phone">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="lbl_reserva_client_addr">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="lbl_reserva_client_name">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entry_reserva_rut">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">●</property>
+                <property name="invisible_char_set">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox6_reserva">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton" id="btn_cancel_reserva">
+                <property name="label" context="yes">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btn_reserva_ok">
+                <property name="label" translatable="yes">Realizar Pedido</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="wnd_sale_check">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -5060,6 +5219,24 @@
               </packing>
             </child>
             <child>
+              <object class="GtkButton" id="btn_realizar_pedido">
+                <property name="label" translatable="yes">Realizar Pedido</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="gtk_widget_show" object="wnd_reserva" swapped="yes"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
               <object class="GtkButton" id="btn_cash_box_close">
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5101,7 +5278,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">4</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -5147,14 +5324,8 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">5</property>
+                <property name="position">7</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
             <child>
               <object class="GtkHBox" id="hbox30">

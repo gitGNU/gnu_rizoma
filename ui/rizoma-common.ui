@@ -405,7 +405,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
               <object class="GtkLabel" id="label23">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">*Limite de Credito:</property>
+                <property name="label" translatable="yes">Limite de Credito:</property>
               </object>
               <packing>
                 <property name="top_attach">7</property>

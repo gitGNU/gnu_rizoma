@@ -11062,7 +11062,6 @@
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_wnd_nullify_buy_close" swapped="no"/>
-                <signal name="clicked" handler="clean_container" object="wnd_nullify_buy" swapped="yes"/>
               </object>
               <packing>
                 <property name="expand">False</property>

@@ -1936,8 +1936,8 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
     AlertMSG (wnd, "El campo giro no puede estar vacío");
   else if (RutExist (rut) == TRUE)
     AlertMSG (wnd, "Ya existe alguien con el mismo rut");
-  else if (credito == 0)
-    AlertMSG (wnd, "El campo credito no puede estar vacío");
+  /*else if (credito == 0)
+    AlertMSG (wnd, "El campo credito no puede estar vacío");*/
   else
     {
       if (VerificarRut (rut, ver) == TRUE)
@@ -3042,8 +3042,8 @@ facturar_cheque_restaurant (void)
      AlertMSG (widget, "El campo telefonico no puede estar vacío");
    else if (strcmp (giro, "") == 0)
      AlertMSG (widget, "El campo giro no puede estar vacío");
-   else if (credito == 0)
-     AlertMSG (widget, "El campo credito no puede estar vacío");
+   /*else if (credito == 0)
+     AlertMSG (widget, "El campo credito no puede estar vacío");*/
    else
      {
        if (VerificarRut (rut[0], rut[1]))

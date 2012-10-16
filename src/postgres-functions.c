@@ -999,6 +999,22 @@ DeudaTotalCliente (gint rut)
   return deuda;
 }
 
+
+gboolean
+tiene_limite_credito (gint rut)
+{
+  PGresult *res;
+
+  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente "
+				      "WHERE rut=%d", rut));
+
+  if (atoi (PQgetvalue (res, 0, 0)) == 0)
+    return FALSE;
+  else
+    return TRUE;
+}
+
+
 PGresult *
 SearchDeudasCliente (gint rut)
 {
@@ -1236,7 +1252,11 @@ CreditoDisponible (gint rut)
 
   credito = atoi (PQgetvalue (res, 0, 0));
 
-  return credito - DeudaTotalCliente (rut);
+  // Si credito es 0, no tiene limite de credito
+  if (credito == 0)
+    return 0;
+  else
+    return credito - DeudaTotalCliente (rut);
 }
 
 gchar *

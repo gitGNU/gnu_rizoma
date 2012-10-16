@@ -358,12 +358,14 @@ on_buy_price_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_string
  * @param: widget
  * @param: data
  */
-void
+gboolean
 on_wnd_nullify_buy_close (GtkWidget *widget, gpointer data)
 {
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_nullify_buy")));
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_nullify_buy")));
   //Si existe algo en la estructura "lista_mod_prod" se limpia
   clean_lista_mod_prod ();
+  return TRUE;
 }
 
 /**
@@ -1852,7 +1854,7 @@ compras_win (void)
 
   g_signal_connect (G_OBJECT (builder_get (builder, "btn_new_product")), "leave-notify-event",
 		    G_CALLBACK (show_default), NULL);
-    g_signal_connect (G_OBJECT (builder_get (builder, "btn_new_offer")), "leave-notify-event",
+  g_signal_connect (G_OBJECT (builder_get (builder, "btn_new_offer")), "leave-notify-event",
 		    G_CALLBACK (show_default), NULL);
   g_signal_connect (G_OBJECT (builder_get (builder, "btn_new_mp")), "leave-notify-event",
   		    G_CALLBACK (show_default), NULL);
@@ -2506,6 +2508,9 @@ poblar_pedido_temporal (void)
 
       add_to_buy_struct (barcode, cantidad, precio_compra, margen, precio);
     }
+
+  if (tuples > 0)
+    gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "button_buy")), TRUE);
 }
 
 void
