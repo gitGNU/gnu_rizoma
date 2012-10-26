@@ -289,7 +289,19 @@ on_notebook1_switch_page (GtkNotebook *notebook,
   switch (page_num)
     {
     case 0:
+      //Pestaña "Usuarios"
       FillUsers();
-    }
+      break;
+    
+    case 4:
+      // Pestaña "Clientes" (Deudas por credito)
+      client_type = CREDIT;
+      break;
 
+    case 5:
+      // Pestaña "Guias/Facturas" (Facturas y guias por pagar)
+      client_type = INVOICE;
+      break;
+      
+    }
 }

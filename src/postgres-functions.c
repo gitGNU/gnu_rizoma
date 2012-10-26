@@ -677,6 +677,75 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 }
 
 
+
+/**
+ *
+ *
+ */
+gboolean
+registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_entrega)
+{
+  gchar *q;
+  gint id_reserva;
+  gint monto;
+
+  id_reserva = 0;
+  monto = CalcularTotal (venta->header);
+
+  q = g_strdup_printf ("INSERT INTO reserva (id, monto, fecha, fecha_entrega, maquina, vendedor, rut_cliente, vendido) "
+		       "VALUES (DEFAULT, %d, NOW(), to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY'), %d, %d, %d, FALSE) RETURNING id", 
+		       monto, g_date_get_day(fecha_entrega), g_date_get_month(fecha_entrega), g_date_get_year(fecha_entrega),
+		       maquina, vendedor, rut_cliente);
+  
+  id_reserva = atoi (GetDataByOne (q));
+
+  if (id_reserva > 0 && registrar_reserva_detalle (id_reserva))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+/**
+ *
+ *
+ */
+gboolean
+registrar_reserva_detalle (gint id_reserva)
+{
+  gchar *q;
+  Productos *products = venta->header;
+  gdouble precio;
+
+  if (id_reserva <= 0)
+    return FALSE;
+
+  do
+    {
+      if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 &&
+	  products->product->cantidad >= products->product->cantidad_mayorista &&
+	  products->product->mayorista == TRUE)
+	precio = products->product->precio_mayor;
+      else
+	precio = products->product->precio;
+
+      
+      q = g_strdup_printf ("INSERT INTO reserva_detalle (id, id_reserva, barcode, cantidad, precio, precio_neto, costo_promedio) "
+			   "VALUES (DEFAULT, %d, %s, %s, %s, %s, %s)",
+			   id_reserva,
+			   products->product->barcode,
+			   CUT (g_strdup_printf ("%.3f", products->product->cantidad)),
+			   CUT (g_strdup_printf ("%.3f", precio)),
+			   CUT (g_strdup_printf ("%.3f", products->product->precio_neto)),
+			   CUT (g_strdup_printf ("%.3f", products->product->fifo)));
+      EjecutarSQL (q);
+    } while (products != venta->header);
+
+  return TRUE;
+}
+
+
+
 /**
  * This function returns a PGresult with the sells
  * If anuladas parameter is NULL return all sells,
@@ -913,15 +982,17 @@ GetTotalSell (guint from_year, guint from_month, guint from_day,
 
 gboolean
 InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-              gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean cliente_facturacion)
+              gchar *direccion, gchar *fono, gint credito, gchar *giro, gint client_type)
 {
   PGresult *res;
   gchar *q;
   gchar *tipo;
 
-  if (cliente_facturacion == TRUE)
+  if (client_type == INVOICE)
     tipo = g_strdup ("factura");
-  else
+  else if (client_type == CREDIT)
+    tipo = g_strdup ("credito");
+  else //Si por algún motivo esta seteada la bandera de ALL o cualquier otra cosa, lo tomará como credito
     tipo = g_strdup ("credito");
 
   q = g_strdup_printf ("INSERT INTO cliente (rut, dv, nombre, apell_p, apell_m, giro, abonado, direccion, telefono, credito, tipo) "
@@ -1910,7 +1981,7 @@ GetCurrentStock (gchar *barcode)
   PGresult *res;
   gdouble stock;
 
-  res = EjecutarSQL (g_strdup_printf ("SELECT stock FROM select_producto (%s)", barcode));
+  res = EjecutarSQL (g_strdup_printf ("SELECT disponible FROM obtener_stock_desde_barcode (%s)", barcode));
 
   stock = strtod (PUT(PQgetvalue (res, 0, 0)), (char **)NULL);
 
@@ -2202,7 +2273,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 			   CUT (g_strdup_printf ("%.3f", products->product->cantidad)),
 			   CUT (g_strdup_printf ("%.3f", precio)),
 			   CUT (g_strdup_printf ("%.3f", precio_neto)),
-			   CUT (g_strdup_printf ("%.3f",products->product->fifo)),
+			   CUT (g_strdup_printf ("%.3f", products->product->fifo)),
 			   CUT (g_strdup_printf ("%.3f", iva)),
 			   CUT (g_strdup_printf ("%.3f", otros)),
 			   CUT (g_strdup_printf ("%.3f", iva_residual)),

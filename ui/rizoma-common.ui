@@ -349,7 +349,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Agregar Cliente</property>
     <property name="window_position">center-always</property>
-    <signal name="delete-event" handler="CloseAddClientWindow" swapped="no"/>
+    <signal name="delete-event" handler="CloseClientWindow" object="wnd_addclient" swapped="yes"/>
     <child>
       <object class="GtkVBox" id="vbox2">
         <property name="visible">True</property>
@@ -618,7 +618,7 @@ Jonathan Gonzalez V. &lt;jonathan@rizoma.cl&gt;</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <accelerator key="Escape" signal="clicked"/>
-                <signal name="clicked" handler="CloseAddClientWindow" swapped="no"/>
+                <signal name="clicked" handler="CloseClientWindow" object="wnd_addclient" swapped="yes"/>
               </object>
               <packing>
                 <property name="expand">False</property>

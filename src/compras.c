@@ -459,7 +459,7 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
   else
     return;
   
-  /*Se agrega a la lista de los productos modificados*/  
+  /*Se agrega a la lista de los productos modificados*/
 
   //Se verifica si ya existe en la lista
   if (lista_mod_prod->header != NULL)
@@ -518,10 +518,9 @@ on_mod_buy_cantity_cell_renderer_edited (GtkCellRendererText *cell, gchar *path_
 
   /* SI se agregan unidades es modificable sin necesidad de realizar una comprobación
      SINO Si el producto existe en esta factura se realiza una comprobación mas
-     De no existir en la factura es modificable pues no tiene datos historicos en esa factura
-  */
+     De no existir en la factura es modificable pues no tiene datos historicos en esa factura */
   if (new_cantity > original_cantity)
-    modificable = 1;  
+    modificable = 1;
   else if (DataExist (g_strdup_printf ("SELECT barcode FROM factura_compra_detalle WHERE id_factura_compra = %d", id_fc)))
     modificable = cantidad_compra_es_modificable (barcode, new_cantity, id_fc);
   else
@@ -4402,10 +4401,10 @@ CalcularTotales (void)
       total_neto += total;
 
       if (iva != 0)
-	total_iva += lround (total * (gdouble) iva / 100);
+	total_iva += (total * (gdouble) iva / 100);
 
       if (otros != 0)
-	total_otros += lround (total * (gdouble) otros / 100);
+	total_otros += (total * (gdouble) otros / 100);
 
       products = products->next;
     } while (products != compra->header);
@@ -4413,13 +4412,13 @@ CalcularTotales (void)
   total = total_neto + total_otros + total_iva;
 
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_net_total")),
-                      PutPoints (g_strdup_printf ("%li", lround (total_neto))));
+                      PutPoints (g_strdup_printf ("%ld", lround (total_neto))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_task_total")),
-                      PutPoints (g_strdup_printf ("%li", lround (total_iva))));
+                      PutPoints (g_strdup_printf ("%ld", lround (total_iva))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_other_task_total")),
-                      PutPoints (g_strdup_printf ("%lu", lround (total_otros))));
+                      PutPoints (g_strdup_printf ("%ld", lround (total_otros))));
   gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "label_pending_total")),
-                      PutPoints (g_strdup_printf ("%li", lround (total))));
+                      PutPoints (g_strdup_printf ("%ld", lround (total))));
   
   selection = gtk_tree_view_get_selection (treeview);
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))

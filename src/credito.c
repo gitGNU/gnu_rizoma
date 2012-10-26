@@ -41,7 +41,7 @@
 #include"caja.h"
 
 GtkWidget *modificar_window;
-gboolean cliente_facturacion=FALSE;
+
 /////////do not delete
 ///used for the print in the client and emisores tab
 Print *client_list;
@@ -80,6 +80,8 @@ fill_credit_data (const gchar *rut, const gchar *name, const gchar *address, con
   label = GTK_LABEL(gtk_builder_get_object(builder, "lbl_client_phone"));
   gtk_label_set_text(label, phone);
 
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_credit_sale")), TRUE);
+
   return;
 }
 
@@ -94,23 +96,37 @@ search_client (GtkWidget *widget, gpointer data)
   gchar *string;
   PGresult *res;
   gint tuples, i;
-  gchar *enable;
+  gchar *enable, *nombre_entry;
   gchar *q, *tipo;
 
   string = g_strdup (gtk_entry_get_text (GTK_ENTRY(widget)));
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_client_search")));
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_search_client")), string);
 
-  if (cliente_facturacion == TRUE)
-    tipo = g_strdup ("factura");
-  else
-    tipo = g_strdup ("credito");
+  nombre_entry = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
+  
+  if (g_str_equal (nombre_entry, "entry_invoice_rut"))
+    client_type = INVOICE;
+  else if  (g_str_equal (nombre_entry, "entry_credit_rut") ||
+	    g_str_equal (nombre_entry, "entry_rut_mixed_pay") ||
+	    g_str_equal (nombre_entry, "entry_rut_mixed_pay_2"))
+    client_type = CREDIT;
+  else if (g_str_equal (nombre_entry, "entry_reserva_rut"))
+    client_type = ALL;
+
+  //TODO: Debe haber uno para mostrar ambos
+  if (client_type == INVOICE)
+    tipo = g_strdup ("AND tipo = 'factura'");
+  else if (client_type == CREDIT)
+    tipo = g_strdup ("AND tipo = 'credito'");
+  else if (client_type == ALL)
+    tipo = g_strdup("");
 
   //ANTES: SELECT rut::varchar || '-' || dv, nombre || ' ' || apell_p, telefono, credito_enable, direccion
   q = g_strdup_printf ("SELECT rut, dv, nombre || ' ' || apell_p AS name, telefono, credito_enable, direccion "
                        "FROM cliente WHERE activo = 't' AND (lower(nombre) LIKE lower('%s%%') OR "
                        "lower(apell_p) LIKE lower('%s%%') OR lower(apell_m) LIKE lower('%s%%') OR "
-                       "rut::varchar like ('%s%%')) AND tipo = '%s'",
+                       "rut::varchar like ('%s%%')) %s",
                        string, string, string, string, tipo);
   res = EjecutarSQL (q);
   g_free (q);
@@ -123,18 +139,16 @@ search_client (GtkWidget *widget, gpointer data)
   if (store == NULL)
     {
       if (user_data->user_id == 1) // De ser admin adquiere la visibilidad de la columna credito
-	{
-	  store = gtk_list_store_new (4,
-				      G_TYPE_STRING,
-				      G_TYPE_STRING,
-				      G_TYPE_STRING,
-				      G_TYPE_BOOLEAN);
-	} else {
-	  store = gtk_list_store_new (3,
-				      G_TYPE_STRING,
-				      G_TYPE_STRING,
-				      G_TYPE_STRING);
-      }
+	store = gtk_list_store_new (4,
+				    G_TYPE_STRING,
+				    G_TYPE_STRING,
+				    G_TYPE_STRING,
+				    G_TYPE_BOOLEAN);
+      else 
+	store = gtk_list_store_new (3,
+				    G_TYPE_STRING,
+				    G_TYPE_STRING,
+				    G_TYPE_STRING);
 
       gtk_tree_view_set_model (GTK_TREE_VIEW(aux_widget),
                                GTK_TREE_MODEL(store));
@@ -191,7 +205,7 @@ search_client (GtkWidget *widget, gpointer data)
         }
       else
         gtk_list_store_set (store, &iter,
-                            0, g_strconcat (PQvaluebycol (res, i, "rut"), 
+                            0, g_strconcat (PQvaluebycol (res, i, "rut"),
 					    PQvaluebycol (res, i, "dv"), NULL),
                             1, PQvaluebycol (res, i, "name"),
                             2, PQvaluebycol (res, i, "telefono"),
@@ -1821,12 +1835,7 @@ AddClient (GtkWidget *widget, gpointer data)
 {
   GtkWidget *wnd;
   GtkWidget *aux;
-  gchar *button_name;
   
-  button_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
-  if (g_str_equal (button_name, "btn_add_gf_client"))
-    cliente_facturacion = TRUE;
-
   wnd = gtk_widget_get_toplevel(widget);
 
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "entry_client_rut"));
@@ -1858,13 +1867,13 @@ add_emisor (GtkWidget *widget, gpointer data)
 
 
 void
-CloseAddClientWindow (void)
+CloseClientWindow (GtkWindow *window, gpointer user_data)
 {
-  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_addclient")));
+  clean_container (GTK_CONTAINER (window));
 
-  gtk_widget_hide (GTK_WIDGET(gtk_builder_get_object(builder, "wnd_addclient")));
-  cliente_facturacion = FALSE;
+  gtk_widget_hide (GTK_WIDGET (window));
 }
+
 
 GtkWidget *
 caja_entrada (gchar *text, gint largo_maximo, gint ancho, GtkWidget *entry)
@@ -1942,19 +1951,17 @@ AgregarClienteABD (GtkWidget *widget, gpointer data)
     {
       if (VerificarRut (rut, ver) == TRUE)
         {
-          if (!(InsertClient (nombre, paterno, materno, rut, ver, direccion, fono, credito, giro, cliente_facturacion)))
+          if (!(InsertClient (nombre, paterno, materno, rut, ver, direccion, fono, credito, giro, client_type)))
             {
               ErrorMSG(wnd, "No fue posible agregar el cliente a la base de datos");
               return;
             }
           else
-            CloseAddClientWindow ();
+            CloseClientWindow (GTK_WINDOW (wnd), NULL);
         }
       else
         AlertMSG (wnd, "El Rut no es valido!!");
     }
-
-  cliente_facturacion = FALSE;
 }
 
 gboolean
@@ -3595,9 +3602,7 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
 			       rut, dv, rs, tel, dir, comuna, ciudad, giro, id);
 
 	  if (EjecutarSQL (q) != NULL)
-	    {	      
-	      statusbar_push (GTK_STATUSBAR(widget), "Se modificaron los datos con exito", 3000);
-	    }
+	    statusbar_push (GTK_STATUSBAR(widget), "Se modificaron los datos con exito", 3000);
 	  else
 	    ErrorMSG (widget, "No se puedo modificar el emisor de cheques");
 
@@ -3609,11 +3614,3 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
     }
 }
 
-/**
- * To set global FLAG
- */
-void 
-set_cliente_facturacion (gboolean cf)
-{
-  cliente_facturacion = cf;
-}

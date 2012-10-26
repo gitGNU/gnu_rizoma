@@ -24,6 +24,8 @@
 
 #define CREDITO_H
 
+enum tipo_cliente client_type;
+
 void fill_credit_data (const gchar *rut, const gchar *name, const gchar *address, const gchar *phone);
 
 void search_client (GtkWidget *widget, gpointer data);
@@ -33,7 +35,7 @@ void clientes_box ();
 
 void AddClient (GtkWidget *widget, gpointer data);
 
-void CloseAddClientWindow (void);
+void CloseClientWindow (GtkWindow *window, gpointer user_data);
 
 GtkWidget * caja_entrada (gchar *text, gint largo_maximo, gint ancho, GtkWidget *entry);
 
@@ -84,7 +86,5 @@ void emisores_box ();
 void abonos_box ();
 
 void guias_facturas_box ();
-
-void set_cliente_facturacion (gboolean cf);
 
 #endif

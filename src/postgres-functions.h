@@ -52,6 +52,10 @@ gboolean DeleteProduct (gchar *codigo);
 gint SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount,
                gint boleta, gint tipo_documento, gchar *cheque_date,  gboolean cheques, gboolean canceled);
 
+gboolean registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_entrega);
+
+gboolean registrar_reserva_detalle (gint id_reserva);
+
 PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
                                gint to_year, gint to_month, gint to_day,
                                gchar *date_column, gchar *fields, gchar *grupo);
@@ -75,7 +79,7 @@ gint GetTotalSell (guint from_year, guint from_month, guint from_day,
                    guint to_year, guint to_month, guint to_day, gint *total);
 
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
-                       gchar *direccion, gchar *fono, gint credito, gchar *giro, gboolean tipo);
+                       gchar *direccion, gchar *fono, gint credito, gchar *giro, gint client_type);
 
 gboolean RutExist (const gchar *rut);
 

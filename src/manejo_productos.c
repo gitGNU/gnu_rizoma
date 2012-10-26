@@ -39,12 +39,11 @@ CreateNew (gchar *barcode, gdouble cantidad)
 
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, otros, familia, impuestos, fraccion, "
                        "unidad, COALESCE(precio, 0) AS precio, COALESCE(precio_neto, 0) AS precio_neto, margen_promedio, tipo, "
-		       "(SELECT costo FROM obtener_costo_promedio_desde_barcode (%s)) AS costo_promedio, "
+		       "costo_promedio, stock, canje, stock_pro, precio_mayor, cantidad_mayor, mayorista, "
                        "(SELECT monto FROM impuesto WHERE id=1 AND producto.impuestos='t') as impuesto_normal, "
-                       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
-                       "canje, stock_pro, precio_mayor, cantidad_mayor, mayorista "
+                       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro "
                        "FROM select_producto(%s) as producto",
-                       barcode, barcode);
+                       barcode);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -59,10 +58,11 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->contenido = atoi (PQvaluebycol (res, 0, "contenido"));
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
   new->product->precio = strtod (PUT (PQvaluebycol (res, 0, "precio")), (char **)NULL);
+  new->product->precio_original = strtod (PUT (PQvaluebycol (res, 0, "precio")), (char **)NULL);
   new->product->precio_neto = strtod (PUT (PQvaluebycol (res, 0, "precio_neto")), (char **)NULL);
   //new->product->precio_neto = new->product->precio / (new->product->iva/100 + new->product->otros/100 + 1)
   new->product->fifo = strtod (PUT (PQvaluebycol (res, 0, "costo_promedio")), (char **)NULL); //TODO: Corregir nomenclatura. No es fifo
-  new->product->precio_compra = GetNeto (barcode);
+  new->product->precio_compra = GetNeto (barcode); //Ojo, puede relentizar la creación de este producto
   new->product->iva = strtod (PUT (PQvaluebycol (res, 0, "impuesto_normal")), (char **)NULL);
   new->product->otros = strtod (PUT (PQvaluebycol (res, 0, "impuesto_otro")), (char **)NULL);
   new->product->otros_id = atoi (PQvaluebycol (res, 0, "otros"));
@@ -71,10 +71,12 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->familia = atoi (PQvaluebycol (res, 0, "familia"));
   new->product->margen = strtod (PUT (PQvaluebycol (res, 0, "margen_promedio")), (char **)NULL);
   new->product->canjeable = atoi (PQvaluebycol (res, 0, "canje"));
+  new->product->stock = strtod (PUT (PQvaluebycol (res, 0, "stock")), (char **)NULL);
   new->product->stock_pro = strtod (PUT (PQvaluebycol (res, 0, "stock_pro")), (char **)NULL);
   new->product->tipo = atoi (PQvaluebycol (res, 0, "tipo"));
   /* Datos Mayoristas */
   new->product->precio_mayor = strtod (PUT (PQvaluebycol (res, 0, "precio_mayor")), (char **)NULL);
+  new->product->precio_mayor_original = strtod (PUT (PQvaluebycol (res, 0, "precio_mayor")), (char **)NULL);
   new->product->cantidad_mayorista = strtod (PUT (PQvaluebycol (res, 0, "cantidad_mayor")), (char **)NULL);
   new->product->mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
 
@@ -396,8 +398,10 @@ CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble
   PGresult *res;
   gchar *q;
 
-  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, "
+  q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, tipo, "
                        "perecibles, canje, stock, stock_pro, tasa_canje, precio_mayor, costo_promedio, "
+		       "(SELECT monto FROM impuesto WHERE id=1 AND producto.impuestos='t') as impuesto_normal, "
+                       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro "
                        "cantidad_mayor, mayorista FROM select_producto (%s)",
                        barcode);
   res = EjecutarSQL (q);
@@ -419,8 +423,8 @@ CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble
   new->product->unidad = PQvaluebycol (res, 0, "unidad");
   //  new->product->precio = atoi (PQvaluebycol (res, 0, 8));
   new->product->margen = margen;
-  new->product->iva = GetIVA (barcode);
-  new->product->otros = GetOtros (barcode);
+  new->product->iva = strtod (PUT (PQvaluebycol (res, 0, "impuesto_normal")), (char **)NULL);
+  new->product->otros = strtod (PUT (PQvaluebycol (res, 0, "impuesto_otro")), (char **)NULL);
   new->product->precio = precio_final;
   new->product->precio_neto = precio_final / (new->product->iva/100 + new->product->otros/100 + 1); //Precio venta neto
   new->product->precio_compra = precio_compra;
@@ -431,6 +435,7 @@ CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble
   new->product->stock = strtod (PUT(PQvaluebycol (res, 0, "stock")), (char **) NULL);
   new->product->stock_pro = strtod (PUT(PQvaluebycol (res, 0, "stock_pro")), (char **) NULL);
   new->product->tasa_canje = strtod (PUT(PQvaluebycol (res, 0, "tasa_canje")), (char **) NULL);
+  new->product->tipo = atoi (PQvaluebycol (res, 0, "tipo"));
   /* Datos Mayoristas */
   new->product->precio_mayor = strtod (PUT(PQvaluebycol (res, 0, "precio_mayor")), (char **) NULL);
   new->product->cantidad_mayorista = strtod (PUT(PQvaluebycol (res, 0, "cantidad_mayor")), (char **) NULL);

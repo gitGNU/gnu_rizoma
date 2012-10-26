@@ -68,14 +68,15 @@ gchar * ModifieBarcode (gchar *barcode);
 
 gboolean CalcularVentas (Productos *header);
 
+void habilitar_venta (void);
+
 void CloseChequeWindow (void);
 
 void PagoCheque (void);
 
 void SelectClient (GtkWidget *widget, gpointer data);
 
-void AddDataEmisor (GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column,
-		    gpointer data);
+void AddDataEmisor (GtkTreeView *treeview, GtkTreePath *path, GtkTreeViewColumn *column, gpointer data);
 
 void TiposVenta (GtkWidget *widget, gpointer data);
 
@@ -93,9 +94,15 @@ void clean_credit_data ();
 
 void nullify_sale_win (void);
 
+void adm_reserva_win (void);
+
 void on_selection_nullify_sales_change (GtkTreeSelection *treeselection, gpointer data);
 
+void on_selection_pedido_change (GtkTreeSelection *treeselection, gpointer data);
+
 void close_nullify_sale_dialog(void);
+
+gboolean close_wnd_adm_pedido (GtkWidget *widget, gpointer data);
 
 void on_btn_devolver_click (GtkWidget *widget, gpointer data);
 

@@ -629,9 +629,11 @@ create table reserva (
   id_venta		    int4, -- El id de la venta realizada en base a esta reserva
   monto                     int4,
   fecha                     timestamp,
+  fecha_entrega             timestamp,
   maquina                   int4,
   vendedor                  int4,
-  vendido		    bool default false,
+  rut_cliente		    int4 not null, 
+  vendido		    bool default false, -- Es true cuando la venta se liquida completamente
   constraint pk_reserva primary key (id)
 ) ;
 
@@ -639,7 +641,7 @@ create table reserva (
 -- Venta_detalle
 -- antes era products_sell_history
 create table reserva_detalle (
-  id                        int4 not null,
+  id                        serial not null,
   id_reserva                int4 not null,
   barcode                   int8 not null,
   cantidad                  float8,

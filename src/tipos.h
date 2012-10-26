@@ -37,6 +37,8 @@ gboolean solo_venta;
 
 enum sell_type {SIMPLE, FACTURA, GUIA, VENTA};
 
+enum tipo_cliente {CREDIT, INVOICE, ALL};
+
 enum pay_way {CASH, CREDITO, CHEQUE_RESTAURANT, MIXTO, CHEQUE, TARJETA}; //CHEQUE_RESTAURANT = No Afecto Impuesto
 
 enum action {ADD, MOD, DEL};
@@ -56,6 +58,7 @@ typedef struct _product
   gint id;
   gdouble fifo;
   gdouble precio;
+  gdouble precio_original;
   gdouble margen;
   gdouble precio_neto;
   gdouble precio_compra;
@@ -118,8 +121,9 @@ typedef struct _product
      Datos para cantidades mayoristas
   */
   gboolean mayorista;
-  gint precio_mayor;
-  gint cantidad_mayorista;
+  gdouble precio_mayor;
+  gdouble precio_mayor_original;
+  gdouble cantidad_mayorista;
 }
 Producto;
 
