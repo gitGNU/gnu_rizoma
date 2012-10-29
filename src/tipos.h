@@ -282,6 +282,12 @@ typedef struct _ventas
   GtkListStore *cancel_store_details;
   GtkWidget *cancel_tree;
   GtkWidget *cancel_tree_details;
+
+  //Datos venta_reserva
+  gint rut_cliente;
+  gint total_pagado;
+  gint deuda_total;
+  gint id_reserva;
 }
 Venta;
 

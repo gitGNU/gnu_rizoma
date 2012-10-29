@@ -657,11 +657,20 @@ create table deuda_reserva (
   id_reserva                int4 not null,
   rut_cliente               int4 not null,
   vendedor                  int4,
-  monto_deuda		    int4,
-  monto_pagado		    int4,
-  fecha_deuda               timestamp,
-  fecha_pago                timestamp,
+  monto_adeudado	    int4,
+  fecha_deuda		    timestamp,
+  pagado		    boolean default false,
   constraint pk_deuda_reserva primary key (id)
+) ;
+
+
+create table pago_deuda_reserva (
+  id                        serial not null,
+  id_deuda_reserva          int4 not null,
+  monto_pagado		    int4,
+  fecha_pago                timestamp,
+  tipo_pago		    int4,
+  constraint pk_deuda_reserva_detalle primary key (id)
 ) ;
 
 

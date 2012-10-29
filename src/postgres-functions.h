@@ -50,11 +50,17 @@ gchar * GetDataByOne (gchar *setencia);
 gboolean DeleteProduct (gchar *codigo);
 
 gint SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount,
-               gint boleta, gint tipo_documento, gchar *cheque_date,  gboolean cheques, gboolean canceled);
+               gint boleta, gint tipo_documento, gchar *cheque_date,  gboolean cheques, gboolean canceled, gboolean venta_reserva);
 
 gboolean registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_entrega);
 
+gboolean actualizar_fecha_reserva (gint id_reserva, GDate *fecha_entrega);
+
 gboolean registrar_reserva_detalle (gint id_reserva);
+
+gboolean registrar_pago_reserva (gint id_reserva, gint monto_pagado, gint tipo_pago);
+
+void pagar_deuda_reserva (gint id_venta, gint id_reserva);
 
 PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
                                gint to_year, gint to_month, gint to_day,

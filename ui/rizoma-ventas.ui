@@ -271,21 +271,23 @@
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="spacing">5</property>
                     <child>
-                      <object class="GtkHBox" id="hbox102">
+                      <object class="GtkTable" id="table1_tipo_venta">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                        <property name="n_rows">2</property>
+                        <property name="n_columns">2</property>
+                        <property name="column_spacing">5</property>
                         <child>
                           <object class="GtkLabel" id="label26">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                            <property name="label" translatable="yes" context="yes">Efectivo</property>
+                            <property name="xalign">1</property>
+                            <property name="label" translatable="yes" context="yes">Efectivo:</property>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
                           </packing>
                         </child>
                         <child>
@@ -293,21 +295,43 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                            <property name="invisible_char">●</property>
+                            <property name="invisible_char_set">True</property>
                             <signal name="changed" handler="CalcularVuelto" swapped="no"/>
                             <signal name="activate" handler="gtk_widget_grab_focus" object="sell_button" swapped="yes"/>
                             <signal name="activate" handler="abrirGaveta" swapped="no"/>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label1_monto_pagado">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
+                            <property name="label" translatable="yes">Monto pagado:</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="lbl_monto_pagado">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="xalign">1</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="padding">5</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -1180,6 +1204,7 @@
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
                     <property name="invisible_char_set">True</property>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_barcode_pedido" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1193,6 +1218,7 @@
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
                     <property name="invisible_char_set">True</property>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="entry_rut_pedido" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -1206,6 +1232,7 @@
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
                     <property name="invisible_char_set">True</property>
+                    <signal name="activate" handler="gtk_widget_grab_focus" object="btn_srch_adm_pedido" swapped="yes"/>
                   </object>
                   <packing>
                     <property name="left_attach">3</property>
@@ -1349,6 +1376,7 @@
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
+                        <signal name="clicked" handler="on_btn_save_new_fecha_entrega_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>

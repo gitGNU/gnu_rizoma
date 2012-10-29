@@ -445,7 +445,7 @@ InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble 
  */
 gboolean
 SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount, gint boleta,
-          gint tipo_documento, gchar *cheque_date, gboolean cheques, gboolean canceled)
+          gint tipo_documento, gchar *cheque_date, gboolean cheques, gboolean canceled, gboolean venta_reserva)
 {
   gint venta_id, monto, id_documento;
   gint day, month, year;
@@ -475,6 +475,9 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   venta_id = atoi (GetDataByOne (q));
   g_free (q);
 
+
+  if (venta_reserva == TRUE)
+    pagar_deuda_reserva (venta_id, venta->id_reserva);
 
   /* Solo se registra un 'Documento' cuando se imprime una boleta o factura */
 
@@ -699,7 +702,32 @@ registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_e
   
   id_reserva = atoi (GetDataByOne (q));
 
+  //Se registra la deuda de la reserva
+  EjecutarSQL (g_strdup_printf ("INSERT INTO deuda_reserva (id, id_reserva, rut_cliente, vendedor, monto_adeudado, fecha_deuda, pagado) "
+				"VALUES (DEFAULT, %d, %d, %d, %d, NOW(), FALSE)", id_reserva, rut_cliente, vendedor, monto));
+
   if (id_reserva > 0 && registrar_reserva_detalle (id_reserva))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+
+/**
+ *
+ *
+ */
+gboolean
+actualizar_fecha_reserva (gint id_reserva, GDate *fecha_entrega)
+{
+  gchar *q;
+
+  q = g_strdup_printf ("UPDATE reserva SET fecha_entrega = to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') WHERE id=%d", 
+		       g_date_get_day(fecha_entrega), g_date_get_month(fecha_entrega), g_date_get_year(fecha_entrega), id_reserva);
+  
+
+  if (EjecutarSQL (q) != NULL)
     return TRUE;
   else
     return FALSE;
@@ -744,6 +772,53 @@ registrar_reserva_detalle (gint id_reserva)
   return TRUE;
 }
 
+
+/**
+ *
+ */
+gboolean
+registrar_pago_reserva (gint id_reserva, gint monto_pagado, gint tipo_pago)
+{
+  gchar *q;
+  gint id_deuda_reserva, monto_adeudado, total_pagado;
+  PGresult *res;
+
+  q = g_strdup_printf ("SELECT id, monto_adeudado FROM deuda_reserva WHERE id_reserva = %d", id_reserva);
+  res = EjecutarSQL (q);
+
+  id_deuda_reserva = atoi (PQvaluebycol (res, 0, "id"));
+  monto_adeudado = atoi (PQvaluebycol (res, 0, "monto_adeudado"));
+
+  q = g_strdup_printf ("INSERT INTO pago_deuda_reserva (id, id_deuda_reserva, monto_pagado, fecha_pago, tipo_pago) "
+		       "VALUES (DEFAULT, %d, %d, NOW(), %d)", id_deuda_reserva, monto_pagado, tipo_pago);
+
+  EjecutarSQL (q);
+
+  total_pagado = atoi (GetDataByOne (g_strdup_printf ("SELECT SUM (monto_pagado) FROM pago_deuda_reserva WHERE id_deuda_reserva = %d", id_deuda_reserva)));
+
+  if (total_pagado >= monto_adeudado)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+/**
+ *
+ *
+ */
+void
+pagar_deuda_reserva (gint id_venta, gint id_reserva)
+{
+  gchar *q;
+  PGresult *res;
+
+  q = g_strdup_printf ("UPDATE reserva SET vendido = TRUE, id_venta = %d WHERE id = %d", id_venta, id_reserva);
+  res = EjecutarSQL (q);
+
+  q = g_strdup_printf ("UPDATE deuda_reserva SET pagado = TRUE WHERE id_reserva = %d", id_reserva);
+  EjecutarSQL (q);
+}
 
 
 /**
