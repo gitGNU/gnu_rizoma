@@ -401,8 +401,8 @@ CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble
   q = g_strdup_printf ("SELECT codigo_corto, barcode, descripcion, marca, contenido, unidad, tipo, "
                        "perecibles, canje, stock, stock_pro, tasa_canje, precio_mayor, costo_promedio, "
 		       "(SELECT monto FROM impuesto WHERE id=1 AND producto.impuestos='t') as impuesto_normal, "
-                       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro "
-                       "cantidad_mayor, mayorista FROM select_producto (%s)",
+                       "(SELECT monto FROM impuesto WHERE id=producto.otros) as impuesto_otro, "
+                       "cantidad_mayor, mayorista FROM select_producto (%s) as producto",
                        barcode);
   res = EjecutarSQL (q);
   g_free (q);
