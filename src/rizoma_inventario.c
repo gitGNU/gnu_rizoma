@@ -38,6 +38,7 @@
 #include "utils.h"
 #include "manejo_productos.h"
 #include "rizoma_errors.h"
+#include "errors.h"
 #include "encriptar.h"
 
 GtkBuilder *builder;
@@ -451,3 +452,140 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
     }
 }
 
+/**
+ * Es llamada cuando el boton "btn_ejecutar_cm" es presionado (signal click).
+ *
+ * Esta funcion crea productos a partir de un archivo  con las columnas
+ * (barcode, codigo_corto, marca, descripcion, contenido, unidad, impuestos, otros, fraccion)
+ * en la  base de datos.
+ *
+ * @param button the button
+ * @param user_data the user data
+ */
+void
+on_btn_ejecutar_cm_clicked (GtkButton *button, gpointer data)
+{
+  FILE *fp;
+  gchar *line = NULL;
+  gchar *barcode, *codigo_corto, *marca, *descripcion, *contenido, *unidad, *impuestos, *otros, *fraccion;
+  gint cont_products_no_BD = 0,cont_products = 0;  
+
+  gchar *dir, *string;
+  GtkTextBuffer *buffer;
+  GtkTextMark *mark;
+  GtkTextIter iter;
+  GdkColor color;
+  char *str;
+  int l;
+
+  gdk_color_parse ("red", &color);
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW (gtk_builder_get_object (builder, "textview_cm")));
+  gtk_text_buffer_create_tag (buffer, "color_red", "foreground-gdk", &color, NULL);
+
+  gtk_text_buffer_create_tag (buffer, "size_medium", "scale", PANGO_SCALE_LARGE, NULL);
+  gtk_text_buffer_create_tag (buffer, "style_italic", "style", PANGO_STYLE_ITALIC, NULL);
+
+
+  dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER  (builder_get (builder, "fcbtn_archivo_mercaderias")));
+  fp = fopen (dir, "r");
+
+  if (fp == NULL)
+    {
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_error_file")));
+      return;
+    }
+
+
+  /* Carga los valores de los pruductos linea por linea del archivo */
+  l = 0;
+  do
+    {
+      line = get_line (fp);
+
+      if (l == 0)
+        {
+          if ((str = strstr(line, ";")) != NULL)
+            str = ";";
+
+          else if ((str = strstr(line, ",")) != NULL)
+            str = ",";
+
+          else if ((str = strstr(line, " ")) != NULL)
+            str = " ";
+
+          else if ((str = strstr(line, "|")) != NULL)
+            str = "|";
+
+          else
+            str = "\t";
+
+          l++;
+        }
+
+      if (line != NULL)
+        {	  
+	  /*Obtención del texto*/
+
+	  barcode = strtok (line, str);
+	  codigo_corto = strtok (NULL, str);
+	  marca = strtok (NULL, str);
+	  descripcion = strtok (NULL, str);
+	  contenido = strtok (NULL, str);
+	  unidad = strtok (NULL, str);
+	  impuestos = strtok (NULL, str);
+	  otros = strtok (NULL, str);
+	  fraccion = strtok (NULL, str);
+	  
+	  if (barcode == NULL || codigo_corto == NULL || marca == NULL || descripcion == NULL || contenido == NULL || unidad == NULL ||
+	      impuestos == NULL || otros == NULL || fraccion == NULL)
+	    {
+	      gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_inconsistencia")));
+	      return;
+	    }
+
+          if ( !DataExist (g_strdup_printf ("SELECT barcode FROM producto WHERE barcode=%s", barcode)) &&
+	       AddNewProductToDB (codigo_corto, barcode, descripcion, marca, contenido, unidad, 
+				  (gboolean)atoi(impuestos), atoi (otros), 1, FALSE, (gboolean)atoi(fraccion), 1) )
+            {
+              string = g_strdup_printf ("El producto con barcode %s se ingreso correctamente \n", barcode);
+              mark = gtk_text_buffer_get_insert(buffer);
+              gtk_text_buffer_get_iter_at_offset (buffer, &iter, (gint) mark);
+              gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
+                                                       ,"size_medium", "style_italic" ,NULL);
+            }
+          else
+            {
+              string = g_strdup_printf ("El barcode %s ya existía en esta en la bd \n", barcode);
+              mark = gtk_text_buffer_get_insert(buffer);
+              gtk_text_buffer_get_iter_at_offset (buffer, &iter,(gint) mark);
+              gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, string, -1
+                                                       ,"size_medium", "style_italic" ,"color_red",NULL);
+              cont_products_no_BD++;
+            }
+          cont_products++;
+        }
+    } while (line != NULL);
+
+
+  /* Mensaje si no realiza ningun inventario */
+  if (cont_products_no_BD == cont_products)
+    {
+      AlertMSG (GTK_WIDGET (builder_get (builder, "button1")), "No se crearon los productos, ya existían en la base de datos");
+      return;
+    }
+  else
+    {
+      /* Mensaje si realiza correctamente el inventario */
+      if (cont_products_no_BD == 0)
+        {
+	  AlertMSG (GTK_WIDGET (builder_get (builder, "button1")), "Se crearon todos los productos exitosamente");
+          return;
+        }
+      /* Mensaje si se realiza parcialmente el inventario*/
+      else
+        {
+          AlertMSG (GTK_WIDGET (builder_get (builder, "button1")), "Algunos productos ya existían en la base de datos");
+          return;
+        }
+    }
+}
