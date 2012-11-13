@@ -160,7 +160,7 @@ gboolean CompraIngresada (void);
 
 gboolean IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean factura);
 
-gboolean IngresarProducto (Producto *product, gint compra);
+gboolean IngresarProducto (Producto *product, gint compra, gchar *rut_proveedor);
 
 gboolean DiscountStock (Productos *header);
 

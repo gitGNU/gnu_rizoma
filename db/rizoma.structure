@@ -74,6 +74,7 @@ drop table if exists pagos cascade;
 drop table if exists producto cascade;
 drop table if exists producto_recibido cascade;
 drop table if exists proveedor cascade;
+drop table if exists producto_proveedor cascade;
 drop table if exists tarjetas cascade;
 drop table if exists tipo_egreso cascade;
 drop table if exists tipo_ingreso cascade;
@@ -737,6 +738,18 @@ create table proveedor (
   lapso_reposicion          int4 default 3,
   constraint pk_proveedor primary key (rut)
 ) ;
+
+
+-- Producto - Proveedor
+create table producto_proveedor (
+  rut_proveedor             int4 not null,
+  barcode_producto          bigint not null,
+  costo_compra		    double precision, --El costo de la última compra
+  constraint pk_producto_proveedor primary key (rut_proveedor,barcode_producto),
+  constraint fk_rut_proveedor foreign key(rut_proveedor) references proveedor(rut),
+  constraint fk_barcode_producto foreign key(barcode_producto) references producto(barcode)
+) ;
+
 
 -- Tarjetas
 create table tarjetas (

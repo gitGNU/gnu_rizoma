@@ -382,7 +382,7 @@ on_btn_ejecutar_Inv (GtkButton *button, gpointer data)
 
 	  /*Casteo*/
 	  pcomp = strtod (PUT(pcompC), (char **)NULL);
-          precio = atoi (precioC);          
+          precio = atoi (precioC);
           cant = strtod (PUT(cantC), (char **)NULL);
 	  
 	  if (pcomp == 0 || precio == 0 || cant == 0)

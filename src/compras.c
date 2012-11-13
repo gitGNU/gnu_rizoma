@@ -3546,7 +3546,7 @@ IngresarCompra (gboolean invoice, gint n_document, gchar *monto, gint costo_brut
     {
       do
 	{
-	  IngresarProducto (products->product, id);
+	  IngresarProducto (products->product, id, rut_proveedor);
 
 	  IngresarDetalleDocumento (products->product, id, doc, invoice);
 

@@ -1853,7 +1853,7 @@ SaveBuyProducts (Productos *header, gint id_compra)
       precio_neto = g_strdup_printf ("%.2f", products->product->precio / 
 				     (products->product->otros/100 + products->product->iva/100 + 1));
 
-      cantidad = g_strdup_printf ("%.2f", products->product->cantidad);
+      cantidad = g_strdup_printf ("%.3f", products->product->cantidad);
       costo = g_strdup_printf ("%.2f", products->product->precio_compra);
       precio = g_strdup_printf ("%.2f", products->product->precio);
       margen = g_strdup_printf ("%.2f", products->product->margen);
@@ -1942,7 +1942,7 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
 }
 
 gboolean
-IngresarProducto (Producto *product, gint compra)
+IngresarProducto (Producto *product, gint compra, gchar *rut_proveedor)
 {
   PGresult *res;
   //  gint old_stock, stock_final;
@@ -1952,16 +1952,27 @@ IngresarProducto (Producto *product, gint compra)
   gchar *q;
   gchar *cantidad;
 
+
+  //Asociamos el producto al proveedor (Si ya esta asociado dará un aviso por terminal, pero no detendra nada)
+  q = g_strdup_printf ("INSERT INTO producto_proveedor (barcode_producto, rut_proveedor, costo_compra) "
+		       "       VALUES (%s, %s, %s) RETURNING barcode_producto",
+                       product->barcode, rut_proveedor, CUT (g_strdup_printf ("%.2f", product->precio_compra)));
+  
+  //Se ejecuta la consulta y si la relación ya existía, se actualiza el precio de compra del producto
+  if (PQntuples (EjecutarSQL (q)) == 0)
+    {
+      q = g_strdup_printf ("UPDATE producto_proveedor SET costo_compra = %s "
+			   "WHERE  barcode_producto = %s AND rut_proveedor = %s",
+			   CUT (g_strdup_printf ("%.2f", product->precio_compra)), product->barcode, rut_proveedor);
+      EjecutarSQL (q);
+    }
+
   cantidad = CUT (g_strdup_printf ("%.2f", product->cantidad));
 
   if (product->stock_pro != 0 && product->tasa_canje != 0)
-    {
-      canjeado = product->stock_pro * ((double)1 / product->tasa_canje);
-    }
+    canjeado = product->stock_pro * ((double)1 / product->tasa_canje);
   else
-    {
-      canjeado = 0;
-    }
+    canjeado = 0;
 
   stock_pro = product->stock_pro - (product->cuanto - canjeado);
 
@@ -3970,7 +3981,7 @@ PGresult *getProductsByProvider (gchar *rut)
   gchar *q;
 
   //TODO: Ojo con el MAX (id_compra), evaluar el uso de last_value  
-  q = g_strdup_printf("SELECT DISTINCT p.barcode, p.codigo_corto, p.descripcion, p.marca, p.contenido, "
+  /*q = g_strdup_printf("SELECT DISTINCT p.barcode, p.codigo_corto, p.descripcion, p.marca, p.contenido, "
 		      "                p.unidad, p.precio, p.stock, p.dias_stock, p.fraccion, "
 		      "       (select_ventas_dia(p.barcode, FALSE)::float) AS ventas_dia, "
 		      "       (stock::float / select_ventas_dia(p.barcode, TRUE)::float) AS stock_day, "
@@ -3997,8 +4008,24 @@ PGresult *getProductsByProvider (gchar *rut)
 		      "      AND c.anulada_pi = false "
 		      "      AND estado = true "
 		      "      AND ingresada = true "
-		      "      AND (c.fecha BETWEEN now() - '2 month'::interval AND now())", rut);
+		      "      AND (c.fecha BETWEEN now() - '2 month'::interval AND now())", rut);*/
 
+  q = g_strdup_printf ("SELECT p.barcode, p.codigo_corto, p.descripcion, p.marca, p.contenido, p.unidad, "
+		       "       p.precio, p.stock, p.dias_stock, p.fraccion, pp.costo_compra AS precio_compra, "
+		       "       (SELECT_ventas_dia(p.barcode, FALSE)::float) AS ventas_dia, "
+		       "       (stock::float / select_ventas_dia(p.barcode, TRUE)::float) AS stock_day, "
+		       "       (SELECT SUM (cantidad-cantidad_ingresada) "
+		       "	       FROM compra_detalle "
+		       "	            INNER JOIN compra ON compra.id = compra_detalle.id_compra "
+		       "	       WHERE barcode_product = p.barcode "
+		       "		     AND compra.anulada = 'f' "
+		       "		     AND compra.anulada_pi = 'f' "
+		       "		     AND compra.ingresada = 'f') AS cantidad_pedido "
+		       "FROM producto p INNER JOIN producto_proveedor pp "
+		       "                ON p.barcode = pp.barcode_producto "
+		       "                AND pp.rut_proveedor = %s", rut);
+  
+  
   res = EjecutarSQL (q);
   g_free (q);
   return res;
