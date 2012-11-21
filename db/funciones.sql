@@ -4686,7 +4686,7 @@ BEGIN
               	  componente_mc.cant_mud * compuesta.cant_mud
            FROM componente_mc, compuesta
        	   WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
-      	)
+      	 )
 	SELECT c.barcode_madre, c.id_mh, c.tipo_madre, c.barcode_comp_der, c.tipo_comp_der, c.cant_mud,
 	       (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_comp_der)) AS costo_hijo
       	FROM compuesta c
@@ -4751,6 +4751,502 @@ BEGIN
 RETURN;
 END; $$ LANGUAGE plpgsql;
 
+
+
+-- Retorna como resultado la suma de todas las operaciones hechas sobre un
+-- producto dentro del día especificado
+CREATE OR REPLACE FUNCTION movimiento_en_fecha (IN fecha_inicio timestamp,
+       	  	  	   		        IN barcode_in bigint,
+						OUT barcode_out varchar,
+       						OUT movimiento_out double precision, 
+						OUT costo_promedio_en_fecha_out double precision)
+RETURNS SETOF record AS $$
+DECLARE
+	q text;
+	l record;
+	corriente int4;
+	materia_prima int4;
+BEGIN
+
+SELECT id INTO corriente FROM tipo_mercaderia WHERE upper(nombre) LIKE 'CORRIENTE';
+SELECT id INTO materia_prima FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA';
+
+--SELECT SUM (COALESCE(cantidad_ingresada,0) - COALESCE(cantidad_c_anuladas,0) - COALESCE(cantidad_vendida,0) - COALESCE(cantidad_vmcd,0) - COALESCE(unidades_merma,0) + COALESCE(cantidad_anulada,0) - COALESCE(cantidad_devolucion,0) - COALESCE(cantidad_envio,0) + COALESCE(cantidad_recibida,0)) AS movimiento
+q := $S$ SELECT p.barcode, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, cantidad_vmcd, unidades_merma, cantidad_anulada, cantidad_devolucion, cantidad_envio, cantidad_recibida,
+     	 	(SELECT fcd.costo_promedio
+			FROM factura_compra_detalle fcd
+			INNER JOIN factura_compra fc
+			ON fcd.id_factura_compra = fc.id
+		
+			WHERE fc.fecha < $S$ ||quote_literal (fecha_inicio+'1 days')|| $S$
+			AND barcode = p.barcode
+			ORDER BY fcd.id_factura_compra DESC
+			LIMIT 1) AS costo_fecha
+       	 	FROM producto p
+
+	 	-- Las compras ingresadas hechas hasta la fecha determinada	
+	 	LEFT JOIN (SELECT SUM(fcd.cantidad) AS cantidad_ingresada, fcd.barcode AS barcode
+		          	  FROM factura_compra_detalle fcd				       
+       		     	          INNER JOIN factura_compra fc
+       		     	          ON fc.id = fcd.id_factura_compra
+
+       		     	          WHERE fc.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND fc.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+                     	          AND fcd.cantidad > 0
+                     	          GROUP BY barcode) AS cantidad_ingresada
+                ON p.barcode = cantidad_ingresada.barcode
+
+	        -- Las anulaciones de compras hechas hasta la fecha determinada
+		LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode
+		       	          FROM compra_anulada ca
+				  INNER JOIN compra_anulada_detalle cad
+				  ON ca.id = cad.id_compra_anulada
+
+				  WHERE ca.fecha_anulacion >= $S$ || quote_literal (fecha_inicio) || $S$ AND ca.fecha_anulacion < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+				  GROUP BY barcode) AS compras_anuladas
+	        ON p.barcode = compras_anuladas.barcode
+
+       		-- Las Ventas hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta v
+		 	      	  INNER JOIN venta_detalle vd 
+			  	  ON v.id = vd.id_venta
+
+			  	  WHERE v.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND v.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+			  	  GROUP BY barcode) AS ventas
+		ON p.barcode = ventas.barcode
+
+       	        -- Las anulaciones de venta hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta v
+		 	          INNER JOIN venta_detalle vd
+			  	  ON v.id = vd.id_venta
+
+			  	  INNER JOIN venta_anulada va
+			    	  ON va.id_sale = v.id
+
+				  WHERE va.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND va.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+			          GROUP BY barcode) AS ventas_anuladas
+                ON p.barcode = ventas_anuladas.barcode
+
+		-- Las Ventas (de compuestos) menos sus anulaciones hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_hijo AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta_mc_detalle vmcd
+				  INNER JOIN venta v ON vmcd.id_venta_vd = v.id
+
+			  	  WHERE vmcd.id_venta_vd NOT IN (SELECT id_sale FROM venta_anulada)
+				  AND v.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND v.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+			  	  GROUP BY barcode_hijo) AS ventas_mcd
+		ON p.barcode = ventas_mcd.barcode
+       
+	        -- Las Mermas sufridas hasta la fecha determinada
+		LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
+       	     	                  FROM merma m
+
+		         	  WHERE m.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND m.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+			          GROUP BY barcode) AS merma
+	        ON p.barcode = merma.barcode
+
+		-- Las Mermas sufridas hasta la fecha determinada
+		LEFT JOIN (SELECT mmcd.barcode_hijo AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
+       	     	                  FROM merma m
+				  INNER JOIN merma_mc_detalle mmcd
+				  ON m.id = mmcd.id_merma
+
+		         	  WHERE m.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND m.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+			          GROUP BY barcode_hijo) AS merma_mcd
+	        ON p.barcode = merma_mcd.barcode
+
+                -- Las devoluciones hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
+       	     	                  FROM devolucion d
+		 	          INNER JOIN devolucion_detalle dd
+			 	  ON d.id = dd.id_devolucion
+
+			          WHERE d.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND d.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+			          GROUP BY barcode) AS devolucion
+                ON p.barcode = devolucion.barcode
+
+	        -- Los traspasos enviados hasta la fecha determinada
+       		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_envio
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_detalle td
+			 	  ON t.id = td.id_traspaso
+
+			          WHERE t.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND t.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+				  AND t.origen = 1
+			          GROUP BY barcode) AS traspaso_envio
+                ON p.barcode = traspaso_envio.barcode
+
+		-- Los traspasos enviados (a traves de un compuesto) hasta la fecha determinada
+		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_mc_detalle tmcd
+			 	  ON t.id = tmcd.id_traspaso
+
+			          WHERE t.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND t.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+				  AND t.origen = 1
+			          GROUP BY barcode_hijo) AS traspaso_mc_envio
+                ON p.barcode = traspaso_mc_envio.barcode
+
+	        -- Los traspasos recibidos hasta la fecha determinada
+       		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_recibida
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_detalle td
+			 	  ON t.id = td.id_traspaso
+
+			          WHERE t.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND t.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+				  AND t.origen != 1
+			          GROUP BY barcode) AS traspaso_recibido
+                ON p.barcode = traspaso_recibido.barcode
+
+		-- Los traspasos recibidos (a traves de un compuesto) hasta la fecha determinada
+       		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_mc_detalle tmcd
+			 	  ON t.id = tmcd.id_traspaso
+
+			          WHERE t.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND t.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
+				  AND t.origen != 1
+			          GROUP BY barcode_hijo) AS traspaso_mc_recibido
+                ON p.barcode = traspaso_mc_recibido.barcode
+                    	    
+                WHERE p.estado = true
+		AND (p.tipo = $S$ || corriente || $S$ 
+		     OR p.tipo = $S$ || materia_prima || $S$ ) $S$ ;
+
+IF barcode_in != 0 THEN
+    q := q || $S$ AND p.barcode = $S$ || barcode_in;
+END IF;
+
+FOR l IN EXECUTE q LOOP
+    barcode_out := l.barcode;
+    movimiento_out := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_c_anuladas,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.cantidad_vmcd,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0) - COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_recibida,0);
+    costo_promedio_en_fecha_out := COALESCE(l.costo_fecha,0);
+    RETURN NEXT;
+END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+
+---
+-- Obtiene las unidades y valorizado de ventas de un producto determinado o 
+-- de todos los productos
+---
+CREATE OR REPLACE FUNCTION ventas_en_fecha (IN fecha_in timestamp,
+				            IN barcode_in bigint,
+					    OUT barcode_out bigint,
+					    OUT cantidad_vendida_out double precision,
+       					    OUT costo_vendido_out double precision,
+					    OUT precio_vendido_out double precision,
+					    OUT ganancia_vendido_out double precision)
+RETURNS SETOF record AS $$
+DECLARE
+	q text;
+	l record;
+BEGIN
+	q := $S$ SELECT barcode, SUM (cantidad) AS cantidad, SUM (fifo*cantidad) AS sub_costo_venta, SUM (precio*cantidad) AS sub_venta, SUM (ganancia*cantidad) AS sub_ganancia
+	         FROM venta_detalle vd
+	     	 INNER JOIN venta v
+	     	 ON vd.id_venta = v.id
+	     	 WHERE v.fecha >= $S$ ||quote_literal (fecha_in)|| $S$ AND v.fecha < $S$ ||quote_literal (fecha_in+'1 days');
+
+        IF barcode_in != 0 THEN
+    	   q := q || $S$ AND barcode = $S$ || barcode_in;
+	END IF;
+
+	q := q || $S$ GROUP BY barcode $S$;
+
+	EXECUTE q INTO l;
+
+	FOR l IN EXECUTE q LOOP
+	    cantidad_vendida_out := COALESCE (l.cantidad,0);
+	    costo_vendido_out := COALESCE (l.sub_costo_venta);
+	    precio_vendido_out := COALESCE (l.sub_venta);
+	    ganancia_vendido_out := COALESCE (l.sub_ganancia);
+	    barcode_out := l.barcode;
+	    RETURN NEXT;
+	END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+
+---
+-- Obtiene el stock, valorizacion stock, ventas y valorizacion de ventas
+-- dia a dia de un producto determinado o de todos los productos
+---
+CREATE OR REPLACE FUNCTION movimiento_en_periodo (IN fecha_inicio_in timestamp,
+       	  	  	   	      	     	  IN fecha_final_in timestamp,
+					          IN barcode_in bigint,
+       					     	  OUT fecha_out timestamp,
+       					     	  OUT stock_fecha_out double precision,
+						  OUT valor_stock_fecha_out double precision,
+						  OUT cantidad_vendida_fecha_out double precision,
+						  OUT monto_venta_fecha_out double precision)
+RETURNS SETOF record AS $$
+DECLARE
+	q text;
+	l record;
+	costo_fecha double precision;
+BEGIN
+	fecha_out := fecha_inicio_in;
+	stock_fecha_out := 0;
+	valor_stock_fecha_out := 0;
+	cantidad_vendida_fecha_out := 0;
+	monto_venta_fecha_out := 0;
+	costo_fecha := 0;
+
+	--TODO: buscar la forma de usar producto_en_fecha una sola vez y los demás días usar movimiento_en_fecha
+	-- Se recorre día a día el rango de fecha
+	WHILE fecha_out <= fecha_final_in LOOP
+	      -- q := $S$ SELECT barcode_out, movimiento_out, costo_promedio_en_fecha_out FROM movimiento_en_fecha ($S$||quote_literal(fecha_out)||$S$,$S$||barcode_in||$S$)$S$;
+	      q := $S$ SELECT barcode, costo_fecha, COALESCE (cantidad_fecha,0) AS cantidad_fecha, COALESCE (cantidad_vendida_out,0) AS c_vendido, COALESCE (precio_vendido_out,0) AS m_vendido
+	      	       FROM producto_en_fecha2 ($S$||quote_literal(fecha_out+'1 days')||$S$,$S$||barcode_in||$S$) AS pf
+		       LEFT JOIN ventas_en_fecha ($S$||quote_literal(fecha_out)||$S$,$S$||barcode_in||$S$) AS vf
+		       ON pf.barcode::bigint = vf.barcode_out $S$;
+
+   	      FOR l IN EXECUTE q LOOP
+		  stock_fecha_out := l.cantidad_fecha;
+
+		  -- Se obtiene el costo promedio del producto a esa fecha
+		  -- SELECT COALESCE (fcd.costo_promedio, 0) INTO costo_fecha
+		  -- 	 FROM factura_compra_detalle fcd
+		  -- 	 INNER JOIN factura_compra fc
+		  -- 	       ON fcd.id_factura_compra = fc.id
+		  -- 	 WHERE fc.fecha < fecha_out+'1 days'
+		  -- 	       AND fcd.barcode = l.barcode::bigint
+		  -- 	 ORDER BY fcd.id_factura_compra DESC
+		  -- 	 LIMIT 1;
+
+		  costo_fecha := l.costo_fecha;
+
+		  valor_stock_fecha_out := COALESCE (stock_fecha_out*costo_fecha, 0);
+		  
+		  -- SELECT INTO cantidad_vendida_fecha_out, monto_venta_fecha_out
+		  --     	      COALESCE (cantidad_vendida_out,0), COALESCE (precio_vendido_out,0)
+                  -- FROM ventas_en_fecha (fecha_out, l.barcode::bigint);
+
+		  cantidad_vendida_fecha_out := l.c_vendido;
+		  monto_venta_fecha_out := l.m_vendido;
+		  RETURN NEXT;
+	    END LOOP;
+
+    	fecha_out := fecha_out + '1 days';
+	END LOOP;
+
+RETURN;
+END; $$ LANGUAGE plpgsql;
+
+---
+-- Obtiene la información de un producto en un día determinado con el costo_promedio del producto en ese día
+---
+create or replace function producto_en_fecha2(
+       in fecha_inicio timestamp,
+       in barcode_in bigint,
+       out barcode varchar,
+       out codigo_corto varchar,
+       out descripcion varchar,
+       out marca varchar,
+       out cont_un varchar,
+       out familia integer,
+       out cantidad_ingresada double precision,
+       out cantidad_c_anuladas double precision,
+       out cantidad_vendida double precision,
+       out cantidad_anulada double precision,
+       out cantidad_insumida double precision,
+       out cantidad_merma double precision,
+       out cantidad_devoluciones double precision,
+       out cantidad_envio double precision,
+       out cantidad_recibida double precision,
+       out cantidad_fecha double precision,
+       out costo_fecha double precision
+       )
+returns setof record as $$
+declare
+q text;
+l record;
+corriente int4;
+materia_prima int4;
+begin
+
+corriente := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'CORRIENTE');
+materia_prima := (SELECT id FROM tipo_mercaderia WHERE upper(nombre) LIKE 'MATERIA PRIMA');
+
+q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, unidades_merma_mcd, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida,
+     	 	(SELECT fcd.costo_promedio
+			FROM factura_compra_detalle fcd
+			INNER JOIN factura_compra fc
+			ON fcd.id_factura_compra = fc.id
+		
+			WHERE fc.fecha < $S$ ||quote_literal (fecha_inicio+'1 days')|| $S$
+			AND barcode = p.barcode
+			ORDER BY fcd.id_factura_compra DESC
+			LIMIT 1) AS costo_fecha
+
+       	 	FROM producto p
+
+	 	-- Las compras ingresadas hechas hasta la fecha determinada	
+	 	LEFT JOIN (SELECT SUM(fcd.cantidad) AS cantidad_ingresada, fcd.barcode AS barcode
+		          	  FROM factura_compra_detalle fcd				       
+       		     	          INNER JOIN factura_compra fc
+       		     	          ON fc.id = fcd.id_factura_compra
+
+       		     	          WHERE fc.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+                     	          AND fcd.cantidad > 0
+                     	          GROUP BY barcode) AS cantidad_ingresada
+                ON p.barcode = cantidad_ingresada.barcode
+			    
+	        -- Las anulaciones de compras hechas hasta la fecha determinada
+		LEFT JOIN (SELECT SUM(cad.cantidad_anulada) AS cantidad_c_anuladas, cad.barcode AS barcode
+		       	          FROM compra_anulada ca
+				  INNER JOIN compra_anulada_detalle cad
+				  ON ca.id = cad.id_compra_anulada
+
+				  WHERE ca.fecha_anulacion < $S$ || quote_literal(fecha_inicio) || $S$
+				  GROUP BY barcode) AS compras_anuladas
+	        ON p.barcode = compras_anuladas.barcode
+
+       		-- Las Ventas hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_vendida, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta v
+		 	      	  INNER JOIN venta_detalle vd 
+			  	  ON v.id = vd.id_venta
+
+			  	  WHERE v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			  	  GROUP BY barcode) AS ventas
+		ON p.barcode = ventas.barcode
+
+       	        -- Las anulaciones de venta hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vd.cantidad) AS cantidad_anulada, vd.barcode AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta v
+		 	          INNER JOIN venta_detalle vd
+			  	  ON v.id = vd.id_venta
+
+			  	  INNER JOIN venta_anulada va
+			    	  ON va.id_sale = v.id
+
+				  WHERE va.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode) AS ventas_anuladas
+                ON p.barcode = ventas_anuladas.barcode
+
+		-- Las Ventas (de compuestos) menos sus anulaciones hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_hijo AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       	     	                  FROM venta_mc_detalle vmcd
+				  INNER JOIN venta v ON vmcd.id_venta_vd = v.id
+
+			  	  WHERE vmcd.id_venta_vd NOT IN (SELECT id_sale FROM venta_anulada)
+				  AND v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			  	  GROUP BY barcode_hijo) AS ventas_mcd
+		ON p.barcode = ventas_mcd.barcode
+       
+	        -- Las Mermas sufridas hasta la fecha determinada
+		LEFT JOIN (SELECT barcode, SUM(unidades) AS unidades_merma
+       	     	                  FROM merma m
+
+		         	  WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode) AS merma
+	        ON p.barcode = merma.barcode
+
+		-- Las Mermas sufridas hasta la fecha determinada
+		LEFT JOIN (SELECT mmcd.barcode_hijo AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
+       	     	                  FROM merma m
+				  INNER JOIN merma_mc_detalle mmcd
+				  ON m.id = mmcd.id_merma
+
+		         	  WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode_hijo) AS merma_mcd
+	        ON p.barcode = merma_mcd.barcode
+
+                -- Las devoluciones hechas hasta la fecha determinada
+       		LEFT JOIN (SELECT dd.barcode AS barcode, SUM(dd.cantidad) AS cantidad_devolucion
+       	     	                  FROM devolucion d
+		 	          INNER JOIN devolucion_detalle dd
+			 	  ON d.id = dd.id_devolucion
+
+			          WHERE d.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+			          GROUP BY barcode) AS devolucion
+                ON p.barcode = devolucion.barcode
+
+	        -- Los traspasos enviados hasta la fecha determinada
+       		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_envio
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_detalle td
+			 	  ON t.id = td.id_traspaso
+
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen = 1
+			          GROUP BY barcode) AS traspaso_envio
+                ON p.barcode = traspaso_envio.barcode
+
+		-- Los traspasos enviados (a traves de un compuesto) hasta la fecha determinada
+		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_mc_detalle tmcd
+			 	  ON t.id = tmcd.id_traspaso
+
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen = 1
+			          GROUP BY barcode_hijo) AS traspaso_mc_envio
+                ON p.barcode = traspaso_mc_envio.barcode
+
+	        -- Los traspasos recibidos hasta la fecha determinada
+       		LEFT JOIN (SELECT td.barcode AS barcode, SUM(td.cantidad) AS cantidad_recibida
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_detalle td
+			 	  ON t.id = td.id_traspaso
+
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen != 1
+			          GROUP BY barcode) AS traspaso_recibido
+                ON p.barcode = traspaso_recibido.barcode
+
+		-- Los traspasos recibidos (a traves de un compuesto) hasta la fecha determinada
+       		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
+       	     	                  FROM traspaso t
+		 	          INNER JOIN traspaso_mc_detalle tmcd
+			 	  ON t.id = tmcd.id_traspaso
+
+			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
+				  AND t.origen != 1
+			          GROUP BY barcode_hijo) AS traspaso_mc_recibido
+                ON p.barcode = traspaso_mc_recibido.barcode
+                    	    
+                WHERE p.estado = true
+		AND (p.tipo = $S$ || corriente || $S$ 
+		     OR p.tipo = $S$ || materia_prima || $S$ ) $S$ ;
+
+if barcode_in != 0 then
+    q := q || $S$ AND p.barcode = $S$ || barcode_in;
+end if;
+
+q := q || $S$ GROUP BY p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, p.unidad, p.familia, cantidad_ingresada, cantidad_c_anuladas, cantidad_vendida, unidades_merma, unidades_merma_mcd, cantidad_anulada, cantidad_vmcd, cantidad_devolucion, cantidad_envio, cantidad_mc_envio, cantidad_recibida, cantidad_mc_recibida, costo_fecha
+              ORDER BY barcode $S$;
+
+for l in execute q loop
+    barcode := l.barcode;
+    codigo_corto := l.codigo_corto;
+    marca := l.marca;
+    descripcion := l.descripcion;
+    cont_un := l.contenido ||' '|| l.unidad;
+    familia := l.familia;
+    cantidad_ingresada := COALESCE (l.cantidad_ingresada,0);
+    cantidad_c_anuladas := COALESCE(l.cantidad_c_anuladas,0);
+    cantidad_vendida := COALESCE(l.cantidad_vendida,0);
+    cantidad_merma := COALESCE(l.unidades_merma,0) + COALESCE(l.unidades_merma_mcd,0);
+    cantidad_anulada := COALESCE(l.cantidad_anulada,0);
+    cantidad_insumida := COALESCE(l.cantidad_vmcd,0);
+    cantidad_devoluciones := COALESCE(l.cantidad_devolucion,0);
+    cantidad_envio := COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_mc_envio,0);
+    cantidad_recibida := COALESCE(l.cantidad_recibida,0) + COALESCE(l.cantidad_mc_recibida,0);
+    cantidad_fecha := COALESCE(l.cantidad_ingresada,0) - COALESCE(l.cantidad_c_anuladas,0) - COALESCE(l.cantidad_vendida,0) - COALESCE(l.cantidad_vmcd,0) - COALESCE(l.unidades_merma,0) + COALESCE(l.cantidad_anulada,0) - COALESCE(l.cantidad_devolucion,0) - COALESCE(l.cantidad_envio,0) + COALESCE(l.cantidad_recibida,0);
+    costo_fecha := COALESCE (l.costo_fecha, 0);
+    return next;
+end loop;
+
+return;
+end; $$ language plpgsql;
 
 
 -- Obtiene la información de un producto en un día determinado

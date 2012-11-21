@@ -382,4 +382,6 @@ gint pagar_factura (gint id_factura, gint id_venta);
 
 gint facturar_guia (gint id_factura, gint id_guia, gint monto_guia);
 
+PGresult * movimiento_en_rango (GDate *fecha_inicio, GDate *fecha_final, gchar *barcode);
+
 #endif

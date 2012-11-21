@@ -5001,3 +5001,36 @@ get_componentes_compuesto (gchar *barcode)
   res = EjecutarSQL (q);
   return res;
 }
+
+
+/**
+ * Obtiene el stock, las ventas, y el valorizado de ambos, día a día dentro del 
+ * rango de fecha especificado, tanto de un producto específico, como toda la mercadería
+ *
+ * @param fecha_inicio
+ * @param fecha_final
+ * @param barcode: Si es 0 muestra el valorizado de todas las mercaderías
+ */
+PGresult *
+movimiento_en_rango (GDate *fecha_inicio, GDate *fecha_final, gchar *barcode)
+{
+  gchar *q;
+  PGresult *res;
+
+  q = g_strdup_printf ("SELECT fecha_out AS fecha, SUM (stock_fecha_out) AS stock, ROUND (SUM (valor_stock_fecha_out)) AS valor_stock, "
+		       "       SUM (cantidad_vendida_fecha_out) AS unidades_vendidas, ROUND (SUM (monto_venta_fecha_out)) AS valor_vendido "
+		       "FROM movimiento_en_periodo (to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY')::timestamp, to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY')::timestamp, %s::bigint) "
+		       "GROUP BY fecha_out "
+		       "ORDER BY fecha_out ASC",
+		       g_date_get_day(fecha_inicio), g_date_get_month(fecha_inicio), g_date_get_year(fecha_inicio),
+		       g_date_get_day(fecha_final), g_date_get_month(fecha_final), g_date_get_year(fecha_final),
+		       barcode);
+  
+  res = EjecutarSQL (q);
+  
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+
+}

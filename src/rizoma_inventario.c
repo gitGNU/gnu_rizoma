@@ -536,6 +536,7 @@ on_btn_ejecutar_cm_clicked (GtkButton *button, gpointer data)
 	  otros = strtok (NULL, str);
 	  fraccion = strtok (NULL, str);
 	  
+	  //TODO: que muestre en el textbox la linea inconsistente (no haga un return)
 	  if (barcode == NULL || codigo_corto == NULL || marca == NULL || descripcion == NULL || contenido == NULL || unidad == NULL ||
 	      impuestos == NULL || otros == NULL || fraccion == NULL)
 	    {
