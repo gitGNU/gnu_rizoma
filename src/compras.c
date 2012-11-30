@@ -3100,7 +3100,7 @@ SearchName (void)
   gchar *q, *barcode;
   PGresult *res;
   gint i, resultado;
-  gchar *materia_prima;
+  //gchar *materia_prima;
 
   GtkTreeView *treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_buscador"));
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (treeview));
@@ -3112,15 +3112,15 @@ SearchName (void)
 
   if (add_to_comp == TRUE)
     {
-      materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id "
-							   "FROM tipo_mercaderia "
-							   "WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id"));
+      /* materia_prima = g_strdup (PQvaluebycol (EjecutarSQL ("SELECT id " */
+      /* 							   "FROM tipo_mercaderia " */
+      /* 							   "WHERE UPPER(nombre) LIKE 'MATERIA PRIMA'"), 0, "id")); */
 
       barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_comp_barcode"))));
       //TODO: Y de ningun producto que lo tenga a él mismo como componente
       q = g_strdup_printf ("%s WHERE barcode != %s "			  
-			   "AND tipo != %s "
-			   "AND costo_promedio > 0", q, barcode, materia_prima);
+			   //"AND tipo != %s "
+			   "AND costo_promedio > 0", q, barcode); //, materia_prima);
     }
 
   res = EjecutarSQL (q);
@@ -3733,7 +3733,7 @@ AddProveedor (GtkWidget *widget, gpointer data)
       return;
     }
 
-  if (atoi(telefono) == 0)
+  if (HaveCharacters (telefono))
     {
       ErrorMSG (compra->telefono_add, "Debe ingresar solo números en el campo telefono");
       return;
@@ -9400,7 +9400,7 @@ on_btn_add_new_comp_clicked (GtkButton *button, gpointer data)
     ErrorMSG (GTK_WIDGET (entry_cont), "Contenido debe ser un valor numérico");
   else
     {
-      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE codigo_corto like '%s')", codigo)))
+      if (DataExist (g_strdup_printf ("SELECT codigo_corto FROM producto WHERE codigo_corto like '%s'", codigo)))
         {
           ErrorMSG (GTK_WIDGET (entry_code), "Ya existe un producto con el mismo codigo corto");
           return;
@@ -9543,9 +9543,9 @@ on_btn_assoc_comp_deriv_clicked (GtkButton *button, gpointer user_data)
   
   //Se ingresan de acuerdo a la asociación de mercaderías
   for (i = 0; i<num_deriv; i++) //Se asocia o modifica la relación de acuerdo a lo realizado
-    asociar_derivada_a_madre (barcode_mp, tipo_mp,
-			      barcode_deriv[i], tipo_deriv,
-			      cant_mud[i]);
+    asociar_componente_o_derivado (barcode_deriv[i], tipo_deriv,
+				   barcode_mp, tipo_mp,
+				   cant_mud[i]);
   
   //Se habilita el botón de compra (cuando se crea la materia prima)
   //gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "button_buy")), TRUE);
@@ -9627,9 +9627,9 @@ on_btn_asoc_comp_clicked (GtkButton *button, gpointer user_data)
   
   //Se ingresan de acuerdo a la asociación de mercadería
   for (i = 0; i<num_componentes; i++) //Se asocia o modifica la relación de acuerdo a lo realizado
-    asociar_derivada_a_madre (barcode_compuesto, tipo_compuesto,
-			      barcode_componentes[i], tipo_componentes[i],
-			      cant_mud[i]);
+    asociar_componente_o_derivado (barcode_compuesto, tipo_compuesto,
+				   barcode_componentes[i], tipo_componentes[i],
+				   cant_mud[i]);
 
   // Se setea la bandera de asociación de compuestos a FALSE
   add_to_comp = FALSE;
@@ -9648,7 +9648,7 @@ on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
   GtkTreeIter iter;
   gint position;
 
-  gchar *barcode_hijo, *barcode_madre;
+  gchar *barcode_derivado, *barcode_mp;
   
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_deriv"));
   selection = gtk_tree_view_get_selection (treeview);
@@ -9657,13 +9657,13 @@ on_btn_remove_deriv_clicked (GtkButton *button, gpointer user_data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter))
     {
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
-                          0, &barcode_hijo,
+                          0, &barcode_derivado,
                           -1);
       
-      barcode_madre = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_barcode_mp"))));
+      barcode_mp = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_barcode_mp"))));
 
       /*Se desasocian las meraderías*/
-      desasociar_madre_hijo (barcode_madre, barcode_hijo);
+      desasociar_componente_compuesto (barcode_derivado, barcode_mp);
 
       position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);
@@ -9702,7 +9702,7 @@ on_btn_remove_comp_clicked (void)
       barcode_madre = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_comp_barcode"))));
 
       /*Se desasocian las meraderías*/
-      desasociar_madre_hijo (barcode_madre, barcode_hijo);
+      desasociar_componente_compuesto (barcode_madre, barcode_hijo);
 
       position = atoi (gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(store), &iter));
       gtk_list_store_remove (store, &iter);

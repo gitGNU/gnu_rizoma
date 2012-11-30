@@ -4199,17 +4199,17 @@ registrar_nuevo_sub_depto (gchar *codigo, gchar *sub_depto)
  * This function save the association
  * between the mother and (derived or components) merchandise
  *
- * @param : gchar *barcode_madre
- * @param : gint tipo_madre
- * @param : gchar *barcode_comp_der
- * @param : gint tipo_comp_der
+ * @param : gchar *barcode_complejo
+ * @param : gint tipo_complejo
+ * @param : gchar *barcode_componente
+ * @param : gint tipo_componente
  * @param : gdouble cant_mud : Cantidad de madre que usa el derivado
  * @return: gboolean: TRUE si realizó algún cambio, FALSE si no realizó cambios
  */
 gboolean
-asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
-			  gchar *barcode_comp_der, gint tipo_comp_der,
-			  gdouble cant_mud)
+asociar_componente_o_derivado (gchar *barcode_complejo, gint tipo_complejo,
+			       gchar *barcode_componente, gint tipo_componente,
+			       gdouble cant_mud)
 {
   PGresult *res;
   gchar *q;
@@ -4217,23 +4217,23 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
 
   // Se comprueba si ya existe la asociación
   q = g_strdup_printf ("SELECT cant_mud FROM componente_mc "
-		       "WHERE barcode_madre = %s AND barcode_comp_der = %s", barcode_madre, barcode_comp_der);
+		       "WHERE barcode_complejo = %s AND barcode_componente = %s", barcode_complejo, barcode_componente);
   res = EjecutarSQL(q);
   g_free(q);
 
   /*Si no existe la asociación*/
   if (res == NULL || PQntuples (res) == 0)
     {
-      q = g_strdup_printf ("INSERT INTO componente_mc (id, barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) "
-			                      "VALUES (DEFAULT,   %s,         %d,            %s,              %d,         %s   ) ", 
-			   barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, CUT (g_strdup_printf ("%.3f", cant_mud)));
+      q = g_strdup_printf ("INSERT INTO componente_mc (id, barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud) "
+			   "                   VALUES (DEFAULT,   %s,             %d,              %s,                  %d,         %s   ) ", 
+			   barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, CUT (g_strdup_printf ("%.3f", cant_mud)));
       res = EjecutarSQL(q);
       g_free(q);
 
       if (res == NULL)
 	return FALSE;
       else
-	printf ("Se asoció %s con %s\n", barcode_madre, barcode_comp_der);
+	printf ("Se asoció %s con %s\n", barcode_complejo, barcode_componente);
     }
   else
     {
@@ -4241,8 +4241,8 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
       if (cant_mud_l != cant_mud && cant_mud > 0)
 	{
 	  q = g_strdup_printf ("UPDATE componente_mc SET cant_mud = %s "
-			       "WHERE barcode_madre = %s AND barcode_comp_der = %s",
-			       CUT (g_strdup_printf ("%.3f", cant_mud)), barcode_madre, barcode_comp_der);
+			       "WHERE barcode_complejo = %s AND barcode_componente = %s",
+			       CUT (g_strdup_printf ("%.3f", cant_mud)), barcode_complejo, barcode_componente);
 	  res = EjecutarSQL(q);
 	  g_free(q);
 
@@ -4250,7 +4250,7 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
 	    return FALSE;
 	  else
 	    printf ("Se actualizó la cant_mud de %s con %s en %s\n", 
-		    barcode_madre, barcode_comp_der, CUT (g_strdup_printf ("%.3f", cant_mud)));
+		    barcode_complejo, barcode_componente, CUT (g_strdup_printf ("%.3f", cant_mud)));
 	}
       else
 	return FALSE;
@@ -4266,7 +4266,7 @@ asociar_derivada_a_madre (gchar *barcode_madre, gint tipo_madre,
  * @param: gchar * barcode_hijo
  */
 gboolean
-desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der)
+desasociar_componente_compuesto (gchar *barcode_complejo, gchar * barcode_componente)
 {
   PGresult *res;
   gchar *q;
@@ -4277,8 +4277,8 @@ desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der)
 				    (g_strdup ("SELECT id FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA'")), 
 				    0, "id"));
 
-  q = g_strdup_printf ("DELETE FROM componente_mc WHERE barcode_madre = %s AND barcode_comp_der = %s RETURNING tipo_comp_der",
-		       barcode_madre, barcode_comp_der);
+  q = g_strdup_printf ("DELETE FROM componente_mc WHERE barcode_complejo = %s AND barcode_componente = %s RETURNING tipo_complejo",
+		       barcode_complejo, barcode_componente);
 
   res = EjecutarSQL(q);
   g_free(q);
@@ -4286,14 +4286,14 @@ desasociar_madre_hijo (gchar *barcode_madre, gchar * barcode_comp_der)
   if (res == NULL)
     return FALSE;
 
-  printf ("Se desasoció %s con %s\n", barcode_madre, barcode_comp_der);
+  printf ("Se desasoció %s con %s\n", barcode_complejo, barcode_componente);
 
   //Si la mercadería es derivada, se debe "deshabilitar"
-  if (atoi (g_strdup (PQvaluebycol (res, 0, "tipo_comp_der"))) == id_derivado)
+  if (atoi (g_strdup (PQvaluebycol (res, 0, "tipo_complejo"))) == id_derivado)
     {
-      res = EjecutarSQL (g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode_comp_der));
+      res = EjecutarSQL (g_strdup_printf ("UPDATE producto SET estado = false WHERE barcode = %s", barcode_complejo));
       if (res == NULL) return FALSE;
-      printf ("Se des-habilitó el producto %s\n", barcode_comp_der);
+      printf ("Se des-habilitó el producto %s\n", barcode_complejo);
     }
 
   return TRUE;
@@ -4985,16 +4985,16 @@ get_componentes_compuesto (gchar *barcode)
   gchar *q;
 
   // barcode_madre = (Mercadería compuesta), barcode_comp_der = (Mercadería que compone a la madre)
-  q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_comp_der AS barcode, cmc.tipo_comp_der AS tipo, "
+  q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_componente AS barcode, cmc.tipo_componente AS tipo, "
 		       "       prd.codigo_corto AS codigo, prd.marca, prd.descripcion, prd.precio, "
-		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_comp_der)) AS costo_promedio "
+		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_componente)) AS costo_promedio "
 		       "FROM ( "
 		       "       SELECT barcode, codigo_corto, marca, descripcion, precio, estado "
 		       "       FROM producto "
 		       "     ) AS prd "
 		       "INNER JOIN componente_mc cmc "
-		       "      on prd.barcode = cmc.barcode_comp_der "
-		       "WHERE cmc.barcode_madre = '%s' "
+		       "      on prd.barcode = cmc.barcode_componente "
+		       "WHERE cmc.barcode_complejo = '%s' "
 		       "      AND prd.estado = true",
 		       barcode);
 

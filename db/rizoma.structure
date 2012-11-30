@@ -468,10 +468,10 @@ create table merma_mc_detalle (
   id                        serial not null,
   id_merma		    int4 not null,
   id_mh                     int4[], -- Un id array para identificar relacion madre-hijo  
-  barcode_madre		    bigint,
-  barcode_hijo              bigint,
-  tipo_madre		    int4,
-  tipo_hijo		    int4,
+  barcode_complejo	    bigint,
+  barcode_componente        bigint,
+  tipo_complejo		    int4,
+  tipo_componente	    int4,
   cantidad                  float8,
   constraint pk_merma_mc_detalle primary key (id)
 ) ;
@@ -540,10 +540,10 @@ create table producto (
 -- Componente_mercaderia_compuesta
 create table componente_mc (
   id   	     		    serial not null,
-  barcode_madre             bigint not null,
-  tipo_madre		    int4,
-  barcode_comp_der          bigint not null,
-  tipo_comp_der		    int4,
+  barcode_complejo          bigint not null, -- Mercaderías compuestas y derivadas (complejas)
+  tipo_complejo		    int4,
+  barcode_componente        bigint not null, -- Mercaderías corrientes y materias primas (simples) y complejas
+  tipo_componente	    int4,
   cant_mud                  float8, -- Cantidad de madre que usa el derivado	
   CONSTRAINT pk_componente_mc primary key (id)
 ) ;
@@ -703,8 +703,8 @@ create table venta_mc_detalle (
   id_venta_detalle          int4 not null, -- FK id (venta_detalle)
   id_venta_vd          	    int4 not null, -- FK id_venta (venta_detalle)
   id_mh	    	    	    int4[],        -- Un id array para identificar relacion madre-hijo
-  barcode_madre             int8 not null,
-  barcode_hijo              int8 not null,
+  barcode_complejo          int8 not null,
+  barcode_componente        int8 not null,
   cantidad                  float8 not null,
   precio_proporcional	    float8 not null,
   precio                    float8 not null,
@@ -714,8 +714,8 @@ create table venta_mc_detalle (
   otros                     float8 not null,
   iva_residual              float8 not null,
   otros_residual            float8 not null,
-  tipo_madre		    int4,
-  tipo_hijo		    int4,
+  tipo_complejo		    int4,
+  tipo_componente	    int4,
   proporcion_iva	    float8,
   proporcion_otros	    float8,
   constraint pk_venta_mc_detalle primary key (id)
@@ -730,7 +730,7 @@ create table proveedor (
   direccion                 varchar(100),
   ciudad                    varchar(100),
   comuna                    varchar(100),
-  telefono                  int4,
+  telefono                  varchar(100),
   email                     varchar(300),
   web                       varchar(300),
   contacto                  varchar(100),
@@ -813,10 +813,10 @@ create table traspaso_mc_detalle (
   id_traspaso               int4 not null,
   id_traspaso_detalle       int4 not null,
   id_mh	    	    	    int4[],
-  barcode_madre             int8 not null,
-  barcode_hijo              int8 not null,
-  tipo_madre		    int4 not null,
-  tipo_hijo		    int4 not null,
+  barcode_complejo          int8 not null,
+  barcode_componente        int8 not null,
+  tipo_complejo		    int4 not null,
+  tipo_componente	    int4 not null,
   cantidad                  float8 not null,
   costo_promedio            float8 not null,
   CONSTRAINT pk_traspaso_mc_detalle primary key (id)
@@ -939,11 +939,11 @@ alter table venta_detalle add constraint fk_venta_detalle_tipo
 alter table venta_mc_detalle add constraint fk_venta_mc_detalle_venta_detalle
   foreign key (id_venta_detalle, id_venta_vd)
   references venta_detalle (id, id_venta)  ;
-alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo_madre
-  foreign key (tipo_madre)
+alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo_complejo
+  foreign key (tipo_complejo)
   references tipo_mercaderia (id)  ;
-alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo_hijo
-  foreign key (tipo_hijo)
+alter table venta_mc_detalle add constraint fk_venta_mc_detalle_tipo_componente
+  foreign key (tipo_componente)
   references tipo_mercaderia (id)  ;
 alter table producto_recibido add constraint fk_productos_recibidos_productos
   foreign key (barcode)
@@ -1087,10 +1087,10 @@ alter table producto add constraint fk_producto_tipo_mercaderia
   foreign key (tipo)
   references tipo_mercaderia (id) ;
 alter table componente_mc add constraint fk_componente_mc_madre_tipo_mercaderia
-  foreign key (tipo_madre)
+  foreign key (tipo_complejo)
   references tipo_mercaderia (id) ;
 alter table componente_mc add constraint fk_componente_mc_derivado_tipo_mercaderia
-  foreign key (tipo_comp_der)
+  foreign key (tipo_componente)
   references tipo_mercaderia (id) ;
 
 

@@ -73,7 +73,7 @@ BEGIN
   SELECT date_trunc ('day', fecha) INTO oldest_vmcd
   FROM venta, venta_mc_detalle 
   WHERE venta.id=id_venta_vd 
-        AND barcode_hijo=codbar
+        AND barcode_componente=codbar
         AND venta.fecha>=last_month
   ORDER BY fecha ASC LIMIT 1;
   -- Se asegura que la fecha no sea null (si es que no se ha vendido el producto)
@@ -108,7 +108,7 @@ BEGIN
   SELECT (SUM (cantidad)) INTO subtotal 
   FROM venta_mc_detalle, venta
   WHERE venta.fecha >= last_month
-       AND barcode_hijo=codbar
+       AND barcode_componente=codbar
        AND venta.id=id_venta_vd;    
   
   total := total + COALESCE (subtotal,0);
@@ -338,55 +338,31 @@ BEGIN
 	disponible := 0;
 	contador_l := 0;
 
-	-- SI LA MERCADERÍA ES DERIVADA
-	IF (tipo_l = derivada_l) THEN
-	   stock_l := (SELECT (SELECT stock 
-	   	      	       FROM producto WHERE barcode = barcode_madre)
-		       FROM componente_mc 
-		       WHERE barcode_comp_der = codigo_barras
-		       AND tipo_madre = materia_prima_l);
-
-	   cant_mud_l := (SELECT cant_mud FROM componente_mc 
-			  	 WHERE barcode_comp_der = codigo_barras
-				 AND tipo_madre = materia_prima_l);
-
-	   -- Deben ser mayores a 0
-	   IF (cant_mud_l <= 0 OR stock_l <= 0) THEN
-	      RETURN;
-	   END IF;
-	     
-	   -- Si se cumple esa condición no se pueden vender esa mercaderia
-	   IF (stock_l < cant_mud_l) THEN
-	      RETURN;
-	   END IF;
-	     
-	   disponible_l := stock_l/cant_mud_l;
-
 	-- SI LA MERCADERÍA ES COMPUESTA
-	ELSIF (tipo_l = compuesta_l) THEN
+	IF (tipo_l = compuesta_l OR tipo_l = derivada_l) THEN
 	   -- SE OBTIENE LA CANTIDAD QUE REQUERIDA DE TODOS LOS PRODUCTOS SIMPLES (CORRIENTES) O MATERIAS PRIMAS
 	   query := $S$
-	   	    WITH RECURSIVE compuesta (barcode_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+	   	    WITH RECURSIVE compuesta (barcode_complejo, barcode_componente, tipo_componente, cant_mud) AS 
 		    (
-		     SELECT barcode_madre, barcode_comp_der, tipo_comp_der, cant_mud
-		     FROM componente_mc WHERE barcode_madre = $S$ || codigo_barras || $S$
+		     SELECT barcode_complejo, barcode_componente, tipo_componente, cant_mud
+		     FROM componente_mc WHERE barcode_complejo = $S$ || codigo_barras || $S$
 	 	     UNION ALL
-	 	     SELECT componente_mc.barcode_madre, componente_mc.barcode_comp_der, 
-		     	    componente_mc.tipo_comp_der,
+	 	     SELECT componente_mc.barcode_complejo, componente_mc.barcode_componente, 
+		     	    componente_mc.tipo_componente,
 		    	    componente_mc.cant_mud * compuesta.cant_mud
 	             FROM componente_mc, compuesta 
-		     WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+		     WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
 		    )
-		    SELECT barcode_comp_der, tipo_comp_der, SUM(compuesta.cant_mud) AS cantidad 
+		    SELECT barcode_componente, tipo_componente, SUM(compuesta.cant_mud) AS cantidad 
 		    FROM compuesta
-		    WHERE tipo_comp_der != $S$ || compuesta_l || $S$
-		    GROUP BY barcode_comp_der, tipo_comp_der$S$;
+		    WHERE tipo_componente != $S$ || compuesta_l || $S$
+		    GROUP BY barcode_componente, tipo_componente$S$;
 
 	   -- OBTENER EL STOCK DE SUS COMPONENTES Y VER PARA CUANTOS COMPUESTOS ALCANZAN
 	   FOR list IN EXECUTE query LOOP
 	       -- Calcula las unidades disponibles de la mercadería para este compuesto
-	       IF (list.tipo_comp_der = corriente_l OR list.tipo_comp_der = derivada_l) THEN
-	       	  stock_l := (SELECT * FROM obtener_stock_desde_barcode (list.barcode_comp_der));
+	       IF (list.tipo_componente = corriente_l OR list.tipo_componente = materia_prima_l) THEN
+	       	  stock_l := (SELECT * FROM obtener_stock_desde_barcode (list.barcode_componente));
 	       	  unidades_l := TRUNC (stock_l / list.cantidad);
 	       END IF;
 	       
@@ -403,7 +379,7 @@ BEGIN
            END IF;
 
 	-- SI ES UNA MERCADERÍA CORRIENTE
-	ELSIF (tipo_l = corriente_l) THEN
+	ELSIF (tipo_l = corriente_l  OR tipo_l = materia_prima_l) THEN
 	   disponible_l := (SELECT stock FROM producto WHERE barcode = codigo_barras);
 	END IF;
 
@@ -534,32 +510,24 @@ BEGIN
 	costo := 0;
 
 	-- PROCEDIMIENTOS SEGÚN EL TIPO DE LA MERCADERIA
-	-- SI ES DERIVADA
-	IF (tipo_l = derivada_l) THEN
-	   SELECT (SELECT costo_promedio * cant_mud
-	   	   FROM producto 
-		   WHERE barcode = barcode_madre) INTO costo_l
-	   FROM componente_mc cmc
-	   WHERE cmc.barcode_comp_der = codigo_barras
-	   AND cmc.tipo_madre = materia_prima_l;
-
-	-- SI ES COMPUESTA
-	ELSIF (tipo_l = compuesta_l) THEN
-	   WITH RECURSIVE compuesta (barcode_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+	-- SI ES COMPUESTA O DERIVADA
+	IF (tipo_l = compuesta_l OR tipo_l = derivada_l) THEN
+	   WITH RECURSIVE compuesta (barcode_complejo, barcode_componente, tipo_componente, cant_mud) AS 
 		(
-		  SELECT barcode_madre, barcode_comp_der, tipo_comp_der, cant_mud
-		  FROM componente_mc WHERE barcode_madre = codigo_barras
+		  SELECT barcode_complejo, barcode_componente, tipo_componente, cant_mud
+		  FROM componente_mc WHERE barcode_complejo = codigo_barras
 	 	  UNION ALL
-	 	  SELECT componente_mc.barcode_madre, componente_mc.barcode_comp_der,
-		         componente_mc.tipo_comp_der,
+	 	  SELECT componente_mc.barcode_complejo, componente_mc.barcode_componente,
+		         componente_mc.tipo_componente,
 		      	 componente_mc.cant_mud * compuesta.cant_mud
 	          FROM componente_mc, compuesta 
-		  WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+		  WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
 		)
-	   SELECT SUM((SELECT * FROM obtener_costo_promedio_desde_barcode ( barcode_comp_der ))
-	   	      * compuesta.cant_mud) INTO costo_l
+	   SELECT SUM((SELECT * FROM obtener_costo_promedio_desde_barcode (barcode_componente))
+	   	      	      	     					  * compuesta.cant_mud) INTO costo_l
 	   FROM compuesta
-	   WHERE tipo_comp_der != compuesta_l;
+	   WHERE tipo_componente != compuesta_l
+	   AND tipo_componente != derivada_l;
 
 	-- SI ES CORRIENTE
 	ELSIF (tipo_l = corriente_l OR tipo_l = materia_prima_l) THEN
@@ -686,12 +654,12 @@ declare
    derivada_l int4;
 BEGIN
   aux := (SELECT COALESCE (count(*), 0) FROM merma WHERE barcode = barcode_in);
-  aux := aux + (SELECT COALESCE (count(*), 0) FROM merma_mc_detalle WHERE barcode_hijo = barcode_in);
+  aux := aux + (SELECT COALESCE (count(*), 0) FROM merma_mc_detalle WHERE barcode_componente = barcode_in);
   IF aux = 0 THEN
      unidades_merma := 0;
   ELSE
      unidades_merma := (SELECT COALESCE (sum(unidades), 0) FROM merma WHERE barcode = barcode_in);
-     unidades_merma := unidades_merma + (SELECT COALESCE (sum(cantidad), 0) FROM merma_mc_detalle WHERE barcode_hijo = barcode_in);
+     unidades_merma := unidades_merma + (SELECT COALESCE (sum(cantidad), 0) FROM merma_mc_detalle WHERE barcode_componente = barcode_in);
   END IF;
 
 RETURN;
@@ -1633,7 +1601,7 @@ create or replace function buscar_proveedor(
        out direccion varchar(100),
        out ciudad varchar(100),
        out comuna varchar(100),
-       out telefono integer,
+       out telefono varchar(100),
        out email varchar(300),
        out web varchar(300),
        out contacto varchar(100),
@@ -1675,7 +1643,7 @@ create or replace function buscar_emisor(
        out rut integer,
        out dv varchar(1),
        out razon_social varchar(100),
-       out telefono integer,
+       out telefono varchar(100),
        out direccion varchar(100),
        out comuna varchar(100),
        out ciudad varchar(100),
@@ -1713,7 +1681,7 @@ create or replace function select_proveedor ( OUT rut int4,
 					      OUT direccion varchar(100),
 					      OUT ciudad varchar(100),
 					      OUT comuna varchar(100),
-					      OUT telefono int4,
+					      OUT telefono varchar(100),
 					      OUT email varchar(300),
 					      OUT web varchar(300),
 					      OUT contacto varchar(100),
@@ -1755,7 +1723,7 @@ create or replace function select_proveedor (IN prov_rut int4,
 					    OUT direccion varchar(100),
   					    OUT ciudad varchar(100),
 					    OUT comuna varchar(100),
-					    OUT telefono int4,
+					    OUT telefono varchar(100),
 					    OUT email varchar(300),
 					    OUT web varchar(300),
 					    OUT contacto varchar(100),
@@ -1951,51 +1919,34 @@ BEGIN
 
    -- De acuerdo al tipo de mercadería
    -- Si es compuesta
-   IF (tipo_l = compuesta_l) THEN
+   IF (tipo_l = compuesta_l OR tipo_l = derivada_l) THEN
       CREATE TEMPORARY TABLE componentes_compuesto AS
-      WITH RECURSIVE compuesta (barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+      WITH RECURSIVE compuesta (barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud) AS 
          (
-	  SELECT barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
-       	  FROM componente_mc WHERE barcode_madre = barcode_in
+	  SELECT barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud
+       	  FROM componente_mc WHERE barcode_complejo = barcode_in
           UNION ALL
-          SELECT componente_mc.barcode_madre, componente_mc.tipo_madre,
-	         componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+          SELECT componente_mc.barcode_complejo, componente_mc.tipo_complejo,
+	         componente_mc.barcode_componente, componente_mc.tipo_componente,
            	 componente_mc.cant_mud * compuesta.cant_mud
           FROM componente_mc, compuesta
-       	  WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+       	  WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
       	 )
-      	 SELECT c.barcode_comp_der AS barcode, c.tipo_comp_der AS tipo, c.cant_mud AS cantidad
+      	 SELECT c.barcode_componente AS barcode, c.tipo_componente AS tipo, c.cant_mud AS cantidad
 	 FROM compuesta c
-	 WHERE c.tipo_comp_der != compuesta_l;
+	 WHERE c.tipo_componente != compuesta_l
+	 AND c.tipo_componente != derivada_l;
 
 	 q := $S$SELECT * FROM componentes_compuesto$S$;
 
 	 -- Se aumenta el stock de los componentes de la mercadería compuesta
 	 FOR l IN EXECUTE q LOOP
-	     IF (l.tipo = derivada_l) THEN
-	        cantidad_mp := (SELECT cant_mud FROM componente_mc 
-			        WHERE barcode_comp_der = barcode_in
-			        AND tipo_madre = materia_prima_l);
-
-	     	UPDATE producto
-		SET stock = stock + (l.cantidad * cantidad_in * cantidad_mp)
-		WHERE barcode = (SELECT barcode_madre 
-		 	      	 FROM componente_mc 
-				 WHERE barcode_comp_der = l.barcode
-				 AND tipo_madre = materia_prima_l);
-	     ELSEIF (l.tipo = materia_prima_l OR l.tipo = corriente_l) THEN
+	     IF (l.tipo = materia_prima_l OR l.tipo = corriente_l) THEN
       	        UPDATE producto SET stock = stock + (l.cantidad * cantidad_in) WHERE barcode = l.barcode;
 	     END IF;
 	 END LOOP;	 
 	 -- Se elimina la tabla temporal
   	 DROP TABLE componentes_compuesto;
-
-   -- Si es derivada
-   ELSEIF (tipo_l = derivada_l) THEN
-      UPDATE producto SET stock = stock + cantidad_in
-      WHERE barcode = (SELECT barcode_madre FROM componente_mc 
-		       WHERE barcode_comp_der = barcode_in AND tipo_madre = materia_prima_l);
-
    -- Si es corriente o materia prima
    ELSEIF (tipo_l = materia_prima_l OR tipo_l = corriente_l) THEN
       UPDATE producto SET stock = stock + cantidad_in WHERE barcode = barcode_in;
@@ -2039,55 +1990,34 @@ BEGIN
 
    -- De acuerdo al tipo de mercadería
    -- Si es compuesta
-   IF (tipo_l = compuesta_l) THEN
+   IF (tipo_l = compuesta_l OR tipo_l = derivada_l) THEN
       CREATE TEMPORARY TABLE componentes_compuesto AS
-      WITH RECURSIVE compuesta (barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+      WITH RECURSIVE compuesta (barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud) AS 
          (
-	  SELECT barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
-       	  FROM componente_mc WHERE barcode_madre = barcode_in
+	  SELECT barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud
+       	  FROM componente_mc WHERE barcode_complejo = barcode_in
           UNION ALL
-          SELECT componente_mc.barcode_madre, componente_mc.tipo_madre,
-	         componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+          SELECT componente_mc.barcode_complejo, componente_mc.tipo_complejo,
+	         componente_mc.barcode_componente, componente_mc.tipo_componente,
            	 componente_mc.cant_mud * compuesta.cant_mud
           FROM componente_mc, compuesta
-       	  WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+       	  WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
       	 )
-      	 SELECT c.barcode_comp_der AS barcode, c.tipo_comp_der AS tipo, c.cant_mud AS cantidad
+      	 SELECT c.barcode_componente AS barcode, c.tipo_componente AS tipo, c.cant_mud AS cantidad
 	 FROM compuesta c
-	 WHERE c.tipo_comp_der != compuesta_l;
+	 WHERE c.tipo_componente != compuesta_l
+	 AND c.tipo_componente != derivada_l;
 
 	 q := $S$SELECT * FROM componentes_compuesto$S$;
 
 	 -- Se disminuye el stock de los componentes de la mercadería compuesta
 	 FOR l IN EXECUTE q LOOP
-	     IF (l.tipo = derivada_l) THEN
-	        cantidad_mp := (SELECT cant_mud FROM componente_mc 
-			        WHERE barcode_comp_der = l.barcode
-			        AND tipo_madre = materia_prima_l);
-
-	     	UPDATE producto
-		SET stock = stock - (l.cantidad * cantidad_in * cantidad_mp) 
-		WHERE barcode = (SELECT barcode_madre 
-		 	      	 FROM componente_mc 
-				 WHERE barcode_comp_der = l.barcode
-				 AND tipo_madre = materia_prima_l);
-	     ELSEIF (l.tipo = materia_prima_l OR l.tipo = corriente_l) THEN
+	     IF (l.tipo = materia_prima_l OR l.tipo = corriente_l) THEN
       	        UPDATE producto SET stock = stock - (l.cantidad * cantidad_in) WHERE barcode = l.barcode;
 	     END IF;
 	 END LOOP;
 	 -- Se elimina la tabla temporal
   	 DROP TABLE componentes_compuesto;
-
-   -- Si es derivada
-   ELSEIF (tipo_l = derivada_l) THEN
-      cantidad_mp := (SELECT cant_mud FROM componente_mc 
-		      WHERE barcode_comp_der = barcode_in
-		      AND tipo_madre = materia_prima_l);
-
-      UPDATE producto SET stock = stock - (cantidad_in * cantidad_mp)
-      WHERE barcode = (SELECT barcode_madre FROM componente_mc 
-		       WHERE barcode_comp_der = barcode_in AND tipo_madre = materia_prima_l);
-
    -- Si es corriente o materia prima
    ELSEIF (tipo_l = materia_prima_l OR tipo_l = corriente_l) THEN
       UPDATE producto SET stock = stock - cantidad_in WHERE barcode = barcode_in;
@@ -2178,32 +2108,12 @@ begin
 			   in_proporcion_otros) returning id into id_venta_detalle_l;
 	
 	-- Si es una mercadería compuesta, se registrará todo su detalle en venta_mc_detalle
-	IF (in_tipo = compuesta_l) THEN -- NOTA:registrar_detalle_compuesto actualiza el stock de sus componentes por si solo
+	IF (in_tipo = compuesta_l OR in_tipo = derivada_l) THEN -- NOTA:registrar_detalle_compuesto actualiza el stock de sus componentes por si solo
 	   PERFORM registrar_detalle_compuesto (in_id_venta::int4, num_linea::int4, in_barcode::bigint,
 			                        ARRAY[0,0]::int[], 0::double precision, in_precio::double precision, in_cantidad::double precision,
 						in_proporcion_iva::double precision, in_proporcion_otros::double precision);
-
-	-- Si es una derivada se registrará su detalle en venta_mc_detalle
-	ELSIF (in_tipo = derivada_l) THEN
-	   SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
-	   SELECT barcode_madre INTO barcode_mp FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
-	   SELECT precio INTO precio_mp FROM producto WHERE barcode = in_barcode;
-	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
-	   SELECT cant_mud INTO cantidad_mp
-	   FROM componente_mc WHERE barcode_madre = barcode_mp AND barcode_comp_der = in_barcode;
-
-	   INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
-				       	 precio_proporcional, precio, costo_promedio, ganancia, iva, otros, iva_residual, otros_residual,
-				       	 tipo_madre, tipo_hijo)
-	   VALUES (DEFAULT, num_linea, in_id_venta, ARRAY[0,1]::int[], in_barcode, barcode_mp, in_cantidad * cantidad_mp,
-	           in_precio, precio_mp, costo_mp, in_ganancia, in_iva, in_otros, in_iva_residual, in_otros_residual,
-		   in_tipo, materia_prima_l);
-
-	   -- Actualiza el stock (lo disminuye segun lo vendido) de la mercadería derivada (de su materia prima)
-	   PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
-	
 	-- Si es mercadería corriente
-	ELSIF (in_tipo = corriente_l) THEN
+	ELSIF (in_tipo = corriente_l OR in_tipo = materia_prima_l) THEN -- La materia prima no se vende directamente, pero se coloca aquí por si acaso
 	   -- Actualiza el stock de la mercadería corriente (lo disminuye segun lo vendido)
 	   PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
 	END IF;
@@ -2505,35 +2415,35 @@ BEGIN
 	ganancia_out := 0;
 
 	-- Consulta recursiva, obtiene todos los componentes y sub componentes de la mercadería compuesta o derivada
-	query :=$S$ WITH RECURSIVE compuesta (barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+	query :=$S$ WITH RECURSIVE compuesta (barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud) AS 
       	      	    (
-		      SELECT barcode_madre, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
-       		      FROM componente_mc WHERE barcode_madre = $S$ || in_barcode_product || $S$
+		      SELECT barcode_complejo, tipo_complejo, barcode_componente, tipo_componente, cant_mud
+       		      FROM componente_mc WHERE barcode_complejo = $S$ || in_barcode_product || $S$
         	      UNION ALL
-        	      SELECT componente_mc.barcode_madre, componente_mc.tipo_madre,
-		      	     componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+        	      SELECT componente_mc.barcode_complejo, componente_mc.tipo_complejo,
+		      	     componente_mc.barcode_componente, componente_mc.tipo_componente,
            	      	     componente_mc.cant_mud * compuesta.cant_mud
               	      FROM componente_mc, compuesta
-       		      WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+       		      WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
       		    )
-      		    SELECT c.barcode_madre, c.tipo_madre, c.barcode_comp_der, c.tipo_comp_der, c.cant_mud,
-		    	   (SELECT precio FROM producto WHERE barcode = c.barcode_comp_der) AS precio_hijo,
-			   (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_comp_der)) AS costo_hijo,
-			   (SELECT valor FROM get_iva (c.barcode_comp_der))/100 AS iva,
-			   (SELECT valor FROM get_otro_impuesto (c.barcode_comp_der))/100 AS otros
+      		    SELECT c.barcode_complejo, c.tipo_complejo, c.barcode_componente, c.tipo_componente, c.cant_mud,
+		    	   (SELECT precio FROM producto WHERE barcode = c.barcode_componente) AS precio_componente,
+			   (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_componente)) AS costo_componente,
+			   (SELECT valor FROM get_iva (c.barcode_componente))/100 AS iva,
+			   (SELECT valor FROM get_otro_impuesto (c.barcode_componente))/100 AS otros
       		    FROM compuesta c $S$;
 
 	FOR l IN EXECUTE query LOOP	-- NOTA: cuidado con las materias primas vendibles como madre
-	    -- PRECIO PROPORCIONAL (proporcion del COSTO hijo con respecto a madre) * PRECIO madre
-	    precio_prop := (l.costo_hijo/costo_madre) * precio_madre;
+	    -- PRECIO PROPORCIONAL (proporcion del COSTO componente con respecto a madre) * PRECIO madre
+	    precio_prop := (l.costo_componente/costo_madre) * precio_madre;
 
-	    -- Si el hijo actual es compuesto (sera la proxima madre)
-	    IF (l.tipo_comp_der = compuesta_l) THEN	       	       
+	    -- Si el componente actual es compuesto (sera la proxima madre)
+	    IF (l.tipo_componente = compuesta_l OR l.tipo_componente = derivada_l) THEN
 	       precio_madre := precio_prop;
-	       SELECT costo INTO costo_madre FROM obtener_costo_promedio_desde_barcode (l.barcode_comp_der);
+	       SELECT costo INTO costo_madre FROM obtener_costo_promedio_desde_barcode (l.barcode_componente);
 	    ELSE
 	       -- GANANCIA ((PRECIO NETO -> precio de venta sin impuestos) - costo del producto) * cantidad_requerida
-	       ganancia_out := ganancia_out + ((precio_prop / (l.iva + l.otros + 1)) - l.costo_hijo) * l.cant_mud;
+	       ganancia_out := ganancia_out + ((precio_prop / (l.iva + l.otros + 1)) - l.costo_componente) * l.cant_mud;
 	       -- IVA ((PRECIO NETO -> precio de venta sin impuestos) * iva)  * cantidad_requerida
 	       iva_out := iva_out + ((precio_prop / (l.iva + l.otros + 1)) * l.iva) * l.cant_mud;
 	       -- OTROS ((PRECIO NETO -> precio de venta sin impuestos) * otros) * cantidad_requerida
@@ -2708,7 +2618,7 @@ BEGIN
 
   -- Incluye en la tabla temporal venta_detalle_completa el detalle de los componentes de una merc. compleja
   INSERT INTO venta_detalle_completa
-  SELECT vmcd.barcode_hijo AS barcode_l,
+  SELECT vmcd.barcode_componente AS barcode_l,
   	 SUM (vmcd.cantidad) AS amount_l,
 	 SUM (vmcd.cantidad * vmcd.precio_proporcional) AS sold_amount_l, -- SubTotal
 	 SUM (vmcd.cantidad * vmcd.costo_promedio) AS costo_l,
@@ -2716,10 +2626,10 @@ BEGIN
   FROM venta v
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id
-  WHERE (vmcd.tipo_hijo = corriente_l OR vmcd.tipo_hijo = derivada_l)
+  WHERE (vmcd.tipo_componente = corriente_l OR vmcd.tipo_componente = derivada_l)
   	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
-  GROUP BY vmcd.barcode_hijo;
+  GROUP BY vmcd.barcode_componente;
 
   q := $S$ 
      SELECT producto.barcode AS barcode,
@@ -2761,7 +2671,7 @@ RETURN;
 END; $$ language plpgsql;
 
 
----
+--- TODOO : REVISAR
 -- Ranking de ventas de las materias primas
 -- (ventas indirectas).
 ---
@@ -2784,9 +2694,10 @@ DECLARE
 	materia_prima_l int4;
 BEGIN
 	SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
-	q := $S$ SELECT CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
-	     	 	     WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
-			END AS barcode,
+	q := $S$ SELECT --CASE WHEN vmcd.tipo_componente = $S$||materia_prima_l||$S$ THEN vmcd.barcode_componente
+	     	 	--     WHEN vmcd.tipo_complejo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_complejo
+			--END AS barcode,
+			vmcd.barcode_componente AS barcode --Ahora la materia prima es un componente base
 	     	 	p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
 		        SUM (vmcd.cantidad) AS cantidad,
 			SUM (vmcd.precio) AS monto_vendido,
@@ -2796,11 +2707,12 @@ BEGIN
 		      INNER JOIN venta v
 		      	    ON v.id = vmcd.id_venta_vd
 		      INNER JOIN producto p
-		      	    ON p.barcode = CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
-	     	 	       		   	WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
-					   END
+		      	    ON p.barcode = vmcd.tipo_componente = $S$||materia_prima_l||$S$
+			       		   --CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
+	     	 	       		   --	WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
+					   --END
 		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-		       AND (vmcd.tipo_hijo = $S$||materia_prima_l||$S$ OR vmcd.tipo_madre = $S$||materia_prima_l||$S$)
+		       AND vmcd.tipo_componente = $S$||materia_prima_l||$S$ -- OR vmcd.tipo_complejo = $S$||materia_prima_l||$S$
 		       AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
 		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
 
@@ -2861,12 +2773,12 @@ BEGIN
   WHERE vd.tipo = derivada_l
   AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
   AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
-  AND vd.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre=barcode_mp::bigint)
+  AND vd.barcode IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente=barcode_mp::bigint)
   GROUP BY vd.barcode;
 
   -- Incluye en la tabla temporal venta_derivados_completa el detalle de los componentes de una merc. compleja
   INSERT INTO venta_derivados_completa
-  SELECT vmcd.barcode_hijo AS barcode_l,
+  SELECT vmcd.barcode_complejo AS barcode_l,
   	 SUM (vmcd.cantidad) AS amount_l,
 	 SUM (vmcd.cantidad * vmcd.precio) AS sold_amount_l, -- SubTotal
 	 SUM (vmcd.cantidad * vmcd.costo_promedio) AS costo_l,
@@ -2874,11 +2786,11 @@ BEGIN
   FROM venta v
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id
-  WHERE vmcd.tipo_hijo = derivada_l
+  WHERE vmcd.tipo_componente = derivada_l
   	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
-	AND vmcd.barcode_hijo IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre = barcode_mp::bigint)
-  GROUP BY vmcd.barcode_hijo;
+	AND vmcd.barcode_complejo IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente = barcode_mp::bigint)
+  GROUP BY vmcd.barcode_complejo;
 
   q := $S$ 
      SELECT producto.barcode AS barcode,
@@ -2947,24 +2859,24 @@ BEGIN
 	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
 
 	q := $S$ 
-	     WITH RECURSIVE compuesta (id_venta, barcode_madre, id_mh, tipo_madre, 
-	     	  	    	       barcode_hijo, tipo_hijo, cantidad, 
+	     WITH RECURSIVE compuesta (id_venta, barcode_complejo, id_mh, tipo_complejo,
+	     	  	    	       barcode_componente, tipo_componente, cantidad, 
 				       precio, costo_promedio, iva, otros, ganancia) AS 
       	      	(
-		   SELECT id_venta_vd, barcode_madre, id_mh, tipo_madre,
-			  barcode_hijo, tipo_hijo, cantidad, 
+		   SELECT id_venta_vd, barcode_complejo, id_mh, tipo_complejo,
+			  barcode_componente, tipo_componente, cantidad, 
 			  precio_proporcional, costo_promedio, iva, otros, ganancia
        		   FROM venta_mc_detalle
 			INNER JOIN venta v
 			ON venta_mc_detalle.id_venta_vd = v.id
-		   WHERE barcode_madre = $S$ || barcode_mc || $S$
+		   WHERE barcode_complejo = $S$ || barcode_mc || $S$
 			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
         	   UNION ALL
-        	   SELECT vmcd.id_venta_vd, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
-		      	  vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad,
+        	   SELECT vmcd.id_venta_vd, vmcd.barcode_complejo, vmcd.id_mh, vmcd.tipo_complejo,
+		      	  vmcd.barcode_componente, vmcd.tipo_componente, vmcd.cantidad,
 			  vmcd.precio_proporcional, vmcd.costo_promedio, vmcd.iva, vmcd.otros, vmcd.ganancia
               	   FROM venta_mc_detalle vmcd, compuesta
-       		   WHERE vmcd.barcode_madre = compuesta.barcode_hijo AND
+       		   WHERE vmcd.barcode_complejo = compuesta.barcode_componente AND
 			 vmcd.id_venta_vd = compuesta.id_venta AND
 			 vmcd.id_mh[1] = compuesta.id_mh[2]
       		)
@@ -2980,11 +2892,11 @@ BEGIN
 	    	       SUM (c.costo_promedio*c.cantidad) AS costo,
        	    	       SUM (c.ganancia) AS contribucion
       	        FROM compuesta c
-      	   	     INNER JOIN producto 
-	   	     	   ON c.barcode_hijo = producto.barcode
-	             WHERE c.tipo_hijo = $S$ ||derivada_l|| $S$
-		     	   OR c.tipo_hijo = $S$ ||corriente_l|| $S$
-      		     GROUP BY c.barcode_hijo,1,2,3,4,5,6,7
+      	   	     INNER JOIN producto
+	   	     	   ON c.barcode_componente = producto.barcode
+	             WHERE c.tipo_componente = $S$ ||derivada_l|| $S$
+		     	   OR c.tipo_componente = $S$ ||corriente_l|| $S$
+      		     GROUP BY c.barcode_componente,1,2,3,4,5,6,7
       		     ORDER BY producto.descripcion ASC $S$;
 
       	FOR l IN EXECUTE q loop
@@ -3064,7 +2976,7 @@ END; $$ LANGUAGE plpgsql;
 -- (agrupados por producto) para el ranking de traspasos. 
 --
 -- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
---
+-- TODOO:: revisar, se deben mostrar las materias primas????
 ---
 CREATE OR REPLACE FUNCTION ranking_traspaso (IN starts date,
        	  	  	   		     IN ends date,
@@ -3114,16 +3026,16 @@ BEGIN
 
   -- Incluye en la tabla temporal venta_detalle_completa el detalle de los componentes de una merc. compleja
   INSERT INTO traspaso_detalle_completa
-  SELECT tmcd.barcode_hijo AS barcode_l,
+  SELECT tmcd.barcode_componente AS barcode_l,
   	 t.origen AS origen_l,
   	 SUM (tmcd.cantidad) AS amount_l,
 	 SUM (tmcd.cantidad * tmcd.costo_promedio) AS costo_l -- SUM (Subtotal costo) = COSTO TOTAL
   FROM traspaso t
        INNER JOIN traspaso_mc_detalle tmcd
        ON tmcd.id_traspaso = t.id
-  WHERE (tmcd.tipo_hijo = corriente_l OR tmcd.tipo_hijo = derivada_l)
+  WHERE (tmcd.tipo_componente = corriente_l OR tmcd.tipo_componente = derivada_l) --Incluir las materias primas??
   	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
-  GROUP BY tmcd.barcode_hijo, t.origen;
+  GROUP BY tmcd.barcode_componente, t.origen;
 
   q := $S$ 
      SELECT producto.barcode AS barcode,
@@ -3197,9 +3109,10 @@ BEGIN
 	   filtro := 't.origen != 1';
 	END IF;
 
-	q := $S$ SELECT CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
-	     	 	     WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
-			END AS barcode,
+	q := $S$ SELECT --CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
+	     	 	--     WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
+			--END AS barcode,
+			tmcd.barcode_componente AS barcode
 	     	 	t.origen, p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
 		        SUM (tmcd.cantidad) AS cantidad,
 			SUM (tmcd.cantidad*tmcd.costo_promedio) AS costo
@@ -3207,11 +3120,13 @@ BEGIN
 		      INNER JOIN traspaso t
 		      	    ON t.id = tmcd.id_traspaso
 		      INNER JOIN producto p
-		      	    ON p.barcode = CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
-	     	 	       		   	WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
-					   END
+		      	    ON p.barcode = tmcd.barcode_componente
+			       		   --CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
+	     	 	       		   --	WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
+					   --END
 		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
-		       AND (tmcd.tipo_hijo = $S$||materia_prima_l||$S$ OR tmcd.tipo_madre = $S$||materia_prima_l||$S$)
+		       --AND (tmcd.tipo_hijo = $S$||materia_prima_l||$S$ OR tmcd.tipo_madre = $S$||materia_prima_l||$S$)
+		       AND tmcd.tipo_componente = $S$||materia_prima_l||$S$
 		       AND $S$ ||filtro|| $S$
 		 GROUP BY 1,2,3,4,5,6,7 ORDER BY p.descripcion ASC $S$;
 
@@ -3264,21 +3179,21 @@ BEGIN
        ON td.id_traspaso = t.id
   WHERE td.tipo = derivada_l
   	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
-  	AND td.barcode IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre=barcode_mp::bigint)
+  	AND td.barcode IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente=barcode_mp::bigint)
   GROUP BY td.barcode;
 
   -- Incluye en la tabla temporal traspaso_derivados_completa el detalle de los componentes de una merc. compleja
   INSERT INTO traspaso_derivados_completa
-  SELECT tmcd.barcode_hijo AS barcode_l,
+  SELECT tmcd.barcode_componente AS barcode_l,
   	 SUM (tmcd.cantidad) AS amount_l,
 	 SUM (tmcd.cantidad * tmcd.costo_promedio) AS costo_l
   FROM traspaso t
        INNER JOIN traspaso_mc_detalle tmcd
        ON tmcd.id_traspaso = t.id
-  WHERE tmcd.tipo_hijo = derivada_l
+  WHERE tmcd.tipo_componente = derivada_l
   	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
-	AND tmcd.barcode_hijo IN (SELECT barcode_comp_der FROM componente_mc WHERE barcode_madre = barcode_mp::bigint)
-  GROUP BY tmcd.barcode_hijo;
+	AND tmcd.barcode_complejo IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente = barcode_mp::bigint)
+  GROUP BY tmcd.barcode_complejo;
 
   q := $S$ 
      SELECT producto.barcode AS barcode,
@@ -3341,21 +3256,21 @@ BEGIN
 	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
 
 	q := $S$ 
-	     WITH RECURSIVE compuesta (id_traspaso, barcode_madre, id_mh, tipo_madre,
-	     	  	    	       barcode_hijo, tipo_hijo, cantidad, costo_promedio) AS 
+	     WITH RECURSIVE compuesta (id_traspaso, barcode_complejo, id_mh, tipo_complejo,
+	     	  	    	       barcode_componente, tipo_componente, cantidad, costo_promedio) AS 
       	      	(
-		   SELECT id_traspaso, barcode_madre, id_mh, tipo_madre,
-			  barcode_hijo, tipo_hijo, cantidad, costo_promedio
+		   SELECT id_traspaso, barcode_complejo, id_mh, tipo_complejo,
+			  barcode_componente, tipo_componente, cantidad, costo_promedio
        		   FROM traspaso_mc_detalle
 			INNER JOIN traspaso t
 			ON traspaso_mc_detalle.id_traspaso = t.id
-		   WHERE barcode_madre = $S$ || barcode_mc || $S$
+		   WHERE barcode_complejo = $S$ || barcode_mc || $S$
 			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
         	   UNION ALL
-        	   SELECT tmcd.id_traspaso, tmcd.barcode_madre, tmcd.id_mh, tmcd.tipo_madre,
-		      	  tmcd.barcode_hijo, tmcd.tipo_hijo, tmcd.cantidad, tmcd.costo_promedio
+        	   SELECT tmcd.id_traspaso, tmcd.barcode_complejo, tmcd.id_mh, tmcd.tipo_complejo,
+		      	  tmcd.barcode_componente, tmcd.tipo_componente, tmcd.cantidad, tmcd.costo_promedio
               	   FROM traspaso_mc_detalle tmcd, compuesta
-       		   WHERE tmcd.barcode_madre = compuesta.barcode_hijo AND
+       		   WHERE tmcd.barcode_complejo = compuesta.barcode_componente AND
 			 tmcd.id_traspaso = compuesta.id_traspaso AND
 			 tmcd.id_mh[1] = compuesta.id_mh[2]
       		)
@@ -3370,10 +3285,10 @@ BEGIN
 	    	       SUM (c.costo_promedio*c.cantidad) AS costo
       	        FROM compuesta c
       	   	     INNER JOIN producto 
-	   	     	   ON c.barcode_hijo = producto.barcode
-	             WHERE c.tipo_hijo = $S$ ||derivada_l|| $S$
-		     	   OR c.tipo_hijo = $S$ ||corriente_l|| $S$
-      		     GROUP BY c.barcode_hijo,1,2,3,4,5,6,7
+	   	     	   ON c.barcode_componente = producto.barcode
+	             WHERE c.tipo_complejo = $S$ ||derivada_l|| $S$
+		     	   OR c.tipo_componente = $S$ ||corriente_l|| $S$
+      		     GROUP BY c.barcode_componente,1,2,3,4,5,6,7
       		     ORDER BY producto.descripcion ASC $S$;
 
       	FOR l IN EXECUTE q loop
@@ -4170,28 +4085,28 @@ BEGIN
             amount := l1.cantidad;
 
 	    -- Si es una mercadería compuesta, se retornan sus componentes (si solo_componentes = TRUE)
-	    IF (l1.tipo = compuesta_l AND solo_componentes = TRUE) THEN
+	    IF ((l1.tipo = compuesta_l OR l1.tipo = derivada_l) AND solo_componentes = TRUE) THEN
 	       q2 := $S$
-	       WITH RECURSIVE compuesta (id_venta, barcode_madre, id_mh, tipo_madre, 
-	     	  	    	     	 barcode_hijo, tipo_hijo, cantidad, precio) AS 
+	       WITH RECURSIVE compuesta (id_venta, barcode_complejo, id_mh, tipo_complejo, 
+	     	  	    	     	 barcode_componente, tipo_componente, cantidad, precio) AS 
       	       (
-	         SELECT id_venta_vd, barcode_madre, id_mh, tipo_madre,
-		      	barcode_hijo, tipo_hijo, cantidad, precio_proporcional
+	         SELECT id_venta_vd, barcode_complejo, id_mh, tipo_complejo,
+		      	barcode_componente, tipo_componente, cantidad, precio_proporcional
        	       	 FROM venta_mc_detalle
-	       	 WHERE barcode_madre = $S$||l1.barcode||$S$
+	       	 WHERE barcode_complejo = $S$||l1.barcode||$S$
 		       AND venta_mc_detalle.id_venta_vd = $S$||sale_id||$S$
                  UNION ALL
-               	 SELECT vmcd.id_venta_vd, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
-	      	      	vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad, precio_proporcional
+               	 SELECT vmcd.id_venta_vd, vmcd.barcode_complejo, vmcd.id_mh, vmcd.tipo_complejo,
+	      	      	vmcd.barcode_componente, vmcd.tipo_componente, vmcd.cantidad, precio_proporcional
                  FROM venta_mc_detalle vmcd, compuesta
-       	       	 WHERE vmcd.barcode_madre = compuesta.barcode_hijo AND
+       	       	 WHERE vmcd.barcode_complejo = compuesta.barcode_componente AND
 		       vmcd.id_venta_vd = compuesta.id_venta AND
 		       vmcd.id_mh[1] = compuesta.id_mh[2]
 	      ) 
-	      SELECT barcode_hijo AS barcode, tipo_hijo AS tipo, cantidad, precio
+	      SELECT barcode_componente AS barcode, tipo_componente AS tipo, cantidad, precio
 	      FROM compuesta
-	      WHERE tipo_hijo = $S$||corriente_l||$S$
-	      OR tipo_hijo = $S$||materia_prima_l;
+	      WHERE tipo_componente = $S$||corriente_l||$S$
+	      OR tipo_componente = $S$||materia_prima_l;
 
 	      FOR l2 IN EXECUTE q2 LOOP
 	      	  barcode := l2.barcode;
@@ -4200,14 +4115,6 @@ BEGIN
             	  amount := l2.cantidad;
 	      	  RETURN NEXT;
 	      END LOOP;
-	    -- Si es una mercadería derivada (y solo_componentes = TRUE), devolverá a su mercadería raíz
-	    ELSEIF (l1.tipo = derivada_l AND solo_componentes = TRUE) THEN
-	      barcode := (SELECT barcode_madre 
-	      	      	  FROM componente_mc 
-			  WHERE barcode_comp_der = l1.barcode
-			  	AND tipo_madre = materia_prima_l);
-	      tipo := materia_prima_l;
-	      RETURN NEXT;
 	    ELSE -- Si es una mercadería corriente o materia prima (o cualquiera, en caso que solo_componentes = FALSE)
 	      RETURN NEXT;
 	    END IF;
@@ -4215,6 +4122,8 @@ BEGIN
 
 RETURN;
 END; $$ LANGUAGE plpgsql;
+
+
 
 create or replace function calculate_fifo (
         in product_barcode bigint,
@@ -4370,25 +4279,10 @@ BEGIN
 	RETURNING id INTO id_merma_l;
 
 	-- Se registra el detalle de la merma de un compuesto
-	IF (tipo_l = compuesta_l) THEN
+	IF (tipo_l = compuesta_l OR tipo_l = derivada_l) THEN
 	   -- Se llama a la función que registra los componentes de esta merma
 	   -- NOTA: Ella también se encarga de disminuir el stock de sus componentes
 	   PERFORM registrar_merma_compuesto (id_merma_l, barcode_in, unidades_in);
-
-	ELSIF (tipo_l = derivada_l) THEN
-	  -- Se registra la mercadería derivada en merma_mc_detalle
-	  SELECT barcode_madre INTO barcode_mp
-	  FROM componente_mc WHERE barcode_comp_der = barcode_in AND tipo_madre = materia_prima_l;
-	  SELECT cant_mud INTO cantidad_mp
-	  FROM componente_mc WHERE barcode_madre = barcode_mp AND barcode_comp_der = barcode_in;
-
-	  INSERT INTO merma_mc_detalle (id, id_merma, id_mh, barcode_madre, barcode_hijo,
-			                tipo_madre, tipo_hijo, cantidad)
-	  VALUES (DEFAULT, id_merma_l, ARRAY[0,1]::int[], barcode_in, barcode_mp,
-		  tipo_l, materia_prima_l, unidades_in * cantidad_mp);
-
-	  -- Se disminuye su stock en la cantidad especificada          
-	  PERFORM disminuir_stock_desde_barcode (barcode_in, unidades_in);
 
 	ELSIF (tipo_l = corriente_l OR tipo_l = materia_prima_l) THEN
 	  -- Se disminuye su stock en la cantidad especificada
@@ -4435,22 +4329,22 @@ BEGIN
 	CREATE SEQUENCE id_mh_seq START 1;
 	-- Se realiza la consulta recursiva y el resultado se almacena en una tabla temporal
 	CREATE TEMPORARY TABLE arbol_componentes AS
-	WITH RECURSIVE compuesta (barcode_madre, id_mh, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+	WITH RECURSIVE compuesta (barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente, cant_mud) AS 
       	 (
-	   SELECT barcode_madre,
+	   SELECT barcode_complejo,
 	   	  ARRAY[0, nextval('id_mh_seq')] AS id_mh,
-		  tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
-       	   FROM componente_mc WHERE barcode_madre = barcode_madre_in
+		  tipo_complejo, barcode_componente, tipo_componente, cant_mud
+       	   FROM componente_mc WHERE barcode_complejo = barcode_madre_in
            UNION ALL
-           SELECT componente_mc.barcode_madre,
+           SELECT componente_mc.barcode_complejo,
 	   	  ARRAY[id_mh[2], nextval('id_mh_seq')],
-		  componente_mc.tipo_madre,
-	      	  componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+		  componente_mc.tipo_complejo,
+	      	  componente_mc.barcode_componente, componente_mc.tipo_componente,
               	  componente_mc.cant_mud * compuesta.cant_mud
            FROM componente_mc, compuesta
-       	   WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+       	   WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
       	)
-	SELECT c.barcode_madre, c.id_mh, c.tipo_madre, c.barcode_comp_der, c.tipo_comp_der, c.cant_mud
+	SELECT c.barcode_complejo, c.id_mh, c.tipo_complejo, c.barcode_componente, c.tipo_componente, c.cant_mud
       	FROM compuesta c
 	ORDER BY id_mh[2] ASC;
 	
@@ -4458,42 +4352,14 @@ BEGIN
 
 	-- Se registra el detalle de compuesto (y subcompuestos) y se actualiza su stock
 	FOR l IN EXECUTE q LOOP
-       	    INSERT INTO merma_mc_detalle (id, id_merma, id_mh, barcode_madre, barcode_hijo,
-	    	   		          tipo_madre, tipo_hijo, cantidad)
-	    VALUES (DEFAULT, id_merma_in, l.id_mh, l.barcode_madre, l.barcode_comp_der,
-	    	    l.tipo_madre, l.tipo_comp_der, l.cant_mud * cantidad_in);
+       	    INSERT INTO merma_mc_detalle (id, id_merma, id_mh, barcode_complejo, barcode_componente,
+	    	   		          tipo_complejo, tipo_componente, cantidad)
+	    VALUES (DEFAULT, id_merma_in, l.id_mh, l.barcode_complejo, l.barcode_componente,
+	    	    l.tipo_complejo, l.tipo_componente, l.cant_mud * cantidad_in);
 
-	    -- Si es un derivado (se registra la materia prima a la que pertenece y actualiza el stock)
-	    IF (l.tipo_comp_der = derivada_l) THEN
-	      -- Se obtiene el barcode de la mercadería de la cual nace este "derivado"
-	      SELECT barcode_madre INTO barcode_mp
-	      FROM componente_mc
-	      WHERE barcode_comp_der = l.barcode_comp_der
-	      AND tipo_madre = materia_prima_l;
-
-	      -- Se obtiene la relacion entre materia prima y la derivada
-	      SELECT cant_mud INTO cantidad_mp
-	      FROM componente_mc 
-	      WHERE barcode_comp_der = l.barcode_comp_der
-	      AND tipo_madre = materia_prima_l;
-
-	      -- Se obtiene el costo_promedio de la materia prima
-	      SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
-
-	      -- Se registra la información de la materia prima correspondiente a este derivado
-	      INSERT INTO merma_mc_detalle (id, id_merma, id_mh, barcode_madre, barcode_hijo,
-	    	   		          tipo_madre, tipo_hijo, cantidad)
-	      VALUES (DEFAULT, id_merma_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')], 
-	      	      l.barcode_comp_der, barcode_mp, l.tipo_comp_der, materia_prima_l, 
-		      l.cant_mud * cantidad_in * cantidad_mp);
-
-	      -- Se actuaiza el stock de la materia prima
-	      UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=barcode_mp;
-	    
-	    -- Si es una mercadería corriente se actualiza su stock	    
-	    ELSIF (l.tipo_comp_der = corriente_l) THEN
+	    IF (l.tipo_componente = corriente_l OR l.tipo_componente = derivada_l) THEN
 	      -- Se actuaiza el stock de la mercadería corriente
-      	      UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
+      	      UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_componente;
 	    END IF;
 	END LOOP;
 
@@ -4597,30 +4463,10 @@ BEGIN
 		       in_modificar_costo);
 
        	-- Si es una mercadería compuesta, se registrará todo su detalle en traspaso_mc_detalle
-	IF (tipo_l = compuesta_l) THEN -- NOTA:registrar_traspaso_compuesto actualiza el stock de sus componentes por si solo
+	IF (tipo_l = compuesta_l OR tipo_l = derivada_l) THEN -- NOTA:registrar_traspaso_compuesto actualiza el stock de sus componentes por si solo
    	   -- (envia o recibe, aumenta o disminuye según el tipo de traspaso)
 	   PERFORM registrar_traspaso_compuesto (in_id_traspaso::int4, num_linea::int4, in_barcode::bigint,
 			                       	 in_cantidad::double precision, in_traspaso_envio);
-
-	-- Si es una derivada se registrará su detalle en venta_mc_detalle
-	ELSIF (tipo_l = derivada_l) THEN	   
-	   SELECT barcode_madre INTO barcode_mp FROM componente_mc WHERE barcode_comp_der = in_barcode AND tipo_madre = materia_prima_l;
-	   SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
-	   SELECT cant_mud INTO cantidad_mp
-	   FROM componente_mc WHERE barcode_madre = barcode_mp AND barcode_comp_der = in_barcode;
-
-	   INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_madre, barcode_hijo,
-				       	    tipo_madre, tipo_hijo, cantidad, costo_promedio)
-	   VALUES (DEFAULT, in_id_traspaso, num_linea, ARRAY[0,1]::int[], in_barcode, barcode_mp,
-		   tipo_l, materia_prima_l, in_cantidad * cantidad_mp, costo_mp);
-
-	   -- Actualiza el stock (lo disminuye o aumenta segun el traspaso) de la mercadería derivada (de su materia prima)
-	   IF (in_traspaso_envio = TRUE) THEN -- Se disminuye el stock porque se envía
-	      PERFORM disminuir_stock_desde_barcode (in_barcode, in_cantidad);
-	   ELSE -- se aumenta el stock porque se recibe
-	      PERFORM aumentar_stock_desde_barcode (in_barcode, in_cantidad);
-	   END IF;
-	
 	-- Si es mercadería corriente
 	ELSIF (tipo_l = corriente_l OR tipo_l = materia_prima_l) THEN
 	   IF (in_traspaso_envio = TRUE) THEN -- se disminuye el stock porque se envía
@@ -4672,23 +4518,23 @@ BEGIN
 	CREATE SEQUENCE id_mh_seq START 1;
 	-- Se realiza la consulta recursiva y el resultado se almacena en una tabla temporal
 	CREATE TEMPORARY TABLE arbol_componentes AS
-	WITH RECURSIVE compuesta (barcode_madre, id_mh, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+	WITH RECURSIVE compuesta (barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente, cant_mud) AS 
       	 (
 	   SELECT barcode_madre,
 	   	  ARRAY[0, nextval('id_mh_seq')] AS id_mh,
-		  tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
-       	   FROM componente_mc WHERE barcode_madre = barcode_madre_in
+		  tipo_madre, barcode_componente, tipo_componente, cant_mud
+       	   FROM componente_mc WHERE barcode_complejo = barcode_madre_in
            UNION ALL
-           SELECT componente_mc.barcode_madre,
+           SELECT componente_mc.barcode_complejo,
 	   	  ARRAY[id_mh[2], nextval('id_mh_seq')],
-		  componente_mc.tipo_madre,
-	      	  componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+		  componente_mc.tipo_complejo,
+	      	  componente_mc.barcode_componente, componente_mc.tipo_componente,
               	  componente_mc.cant_mud * compuesta.cant_mud
            FROM componente_mc, compuesta
-       	   WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+       	   WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
       	 )
-	SELECT c.barcode_madre, c.id_mh, c.tipo_madre, c.barcode_comp_der, c.tipo_comp_der, c.cant_mud,
-	       (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_comp_der)) AS costo_hijo
+	SELECT c.barcode_complejo, c.id_mh, c.tipo_complejo, c.barcode_componente, c.tipo_componente, c.cant_mud,
+	       (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_componente)) AS costo_componente
       	FROM compuesta c
 	ORDER BY id_mh[2] ASC;
 	
@@ -4696,52 +4542,21 @@ BEGIN
 
 	-- Se registra el detalle de compuesto (y subcompuestos) y se actualiza su stock
 	FOR l IN EXECUTE q LOOP
-       	    INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_madre, barcode_hijo,
-	    	   			     tipo_madre, tipo_hijo, cantidad, costo_promedio)
-	    VALUES (DEFAULT, id_traspaso_in, id_traspaso_detalle_in, l.id_mh, l.barcode_madre, l.barcode_comp_der,
-	    	    l.tipo_madre, l.tipo_comp_der, l.cant_mud * cantidad_in, l.costo_hijo);
-
-	    -- Si es un derivado (se registra la materia prima a la que pertenece y actualiza el stock)
-	    IF (l.tipo_comp_der = derivada_l) THEN
-	      -- Se obtiene el barcode de la mercadería de la cual nace este "derivado"
-	      SELECT barcode_madre INTO barcode_mp
-	      FROM componente_mc
-	      WHERE barcode_comp_der = l.barcode_comp_der
-	      AND tipo_madre = materia_prima_l;
-
-	      -- Se obtiene la relacion entre materia prima y la derivada
-	      SELECT cant_mud INTO cantidad_mp
-	      FROM componente_mc 
-	      WHERE barcode_comp_der = l.barcode_comp_der
-	      AND barcode_madre = barcode_mp;
-
-	      -- Se obtiene el costo_promedio de la materia prima
-	      SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
-
-	      -- Se registra la información de la materia prima correspondiente a este derivado
-       	      INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_madre, barcode_hijo,
-	    	   			       tipo_madre, tipo_hijo, cantidad, costo_promedio)
-	      VALUES (DEFAULT, id_traspaso_in, id_traspaso_detalle_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')], 
-	      	      l.barcode_comp_der, barcode_mp, l.tipo_comp_der, materia_prima_l, 
-		      l.cant_mud * cantidad_in * cantidad_mp, costo_mp);
-
-	      -- Se actuaiza el stock
-	      IF (traspaso_envio_in = TRUE) THEN -- se disminuye el stock porque se envía
-	      	 UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=barcode_mp;
-	      ELSE -- se aumenta el stock porque se recibe
-	      	 UPDATE producto SET stock=stock+(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=barcode_mp;
-	      END IF;
+       	    INSERT INTO traspaso_mc_detalle (id, id_traspaso, id_traspaso_detalle, id_mh, barcode_complejo, barcode_componente,
+	    	   			     tipo_complejo, tipo_componente, cantidad, costo_promedio)
+	    VALUES (DEFAULT, id_traspaso_in, id_traspaso_detalle_in, l.id_mh, l.barcode_complejo, l.barcode_componente,
+	    	    l.tipo_complejo, l.tipo_componente, l.cant_mud * cantidad_in, l.costo_componente);
 	    
-	    -- Si es una mercadería corriente se actualiza su stock	    
-	    ELSIF (l.tipo_comp_der = corriente_l) THEN
+	    -- Si es una mercadería corriente se actualiza su stock
+	    IF (l.tipo_componente = corriente_l OR l.tipo_componente = materia_prima_l) THEN
 	      -- Se actuaiza el stock
 	      IF (traspaso_envio_in = TRUE) THEN -- se disminuye el stock porque se envía
-	      	 UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
+	      	 UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_componente;
 	      ELSE -- se aumenta el stock porque se recibe
-	      	 UPDATE producto SET stock=stock+(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
+	      	 UPDATE producto SET stock=stock+(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_componente;
 	      END IF;
-		  
 	    END IF;
+
 	END LOOP;
 
         -- Se elimina la tabla temporal arbol_componentes
@@ -4829,13 +4644,13 @@ q := $S$ SELECT p.barcode, cantidad_ingresada, cantidad_c_anuladas, cantidad_ven
                 ON p.barcode = ventas_anuladas.barcode
 
 		-- Las Ventas (de compuestos) menos sus anulaciones hechas hasta la fecha determinada
-       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_hijo AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_componente AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
        	     	                  FROM venta_mc_detalle vmcd
 				  INNER JOIN venta v ON vmcd.id_venta_vd = v.id
 
 			  	  WHERE vmcd.id_venta_vd NOT IN (SELECT id_sale FROM venta_anulada)
 				  AND v.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND v.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
-			  	  GROUP BY barcode_hijo) AS ventas_mcd
+			  	  GROUP BY barcode_componente) AS ventas_mcd
 		ON p.barcode = ventas_mcd.barcode
        
 	        -- Las Mermas sufridas hasta la fecha determinada
@@ -4847,13 +4662,13 @@ q := $S$ SELECT p.barcode, cantidad_ingresada, cantidad_c_anuladas, cantidad_ven
 	        ON p.barcode = merma.barcode
 
 		-- Las Mermas sufridas hasta la fecha determinada
-		LEFT JOIN (SELECT mmcd.barcode_hijo AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
+		LEFT JOIN (SELECT mmcd.barcode_componente AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
        	     	                  FROM merma m
 				  INNER JOIN merma_mc_detalle mmcd
 				  ON m.id = mmcd.id_merma
 
 		         	  WHERE m.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND m.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
-			          GROUP BY barcode_hijo) AS merma_mcd
+			          GROUP BY barcode_componente) AS merma_mcd
 	        ON p.barcode = merma_mcd.barcode
 
                 -- Las devoluciones hechas hasta la fecha determinada
@@ -4878,14 +4693,14 @@ q := $S$ SELECT p.barcode, cantidad_ingresada, cantidad_c_anuladas, cantidad_ven
                 ON p.barcode = traspaso_envio.barcode
 
 		-- Los traspasos enviados (a traves de un compuesto) hasta la fecha determinada
-		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
+		LEFT JOIN (SELECT tmcd.barcode_componente AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
        	     	                  FROM traspaso t
 		 	          INNER JOIN traspaso_mc_detalle tmcd
 			 	  ON t.id = tmcd.id_traspaso
 
 			          WHERE t.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND t.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
 				  AND t.origen = 1
-			          GROUP BY barcode_hijo) AS traspaso_mc_envio
+			          GROUP BY barcode_componente) AS traspaso_mc_envio
                 ON p.barcode = traspaso_mc_envio.barcode
 
 	        -- Los traspasos recibidos hasta la fecha determinada
@@ -4900,14 +4715,14 @@ q := $S$ SELECT p.barcode, cantidad_ingresada, cantidad_c_anuladas, cantidad_ven
                 ON p.barcode = traspaso_recibido.barcode
 
 		-- Los traspasos recibidos (a traves de un compuesto) hasta la fecha determinada
-       		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
+       		LEFT JOIN (SELECT tmcd.barcode_componente AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
        	     	                  FROM traspaso t
 		 	          INNER JOIN traspaso_mc_detalle tmcd
 			 	  ON t.id = tmcd.id_traspaso
 
 			          WHERE t.fecha >= $S$ || quote_literal (fecha_inicio) || $S$ AND t.fecha < $S$ || quote_literal (fecha_inicio+'1 days') || $S$
 				  AND t.origen != 1
-			          GROUP BY barcode_hijo) AS traspaso_mc_recibido
+			          GROUP BY barcode_componente) AS traspaso_mc_recibido
                 ON p.barcode = traspaso_mc_recibido.barcode
                     	    
                 WHERE p.estado = true
@@ -5132,13 +4947,13 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
                 ON p.barcode = ventas_anuladas.barcode
 
 		-- Las Ventas (de compuestos) menos sus anulaciones hechas hasta la fecha determinada
-       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_hijo AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_componente AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
        	     	                  FROM venta_mc_detalle vmcd
 				  INNER JOIN venta v ON vmcd.id_venta_vd = v.id
 
 			  	  WHERE vmcd.id_venta_vd NOT IN (SELECT id_sale FROM venta_anulada)
 				  AND v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			  	  GROUP BY barcode_hijo) AS ventas_mcd
+			  	  GROUP BY barcode_componente) AS ventas_mcd
 		ON p.barcode = ventas_mcd.barcode
        
 	        -- Las Mermas sufridas hasta la fecha determinada
@@ -5150,13 +4965,13 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 	        ON p.barcode = merma.barcode
 
 		-- Las Mermas sufridas hasta la fecha determinada
-		LEFT JOIN (SELECT mmcd.barcode_hijo AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
+		LEFT JOIN (SELECT mmcd.barcode_componente AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
        	     	                  FROM merma m
 				  INNER JOIN merma_mc_detalle mmcd
 				  ON m.id = mmcd.id_merma
 
 		         	  WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			          GROUP BY barcode_hijo) AS merma_mcd
+			          GROUP BY barcode_componente) AS merma_mcd
 	        ON p.barcode = merma_mcd.barcode
 
                 -- Las devoluciones hechas hasta la fecha determinada
@@ -5181,14 +4996,14 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
                 ON p.barcode = traspaso_envio.barcode
 
 		-- Los traspasos enviados (a traves de un compuesto) hasta la fecha determinada
-		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
+		LEFT JOIN (SELECT tmcd.barcode_componente AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
        	     	                  FROM traspaso t
 		 	          INNER JOIN traspaso_mc_detalle tmcd
 			 	  ON t.id = tmcd.id_traspaso
 
 			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
 				  AND t.origen = 1
-			          GROUP BY barcode_hijo) AS traspaso_mc_envio
+			          GROUP BY barcode_componente) AS traspaso_mc_envio
                 ON p.barcode = traspaso_mc_envio.barcode
 
 	        -- Los traspasos recibidos hasta la fecha determinada
@@ -5203,14 +5018,14 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
                 ON p.barcode = traspaso_recibido.barcode
 
 		-- Los traspasos recibidos (a traves de un compuesto) hasta la fecha determinada
-       		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
+       		LEFT JOIN (SELECT tmcd.barcode_componente AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
        	     	                  FROM traspaso t
 		 	          INNER JOIN traspaso_mc_detalle tmcd
 			 	  ON t.id = tmcd.id_traspaso
 
 			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
 				  AND t.origen != 1
-			          GROUP BY barcode_hijo) AS traspaso_mc_recibido
+			          GROUP BY barcode_componente) AS traspaso_mc_recibido
                 ON p.barcode = traspaso_mc_recibido.barcode
                     	    
                 WHERE p.estado = true
@@ -5329,13 +5144,13 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
                 ON p.barcode = ventas_anuladas.barcode
 
 		-- Las Ventas (de compuestos) menos sus anulaciones hechas hasta la fecha determinada
-       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_hijo AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
+       		LEFT JOIN (SELECT SUM(vmcd.cantidad) AS cantidad_vmcd, vmcd.barcode_componente AS barcode -- LEFT JOIN MUESTRA TODOS LOS PRODUCTOS
        	     	                  FROM venta_mc_detalle vmcd
 				  INNER JOIN venta v ON vmcd.id_venta_vd = v.id
 
 			  	  WHERE vmcd.id_venta_vd NOT IN (SELECT id_sale FROM venta_anulada)
 				  AND v.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			  	  GROUP BY barcode_hijo) AS ventas_mcd
+			  	  GROUP BY barcode_componente) AS ventas_mcd
 		ON p.barcode = ventas_mcd.barcode
        
 	        -- Las Mermas sufridas hasta la fecha determinada
@@ -5347,13 +5162,13 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
 	        ON p.barcode = merma.barcode
 
 		-- Las Mermas sufridas hasta la fecha determinada
-		LEFT JOIN (SELECT mmcd.barcode_hijo AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
+		LEFT JOIN (SELECT mmcd.barcode_componente AS barcode, SUM(mmcd.cantidad) AS unidades_merma_mcd
        	     	                  FROM merma m
 				  INNER JOIN merma_mc_detalle mmcd
 				  ON m.id = mmcd.id_merma
 
 		         	  WHERE m.fecha < $S$ || quote_literal(fecha_inicio) || $S$
-			          GROUP BY barcode_hijo) AS merma_mcd
+			          GROUP BY barcode_componente) AS merma_mcd
 	        ON p.barcode = merma_mcd.barcode
 
                 -- Las devoluciones hechas hasta la fecha determinada
@@ -5378,14 +5193,14 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
                 ON p.barcode = traspaso_envio.barcode
 
 		-- Los traspasos enviados (a traves de un compuesto) hasta la fecha determinada
-		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
+		LEFT JOIN (SELECT tmcd.barcode_componente AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_envio
        	     	                  FROM traspaso t
 		 	          INNER JOIN traspaso_mc_detalle tmcd
 			 	  ON t.id = tmcd.id_traspaso
 
 			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
 				  AND t.origen = 1
-			          GROUP BY barcode_hijo) AS traspaso_mc_envio
+			          GROUP BY barcode_componente) AS traspaso_mc_envio
                 ON p.barcode = traspaso_mc_envio.barcode
 
 	        -- Los traspasos recibidos hasta la fecha determinada
@@ -5400,14 +5215,14 @@ q := $S$ SELECT p.barcode, p.codigo_corto, p.marca, p.descripcion, p.contenido, 
                 ON p.barcode = traspaso_recibido.barcode
 
 		-- Los traspasos recibidos (a traves de un compuesto) hasta la fecha determinada
-       		LEFT JOIN (SELECT tmcd.barcode_hijo AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
+       		LEFT JOIN (SELECT tmcd.barcode_componente AS barcode, SUM(tmcd.cantidad) AS cantidad_mc_recibida
        	     	                  FROM traspaso t
 		 	          INNER JOIN traspaso_mc_detalle tmcd
 			 	  ON t.id = tmcd.id_traspaso
 
 			          WHERE t.fecha < $S$ || quote_literal(fecha_inicio) || $S$
 				  AND t.origen != 1
-			          GROUP BY barcode_hijo) AS traspaso_mc_recibido
+			          GROUP BY barcode_componente) AS traspaso_mc_recibido
                 ON p.barcode = traspaso_mc_recibido.barcode
                     	    
                 WHERE p.estado = true
@@ -5812,26 +5627,26 @@ BEGIN
 	   CREATE SEQUENCE id_mh_seq START 1;
 	   -- Se realiza la consulta recursiva y el resultado se almacena en una tabla temporal
 	   CREATE TEMPORARY TABLE arbol_componentes AS
-	   WITH RECURSIVE compuesta (barcode_madre, id_mh, tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud) AS 
+	   WITH RECURSIVE compuesta (barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente, cant_mud) AS 
       	      	(
-		   SELECT barcode_madre,
+		   SELECT barcode_complejo,
 		   	  ARRAY[0, nextval('id_mh_seq')] AS id_mh,
-			  tipo_madre, barcode_comp_der, tipo_comp_der, cant_mud
-       		   FROM componente_mc WHERE barcode_madre = barcode_madre_in
+			  tipo_complejo, barcode_componente, tipo_componente, cant_mud
+       		   FROM componente_mc WHERE barcode_complejo = barcode_madre_in
         	   UNION ALL
-        	   SELECT componente_mc.barcode_madre,
+        	   SELECT componente_mc.barcode_complejo,
 		   	  ARRAY[id_mh[2], nextval('id_mh_seq')],
-			  componente_mc.tipo_madre,
-		      	  componente_mc.barcode_comp_der, componente_mc.tipo_comp_der,
+			  componente_mc.tipo_complejo,
+		      	  componente_mc.barcode_componente, componente_mc.tipo_componente,
            	      	  componente_mc.cant_mud * compuesta.cant_mud
               	   FROM componente_mc, compuesta
-       		   WHERE componente_mc.barcode_madre = compuesta.barcode_comp_der
+       		   WHERE componente_mc.barcode_complejo = compuesta.barcode_componente
       		)
-		SELECT c.barcode_madre, c.id_mh, c.tipo_madre, c.barcode_comp_der, c.tipo_comp_der, c.cant_mud,
-		       (SELECT precio FROM producto WHERE barcode = c.barcode_comp_der) AS precio_hijo,
-		       (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_comp_der)) AS costo_hijo,
-		       (SELECT valor FROM get_iva (c.barcode_comp_der))/100 AS iva,
-		       (SELECT valor FROM get_otro_impuesto (c.barcode_comp_der))/100 AS otros
+		SELECT c.barcode_complejo, c.id_mh, c.tipo_complejo, c.barcode_componente, c.tipo_componente, c.cant_mud,
+		       (SELECT precio FROM producto WHERE barcode = c.barcode_componente) AS precio_componente,
+		       (SELECT costo FROM obtener_costo_promedio_desde_barcode (c.barcode_componente)) AS costo_componente,
+		       (SELECT valor FROM get_iva (c.barcode_componente))/100 AS iva,
+		       (SELECT valor FROM get_otro_impuesto (c.barcode_componente))/100 AS otros
       		FROM compuesta c
 		ORDER BY id_mh[2] ASC;
 	ELSE
@@ -5844,15 +5659,15 @@ BEGIN
 
 	FOR l IN EXECUTE q LOOP
 	    -- Si es una mercadería compuesta entra en ella
-	    IF (l.tipo_comp_der = compuesta_l) THEN
-	       -- PRECIO PROPORCIONAL (costo_hijo/costo_madre) * precio_proporcional_madre
-	       precio_proporcional_l := (l.costo_hijo/costo_l) * precio_proporcional_in;
+	    IF (l.tipo_componente = compuesta_l OR l.tipo_componente = derivada_l) THEN
+	       -- PRECIO PROPORCIONAL (costo_componente/costo_madre) * precio_proporcional_madre
+	       precio_proporcional_l := (l.costo_componente/costo_l) * precio_proporcional_in;
 
 	       q2 := 'SELECT * FROM registrar_detalle_compuesto ('||id_venta_in||'::int4,'
 	       	     	       	    				  ||id_venta_detalle_in||'::int4,'
 								  ||barcode_madre_in||'::bigint, 
 								  ARRAY['||l.id_mh[1]||','||l.id_mh[2]||']::int4[],'
-								  ||l.costo_hijo||'::double precision,'
+								  ||l.costo_componente||'::double precision,'
 								  ||precio_proporcional_l||'::double precision,'
 								  ||cantidad_in||'::double precision,'
 								  ||proporcion_iva_in||'::double precision,'
@@ -5863,7 +5678,7 @@ BEGIN
 	       otros_residual_madre := 0;
 	       ganancia_madre := 0;
 	       FOR l2 IN EXECUTE q2 LOOP
-	       	   -- Sumo los impuestos y la ganancia de los hijos para setearselo al padre
+	       	   -- Sumo los impuestos y la ganancia de los componentes para setearselo al padre
 		   iva_madre := iva_madre + l2.iva_out;
 		   otros_madre := otros_madre + l2.otros_out;
 		   iva_residual_madre := iva_residual_madre + l2.iva_residual_out;
@@ -5878,16 +5693,16 @@ BEGIN
 	       ganancia_out := ganancia_madre;
 	       
 	       -- Se guardan los valores de la mercadería madre que corresponden
-	       INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
+	       INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_complejo, barcode_componente, cantidad,
 				       	     precio_proporcional, precio, costo_promedio, ganancia, iva, otros, iva_residual, otros_residual,
-				       	     tipo_madre, tipo_hijo, proporcion_iva, proporcion_otros)
-	       VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, l.id_mh, l.barcode_madre, l.barcode_comp_der, l.cant_mud * cantidad_in,
-	    	       precio_proporcional_l, l.precio_hijo, l.costo_hijo, ganancia_madre, iva_madre, otros_madre, iva_residual_madre, otros_residual_madre,
-		       l.tipo_madre, l.tipo_comp_der, proporcion_iva_in, proporcion_otros_in);
+				       	     tipo_complejo, tipo_componente, proporcion_iva, proporcion_otros)
+	       VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, l.id_mh, l.barcode_complejo, l.barcode_componente, l.cant_mud * cantidad_in,
+	    	       precio_proporcional_l, l.precio_componente, l.costo_componente, ganancia_madre, iva_madre, otros_madre, iva_residual_madre, otros_residual_madre,
+		       l.tipo_complejo, l.tipo_componente, proporcion_iva_in, proporcion_otros_in);
 
 	    ELSE --Si no es mercadería compuesta
-	       -- PRECIO PROPORCIONAL (costo_hijo/costo_madre) * precio_proporcional_madre
-	       precio_proporcional_l := (l.costo_hijo/costo_l) * precio_proporcional_in;
+	       -- PRECIO PROPORCIONAL (costo_componente/costo_madre) * precio_proporcional_madre
+	       precio_proporcional_l := (l.costo_componente/costo_l) * precio_proporcional_in;
 	       -- IVA ((PRECIO NETO -> precio de venta sin impuestos) * iva)  * cantidad_requerida * cantidad_vendida
 	       iva_out := ((precio_proporcional_l / (l.iva + l.otros + 1)) * l.iva) * l.cant_mud * cantidad_in;
 	       -- OTROS ((PRECIO NETO -> precio de venta sin impuestos) * otros) * cantidad_requerida * cantidad_vendida
@@ -5896,49 +5711,19 @@ BEGIN
 	       iva_residual_out := ((precio_proporcional_l / (l.iva + l.otros + 1)) * l.iva) * l.cant_mud * cantidad_in * proporcion_iva_in;
 	       otros_residual_out := ((precio_proporcional_l / (l.iva + l.otros + 1)) * l.otros) * l.cant_mud * cantidad_in * proporcion_otros_in;
 	       -- GANANCIA ((PRECIO NETO -> precio de venta sin impuestos) - costo del producto) * cantidad_requerida * cantidad_vendida
-	       ganancia_out := ((precio_proporcional_l / (l.iva + l.otros + 1)) - l.costo_hijo) * l.cant_mud * cantidad_in;
+	       ganancia_out := ((precio_proporcional_l / (l.iva + l.otros + 1)) - l.costo_componente) * l.cant_mud * cantidad_in;
 
-	       INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo, cantidad,
+	       INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_complejo, barcode_componente, cantidad,
 				       	     precio_proporcional, precio, costo_promedio, ganancia, iva, otros, iva_residual, otros_residual,
-				       	     tipo_madre, tipo_hijo, proporcion_iva, proporcion_otros)
-	       VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, l.id_mh, l.barcode_madre, l.barcode_comp_der, l.cant_mud * cantidad_in, 
-	    	       precio_proporcional_l, l.precio_hijo, l.costo_hijo, ganancia_out, iva_out, otros_out, iva_residual_out, otros_residual_out,
-		       l.tipo_madre, l.tipo_comp_der, proporcion_iva_in, proporcion_otros_in);
+				       	     tipo_complejo, tipo_componente, proporcion_iva, proporcion_otros)
+	       VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, l.id_mh, l.barcode_complejo, l.barcode_componente, l.cant_mud * cantidad_in, 
+	    	       precio_proporcional_l, l.precio_componente, l.costo_componente, ganancia_out, iva_out, otros_out, iva_residual_out, otros_residual_out,
+		       l.tipo_complejo, l.tipo_componente, proporcion_iva_in, proporcion_otros_in);
 
-	       --Se actualiza el stock del producto
-	       IF (l.tipo_comp_der = derivada_l) THEN
-	       	  -- Se obtiene el barcode de la mercadería de la cual nace este "derivado"
-	       	  SELECT barcode_madre INTO barcode_mp
-		  FROM componente_mc
-		  WHERE barcode_comp_der = l.barcode_comp_der
-		  AND tipo_madre = materia_prima_l;
-
-		  -- Se obtiene la relacion entre materia prima y la derivada
-		  SELECT cant_mud INTO cantidad_mp
-		  FROM componente_mc 
-		  WHERE barcode_comp_der = l.barcode_comp_der
-		  AND barcode_madre = barcode_mp;
-
-		  -- Se obtiene el costo_promedio de la materia prima
-		  SELECT costo_promedio INTO costo_mp FROM producto WHERE barcode = barcode_mp;
-
-		  -- Se registra la información de la materia prima correspondiente a este derivado
-		  INSERT INTO venta_mc_detalle (id, id_venta_detalle, id_venta_vd, id_mh, barcode_madre, barcode_hijo,
-		  	      		        cantidad, precio_proporcional, precio, costo_promedio, ganancia, 
-						iva, otros, iva_residual, otros_residual, tipo_madre, tipo_hijo, 
-						proporcion_iva, proporcion_otros)
-	          VALUES (DEFAULT, id_venta_detalle_in, id_venta_in, ARRAY[l.id_mh[2], nextval('id_mh_seq')],
-		  	  l.barcode_comp_der, barcode_mp, l.cant_mud * cantidad_in * cantidad_mp, precio_proporcional_l, 
-			  l.precio_hijo, costo_mp, ganancia_out, iva_out, otros_out, iva_residual_out, otros_residual_out, 
-			  l.tipo_comp_der, materia_prima_l, proporcion_iva_in, proporcion_otros_in);
-
-	       	  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in * cantidad_mp) WHERE barcode=barcode_mp;
-	       ELSIF (l.tipo_comp_der = corriente_l) THEN
-		  UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_comp_der;
-	       END IF;
+	       UPDATE producto SET stock=stock-(l.cant_mud * cantidad_in) WHERE barcode=l.barcode_componente;
 	    END IF;
 	    
-	    tipo_out := l.tipo_comp_der;
+	    tipo_out := l.tipo_componente;
 
 	    RETURN NEXT;
 	END LOOP;
@@ -5964,8 +5749,8 @@ BEGIN
 	   	    FROM venta_mc_detalle
 	   	    WHERE id_venta_vd = id_venta_in
 	   	    	  AND id_venta_detalle = id_venta_detalle_in
-		 	  AND tipo_hijo != compuesta_l
-		 	  AND tipo_hijo != materia_prima_l
+		 	  AND tipo_componente != compuesta_l
+		 	  AND tipo_componente != derivada_l
 		  ) vmcd
 	   WHERE id_venta = id_venta_in
 	   	 AND id = id_venta_detalle_in;
@@ -6108,42 +5893,50 @@ BEGIN
 
      -- Se crea una tabla temporal con todos los componentes de la mercadería compuesta a buscar
      CREATE TEMPORARY TABLE arbol_componentes_a AS
-     WITH RECURSIVE compuesta (id, id_venta, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo, 
+     WITH RECURSIVE compuesta (id, id_venta, id_venta_detalle, barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente, 
      	  	    	       cantidad, costo_promedio) AS 
        (
-         SELECT id, id_venta_vd, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo,
+         SELECT id, id_venta_vd, id_venta_detalle, barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente,
 	 	cantidad, costo_promedio
        	 FROM venta_mc_detalle
 	 WHERE venta_mc_detalle.id_mh[1] = 0
 	       AND venta_mc_detalle.id_venta_vd = id_venta_in
 	       AND venta_mc_detalle.id_venta_detalle = id_venta_detalle_in
          UNION ALL
-         SELECT vmcd.id, vmcd.id_venta_vd, vmcd.id_venta_detalle, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
-	 	vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad, vmcd.costo_promedio		
+         SELECT vmcd.id, vmcd.id_venta_vd, vmcd.id_venta_detalle, vmcd.barcode_complejo, vmcd.id_mh, vmcd.tipo_complejo,
+	 	vmcd.barcode_componente, vmcd.tipo_componente, vmcd.cantidad, vmcd.costo_promedio		
          FROM venta_mc_detalle vmcd, compuesta
-       	 WHERE vmcd.barcode_madre = compuesta.barcode_hijo
+       	 WHERE vmcd.barcode_complejo = compuesta.barcode_componente
 	       AND vmcd.id_venta_vd = compuesta.id_venta
 	       AND vmcd.id_venta_detalle = compuesta.id_venta_detalle
 	       AND vmcd.id_mh[1] = compuesta.id_mh[2]
        )
        SELECT *,
-       	      (SELECT valor FROM get_iva (c.barcode_hijo))/100 AS iva,
-	      (SELECT valor FROM get_otro_impuesto (c.barcode_hijo))/100 AS otros
+       	      (SELECT valor FROM get_iva (c.barcode_componente))/100 AS iva,
+	      (SELECT valor FROM get_otro_impuesto (c.barcode_componente))/100 AS otros
+       	      --CASE WHEN tipo_componente != materia_prima_l
+	      --     THEN (SELECT valor FROM get_iva (c.barcode_componente))/100
+	      --     ELSE (SELECT valor FROM get_iva (c.barcode_complejo))/100
+	      --END AS iva,
+	      --CASE WHEN tipo_componente != materia_prima_l
+	      --     THEN (SELECT valor FROM get_otro_impuesto (c.barcode_componente))/100
+	      --     ELSE (SELECT valor FROM get_otro_impuesto (c.barcode_complejo))/100
+	      --END AS otros,
        FROM compuesta c;
   END IF;
 
   q := $S$ SELECT ac.*
 	   FROM arbol_componentes_a ac
 	   INNER JOIN prioridad_a pd
-	   	 ON ac.tipo_hijo = pd.tipo_id
+	   	 ON ac.tipo_componente = pd.tipo_id
 	   INNER JOIN producto po
-	   	 ON po.barcode = ac.barcode_hijo
+	   	 ON po.barcode = ac.barcode_componente
 	   WHERE id_mh[1] = $S$||id_mh_in[2]||$S$
 	   ORDER BY pd.orden ASC $S$;
 
   FOR l IN EXECUTE q LOOP
       -- Si el hijo actual es compuesto (sera la proxima madre)
-      IF l.tipo_hijo = compuesta_l OR l.tipo_hijo = derivada_l THEN
+      IF l.tipo_componente = compuesta_l OR l.tipo_componente = derivada_l THEN
       	-- Se consulta así mismo y calcula el costo_promedio unitario del compuesto
       	q2 := 'SELECT * FROM update_costo_promedio_detalle_compuesto ('||id_venta_in||',
 							              '||id_venta_detalle_in||',
@@ -6165,7 +5958,7 @@ BEGIN
 	costo_promedio_out := costo_compuesto_l;
 	cantidad_out := l.cantidad;
 
-      ELSIF l.tipo_hijo = corriente_l OR l.tipo_hijo = materia_prima_l THEN
+      ELSIF l.tipo_componente = corriente_l OR l.tipo_componente = materia_prima_l THEN
         costo_promedio_out := l.costo_promedio;
 	cantidad_out := l.cantidad;
       END IF;
@@ -6250,36 +6043,36 @@ BEGIN
 
      -- Se crea una tabla temporal con todos los componentes de la mercadería compuesta a buscar
      CREATE TEMPORARY TABLE arbol_componentes_b AS
-     WITH RECURSIVE compuesta (id, id_venta, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo, 
+     WITH RECURSIVE compuesta (id, id_venta, id_venta_detalle, barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente, 
      	  	    	       cantidad, costo_promedio, proporcion_iva, proporcion_otros) AS 
        (
-         SELECT id, id_venta_vd, id_venta_detalle, barcode_madre, id_mh, tipo_madre, barcode_hijo, tipo_hijo,
+         SELECT id, id_venta_vd, id_venta_detalle, barcode_complejo, id_mh, tipo_complejo, barcode_componente, tipo_componente,
 	 	cantidad, costo_promedio, proporcion_iva, proporcion_otros
        	 FROM venta_mc_detalle
 	 WHERE venta_mc_detalle.id_mh[1] = 0
 	       AND venta_mc_detalle.id_venta_vd = id_venta_in
 	       AND venta_mc_detalle.id_venta_detalle = id_venta_detalle_in
          UNION ALL
-         SELECT vmcd.id, vmcd.id_venta_vd, vmcd.id_venta_detalle, vmcd.barcode_madre, vmcd.id_mh, vmcd.tipo_madre,
-	 	vmcd.barcode_hijo, vmcd.tipo_hijo, vmcd.cantidad, vmcd.costo_promedio, vmcd.proporcion_iva, vmcd.proporcion_otros
+         SELECT vmcd.id, vmcd.id_venta_vd, vmcd.id_venta_detalle, vmcd.barcode_complejo, vmcd.id_mh, vmcd.tipo_complejo,
+	 	vmcd.barcode_componente, vmcd.tipo_componente, vmcd.cantidad, vmcd.costo_promedio, vmcd.proporcion_iva, vmcd.proporcion_otros
          FROM venta_mc_detalle vmcd, compuesta
-       	 WHERE vmcd.barcode_madre = compuesta.barcode_hijo
+       	 WHERE vmcd.barcode_complejo = compuesta.barcode_componente
 	       AND vmcd.id_venta_vd = compuesta.id_venta
 	       AND vmcd.id_venta_detalle = compuesta.id_venta_detalle
 	       AND vmcd.id_mh[1] = compuesta.id_mh[2]
        )
        SELECT *,
-       	      (SELECT valor FROM get_iva (c.barcode_hijo))/100 AS iva_percent,
-	      (SELECT valor FROM get_otro_impuesto (c.barcode_hijo))/100 AS otros_percent
+       	      (SELECT valor FROM get_iva (c.barcode_componente))/100 AS iva_percent,
+	      (SELECT valor FROM get_otro_impuesto (c.barcode_componente))/100 AS otros_percent
        FROM compuesta c;
   END IF;
 
   q := $S$ SELECT ac.*
 	   FROM arbol_componentes_b ac
 	   INNER JOIN prioridad_b pd
-	   	 ON ac.tipo_hijo = pd.tipo_id
+	   	 ON ac.tipo_componente = pd.tipo_id
 	   INNER JOIN producto po
-	   	 ON po.barcode = ac.barcode_hijo
+	   	 ON po.barcode = ac.barcode_componente
 	   WHERE id_mh[1] = $S$||id_mh_in[2]||$S$
 	   ORDER BY pd.orden ASC $S$;
 
@@ -6295,7 +6088,7 @@ BEGIN
   -- Se recorre el arbol de componentes
   FOR l IN EXECUTE q LOOP
       -- Si el hijo actual es compuesto (sera la proxima madre)
-      IF l.tipo_hijo = compuesta_l OR l.tipo_hijo = derivada_l THEN
+      IF l.tipo_componente = compuesta_l OR l.tipo_componente = derivada_l THEN
 	-- precio proporcional =  (proporcion del COSTO hijo con respecto a madre) * PRECIO madre
         precio_out := (l.costo_promedio / costo_madre_l) * precio_madre_l;
       	 
@@ -6318,11 +6111,11 @@ BEGIN
 	  otros_residual_out := otros_residual_out + l2.otros_residual_out;
 	END LOOP;
 
-	barcode_out := l.barcode_hijo;
+	barcode_out := l.barcode_componente;
 	costo_out := l.costo_promedio;
 	cantidad_out := l.cantidad;
 
-      ELSIF l.tipo_hijo = corriente_l OR l.tipo_hijo = materia_prima_l THEN
+      ELSIF l.tipo_componente = corriente_l OR l.tipo_componente = materia_prima_l THEN
 
       	-- precio proporcional =  (proporcion del COSTO hijo con respecto a madre) * PRECIO madre
         precio_out := (l.costo_promedio / costo_madre_l) * precio_madre_l;
@@ -6337,7 +6130,7 @@ BEGIN
 	iva_residual_out := iva_out * l.proporcion_iva;
 	otros_residual_out := otros_out * l.proporcion_otros;
 
-	barcode_out := l.barcode_hijo;
+	barcode_out := l.barcode_componente;
 	costo_out := l.costo_promedio;
 	cantidad_out := l.cantidad;
       END IF;
@@ -6651,7 +6444,7 @@ BEGIN
 	       	  	 SET costo_promedio = $S$ || avg_cost || $S$
 	       	  FROM venta v
 	      	  WHERE v.id = vmcd.id_venta_vd
-	       	  	AND vmcd.barcode_hijo = $S$ || l.barcode || $S$
+	       	  	AND vmcd.barcode_componente = $S$ || l.barcode || $S$
 	       	  	AND v.fecha > $S$ || quote_literal (l.fecha); --fecha de la compra donde se cambio el costo_promedio
 
 	-- Si next-date es null
@@ -6679,7 +6472,7 @@ BEGIN
 	     ON vmcd.id_venta_vd = v.id
 	WHERE v.fecha > l.fecha::TIMESTAMP
 	      AND v.fecha < next_date_l::TIMESTAMP
-	      AND vmcd.barcode_hijo = l.barcode::BIGINT;
+	      AND vmcd.barcode_componente = l.barcode::BIGINT;
 
         -- Se asignan los valores a retornar
         id_fcompra_r := l.id_fc;
