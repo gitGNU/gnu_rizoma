@@ -2931,14 +2931,13 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
   //gtk_list_store_clear (store);
 
   //Agrega los productos derivados de mother (de tenerlo) TODO: Debe estar en postgres function
-  q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_comp_der AS barcode, "
-		       "(SELECT codigo_corto FROM producto WHERE barcode = cmc.barcode_comp_der) AS codigo, "
-		       "(SELECT marca FROM producto WHERE barcode = cmc.barcode_comp_der) AS marca, "
-		       "(SELECT descripcion FROM producto WHERE barcode = cmc.barcode_comp_der) AS descripcion, "
-		       "(SELECT precio FROM producto WHERE barcode = cmc.barcode_comp_der) AS precio "
+  q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_complejo AS barcode, "
+		       "       prd.codigo_corto AS codigo, prd.marca, prd.descripcion, prd.precio "
 		       "FROM componente_mc cmc "
-		       "WHERE cmc.barcode_madre = '%s' "
-		       "AND (SELECT estado FROM producto WHERE barcode = cmc.barcode_comp_der) = true",
+		       "INNER JOIN producto AS prd "
+		       "ON prd.barcode = cmc.barcode_complejo "
+		       "WHERE cmc.barcode_componente = '%s' "
+		       "AND (SELECT estado FROM producto WHERE barcode = cmc.barcode_complejo) = true",
 		       barcode);
   res = EjecutarSQL(q);
 

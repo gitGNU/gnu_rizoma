@@ -819,6 +819,7 @@ ventas_win ()
   pago_mixto->check_rest1 = NULL;
   pago_mixto->check_rest2 = NULL;
 
+  venta->total_pagado = 0;
 
   builder = gtk_builder_new ();
 
@@ -1625,7 +1626,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
 	gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_discount_money")));
 
       clean_container (GTK_CONTAINER (window));
-      gtk_widget_show_all (GTK_WIDGET (window));
+      //gtk_widget_show (GTK_WIDGET (window));
 
       if (venta_reserva == TRUE)
 	{
@@ -1638,7 +1639,10 @@ TipoVenta (GtkWidget *widget, gpointer data)
 	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1_monto_pagado")));
 	}
 
-      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_monto_pagado")), PutPoints (g_strdup_printf ("<span size=\"20000\">%d</span>",venta->total_pagado)));
+      if (venta->total_pagado > 0)
+	gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_monto_pagado")), PutPoints (g_strdup_printf ("<span size=\"20000\">%d</span>",venta->total_pagado)));
+      
+      gtk_widget_show (GTK_WIDGET (window));
 
     }
   return;

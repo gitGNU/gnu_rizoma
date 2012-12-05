@@ -315,8 +315,8 @@ gboolean SaveProductsDevolucion (Productos *products, gint id_devolucion);
 
 gboolean SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_traspaso);
 
-gboolean asociar_componente_o_derivado (gchar *barcode_madre, gint tipo_madre, gchar *barcode_comp_der, 
-                                        gint tipo_comp_der, gdouble cant_mud);
+gboolean asociar_componente_o_derivado (gchar *barcode_complejo, gint tipo_complejo, gchar *barcode_componente, 
+                                        gint tipo_componente, gdouble cant_mud);
 
 gchar * sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght);
 
@@ -364,7 +364,7 @@ gchar * codigo_corto_to_barcode (gchar *codigo_corto);
 
 PGresult * get_componentes_compuesto (gchar *barcode);
 
-gboolean desasociar_componente_compuesto (gchar *barcode_madre, gchar * barcode_comp_der);
+gboolean desasociar_componente_compuesto (gchar *barcode_complejo, gchar * barcode_componente);
 
 gboolean mod_to_mod_on_transfer (Prod *producto);
 

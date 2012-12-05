@@ -4988,12 +4988,9 @@ get_componentes_compuesto (gchar *barcode)
   q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_componente AS barcode, cmc.tipo_componente AS tipo, "
 		       "       prd.codigo_corto AS codigo, prd.marca, prd.descripcion, prd.precio, "
 		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (cmc.barcode_componente)) AS costo_promedio "
-		       "FROM ( "
-		       "       SELECT barcode, codigo_corto, marca, descripcion, precio, estado "
-		       "       FROM producto "
-		       "     ) AS prd "
-		       "INNER JOIN componente_mc cmc "
-		       "      on prd.barcode = cmc.barcode_componente "
+		       "FROM componente_mc cmc "
+		       "INNER JOIN producto prd "
+		       "      ON prd.barcode = cmc.barcode_componente "
 		       "WHERE cmc.barcode_complejo = '%s' "
 		       "      AND prd.estado = true",
 		       barcode);
