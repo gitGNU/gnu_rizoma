@@ -355,7 +355,7 @@ BEGIN
 		    )
 		    SELECT barcode_componente, tipo_componente, SUM(compuesta.cant_mud) AS cantidad 
 		    FROM compuesta
-		    WHERE tipo_componente != $S$ || compuesta_l || $S$
+		    WHERE tipo_componente != $S$ || compuesta_l || $S$ AND tipo_componente != $S$ || derivada_l || $S$
 		    GROUP BY barcode_componente, tipo_componente$S$;
 
 	   -- OBTENER EL STOCK DE SUS COMPONENTES Y VER PARA CUANTOS COMPUESTOS ALCANZAN
