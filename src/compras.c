@@ -3659,29 +3659,28 @@ CloseAddProveedorWindow (GtkWidget *button, gpointer data)
 void
 AddProveedor (GtkWidget *widget, gpointer data)
 {
-  GtkWidget *widget_aux;
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_rut"));
-  gchar *rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_dv"));
-  gchar *rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_nombre"));
-  gchar *nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_direccion"));
-  gchar *direccion = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_ciudad"));
-  gchar *ciudad = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_comuna"));
-  gchar *comuna = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_telefono"));
-  gchar *telefono = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_email"));
-  gchar *email = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_web"));
-  gchar *web = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_contacto"));
-  gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
-  widget_aux = GTK_WIDGET (builder_get (builder, "entry_np_giro"));
-  gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget_aux)));
+  compra->rut_add = GTK_WIDGET (builder_get (builder, "entry_np_rut"));
+  gchar *rut = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->rut_add)));
+  compra->rut_ver = GTK_WIDGET (builder_get (builder, "entry_np_dv"));
+  gchar *rut_ver = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->rut_ver)));
+  compra->nombre_add = GTK_WIDGET (builder_get (builder, "entry_np_nombre"));
+  gchar *nombre = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->nombre_add)));
+  compra->direccion_add = GTK_WIDGET (builder_get (builder, "entry_np_direccion"));
+  gchar *direccion = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->direccion_add)));
+  compra->ciudad_add = GTK_WIDGET (builder_get (builder, "entry_np_ciudad"));
+  gchar *ciudad = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->ciudad_add)));
+  compra->comuna_add = GTK_WIDGET (builder_get (builder, "entry_np_comuna"));
+  gchar *comuna = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->comuna_add)));
+  compra->telefono_add = GTK_WIDGET (builder_get (builder, "entry_np_telefono"));
+  gchar *telefono = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->telefono_add)));
+  compra->email_add = GTK_WIDGET (builder_get (builder, "entry_np_email"));
+  gchar *email = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->email_add)));
+  compra->web_add = GTK_WIDGET (builder_get (builder, "entry_np_web"));
+  gchar *web = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->web_add)));
+  compra->contacto_add = GTK_WIDGET (builder_get (builder, "entry_np_contacto"));
+  gchar *contacto = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->contacto_add)));
+  compra->giro_add = GTK_WIDGET (builder_get (builder, "entry_np_giro"));
+  gchar *giro = g_strdup (gtk_entry_get_text (GTK_ENTRY (compra->giro_add)));
 
   if (strcmp (rut, "") == 0)
     {
