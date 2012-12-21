@@ -388,4 +388,6 @@ gboolean agregar_producto_mesa (gint num_mesa, gchar *barcode, gdouble precio, g
 
 gboolean aumentar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad);
 
+gboolean eliminar_producto_mesa (gint num_mesa, gchar *barcode);
+
 #endif

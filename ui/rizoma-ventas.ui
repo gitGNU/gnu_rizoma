@@ -5918,7 +5918,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_realizar_pedido">
-                <property name="label" translatable="yes">_Reservar</property>
+                <property name="label" translatable="yes">_Encargo</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5928,7 +5928,7 @@
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
+                <property name="fill">False</property>
                 <property name="position">4</property>
               </packing>
             </child>
@@ -5943,8 +5943,8 @@
                 <signal name="clicked" handler="on_btn_seleccionar_mesa_clicked" swapped="yes"/>
               </object>
               <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">5</property>
               </packing>
             </child>

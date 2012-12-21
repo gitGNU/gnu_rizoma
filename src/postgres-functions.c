@@ -676,6 +676,12 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
       g_printerr("%s: Trying to sale without the proper document type", G_STRFUNC);
       return FALSE;
     }
+
+
+  //Se limpian mesas (si esta en modo mesero)
+  if (rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
+    EjecutarSQL (g_strdup_printf ("DELETE FROM mesa WHERE num_mesa = %d", venta->num_mesa));
+
   return TRUE;
 }
 
@@ -5042,7 +5048,7 @@ agregar_producto_mesa (gint num_mesa, gchar *barcode, gdouble precio, gdouble ca
 {
   PGresult *res;
   res = EjecutarSQL (g_strdup_printf
-                     ("INSERT INTO mesa (num_mesa, barcode, precio, cantidad) "
+                     ("INSERT INTO mesa (num_mesa, barcode, precio, cantidad_total) "
                       "VALUES (%d, %s, %s, %s)", num_mesa, barcode, CUT (g_strdup_printf ("%.3f", precio)), CUT (g_strdup_printf ("%.3f", cantidad)) ));
 
   if (res != NULL)
@@ -5060,8 +5066,25 @@ aumentar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad)
 {
   PGresult *res;
   res = EjecutarSQL (g_strdup_printf
-                     ("UPDATE mesa SET cantidad = cantidad + %s "
+                     ("UPDATE mesa SET cantidad_total = cantidad_total + %s "
                       "WHERE num_mesa=%d AND barcode=%s", CUT (g_strdup_printf ("%.3f", cantidad)), num_mesa, barcode));
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+/**
+ *
+ */
+gboolean
+eliminar_producto_mesa (gint num_mesa, gchar *barcode)
+{
+  PGresult *res;
+  res = EjecutarSQL (g_strdup_printf
+                     ("DELETE FROM mesa WHERE num_mesa=%d AND barcode=%s", num_mesa, barcode));
 
   if (res != NULL)
     return TRUE;

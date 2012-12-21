@@ -1136,7 +1136,21 @@ ventas_win ()
     gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "entry_precio")), FALSE);
 
   if (rizoma_get_value_boolean ("MODO_MESERO"))
-    on_btn_seleccionar_mesa_clicked (NULL, NULL);
+    {
+      on_btn_seleccionar_mesa_clicked (NULL, NULL);
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_invoice")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_sale")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_realizar_pedido")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_cash_box_close")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_devolver")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")));
+    }
+  else if (!rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT")) /*Se ocultan los botones de mesas*/
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "hbox1_mesa")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_seleccionar_mesa")));
+    }
+
 }
 
 gboolean
@@ -1313,15 +1327,15 @@ AgregarProducto (GtkButton *button, gpointer data)
 
       if (nuevo) venta->product_check->product->iter = iter;
 
-      //Si esta en modo mesero, se agrega el producto a la mesa actual
-      if (rizoma_get_value_boolean ("MODO_MESERO"))
+      /*Si esta en modo mesero, se agrega el producto a la mesa actual*/
+      if (rizoma_get_value_boolean ("MODO_MESERO") ||
+	  rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
 	{
 	  if (nuevo)
 	    agregar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, precio, cantidad);
 	  else
 	    aumentar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, cantidad);
 	}
-      
 
       /* Eliminamos los datos del producto en las entradas */
       CleanEntryAndLabelData ();
@@ -1408,7 +1422,7 @@ EliminarProducto (GtkButton *button, gpointer data)
 {
   GtkTreeIter iter;
   GtkTreeSelection *selection;
-  gchar *value;
+  gchar *codigo;
   gint position;
 
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (venta->treeview_products));
@@ -1416,12 +1430,14 @@ EliminarProducto (GtkButton *button, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       gtk_tree_model_get (GTK_TREE_MODEL (venta->store), &iter,
-                          0, &value,
+                          0, &codigo,
                           -1);
 
       position = atoi (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (venta->store), &iter));
 
-      EliminarDeLista (value, position);
+      EliminarDeLista (codigo, position);
+
+      eliminar_producto_mesa (venta->num_mesa, codigo_corto_to_barcode (codigo));
 
       gtk_list_store_remove (GTK_LIST_STORE (venta->store), &iter);
 
@@ -1441,8 +1457,6 @@ EliminarProducto (GtkButton *button, gpointer data)
       venta->rut_cliente = 0;
       venta->id_reserva = 0;
     }
-
-  
 }
 
 /**
@@ -3392,7 +3406,7 @@ on_btn_cambiar_mesa_ok_clicked (GtkWidget *widget, gpointer data)
       //- Si existe, rellena con los productos existentes
       for (i = 0; i < tuples; i++)
 	{
-	  AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL));
+	  AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), strtod (PUT (PQvaluebycol (res, i, "cantidad_total")), (char **)NULL));
 
 	  //Se reemplazan los 2 precios, para asegurarse que se venda con el precio puesto en el pedido, sin importar si la mercadería esta por mayor o no
 	  venta->products->product->precio = strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL);

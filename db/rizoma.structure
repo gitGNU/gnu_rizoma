@@ -643,8 +643,9 @@ create table reserva (
 create table mesa (
   num_mesa		    int4,
   barcode                   bigint,
-  cantidad		    float8,
-  precio		    float8
+  precio		    float8,
+  cantidad_total	    float8,
+  cantidad_impresa	    float8
 ) ;
 
 
