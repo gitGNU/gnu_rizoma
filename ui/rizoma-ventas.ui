@@ -4036,7 +4036,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_reserva_ok">
-                <property name="label" translatable="yes">Realizar Pedido</property>
+                <property name="label" translatable="yes">Reservar</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -5918,7 +5918,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_realizar_pedido">
-                <property name="label" translatable="yes">_Realizar Pedido</property>
+                <property name="label" translatable="yes">_Reservar</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
