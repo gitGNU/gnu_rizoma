@@ -792,6 +792,19 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
 }
 
 
+/**
+ *
+ */
+void
+on_btn_seleccionar_mesa_clicked (GtkButton *button, gpointer data)
+{
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_cambio_mesa")));
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_cambio_mesa")));
+}
+
+/**
+ * Main window
+ */
 void
 ventas_win ()
 {
@@ -820,6 +833,7 @@ ventas_win ()
   pago_mixto->check_rest2 = NULL;
 
   venta->total_pagado = 0;
+  venta->num_mesa = 0;
 
   builder = gtk_builder_new ();
 
@@ -871,10 +885,16 @@ ventas_win ()
 
   gtk_widget_show_all (ventas_gui);
 
+  // Se setea el label con el nombre de usuario
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_seller_name")),
                         g_strdup_printf ("<span size=\"15000\">%s</span>", user_data->user));
 
-  
+
+  // Se setea el label con el número de mesa
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_num_mesa")),
+                        g_strdup_printf ("<span size=\"15000\">%d</span>", venta->num_mesa));
+
+  // Se setea el label con el número de boleta
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")),
                         g_strdup_printf ("<span size=\"15000\">%.6d</span>", get_ticket_number (SIMPLE)-1)); //antes get_last_sell_id ()
 
@@ -998,8 +1018,12 @@ ventas_win ()
   if (rizoma_get_value_boolean ("MODO_GUIA_FACTURA"))
     {
       renderer = gtk_cell_renderer_text_new ();
-      g_object_set (renderer, "editable", TRUE, NULL);
-      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_precio_neto_sell_edited), (gpointer)venta->store);
+      //El precio es editable si PRECIO_DISCRECIONAL esta habilitado
+      if (rizoma_get_value_boolean ("PRECIO_DISCRECIONAL"))
+	{
+	  g_object_set (renderer, "editable", TRUE, NULL);
+	  g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_precio_neto_sell_edited), (gpointer)venta->store);
+	}
       column = gtk_tree_view_column_new_with_attributes ("Prec. Neto Un.", renderer,
 							 "text", 3,
 							 "foreground", 8,
@@ -1027,8 +1051,12 @@ ventas_win ()
     }
 
   renderer = gtk_cell_renderer_text_new ();
-  g_object_set (renderer, "editable", TRUE, NULL);
-  g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_precio_final_sell_edited), (gpointer)venta->store);
+  //El precio es editable si PRECIO_DISCRECIONAL esta habilitado
+  if (rizoma_get_value_boolean ("PRECIO_DISCRECIONAL"))
+    {
+      g_object_set (renderer, "editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_precio_final_sell_edited), (gpointer)venta->store);
+    }
   column = gtk_tree_view_column_new_with_attributes ("Precio Uni.", renderer,
                                                      "text", 5,
 						     "foreground", 8,
@@ -1102,6 +1130,13 @@ ventas_win ()
 		    G_CALLBACK (calculate_amount), NULL);
 
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")), "<span size=\"40000\">0</span>");
+
+  //Algunas configuraciones del .rizoma
+  if (!rizoma_get_value_boolean ("PRECIO_DISCRECIONAL"))
+    gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "entry_precio")), FALSE);
+
+  if (rizoma_get_value_boolean ("MODO_MESERO"))
+    on_btn_seleccionar_mesa_clicked (NULL, NULL);
 }
 
 gboolean
@@ -1278,6 +1313,15 @@ AgregarProducto (GtkButton *button, gpointer data)
 
       if (nuevo) venta->product_check->product->iter = iter;
 
+      //Si esta en modo mesero, se agrega el producto a la mesa actual
+      if (rizoma_get_value_boolean ("MODO_MESERO"))
+	{
+	  if (nuevo)
+	    agregar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, precio, cantidad);
+	  else
+	    aumentar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, cantidad);
+	}
+      
 
       /* Eliminamos los datos del producto en las entradas */
       CleanEntryAndLabelData ();
@@ -2942,8 +2986,25 @@ main (int argc, char **argv)
   gtk_combo_box_set_model (combo, (GtkTreeModel *)model);
   gtk_combo_box_set_active (combo, 0);
 
-  gtk_widget_show_all ((GtkWidget *)login_window);
+  /*El perfil se elije al seleccionar un grupo, 
+   pero por defecto se seleccionará el del primero*/
+  gchar *group_name;
+  gtk_combo_box_get_active_iter (combo, &iter);
+  gtk_tree_model_get (gtk_combo_box_get_model (combo), &iter,
+                      0, &group_name,
+                      -1);
 
+  rizoma_set_profile (group_name);
+
+  //Inicia la ventana de venta de acuerdo al tipo de login en el .rizoma
+  if (rizoma_get_value_boolean ("ONLY_PASSWORD"))
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "user_entry")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "passwd_entry")));
+    }    
+
+  gtk_widget_show ((GtkWidget *)login_window);
   gtk_main();
 
   return 0;
@@ -2967,9 +3028,12 @@ check_passwd (GtkWidget *widget, gpointer data)
   GtkTreeModel *model = gtk_combo_box_get_model (combo);
   gchar *group_name;
 
-  gchar *passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
-  gchar *user = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"user_entry")));
+  gchar *passwd;
+  gchar *user;
+  
+  gboolean valido;
 
+  //Se obtiene el grupo seleccionado
   gtk_combo_box_get_active_iter (combo, &iter);
   gtk_tree_model_get (model, &iter,
                       0, &group_name,
@@ -2977,7 +3041,21 @@ check_passwd (GtkWidget *widget, gpointer data)
 
   rizoma_set_profile (group_name);
 
-  switch (AcceptPassword (passwd, user))
+  //Obtiene los datos necesarios
+  if (!rizoma_get_value_boolean ("ONLY_PASSWORD"))
+    {
+      passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
+      user = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"user_entry")));
+      valido = AcceptPassword (passwd, user);
+    }
+  else
+    {
+      passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
+      user = AcceptOnlyPassword (passwd);
+      valido = g_str_equal (user, "") ? FALSE : TRUE;
+    }
+
+  switch (valido)
     {
     case TRUE:
 
@@ -3036,6 +3114,7 @@ on_delete_ventas_gui (GtkWidget *widget, GdkEvent *event, gpointer data)
   return TRUE;
 }
 
+
 /**
  * Callback connected to response signal emited by the confirmation
  * dialog of rizoma-ventas
@@ -3061,7 +3140,10 @@ exit_response (GtkDialog *dialog, gint response_id, gpointer data)
       gtk_widget_hide (GTK_WIDGET (dialog));
 }
 
-//related with the credit sale
+
+/**
+ * related with the credit sale
+ */
 void
 on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
 {
@@ -3262,6 +3344,94 @@ on_btn_reserva_ok_clicked (GtkButton *button, gpointer data)
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_reserva")));
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+}
+
+
+/**
+ * callback 'entry_numero_mesa' and 'btn_cambiar_mesa_ok'
+ */
+void
+on_btn_cambiar_mesa_ok_clicked (GtkWidget *widget, gpointer data)
+{
+  gchar *num_mesa;
+  PGresult *res;
+  gchar *q;
+  gint i, tuples;
+  gdouble iva, otros;
+
+  GtkListStore *sell = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))));
+  GtkTreeIter iter;
+
+
+  num_mesa = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_numero_mesa"))));
+
+  if (HaveCharacters (num_mesa))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_numero_mesa")), 
+		"El número de la mesa debe ser un valor numérico");
+      return;
+    }
+
+  venta->num_mesa = atoi (num_mesa);
+
+  //Limpia la estructura de productos
+  ListClean ();
+
+  //Se limpian el store y los labels
+  gtk_list_store_clear (venta->store);
+  CleanEntryAndLabelData();
+  
+  //Consulta
+  q = g_strdup_printf ("SELECT * FROM mesa WHERE num_mesa = %d", venta->num_mesa);
+  res = EjecutarSQL (q);
+  tuples = PQntuples (res);
+
+  //Revisa si la mesa existe
+  if (res != NULL && tuples > 0)
+    {
+      //- Si existe, rellena con los productos existentes
+      for (i = 0; i < tuples; i++)
+	{
+	  AgregarALista (NULL, PQvaluebycol (res, i, "barcode"), strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL));
+
+	  //Se reemplazan los 2 precios, para asegurarse que se venda con el precio puesto en el pedido, sin importar si la mercadería esta por mayor o no
+	  venta->products->product->precio = strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL);
+	  venta->products->product->precio_mayor = strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL);
+
+	  iva = (gdouble)venta->products->product->iva / 100;
+	  otros = (gdouble)venta->products->product->otros / 100;
+	  venta->products->product->precio_neto = (venta->products->product->precio / (1 + otros + iva));
+
+	  gtk_list_store_insert_after (sell, &iter, NULL);
+	  gtk_list_store_set (sell, &iter,
+			      0, venta->products->product->codigo,
+			      1, g_strdup_printf ("%s %s %d %s",
+						  venta->products->product->producto,
+						  venta->products->product->marca,
+						  venta->products->product->contenido,
+						  venta->products->product->unidad),
+			      2, venta->products->product->cantidad,
+			      3, venta->products->product->precio_neto,
+			      4, lround (venta->products->product->cantidad * venta->products->product->precio_neto),
+			      5, venta->products->product->precio,
+			      6, lround (venta->products->product->cantidad * venta->products->product->precio),
+			      7, venta->products->product->stock,
+			      8, (venta->products->product->cantidad > venta->products->product->stock) ? "Red":"Black",
+			      9, TRUE,
+			      -1);
+
+	  venta->products->product->iter = iter;
+	}
+
+      CalcularVentas (venta->header);
+    }
+
+  //Setea el label con el numero de mesa
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_num_mesa")),
+                        g_strdup_printf ("<span size=\"15000\">%d</span>", venta->num_mesa));
+
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_cambio_mesa")));
+
 }
 
 

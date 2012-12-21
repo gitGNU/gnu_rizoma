@@ -288,6 +288,9 @@ typedef struct _ventas
   gint total_pagado;
   gint deuda_total;
   gint id_reserva;
+
+  //Datos mesa
+  gint num_mesa;
 }
 Venta;
 

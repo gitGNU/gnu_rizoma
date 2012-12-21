@@ -4761,6 +4761,7 @@ DECLARE
 	q text;
 	l record;
 BEGIN
+	-- TODO: agregar tb venta_mc_detalle
 	q := $S$ SELECT barcode, SUM (cantidad) AS cantidad, SUM (fifo*cantidad) AS sub_costo_venta, SUM (precio*cantidad) AS sub_venta, SUM (ganancia*cantidad) AS sub_ganancia
 	         FROM venta_detalle vd
 	     	 INNER JOIN venta v

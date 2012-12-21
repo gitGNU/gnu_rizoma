@@ -31,4 +31,6 @@ gboolean AcceptPassword (gchar *passwd, gchar *user);
 
 gboolean CompararPassword (gchar *passwd_db, gchar *passwd);
 
+gchar * AcceptOnlyPassword (gchar *passwd);
+
 #endif

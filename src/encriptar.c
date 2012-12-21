@@ -54,6 +54,20 @@ AcceptPassword (gchar *passwd, gchar *user)
     return TRUE;
   else
     return FALSE;
+}
 
+gchar *
+AcceptOnlyPassword (gchar *passwd)
+{
+  PGresult *res;
 
+  res = EjecutarSQL (g_strdup_printf ("SELECT usuario FROM users WHERE passwd=md5('%s')", passwd));
+
+  if (res != NULL && PQntuples (res) == 0)
+    {
+      rizoma_errors_set ("La contraseña no existe", "AcceptPassword ()", ALERT);
+      return g_strdup ("");
+    }
+  else
+    return g_strdup (PQvaluebycol (res, 0, "usuario"));
 }

@@ -911,13 +911,14 @@ inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar 
   PGresult *res;
   gchar *q;
 
+  //TODO: solo debe ser para mercaderías corrientes
   q = g_strdup_printf ("SELECT barcode, codigo_corto, (descripcion||' '||marca||' '||cont_un) AS descripcion, "
 		       "       stock_inicial, stock_teorico, "
 	               "       (ventas_periodo-anulaciones_periodo) AS unidades_vendidas, "
-		       "       ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) AS porcentaje_vendido, "
-		       "       (SELECT precio FROM producto WHERE producto.barcode = barcode) AS precio, "
-		       "       (SELECT * FROM obtener_costo_promedio_desde_barcode (barcode::bigint)) AS costo_promedio "
-		       "FROM producto_en_periodo ('%.4d-%.2d-%.2d') ",
+		       "       ((ventas_periodo-anulaciones_periodo)/CASE WHEN (stock_inicial*100) = 0 THEN 1 ELSE stock_inicial*100 END) AS porcentaje_vendido, "
+		       "       (SELECT precio FROM producto WHERE producto.barcode = pep.barcode::bigint) AS precio, "
+		       "       (SELECT costo FROM obtener_costo_promedio_desde_barcode (barcode::bigint)) AS costo_promedio "
+		       "FROM producto_en_periodo ('%.4d-%.2d-%.2d') AS pep ",
 		       from_year, from_month, from_day);
 
   /*Se aplica a la un filtro a la consulta*/
@@ -926,17 +927,17 @@ inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar 
       q = g_strdup_printf ("%s WHERE ", q);
       
       if (!g_str_equal (max_unid_sell, "") && g_str_equal (max_avg_sell, ""))
-	q = g_strdup_printf ("%s (ventas_periodo-anulaciones_periodo) < %s", q, CUT(max_unid_sell));
+	q = g_strdup_printf ("%s (ventas_periodo-anulaciones_periodo) < %s ", q, CUT(max_unid_sell));
       else if (g_str_equal (max_unid_sell, "") && !g_str_equal (max_avg_sell, ""))
 	q = g_strdup_printf ("%s ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) < %s ", q, CUT(max_avg_sell));
       else
 	q = g_strdup_printf ("%s ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) < %s "
-			     "OR (ventas_periodo-anulaciones_periodo) < %s", q, CUT(max_avg_sell), CUT(max_unid_sell));
+			     "OR (ventas_periodo-anulaciones_periodo) < %s ", q, CUT(max_avg_sell), CUT(max_unid_sell));
     }
 
   /*Los datos se ordenan por su porcentaje de venta*/
   q = g_strdup_printf ("%s "
-		       "ORDER BY ((ventas_periodo-anulaciones_periodo)/stock_inicial*100) ASC", q);
+		       "ORDER BY ((ventas_periodo-anulaciones_periodo)/CASE WHEN (stock_inicial*100) = 0 THEN 1 ELSE stock_inicial*100 END) ASC", q);
 
   res = EjecutarSQL (q);
 
@@ -5030,4 +5031,40 @@ movimiento_en_rango (GDate *fecha_inicio, GDate *fecha_final, gchar *barcode)
   else
     return NULL;
 
+}
+
+
+/**
+ *
+ */
+gboolean
+agregar_producto_mesa (gint num_mesa, gchar *barcode, gdouble precio, gdouble cantidad)
+{
+  PGresult *res;
+  res = EjecutarSQL (g_strdup_printf
+                     ("INSERT INTO mesa (num_mesa, barcode, precio, cantidad) "
+                      "VALUES (%d, %s, %s, %s)", num_mesa, barcode, CUT (g_strdup_printf ("%.3f", precio)), CUT (g_strdup_printf ("%.3f", cantidad)) ));
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+
+/**
+ *
+ */
+gboolean
+aumentar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad)
+{
+  PGresult *res;
+  res = EjecutarSQL (g_strdup_printf
+                     ("UPDATE mesa SET cantidad = cantidad + %s "
+                      "WHERE num_mesa=%d AND barcode=%s", CUT (g_strdup_printf ("%.3f", cantidad)), num_mesa, barcode));
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
 }

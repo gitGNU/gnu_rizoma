@@ -384,4 +384,8 @@ gint facturar_guia (gint id_factura, gint id_guia, gint monto_guia);
 
 PGresult * movimiento_en_rango (GDate *fecha_inicio, GDate *fecha_final, gchar *barcode);
 
+gboolean agregar_producto_mesa (gint num_mesa, gchar *barcode, gdouble precio, gdouble cantidad);
+
+gboolean aumentar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad);
+
 #endif

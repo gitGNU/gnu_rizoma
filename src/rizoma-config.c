@@ -103,6 +103,8 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "VALE_COPY", "1");
   g_key_file_set_string (file, "RIZOMA", "VENDEDOR", "0");
   g_key_file_set_string (file, "RIZOMA", "MAQUINA", "1");
+  g_key_file_set_string (file, "RIZOMA", "ONLY_PASSWORD", "0"); //Solo afecta al login en rizoma-ventas
+  g_key_file_set_string (file, "RIZOMA", "MODO_MESERO", "0");   //Pregunta mesa y cierra automágicamente
   g_key_file_set_string (file, "RIZOMA", "SPREADSHEET_APP", "gnumeric");
   g_key_file_set_string (file, "RIZOMA", "VENTA_DIRECTA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
