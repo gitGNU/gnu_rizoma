@@ -721,7 +721,7 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
   GtkTreePath *path = gtk_tree_path_new_from_string (path_string);
   GtkTreeIter iter;
 
-  gchar *codigo;
+  gchar *codigo, *color;
   gdouble cantidad, precio_neto, precio_final, iva, otros;
 
   //Verifica que sea un valor numérico
@@ -766,15 +766,27 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
 	}
     }
 
+
+  /*Se elige el color de la fila*/
+  if (venta->product_check->product->cantidad <= venta->product_check->product->stock)
+    color =  (venta->product_check->product->cantidad != venta->product_check->product->cantidad_impresa) ? g_strdup ("Blue") : g_strdup ("Black");
+  else /*Si la cantidad solicitada supera al stock*/
+    color = g_strdup ("Red");
+
   gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 		      2, cantidad,
 		      3, precio_neto,
 		      4, lround (precio_neto*cantidad),
 		      5, precio_final,
 		      6, lround (precio_final*cantidad),
-		      8, (cantidad > venta->product_check->product->stock) ? "Red":"Black",
-		      9, TRUE,
+		      9, color,
+		      10, TRUE,
 		      -1);
+
+  //Se actualiza la cantidad en la tabla mesa
+  if (rizoma_get_value_boolean ("MODO_MESERO") ||
+      rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
+    modificar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, venta->product_check->product->cantidad, venta->product_check->product->cantidad_impresa);
 
   if (venta->product_check->product->stock < cantidad)
     {
@@ -800,6 +812,7 @@ on_btn_seleccionar_mesa_clicked (GtkButton *button, gpointer data)
 {
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_cambio_mesa")));
   gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_cambio_mesa")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_numero_mesa")));
 }
 
 /**
@@ -902,7 +915,7 @@ ventas_win ()
   /* gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_ticket_number")), */
   /*                       g_strdup_printf ("<b><big>%.6d</big></b>", get_ticket_number (SIMPLE))); */
 
-  venta->store = gtk_list_store_new (10,
+  venta->store = gtk_list_store_new (11,
 				     G_TYPE_STRING,   //CODIGO
 				     G_TYPE_STRING,   //DESCRIPCION
 				     G_TYPE_DOUBLE,   //CANTIDAD
@@ -911,6 +924,7 @@ ventas_win ()
 				     G_TYPE_DOUBLE,   //PRECIO FINAL
 				     G_TYPE_INT,      //SUB TOTAL FINAL
 				     G_TYPE_DOUBLE,   //STOCK
+				     G_TYPE_DOUBLE,   //CANTIDAD IMPRESA
 				     G_TYPE_STRING,   //COLOR
 				     G_TYPE_BOOLEAN); //COLOREAR
   if (venta->header != NULL)
@@ -942,8 +956,9 @@ ventas_win ()
                               5, precio,
                               6, lround (fill->product->cantidad * precio),
 			      7, fill->product->stock,
-			      8, (fill->product->cantidad > fill->product->stock) ? "Red":"Black",
-			      9, TRUE,
+			      8, fill->product->cantidad_impresa,
+			      9, (fill->product->cantidad > fill->product->stock) ? "Red":"Black",
+			      10, TRUE,
                               -1);
           fill = fill->next;
         }
@@ -956,8 +971,8 @@ ventas_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Código", renderer,
                                                      "text", 0,
-						     "foreground", 8,
-						     "foreground-set", 9,
+						     "foreground", 9,
+						     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -967,8 +982,8 @@ ventas_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Descripción", renderer,
                                                      "text", 1,
-						     "foreground", 8,
-						     "foreground-set", 9,
+						     "foreground", 9,
+						     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1006,8 +1021,8 @@ ventas_win ()
   g_signal_connect (G_OBJECT (renderer), "edited", G_CALLBACK (on_cantidad_sell_edited), (gpointer)venta->store);
   column = gtk_tree_view_column_new_with_attributes ("Cant.", renderer,
                                                      "text", 2,
-						     "foreground", 8,
-						     "foreground-set", 9,
+						     "foreground", 9,
+						     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1026,8 +1041,8 @@ ventas_win ()
 	}
       column = gtk_tree_view_column_new_with_attributes ("Prec. Neto Un.", renderer,
 							 "text", 3,
-							 "foreground", 8,
-							 "foreground-set", 9,
+							 "foreground", 9,
+							 "foreground-set", 10,
 							 NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1039,8 +1054,8 @@ ventas_win ()
       renderer = gtk_cell_renderer_text_new ();
       column = gtk_tree_view_column_new_with_attributes ("Sub Total Neto", renderer,
 							 "text", 4,
-							 "foreground", 8,
-							 "foreground-set", 9,
+							 "foreground", 9,
+							 "foreground-set", 10,
 							 NULL);
       gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
       gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1059,8 +1074,8 @@ ventas_win ()
     }
   column = gtk_tree_view_column_new_with_attributes ("Precio Uni.", renderer,
                                                      "text", 5,
-						     "foreground", 8,
-						     "foreground-set", 9,
+						     "foreground", 9,
+						     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1071,8 +1086,8 @@ ventas_win ()
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Sub Total", renderer,
                                                      "text", 6,
-						     "foreground", 8,
-						     "foreground-set", 9,
+						     "foreground", 9,
+						     "foreground-set", 10,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (venta->treeview_products), column);
   gtk_tree_view_column_set_alignment (column, 0.5);
@@ -1213,6 +1228,7 @@ AgregarProducto (GtkButton *button, gpointer data)
     {
       gdouble precio, precio_neto;
       gboolean nuevo;
+      gchar *color;
 
       /*Agregamos el producto a la lista enlazada circular*/
       if ( venta->products != NULL && //Si existen productos en la lista y está el seleccionado
@@ -1304,6 +1320,21 @@ AgregarProducto (GtkButton *button, gpointer data)
       if (!nuevo)
 	venta->product_check->product->cantidad += cantidad;
 
+      /*Si esta en modo mesero, se agrega el producto a la mesa actual*/
+      if (rizoma_get_value_boolean ("MODO_MESERO") ||
+	  rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
+	{
+	  if (nuevo)
+	    agregar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, precio, cantidad);
+	  else
+	    aumentar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, cantidad);
+
+	  /*Blue indica que no ha sido impreso, o falta imprimir la 'cantidad' a preparar restante*/
+	  color = (venta->product_check->product->cantidad > venta->product_check->product->stock) ? g_strdup ("Red") : g_strdup ("Blue");
+	}
+      else /*Si no está en modo restaurant, se ven otras condiciones para el color*/
+	color = (venta->product_check->product->cantidad > venta->product_check->product->stock) ? g_strdup ("Red") : g_strdup ("Black");
+
       /*
 	Agregamos el producto al TreeView
       */
@@ -1321,21 +1352,14 @@ AgregarProducto (GtkButton *button, gpointer data)
 			  5, precio,
 			  6, lround (venta->product_check->product->cantidad * precio),
 			  7, stock,
-			  8, (venta->product_check->product->cantidad > venta->product_check->product->stock) ? "Red":"Black",
-			  9, TRUE,
+			  8, venta->product_check->product->cantidad_impresa, //TODOOO::ver todas las funcinoes que modifican estre treeview
+			  9, color,
+			  10, TRUE,
 			  -1);
 
       if (nuevo) venta->product_check->product->iter = iter;
 
-      /*Si esta en modo mesero, se agrega el producto a la mesa actual*/
-      if (rizoma_get_value_boolean ("MODO_MESERO") ||
-	  rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
-	{
-	  if (nuevo)
-	    agregar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, precio, cantidad);
-	  else
-	    aumentar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, cantidad);
-	}
+      //TODOOO: Color requiere de un g_free?... si un *gchar iniciado con g_strdup se libera con g_free, ¿se le puede volver asignar un valor?
 
       /* Eliminamos los datos del producto en las entradas */
       CleanEntryAndLabelData ();
@@ -3369,13 +3393,12 @@ on_btn_cambiar_mesa_ok_clicked (GtkWidget *widget, gpointer data)
 {
   gchar *num_mesa;
   PGresult *res;
-  gchar *q;
+  gchar *q, *color;
   gint i, tuples;
   gdouble iva, otros;
 
   GtkListStore *sell = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))));
   GtkTreeIter iter;
-
 
   num_mesa = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_numero_mesa"))));
 
@@ -3411,10 +3434,17 @@ on_btn_cambiar_mesa_ok_clicked (GtkWidget *widget, gpointer data)
 	  //Se reemplazan los 2 precios, para asegurarse que se venda con el precio puesto en el pedido, sin importar si la mercadería esta por mayor o no
 	  venta->products->product->precio = strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL);
 	  venta->products->product->precio_mayor = strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL);
+	  venta->products->product->cantidad_impresa = strtod (PUT (PQvaluebycol (res, i, "cantidad_impresa")), (char **)NULL);
 
 	  iva = (gdouble)venta->products->product->iva / 100;
 	  otros = (gdouble)venta->products->product->otros / 100;
 	  venta->products->product->precio_neto = (venta->products->product->precio / (1 + otros + iva));
+
+	  /*Se elige el color de la fila*/
+	  if (venta->products->product->cantidad <= venta->products->product->stock)
+	    color =  (venta->products->product->cantidad != venta->products->product->cantidad_impresa) ? g_strdup ("Blue") : g_strdup ("Black");
+	  else /*Si la cantidad solicitada supera al stock*/
+	    color = g_strdup ("Red");
 
 	  gtk_list_store_insert_after (sell, &iter, NULL);
 	  gtk_list_store_set (sell, &iter,
@@ -3430,11 +3460,14 @@ on_btn_cambiar_mesa_ok_clicked (GtkWidget *widget, gpointer data)
 			      5, venta->products->product->precio,
 			      6, lround (venta->products->product->cantidad * venta->products->product->precio),
 			      7, venta->products->product->stock,
-			      8, (venta->products->product->cantidad > venta->products->product->stock) ? "Red":"Black",
-			      9, TRUE,
+			      8, venta->products->product->cantidad_impresa,
+			      9, color,
+			      10, TRUE,
 			      -1);
 
 	  venta->products->product->iter = iter;
+
+	  //TODOOO: Color requiere de un g_free?... si un *gchar iniciado con g_strdup se libera con g_free, ¿se le puede volver asignar un valor?
 	}
 
       CalcularVentas (venta->header);
@@ -4744,6 +4777,16 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 	mixed_pay_window ();
       break;
 
+    case GDK_F9:
+      if (rizoma_get_value_boolean ("MODO_MESERO"))
+	{
+	  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_print_mesa")));
+	  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_print_mesa")));
+	}
+      else
+	TipoVenta (NULL, NULL);
+      break;
+
       //if the key pressed is not in use let it pass
     case GDK_F10:
       if (no_venta == FALSE && venta_reserva == FALSE)
@@ -5668,8 +5711,9 @@ on_btn_adm_pedido_ok_clicked (GtkButton *button, gpointer data)
                                   5, venta->products->product->precio,
                                   6, lround (venta->products->product->cantidad * venta->products->product->precio),
 				  7, venta->products->product->stock,
-				  8, (venta->products->product->cantidad > venta->products->product->stock) ? "Red":"Black",
-				  9, TRUE,
+				  8, venta->products->product->cantidad_impresa,
+				  9, (venta->products->product->cantidad > venta->products->product->stock) ? "Red":"Black",
+				  10, TRUE,
                                   -1);
 
               venta->products->product->iter = iter;
@@ -5840,8 +5884,9 @@ on_btn_nullify_ok_clicked (GtkButton *button, gpointer data)
                                   5, venta->products->product->precio,
                                   6, lround (venta->products->product->cantidad * venta->products->product->precio),
 				  7, venta->products->product->stock,
-				  8, (venta->products->product->cantidad > venta->products->product->stock) ? "Red":"Black",
-				  9, TRUE,
+				  8, venta->products->product->cantidad_impresa,
+				  9, (venta->products->product->cantidad > venta->products->product->stock) ? "Red":"Black",
+				  10, TRUE,
                                   -1);
 
               venta->products->product->iter = iter;
@@ -6535,3 +6580,47 @@ on_enviar_button_clicked (GtkButton *button, gpointer data)
     }
   return;
 }
+
+
+/**
+ *
+ */
+void
+normalizar_treeview_venta ()
+{
+  GtkTreeModel *model = gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "sell_products_list")));
+  GtkTreeIter iter;
+  gboolean valid;
+  gdouble cantidad, stock;
+
+  valid = gtk_tree_model_get_iter_first (model, &iter);
+  while (valid)
+    {
+      gtk_tree_model_get (model, &iter,
+			  2, &cantidad, // Se obtiene el codigo del producto
+			  7, &stock,
+			  -1);
+
+      gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+			  8, cantidad, //cantidad_impresa = cantidad
+			  9, (cantidad > stock) ? "Red" : "Black",
+			  -1);
+      valid = gtk_tree_model_iter_next (model, &iter);
+    }
+}
+
+/**
+ *
+ *
+ * @param button the GtkButton that recieves the signal
+ * @param data the pointer passed to the callback
+ */
+void
+on_btn_print_mesa_clicked (GtkButton *button, gpointer data)
+{
+  if (get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))) > 0)
+      PrintValeMesa (venta->header, venta->num_mesa);
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_print_mesa")));
+  normalizar_treeview_venta ();
+}
+

@@ -388,6 +388,120 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
 }
 
 
+/**
+ *
+ *
+ */
+void
+PrintValeMesa (Productos *header, gint num_mesa)
+{
+  Productos *products = header;
+  FILE *fp;
+  char *vale_dir = rizoma_get_value ("VALE_DIR");
+  char *vale_copy = rizoma_get_value ("VALE_COPY");
+  char *print_command = rizoma_get_value ("PRINT_COMMAND");
+  gchar *vale_file = g_strdup_printf ("%s/Vale.txt", vale_dir);
+  char start[] = {0x1B, 0x40, 0x0};
+  char cut[] = {0x1B, 0x69, 0x0};
+  char size2[] = {0x1B, 0x45, 0x1, 0x0};
+  char size1[] = {0x1B, 0x45, 0x0, 0x0};
+  int n_copy = atoi (vale_copy);
+  int i, precio;
+  gdouble siva = 0.0, civa = 0.0;
+  gboolean hay_selectivo = FALSE;
+  gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
+  gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
+
+  if (impresora == FALSE)
+    return;
+
+  fp = fopen (vale_file, "w+");
+  fprintf (fp, "%s", start);
+  fprintf (fp, "\t CONTROL INTERNO \n");
+  fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
+  fprintf (fp, "Mesero: %s - Mesa: %d \n", user_data->user, num_mesa);
+  fprintf (fp, "==========================================\n\n");
+
+  do {
+
+    // Se imprimen solo los productos que no se hayan impreso o que no se haya impreso toda su cantidad
+    if (products->product->cantidad != products->product->cantidad_impresa) //TODO: En una de esas desea disminuir una orden
+      {
+	if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 && 
+	    products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)      
+	  precio = products->product->precio_mayor;
+	else
+	  precio = products->product->precio;
+
+	if ((vale_selectivo != NULL) && (g_str_equal(vale_selectivo, "YES")))
+	  {
+	    if (g_str_has_suffix(products->product->producto,"@"))
+	      {
+		hay_selectivo = TRUE;
+	    
+		fprintf (fp, "%s %s\nCant.: %.2f $%7s  $%7s\n",
+			 g_strndup (products->product->producto, 30),
+			 products->product->marca,
+			 products->product->cantidad - products->product->cantidad_impresa,
+			 PutPoints (g_strdup_printf ("%d",precio)),
+			 PutPoints (g_strdup_printf ("%lu",
+						     lround ((double)((products->product->cantidad - products->product->cantidad_impresa) * precio)))));
+		if (products->product->iva != 0)
+		  civa += (double)((products->product->cantidad - products->product->cantidad_impresa) * precio);
+		else if (products->product->iva == 0)
+		  siva += (double)((products->product->cantidad - products->product->cantidad_impresa) * precio);
+	      }
+	  }
+	else
+	  {
+	    fprintf (fp, "%s %s\nCant.: %.2f $%7s  $%7s\n",
+		     g_strndup (products->product->producto, 30),
+		     products->product->marca,
+		     products->product->cantidad - products->product->cantidad_impresa,
+		     PutPoints (g_strdup_printf ("%d",precio)),
+		     PutPoints (g_strdup_printf ("%lu",
+						 lround ((double)((products->product->cantidad - products->product->cantidad_impresa) * precio)))));
+	    if (products->product->iva != 0)
+	      civa += (double)((products->product->cantidad - products->product->cantidad_impresa) * precio);
+	    else if (products->product->iva == 0)
+	      siva += (double)((products->product->cantidad - products->product->cantidad_impresa) * precio);
+	  }
+	
+	products->product->cantidad_impresa = products->product->cantidad;
+	modificar_producto_mesa (num_mesa, products->product->barcode, products->product->cantidad, products->product->cantidad_impresa);
+	//Actualizar Treeview (color de las filas y la cantidad impresa)
+      }
+
+    products = products->next;
+  } while (products != header);
+  
+  //Si no hay ningún producto que imprimir, no se imprime nada
+  if ((civa + siva) == 0)
+    return;
+
+  fprintf (fp, "\n");
+  fprintf (fp, "Sub Total no afecto:  $%7s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
+  fprintf (fp, "Sub Total afecto:     %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(civa))), size1);
+  fprintf (fp, "\n\n");
+  gdouble totalLocal = civa + siva;
+  fprintf (fp, "Total Venta:          %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
+  fprintf (fp, "\n\n\tGracias por su compra! \n");
+  fprintf (fp, "\n\n\n");
+  fprintf (fp, "%s", cut); /* We cut the paper :) */
+  fclose (fp);
+
+  for (i = 0; i < n_copy; i++) 
+    system(g_strdup_printf ("%s %s", print_command, vale_file));
+
+  system (g_strdup_printf ("rm %s", vale_file));
+}
+
+
+
+/**
+ *
+ *
+ */
 void
 print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar *motivo)
 {

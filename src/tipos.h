@@ -124,6 +124,12 @@ typedef struct _product
   gdouble precio_mayor;
   gdouble precio_mayor_original;
   gdouble cantidad_mayorista;
+    
+  /*
+    Adicional para ventas
+   */
+  gdouble cantidad_impresa;
+
 }
 Producto;
 

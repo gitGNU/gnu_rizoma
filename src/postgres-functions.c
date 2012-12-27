@@ -5091,3 +5091,24 @@ eliminar_producto_mesa (gint num_mesa, gchar *barcode)
   else
     return FALSE;
 }
+
+
+/**
+ *
+ */
+gboolean
+modificar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad_total, gdouble cantidad_impresa)
+{
+  PGresult *res;
+  res = EjecutarSQL (g_strdup_printf
+                     ("UPDATE mesa SET cantidad_total = %s, cantidad_impresa = %s "
+                      "WHERE num_mesa=%d AND barcode=%s",
+		      CUT (g_strdup_printf ("%.3f", cantidad_total)),
+		      CUT (g_strdup_printf ("%.3f", cantidad_impresa)),
+		      num_mesa, barcode));
+
+  if (res != NULL)
+    return TRUE;
+  else
+    return FALSE;
+}

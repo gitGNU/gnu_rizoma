@@ -79,6 +79,7 @@ CreateNew (gchar *barcode, gdouble cantidad)
   new->product->precio_mayor_original = strtod (PUT (PQvaluebycol (res, 0, "precio_mayor")), (char **)NULL);
   new->product->cantidad_mayorista = strtod (PUT (PQvaluebycol (res, 0, "cantidad_mayor")), (char **)NULL);
   new->product->mayorista = strcmp (PQvaluebycol (res, 0, "mayorista"), "t") == 0 ? TRUE : FALSE;
+  new->product->cantidad_impresa = 0;
 
   return new;
 }
@@ -440,6 +441,7 @@ CompraCreateNew (gchar *barcode, gdouble cantidad, gdouble precio_final, gdouble
   new->product->precio_mayor = strtod (PUT(PQvaluebycol (res, 0, "precio_mayor")), (char **) NULL);
   new->product->cantidad_mayorista = strtod (PUT(PQvaluebycol (res, 0, "cantidad_mayor")), (char **) NULL);
   new->product->mayorista = atoi (PQvaluebycol (res, 0, "mayorista"));
+  new->product->cantidad_impresa = 0;
 
   new->product->canjear = FALSE;
 

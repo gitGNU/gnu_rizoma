@@ -390,4 +390,6 @@ gboolean aumentar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad
 
 gboolean eliminar_producto_mesa (gint num_mesa, gchar *barcode);
 
+gboolean modificar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad_total, gdouble cantidad_impresa);
+
 #endif
