@@ -53,8 +53,10 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
   gboolean hay_selectivo = FALSE;
   gboolean impresora = rizoma_get_value_boolean ("IMPRESORA");
   gboolean emitir_documento = rizoma_get_value_boolean ("EMITIR_DOCUMENTO");
+  gboolean venta_restaurant = rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT");
   gchar *vale_selectivo = rizoma_get_value ("VALE_SELECTIVO");
   gboolean is_imp1, is_imp2;
+  gchar *mesa;
 
   if (impresora == FALSE && emitir_documento == FALSE)
     return;
@@ -64,6 +66,11 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
       is_imp1 = (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
       is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
     }
+
+  if (venta_restaurant)
+    mesa = g_strdup_printf ("- Mesa: %d", venta->num_mesa);
+  else
+    mesa = g_strdup ("");
 
   id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, rut_cliente);
 
@@ -75,7 +82,7 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
   fprintf (fp, "Num. venta: %d - Num. boleta: %d\n", venta_id, boleta);
-  fprintf (fp, "Vendedor: %s\n", user_data->user);
+  fprintf (fp, "Vendedor: %s %s\n", user_data->user, mesa);
   fprintf (fp, "==========================================\n\n");
 
   do {
