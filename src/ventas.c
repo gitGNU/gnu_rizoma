@@ -3069,8 +3069,12 @@ check_passwd (GtkWidget *widget, gpointer data)
   gchar *passwd;
   gchar *user;
   
+  gboolean only_password;
   gboolean valido;
 
+  //Se obtiene la configuración del .rizoma
+  only_password = rizoma_get_value_boolean ("ONLY_PASSWORD");
+  
   //Se obtiene el grupo seleccionado
   gtk_combo_box_get_active_iter (combo, &iter);
   gtk_tree_model_get (model, &iter,
@@ -3080,7 +3084,7 @@ check_passwd (GtkWidget *widget, gpointer data)
   rizoma_set_profile (group_name);
 
   //Obtiene los datos necesarios
-  if (!rizoma_get_value_boolean ("ONLY_PASSWORD"))
+  if (!only_password)
     {
       passwd = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"passwd_entry")));
       user = g_strdup (gtk_entry_get_text ( (GtkEntry *) gtk_builder_get_object (builder,"user_entry")));
@@ -3117,7 +3121,11 @@ check_passwd (GtkWidget *widget, gpointer data)
     case FALSE:
       gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"user_entry"), "");
       gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"passwd_entry"), "");
-      rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
+
+      if (only_password)
+	rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"passwd_entry"));
+      else
+	rizoma_error_window ((GtkWidget *) gtk_builder_get_object (builder,"user_entry"));
       break;
     default:
       break;
@@ -6615,12 +6623,18 @@ normalizar_treeview_venta ()
  * @param button the GtkButton that recieves the signal
  * @param data the pointer passed to the callback
  */
-void
+gint
 on_btn_print_mesa_clicked (GtkButton *button, gpointer data)
 {
   if (get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))) > 0)
       PrintValeMesa (venta->header, venta->num_mesa);
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_print_mesa")));
   normalizar_treeview_venta ();
+
+  //Se reinicia rizoma
+  gtk_main_quit ();
+
+  system ("rizoma-ventas &");
+  return (0);
 }
 
