@@ -111,7 +111,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
   g_key_file_set_string (file, "RIZOMA", "IMPRESORA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRINT_FACTURA", "0");
-  g_key_file_set_string (file, "RIZOMA", "EMITIR_DOCUMENTO", "0"); //Emite documentos aunque no se imprima
+  g_key_file_set_string (file, "RIZOMA", "EMITIR_DOCUMENTO", "1"); //Emite documentos aunque no se imprima
   g_key_file_set_string (file, "RIZOMA", "VALE_SELECTIVO", "NO");
   g_key_file_set_string (file, "RIZOMA", "VALE_CONTINUO", "0");
   g_key_file_set_string (file, "RIZOMA", "LOGO", "");

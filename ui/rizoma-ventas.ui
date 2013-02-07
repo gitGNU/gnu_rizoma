@@ -1607,7 +1607,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="label" translatable="yes">Debe haber:</property>
+                <property name="label" translatable="yes">Dinero en caja:</property>
               </object>
             </child>
             <child>
@@ -1627,7 +1627,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">1</property>
-                <property name="label" translatable="yes">Retiro por cierre:</property>
+                <property name="label" translatable="yes">Saldo de apertura:</property>
               </object>
               <packing>
                 <property name="top_attach">2</property>

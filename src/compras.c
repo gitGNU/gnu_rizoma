@@ -1818,7 +1818,7 @@ compras_win (void)
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_price")), 9);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_gain")), 6);
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_sell_price")), 9);
-  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), 6);
+  gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_buy_amount")), 8);
 
   //Pestaña mercaderías
   gtk_entry_set_max_length (GTK_ENTRY (builder_get (builder, "entry_infomerca_percentmargin")), 7);
