@@ -1276,7 +1276,6 @@
     <property name="window_position">center-always</property>
     <property name="transient_for">wnd_compras</property>
     <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
-    <signal name="delete-event" handler="clean_container" object="wnd_comp_deriv" swapped="yes"/>
     <child>
       <object class="GtkVBox" id="vbox1_comp_deriv">
         <property name="visible">True</property>
@@ -1349,12 +1348,13 @@
                   <object class="GtkTable" id="table1_comp_deriv">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="n_rows">2</property>
+                    <property name="n_rows">3</property>
                     <property name="n_columns">2</property>
                     <child>
                       <object class="GtkLabel" id="lbl_barcode_mp">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1365,6 +1365,7 @@
                       <object class="GtkLabel" id="lbl_codigo_mp">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -1409,47 +1410,37 @@
                         </child>
                       </object>
                     </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkHBox" id="hbox4_comp_deriv">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkLabel" id="label3_comp_deriv">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Costo: &lt;/b&gt;</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Costo :&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="lbl_mother_price">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="xalign">1</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="left_attach">1</property>
+                        <property name="right_attach">2</property>
+                        <property name="top_attach">2</property>
+                        <property name="bottom_attach">3</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="padding">3</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -1614,7 +1605,6 @@
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_comp_deriv" swapped="yes"/>
-                <signal name="clicked" handler="clean_container" object="wnd_comp_deriv" swapped="yes"/>
               </object>
               <packing>
                 <property name="expand">False</property>

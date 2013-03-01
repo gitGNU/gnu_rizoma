@@ -2834,6 +2834,135 @@ BuyWindow (void)
 
 
 /**
+ * Callback to edit Price on 'treeview_deriv'
+ * (editable-event)
+ *
+ * @param cell
+ * @param path_string
+ * @param new_cantity
+ * @param data -> A GtkListStore
+ */
+void
+on_precio_derivada_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_price, gpointer data)
+{
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+
+  gdouble precio;
+  gchar *barcode;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /* obtiene el iter para poder obtener y setear datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  /*Comprueba que el precio ingresado sea numerico*/
+  if (!is_numeric (new_price))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_deriv")),
+		"Precio debe ser un valor numérico");
+      return;
+    }
+
+  precio = strtod (PUT(new_price), (char **)NULL);
+
+  /*Condicion para el precio nuevo*/
+  //TODO: que no sea menor al costo
+  if (precio <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_deriv")),
+		"precio debe ser mayor a cero");
+      return;
+    }
+
+  //Se obtiene el barcode del producto
+  gtk_tree_model_get (model, &iter,
+                      0, &barcode,
+                      -1);
+
+
+  // Se setea el precio
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      3, precio,
+		      -1);
+
+    //Se actualiza la cantidad en la base de datos
+  EjecutarSQL (g_strdup_printf ("UPDATE producto "
+				"SET  precio = %s "
+				"WHERE barcode = %s",
+				CUT (g_strdup_printf ("%.3f",precio)), barcode));
+  return;
+}
+
+
+
+/**
+ * Callback to edit Price on 'treeview_deriv'
+ * (editable-event)
+ *
+ * @param cell
+ * @param path_string
+ * @param new_cantity
+ * @param data -> A GtkListStore
+ */
+void
+on_cantidad_derivada_renderer_edited (GtkCellRendererText *cell, gchar *path_string, gchar *new_cantity, gpointer data)
+{
+  GtkTreeModel *model;
+  GtkTreePath *path;
+  GtkTreeIter iter;
+
+  gdouble cantidad;
+  gchar *barcode;
+
+  /*Obtiene el modelo del treeview compra detalle*/
+  model = GTK_TREE_MODEL (data);
+  path = gtk_tree_path_new_from_string (path_string);
+
+  /* obtiene el iter para poder obtener y setear datos del treeview */
+  gtk_tree_model_get_iter (model, &iter, path);
+
+  /*Comprueba que la cantidad ingresada sea numerico*/
+  if (!is_numeric (new_cantity))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_deriv")),
+		"Cantidad debe ser un valor numérico");
+      return;
+    }
+
+  cantidad = strtod (PUT(new_cantity), (char **)NULL);
+
+  /*Condicion para el precio nuevo*/
+  //TODO: que no sea menor al costo
+  if (cantidad <= 0)
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "treeview_deriv")),
+		"Cantidad debe ser mayor a cero");
+      return;
+    }
+
+  //Se obtiene el barcode del producto
+  gtk_tree_model_get (model, &iter,
+                      0, &barcode,
+                      -1);
+
+  // Se setea el precio
+  gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+		      4, cantidad,
+		      -1);
+
+  //Se actualiza la cantidad en la base de datos
+  EjecutarSQL (g_strdup_printf ("UPDATE componente_mc "
+				"SET cant_mud = %s "
+				"WHERE barcode_complejo = %s",
+				CUT (g_strdup_printf ("%.3f",cantidad)), barcode));
+  return;
+}
+
+/**
  * This function is a callback from
  * 'btn_der_mp_yes' button (signal click)
  *
@@ -2860,17 +2989,25 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
   /*Se obtienen los datos de la materia prima*/
   barcode = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_barcode_mp"))));
   //costo = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "lbl_mother_price"))));
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_comp_deriv")));
   
-  res = EjecutarSQL (g_strdup_printf ("SELECT codigo_corto, marca, descripcion "
+  res = EjecutarSQL (g_strdup_printf ("SELECT costo_promedio, codigo_corto, marca, descripcion "
 				      "FROM producto WHERE barcode = %s", barcode));
 
+  /*Se poblan los labels*/
+  //Descripcion
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_descripcion_mp")), 
 			g_strdup_printf ("<span font_weight='bold' size='12500'>%s %s</span>",
 					 g_strdup (PQvaluebycol (res, 0, "descripcion")),
 					 g_strdup (PQvaluebycol (res, 0, "marca")) ));
-
+  //Barcode
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_barcode_mp")), barcode);
+  //Codigo Corto
   gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_codigo_mp")),
 		      g_strdup (PQvaluebycol (res, 0, "codigo_corto")) );
+  //Costo
+  gtk_label_set_text (GTK_LABEL (builder_get (builder, "lbl_mother_price")),
+		      PutPoints (g_strdup (PQvaluebycol (res, 0, "costo_promedio"))) );
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_make_deriv")));
   treeview = GTK_TREE_VIEW (gtk_builder_get_object (builder, "treeview_deriv"));
@@ -2880,7 +3017,7 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
 				  G_TYPE_STRING,  //barcode
 				  G_TYPE_STRING,  //Codigo Corto
 				  G_TYPE_STRING,  //Marca Descripción
-				  G_TYPE_INT,     //Precio
+				  G_TYPE_DOUBLE,  //Precio
 				  G_TYPE_DOUBLE); //Cantidad
 
       gtk_tree_view_set_model (GTK_TREE_VIEW (treeview), GTK_TREE_MODEL (store));
@@ -2903,7 +3040,12 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
       g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
       gtk_tree_view_column_set_resizable (column, FALSE);
 
+      //Editable
       renderer = gtk_cell_renderer_text_new ();
+      g_object_set (renderer,"editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_precio_derivada_renderer_edited), (gpointer)store);
+
       column = gtk_tree_view_column_new_with_attributes ("Precio", renderer,
 							 "text", 3,
 							 NULL);
@@ -2914,6 +3056,11 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
       renderer = gtk_cell_renderer_text_new ();
+      g_object_set (renderer,"editable", TRUE, NULL);
+      g_signal_connect (G_OBJECT (renderer), "edited",
+			G_CALLBACK (on_cantidad_derivada_renderer_edited), (gpointer)store);
+
+      g_object_set (renderer,"editable", TRUE, NULL);
       column = gtk_tree_view_column_new_with_attributes ("Cant. Madre", renderer,
 							 "text", 4,
 							 NULL);
@@ -2923,12 +3070,6 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
       gtk_tree_view_column_set_resizable (column, FALSE);
       gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)4, NULL);
     }
-
-  /*Clean container debe ejecutarse al cerrar la ventana*/
-  //clean_container (GTK_CONTAINER (builder_get (builder, "wnd_comp_deriv")));
-
-  //Se limpia el treeview "deriv"
-  //gtk_list_store_clear (store);
 
   //Agrega los productos derivados de mother (de tenerlo) TODO: Debe estar en postgres function
   q = g_strdup_printf ("SELECT cmc.cant_mud AS cantidad_mud, cmc.barcode_complejo AS barcode, "
@@ -2955,7 +3096,7 @@ on_btn_der_mp_yes_clicked (GtkButton *button, gpointer user_data)
 			      2, g_strdup_printf ("%s %s",
 						  PQvaluebycol (res, i, "descripcion"),
 						  PQvaluebycol (res, i, "marca")),
-			      3, atoi (g_strdup (PQvaluebycol (res, i, "precio"))),
+			      3, strtod (PUT (g_strdup (PQvaluebycol (res, i, "precio"))), (char **)NULL),
 			      4, strtod (PUT (g_strdup (PQvaluebycol (res, i, "cantidad_mud"))), (char **)NULL),
 			      -1);
 	}
@@ -9106,7 +9247,7 @@ on_btn_add_new_mcd_clicked (GtkButton *button, gpointer data)
 			  0, barcode,
 			  1, codigo,
 			  2, g_strdup_printf ("%s %s", description, marca),
-			  3, atoi (precio),
+			  3, strtod (PUT (precio), (char **)NULL),
 			  4, strtod (PUT (cantidad), (char **)NULL),
 			  -1);
 
@@ -9190,9 +9331,9 @@ on_cantidad_compuesta_renderer_edited (GtkCellRendererText *cell, gchar *path_st
 		      g_strdup_printf ("%.2f", 
 				       sum_treeview_column (GTK_TREE_VIEW (builder_get (builder, "treeview_components")), 
 							    5, G_TYPE_DOUBLE) ));
-
   return;
 }
+
 
 /**
  * Callback from "btn_cancel_asoc_comp" Button
