@@ -352,7 +352,13 @@ DeleteProduct (gchar *codigo)
   PGresult *res;
   gchar *q;
 
+  // Se deshabilita el producto
   q = g_strdup_printf ("UPDATE producto SET estado=false WHERE barcode=%s", codigo);
+  res = EjecutarSQL (q);
+  g_free (q);
+
+  // Se desasocia el producto de cualquier lazo
+  q = g_strdup_printf ("DELETE FROM componente_mc WHERE barcode_complejo=%s OR barcode_componente=%s", codigo, codigo);
   res = EjecutarSQL (q);
   g_free (q);
 
