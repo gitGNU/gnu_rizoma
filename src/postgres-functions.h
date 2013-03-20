@@ -392,4 +392,10 @@ gboolean eliminar_producto_mesa (gint num_mesa, gchar *barcode);
 
 gboolean modificar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad_total, gdouble cantidad_impresa);
 
+gint registrar_preventa (gint maquina, gint vendedor);
+
+gboolean registrar_preventa_detalle (gint id_preventa);
+
+void actualizar_preventa (gint id_venta, gint id_preventa);
+
 #endif

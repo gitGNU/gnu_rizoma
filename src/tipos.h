@@ -294,6 +294,7 @@ typedef struct _ventas
   gint total_pagado;
   gint deuda_total;
   gint id_reserva;
+  gint id_preventa;
 
   //Datos mesa
   gint num_mesa;

@@ -485,6 +485,12 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (venta_reserva == TRUE)
     pagar_deuda_reserva (venta_id, venta->id_reserva);
 
+  if (venta->id_preventa > 0)
+    {
+      actualizar_preventa (venta_id, venta->id_preventa);
+      venta->id_preventa = 0;
+    }
+
   /* Solo se registra un 'Documento' cuando se imprime una boleta o factura */
 
   /* id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_venta); */
@@ -688,6 +694,9 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
     EjecutarSQL (g_strdup_printf ("DELETE FROM mesa WHERE num_mesa = %d", venta->num_mesa));
 
+  if (rizoma_get_value_boolean ("PREVENTA_CAJA"))
+    show_clean_window (GTK_WINDOW (builder_get (builder, "wnd_get_preventa")));
+
   return TRUE;
 }
 
@@ -724,6 +733,74 @@ registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_e
     return FALSE;
 }
 
+
+/**
+ *
+ *
+ */
+gboolean
+registrar_preventa_detalle (gint id_preventa)
+{
+  gchar *q;
+  Productos *products = venta->header;
+  gdouble precio;
+
+  if (id_preventa <= 0)
+    return FALSE;
+
+  do
+    {
+      if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 &&
+          products->product->cantidad >= products->product->cantidad_mayorista &&
+          products->product->mayorista == TRUE)
+        precio = products->product->precio_mayor;
+      else
+        precio = products->product->precio;
+
+
+      q = g_strdup_printf ("INSERT INTO preventa_detalle (id, id_preventa, barcode, cantidad, precio, precio_neto, costo_promedio) "
+                           "VALUES (DEFAULT, %d, %s, %s, %s, %s, %s)",
+                           id_preventa,
+                           products->product->barcode,
+                           CUT (g_strdup_printf ("%.3f", products->product->cantidad)),
+                           CUT (g_strdup_printf ("%.3f", precio)),
+                           CUT (g_strdup_printf ("%.3f", products->product->precio_neto)),
+                           CUT (g_strdup_printf ("%.3f", products->product->fifo)));
+      EjecutarSQL (q);
+
+      products = products->next;
+    } while (products != venta->header);
+
+  return TRUE;
+}
+
+
+
+/**
+ *
+ *
+ */
+gint
+registrar_preventa (gint maquina, gint vendedor)
+{
+  gchar *q;
+  gint id_preventa;
+  gint monto;
+
+  id_preventa = 0;
+  monto = CalcularTotal (venta->header);
+
+  q = g_strdup_printf ("INSERT INTO preventa (id, monto, fecha, maquina, vendedor, vendido) "
+                       "VALUES (DEFAULT, %d, NOW(), %d, %d, FALSE) RETURNING id",
+                       monto, maquina, vendedor);
+
+  id_preventa = atoi (GetDataByOne (q));
+
+  if (id_preventa > 0 && registrar_preventa_detalle (id_preventa))
+    return id_preventa;
+  else
+    return 0;
+}
 
 
 /**
@@ -779,10 +856,13 @@ registrar_reserva_detalle (gint id_reserva)
                            CUT (g_strdup_printf ("%.3f", products->product->precio_neto)),
                            CUT (g_strdup_printf ("%.3f", products->product->fifo)));
       EjecutarSQL (q);
+
+      products = products->next;
     } while (products != venta->header);
 
   return TRUE;
 }
+
 
 
 /**
@@ -830,6 +910,21 @@ pagar_deuda_reserva (gint id_venta, gint id_reserva)
 
   q = g_strdup_printf ("UPDATE deuda_reserva SET pagado = TRUE WHERE id_reserva = %d", id_reserva);
   EjecutarSQL (q);
+}
+
+
+/**
+ *
+ *
+ */
+void
+actualizar_preventa (gint id_venta, gint id_preventa)
+{
+  gchar *q;
+  PGresult *res;
+
+  q = g_strdup_printf ("UPDATE preventa SET vendido = TRUE, id_venta = %d WHERE id = %d", id_venta, id_preventa);
+  res = EjecutarSQL (q);
 }
 
 

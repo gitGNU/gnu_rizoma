@@ -100,4 +100,6 @@ void strdup_string_range (gchar *result, gchar *string, gint inicio, gint final)
 
 void strdup_string_range_with_decimal (gchar *result, gchar *string, gint inicio, gint final, gint decimal);
 
+void show_clean_window (GtkWindow *window);
+
 #endif

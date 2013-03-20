@@ -45,12 +45,16 @@ drop table if exists cheques cascade;
 drop table if exists cliente cascade;
 drop table if exists compra cascade;
 drop table if exists compra_detalle cascade;
+drop table if exists reserva cascade;
+drop table if exists preventa cascade;
+drop table if exists mesa cascade;
+drop table if exists reserva_detalle cascade;
+drop table if exists preventa_detalle cascade;
 drop table if exists compra_anulda cascade;
 drop table if exists compra_anulada_detalle cascade;
 drop table if exists nota_credito cascade;
 drop table if exists nota_credito_detalle cascade;
 drop table if exists deuda cascade;
---drop table if exists Devolucion cascade;
 drop table if exists devolucion cascade;
 drop table if exists devolucion_detalle cascade;
 drop table if exists documentos_detalle cascade;
@@ -128,9 +132,9 @@ create table asistencia (
 create table bodega
 (
   id serial not null,
-  nombre		    character varying(50),
-  tipo 			    character varying(50),
-  estado 		    boolean default 't',
+  nombre                    character varying(50),
+  tipo                      character varying(50),
+  estado                    boolean default 't',
   constraint pk_bodega primary key (id)
 );
 
@@ -148,14 +152,14 @@ create table deuda (
 -- Documentos_emitidos
 create table documentos_emitidos (
   id                        serial not null,
-  id_venta		    int4, -- Si es una factura, el id_venta = 0
-  id_factura		    int4, -- Si una guía, al ser facturado queda asociado a una factura en esta misma tabla (sino = 0)
-  rut_cliente		    int4,
+  id_venta                  int4, -- Si es una factura, el id_venta = 0
+  id_factura                int4, -- Si una guía, al ser facturado queda asociado a una factura en esta misma tabla (sino = 0)
+  rut_cliente               int4,
   tipo_documento            int2,
   forma_pago                int2,
   num_documento             int4,
-  monto			    int4 default 0,
-  pagado		    bool default false,
+  monto                     int4 default 0,
+  pagado                    bool default false,
   fecha_emision             timestamp,
   constraint pk_documentos_emitidos primary key (id)
 ) ;
@@ -186,10 +190,10 @@ create table cheques (
 create table pedido_temporal (
   id                        serial not null,
   barcode                   bigint not null,
-  cantidad		    float8 not null,
-  costo_promedio	    float8 not null,
-  margen		    float8 not null,
-  precio		    float8 not null,
+  cantidad                  float8 not null,
+  costo_promedio            float8 not null,
+  margen                    float8 not null,
+  precio                    float8 not null,
   CONSTRAINT pk_pedido_temporal primary key (id)
 );
 
@@ -207,7 +211,7 @@ create table factura_compra (
   pagada                    bool,
   monto                     float8, -- monto total de los productos
   costo_neto_transporte     double precision,
-  iva_transporte	    double precision,
+  iva_transporte            double precision,
   fecha_pago                timestamp,
   forma_pago                int4,
   constraint pk_factura_compra primary key (id)
@@ -216,10 +220,10 @@ create table factura_compra (
 -- Devolucion
 create table devolucion
 (
-  id 			    serial not null,
-  monto		 	    integer not null,
-  fecha 		    timestamp without time zone ,
-  proveedor	 	    integer not null,
+  id                        serial not null,
+  monto                     integer not null,
+  fecha                     timestamp without time zone ,
+  proveedor                 integer not null,
   constraint pk_devolucion primary key (id)
 );
 
@@ -230,7 +234,7 @@ create table devolucion_detalle (
   barcode                   int8 not null,
   cantidad                  float8 not null,
   precio                    float8 not null,
-  precio_compra		    float8 not null,
+  precio_compra             float8 not null,
   constraint pk_devolucion_detalle primary key (id,id_devolucion)
 ) ;
 
@@ -271,41 +275,41 @@ create table compra (
 -- Compra Anulada
 create table compra_anulada (
   id                        serial not null primary key,
-  id_compra		    int4 not null,
-  id_factura_compra	    int4 not null,
-  fecha_anulacion	    timestamp,
+  id_compra                 int4 not null,
+  id_factura_compra         int4 not null,
+  fecha_anulacion           timestamp,
   rut_proveedor             int4 not null,
-  maquina              	    int4
+  maquina                   int4
 );
 
 -- Compra Anulada Detalle
 create table compra_anulada_detalle (
-  id   	     		    serial not null primary key,
-  id_compra_anulada 	    int4 not null,
-  barcode 		    int8 not null,
-  costo   		    float8,
-  precio  		    float8,
-  cantidad 		    float8,
-  cantidad_anulada 	    float8
+  id                        serial not null primary key,
+  id_compra_anulada         int4 not null,
+  barcode                   int8 not null,
+  costo                     float8,
+  precio                    float8,
+  cantidad                  float8,
+  cantidad_anulada          float8
 );
 
 -- Nota Credito
 create table nota_credito (
- id   		    	    serial not null primary key,
+ id                         serial not null primary key,
  id_factura_compra          int4,
- fecha 		    	    timestamp,
- fecha_factura	    	    timestamp,
- rut_proveedor       	    int4 not null
+ fecha                      timestamp,
+ fecha_factura              timestamp,
+ rut_proveedor              int4 not null
 );
 
 -- Nota Credito Detalle
 create table nota_credito_detalle (
  id                         serial not null primary key,
- id_nota_credito     	    int4 not null,
- barcode 	    	    int8 not null,
- costo 		    	    float8,
- precio 		    float8,
- cantidad 	    	    float8
+ id_nota_credito            int4 not null,
+ barcode                    int8 not null,
+ costo                      float8,
+ precio                     float8,
+ cantidad                   float8
 );
 
 CREATE TYPE tc AS ENUM ('credito', 'factura');
@@ -318,15 +322,15 @@ create table cliente (
   apell_m                   varchar(60),
   giro                      varchar(255),
   direccion                 varchar(150),
-  comuna		    varchar(25),
+  comuna                    varchar(25),
   telefono                  varchar(15),
   telefono_movil            varchar(15),
   mail                      varchar(30),
   abonado                   int4,
   credito                   int4,
   credito_enable            bool,
-  activo		    bool default 't',
-  tipo			    tc, -- (1 cliente credito, 2 cliente factura)
+  activo                    bool default 't',
+  tipo                      tc, -- (1 cliente credito, 2 cliente factura)
   constraint pk_cliente primary key (rut)
 ) ;
 
@@ -338,7 +342,7 @@ create table documentos_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8, --precio_compra
-  costo_promedio	    float8,
+  costo_promedio            float8,
   fecha                     timestamp,
   factura                   bool not null,
   elaboracion               timestamp,
@@ -354,7 +358,7 @@ create table factura_compra_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8, --precio_compra
-  costo_promedio	    float8,
+  costo_promedio            float8,
   iva                       float8,
   otros                     float8,
   constraint pk_factura_compra_detalle primary key(id, id_factura_compra),
@@ -456,22 +460,22 @@ create table negocio (
 create table merma (
   id                        serial not null,
   barcode                   int8,
-  tipo			    int4, -- tipo de producto
+  tipo                      int4, -- tipo de producto
   unidades                  float8,
   motivo                    int2,
-  fecha 		    timestamp without time zone,
+  fecha                     timestamp without time zone,
   constraint pk_merma primary key (id)
 ) ;
 
--- Merma_mc_detalle 
+-- Merma_mc_detalle
 create table merma_mc_detalle (
   id                        serial not null,
-  id_merma		    int4 not null,
-  id_mh                     int4[], -- Un id array para identificar relacion madre-hijo  
-  barcode_complejo	    bigint,
+  id_merma                  int4 not null,
+  id_mh                     int4[], -- Un id array para identificar relacion madre-hijo
+  barcode_complejo          bigint,
   barcode_componente        bigint,
-  tipo_complejo		    int4,
-  tipo_componente	    int4,
+  tipo_complejo             int4,
+  tipo_componente           int4,
   cantidad                  float8,
   constraint pk_merma_mc_detalle primary key (id)
 ) ;
@@ -506,8 +510,8 @@ create table unidad_producto
 
 -- Producto
 create table producto (
-  barcode                   serial8 not null,	-- llave primaria
-  codigo_corto              varchar(16),	-- crear ckeck point
+  barcode                   serial8 not null,   -- llave primaria
+  codigo_corto              varchar(16),        -- crear ckeck point
   marca                     varchar(35),
   descripcion               varchar(50),
   contenido                 varchar(10),
@@ -515,7 +519,7 @@ create table producto (
   stock                     float8 default 0,
   precio                    float8,
   precio_neto               float8,     -- precio venta neto
-  costo_promedio            float8,	-- antes fifo
+  costo_promedio            float8,     -- antes fifo
   vendidos                  float8,
   impuestos                 bool,
   otros                     int4,
@@ -531,7 +535,7 @@ create table producto (
   cantidad_mayor            float8,
   mayorista                 bool default false,
   estado                    bool default true,
-  tipo			    int4 default 1, -- 1 = mercadería discreta
+  tipo                      int4 default 1, -- 1 = mercadería discreta
   CONSTRAINT pk_producto primary key (barcode),
   CONSTRAINT unique_short_code UNIQUE (codigo_corto)
 ) ;
@@ -539,12 +543,12 @@ create table producto (
 
 -- Componente_mercaderia_compuesta
 create table componente_mc (
-  id   	     		    serial not null,
+  id                        serial not null,
   barcode_complejo          bigint not null, -- Mercaderías compuestas y derivadas (complejas)
-  tipo_complejo		    int4,
+  tipo_complejo             int4,
   barcode_componente        bigint not null, -- Mercaderías corrientes y materias primas (simples) y complejas
-  tipo_componente	    int4,
-  cant_mud                  float8, -- Cantidad de madre que usa el derivado	
+  tipo_componente           int4,
+  cant_mud                  float8, -- Cantidad de madre que usa el derivado
   CONSTRAINT pk_componente_mc primary key (id)
 ) ;
 
@@ -552,7 +556,7 @@ create table componente_mc (
 -- Tipo_mercaderia
 create table tipo_mercaderia (
   id                        serial not null,
-  nombre		    varchar(20),
+  nombre                    varchar(20),
   CONSTRAINT pk_tipo_mercaderia primary key (id)
 );
 
@@ -560,37 +564,37 @@ create table tipo_mercaderia (
 -- Color
 create table color (
   id                        serial not null,
-  codigo		    varchar(2),
-  nombre		    varchar(20),
+  codigo                    varchar(2),
+  nombre                    varchar(20),
   CONSTRAINT pk_color primary key (id)
 );
 
 -- Sub_Depto
 create table sub_depto (
   id                        serial not null,
-  codigo		    varchar(3),
-  nombre		    varchar(30),
+  codigo                    varchar(3),
+  nombre                    varchar(30),
   CONSTRAINT pk_sub_depto primary key (id)
 );
 
 -- Talla
 create table talla (
   id                        serial not null,
-  codigo		    varchar(2),
-  nombre		    varchar(30)
+  codigo                    varchar(2),
+  nombre                    varchar(30)
 );
 
 -- Clothes_Code
 create table clothes_code (
   id                        serial not null,
   codigo_corto              varchar(16),
-  depto              	    varchar(2),
-  temp              	    varchar(3),
-  ano              	    varchar(2),
+  depto                     varchar(2),
+  temp                      varchar(3),
+  ano                       varchar(2),
   sub_depto                 varchar(3),
-  id_ropa              	    varchar(2),
-  talla			    varchar(2),
-  color			    varchar(2),
+  id_ropa                   varchar(2),
+  talla                     varchar(2),
+  color                     varchar(2),
   CONSTRAINT pk_clothes_code primary key (id)
 );
 
@@ -612,7 +616,7 @@ create table compra_detalle (
   cantidad                  float8,
   precio                    float8 not null,
   precio_venta              float8 not null,
-  precio_neto		    float8 not null,
+  precio_neto               float8 not null,
   cantidad_ingresada        float8,
   descuento                 int4,
   barcode_product           int8 not null,
@@ -624,33 +628,44 @@ create table compra_detalle (
   constraint pk_compra_detalle primary key (id,id_compra)
 ) ;
 
-
+-- Reserva de venta (pedidos)
 create table reserva (
   id                        serial not null,
-  id_venta		    int4, -- El id de la venta realizada en base a esta reserva
+  id_venta                  int4, -- El id de la venta realizada en base a esta reserva
   monto                     int4,
   fecha                     timestamp,
   fecha_entrega             timestamp,
   maquina                   int4,
   vendedor                  int4,
-  rut_cliente		    int4 not null, 
-  vendido		    bool default false, -- Es true cuando la venta se liquida completamente
+  rut_cliente               int4 not null,
+  vendido                   bool default false, -- Es true cuando la venta se liquida completamente
   constraint pk_reserva primary key (id)
+) ;
+
+-- Pre-venta
+create table preventa (
+id                        serial not null,
+id_venta                  int4, -- El id de la venta realizada en base a esta preventa
+monto                     int4,
+fecha                     timestamp,
+maquina                   int4,
+vendedor                  int4,
+vendido                   bool default false, -- Es true cuando la venta se liquida completamente
+constraint pk_preventa primary key (id)
 ) ;
 
 
 -- Mesa (tabla flotante)
 create table mesa (
-  num_mesa		    int4,
+  num_mesa                  int4,
   barcode                   bigint,
-  precio		    float8,
-  cantidad_total	    float8,
-  cantidad_impresa	    float8
+  precio                    float8,
+  cantidad_total            float8,
+  cantidad_impresa          float8
 ) ;
 
 
--- Venta_detalle
--- antes era products_sell_history
+-- Reserva Detalle
 create table reserva_detalle (
   id                        serial not null,
   id_reserva                int4 not null,
@@ -663,14 +678,27 @@ create table reserva_detalle (
 ) ;
 
 
+-- Preventa Detalle
+create table preventa_detalle (
+id                        serial not null,
+id_preventa               int4 not null,
+barcode                   int8 not null,
+cantidad                  float8,
+precio                    float8 not null,
+precio_neto               float8 not null,
+costo_promedio            float8 not null,
+constraint pk_preventa_detalle primary key (id)
+) ;
+
+
 create table deuda_reserva (
   id                        serial not null,
   id_reserva                int4 not null,
   rut_cliente               int4 not null,
   vendedor                  int4,
-  monto_adeudado	    int4,
-  fecha_deuda		    timestamp,
-  pagado		    boolean default false,
+  monto_adeudado            int4,
+  fecha_deuda               timestamp,
+  pagado                    boolean default false,
   constraint pk_deuda_reserva primary key (id)
 ) ;
 
@@ -678,9 +706,9 @@ create table deuda_reserva (
 create table pago_deuda_reserva (
   id                        serial not null,
   id_deuda_reserva          int4 not null,
-  monto_pagado		    int4,
+  monto_pagado              int4,
   fecha_pago                timestamp,
-  tipo_pago		    int4,
+  tipo_pago                 int4,
   constraint pk_deuda_reserva_detalle primary key (id)
 ) ;
 
@@ -700,23 +728,23 @@ create table venta_detalle (
   otros                     float8,
   iva_residual              float8,
   otros_residual            float8,
-  tipo			    int4,
-  impuestos		    bool,
-  proporcion_iva	    float8,
-  proporcion_otros	    float8,
+  tipo                      int4,
+  impuestos                 bool,
+  proporcion_iva            float8,
+  proporcion_otros          float8,
   constraint pk_venta_detalle primary key (id,id_venta)
 ) ;
 
 -- Venta_mercaderia_compuesta_detalle
 create table venta_mc_detalle (
-  id                        serial not null,  
+  id                        serial not null,
   id_venta_detalle          int4 not null, -- FK id (venta_detalle)
-  id_venta_vd          	    int4 not null, -- FK id_venta (venta_detalle)
-  id_mh	    	    	    int4[],        -- Un id array para identificar relacion madre-hijo
+  id_venta_vd               int4 not null, -- FK id_venta (venta_detalle)
+  id_mh                     int4[],        -- Un id array para identificar relacion madre-hijo
   barcode_complejo          int8 not null,
   barcode_componente        int8 not null,
   cantidad                  float8 not null,
-  precio_proporcional	    float8 not null,
+  precio_proporcional       float8 not null,
   precio                    float8 not null,
   costo_promedio            float8 not null,
   ganancia                  float8 not null,
@@ -724,10 +752,10 @@ create table venta_mc_detalle (
   otros                     float8 not null,
   iva_residual              float8 not null,
   otros_residual            float8 not null,
-  tipo_complejo		    int4,
-  tipo_componente	    int4,
-  proporcion_iva	    float8,
-  proporcion_otros	    float8,
+  tipo_complejo             int4,
+  tipo_componente           int4,
+  proporcion_iva            float8,
+  proporcion_otros          float8,
   constraint pk_venta_mc_detalle primary key (id)
 ) ;
 
@@ -754,7 +782,7 @@ create table proveedor (
 create table producto_proveedor (
   rut_proveedor             int4 not null,
   barcode_producto          bigint not null,
-  costo_compra		    double precision, --El costo de la última compra
+  costo_compra              double precision, --El costo de la última compra
   constraint pk_producto_proveedor primary key (rut_proveedor,barcode_producto),
   constraint fk_rut_proveedor foreign key(rut_proveedor) references proveedor(rut),
   constraint fk_barcode_producto foreign key(barcode_producto) references producto(barcode)
@@ -799,7 +827,7 @@ create table traspaso (
   monto                     float8,
   fecha                     timestamp,
   origen                    int4,
-  destino	            int4,
+  destino                   int4,
   vendedor                  int4,
   constraint pk_traspaso primary key (id)
 ) ;
@@ -811,9 +839,9 @@ create table traspaso_detalle (
   barcode                   int8 not null,
   cantidad                  float8,
   precio                    float8 not null, --precio costo
-  precio_venta		    float8,
-  tipo			    int4,
-  costo_modificado	    boolean, -- Indica si se le dió un costo para poder realizar el traspaso
+  precio_venta              float8,
+  tipo                      int4,
+  costo_modificado          boolean, -- Indica si se le dió un costo para poder realizar el traspaso
   constraint pk_traspaso_detalle primary key (id,id_traspaso)
 ) ;
 
@@ -822,11 +850,11 @@ create table traspaso_mc_detalle (
   id                        serial not null,
   id_traspaso               int4 not null,
   id_traspaso_detalle       int4 not null,
-  id_mh	    	    	    int4[],
+  id_mh                     int4[],
   barcode_complejo          int8 not null,
   barcode_componente        int8 not null,
-  tipo_complejo		    int4 not null,
-  tipo_componente	    int4 not null,
+  tipo_complejo             int4 not null,
+  tipo_componente           int4 not null,
   cantidad                  float8 not null,
   costo_promedio            float8 not null,
   CONSTRAINT pk_traspaso_mc_detalle primary key (id)
@@ -864,44 +892,44 @@ create table venta (
 
 -- Pago_mixto
 create table pago_mixto (
-  id                   	    serial not null primary key,         	     
+  id                        serial not null primary key,
   id_sale                   int4 not null,
-  tipo_pago1		    int2,
-  tipo_pago2		    int2,
-  rut1 			    int4,
+  tipo_pago1                int2,
+  tipo_pago2                int2,
+  rut1                      int4,
   rut2                      int4,
   dv1                       varchar(1),
   dv2                       varchar(1),
-  aff_imp1		    bool,
-  aff_imp2		    bool,
+  aff_imp1                  bool,
+  aff_imp2                  bool,
   monto1                    int4,
   monto2                    int4
 ) ;
 
 -- Emisor_cheque
 create table emisor_cheque (
-  id                   	    serial not null primary key,
-  rut			    int4,
+  id                        serial not null primary key,
+  rut                       int4,
   dv                        varchar(1),
-  razon_social		    varchar (50),
-  telefono		    varchar(15),
-  direccion		    varchar(35),
-  comuna		    varchar(15),
-  ciudad		    varchar(15),
-  giro			    varchar(30),
-  activo		    bool default 't'
+  razon_social              varchar (50),
+  telefono                  varchar(15),
+  direccion                 varchar(35),
+  comuna                    varchar(15),
+  ciudad                    varchar(15),
+  giro                      varchar(30),
+  activo                    bool default 't'
 ) ;
 
 -- Cheques_rest
 create table cheque_rest (
-  id                   	    serial not null primary key,
-  id_emisor		    int4 not null,
-  id_venta		    int4 not null,
-  codigo		    varchar (30),
-  monto			    int4,
+  id                        serial not null primary key,
+  id_emisor                 int4 not null,
+  id_venta                  int4 not null,
+  codigo                    varchar (30),
+  monto                     int4,
   fecha_vencimiento         timestamp,
-  facturado		    bool default 'f',
-  pagado		    bool default 'f'
+  facturado                 bool default 'f',
+  pagado                    bool default 'f'
 ) ;
 
 -- Venta_anulada
@@ -1112,4 +1140,3 @@ CREATE INDEX indx_venta_fecha ON venta USING btree (fecha);
 
 -- Alter sequence barcode
 ALTER SEQUENCE producto_barcode_seq RESTART WITH 1000000;
-

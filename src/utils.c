@@ -1289,3 +1289,11 @@ strdup_string_range_with_decimal (gchar *result, gchar *string, gint inicio, gin
 
   strcpy (result, range_string);
 }
+
+
+void
+show_clean_window (GtkWindow *window)
+{
+  clean_container (GTK_CONTAINER (window));
+  gtk_widget_show(window);
+}
