@@ -4510,6 +4510,8 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
 
   //Se quitan los productos de la lista de venta (de la estructura)
   gtk_list_store_clear (venta->store);
+  //Se limpian los labels
+  CleanEntryAndLabelData();
 }
 
 
