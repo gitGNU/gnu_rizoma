@@ -20,7 +20,7 @@
 
 AC_INIT(rizoma, 1.0-git, info@rizoma.cl)
 AM_INIT_AUTOMAKE(dist-bzip2)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AC_ARG_ENABLE(debug,
 	     [	     --enable-debug	enable debugging information (default=no)],
