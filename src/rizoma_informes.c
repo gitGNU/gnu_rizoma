@@ -751,7 +751,7 @@ on_selection_buy_invoice_change (GtkTreeSelection *selection, gpointer data)
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
       gtk_tree_model_get (model, &iter,
-			  7, &id_factura_compra,
+			  8, &id_factura_compra,
 			  -1);
 
       q = g_strdup_printf ("SELECT fc.id_compra, fcd.barcode, fcd.cantidad AS cantidad_comprada, fcd.precio AS costo, round((fcd.cantidad * fcd.precio)) AS monto_compra, "
@@ -6381,6 +6381,8 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
   q = g_strdup_printf (" %s AND c.fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59'", q,
 		       g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
 		       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+
+  q = g_strdup_printf (" %s GROUP BY c.id, c.fecha, c.rut_proveedor, c.anulada_pi", q);
 
   // Se ejecuta la consulta construida
   res = EjecutarSQL (q);
