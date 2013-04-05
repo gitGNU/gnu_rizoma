@@ -110,6 +110,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "VENTA_DIRECTA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
   g_key_file_set_string (file, "RIZOMA", "IMPRESORA", "0");
+  g_key_file_set_string (file, "RIZOMA", "IMPRIMIR_BARCODE_PREVENTA", "0"); //Imprime el barcode en las voletas de preventa
   g_key_file_set_string (file, "RIZOMA", "PRINT_FACTURA", "0");
   g_key_file_set_string (file, "RIZOMA", "EMITIR_DOCUMENTO", "1"); //Emite documentos aunque no se imprima
   g_key_file_set_string (file, "RIZOMA", "VALE_SELECTIVO", "NO");

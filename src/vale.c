@@ -599,15 +599,35 @@ PrintValePreVenta (Productos *header, gint id_preventa)
   fprintf (fp, "\n\n");
   gdouble totalLocal = civa + siva;
   fprintf (fp, "Total Venta:          %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
-  fprintf (fp, "\n\n\tGracias por su compra! \n");
-  fprintf (fp, "\n\n\n");
-  fprintf (fp, "%s", cut); /* We cut the paper :) */
+  fprintf (fp, "\n\n\tGracias por su compra!\n");
+  //fprintf (fp, "\n\n\n");
   fclose (fp);
 
+  //Se imprime el vale n cantidad de veces
   for (i = 0; i < n_copy; i++) 
     system(g_strdup_printf ("%s %s", print_command, vale_file));
 
+  //Se borran los archivos
   system (g_strdup_printf ("rm %s", vale_file));
+
+  //Barcode Pre-venta (Al imprimir el ps se autocorta)
+  if (rizoma_get_value_boolean ("IMPRIMIR_BARCODE_PREVENTA") == TRUE)
+    {
+      //Se genera el barcode
+      system (g_strdup_printf ("barcode -b \"%d\" -g 100x100 -o %s/barcode.ps", id_preventa, vale_dir));
+      //Se imprime el barcode
+      system (g_strdup_printf ("%s %s/barcode.ps", print_command, vale_dir));
+      system (g_strdup_printf ("rm %s/barcode.ps", vale_dir));
+    }
+  else
+    {
+      //Corte
+      system (g_strdup_printf ("echo %s > %s/cut.txt", cut, vale_dir));
+      system (g_strdup_printf ("%s %s/cut.txt", print_command, vale_dir));
+      system (g_strdup_printf ("rm %s/cut.txt", vale_dir));
+    }
+
+  //  fprintf (fp, "%s", cut); /* We cut the paper :) */
 }
 
 
