@@ -704,9 +704,9 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
 /**
  *
- *
+ * return: id_reserva
  */
-gboolean
+gint
 registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_entrega)
 {
   gchar *q;
@@ -728,9 +728,9 @@ registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_e
                                 "VALUES (DEFAULT, %d, %d, %d, %d, NOW(), FALSE)", id_reserva, rut_cliente, vendedor, monto));
 
   if (id_reserva > 0 && registrar_reserva_detalle (id_reserva))
-    return TRUE;
+    return id_reserva;
   else
-    return FALSE;
+    return 0;
 }
 
 

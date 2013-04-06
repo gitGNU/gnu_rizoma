@@ -52,7 +52,7 @@ gboolean DeleteProduct (gchar *codigo);
 gint SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gchar *discount,
                gint boleta, gint tipo_documento, gchar *cheque_date,  gboolean cheques, gboolean canceled, gboolean venta_reserva);
 
-gboolean registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_entrega);
+gint registrar_reserva (gint maquina, gint vendedor, gint rut_cliente, GDate *fecha_entrega);
 
 gboolean actualizar_fecha_reserva (gint id_reserva, GDate *fecha_entrega);
 
@@ -78,7 +78,7 @@ gint GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
                          guint to_year, guint to_month, guint to_day, gint *total);
 
 void total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
-                                   guint to_year, guint to_month, guint to_day, 
+                                   guint to_year, guint to_month, guint to_day,
                                    gint *total_iva, gint *total_otros);
 
 gint GetTotalSell (guint from_year, guint from_month, guint from_day,
@@ -315,7 +315,7 @@ gboolean SaveProductsDevolucion (Productos *products, gint id_devolucion);
 
 gboolean SaveProductsTraspaso (Productos *products, gint id_traspaso, gboolean tipo_traspaso);
 
-gboolean asociar_componente_o_derivado (gchar *barcode_complejo, gint tipo_complejo, gchar *barcode_componente, 
+gboolean asociar_componente_o_derivado (gchar *barcode_complejo, gint tipo_complejo, gchar *barcode_componente,
                                         gint tipo_componente, gdouble cant_mud);
 
 gchar * sugerir_codigo (gchar *codigo, guint min_lenght, guint max_lenght);

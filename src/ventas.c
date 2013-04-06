@@ -1679,7 +1679,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
       paga_con = (paga_con+venta->total_pagado >= venta->deuda_total) ? venta->deuda_total-venta->total_pagado : paga_con;
 
       //Si el pago liquída la deuda, se debe asegurar que haya stock para todo!
-      if (compare_treeview_column (GTK_TREE_VIEW (venta->treeview_products), 8, G_TYPE_STRING, "Red"))
+      if (compare_treeview_column (GTK_TREE_VIEW (venta->treeview_products), 9, G_TYPE_STRING, "Red"))
         {
           AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "btn_close_win")),
                     "Hay productos sin el stock suficiente para finalizar esta venta,\n"
@@ -1833,18 +1833,23 @@ TipoVenta (GtkWidget *widget, gpointer data)
         {
           gtk_widget_show (GTK_WIDGET (builder_get (builder, "lbl_monto_pagado")));
           gtk_widget_show (GTK_WIDGET (builder_get (builder, "label1_monto_pagado")));
+          gtk_label_set_markup_with_mnemonic (GTK_LABEL (builder_get (builder, "label72")), "_Abonar");
         }
       else
         {
           gtk_widget_hide (GTK_WIDGET (builder_get (builder, "lbl_monto_pagado")));
           gtk_widget_hide (GTK_WIDGET (builder_get (builder, "label1_monto_pagado")));
+          gtk_label_set_markup_with_mnemonic (GTK_LABEL (builder_get (builder, "label72")), "_Vender");
         }
 
       if (venta->total_pagado > 0)
-        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_monto_pagado")), PutPoints (g_strdup_printf ("<span size=\"20000\">%d</span>",venta->total_pagado)));
+        gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_monto_pagado")), g_strdup_printf ("<span size=\"20000\">%s</span>",
+												      PutPoints (g_strdup_printf ("%d",venta->total_pagado)) ));
+
+      if (!venta_reserva)
+        gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "sell_button")), FALSE);
 
       gtk_widget_show (GTK_WIDGET (window));
-
     }
   return;
 }
@@ -1869,6 +1874,9 @@ CalcularVuelto (void)
                                 g_strdup_printf ("<span size=\"30000\">%s</span>", resto_t));
           gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_button")), (venta_reserva) ? TRUE : FALSE); //Debe estar siempre habilitado para venta reserva
 
+          if (venta_reserva)
+            gtk_label_set_markup_with_mnemonic (GTK_LABEL (builder_get (builder, "label72")), "_Abonar");
+
           return;
         }
       else
@@ -1881,12 +1889,18 @@ CalcularVuelto (void)
                                                  PutPoints (g_strdup_printf ("%d", resto))));
 
           gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_button")), TRUE);
+
+          if (venta_reserva)
+            gtk_label_set_markup_with_mnemonic (GTK_LABEL (builder_get (builder, "label72")), "_Vender");
         }
     }
   else
-    gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")),
-                          g_strdup_printf ("<span size=\"30000\">%s</span>",
-                                           (venta->total_pagado) ? PutPoints (g_strdup_printf ("%d", total-venta->total_pagado)):""));
+    {
+      gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "vuelto_label")),
+                            g_strdup_printf ("<span size=\"30000\">%s</span>",
+                                             (venta->total_pagado) ? PutPoints (g_strdup_printf ("%d", total-venta->total_pagado)):""));
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "sell_button")), FALSE);
+    }
 }
 
 
@@ -3446,6 +3460,7 @@ on_btn_reserva_ok_clicked (GtkButton *button, gpointer data)
   gint rut;
   gint vendedor;
   gint maquina;
+  gint id_reserva;
 
   gchar *dv;
   gchar *str_rut;
@@ -3495,15 +3510,25 @@ on_btn_reserva_ok_clicked (GtkButton *button, gpointer data)
   g_date_set_parse (date_aux, str_date);
 
   //Obtener los datos de la venta y registrarlo como 'pedido'
-  registrar_reserva (maquina, vendedor, rut, date_aux);
-  ListClean ();     //Limpia la estructura de productos de reserva
+  id_reserva = registrar_reserva (maquina, vendedor, rut, date_aux);
+  venta->deuda_total = CalcularTotal (venta->header);
 
-  //Se limpian el store y los labels
-  gtk_list_store_clear (venta->store);
-  CleanEntryAndLabelData();
+  //Se limpian el store, la estructura y los labels
+  //gtk_list_store_clear (venta->store);
+  //ListClean (); //Limpia la estructura de productos de reserva
+  //CleanEntryAndLabelData();
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_reserva")));
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_reserva")));
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+  //Abonar a reserva
+  venta_reserva = TRUE;
+  venta->total_pagado = 0;
+  venta->rut_cliente = rut;
+  venta->id_reserva = id_reserva;
+
+  TipoVenta (NULL, NULL);
 }
 
 
@@ -3921,6 +3946,14 @@ on_btn_cancel_tipo_venta_win_venta (GtkButton *button, gpointer data)
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
                         g_strdup_printf ("<span size=\"40000\">%s</span>",
                                          PutPoints (g_strdup_printf ("%u", total))));
+
+  if (venta_reserva)
+    {
+      //Se limpian el store, la estructura y los labels
+      gtk_list_store_clear (venta->store);
+      ListClean (); //Limpia la estructura de productos de reserva
+      CleanEntryAndLabelData();
+    }
 }
 
 /**
@@ -5924,6 +5957,7 @@ on_btn_adm_pedido_ok_clicked (GtkButton *button, gpointer data)
     }
 
   close_wnd_adm_pedido (NULL, NULL);
+  TipoVenta (NULL, NULL);
 }
 
 
