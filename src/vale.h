@@ -28,7 +28,7 @@ int PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta
 void PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gint total,
                         gint tipo_pago, gint tipo_documento, Productos *prod);
 void PrintValeMesa (Productos *header, gint num_mesa);
-void PrintValePreVenta (Productos *header, gint id_preventa);
+void PrintValePreVentaReserva (Productos *header, gint id, gchar *prefijo);
 void print_cash_box_info (gint cash_id, gint monto_ingreso, gint monto_egreso, gchar *motivo);
 void PrintValeTraspaso (Productos *header, gint traspaso_id, gboolean traspaso_envio, gchar *origen, gchar *destino);
 void PrintValeCompra (Productos *header, gint compra_id, gint n_document, gchar *nombre_proveedor);

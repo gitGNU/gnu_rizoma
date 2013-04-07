@@ -817,13 +817,13 @@ on_btn_seleccionar_mesa_clicked (GtkButton *button, gpointer data)
 
 
 /**
- *
+ * Obtiene pre-ventas y reservas
  */
 void
 on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 {
-  gint preventa_id;
-  gchar *preventa_txt;
+  gint id;
+  gchar **preventa_txt;
   guint32 total;
 
   gdouble iva, otros;
@@ -835,28 +835,36 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 
   GtkListStore *sell = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))));
 
-  preventa_txt = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa"))));
-  if (HaveCharacters (preventa_txt))
+  preventa_txt = g_strsplit (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")))), "-", 0);
+
+  //Si el código no es un PV (PreVenta) o un RV (ReserVa) es inválido
+  if (!g_str_equal (preventa_txt[0], "PV") && !g_str_equal (preventa_txt[0], "RV"))
     {
-      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), "El ID de la preventa debe ser numérico");
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), "El ID ingresado es inválido");
       return;
     }
-  else
-    preventa_id = atoi (preventa_txt);
 
-  if (preventa_id > 0)
+  id = atoi (preventa_txt[1]);
+
+  //Si es un id  valido
+  if (id > 0)
     {
       gtk_list_store_clear (sell);
       CleanEntryAndLabelData ();
       ListClean ();
 
-      /*Se obtiene la preventa*/
-      q = g_strdup_printf ("SELECT barcode, cantidad, precio "
-			   "FROM preventa_detalle pvd "
-			   "INNER JOIN preventa pv "
-			   "ON pvd.id_preventa = pv.id "
-			   "WHERE pv.id = %d "
-			   "AND pv.vendido = false", preventa_id);
+      //Se obtiene la preventa, si el id es del tipo PV
+      if (g_str_equal (preventa_txt[0], "PV"))
+        q = g_strdup_printf ("SELECT barcode, cantidad, precio "
+                             "FROM preventa_detalle pvd "
+                             "INNER JOIN preventa pv "
+                             "ON pvd.id_preventa = pv.id "
+                             "WHERE pv.id = %d "
+                             "AND pv.vendido = false", id);
+      //Se obtiene la reserva, si el id es del tipo RV
+      else if (g_str_equal (preventa_txt[0], "RV"))
+        q = g_strdup_printf ("SELECT barcode, cantidad, precio FROM reserva_detalle WHERE id_reserva = %d", id);
+
       res = EjecutarSQL (q);
       g_free (q);
 
@@ -906,11 +914,41 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
                                 g_strdup_printf ("<span size=\"40000\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%u", total))));
         }
+      else
+	{
+	  //No existen datos con ese id	  
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")), "");
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), 
+		    g_strdup_printf ("No existen datos con el id %s-%s", preventa_txt[0], preventa_txt[1]));
+	  return;
+	}
 
-      venta->id_preventa = preventa_id;
+      if (g_str_equal (preventa_txt[0], "PV"))
+        venta->id_preventa = id;
+      else if (g_str_equal (preventa_txt[0], "RV"))
+        {
+          res = get_data_from_reserva_id (id);
+	  if (res == NULL || PQntuples (res) == 0)
+	    {
+	      //No existen datos con ese id
+	      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")), "");
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), 
+		    g_strdup_printf ("No existen datos con el id %s-%s", preventa_txt[0], preventa_txt[1]));
+	      return;
+	    }
+
+          venta_reserva = TRUE;
+          venta->deuda_total = atoi (PQvaluebycol (res, 0, "monto"));
+          venta->total_pagado = atoi (PQvaluebycol (res, 0, "monto_pagado"));
+          venta->rut_cliente = atoi (g_strdup (PQvaluebycol(res, 0, "rut_cliente")));
+          venta->id_reserva = id;
+        }
     }
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_get_preventa")));
+
+  if (g_str_equal (preventa_txt[0], "RV"))
+    TipoVenta (NULL, NULL);
 }
 
 
@@ -3513,22 +3551,31 @@ on_btn_reserva_ok_clicked (GtkButton *button, gpointer data)
   id_reserva = registrar_reserva (maquina, vendedor, rut, date_aux);
   venta->deuda_total = CalcularTotal (venta->header);
 
-  //Se limpian el store, la estructura y los labels
-  //gtk_list_store_clear (venta->store);
-  //ListClean (); //Limpia la estructura de productos de reserva
-  //CleanEntryAndLabelData();
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_reserva")));
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_reserva")));
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
 
-  //Abonar a reserva
-  venta_reserva = TRUE;
-  venta->total_pagado = 0;
-  venta->rut_cliente = rut;
-  venta->id_reserva = id_reserva;
 
-  TipoVenta (NULL, NULL);
+  //Si esta como punto de pre-venta no se maneja dinero, por tanto no posibilidad de abono
+  if (rizoma_get_value_boolean ("PREVENTA"))
+    {
+      //Se limpian el store, la estructura y los labels
+      gtk_list_store_clear (venta->store);
+      PrintValePreVentaReserva (venta->header, id_reserva, "RV");
+      ListClean (); //Limpia la estructura de productos de reserva
+      CleanEntryAndLabelData();
+    }
+  else
+    {
+      //Abonar a reserva
+      venta_reserva = TRUE;
+      venta->total_pagado = 0;
+      venta->rut_cliente = rut;
+      venta->id_reserva = id_reserva;
+
+      TipoVenta (NULL, NULL);
+    }
 }
 
 
@@ -3550,7 +3597,7 @@ on_btn_preventa_ok_clicked (GtkButton *button, gpointer data)
 
   //Obtener los datos de la venta y registrarlo como 'preventa'
   id_preventa = registrar_preventa (maquina, vendedor);
-  PrintValePreVenta (venta->header, id_preventa);
+  PrintValePreVentaReserva (venta->header, id_preventa, "PV");
   ListClean ();     //Limpia la estructura de productos de reserva
 
   //Se limpian el store y los labels

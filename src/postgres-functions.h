@@ -398,4 +398,6 @@ gboolean registrar_preventa_detalle (gint id_preventa);
 
 void actualizar_preventa (gint id_venta, gint id_preventa);
 
+PGresult * get_data_from_reserva_id (gint id_reserva);
+
 #endif

@@ -1295,5 +1295,5 @@ void
 show_clean_window (GtkWindow *window)
 {
   clean_container (GTK_CONTAINER (window));
-  gtk_widget_show(window);
+  gtk_widget_show (GTK_WIDGET (window));
 }

@@ -909,7 +909,7 @@ pagar_deuda_reserva (gint id_venta, gint id_reserva)
   res = EjecutarSQL (q);
 
   q = g_strdup_printf ("UPDATE deuda_reserva SET pagado = TRUE WHERE id_reserva = %d", id_reserva);
-  EjecutarSQL (q);
+  res = EjecutarSQL (q);
 }
 
 
@@ -5212,4 +5212,26 @@ modificar_producto_mesa (gint num_mesa, gchar *barcode, gdouble cantidad_total, 
     return TRUE;
   else
     return FALSE;
+}
+
+
+/**
+ *
+ */
+PGresult *
+get_data_from_reserva_id (gint id_reserva)
+{
+  gchar *q;
+  PGresult *res;
+
+  q = g_strdup_printf ("SELECT id, monto, rut_cliente, rut_cliente||(SELECT dv FROM cliente WHERE rut = rut_cliente) AS rut_cliente_completo, "
+                       "       (SELECT nombre FROM cliente WHERE rut = rut_cliente) AS nombre_cliente, "
+                       "       DATE_TRUNC('day', fecha) AS fecha, DATE_TRUNC('day', fecha_entrega) AS fecha_entrega, "
+                       "       (SELECT COALESCE (SUM (monto_pagado),0) FROM pago_deuda_reserva WHERE id_deuda_reserva = (SELECT id FROM deuda_reserva WHERE id_reserva = reserva.id)) AS monto_pagado "
+                       "FROM reserva "
+                       "WHERE vendido = false "
+                       "AND id = %d", id_reserva);
+
+  res = EjecutarSQL (q);
+  return res;
 }
