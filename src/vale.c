@@ -609,7 +609,7 @@ PrintValePreVentaReserva (Productos *header, gint id, gchar *prefijo)
     system(g_strdup_printf ("%s %s", print_command, vale_file));
 
   //Se borran los archivos
-  //system (g_strdup_printf ("rm %s", vale_file));
+  system (g_strdup_printf ("rm %s", vale_file));
 
   //Barcode Pre-venta (Al imprimir el ps se autocorta)
   if (rizoma_get_value_boolean ("IMPRIMIR_BARCODE_PREVENTA") == TRUE)
@@ -618,7 +618,7 @@ PrintValePreVentaReserva (Productos *header, gint id, gchar *prefijo)
       system (g_strdup_printf ("barcode -b \"%s-%d\" -g 100x100 -o %s/barcode.ps", prefijo, id, vale_dir));
       //Se imprime el barcode
       system (g_strdup_printf ("%s %s/barcode.ps", print_command, vale_dir));
-      //system (g_strdup_printf ("rm %s/barcode.ps", vale_dir));
+      system (g_strdup_printf ("rm %s/barcode.ps", vale_dir));
     }
   else
     {
