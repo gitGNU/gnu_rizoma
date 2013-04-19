@@ -2697,17 +2697,17 @@ BEGIN
 	q := $S$ SELECT --CASE WHEN vmcd.tipo_componente = $S$||materia_prima_l||$S$ THEN vmcd.barcode_componente
 	     	 	--     WHEN vmcd.tipo_complejo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_complejo
 			--END AS barcode,
-			vmcd.barcode_componente AS barcode --Ahora la materia prima es un componente base
+			vmcd.barcode_componente AS barcode, --Ahora la materia prima es un componente base
 	     	 	p.descripcion, p.marca, p.contenido, p.unidad, p.familia,
 		        SUM (vmcd.cantidad) AS cantidad,
-			SUM (vmcd.precio) AS monto_vendido,
+			SUM (vmcd.cantidad*vmcd.precio_proporcional) AS monto_vendido,
 			SUM (vmcd.cantidad*vmcd.costo_promedio) AS costo,
-       			SUM ((vmcd.precio)-((vmcd.iva+vmcd.otros)+(vmcd.costo_promedio*vmcd.cantidad))) AS contribucion
+       			SUM ((vmcd.precio_proporcional*vmcd.cantidad)-((vmcd.iva+vmcd.otros)+(vmcd.costo_promedio*vmcd.cantidad))) AS contribucion
 		 FROM venta_mc_detalle vmcd
 		      INNER JOIN venta v
 		      	    ON v.id = vmcd.id_venta_vd
 		      INNER JOIN producto p
-		      	    ON p.barcode = vmcd.tipo_componente = $S$||materia_prima_l||$S$
+		      	    ON p.barcode = vmcd.barcode_componente
 			       		   --CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
 	     	 	       		   --	WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
 					   --END
@@ -2853,10 +2853,12 @@ DECLARE
 	-------------
 	derivada_l int4;  -- id tipo derivado
 	corriente_l int4; -- id tipo corriente
+        materia_prima_l int4; -- id tipo materia prima
 	-------------
 BEGIN
 	SELECT id INTO derivada_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'DERIVADA';
 	SELECT id INTO corriente_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'CORRIENTE';
+        SELECT id INTO materia_prima_l FROM tipo_mercaderia WHERE UPPER(nombre) LIKE 'MATERIA PRIMA';
 
 	q := $S$
 	     WITH RECURSIVE compuesta (id_venta, barcode_complejo, id_mh, tipo_complejo,
@@ -2896,6 +2898,7 @@ BEGIN
 	   	     	   ON c.barcode_componente = producto.barcode
 	             WHERE c.tipo_componente = $S$ ||derivada_l|| $S$
 		     	   OR c.tipo_componente = $S$ ||corriente_l|| $S$
+                           OR c.tipo_componente = $S$ ||materia_prima_l|| $S$
       		     GROUP BY c.barcode_componente,1,2,3,4,5,6,7
       		     ORDER BY producto.descripcion ASC $S$;
 
