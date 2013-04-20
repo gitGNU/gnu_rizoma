@@ -104,7 +104,7 @@ search_client (GtkWidget *widget, gpointer data)
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_search_client")), string);
 
   nombre_entry = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
-  
+
   if (g_str_equal (nombre_entry, "entry_invoice_rut"))
     client_type = INVOICE;
   else if  (g_str_equal (nombre_entry, "entry_credit_rut") ||
@@ -144,7 +144,7 @@ search_client (GtkWidget *widget, gpointer data)
 				    G_TYPE_STRING,
 				    G_TYPE_STRING,
 				    G_TYPE_BOOLEAN);
-      else 
+      else
 	store = gtk_list_store_new (3,
 				    G_TYPE_STRING,
 				    G_TYPE_STRING,
@@ -214,6 +214,15 @@ search_client (GtkWidget *widget, gpointer data)
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_client_search"));
   gtk_widget_show_all (aux_widget);
+
+  if (tuples > 0)
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "treeview_clients")));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "treeview_clients"))),
+                                      gtk_tree_path_new_from_string ("0"));
+    }
+  else
+    gtk_widget_grab_focus (widget);
 }
 
 /**
@@ -329,7 +338,7 @@ search_client_abono (GtkWidget *widget, gpointer data)
         }
       else
         gtk_list_store_set (store, &iter,
-                            0, g_strconcat (PQvaluebycol (res, i, "rut"), 
+                            0, g_strconcat (PQvaluebycol (res, i, "rut"),
 					    PQvaluebycol (res, i, "dv"), NULL),
                             1, PQvaluebycol (res, i, "name"),
                             2, PQvaluebycol (res, i, "telefono"),
@@ -338,6 +347,15 @@ search_client_abono (GtkWidget *widget, gpointer data)
 
   aux_widget = GTK_WIDGET(gtk_builder_get_object(builder, "wnd_search_client_abono"));
   gtk_widget_show_all (aux_widget);
+
+  if (tuples > 0)
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "treeview_sca")));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "treeview_sca"))),
+                                      gtk_tree_path_new_from_string ("0"));
+    }
+  else
+    gtk_widget_grab_focus (widget);
 }
 
 void
@@ -712,7 +730,7 @@ ToggleGuiaSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer dat
   GtkTreePath *path;
   GtkTreeIter iter;
   gchar *tipo_documento;
-  gint subTotal = 0, monto = 0; 
+  gint subTotal = 0, monto = 0;
   gint id_venta_seleccionado, id_venta, id_documento_seleccionado, id_documento;
 
   treeview = GTK_WIDGET (gtk_builder_get_object (builder, "treeview_guia_factura"));
@@ -747,7 +765,7 @@ ToggleGuiaSelection (GtkCellRendererToggle *toggle, char *path_str, gpointer dat
 	gtk_tree_store_set ((GtkTreeStore*)store, &iter,
 			    1, enable,
 			    -1);
-      
+
       /*Se suma el total de todas las guias seleccionadas*/
       gtk_tree_model_get (store, &iter,
 			  1, &enable,
@@ -1147,7 +1165,7 @@ on_btn_facturar_guias_clicked (GtkButton *button, gpointer *data)
 			-1);
       if (enable == TRUE)
 	facturar_guia (id_factura, id_guia, monto);
-      
+
       // Itero a la siguiente fila --
       valid = gtk_tree_model_iter_next (store, &iter); /* Me da TRUE si itera a la siguiente */
     }
@@ -1188,9 +1206,9 @@ on_btn_pagar_factura_clicked (GtkButton *button, gpointer *data)
 			  2, &id_venta,
 			  -1);
     }
-  
+
   pagar_factura (id_factura, id_venta);
-  
+
   //Se vuelve a seleccionar el cliente para actualizar la vista de sus facturas impagas
   treeview = GTK_TREE_VIEW (builder_get (builder, "treeview_clients_gf"));
   store = gtk_tree_view_get_model (treeview);
@@ -1200,7 +1218,7 @@ on_btn_pagar_factura_clicked (GtkButton *button, gpointer *data)
 
 /**
  * Realiza la búsqueda de las deudas y abonos de cliente seleccionado
- * (signal-clicked) -> btn_search_abonos 
+ * (signal-clicked) -> btn_search_abonos
  *
  * @param: GtkButton *button
  * @param: gpointer *data
@@ -1251,14 +1269,14 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
     /*Solo fecha inicio*/
     if (!g_str_equal (str_begin, "") && g_str_equal (str_end, "")) {
       g_date_set_parse (date_begin, str_begin);
-      q = g_strdup_printf ("%s WHERE out_fecha >= to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD')", 
+      q = g_strdup_printf ("%s WHERE out_fecha >= to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD')",
 			   q, g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin));
     }
 
     /*Solo fecha Termino*/
     else if (!g_str_equal (str_end, "") && g_str_equal (str_begin, "")) {
       g_date_set_parse (date_end, str_end);
-      q = g_strdup_printf ("%s WHERE out_fecha < to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') + '1 days'", 
+      q = g_strdup_printf ("%s WHERE out_fecha < to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') + '1 days'",
 			   q, g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
     }
 
@@ -1267,7 +1285,7 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
       g_date_set_parse (date_begin, str_begin);
       g_date_set_parse (date_end, str_end);
       q = g_strdup_printf ("%s WHERE out_fecha >= to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') "
-			   "AND out_fecha < to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') + '1 days'", 
+			   "AND out_fecha < to_timestamp ('%.4d %.2d %.2d', 'YYYY MM DD') + '1 days'",
 			   q, g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
 			   g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
     }
@@ -1283,12 +1301,12 @@ on_btn_search_abonos_clicked (GtkButton *button, gpointer *data)
     {
       id_venta = g_strdup (PQvaluebycol (res, i, "out_id_venta"));
       abono = g_strdup (PQvaluebycol (res, i, "out_abono"));
-      
+
       if (g_str_equal (id_venta, "0")) id_venta = g_strdup_printf ("--");
       if (g_str_equal (abono, "0")) abono = g_strdup_printf ("--");
-      
+
       if (!g_str_equal (id_venta, "--") || //Para que no muestre el totalizador
-	  !g_str_equal (abono, "--")) 
+	  !g_str_equal (abono, "--"))
 	{
 	  gtk_list_store_append (store, &iter);
 	  gtk_list_store_set (store, &iter,
@@ -1345,9 +1363,9 @@ on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
 
   //dv = invested_strndup (rut, strlen (rut)-1);
   rut = g_strndup (rut, strlen (rut)-1);
-  
+
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_client_abono")), rut);
-  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_name_selected")), 
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_name_selected")),
 			g_strdup_printf ("<b>%s</b>", nombre));
 
   //Se habilitan las fechas
@@ -1362,7 +1380,7 @@ on_btn_accept_sca_clicked (GtkButton *button, gpointer data)
 
 
 /**
- * Limpia los treeviews, entry, y label 
+ * Limpia los treeviews, entry, y label
  * correspondientes de la pestaña 'abonos'
  *
  * (signal-clicked) -> btn_clean_abonos
@@ -1457,7 +1475,7 @@ abonos_box ()
   g_object_set (G_OBJECT (renderer), "xalign", 0.0, NULL);
   gtk_tree_view_column_set_resizable (column, FALSE);
 
-  
+
   //Monto Deuda
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Monto Deuda", renderer,
@@ -1469,7 +1487,7 @@ abonos_box ()
   gtk_tree_view_column_set_resizable (column, FALSE);
   gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)2, NULL);
 
-  
+
   //Abono
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Abono", renderer,
@@ -1482,7 +1500,7 @@ abonos_box ()
   //gtk_tree_view_column_set_cell_data_func (column, renderer, control_decimal, (gpointer)3, NULL);
 
 
-  //Deuda Total 
+  //Deuda Total
   renderer = gtk_cell_renderer_text_new ();
   column = gtk_tree_view_column_new_with_attributes ("Deuda Total", renderer,
                                                      "text", 4,
@@ -1612,7 +1630,7 @@ abonos_box ()
 
 /**
  * Emisores box
- * 
+ *
  */
 void
 emisores_box ()
@@ -1835,7 +1853,7 @@ AddClient (GtkWidget *widget, gpointer data)
 {
   GtkWidget *wnd;
   GtkWidget *aux;
-  
+
   wnd = gtk_widget_get_toplevel(widget);
 
   aux = GTK_WIDGET(gtk_builder_get_object(builder, "entry_client_rut"));
@@ -2036,9 +2054,9 @@ FillClientStore (GtkListStore *store)
                               3, strcmp (enable, "t") ? FALSE : TRUE,
                               4, PutPoints (g_strdup_printf ("%d",
 							     ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
-                              5, PutPoints (g_strdup_printf ("%d", 
+                              5, PutPoints (g_strdup_printf ("%d",
 							     DeudaTotalCliente (atoi (PQvaluebycol(res, i, "rut"))))),
-                              6, PutPoints (g_strdup_printf ("%d", 
+                              6, PutPoints (g_strdup_printf ("%d",
 							     CreditoDisponible (atoi (PQvaluebycol(res, i, "rut"))))),
                               -1);
         }
@@ -2188,7 +2206,7 @@ datos_cheques_restaurant (GtkTreeSelection *treeselection,
 			   "date_part ('year', v.fecha) AS fvta_year, "
 			   "date_part ('month', v.fecha) AS fvta_month, "
 			   "date_part ('day', v.fecha) AS fvta_day, "
-			   
+
 			   "date_part ('year', fecha_vencimiento) AS fvto_year, "
 			   "date_part ('month', fecha_vencimiento) AS fvto_month, "
 			   "date_part ('day', fecha_vencimiento) AS fvto_day "
@@ -2197,7 +2215,7 @@ datos_cheques_restaurant (GtkTreeSelection *treeselection,
 			   "WHERE id_emisor = %d", id);
       res = EjecutarSQL (q);
       tuples = PQntuples (res);
-      
+
       for (i = 0; i < tuples; i++)
 	{
 	  gtk_list_store_append (store, &iter);
@@ -2297,7 +2315,7 @@ fill_deudas_facturas_guias (gint rut, gint tipo_documento_n)
     tipo_documento = g_strdup ("FACTURA");
   else if (tipo_documento_n == GUIA)
     tipo_documento = g_strdup ("GUIA");
-  
+
   res = search_deudas_guias_facturas_cliente (rut, "", tipo_documento_n);
   tuples = PQntuples (res);
 
@@ -2372,10 +2390,10 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
 
   treeview = gtk_tree_selection_get_tree_view(treeselection);
   store = GTK_LIST_STORE(gtk_tree_view_get_model(treeview));
-  
+
   //De acuerdo al treeview desde donde se llama, rellenará el store correspondiente
   treeview_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (treeview)));
-  
+
   if (g_str_equal (treeview_name, "treeview_sales")) {
     widget = GTK_WIDGET (gtk_builder_get_object(builder, "treeview_sale_details"));
     numerico = TRUE;
@@ -2389,10 +2407,10 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
       gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
                           0, (numerico) ? &data_get : &data_get,
                           -1);
-      
-      if (numerico) 
+
+      if (numerico)
 	id_venta = (gint)data_get;
-      else 
+      else
 	id_venta_char = (gchar *)data_get;
 
       if (numerico == FALSE && g_str_equal (id_venta_char, "--"))
@@ -2418,7 +2436,7 @@ ChangeDetalle (GtkTreeSelection *treeselection, gpointer user_data)
                               2, PQgetvalue (res, i, 2),
                               3, strtod (PUT (PQgetvalue (res, i, 3)),(char **)NULL),
                               4, PutPoints (PQgetvalue (res, i, 4)),
-                              5, PutPoints (g_strdup_printf("%ld", lround (strtod (PUT (PQgetvalue (res, i, 3)), (char **)NULL) * 
+                              5, PutPoints (g_strdup_printf("%ld", lround (strtod (PUT (PQgetvalue (res, i, 3)), (char **)NULL) *
 									   strtod (PUT (PQgetvalue (res, i, 4)), (char **)NULL)))),
                               -1);
         }
@@ -2441,7 +2459,7 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
 
   treeview = gtk_tree_selection_get_tree_view(treeselection);
   store = GTK_TREE_STORE (gtk_tree_view_get_model(treeview));
-  
+
   widget = GTK_WIDGET (builder_get (builder, "treeview_gf_sale_detail"));
 
   if (gtk_tree_selection_get_selected (treeselection, NULL, &iter))
@@ -2451,7 +2469,7 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
                           2, &id_venta,
 			  6, &tipo_documento,
                           -1);
-      
+
       store_detalle = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (widget)));
       gtk_list_store_clear (store_detalle);
 
@@ -2479,7 +2497,7 @@ change_detalle_guia_factura (GtkTreeSelection *treeselection, gpointer user_data
                               3, strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL),
 			      4, strtod (PUT (PQvaluebycol (res, i, "precio_neto")), (char **)NULL),
 			      5, strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL),
-                              6, lround (strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL) * 
+                              6, lround (strtod (PUT (PQvaluebycol (res, i, "precio")), (char **)NULL) *
 					 strtod (PUT (PQvaluebycol (res, i, "cantidad")), (char **)NULL)),
                               -1);
         }
@@ -2628,14 +2646,14 @@ Abonar (void)
   GtkTreeIter iter;
   GtkTreeSelection *selection;
   GtkTreeModel *store;
-  gint abonar;  
+  gint abonar;
   gchar *rut;
   gint rut_n;
 
-  /*De estar habilitada caja, se asegura que ésta se encuentre 
+  /*De estar habilitada caja, se asegura que ésta se encuentre
     abierta al momento de vender*/
 
-  //TODO: Unificar esta comprobación en las funciones primarias 
+  //TODO: Unificar esta comprobación en las funciones primarias
   //      encargadas de hacer cualquier movimiento de caja
 
   if (rizoma_get_value_boolean ("CAJA"))
@@ -2680,7 +2698,7 @@ Abonar (void)
 
           ExitoMSG(widget, msg);
           FillClientStore(GTK_LIST_STORE(store));
-	  
+
 	  // Limpiando treeviews //TODO: crear funciones que simplifiquen limpiar treeviews
 	  widget = GTK_WIDGET(gtk_builder_get_object(builder, "treeview_sales"));
 	  store = GTK_TREE_MODEL (gtk_tree_view_get_model(GTK_TREE_VIEW(widget)));
@@ -2791,7 +2809,7 @@ ModificarCliente (void)
 
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "entry_modclient_limit_credit"));
       gtk_entry_set_text (GTK_ENTRY (widget), credito);
-      
+
       widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_modclient"));
       gtk_window_set_transient_for(GTK_WINDOW(widget), GTK_WINDOW(gtk_builder_get_object(builder, "wnd_admin")));
       gtk_widget_show_all(widget);
@@ -3227,7 +3245,7 @@ admin_search_client (GtkButton *button)
                               1, g_strdup (PQvaluebycol (res, i, "name")),
                               2, atoi (PQvaluebycol (res, i, "telefono")),
                               3, strcmp (enable, "t") ? FALSE : TRUE,
-                              4, PutPoints (g_strdup_printf ("%d", 
+                              4, PutPoints (g_strdup_printf ("%d",
 							     ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
 			      5, PutPoints (g_strdup_printf ("%d",
 							     DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
@@ -3241,7 +3259,7 @@ admin_search_client (GtkButton *button)
 					    PQvaluebycol (res, i, "dv"), NULL),
                             1, g_strdup (PQvaluebycol (res, i, "name")),
                             2, atoi (PQvaluebycol (res, i, "telefono")),
-                            4, PutPoints (g_strdup_printf ("%d", 
+                            4, PutPoints (g_strdup_printf ("%d",
 							   ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
 			    5, PutPoints (g_strdup_printf ("%d",
 							   DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
@@ -3300,7 +3318,7 @@ admin_search_client_gf (GtkButton *button)
 					  PQvaluebycol (res, i, "dv"), NULL),
 			  1, g_strdup (PQvaluebycol (res, i, "name")),
 			  2, atoi (PQvaluebycol (res, i, "telefono")),
-			  3, PutPoints (g_strdup_printf ("%d", 
+			  3, PutPoints (g_strdup_printf ("%d",
 							 ReturnClientCredit (atoi (PQvaluebycol (res, i, "rut"))))),
 			  4, PutPoints (g_strdup_printf ("%d",
 							 DeudaTotalCliente (atoi(PQvaluebycol(res, i, "rut"))))),
@@ -3315,7 +3333,7 @@ admin_search_client_gf (GtkButton *button)
  * This function search the emisor filtering according to the search criteria
  * on the "entry_search_emisores" entry. (activate-signal)
  *
- * 
+ *
  */
 void
 search_emisor (void)
@@ -3517,10 +3535,10 @@ on_btn_edit_emisores_clicked (GtkButton *button, gpointer user_data)
 
       widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_ciudad"));
       gtk_entry_set_text (GTK_ENTRY (widget), ciudad);
-      
+
       widget = GTK_WIDGET (gtk_builder_get_object (builder, "entry_mod_cm_giro"));
       gtk_entry_set_text (GTK_ENTRY (widget), giro);
-      
+
       widget = GTK_WIDGET (gtk_builder_get_object (builder, "lbl_mod_cm_id"));
       gtk_label_set_text (GTK_LABEL (widget), g_strdup_printf ("%d",id));
 
@@ -3586,7 +3604,7 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
   else if (strcmp (giro, "") == 0)
     AlertMSG (GTK_WIDGET (giro_w), "Debe especificar el giro del emisor");
   else
-    {      
+    {
       if (VerificarRut (rut, dv))
 	{
 	  //Verifica que el no haya otro emisor con el mismo rut
@@ -3613,4 +3631,3 @@ on_btn_mod_cm_clicked (GtkButton *button, gpointer user_data)
 	AlertMSG (creditos->rut, "El Rut no es valido!!");
     }
 }
-

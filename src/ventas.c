@@ -916,9 +916,9 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
         }
       else
 	{
-	  //No existen datos con ese id	  
+	  //No existen datos con ese id
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")), "");
-	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), 
+	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")),
 		    g_strdup_printf ("No existen datos con el id %s-%s", preventa_txt[0], preventa_txt[1]));
 	  return;
 	}
@@ -932,7 +932,7 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 	    {
 	      //No existen datos con ese id
 	      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")), "");
-	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), 
+	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")),
 		    g_strdup_printf ("No existen datos con el id %s-%s", preventa_txt[0], preventa_txt[1]));
 	      return;
 	    }
@@ -3782,11 +3782,12 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
       gtk_entry_set_text (GTK_ENTRY(aux), rut);
 
       aux = GTK_WIDGET(gtk_builder_get_object(builder, "btn_credit_sale"));
-      gtk_widget_grab_focus(aux);
 
       fill_credit_data(rut, PQgetvalue(res, 0, 0),
                        PQvaluebycol (res, 0, "direccion"),
                        PQvaluebycol (res, 0, "telefono"));
+
+      gtk_widget_grab_focus(aux);
     }
   else if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_sale_invoice"))))
     {
@@ -6419,9 +6420,14 @@ on_entry_srch_emisor_activate (GtkEntry *entry, gpointer user_data)
       g_free (str_axu);
     }
 
-  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_srch_emisor")));
-  //gtk_widget_grab_focus (GTK_WIDGET (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_emisor"))));
-  //gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_emisor"))), gtk_tree_path_new_from_string ("0"));
+  if (tuples > 0)
+    {
+      gtk_widget_grab_focus (GTK_WIDGET (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_emisor"))));
+      gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "tree_view_srch_emisor"))),
+                                      gtk_tree_path_new_from_string ("0"));
+    }
+  else
+    gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_srch_emisor")));
 }
 
 
