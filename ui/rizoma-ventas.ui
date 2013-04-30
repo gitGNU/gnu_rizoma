@@ -6108,7 +6108,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btn_realizar_pedido">
-                <property name="label" translatable="yes">_Encargo</property>
+                <property name="label" translatable="yes">E_ncargo</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

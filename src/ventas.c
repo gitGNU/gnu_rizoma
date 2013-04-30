@@ -3507,6 +3507,12 @@ on_btn_reserva_ok_clicked (GtkButton *button, gpointer data)
   gchar *str_date;
   GDate *date_aux;
 
+  if (venta->products == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "btn_cancel_reserva")), "No hay productos para realizar el encargo");
+      return;
+    }
+
   if (g_str_equal (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_reserva_rut"))), "") ||
       gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_reserva_rut"))) == NULL)
     {
@@ -3943,6 +3949,12 @@ void
 on_btn_realizar_pedido_clicked (GtkButton *button, gpointer data)
 {
   GtkWidget *widget;
+
+  if (venta->products == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")), "No hay productos para realizar el encargo");
+      return;
+    }
 
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_reserva"));
   gtk_widget_show(widget);
