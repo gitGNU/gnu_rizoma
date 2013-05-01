@@ -3832,6 +3832,7 @@ create or replace function cash_box_report (
         out cash_box_start integer,
         out cash_box_end integer,
         out cash_sells integer,
+        out cash_on_mixed_sell integer,
         out cash_outcome integer,
 	out nullify_sell integer,
 	out current_expenses integer,
@@ -3881,14 +3882,25 @@ begin
         end if;
 
 	-- sell_first_id es el último id de venta antes de la apertura de caja
+        -- Ve las ventas directas en efectivo y el efectivo de las ventas mixtas
         if sell_last_id = 0 or sell_last_id is null then
+                --Cash sell
                 select sum (monto) into cash_sells
                 from venta
                 where id > sell_first_id and tipo_venta = 0;
+                --Cash on mixed sell
+                select sum (pm.monto2) into cash_on_mixed_sell
+                from pago_mixto pm
+                where pm.id_sale > sell_first_id and pm.tipo_pago2 = 0;
         else
+                --Cash sell
                 select sum (monto) into cash_sells
                 from venta
                 where id > sell_first_id and id <= sell_last_id and tipo_venta = 0;
+                --Cash on mixed sell
+                select sum (pm.monto2) into cash_on_mixed_sell
+                from pago_mixto pm
+                where pm.id_sale > sell_first_id and pm.id_sale <= sell_last_id and pm.tipo_pago2 = 0;
         end if;
 
         if cash_sells is null then

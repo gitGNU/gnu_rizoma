@@ -562,7 +562,8 @@ fill_caja_data (void)
                                                                              )))));
 
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_cash")),
-                                g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_sells"))));
+                                g_strdup_printf ("<b>%s</b>", PutPoints ( g_strdup_printf ("%d", atoi(PQvaluebycol (res, 0, "cash_sells")) +
+                                                                                                 atoi(PQvaluebycol (res, 0, "cash_on_mixed_sell"))) )));
 
           gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_payed_money")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_payed_money"))));
@@ -585,6 +586,7 @@ fill_caja_data (void)
                                 g_strdup_printf
                                 ("<b>$ %s</b>", PutPoints
                                  (g_strdup_printf ("%d", atoi (PQvaluebycol (res, 0, "cash_sells"))
+                                                   + atoi (PQvaluebycol (res, 0, "cash_on_mixed_sell"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_income"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
                                                    + atoi (PQvaluebycol (res, 0, "cash_box_start"))
@@ -609,7 +611,7 @@ fill_caja_data (void)
 
 	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_mbox_bottle_return")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "bottle_return"))));
-	  
+
 	  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_close_out")),
                                 g_strdup_printf ("<b>%s</b>", PutPoints (PQvaluebycol (res, 0, "cash_close_outcome"))));
 
@@ -642,6 +644,7 @@ fill_caja_data (void)
               (g_strdup_printf ("%d",
                                 atoi (PQvaluebycol (res, 0, "cash_box_start"))
                                 + atoi (PQvaluebycol (res, 0, "cash_sells"))
+                                + atoi (PQvaluebycol (res, 0, "cash_on_mixed_sell"))
                                 + atoi (PQvaluebycol (res, 0, "cash_payed_money"))
                                 + atoi (PQvaluebycol (res, 0, "cash_income"))
 				+ atoi (PQvaluebycol (res, 0, "bottle_deposit"))
@@ -2858,7 +2861,7 @@ reports_win (void)
     END Informe Traspasos
    */
 
-  
+
   /*
     ----------- INFORME RANKING TRASPASOS ------------
    */
@@ -3508,7 +3511,7 @@ reports_win (void)
   g_object_set (G_OBJECT (renderer), "xalign", 0.5, NULL);
   gtk_tree_view_column_set_sort_column_id (column, 1);
   gtk_tree_view_column_set_resizable (column, FALSE);
-  
+
   //Fecha Documento
   renderer = gtk_cell_renderer_text_new();
   column = gtk_tree_view_column_new_with_attributes("Fecha Doc.", renderer,
@@ -3955,7 +3958,7 @@ reports_win (void)
 
   /* End Sells (tax exempt) */
 
-  
+
   /*
     Start 'Mercadería inmovilizada'
    */
@@ -4097,7 +4100,7 @@ reports_win (void)
   g_signal_connect (G_OBJECT (builder_get (builder, "entry_unit_sale")), "insert-text",
 		    G_CALLBACK (only_numberd_filter), NULL);
 
-  /* 
+  /*
      End 'Mercadería inmovilizada'
    */
 
@@ -4183,11 +4186,11 @@ reports_win (void)
   movimiento->cols[3].name = "Vendido (Unidades)";
   movimiento->cols[4].name = "Valor Vendido ($)";
   movimiento->cols[10].name = NULL;
-  
+
   g_signal_connect (builder_get (builder, "btn_print_movimiento"), "clicked",
                     G_CALLBACK (PrintTree), (gpointer)movimiento);
 
-  /* 
+  /*
      End 'Movimiento_mercadería'
    */
 
@@ -5123,7 +5126,7 @@ fill_exempt_sells ()
  * opcion 10 del switch.
  *
  * Esta funcion a traves de una consulta sql retorna los datos de
- * de las mercaderias inmovilizadas en un lapso de tiempo, luego las 
+ * de las mercaderias inmovilizadas en un lapso de tiempo, luego las
  * visualiza a traves del tree_view correspondiente.
  *
  */
@@ -5138,13 +5141,13 @@ fill_inmovilizados (GtkWidget *widget, gpointer user_data)
 
   avg_unid_vend = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_percent_sale"))));
   unid_vend = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_unit_sale"))));
-  
+
   gtk_list_store_clear (store);
 
   /*Se obtienen los datos de ventas de mercaderías desde una fecha inicial hasta ahora*/
   res = inmovilizados_en_periodo
     (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), avg_unid_vend, unid_vend);
-  
+
   tuples = PQntuples (res);
 
   for (i = 0; i < tuples; i++)
@@ -5156,7 +5159,7 @@ fill_inmovilizados (GtkWidget *widget, gpointer user_data)
       			  2, PQvaluebycol (res, i, "descripcion"),
       			  3, strtod (PUT (PQvaluebycol (res, i,"stock_inicial")), (char **)NULL),
       			  4, strtod (PUT (PQvaluebycol (res, i,"unidades_vendidas")), (char **)NULL),
-      			  5, (strtod (PUT (PQvaluebycol (res, i,"unidades_vendidas")), (char **)NULL) * 
+      			  5, (strtod (PUT (PQvaluebycol (res, i,"unidades_vendidas")), (char **)NULL) *
 			      strtod (PUT (PQvaluebycol (res, i,"precio")), (char **)NULL)),
       			  6, strtod (PUT (PQvaluebycol (res, i,"porcentaje_vendido")), (char **)NULL),
       			  7, strtod (PUT (PQvaluebycol (res, i,"stock_teorico")), (char **)NULL),
@@ -5450,7 +5453,7 @@ fill_transfer_rank (gboolean traspaso_envio)
   PGresult *res;
   gint i, tuples;
   glong total_costo, costo;
-  
+
   total_costo = 0;
   costo = 0;
 
@@ -5489,7 +5492,7 @@ fill_transfer_rank (gboolean traspaso_envio)
 }
 
 /**
- * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Traspasos' tab and 
+ * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Traspasos' tab and
  * 'Materias Primas' subtab are selected.
  *
  * Fill the 'treeview_mp_transfer_rank' treeview with raw materials information.
@@ -5549,7 +5552,7 @@ fill_transfer_rank_mp (gboolean traspaso_envio)
 
 
 /**
- * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Traspaso' tab and 
+ * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Traspaso' tab and
  * 'Ofertas' subtab are selected.
  *
  * Fill the 'treeview_offer_transfer_rank' treeview with 'complex merchandise' information.
@@ -5567,7 +5570,7 @@ fill_transfer_rank_mc (gboolean traspaso_envio)
   PGresult *res;
   gint i, tuples;
   glong total_costo, costo;
-  
+
   total_costo = 0;
   costo = 0;
 
@@ -5648,7 +5651,7 @@ fill_products_rank (gint familia)
       vendido = strtod (PUT (g_strdup (PQvaluebycol (res, i, "sold_amount"))), (char **)NULL);
       costo = strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL);
       contribucion = strtod (PUT (g_strdup (PQvaluebycol (res, i, "contrib"))), (char **)NULL);
-      
+
       vendido_total += vendido;
       costo_total += costo;
       contribucion_total += contribucion;
@@ -5690,11 +5693,11 @@ fill_products_rank (gint familia)
                                          PutPoints (g_strdup_printf ("%ld", lround (contribucion_total) ))));
 
   margen = (contribucion_total == 0 || costo_total == 0) ? 0 : (contribucion_total/costo_total)*100;
-  
+
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_rank_margin")),
                         g_strdup_printf ("<span size=\"x-large\">%s %%</span>",
                                          g_strdup_printf ("%.2f", margen )));
-  
+
   //gtk_timeout_remove (flagProgress);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), TRUE);
   GtkWidget *progreso = GTK_WIDGET (builder_get (builder, "progressbar"));
@@ -5703,7 +5706,7 @@ fill_products_rank (gint familia)
 }
 
 /**
- * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Ventas' tab and 
+ * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Ventas' tab and
  * 'Materias Primas' subtab are selected.
  *
  * Fill the 'treeview_sell_rank_mp' treeview with raw materials information.
@@ -5742,7 +5745,7 @@ fill_products_rank_mp (gint familia)
       vendido = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "monto_vendido"))), (char **)NULL));
       costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
       contribucion = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL));
-      
+
       vendido_total += vendido;
       costo_total += costo;
       contribucion_total += contribucion;
@@ -5802,7 +5805,7 @@ fill_products_rank_mp (gint familia)
 
 
 /**
- * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Ventas' tab and 
+ * Called by 'on_btn_get_stat_clicked()' when the 'Ranking Ventas' tab and
  * 'Mercaderías Compuestas' subtab are selected.
  *
  * Fill the 'treeview_sell_rank_mc' treeview with 'complex merchandise' information.
@@ -5840,7 +5843,7 @@ fill_products_rank_mc (gint familia)
       vendido = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "monto_vendido"))), (char **)NULL));
       costo = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "costo"))), (char **)NULL));
       contribucion = lround (strtod (PUT (g_strdup (PQvaluebycol (res, i, "contribucion"))), (char **)NULL));
-      
+
       vendido_total += vendido;
       costo_total += costo;
       contribucion_total += contribucion;
@@ -6078,7 +6081,7 @@ fill_movimiento (GtkWidget *widget, gpointer user_data)
     }
 
   gtk_list_store_clear (store);
-  
+
   res = movimiento_en_rango (date_begin, date_end, barcode);
   tuples = PQntuples (res);
 
@@ -6497,7 +6500,7 @@ calcular_traspasos (void)
     return;
 
   enviado = PQvaluebycol (res, 0, "enviados");
-  enviado = g_strdup_printf (g_str_equal ("", enviado) ? " No hay productos enviados" : 
+  enviado = g_strdup_printf (g_str_equal ("", enviado) ? " No hay productos enviados" :
 			                                 "<span size=\"12000\" weight=\"bold\"> %s </span>", PutPoints(enviado));
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_enviado")), enviado);
@@ -6525,7 +6528,7 @@ calcular_traspasos (void)
   recibido = PQvaluebycol (res, 0, "recibidos");
 
   gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_total_recibido")),
-                        g_strdup_printf (g_str_equal ("",recibido) ? " No hay productos recibidos" : 
+                        g_strdup_printf (g_str_equal ("",recibido) ? " No hay productos recibidos" :
 					                             "<span size=\"12000\" weight=\"bold\"> %s </span>", PutPoints (recibido)));
 }
 
@@ -6588,8 +6591,8 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
 	  sub_notebook = GTK_NOTEBOOK (builder_get (builder, "ntbk_sells_rank"));
 	  sub_page_num = gtk_notebook_get_current_page (sub_notebook);
 	  combo = GTK_COMBO_BOX (builder_get (builder, "cmb_family_filter"));
-	  modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));	  
-	  
+	  modelo = GTK_TREE_MODEL (gtk_combo_box_get_model(combo));
+
 	  gint familia;
 	  gtk_combo_box_get_active_iter (combo, &iter);
 
@@ -6942,7 +6945,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
       else if (sub_page_num == 1) //Sell rank MP
 	{
 	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
-	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));	  
+	  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
 	  gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
 	}
       else if (sub_page_num == 2) //Sell rank MC
@@ -7154,7 +7157,7 @@ on_ntbk_sells_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, gu
     {
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mc")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_rank_mp")));
-      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank")));      
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_rank")));
     }
   else if (page_num == 1) //Sell rank MP
     {
@@ -7207,7 +7210,7 @@ on_ntbk_transfers_rank_switch_page (GtkNotebook *notebook, GtkNotebookPage *page
       fill_transfer_rank_mp(traspaso_envio);
 
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank")));
-      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));	  
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mc")));
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_print_transfer_rank_mp")));
     }
   else if (page_num == 2) //Sell rank MC
