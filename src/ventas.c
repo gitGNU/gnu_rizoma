@@ -823,7 +823,9 @@ void
 on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 {
   gint id;
-  gchar **preventa_txt;
+  gchar *preventa_txt1;
+  gchar *preventa_txt2;
+  gchar *entry_text;
   guint32 total;
 
   gdouble iva, otros;
@@ -835,26 +837,40 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 
   GtkListStore *sell = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))));
 
-  preventa_txt = g_strsplit (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")))), "-", 0);
-
-  //Si el código no es un PV (PreVenta) o un RV (ReserVa) es inválido
-  if (!g_str_equal (preventa_txt[0], "PV") && !g_str_equal (preventa_txt[0], "RV"))
+  entry_text = pango_trim_string  (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa"))));
+  if (g_str_equal (entry_text, "") || strlen (entry_text) < 3)
     {
       ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), "El ID ingresado es inválido");
       return;
     }
 
-  id = atoi (preventa_txt[1]);
+  preventa_txt1 =  g_strndup (entry_text, 2);
+  preventa_txt2 =  invested_strndup (entry_text, 2);
+
+  //Si el código no es un PV (PreVenta) o un RV (ReserVa) es inválido
+  if ( (!g_str_equal (preventa_txt1, "PV") && !g_str_equal (preventa_txt1, "RV"))
+       || HaveCharacters (preventa_txt2) || g_str_equal (preventa_txt2, ""))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")), "El ID ingresado es inválido");
+      return;
+    }
+
+  //printf ("COD: %s %s", preventa_txt1, preventa_txt2);
+  id = atoi (preventa_txt2);
 
   //Si es un id  valido
   if (id > 0)
     {
+      /*TODO: Se debería dejar que la preventa de agregue a la lista
+	junto a productos anteriormente agregados. Se debe cuidar que una
+	misma pre-venta no se cargue 2 veces en la misma lista.
+	Para ello debe haber una especie de 'manejo' de pre-venta.*/
       gtk_list_store_clear (sell);
       CleanEntryAndLabelData ();
       ListClean ();
 
       //Se obtiene la preventa, si el id es del tipo PV
-      if (g_str_equal (preventa_txt[0], "PV"))
+      if (g_str_equal (preventa_txt1, "PV"))
         q = g_strdup_printf ("SELECT barcode, cantidad, precio "
                              "FROM preventa_detalle pvd "
                              "INNER JOIN preventa pv "
@@ -862,7 +878,7 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
                              "WHERE pv.id = %d "
                              "AND pv.vendido = false", id);
       //Se obtiene la reserva, si el id es del tipo RV
-      else if (g_str_equal (preventa_txt[0], "RV"))
+      else if (g_str_equal (preventa_txt1, "RV"))
         q = g_strdup_printf ("SELECT barcode, cantidad, precio FROM reserva_detalle WHERE id_reserva = %d", id);
 
       res = EjecutarSQL (q);
@@ -919,13 +935,13 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 	  //No existen datos con ese id
 	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")), "");
 	  ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")),
-		    g_strdup_printf ("No existen datos con el id %s-%s", preventa_txt[0], preventa_txt[1]));
+		    g_strdup_printf ("No existen datos con el id %s%s", preventa_txt1, preventa_txt2));
 	  return;
 	}
 
-      if (g_str_equal (preventa_txt[0], "PV"))
+      if (g_str_equal (preventa_txt1, "PV"))
         venta->id_preventa = id;
-      else if (g_str_equal (preventa_txt[0], "RV"))
+      else if (g_str_equal (preventa_txt2, "RV"))
         {
           res = get_data_from_reserva_id (id);
 	  if (res == NULL || PQntuples (res) == 0)
@@ -933,7 +949,7 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 	      //No existen datos con ese id
 	      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_id_preventa")), "");
 	      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_id_preventa")),
-		    g_strdup_printf ("No existen datos con el id %s-%s", preventa_txt[0], preventa_txt[1]));
+		    g_strdup_printf ("No existen datos con el id %s%s", preventa_txt1, preventa_txt2));
 	      return;
 	    }
 
@@ -947,7 +963,7 @@ on_btn_get_preventa_ok_clicked (GtkButton *button, gpointer data)
 
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_get_preventa")));
 
-  if (g_str_equal (preventa_txt[0], "RV"))
+  if (g_str_equal (preventa_txt1, "RV"))
     TipoVenta (NULL, NULL);
 }
 
@@ -3594,6 +3610,12 @@ on_btn_preventa_ok_clicked (GtkButton *button, gpointer data)
   gint vendedor;
   gint maquina;
   gint id_preventa;
+  
+  if (venta->header == NULL)
+    {
+      ErrorMSG (GTK_WIDGET (gtk_builder_get_object (builder, "btn_cancel_preventa")), "No hay productos para vender");
+      return;
+    }
 
   //maquina
   maquina = rizoma_get_value_int ("MAQUINA");
@@ -5041,7 +5063,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
       break;
 
     case GDK_F8:
-      if (no_venta == FALSE && venta_reserva == FALSE)
+      if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         mixed_pay_window ();
       break;
 
@@ -5061,7 +5083,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
       //if the key pressed is not in use let it pass
     case GDK_F10:
-      if (no_venta == FALSE && venta_reserva == FALSE)
+      if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         on_btn_credit_clicked (NULL, NULL);
       break;
 

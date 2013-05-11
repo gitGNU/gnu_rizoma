@@ -536,7 +536,7 @@ PrintValePreVentaReserva (Productos *header, gint id, gchar *prefijo)
   fprintf (fp, "%s", start);
   fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
-  fprintf (fp, "ID %s: %s-%d \n", g_str_equal (prefijo, "RV")? "ENCARGO":"PREVENTA",prefijo, id);
+  fprintf (fp, "ID %s: %s%d \n", g_str_equal (prefijo, "RV")? "ENCARGO":"PREVENTA",prefijo, id);
   fprintf (fp, "==========================================\n\n");
 
   do {
@@ -615,7 +615,7 @@ PrintValePreVentaReserva (Productos *header, gint id, gchar *prefijo)
   if (rizoma_get_value_boolean ("IMPRIMIR_BARCODE_PREVENTA") == TRUE)
     {
       //Se genera el barcode
-      system (g_strdup_printf ("barcode -b \"%s-%d\" -g 100x100 -o %s/barcode.ps", prefijo, id, vale_dir));
+      system (g_strdup_printf ("barcode -b \"%s%d\" -g 100x100 -o %s/barcode.ps", prefijo, id, vale_dir));
       //Se imprime el barcode
       system (g_strdup_printf ("%s %s/barcode.ps", print_command, vale_dir));
       system (g_strdup_printf ("rm %s/barcode.ps", vale_dir));
