@@ -5081,10 +5081,24 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
         TipoVenta (NULL, NULL);
       break;
 
-      //if the key pressed is not in use let it pass
+    //No se permiten ventas en modo PREVENTA o cuando las banderas VENTA_RESERVA o NO_VENTA esten en FALSE
     case GDK_F10:
       if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         on_btn_credit_clicked (NULL, NULL);
+
+      // Si esta habilitada la opcion "CUENTA_RAPIDA" se selecciona automaticamente la cuenta especificada (si es valida)
+      if (!g_str_equal (rizoma_get_value ("CUENTA_RAPIDA"), "NONE") && !HaveCharacters (rizoma_get_value ("CUENTA_RAPIDA")))
+	{
+	  //Si es CONTROL+F10
+	  if (event->state & GDK_CONTROL_MASK)
+	    on_btn_credit_clicked (NULL, NULL);
+	  else //Si solo es F10
+	    {
+	      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_credit_rut")), rizoma_get_value ("CUENTA_RAPIDA"));
+	      search_client (GTK_WIDGET (builder_get (builder, "entry_credit_rut")), NULL);
+	    }
+	}
+
       break;
 
     case GDK_F11:

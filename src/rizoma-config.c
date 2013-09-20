@@ -136,6 +136,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "PRECIO_DISCRECIONAL", "0");
   g_key_file_set_string (file, "RIZOMA", "GANANCIA_MINIMA", "0"); //En terminos porcentuales
   g_key_file_set_string (file, "RIZOMA", "MODO_GUIA_FACTURA", "0"); //Modo para visualización en venta
+  g_key_file_set_string (file, "RIZOMA", "CUENTA_RAPIDA", "NONE"); //NONE=Deshabilitado - [RUTCuenta]=Cuenta a seleccionar
 
   //PreVenta (si uno es 1 el otro debe ser 0)
   g_key_file_set_string (file, "RIZOMA", "PREVENTA", "0");

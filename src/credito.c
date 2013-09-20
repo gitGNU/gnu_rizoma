@@ -220,6 +220,12 @@ search_client (GtkWidget *widget, gpointer data)
       gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "treeview_clients")));
       gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (builder_get (builder, "treeview_clients"))),
                                       gtk_tree_path_new_from_string ("0"));
+
+      //Si la opcion CUENTA_RAPIDA esta habilitada, se selecciona el cliente buscado (si solo se ha encontrado 1)
+      if (!g_str_equal (rizoma_get_value ("CUENTA_RAPIDA"), "NONE")  && 
+	  !HaveCharacters (rizoma_get_value ("CUENTA_RAPIDA")) &&
+	  tuples == 1)
+	gtk_button_clicked (GTK_BUTTON (builder_get (builder, "btn_client_ok")));
     }
   else
     gtk_widget_grab_focus (widget);
