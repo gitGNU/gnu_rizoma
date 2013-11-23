@@ -19,7 +19,7 @@
 
 
 -- se debe ser superusuario para crear el lenguaje
-CREATE LANGUAGE plpgsql;
+--CREATE LANGUAGE plpgsql;
 
 --helper function for informacion_producto
 create or replace function select_vendidos(

@@ -105,13 +105,16 @@ search_client (GtkWidget *widget, gpointer data)
 
   nombre_entry = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
 
-  if (g_str_equal (nombre_entry, "entry_invoice_rut"))
+  if (g_str_equal (nombre_entry, "entry_invoice_rut") )// || // Facturacion-Guia
+    //g_str_equal (nombre_entry, "entry_rutcli_pre_factura") ) // Venta a clientes registrados
     client_type = INVOICE;
   else if  (g_str_equal (nombre_entry, "entry_credit_rut") ||
 	    g_str_equal (nombre_entry, "entry_rut_mixed_pay") ||
 	    g_str_equal (nombre_entry, "entry_rut_mixed_pay_2"))
     client_type = CREDIT;
   else if (g_str_equal (nombre_entry, "entry_reserva_rut"))
+    client_type = ALL;
+  else
     client_type = ALL;
 
   //TODO: Debe haber uno para mostrar ambos

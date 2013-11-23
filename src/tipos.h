@@ -35,6 +35,8 @@ gchar *config_profile;
 // Solo vamos a tener un pequeño display de ventas ?
 gboolean solo_venta;
 
+gint rut_cliente_pre_factura; //Rut del cliente seleccionado en rizoma-ventas
+
 enum sell_type {SIMPLE, FACTURA, GUIA, VENTA};
 
 enum tipo_cliente {CREDIT, INVOICE, ALL};

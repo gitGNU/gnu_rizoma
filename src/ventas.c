@@ -1338,6 +1338,13 @@ ventas_win ()
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "hbox1_mesa")));
       gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_seleccionar_mesa")));
     }
+
+  if (rizoma_get_value_boolean ("VENTA_SUSCRITO"))
+    {
+      gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "barcode_entry")), FALSE);
+      gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "entry_precio")), TRUE);
+      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")), TRUE);
+    }
 }
 
 gboolean
@@ -2511,7 +2518,24 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
                                                  PutPoints (g_strdup_printf ("%u", atoi (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))) *
                                                  atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_precio"))))))))));*/
 
-          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), g_strdup_printf ("%d", precio * atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "cantidad_entry"))))));
+	  /*Si se selecciono un cliente 
+	    (Que puede tener precio preferencial para el producto seleccionado)*/
+	  if (rut_cliente_pre_factura > 0)
+	    {
+	      gchar *q;
+	      gdouble client_price = 0;
+	      q = g_strdup_printf ("SELECT precio FROM cliente_precio WHERE rut_cliente = %d AND barcode = '%s'", 
+				   rut_cliente_pre_factura, barcode);
+	      client_price = strtod (PUT (GetDataByOne (q)), (char **)NULL);
+
+	      if (client_price > 0)
+		precio = client_price;
+
+	      g_free (q);
+	    }
+
+          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), 
+			      g_strdup_printf ("%d", precio * atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "cantidad_entry"))))));
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")),
                                 g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", codigo));

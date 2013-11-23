@@ -655,6 +655,25 @@ constraint pk_preventa primary key (id)
 ) ;
 
 
+-- cliente_venta  - ventas normales a clientes registrados (para facturas post-ventas)
+create table cliente_venta (
+id                        serial not null,
+id_venta                  int4,
+rut_cliente               int4 not null,
+facturado                 bool default false,
+constraint pk_cliente_venta primary key (id)
+) ;
+
+-- cliente_precio  - último precio a cliente
+create table cliente_precio (
+id                        serial not null,
+rut_cliente               int4 not null,
+barcode                   serial8 not null,
+precio                    float8,
+constraint pk_cliente_precio primary key (id)
+) ;
+
+
 -- Mesa (tabla flotante)
 create table mesa (
   num_mesa                  int4,
