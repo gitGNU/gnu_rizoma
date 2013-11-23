@@ -145,6 +145,24 @@ FillProductSell (gchar *barcode,
                         g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                         PutPoints (precio)));*/
 
+  if (rut_cliente_pre_factura > 0)
+    {
+      gchar *q;
+      gdouble client_price = 0;
+      q = g_strdup_printf ("SELECT precio FROM cliente_precio WHERE rut_cliente = %d AND barcode = '%s'", 
+			   rut_cliente_pre_factura, barcode);
+
+      PGresult *res = EjecutarSQL (q);
+      if (res != NULL && PQntuples (res) != 0)
+	{
+	  client_price = strtod (PUT (PQgetvalue (res, 0, 0)), (char **)NULL);
+
+	  if (client_price > 0)
+	    precio = PUT (g_strdup_printf ("%.3f",client_price));
+	}
+
+      g_free (q);
+    }
   gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), precio);
 
   //precio de mayorista
@@ -1007,6 +1025,9 @@ ventas_win ()
   venta->id_preventa = 0;
   Productos *fill = venta->header;
 
+  //TODO: Usar esta estructura para almacenar los datos del cliente seleccionado
+  cliente = (DatosCliente *) g_malloc (sizeof (DatosCliente));
+
   //Inicialización de la estructura de cheques de restaurant
   pago_chk_rest = (PagoChequesRest *) g_malloc (sizeof (PagoChequesRest));
   pago_chk_rest->header = NULL;
@@ -1017,6 +1038,9 @@ ventas_win ()
   pago_mixto = (PagoMixto *) g_malloc (sizeof (PagoMixto));
   pago_mixto->check_rest1 = NULL;
   pago_mixto->check_rest2 = NULL;
+
+  //Se inicializa bandera global (venta suscritos)
+  rut_cliente_pre_factura = 0;
 
   venta->total_pagado = 0;
   venta->num_mesa = 0;
@@ -1341,9 +1365,22 @@ ventas_win ()
 
   if (rizoma_get_value_boolean ("VENTA_SUSCRITO"))
     {
-      gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "barcode_entry")), FALSE);
+      //gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "barcode_entry")), FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "barcode_entry")), FALSE);
       gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "entry_precio")), TRUE);
-      //gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")), TRUE);
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")));
+      
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")));
+      
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "hbox13")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "box2")));
+
+    }
+  else
+    {
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")));
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "hbox13")));
+      gtk_widget_hide (GTK_WIDGET (builder_get (builder, "box2")));
     }
 }
 
@@ -1453,7 +1490,7 @@ AgregarProducto (GtkButton *button, gpointer data)
         }
 
       if ( (rizoma_get_value_boolean ("PRECIO_DISCRECIONAL") == TRUE && precio != venta->product_check->product->precio) ||
-           venta->product_check->product->precio == 0)
+           venta->product_check->product->precio == 0 || rizoma_get_value_boolean ("VENTA_SUSCRITO") == TRUE)
         {
           //TODOOO: Se debe habilitar el entry precio, para darle uno y al agregarlo a la lista se debe deshabilitar
           //Se actualiza el valor en la estructura para el registro de venta (si es mayorista da igual, porque prevalece el precio discrecional)
@@ -1607,6 +1644,15 @@ CleanEntryAndLabelData (void)
   gtk_widget_set_sensitive (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")), FALSE);
 
   gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+  if (rizoma_get_value_boolean ("VENTA_SUSCRITO") == TRUE && rut_cliente_pre_factura > 0 &&
+      get_treeview_length (GTK_TREE_VIEW (builder_get (builder, "sell_products_list"))) <= 0)
+    {
+      rut_cliente_pre_factura = 0;
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "barcode_entry")), FALSE);
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")));
+      gtk_label_set_text (GTK_LABEL (gtk_builder_get_object (builder, "lbl_selected_client")), "");
+    }
 }
 
 
@@ -1806,9 +1852,12 @@ MoveFocus (GtkEntry *entry, gpointer data)
       button = GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button"));
       gtk_widget_set_sensitive(button, TRUE);
       gtk_widget_grab_focus (button);
-    }
-  else // De lo contrario el foco regresa al entry "Código de barras"
+    } // De lo contrario el foco regresa al entry "Código de barras"
+  else if (rizoma_get_value_boolean ("VENTA_SUSCRITO") == FALSE) 
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "barcode_entry")));
+
+  if (rizoma_get_value_boolean ("VENTA_SUSCRITO") == TRUE && rut_cliente_pre_factura > 0)
+    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "entry_precio")));
 }
 
 void
@@ -2263,8 +2312,12 @@ on_entry_precio_activate (GtkEntry *entry, gpointer data)
       else
         AgregarProducto (NULL, NULL);
     }
-  else
+  else if (rizoma_get_value_boolean ("VENTA_SUSCRITO") == FALSE)
     gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")));
+
+
+  if (rizoma_get_value_boolean ("VENTA_SUSCRITO") == TRUE && rut_cliente_pre_factura > 0)
+    gtk_widget_grab_focus (GTK_WIDGET (gtk_builder_get_object (builder, "sell_add_button")));
 }
 
 
@@ -2488,7 +2541,7 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
   GtkListStore *store = GTK_LIST_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (gtk_builder_get_object (builder, "ventas_search_treeview"))));
   GtkTreeIter iter;
   gchar *barcode, *product, *codigo;
-  gint precio;
+  gdouble precio;
 
   if (gtk_tree_selection_get_selected (selection, NULL, &iter) == TRUE)
     {
@@ -2511,8 +2564,6 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
                                 g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                 PutPoints (g_strdup_printf ("%d", precio))));*/
 
-          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), g_strdup_printf ("%d", precio));
-
           /*gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_subtotal")),
                                 g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>",
                                                  PutPoints (g_strdup_printf ("%u", atoi (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry")))) *
@@ -2526,16 +2577,22 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
 	      gdouble client_price = 0;
 	      q = g_strdup_printf ("SELECT precio FROM cliente_precio WHERE rut_cliente = %d AND barcode = '%s'", 
 				   rut_cliente_pre_factura, barcode);
-	      client_price = strtod (PUT (GetDataByOne (q)), (char **)NULL);
 
-	      if (client_price > 0)
-		precio = client_price;
+	      PGresult *res = EjecutarSQL (q);
+	      if (res != NULL && PQntuples (res) != 0)
+		{
+		  client_price = strtod (PUT (PQgetvalue (res, 0, 0)), (char **)NULL);
+
+		  if (client_price > 0)
+		    precio = client_price;
+		}
 
 	      g_free (q);
 	    }
+	  gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), PUT (g_strdup_printf ("%.3f",precio)));
 
-          gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), 
-			      g_strdup_printf ("%d", precio * atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "cantidad_entry"))))));
+          /*gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_precio")), 
+	    g_strdup_printf ("%d", precio * atoi (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "cantidad_entry"))))));*/
 
           gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "codigo_corto")),
                                 g_strdup_printf ("<span weight=\"ultrabold\" size=\"12000\">%s</span>", codigo));
@@ -3883,7 +3940,24 @@ on_btn_client_ok_clicked (GtkButton *button, gpointer data)
       gtk_widget_set_sensitive(aux, TRUE);
       gtk_widget_grab_focus (aux);
     }
+  else if (gtk_widget_get_visible (GTK_WIDGET (builder_get (builder,"wnd_cliente_pre_factura"))))
+    {
+      aux = GTK_WIDGET (builder_get (builder, "entry_rutcli_pre_factura"));
+      gtk_entry_set_text (GTK_ENTRY(aux), rut);
 
+      aux = GTK_WIDGET (builder_get (builder, "lbl_nombrecli_pre_factura"));
+      gtk_label_set_text(GTK_LABEL(aux), PQgetvalue (res, 0, 0));
+
+      aux = GTK_WIDGET (builder_get (builder, "lbl_dircli_pre_factura"));
+      gtk_label_set_text(GTK_LABEL(aux), PQvaluebycol (res, 0, "direccion"));
+
+      aux = GTK_WIDGET (builder_get (builder, "lbl_fonocli_pre_factura"));
+      gtk_label_set_text(GTK_LABEL(aux), PQvaluebycol(res, 0, "telefono"));
+
+      aux = GTK_WIDGET (builder_get (builder, "btn_selectcli_pre_factura"));
+      gtk_widget_set_sensitive(aux, TRUE);
+      gtk_widget_grab_focus (aux);
+    }
 }
 
 void
@@ -4063,6 +4137,64 @@ on_btn_cancel_tipo_venta_win_venta (GtkButton *button, gpointer data)
 }
 
 /**
+ * Conected to the internal entry of the GtkComboBoxEntry that displays the rut
+ * of the clients when is being sold with invoice
+ *
+ * @param editable The entry
+ * @param user_data
+ */
+void
+on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
+{
+  /*
+  GtkWidget *widget;
+  PGresult *res;
+  gchar *rut;
+  gchar *q;
+  gchar **rut_split;
+  rut = g_strdup(gtk_entry_get_text(entry));
+
+  rut_split = g_strsplit(rut, "-", 2);
+
+  if (!(RutExist(rut)))
+    {
+      //the user with that rut does not exist so it is neccesary create a new client
+      gtk_window_set_modal(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(entry))), FALSE);
+      AddClient(NULL, NULL); //raise the window to add a proveedor
+      return;
+    }
+
+  q = g_strdup_printf("SELECT nombre, giro, direccion, telefono "
+                      "FROM cliente WHERE rut = %s", rut_split[0]);
+
+  res = EjecutarSQL(q);
+  g_free (q);
+  g_strfreev (rut_split);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_name"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "nombre"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_giro"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_direccion_factura"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_telefono_factura"));
+  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_invoice"));
+  gtk_widget_set_sensitive(widget, TRUE);
+
+  widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_guide"));
+  gtk_widget_set_sensitive(widget, TRUE);
+  */
+
+  search_client (GTK_WIDGET (entry), NULL);
+}
+
+
+/**
  * Callback conected to the btn_sale_invoice button.
  *
  * This function setup the window and the show it
@@ -4118,63 +4250,16 @@ on_btn_invoice_clicked (GtkButton *button, gpointer user_data)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_make_guide")), FALSE);
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_invoice_rut")));
-}
 
-/**
- * Conected to the internal entry of the GtkComboBoxEntry that displays the rut
- * of the clients when is being sold with invoice
- *
- * @param editable The entry
- * @param user_data
- */
-void
-on_entry_invoice_rut_activate (GtkEntry *entry, gpointer user_data)
-{
-  /*
-  GtkWidget *widget;
-  PGresult *res;
-  gchar *rut;
-  gchar *q;
-  gchar **rut_split;
-  rut = g_strdup(gtk_entry_get_text(entry));
-
-  rut_split = g_strsplit(rut, "-", 2);
-
-  if (!(RutExist(rut)))
+  if (rizoma_get_value_boolean ("VENTA_SUSCRITO") && rut_cliente_pre_factura > 0)
     {
-      //the user with that rut does not exist so it is neccesary create a new client
-      gtk_window_set_modal(GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(entry))), FALSE);
-      AddClient(NULL, NULL); //raise the window to add a proveedor
-      return;
+      gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_invoice_rut")), 
+			  g_strdup_printf ("%d", rut_cliente_pre_factura));
+
+      on_entry_invoice_rut_activate (GTK_ENTRY (builder_get (builder, "entry_invoice_rut")),NULL);
+      search_client (GTK_WIDGET (builder_get (builder, "entry_search_client")),NULL);
+      on_btn_client_ok_clicked (GTK_BUTTON (builder_get (builder, "btn_client_ok")), NULL);
     }
-
-  q = g_strdup_printf("SELECT nombre, giro, direccion, telefono "
-                      "FROM cliente WHERE rut = %s", rut_split[0]);
-
-  res = EjecutarSQL(q);
-  g_free (q);
-  g_strfreev (rut_split);
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_name"));
-  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "nombre"));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_invoice_giro"));
-  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_direccion_factura"));
-  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "lbl_telefono_factura"));
-  gtk_label_set_text(GTK_LABEL(widget), PQvaluebycol(res, 0, "giro"));
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_invoice"));
-  gtk_widget_set_sensitive(widget, TRUE);
-
-  widget = GTK_WIDGET(gtk_builder_get_object(builder, "btn_make_guide"));
-  gtk_widget_set_sensitive(widget, TRUE);
-  */
-
-  search_client (GTK_WIDGET (entry), NULL);
 }
 
 
@@ -5100,6 +5185,10 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
       else if (rizoma_get_value_boolean ("PREVENTA"))
 	{
 	  on_btn_preventa_clicked (NULL, NULL);
+	}
+      else if (rizoma_get_value_boolean ("VENTA_SUSCRITO"))
+	{
+	  on_btn_invoice_clicked (NULL,NULL);
 	}
       else
         TipoVenta (NULL, NULL);
@@ -6089,6 +6178,60 @@ close_wnd_adm_pedido (GtkWidget *widget, gpointer data)
 {
   clean_container (GTK_CONTAINER (builder_get (builder, "wnd_adm_pedido")));
   gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_adm_pedido")));
+  return TRUE;
+}
+
+
+/**
+ *
+ */
+gboolean
+close_wnd_cliente_pre_factura (GtkWidget *widget, gpointer data)
+{
+  clean_container (GTK_CONTAINER (builder_get (builder, "wnd_cliente_pre_factura")));
+  gtk_widget_hide (GTK_WIDGET (builder_get (builder, "wnd_cliente_pre_factura")));
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_selectcli_pre_factura")), FALSE);
+  return TRUE;
+}
+
+
+/**
+ *
+ */
+gboolean
+on_btn_cliente_pre_factura_clicked (GtkWidget *widget, gpointer data)
+{
+  gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_cliente_pre_factura")));
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rutcli_pre_factura")));
+  return TRUE;
+}
+
+
+/**
+ *
+ */
+gboolean
+on_btn_selectcli_pre_factura_clicked (GtkWidget *widget, gpointer data)
+{
+  gchar *rut_cliente = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_rutcli_pre_factura"))));
+  rut_cliente = g_strndup (rut_cliente, strlen (rut_cliente)-2);
+  
+  if (rut_cliente == NULL || HaveCharacters (rut_cliente) || g_str_equal (rut_cliente, ""))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "entry_rutcli_pre_factura")), 
+		g_strdup_printf ("Debe seleccionar un cliente"));
+      return FALSE;
+    }
+
+  rut_cliente_pre_factura = atoi (rut_cliente);
+  gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "barcode_entry")), TRUE);
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "barcode_entry")));
+  
+  gchar *nombre = g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder,"lbl_nombrecli_pre_factura"))));
+  gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "lbl_selected_client")),
+			g_strdup_printf ("<span size=\"15000\">%s</span>", nombre));
+
+  close_wnd_cliente_pre_factura (widget, data);
   return TRUE;
 }
 

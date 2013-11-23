@@ -305,6 +305,27 @@ Venta;
 
 Venta *venta;
 
+
+typedef struct _datos_cliente
+{
+    gchar * rut;
+    gint dv;
+    gchar * nombre;
+    gchar * apellido_m;
+    gchar * apellido_p;
+    gchar * giro;
+    gchar * direccion;
+    gchar * comuna;
+    gchar * telefono;
+    gchar * telefono_movil;
+    gchar * mail;
+    gint credito;
+    gint tipo;
+}
+DatosCliente;
+
+DatosCliente *cliente;
+
 //Información cheques de restaurant
 typedef struct _cheque_restaurant
 {

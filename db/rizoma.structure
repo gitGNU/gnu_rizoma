@@ -47,6 +47,8 @@ drop table if exists compra cascade;
 drop table if exists compra_detalle cascade;
 drop table if exists reserva cascade;
 drop table if exists preventa cascade;
+drop table if exists cliente_venta cascade;
+drop table if exists cliente_precio cascade;
 drop table if exists mesa cascade;
 drop table if exists reserva_detalle cascade;
 drop table if exists preventa_detalle cascade;
@@ -654,7 +656,6 @@ vendido                   bool default false, -- Es true cuando la venta se liqu
 constraint pk_preventa primary key (id)
 ) ;
 
-
 -- cliente_venta  - ventas normales a clientes registrados (para facturas post-ventas)
 create table cliente_venta (
 id                        serial not null,
@@ -672,7 +673,6 @@ barcode                   serial8 not null,
 precio                    float8,
 constraint pk_cliente_precio primary key (id)
 ) ;
-
 
 -- Mesa (tabla flotante)
 create table mesa (

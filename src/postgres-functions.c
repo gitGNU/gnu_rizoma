@@ -703,11 +703,12 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   if (rizoma_get_value_boolean ("PREVENTA_CAJA"))
     show_clean_window (GTK_WINDOW (builder_get (builder, "wnd_get_preventa")));
 
-  if (rut_cliente_pre_factura > 0)
+  /*if (rut_cliente_pre_factura > 0)
     {
       rut_cliente_pre_factura = 0;
-      gtk_editable_set_editable (GTK_EDITABLE (builder_get (builder, "barcode_entry")), FALSE);
-    }
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "barcode_entry")), FALSE);
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_cliente_pre_factura")));
+      }*/
 
   return TRUE;
 }
@@ -2497,20 +2498,21 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	{
 	  PGresult *resLocal;
 	  resLocal = EjecutarSQL (g_strdup_printf ("SELECT precio FROM cliente_precio "
-						   "WHERE rut_cliente = %s AND barcode = '%s'", 
+						   "WHERE rut_cliente = %d AND barcode = '%s'", 
 						   rut_cliente_pre_factura, products->product->barcode));
 	  if (resLocal != NULL)
 	    {
 	      gdouble precio_cliente;
+
 	      //Si existe un precio establecido del producto para ese cliente
 	      if (PQntuples (resLocal) > 0)
 		{
-		   precio_cliente = strtod (PUT (PQgetvalue (resLocal, 0, 0)), (char **)NULL);
+		  precio_cliente = strtod (PUT (PQgetvalue (resLocal, 0, 0)), (char **)NULL);
 		  // Si el precio obtenido es distinto del precio actual, se actualiza
 		  if (precio_cliente != precio)
 		    EjecutarSQL (g_strdup_printf ("UPDATE cliente_precio SET precio = %s"
 						  "WHERE rut_cliente = %d AND barcode = '%s'", 
-						  CUT (g_strdup_printf ("%.3f", precio_cliente)),
+						  CUT (g_strdup_printf ("%.3f", precio)),
 						  rut_cliente_pre_factura, 
 						  products->product->barcode));
 		}
@@ -2519,8 +2521,9 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 		  EjecutarSQL (g_strdup_printf ("INSERT INTO cliente_precio VALUES (DEFAULT, %d, '%s', %s) ",
 						rut_cliente_pre_factura, 
 						products->product->barcode,
-						CUT (g_strdup_printf ("%.3f", precio_cliente))) );
+						CUT (g_strdup_printf ("%.3f", precio))) );
 		}
+	      
 	    }
 	}
 
