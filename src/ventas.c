@@ -2302,8 +2302,28 @@ CloseBuscarWindow (GtkWidget *widget, gpointer data)
 void
 on_entry_precio_activate (GtkEntry *entry, gpointer data)
 {
-  gint venta_directa = atoi (rizoma_get_value ("VENTA_DIRECTA"));
-  gboolean fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry")))));
+  gint venta_directa;
+  gboolean fraccion;
+
+  gchar *precio_venta = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
+  gchar *barcode = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry"))));
+
+
+  if (g_str_equal (barcode, "") || HaveCharacters (barcode))
+    {
+      ErrorMSG (GTK_WIDGET (builder_get (builder, "barcode_entry")), 
+		"Debe seleccionar un producto con anterioridad");
+      return;
+    }
+
+  if (g_str_equal (precio_venta, "") || !is_numeric (precio_venta))
+    {
+      ErrorMSG (GTK_WIDGET (entry), "El precio de venta debe ser un número válido");
+      return;
+    }
+
+  venta_directa = atoi (rizoma_get_value ("VENTA_DIRECTA"));
+  fraccion = VentaFraccion (g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "barcode_entry")))));
 
   if (venta_directa == 1)
     {
