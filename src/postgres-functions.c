@@ -421,7 +421,7 @@ InsertNewDocumentDetail (gint document_id, gchar *barcode, gint precio, gdouble 
 
   res = EjecutarSQL (g_strdup_printf
                      ("INSERT INTO documentos_emitidos_detalle (id_documento, barcode_product, precio, cantidad) "
-                      "VALUES (%d, %s, %d, %s)", document_id, barcode, precio, CUT (g_strdup_printf ("%.2f",cantidad))));
+                      "VALUES (%d, %s, %d, %s)", document_id, barcode, precio, CUT (g_strdup_printf ("%.3f",cantidad))));
 
   if (res != NULL)
     return TRUE;
@@ -2036,7 +2036,7 @@ IngresarDetalleDocumento (Producto *product, gint compra, gint doc, gboolean fac
     otros = 0;
 
 
-  cantidad = CUT (g_strdup_printf ("%.2f", product->cantidad));
+  cantidad = CUT (g_strdup_printf ("%.3f", product->cantidad));
 
   if (factura)
     {
@@ -2070,25 +2070,31 @@ IngresarProducto (Producto *product, gint compra, gchar *rut_proveedor)
   gdouble fifo;
   gdouble stock_pro, canjeado;
   gdouble imps, ganancia, margen_promedio;
-  gchar *q;
+  gchar *q, *qc;
   gchar *cantidad;
 
-
-  //Asociamos el producto al proveedor (Si ya esta asociado dará un aviso por terminal, pero no detendra nada)
-  q = g_strdup_printf ("INSERT INTO producto_proveedor (barcode_producto, rut_proveedor, costo_compra) "
-                       "       VALUES (%s, %s, %s) RETURNING barcode_producto",
-                       product->barcode, rut_proveedor, CUT (g_strdup_printf ("%.2f", product->precio_compra)));
+  qc = g_strdup_printf ("SELECT * FROM producto_proveedor WHERE barcode_producto = %s AND rut_proveedor = %s ",
+			product->barcode, rut_proveedor);
 
   //Se ejecuta la consulta y si la relación ya existía, se actualiza el precio de compra del producto
-  if (PQntuples (EjecutarSQL (q)) == 0)
+  if (PQntuples (EjecutarSQL (qc)) > 0)
     {
       q = g_strdup_printf ("UPDATE producto_proveedor SET costo_compra = %s "
                            "WHERE  barcode_producto = %s AND rut_proveedor = %s",
                            CUT (g_strdup_printf ("%.2f", product->precio_compra)), product->barcode, rut_proveedor);
       EjecutarSQL (q);
     }
+  else
+    {
+      //Si no hay una asociación anterior, asociamos el producto al proveedor
+      q = g_strdup_printf ("INSERT INTO producto_proveedor (barcode_producto, rut_proveedor, costo_compra) "
+			   "       VALUES (%s, %s, %s) RETURNING barcode_producto",
+			   product->barcode, rut_proveedor, CUT (g_strdup_printf ("%.2f", product->precio_compra)));
 
-  cantidad = CUT (g_strdup_printf ("%.2f", product->cantidad));
+      EjecutarSQL (q);
+    }
+
+  cantidad = CUT (g_strdup_printf ("%.3f", product->cantidad));
 
   if (product->stock_pro != 0 && product->tasa_canje != 0)
     canjeado = product->stock_pro * ((double)1 / product->tasa_canje);
@@ -2151,7 +2157,7 @@ DiscountStock (Productos *header)
 
   do
     {
-      cantidad = CUT (g_strdup_printf ("%.2f", products->product->cantidad));
+      cantidad = CUT (g_strdup_printf ("%.3f", products->product->cantidad));
 
       res = EjecutarSQL (g_strdup_printf ("UPDATE productos SET stock=stock-%s WHERE barcode=%s",
                                           cantidad, products->product->barcode));
@@ -3615,7 +3621,7 @@ AnularCompraDB (gint id_compra)
   q = g_strdup_printf ("UPDATE compra_detalle "
                        "SET cantidad = cantidad_ingresada "
                        "WHERE id_compra=%d "
-                       "AND candidad_ingresada > 0", id_compra);
+                       "AND cantidad_ingresada > 0", id_compra);
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -3636,11 +3642,11 @@ CanjearProduct (gchar *barcode, gdouble cantidad)
 
   res = EjecutarSQL (g_strdup_printf
                      ("UPDATE producto SET stock=stock-%s, stock_pro=stock_pro+%s WHERE barcode=%s",
-                      CUT (g_strdup_printf ("%.2f", cantidad)), CUT (g_strdup_printf ("%2.f", cantidad)), barcode));
+                      CUT (g_strdup_printf ("%.3f", cantidad)), CUT (g_strdup_printf ("%2.f", cantidad)), barcode));
 
   res = EjecutarSQL (g_strdup_printf
                      ("INSERT INTO canje VALUES (DEFAULT, NOW (), '%s', %s)",
-                      barcode, CUT (g_strdup_printf ("%.2f", cantidad))));
+                      barcode, CUT (g_strdup_printf ("%.3f", cantidad))));
 
   if (res != NULL)
     return 0;
