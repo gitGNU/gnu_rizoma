@@ -1002,6 +1002,7 @@ on_btn_get_preventa_clicked (GtkButton *button, gpointer data)
   widget = GTK_WIDGET (gtk_builder_get_object(builder, "wnd_get_preventa"));
   clean_container (GTK_CONTAINER (widget));
   gtk_widget_show(widget);
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder,"entry_id_preventa")));
 }
 
 
