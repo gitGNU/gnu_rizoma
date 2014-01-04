@@ -5145,6 +5145,29 @@ on_btn_del_chk_rest_clicked (GtkButton *button, gpointer user_data)
   //select_back_deleted_row ("treeview_mixed_pay", position);
 }
 
+/**
+ * Deriva al modo de venta correspondiente
+ */
+void
+modo_venta ()
+{
+  if (rizoma_get_value_boolean ("MODO_MESERO"))
+    {
+      gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_print_mesa")));
+      gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_print_mesa")));
+    }
+  else if (rizoma_get_value_boolean ("PREVENTA"))
+    {
+      on_btn_preventa_clicked (NULL, NULL);
+    }
+  else if (rizoma_get_value_boolean ("VENTA_SUSCRITO"))
+    {
+      on_btn_invoice_clicked (NULL,NULL);
+    }
+  else
+    TipoVenta (NULL, NULL);
+}
+
 
 /**
  * Callback connected the key-press-event in the main window.
@@ -5198,21 +5221,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
       break;
 
     case GDK_F9:
-      if (rizoma_get_value_boolean ("MODO_MESERO"))
-        {
-          gtk_widget_show (GTK_WIDGET (builder_get (builder, "wnd_print_mesa")));
-          gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "btn_print_mesa")));
-        }
-      else if (rizoma_get_value_boolean ("PREVENTA"))
-	{
-	  on_btn_preventa_clicked (NULL, NULL);
-	}
-      else if (rizoma_get_value_boolean ("VENTA_SUSCRITO"))
-	{
-	  on_btn_invoice_clicked (NULL,NULL);
-	}
-      else
-        TipoVenta (NULL, NULL);
+      modo_venta();
       break;
 
     //No se permiten ventas en modo PREVENTA o cuando las banderas VENTA_RESERVA o NO_VENTA esten en FALSE
