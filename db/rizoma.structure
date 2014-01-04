@@ -39,6 +39,7 @@
 drop table if exists abono cascade;
 drop table if exists asistencia cascade;
 drop table if exists bodega cascade;
+drop table if exists maquina cascade;
 drop table if exists caja cascade;
 drop table if exists canje cascade;
 drop table if exists cheques cascade;
@@ -367,9 +368,17 @@ create table factura_compra_detalle (
   constraint fk_factura_compra_detalle_factura foreign key(id_factura_compra) references factura_compra(id)
 ) ;
 
+-- Maquina
+create table maquina (
+  id                        serial not null primary key,
+  codigo_maquina	    varchar(1000),
+  nombre_maqina		    varchar(90)		    
+) ;
+
 -- Caja
 create table caja (
   id                        serial not null,
+  id_maquina                int4 not null,
   id_vendedor               int4 not null,
   fecha_inicio              timestamp,
   inicio                    int4,
@@ -378,7 +387,8 @@ create table caja (
   termino                   int4,
   id_venta_termino          int4,
   perdida                   int4,
-  constraint pk_caja primary key (id)
+  constraint pk_caja primary key (id),
+  constraint fk_caja_maquina foreign key(id_maquina) references maquina(id)
 ) ;
 
 -- Canje
