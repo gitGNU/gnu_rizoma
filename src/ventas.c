@@ -88,7 +88,7 @@ gboolean block_discount = FALSE;
 // Venta de mercadería que se encuentre en la tabla de reserva
 gboolean venta_reserva = FALSE;
 // Inhabilita los procedimientos que requieran un stock en el producto
-gboolean no_venta = FALSE;
+//gboolean no_venta = FALSE;
 
 
 /**
@@ -806,6 +806,8 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
       rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
     modificar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, venta->product_check->product->cantidad, venta->product_check->product->cantidad_impresa);
 
+
+  /* AHORA SE PERMITE VENTA NEGATIVA
   if (venta->product_check->product->stock < cantidad)
     {
       no_venta = TRUE;
@@ -813,9 +815,9 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
-    }
+      }*/
 
-  habilitar_venta ();
+  //habilitar_venta ();
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
                         g_strdup_printf ("<span size=\"40000\">%s</span>",
                                          PutPoints (g_strdup_printf ("%ld", lround (CalcularTotal (venta->header))))));
@@ -1415,6 +1417,7 @@ AgregarProducto (GtkButton *button, gpointer data)
       //CleanEntryAndLabelData ();
       return FALSE;
     }
+  /* AHORA SE PERMITE VENTA NEGATIVA
   else if (cantidad > stock)
     {
       no_venta = TRUE;
@@ -1422,12 +1425,13 @@ AgregarProducto (GtkButton *button, gpointer data)
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
+  
+      //aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")); 
+      //AlertMSG (aux_widget, "Stock insuficiente, debe ingresar una cantidad igual o menor al stock disponible"); 
 
-      /* aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")); */
-      /* AlertMSG (aux_widget, "Stock insuficiente, debe ingresar una cantidad igual o menor al stock disponible"); */
-
-      /* return FALSE; */
+      //return FALSE; 
     }
+  */
   else if (strchr (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))), ',') != NULL ||
            strchr (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))), '.') != NULL)
     {
@@ -1460,6 +1464,7 @@ AgregarProducto (GtkButton *button, gpointer data)
           nuevo = TRUE;
         }
 
+      /*AHORA SE PERMITE VENTA NEGATIVA
       if (!nuevo && (venta->product_check->product->cantidad + cantidad) > stock)
         {
           no_venta = TRUE;
@@ -1467,13 +1472,13 @@ AgregarProducto (GtkButton *button, gpointer data)
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), FALSE);
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), FALSE);
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
-
-          /* AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")), */
-          /*        "No puede vender más productos de los que tiene en stock"); */
-          /* if (nuevo) */
-          /*   EliminarDeLista (venta->product_check->product->codigo, venta->product_check->product->lugar); */
-          /* return FALSE; */
-        }
+      
+          //AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")),
+	  //"No puede vender más productos de los que tiene en stock");
+          //if (nuevo)
+	  //EliminarDeLista (venta->product_check->product->codigo, venta->product_check->product->lugar);
+          //return FALSE;
+        }*/
 
       precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 
@@ -1693,7 +1698,7 @@ EliminarProducto (GtkButton *button, gpointer data)
 
       CalcularVentas (venta->header);
 
-      habilitar_venta ();
+      //habilitar_venta ();
     }
 
   select_back_deleted_row("sell_products_list", position);
@@ -2707,9 +2712,10 @@ CalcularVentas (Productos *header)
 
 
 /**
- *
+ * Actualmente el procedimiento de venta no tiene restricción de stock,
+ * admitiendo de esta forma ventas con stock negativo.
  */
-void
+/*void
 habilitar_venta (void)
 {
   gboolean valid;
@@ -2731,13 +2737,13 @@ habilitar_venta (void)
       valid = gtk_tree_model_iter_next (model, &iter);
     }
 
-  no_venta = FALSE;
+  //no_venta = FALSE;
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_invoice")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
 }
-
+*/
 
 
 void
@@ -5216,7 +5222,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
       break;
 
     case GDK_F8:
-      if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
+      if (/*no_venta == FALSE &&*/ venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         mixed_pay_window ();
       break;
 
@@ -5226,7 +5232,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
     //No se permiten ventas en modo PREVENTA o cuando las banderas VENTA_RESERVA o NO_VENTA esten en FALSE
     case GDK_F10:
-      if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
+      if (/*no_venta == FALSE &&*/ venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         on_btn_credit_clicked (NULL, NULL);
 
       // Si esta habilitada la opcion "CUENTA_RAPIDA" se selecciona automaticamente la cuenta especificada (si es valida)
