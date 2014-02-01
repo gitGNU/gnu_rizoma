@@ -297,8 +297,7 @@
                             <property name="invisible_char">●</property>
                             <property name="invisible_char_set">True</property>
                             <signal name="changed" handler="CalcularVuelto" swapped="no"/>
-                            <signal name="activate" handler="gtk_widget_grab_focus" object="sell_button" swapped="yes"/>
-                            <signal name="activate" handler="abrirGaveta" swapped="no"/>
+                            <signal name="activate" handler="on_sencillo_entry_activate" swapped="yes"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -4205,7 +4204,6 @@
                                 <property name="use_action_appearance">False</property>
                                 <property name="use_underline">True</property>
                                 <property name="xalign">0.5</property>
-                                <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <signal name="toggled" handler="change_pay_mode" swapped="no"/>
                                 <signal name="activate" handler="gtk_widget_grab_focus" object="entry_rut_mixed_pay" swapped="yes"/>
@@ -4226,6 +4224,7 @@
                                 <property name="use_action_appearance">False</property>
                                 <property name="use_underline">True</property>
                                 <property name="xalign">0.5</property>
+                                <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">radio_btn_cheques</property>
                                 <signal name="activate" handler="gtk_widget_grab_focus" object="entry_rut_mixed_pay" swapped="yes"/>

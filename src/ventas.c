@@ -1337,6 +1337,9 @@ ventas_win ()
   /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_detail_mp")), "insert-text", */
   /*                G_CALLBACK (only_numberi_filter), NULL); */
 
+  g_signal_connect (G_OBJECT (builder_get (builder, "sencillo_entry")), "insert-text",
+		    G_CALLBACK (only_numberi_filter), NULL);
+
   // Conectando la señal 'insert-text' para calcular diferencia con el monto total
   g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_mixed_pay")), "changed",
                     G_CALLBACK (calculate_amount), NULL);
@@ -1965,6 +1968,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
       if (!venta_reserva)
         gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "sell_button")), FALSE);
 
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_close_win")), TRUE);
       gtk_widget_show (GTK_WIDGET (window));
     }
   return;
@@ -4891,7 +4895,7 @@ mixed_pay_window (void)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_cheques")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_general")), TRUE);
 
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_cheques")), TRUE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_credito")), TRUE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_general")), TRUE);
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
@@ -6565,6 +6569,22 @@ on_entry_srch_provider_activate (GtkEntry *entry, gpointer user_data)
     gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_provider"))), gtk_tree_path_new_from_string ("0"));
 }
 
+
+
+/**
+ *
+ */
+void
+on_sencillo_entry_activate (GtkEntry *entry, gpointer user_data)
+{
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "sell_button")));
+
+  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "sell_button"))))
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_close_win")), FALSE);
+      abrirGaveta();
+    }
+}
 
 /**
  * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
