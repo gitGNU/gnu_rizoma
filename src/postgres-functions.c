@@ -2137,7 +2137,7 @@ IngresarProducto (Producto *product, gint compra, gchar *rut_proveedor)
   else
     {
       q = g_strdup_printf ("UPDATE producto SET margen_promedio=%s, costo_promedio=%s, stock=stock+%s WHERE barcode=%s",
-                           CUT (g_strdup_printf ("%2f", margen_promedio)), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, product->barcode);
+                           CUT (g_strdup_printf ("%.2f", margen_promedio)), CUT (g_strdup_printf ("%.2f", fifo)), cantidad, product->barcode);
       res = EjecutarSQL (q);
       g_free (q);
     }
@@ -3642,7 +3642,7 @@ CanjearProduct (gchar *barcode, gdouble cantidad)
 
   res = EjecutarSQL (g_strdup_printf
                      ("UPDATE producto SET stock=stock-%s, stock_pro=stock_pro+%s WHERE barcode=%s",
-                      CUT (g_strdup_printf ("%.3f", cantidad)), CUT (g_strdup_printf ("%2.f", cantidad)), barcode));
+                      CUT (g_strdup_printf ("%.3f", cantidad)), CUT (g_strdup_printf ("%.2f", cantidad)), barcode));
 
   res = EjecutarSQL (g_strdup_printf
                      ("INSERT INTO canje VALUES (DEFAULT, NOW (), '%s', %s)",
