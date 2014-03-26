@@ -4649,9 +4649,9 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
 
   //Primer rut
   if (tipo_pago1 == CREDITO)
-    rut_cuenta1 = pago_mixto->rut_credito1;
+    rut_cuenta1 = g_strdup (pago_mixto->rut_credito1);
   else
-    rut_cuenta1 = pago_mixto->check_rest1->rut_emisor;
+    rut_cuenta1 = g_strdup (pago_mixto->check_rest1->rut_emisor);
 
   str_splited = parse_rut (rut_cuenta1);
   rut1 = atoi (str_splited[0]);
