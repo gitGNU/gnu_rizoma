@@ -588,55 +588,32 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
         //Ingreso de la info en pagos mixtos
         gchar **str_splited;
 
-        //Se agrega el monto del pago credito a la deuda
-        if (pago_mixto->tipo_pago1 == CREDITO)
-          {
-            rut1_gc = g_strdup (pago_mixto->rut_credito1);
-            str_splited = parse_rut (pago_mixto->rut_credito1);
-            InsertDeuda (venta_id, atoi (str_splited[0]), seller);
+	/*Se obtiene el rut de acuerdo al los tipos de venta*/
+	//Pago1
+	if (pago_mixto->tipo_pago1 == CREDITO) {
+	  rut1_gc = g_strdup (pago_mixto->rut_credito1);
+	  afecto_impuesto1 = TRUE;
 
-            if (GetResto (atoi (str_splited[0])) != 0)
-              CancelarDeudas (0, atoi (str_splited[0]));
+	} else if (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT) {
+	  rut1_gc = g_strdup (pago_mixto->check_rest1->rut_emisor);
+	  afecto_impuesto1 = FALSE;
+	}
 
-            afecto_impuesto1 = TRUE;
-          }
+	//Pago2
+	if (pago_mixto->tipo_pago2 == CREDITO) {
+	  rut2_gc = g_strdup (pago_mixto->rut_credito2);
+	  afecto_impuesto2 = TRUE;
+	}
 
-        if (pago_mixto->tipo_pago2 == CREDITO)
-          {
-            rut2_gc = g_strdup (pago_mixto->rut_credito2);
-            str_splited = parse_rut (pago_mixto->rut_credito2);
-            InsertDeuda (venta_id, atoi (str_splited[0]), seller);
+	else if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT){
+	  rut2_gc = g_strdup (pago_mixto->check_rest2->rut_emisor);
+	  afecto_impuesto2 = FALSE;
 
-            if (GetResto (atoi (str_splited[0])) != 0)
-              CancelarDeudas (0, atoi (str_splited[0]));
-
-            afecto_impuesto2 = TRUE;
-          }
-
-        //Se ingresan los cheques correspondientes
-        if (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT)
-          {
-            rut1_gc = g_strdup (pago_mixto->check_rest1->rut_emisor);
-            ingresar_cheques (pago_mixto->check_rest1->id_emisor,
-                              venta_id, pago_mixto->check_rest1->header);
-            afecto_impuesto1 = FALSE;
-          }
-        if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT)
-          {
-            rut2_gc = g_strdup (pago_mixto->check_rest2->rut_emisor);
-            ingresar_cheques (pago_mixto->check_rest2->id_emisor,
-                              venta_id, pago_mixto->check_rest2->header);
-            afecto_impuesto2 = FALSE;
-          }
-
-        //Si el segundo pago es en efectivo
-        if (pago_mixto->tipo_pago2 == CASH)
-          {
+	} else if (pago_mixto->tipo_pago2 == CASH){ //Si el segundo pago es en efectivo
             rut2_gc = g_strdup_printf ("0-0");
             afecto_impuesto2 = TRUE;
-          }
+	}
 
-        //Se registra el detalle del pago mixto
         str_splited = parse_rut (rut1_gc);
         rut1 = atoi (str_splited[0]);
         dv1 = str_splited[1];
@@ -662,6 +639,33 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
                                       (afecto_impuesto2==TRUE) ? "true" : "false",
                                       pago_mixto->monto_pago1, monto2));
 
+
+        //Se agrega el monto del pago credito a la deuda
+        if (pago_mixto->tipo_pago1 == CREDITO)
+          {
+            InsertDeuda (venta_id, rut1, seller);
+            if (GetResto (rut1) != 0)
+	      CancelarDeudas (0, rut1);
+          }
+
+        if (pago_mixto->tipo_pago2 == CREDITO)
+          {
+            InsertDeuda (venta_id, rut2, seller);
+            if (GetResto (rut2) != 0)
+	      CancelarDeudas (0, rut2);
+          }
+
+        //Se ingresan los cheques correspondientes
+        if (pago_mixto->tipo_pago1 == CHEQUE_RESTAURANT)
+          {
+            ingresar_cheques (pago_mixto->check_rest1->id_emisor,
+                              venta_id, pago_mixto->check_rest1->header);
+          }
+        if (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT)
+          {
+            ingresar_cheques (pago_mixto->check_rest2->id_emisor,
+                              venta_id, pago_mixto->check_rest2->header);
+          }
       }
       break;
 
