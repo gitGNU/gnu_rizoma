@@ -1297,3 +1297,39 @@ show_clean_window (GtkWindow *window)
   clean_container (GTK_CONTAINER (window));
   gtk_widget_show (GTK_WIDGET (window));
 }
+
+
+gdouble
+total_productos_afectos (Productos *header)
+{
+  gdouble civa = 0.0;
+  Productos *products = header;
+  int precio=0;
+
+  do {
+    if (products->product->cantidad_mayorista > 0 && products->product->precio_mayor > 0 &&
+	products->product->cantidad >= products->product->cantidad_mayorista && products->product->mayorista == TRUE)
+      precio = products->product->precio_mayor;
+    else
+      precio = products->product->precio;
+
+    if (products->product->iva != 0)
+      civa += (double)(products->product->cantidad * precio);
+    products = products->next;
+  } while (products != header);
+
+  return civa;
+}
+
+gdouble
+porcentaje_descuento_boleta (Productos *header, gdouble monto_descuento)
+{
+  gdouble porcentaje_descuento = 0.0;
+  gdouble productos_afectos = 0.0;
+  productos_afectos = total_productos_afectos (header);
+  if (productos_afectos != 0 && monto_descuento != 0)
+    porcentaje_descuento = (monto_descuento/productos_afectos);
+  else porcentaje_descuento = 0;
+
+  return porcentaje_descuento;
+}

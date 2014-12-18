@@ -509,10 +509,12 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   SaveProductsSell (venta->header, venta_id, tipo_venta);
 
   // Imprimir vale
+  gdouble porcentaje_descuento = porcentaje_descuento_boleta (venta->header, strtod (PUT (discount), (char **)NULL));
+  
   if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
     {
       if (vale_continuo)
-        PrintValeContinuo (venta->header, venta_id, rut, boleta, total, tipo_venta, tipo_documento, NULL);
+        PrintValeContinuo (venta->header, venta_id, rut, boleta, total, tipo_venta, tipo_documento, porcentaje_descuento, NULL);
       else
         PrintVale (venta->header, venta_id, rut, boleta, total, tipo_venta, tipo_documento);
     }

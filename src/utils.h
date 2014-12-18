@@ -102,4 +102,8 @@ void strdup_string_range_with_decimal (gchar *result, gchar *string, gint inicio
 
 void show_clean_window (GtkWindow *window);
 
+gdouble porcentaje_descuento_boleta (Productos *header, gdouble monto_descuento);
+
+gdouble total_productos_afectos (Productos *header);
+
 #endif

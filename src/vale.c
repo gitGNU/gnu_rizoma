@@ -25,6 +25,7 @@
 
 #include<math.h>
 #include<stdlib.h>
+#include<string.h>
 
 #include"tipos.h"
 #include"config_file.h"
@@ -181,7 +182,7 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
 
 void
 PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta,
-		   gint total, gint tipo_pago, gint tipo_documento, Productos *prod)
+		   gint total, gint tipo_pago, gint tipo_documento, gdouble porcentaje_descuento, Productos *prod)
 {
   FILE *fp;
   char *vale_dir = rizoma_get_value ("VALE_DIR");
@@ -238,13 +239,14 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
   fp = fopen (vale_file, "w+");
   //fprintf (fp, "\t CONTROL INTERNO \n");
   fprintf (fp, "%s", start);
-  //fprintf (fp, "%s", pageSize);
   fprintf (fp, "%s%s%s%s",f,f,f,f);
-  fprintf (fp, "Fecha: %s Hora: %s\n", CurrentDate(0), CurrentTime());
-  fprintf (fp, "Num. venta: %d - Num. boleta: %d\n", venta_id, boleta);
-  fprintf (fp, "Vendedor: %s\n", user_data->user);
+  fprintf (fp, "   Vendedor: %s\n", user_data->user);
+  fprintf (fp, "   Num. venta: %d \n", venta_id);
+  fprintf (fp, "%s",f);
+  fprintf (fp, "   %s         Hora: %s\n", CurrentDate(0), CurrentTime());
+  //fprintf (fp, "%s", pageSize);
   //fprintf (fp, "========================================\n\n");
-  fprintf (fp, "\n");
+  fprintf (fp, "\n\n");
 
   while ((products != header && continuar) || (cantProd != pph && continuar))
     {
@@ -260,7 +262,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
 	    {
 	      hay_selectivo = TRUE;
 
-	      fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+	      fprintf (fp, "   %s %s\n   Cant.: %.2f $%7s\t$%7s\n",
 		       g_strndup (products->product->producto, 30),
 		       products->product->marca,
 		       products->product->cantidad,
@@ -283,7 +285,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
 	}
       else
 	{
-	  fprintf (fp, "%s %s\nCant.: %.2f $%7s\t$%7s\n",
+	  fprintf (fp, "   %s %s\n   Cant.: %.2f $%7s\t$%7s\n",
 		   g_strndup (products->product->producto, 30),
 		   products->product->marca,
 		   products->product->cantidad,
@@ -347,32 +349,50 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
 	  civa = prop_afecta;
 	}
 
-      fprintf (fp, "\nSub Total no afecto: \t$%7s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
-      fprintf (fp, "Sub Total afecto:      \t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(civa))), size1);
-      fprintf (fp, "\n\n");
-      gdouble totalLocal = civa + siva;
-      fprintf (fp, "Total Venta: \t\t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
-      fprintf (fp, "\n\n\tGracias por su compra! \n");
+      gdouble descuento = civa*porcentaje_descuento;
+      //fprintf (fp, "\n   Sub Total no afecto: $%7s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
+      fprintf (fp, "\n   Sub Total afecto:   %s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(civa))), size1);
+      fprintf (fp, "   Descuento:          $%7s\n", PutPoints (g_strdup_printf ("%lu",lround(descuento))));
+      //Saltos para imprimir el total
+      if ((cantProd-1) == 1)
+        fprintf (fp, "\n\n\n\n\n\n\n\n\n");
+      else if ((cantProd-1) == 2)
+        fprintf (fp, "\n\n\n\n\n\n\n");
+      else if ((cantProd-1) == 3)
+        fprintf (fp, "\n\n\n\n\n");
+      else if ((cantProd-1) == 4)
+        fprintf (fp, "\n\n\n");
+      else if ((cantProd-1) == 5)
+        fprintf (fp, "\n");
+      gdouble totalLocal = civa-descuento;//civa + siva;
+
+      printf("Subtotal afecto: %s\n", PutPoints (g_strdup_printf ("%lu",lround(civa))));
+      printf("Subtotal no afecto: %s\n", PutPoints (g_strdup_printf ("%lu",lround(siva))));
+      printf("descuento: %s\n", PutPoints (g_strdup_printf ("%lu",lround(descuento))));
+      printf("Total boleta: %s\n", PutPoints (g_strdup_printf ("%lu",lround(totalLocal))));
+
+      fprintf (fp, "\t\t\t%s$%7s %s\n", size2, PutPoints (g_strdup_printf ("%lu",lround(totalLocal))), size1);
+      //fprintf (fp, "\n\   Gracias por su compra \n");
       fprintf (fp, "\n\n");
 
       //fprintf (fp, "%s", cut); /* We cut the paper :) */
       //fprintf (fp, "%s", salto);
 
       if ((cantProd-1) == 1)
-	fprintf (fp, "%s%s%s%s%s%s%s%s%s%s%s%s%s",
-		 f,f,f,f,f,f,f,f,f,f,f,f,f);
+	fprintf (fp, "%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f);
       else if ((cantProd-1) == 2)
-	fprintf (fp, "%s%s%s%s%s%s%s%s%s%s%s",
-		 f,f,f,f,f,f,f,f,f,f,f);
+	fprintf (fp, "%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f);
       else if ((cantProd-1) == 3)
-	fprintf (fp, "%s%s%s%s%s%s%s%s%s",
-		 f,f,f,f,f,f,f,f,f);
+	fprintf (fp, "%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f);
       else if ((cantProd-1) == 4)
-	fprintf (fp, "%s%s%s%s%s%s%s",
-		 f,f,f,f,f,f,f);
+	fprintf (fp, "%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f);
       else if ((cantProd-1) == 5)
-	fprintf (fp, "%s%s%s%s%s",
-		 f,f,f,f,f);
+	fprintf (fp, "%s%s%s%s%s%s%s%s",
+		 f,f,f,f,f,f,f,f);
 
       //fprintf (fp, "%s", abrirCaja);
       //fprintf (fp, "%s", abrirCaja2);
@@ -390,7 +410,7 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
   if (products != header)
     {
       boleta = get_ticket_number (tipo_documento);
-      PrintValeContinuo (header, venta_id, rut_cliente, boleta, total, tipo_pago, tipo_documento, products);
+      PrintValeContinuo (header, venta_id, rut_cliente, boleta, total, tipo_pago, tipo_documento, porcentaje_descuento, products);
     }
 }
 
