@@ -401,8 +401,9 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
 
   if ( ((vale_selectivo != NULL) && (g_str_equal (vale_selectivo, "YES")) && hay_selectivo && impresora == TRUE) ||
        (impresora == TRUE && !g_str_equal (vale_selectivo, "YES")) )
-    for (i = 0; i < n_copy; i++)
-      system(g_strdup_printf ("%s %s", print_command, vale_file));
+    if (civa > 0)
+      for (i = 0; i < n_copy; i++)
+        system(g_strdup_printf ("%s %s", print_command, vale_file));
 
   //system (g_strdup_printf ("cp %s /home/alumno/Escritorio/", vale_file));
   system (g_strdup_printf ("rm %s", vale_file));

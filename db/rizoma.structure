@@ -378,7 +378,7 @@ create table maquina (
 -- Caja
 create table caja (
   id                        serial not null,
-  id_maquina                int4 not null,
+  id_maquina                int4 default 1,
   id_vendedor               int4 not null,
   fecha_inicio              timestamp,
   inicio                    int4,
