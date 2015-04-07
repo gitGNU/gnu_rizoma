@@ -73,7 +73,7 @@ PrintDocument (gint sell_type, gchar *rut, gint total, gint num, Productos *prod
 
   q = g_strdup_printf("SELECT nombre || ' ' || apell_p || ' ' || apell_m AS name, "
                       "direccion, giro, comuna, telefono FROM cliente where rut=%s",
-                      strtok(aux_rut,"-"));
+                      strtok(g_strdup(aux_rut),"-"));
   res = EjecutarSQL(q);
   g_free (q);
   client = PQvaluebycol(res, 0, "name");

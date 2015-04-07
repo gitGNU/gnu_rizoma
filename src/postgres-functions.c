@@ -1234,7 +1234,7 @@ RutExist (const gchar *rut)
   PGresult *res;
   gchar *q;
   gchar *rut2 = g_strdup(rut);
-  q = g_strdup_printf ("SELECT * FROM cliente WHERE rut=%s", strtok(rut2,"-"));
+  q = g_strdup_printf ("SELECT * FROM cliente WHERE rut=%s", strtok(g_strdup(rut2),"-"));
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -3746,7 +3746,7 @@ provider_exist (const gchar *rut)
   PGresult *res;
   gchar *q;
   gchar *rut2 = g_strdup(rut);
-  q = g_strdup_printf ("SELECT count(*) FROM proveedor WHERE rut=%s", strtok(rut2,"-"));
+  q = g_strdup_printf ("SELECT count(*) FROM proveedor WHERE rut=%s", strtok(g_strdup(rut2),"-"));
   res = EjecutarSQL (q);
   g_free (q);
   g_free (rut2);
