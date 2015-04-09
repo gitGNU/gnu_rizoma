@@ -4165,7 +4165,12 @@ begin
 
         current_stock = current_stock + stock_add;
 
-        fifo = (suma / current_stock);
+	
+	if current_stock > 0 AND suma > 0 then
+            fifo = (suma / current_stock);
+	else
+	    fifo = current_fifo;
+        end if;
 
         return fifo;
 end; $$ language plpgsql;
