@@ -45,6 +45,7 @@ PGresult *res_sells;
 gint contador, fin;
 GDate *date_begin;
 GDate *date_end;
+gint hrIni, hrFin, minIni, minFin;
 //int flagProgress;
 
 /**
@@ -1080,6 +1081,29 @@ reports_win (void)
   gtk_builder_connect_signals (builder, NULL);
 
 
+  /*Inicializando SpinButton de Horas*/
+  GtkSpinButton *spnBtnHourIni = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourIni"));
+  GtkSpinButton *spnBtnMinIni  = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinIni" ));
+  GtkSpinButton *spnBtnHourFin = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourFin"));
+  GtkSpinButton *spnBtnMinFin  = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinFin" ));
+
+  /*Setting Range*/
+  gtk_spin_button_set_range(spnBtnHourIni, 0, 23);
+  gtk_spin_button_set_range(spnBtnMinIni,  0, 59);
+
+  gtk_spin_button_set_range(spnBtnHourFin, 0, 23);
+  gtk_spin_button_set_range(spnBtnMinFin,  0, 59);
+
+  /*Setting Increments*/
+  gtk_spin_button_set_increments (spnBtnHourIni, 1, 0);
+  gtk_spin_button_set_increments (spnBtnMinIni,  1, 0);
+  gtk_spin_button_set_increments (spnBtnHourFin, 1, 0);
+  gtk_spin_button_set_increments (spnBtnMinFin,  1, 0);
+
+  /*Set Init Value*/
+  gtk_spin_button_set_value (spnBtnHourFin, 23);
+  gtk_spin_button_set_value (spnBtnMinFin,  59);
+  
   /* Sells */
   store = gtk_list_store_new (7,
                               G_TYPE_STRING,  //Fecha
@@ -4218,6 +4242,11 @@ reports_win (void)
   // Se inicializan con la fecha actual
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_begin"), CurrentDate(1));
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_end"), CurrentDate(1));
+
+  /*Set filter hour visibility*/
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
+    gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+
 }
 
 /**
@@ -4754,14 +4783,24 @@ fill_sells_list ()
 
   /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
      retorna los datos de ventas en un intervalo de fechas*/
-  res_sells = SearchTuplesByDate
-    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-     "fecha", " id, maquina, "
-              " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
-              " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
-              " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
-     store_combo);
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
+    res_sells = SearchTuplesByDate
+      (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
+       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+       "fecha", " id, maquina, "
+                " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
+                " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+                " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
+       store_combo);
+  else
+    res_sells = SearchTuplesByFullDate
+      (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
+       "fecha", " id, maquina, "
+                " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
+                " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+                " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
+       store_combo);
 
   tuples = PQntuples (res_sells);
 
@@ -6455,7 +6494,8 @@ progress_timeout(gpointer data)
  *
  * @param progreso widget de gtk_progress_bar
  */
-gint
+//gint
+void
 avanzar_barra_progreso (GtkWidget * progreso)
 {
   GtkAdjustment *adj;
@@ -6550,6 +6590,16 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
   GtkNotebook *sub_notebook;
   gint sub_page_num;
 
+
+  //gint hrIni, hrFin, minIni, minFin;
+  hrIni  = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourIni")));
+  minIni = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinIni" )));
+  hrFin  = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourFin")));
+  minFin = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinFin" )));
+
+  //printf("%d:%d  -  %d:%d\n", hrIni, minIni, hrFin, minFin);
+
+  
   if (page_num == 5)
     {
       /* Informe de proveedores */
@@ -6761,6 +6811,18 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   PGresult *res;
   GtkNotebook *sub_notebook;
 
+
+  /*Set filter hour visibility*/
+  if (page_num == 0) {
+    if (rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
+      gtk_widget_show (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+    else
+      gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+  } else {
+     gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+  }
+  
+  
 
   //NOTA: Cada página se preocupa SOLO de sus PROPIOS widgets (mostrarlos, rellenarlos y ocultarlos)
   /*Paginas 1 y 6*/

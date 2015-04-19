@@ -133,6 +133,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "BAR_NUM_DECIMAL", "1");
   g_key_file_set_string (file, "RIZOMA", "MONTO_BASE_CAJA", "0");
   g_key_file_set_string (file, "RIZOMA", "MODO_INVENTARIO", "0");
+  g_key_file_set_string (file, "RIZOMA", "INFORME_FILTRO_HORA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRECIO_DISCRECIONAL", "0");
   g_key_file_set_string (file, "RIZOMA", "GANANCIA_MINIMA", "0"); //En terminos porcentuales
   g_key_file_set_string (file, "RIZOMA", "MODO_GUIA_FACTURA", "0"); //Modo para visualización en venta

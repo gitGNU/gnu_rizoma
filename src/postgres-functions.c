@@ -997,6 +997,67 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
     return NULL;
 }
 
+
+/**
+ * This function returns a PGresult with the sells
+ * If anuladas parameter is NULL return all sells,
+ * if TRUE, return nullified sales only and
+ * if FALSE, return sales not nullified only
+ *
+ * @param: gint begin year
+ * @param: gint begin month
+ * @param: gint begin day
+ * @param: gint begin hour
+ * @param: gint begin min
+ * @param: gint end year
+ * @param: gint end month
+ * @param: gint end day
+ * @param: gint end hour
+ * @param: gint end min
+ * @param: gchar date colum
+ * @param: gchar fields
+ * @param: gchar grupo, "Anuladas", "Ingresadas", "TODAS"
+ */
+PGresult *
+SearchTuplesByFullDate (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                        gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
+                        gchar *date_column, gchar *fields, gchar *grupo)
+{
+  PGresult *res;
+  gchar *q;
+
+  q = g_strdup_printf ("SELECT %s FROM venta WHERE "
+                       "%s>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') AND "
+                       "%s<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')",
+                       fields,
+                       date_column,
+                       from_day, from_month, from_year, from_hour, from_min,
+                       date_column,
+                       to_day, to_month, to_year, to_hour, to_min);
+
+  //printf("%s\n",q);
+  
+  if (g_str_equal (grupo, "TODAS"))
+    printf ("Todas las ventas\n");
+
+  else if (g_str_equal (grupo, "Anuladas"))
+    q = g_strdup_printf ("%s AND id IN (SELECT id_sale FROM venta_anulada)", q);
+
+  else if (g_str_equal (grupo, "Vigentes"))
+    q = g_strdup_printf ("%s AND id NOT IN (SELECT id_sale FROM venta_anulada)", q);
+
+  q = g_strdup_printf ("%s ORDER BY fecha DESC", q);
+
+  res = EjecutarSQL (q);
+
+  if (res != NULL)
+    return res;
+  else
+    return NULL;
+}
+
+
+
 PGresult *
 exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
                       gint to_year, gint to_month, gint to_day)
