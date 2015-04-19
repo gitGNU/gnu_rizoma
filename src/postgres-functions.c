@@ -956,57 +956,6 @@ actualizar_preventa (gint id_venta, gint id_preventa)
  * @param: gint begin year
  * @param: gint begin month
  * @param: gint begin day
- * @param: gint end year
- * @param: gint end month
- * @param: gint end day
- * @param: gchar date colum
- * @param: gchar fields
- * @param: gchar grupo, "Anuladas", "Ingresadas", "TODAS"
- */
-PGresult *
-SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
-                    gint to_year, gint to_month, gint to_day,
-                    gchar *date_column, gchar *fields, gchar *grupo)
-{
-  PGresult *res;
-  gchar *q;
-
-  q = g_strdup_printf ("SELECT %s FROM venta WHERE "
-                       "%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-                       "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
-                       fields, date_column, from_day, from_month, from_year,
-                       date_column, to_day+1, to_month, to_year);
-
-
-  if (g_str_equal (grupo, "TODAS"))
-    printf ("Todas las ventas\n");
-
-  else if (g_str_equal (grupo, "Anuladas"))
-    q = g_strdup_printf ("%s AND id IN (SELECT id_sale FROM venta_anulada)", q);
-
-  else if (g_str_equal (grupo, "Vigentes"))
-    q = g_strdup_printf ("%s AND id NOT IN (SELECT id_sale FROM venta_anulada)", q);
-
-  q = g_strdup_printf ("%s ORDER BY fecha DESC", q);
-
-  res = EjecutarSQL (q);
-
-  if (res != NULL)
-    return res;
-  else
-    return NULL;
-}
-
-
-/**
- * This function returns a PGresult with the sells
- * If anuladas parameter is NULL return all sells,
- * if TRUE, return nullified sales only and
- * if FALSE, return sales not nullified only
- *
- * @param: gint begin year
- * @param: gint begin month
- * @param: gint begin day
  * @param: gint begin hour
  * @param: gint begin min
  * @param: gint end year
@@ -1019,13 +968,19 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
  * @param: gchar grupo, "Anuladas", "Ingresadas", "TODAS"
  */
 PGresult *
-SearchTuplesByFullDate (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
-                        gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
-                        gchar *date_column, gchar *fields, gchar *grupo)
+SearchTuplesByDate (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                    gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
+                    gchar *date_column, gchar *fields, gchar *grupo)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = to_hour = to_min = 0;
+    to_day += 1;
+  }
+
+  
   q = g_strdup_printf ("SELECT %s FROM venta WHERE "
                        "%s>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') AND "
                        "%s<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')",

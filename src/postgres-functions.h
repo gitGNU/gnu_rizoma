@@ -62,13 +62,9 @@ gboolean registrar_pago_reserva (gint id_reserva, gint monto_pagado, gint tipo_p
 
 void pagar_deuda_reserva (gint id_venta, gint id_reserva);
 
-PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
-                               gint to_year, gint to_month, gint to_day,
+PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                               gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
                                gchar *date_column, gchar *fields, gchar *grupo);
-
-PGresult * SearchTuplesByFullDate (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
-                                   gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
-                                   gchar *date_column, gchar *fields, gchar *grupo);
 
 PGresult * exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
                                  gint to_year, gint to_month, gint to_day);

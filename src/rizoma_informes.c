@@ -4783,17 +4783,7 @@ fill_sells_list ()
 
   /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
      retorna los datos de ventas en un intervalo de fechas*/
-  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
     res_sells = SearchTuplesByDate
-      (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-       "fecha", " id, maquina, "
-                " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
-                " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
-                " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
-       store_combo);
-  else
-    res_sells = SearchTuplesByFullDate
       (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
        g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
        "fecha", " id, maquina, "
@@ -4948,8 +4938,8 @@ on_togglebtn_clicked()
       /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
 	 retorna los datos de ventas en un intervalo de fechas*/
       res_sells = SearchTuplesByDate
-	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-	 g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+         g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
 	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
 	          " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
 	 store_combo);
