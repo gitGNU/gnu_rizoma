@@ -2666,10 +2666,16 @@ ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint to_ye
 
 
 PGresult *
-ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                    gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family)
 {
   PGresult *res;
   gchar *q, *family_filter;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   if (family == 0)
     family_filter = g_strdup ("");
@@ -2677,8 +2683,10 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                   "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone) %s",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2690,10 +2698,16 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
 }
 
 PGresult *
-ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family)
 {
   PGresult *res;
   gchar *q, *family_filter;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   if (family == 0)
     family_filter = g_strdup ("");
@@ -2701,8 +2715,10 @@ ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                      "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone) %s",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2714,19 +2730,27 @@ ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
 }
 
 PGresult *
-ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family)
 {
   PGresult *res;
   gchar *q, *family_filter;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   if (family == 0)
     family_filter = g_strdup ("");
   else
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_mc (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+    ("SELECT * FROM ranking_ventas_mc (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                      "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone) %s",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2794,14 +2818,22 @@ ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint to_
  *
  */
 PGresult *
-ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                         gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre)
 {
   PGresult *res;
   gchar *q;
+  
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+    ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                         "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, '%s')",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2818,14 +2850,22 @@ ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to
  *
  */
 PGresult *
-ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                        gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_comp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+    ("SELECT * FROM ranking_ventas_comp (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                        "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, '%s')",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);

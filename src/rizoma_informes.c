@@ -234,8 +234,8 @@ change_sell_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *stock
 
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_deriv));
 
-      res = ReturnDerivProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnDerivProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -283,8 +283,8 @@ change_sell_rank_mc (GtkCellRendererText *cell, gchar *path_string, gchar *stock
 
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_comp));
 
-      res = ReturnCompProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnCompProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -5666,8 +5666,8 @@ fill_products_rank (gint familia)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
+  res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, familia);
 
   tuples = PQntuples (res);
 
@@ -5758,8 +5758,8 @@ fill_products_rank_mp (gint familia)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMpProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
+  res = ReturnMpProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),  hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, familia);
 
   tuples = PQntuples (res);
 
@@ -5857,8 +5857,8 @@ fill_products_rank_mc (gint familia)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMcProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
+  res = ReturnMcProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, familia);
 
   tuples = PQntuples (res);
 

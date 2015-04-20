@@ -188,15 +188,15 @@ PGresult * ReturnDerivTransferRank (gint from_year, gint from_month, gint from_d
 
 PGresult * ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre);
 
-PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family);
+PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family);
 
-PGresult * ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family);
+PGresult * ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family);
 
-PGresult * ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family);
+PGresult * ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family);
 
-PGresult * ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre);
+PGresult * ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre);
 
-PGresult * ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre);
+PGresult * ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre);
 
 gboolean AddProveedorToDB (gchar *rut, gchar *nombre, gchar *direccion, gchar *ciudad, gchar *comuna,
                            gchar *telefono, gchar *email, gchar *web, gchar *contacto, gchar *giro);

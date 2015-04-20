@@ -2575,8 +2575,8 @@ end; $$ language plpgsql;
 -- Se obtienen los detalles de cada venta
 -- (agrupados por producto) para el ranking de ventas.
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas (IN starts date,
-       	  	  	   		   IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas (IN starts timestamp,
+       	  	  	   		   IN ends timestamp,
        					   OUT barcode varchar,
        					   OUT descripcion varchar,
        					   OUT marca varchar,
@@ -2612,7 +2612,7 @@ BEGIN
        INNER JOIN venta_detalle vd
        ON vd.id_venta = v.id
   WHERE (vd.tipo = corriente_l OR vd.tipo = derivada_l)
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   GROUP BY vd.barcode;
 
@@ -2627,7 +2627,7 @@ BEGIN
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id
   WHERE (vmcd.tipo_componente = corriente_l OR vmcd.tipo_componente = derivada_l)
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   GROUP BY vmcd.barcode_componente;
 
@@ -2675,8 +2675,8 @@ END; $$ language plpgsql;
 -- Ranking de ventas de las materias primas
 -- (ventas indirectas).
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
-       	  	  	   		      IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts timestamp,
+       	  	  	   		      IN ends timestamp,
 					      OUT barcode varchar,
 					      OUT descripcion varchar,
 					      OUT marca varchar,
@@ -2711,7 +2711,7 @@ BEGIN
 			       		   --CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
 	     	 	       		   --	WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
 					   --END
-		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha <= $S$ || quote_literal(ends) || $S$
 		       AND vmcd.tipo_componente = $S$||materia_prima_l||$S$ -- OR vmcd.tipo_complejo = $S$||materia_prima_l||$S$
 		       AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
 		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
@@ -2737,8 +2737,8 @@ END; $$ LANGUAGE plpgsql;
 -- Ranking de ventas de los productos derivados
 -- (ventas indirectas).
 --
-CREATE OR REPLACE FUNCTION ranking_ventas_deriv (IN starts date,
-       	  	  	   		      	 IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_deriv (IN starts timestamp,
+       	  	  	   		      	 IN ends timestamp,
 						 IN barcode_mp varchar,
 					      	 OUT barcode varchar,
 					      	 OUT descripcion varchar,
@@ -2771,7 +2771,7 @@ BEGIN
   INNER JOIN venta_detalle vd
   ON vd.id_venta = v.id
   WHERE vd.tipo = derivada_l
-  AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   AND vd.barcode IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente=barcode_mp::bigint)
   GROUP BY vd.barcode;
@@ -2787,7 +2787,7 @@ BEGIN
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id
   WHERE vmcd.tipo_componente = derivada_l
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
 	AND vmcd.barcode_complejo IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente = barcode_mp::bigint)
   GROUP BY vmcd.barcode_complejo;
@@ -2834,8 +2834,8 @@ END; $$ LANGUAGE plpgsql;
 -- Ranking de ventas de los componentes de un producto compuesto
 -- (ventas indirectas).
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas_comp (IN starts date,
-       	  	  	   		      	IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_comp (IN starts timestamp,
+       	  	  	   		      	IN ends timestamp,
 						IN barcode_mc varchar,
 					      	OUT barcode varchar,
 					      	OUT descripcion varchar,
@@ -2872,7 +2872,7 @@ BEGIN
 			INNER JOIN venta v
 			ON venta_mc_detalle.id_venta_vd = v.id
 		   WHERE barcode_complejo = $S$ || barcode_mc || $S$
-			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha <= $S$ || quote_literal(ends) || $S$
         	   UNION ALL
         	   SELECT vmcd.id_venta_vd, vmcd.barcode_complejo, vmcd.id_mh, vmcd.tipo_complejo,
 		      	  vmcd.barcode_componente, vmcd.tipo_componente, vmcd.cantidad,
@@ -2922,8 +2922,8 @@ END; $$ LANGUAGE plpgsql;
 ---
 -- Ranking de ventas de las mercaderías compuestas
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas_mc (IN starts date,
-       	  	  	   		      IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_mc (IN starts timestamp,
+       	  	  	   		      IN ends timestamp,
 					      OUT barcode varchar,
 					      OUT descripcion varchar,
 					      OUT marca varchar,
@@ -2951,7 +2951,7 @@ BEGIN
 		 ON v.id = vd.id_venta
 		 INNER JOIN producto p
 		 ON p.barcode = vd.barcode
-		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<$S$ || quote_literal(ends) || $S$
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<=$S$ || quote_literal(ends) || $S$
 		 AND vd.tipo=$S$ || compuesta_l || $S$
 		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
 
