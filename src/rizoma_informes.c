@@ -334,8 +334,8 @@ change_transfer_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *s
 
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_deriv));
 
-      res = ReturnDerivTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnDerivTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -380,8 +380,8 @@ change_transfer_rank_mc (GtkCellRendererText *cell, gchar *path_string, gchar *s
 
       gtk_list_store_clear (GTK_LIST_STORE (store_tr_comp));
 
-      res = ReturnCompTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnCompTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -5045,8 +5045,8 @@ fill_exempt_sells ()
   /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
      retorna los datos de ventas en un intervalo de fechas */
   res = exempt_sells_on_date
-    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin);
 
   tuples = PQntuples (res);
   nventas = PutPoints (g_strdup_printf ("%d", tuples));
@@ -5109,10 +5109,10 @@ fill_exempt_sells ()
 		       "date_part ('day', fecha_vencimiento) AS fvto_day "
 
 		       "FROM cheque_rest cr INNER JOIN venta v ON cr.id_venta = v.id "
-		       "WHERE v.fecha >= to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-		       "AND v.fecha <= to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
-		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-		       g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end));
+		       "WHERE v.fecha >= to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+		       "AND v.fecha <= to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')",
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni,
+		       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   res = EjecutarSQL (q);
   tuples = PQntuples (res);
@@ -5489,8 +5489,8 @@ fill_transfer_rank (gboolean traspaso_envio)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+  res = ReturnTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, traspaso_envio);
 
   tuples = PQntuples (res);
 
@@ -5546,8 +5546,8 @@ fill_transfer_rank_mp (gboolean traspaso_envio)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMpTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+  res = ReturnMpTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, traspaso_envio);
 
   tuples = PQntuples (res);
 
@@ -5606,8 +5606,8 @@ fill_transfer_rank_mc (gboolean traspaso_envio)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMcTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+  res = ReturnMcTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, traspaso_envio);
 
   tuples = PQntuples (res);
 
@@ -6806,7 +6806,8 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 
 
   /*Set filter hour visibility*/
-  if (page_num == 0 || page_num == 1 || page_num == 2 || page_num == 3 || page_num == 4 || page_num == 7) {
+  if (page_num == 0 || page_num == 1 || page_num == 2 || page_num == 3 ||
+      page_num == 4 || page_num == 7 || page_num == 8 || page_num == 9  ) {
     if (rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
       gtk_widget_show (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
     else

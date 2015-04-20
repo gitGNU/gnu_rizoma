@@ -66,8 +66,7 @@ PGresult * SearchTuplesByDate (gint from_year, gint from_month, gint from_day, g
                                gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
                                gchar *date_column, gchar *fields, gchar *grupo);
 
-PGresult * exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
-                                 gint to_year, gint to_month, gint to_day);
+PGresult * exempt_sells_on_date (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min);
 
 PGresult * inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar *max_avg_sell, gchar *max_unid_sell);
 
@@ -178,15 +177,15 @@ gdouble FiFo (gchar *barcode, gint compra);
 
 gboolean SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta);
 
-PGresult * ReturnTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio);
+PGresult * ReturnTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gboolean traspaso_envio);
 
-PGresult * ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio);
+PGresult * ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gboolean traspaso_envio);
 
-PGresult * ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio);
+PGresult * ReturnDerivTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre);
 
-PGresult * ReturnDerivTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre);
+PGresult * ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gboolean traspaso_envio);
 
-PGresult * ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre);
+PGresult * ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre);
 
 PGresult * ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min, gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family);
 
