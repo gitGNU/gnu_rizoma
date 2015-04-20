@@ -5224,10 +5224,11 @@ fill_devolucion ()
 
   /* consulta de sql que retorna los datos necesarios de una devolucion en
      un intrevalo de tiempo*/
-  query = g_strdup_printf ("select fecha, id, monto, proveedor from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                           "and fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')  order by id"
-                           , g_date_get_day (date_begin),g_date_get_month (date_begin), g_date_get_year (date_begin)
-                           , g_date_get_day (date_end) + 1,g_date_get_month (date_end),  g_date_get_year (date_end));
+  query = g_strdup_printf ("SELECT fecha, id, monto, proveedor from devolucion "
+                           "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                           "AND fecha<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') ORDER BY id"
+                           , g_date_get_day (date_begin),g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+                           , g_date_get_day (date_end),g_date_get_month (date_end),  g_date_get_year (date_end), hrFin, minFin);
 
 
   res = EjecutarSQL (query);
@@ -5954,11 +5955,11 @@ fill_cash_box_list ()
   query = g_strdup_printf ("SELECT id, fecha_inicio, inicio, fecha_termino, termino, perdida, "
 			   "       (SELECT cash_close_outcome FROM cash_box_report (id)) AS monto_pre_cierre "
 			   "FROM caja "
-			   "WHERE fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-			   "AND (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') OR fecha_termino IS NULL) "
+			   "WHERE fecha_inicio>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp "
+			   "AND (fecha_termino<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp OR fecha_termino IS NULL) "
 			   "ORDER BY id"
-			   , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin)
-			   , g_date_get_day (date_end) + 1, g_date_get_month (date_end), g_date_get_year (date_end));
+			   , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+			   , g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   res = EjecutarSQL (query);
   g_free (query);
@@ -6168,11 +6169,12 @@ fill_traspaso (gchar *local)
 			    "ON t.destino = b.id "
 			    "WHERE destino != 1 "
 			    "%s "
-			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    "AND fecha BETWEEN to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                            "              AND to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
 			    "ORDER BY fecha ASC"
 			    , local_consulta
-			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
-			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+			    , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+			    , g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
   else
     sql = g_strdup_printf ( "SELECT fecha, t.id, b.nombre AS origen, monto "
 			    "FROM traspaso t "
@@ -6180,11 +6182,12 @@ fill_traspaso (gchar *local)
 			    "ON t.origen = b.id "
 			    "WHERE origen != 1 "
 			    "%s "
-			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    "AND fecha BETWEEN to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                            "              AND to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
 			    "ORDER BY fecha ASC"
 			    , local_consulta
-			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
-			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+                            , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+			    , g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   res = EjecutarSQL (sql);
   tuples = PQntuples (res);
@@ -6803,7 +6806,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 
 
   /*Set filter hour visibility*/
-  if (page_num == 0 || page_num == 1 || page_num == 2) {
+  if (page_num == 0 || page_num == 1 || page_num == 2 || page_num == 3 || page_num == 4 || page_num == 7) {
     if (rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
       gtk_widget_show (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
     else
@@ -6811,7 +6814,6 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   } else {
      gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
   }
-  
   
 
   //NOTA: Cada página se preocupa SOLO de sus PROPIOS widgets (mostrarlos, rellenarlos y ocultarlos)
