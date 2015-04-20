@@ -6409,9 +6409,10 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 	AlertMSG (widget, "No existen proveedores con el nombre o rut que ha especificado");
     }
 
-  q = g_strdup_printf (" %s AND c.fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59'", q,
-		       g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-		       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+  q = g_strdup_printf (" %s AND c.fecha BETWEEN to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                       "                    AND to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') ", q,
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni,
+		       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   q = g_strdup_printf (" %s GROUP BY c.id, c.fecha, c.rut_proveedor, c.anulada_pi", q);
 
@@ -6802,7 +6803,7 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
 
 
   /*Set filter hour visibility*/
-  if (page_num == 0) {
+  if (page_num == 0 || page_num == 1 || page_num == 2) {
     if (rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
       gtk_widget_show (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
     else
