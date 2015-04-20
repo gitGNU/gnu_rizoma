@@ -4192,10 +4192,10 @@ declare
        l record;
 begin
 	--Tipo Venta = 0 (es en efectivo), tipo_venta debería llamarse "tipo_pago"
-        select COALESCE (SUM (descuento), 0) into total_cash_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
+        select COALESCE (SUM (descuento), 0) into total_cash_discount from venta where fecha >= starts and fecha <= ends and descuento!=0
                 and tipo_venta=0 and venta.id not in (select id_sale from venta_anulada);
 
-        select COALESCE (count(*), 0) into total_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
+        select COALESCE (count(*), 0) into total_discount from venta where fecha >= starts and fecha <= ends and descuento!=0
                 and tipo_venta=0 and venta.id not in (select id_sale from venta_anulada);
 return next;
 return;

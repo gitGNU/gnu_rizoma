@@ -5341,23 +5341,24 @@ void
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
 
   /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
-  total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
-				      g_date_get_day (date_begin),  g_date_get_year (date_end),
-				      g_date_get_month (date_end), g_date_get_day (date_end),
+  total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin),  g_date_get_day (date_begin), hrIni, minIni,
+                                      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
                                       &total_cash);
 
   /*Esta funcion entrega el total del iva y otros dentro del rango de fecha entregado*/
-  total_taxes_on_time_interval (g_date_get_year (date_begin), g_date_get_month (date_begin),
-				g_date_get_day (date_begin),  g_date_get_year (date_end),
-				g_date_get_month (date_end), g_date_get_day (date_end),
+  total_taxes_on_time_interval (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                                g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
 				&total_iva, &total_otros);
 
   /* Consulta que retorna el numero de ventas con descuento y la suma total
      con descuento en un intervalo de tiempo */
+  
+  //NOTA: Por defecto hrIni = minIni = 0 | HrFin = 23 minFin = 59 (este o no habilitada la opcion de la hora)
   res = EjecutarSQL
-    (g_strdup_printf ("SELECT * FROM sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
-                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
+    (g_strdup_printf ("SELECT * FROM sells_get_totals (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                      "                                to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone )",
+                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni,
+                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin));
 
   if (res != NULL)
     {
@@ -5366,16 +5367,14 @@ void
     }
 
   /* Funcion que retorna el total de ventas a credito en un intervarlo de tiempo */
-  total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
-					  g_date_get_day (date_begin), g_date_get_year (date_end),
-					  g_date_get_month (date_end), g_date_get_day (date_end),
+  total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                                          g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
                                           &total_credit);
 
   /* Funcion que retorna el total de todas las ventas(al contado, con
      descuento y a credito ) en un intervarlo de tiempo */
-  total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
-			     g_date_get_day (date_begin), g_date_get_year (date_end),
-			     g_date_get_month (date_end), g_date_get_day (date_end),
+  total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
                              &total_ventas);
 
   /*Taxes*/

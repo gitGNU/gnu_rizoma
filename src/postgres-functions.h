@@ -71,18 +71,22 @@ PGresult * exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
 
 PGresult * inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar *max_avg_sell, gchar *max_unid_sell);
 
-gint GetTotalCashSell (guint from_year, guint from_month, guint from_day,
-                       guint to_year, guint to_month, guint to_day, gint *total);
+gint GetTotalCashSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                       guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total);
 
-gint GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
-                         guint to_year, guint to_month, guint to_day, gint *total);
+gint
+GetTotalCreditSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                    guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total);
 
-void total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
-                                   guint to_year, guint to_month, guint to_day,
-                                   gint *total_iva, gint *total_otros);
+void
+total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                              guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min,
+                              gint *total_iva, gint *total_otros);
 
-gint GetTotalSell (guint from_year, guint from_month, guint from_day,
-                   guint to_year, guint to_month, guint to_day, gint *total);
+gint
+GetTotalSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+              guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total);
+
 
 gboolean InsertClient (gchar *nombres, gchar *paterno, gchar *materno, gchar *rut, gchar *ver,
                        gchar *direccion, gchar *fono, gint credito, gchar *giro, gint client_type);

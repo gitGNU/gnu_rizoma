@@ -976,8 +976,8 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day, gint from_ho
   gchar *q;
 
   if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
-    from_hour = from_min = to_hour = to_min = 0;
-    to_day += 1;
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
   }
 
   
@@ -1091,21 +1091,28 @@ inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar 
 
 
 gint
-GetTotalCashSell (guint from_year, guint from_month, guint from_day,
-                  guint to_year, guint to_month, guint to_day, gint *total)
+GetTotalCashSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                  guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total)
 {
   PGresult *res;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+   
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT round (SUM(vd.precio * vd.cantidad)), "
       "count (Distinct(v.id)) "
       "FROM venta v,venta_detalle vd "
-      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-      "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND fecha<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND v.id = id_venta "
       "AND tipo_venta = %d "
       "AND v.id NOT IN (select id_sale from venta_anulada)",
-      from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
+      from_day, from_month, from_year, from_hour, from_min,
+      to_day, to_month, to_year, to_hour, to_min, CASH));
 
   if (res == NULL)
     return 0;
@@ -1116,21 +1123,27 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 }
 
 gint
-GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
-                    guint to_year, guint to_month, guint to_day, gint *total)
+GetTotalCreditSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                    guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total)
 {
   PGresult *res;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT COALESCE (SUM ((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), 0), "
       "       COALESCE (count (*), 0) "
       "FROM venta "
-      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
-      "AND fecha<to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND fecha<=to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
       "AND ((tipo_venta)=%d OR (tipo_venta)=%d) "
       "AND venta.id NOT IN (SELECT id_sale FROM venta_anulada)",
-      from_day, from_month, from_year, to_day+1, to_month, to_year, CREDITO, TARJETA));
+      from_day, from_month, from_year, from_hour, from_min,
+      to_day, to_month, to_year, to_hour, to_min, CREDITO, TARJETA));
 
   if (res == NULL)
     return 0;
@@ -1151,21 +1164,27 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
  * @param: gdouble *total_otros: In which to store the result (Others total)
  */
 void
-total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
-                              guint to_year, guint to_month, guint to_day,
+total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                              guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min,
                               gint *total_iva, gint *total_otros)
 {
   PGresult *res;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT ROUND (SUM((SELECT SUM(iva)   FROM venta_detalle WHERE id_venta=v.id))) AS total_iva, "
       "       ROUND (SUM((SELECT SUM(otros) FROM venta_detalle WHERE id_venta=v.id))) AS total_otros "
       "FROM venta v "
-      "WHERE fecha >= TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
-      "AND fecha   <  TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "WHERE fecha >= TO_TIMESTAMP ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND fecha   <= TO_TIMESTAMP ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
       "AND v.id NOT IN (SELECT id_sale FROM venta_anulada)",
-      from_day, from_month, from_year, to_day+1, to_month, to_year));
+      from_day, from_month, from_year, from_hour, from_min,
+      to_day, to_month, to_year, to_hour, to_min));
 
   if (res == NULL)
     return;
@@ -1176,19 +1195,26 @@ total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
 
 
 gint
-GetTotalSell (guint from_year, guint from_month, guint from_day,
-              guint to_year, guint to_month, guint to_day, gint *total)
+GetTotalSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+              guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total)
 {
   PGresult *res;
-
+  
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   res = EjecutarSQL (g_strdup_printf
                      ("SELECT COALESCE (ROUND(SUM(vd.precio * vd.cantidad)), 0), "
                       "       COALESCE (COUNT(DISTINCT(v.id)), 0) "
                       "FROM venta v, venta_detalle vd "
-                      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
-                      "AND fecha<to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+                      "WHERE fecha >= to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                      "AND fecha   <= to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                      "AND v.id = id_venta "
                       "AND  v.id NOT IN (select id_sale from venta_anulada)",
-                      from_day, from_month, from_year, to_day+1, to_month, to_year));
+                      from_day, from_month, from_year, from_hour, from_min,
+                      to_day, to_month, to_year, to_hour, to_min));
 
   if (res == NULL)
     return 0;
