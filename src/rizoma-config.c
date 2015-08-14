@@ -103,16 +103,16 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "VALE_COPY", "1");
   g_key_file_set_string (file, "RIZOMA", "VENDEDOR", "0");
   g_key_file_set_string (file, "RIZOMA", "MAQUINA", "1");
-  g_key_file_set_string (file, "RIZOMA", "ONLY_PASSWORD", "0"); //Solo afecta al login en rizoma-ventas
-  g_key_file_set_string (file, "RIZOMA", "MODO_MESERO", "0");   //Pregunta mesa y cierra automágicamente
-  g_key_file_set_string (file, "RIZOMA", "MODO_VENTA_RESTAURANT", "0");   //Pregunta mesa y cierra automágicamente
+  g_key_file_set_string (file, "RIZOMA", "ONLY_PASSWORD", "0");             //Solo afecta al login en rizoma-ventas
+  g_key_file_set_string (file, "RIZOMA", "MODO_MESERO", "0");               //Pregunta mesa y cierra automágicamente
+  g_key_file_set_string (file, "RIZOMA", "MODO_VENTA_RESTAURANT", "0");     //Pregunta mesa y cierra automágicamente
   g_key_file_set_string (file, "RIZOMA", "SPREADSHEET_APP", "gnumeric");
   g_key_file_set_string (file, "RIZOMA", "VENTA_DIRECTA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRINT_COMMAND", "lpr");
   g_key_file_set_string (file, "RIZOMA", "IMPRESORA", "0");
   g_key_file_set_string (file, "RIZOMA", "IMPRIMIR_BARCODE_PREVENTA", "0"); //Imprime el barcode en las voletas de preventa
   g_key_file_set_string (file, "RIZOMA", "PRINT_FACTURA", "0");
-  g_key_file_set_string (file, "RIZOMA", "EMITIR_DOCUMENTO", "1"); //Emite documentos aunque no se imprima
+  g_key_file_set_string (file, "RIZOMA", "EMITIR_DOCUMENTO", "1");          //Emite documentos aunque no se imprima
   g_key_file_set_string (file, "RIZOMA", "VALE_SELECTIVO", "NO");
   g_key_file_set_string (file, "RIZOMA", "VALE_CONTINUO", "0");
   g_key_file_set_string (file, "RIZOMA", "LOGO", "");
@@ -135,10 +135,11 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "MODO_INVENTARIO", "0");
   g_key_file_set_string (file, "RIZOMA", "INFORME_FILTRO_HORA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRECIO_DISCRECIONAL", "0");
-  g_key_file_set_string (file, "RIZOMA", "GANANCIA_MINIMA", "0"); //En terminos porcentuales
-  g_key_file_set_string (file, "RIZOMA", "MODO_GUIA_FACTURA", "0"); //Modo para visualización en venta
-  g_key_file_set_string (file, "RIZOMA", "CUENTA_RAPIDA", "NONE"); //NONE=Deshabilitado - [RUTCuenta]=Cuenta a seleccionar
-  g_key_file_set_string (file, "RIZOMA", "VENTA_SUSCRITO", "0"); //Vender solo a clientes existentes (no anonimo)
+  g_key_file_set_string (file, "RIZOMA", "GANANCIA_MINIMA", "0");           //En terminos porcentuales
+  g_key_file_set_string (file, "RIZOMA", "MODO_GUIA_FACTURA", "0");         //Modo para visualización en venta
+  g_key_file_set_string (file, "RIZOMA", "CUENTA_RAPIDA", "NONE");          //NONE=Deshabilitado - [RUTCuenta]=Cuenta a seleccionar
+  g_key_file_set_string (file, "RIZOMA", "VENTA_SUSCRITO", "0");            //Vender solo a clientes existentes (no anonimo)
+  g_key_file_set_string (file, "RIZOMA", "STOCK_NEGATIVO", "0");            //Permite realizar operaciones con stock negativo
 
   //PreVenta (si uno es 1 el otro debe ser 0)
   g_key_file_set_string (file, "RIZOMA", "PREVENTA", "0");
