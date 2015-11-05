@@ -1769,7 +1769,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (monto >= 180)
+      if (monto >= rizoma_get_value_int ("VALE_MINIMO"))
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -3572,7 +3572,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (monto >= 180)
+      if (monto >= rizoma_get_value_int ("VALE_MINIMO"))
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -4555,7 +4555,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
       switch (tipo_documento)
         {
         case SIMPLE: case VENTA:
-          if (total >= 180)
+          if (total >= rizoma_get_value_int ("VALE_MINIMO"))
             ticket = get_ticket_number (tipo_documento);
           else
             ticket = -1;
@@ -4711,7 +4711,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (total >= 180)
+      if (total >= rizoma_get_value_int ("VALE_MINIMO"))
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
