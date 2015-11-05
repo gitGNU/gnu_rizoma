@@ -88,7 +88,7 @@ gboolean block_discount = FALSE;
 // Venta de mercadería que se encuentre en la tabla de reserva
 gboolean venta_reserva = FALSE;
 // Inhabilita los procedimientos que requieran un stock en el producto
-gboolean no_venta = FALSE;
+//gboolean no_venta = FALSE;
 
 
 /**
@@ -806,6 +806,8 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
       rizoma_get_value_boolean ("MODO_VENTA_RESTAURANT"))
     modificar_producto_mesa (venta->num_mesa, venta->product_check->product->barcode, venta->product_check->product->cantidad, venta->product_check->product->cantidad_impresa);
 
+
+  /* AHORA SE PERMITE VENTA NEGATIVA
   if (venta->product_check->product->stock < cantidad)
     {
       no_venta = TRUE;
@@ -813,9 +815,9 @@ on_cantidad_sell_edited (GtkCellRendererText *cell, gchar *path_string, gchar *c
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
-    }
+      }*/
 
-  habilitar_venta ();
+  //habilitar_venta ();
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
                         g_strdup_printf ("<span size=\"40000\">%s</span>",
                                          PutPoints (g_strdup_printf ("%ld", lround (CalcularTotal (venta->header))))));
@@ -1335,6 +1337,9 @@ ventas_win ()
   /* g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_detail_mp")), "insert-text", */
   /*                G_CALLBACK (only_numberi_filter), NULL); */
 
+  g_signal_connect (G_OBJECT (builder_get (builder, "sencillo_entry")), "insert-text",
+		    G_CALLBACK (only_numberi_filter), NULL);
+
   // Conectando la señal 'insert-text' para calcular diferencia con el monto total
   g_signal_connect (G_OBJECT (builder_get (builder, "entry_int_amount_mixed_pay")), "changed",
                     G_CALLBACK (calculate_amount), NULL);
@@ -1415,6 +1420,7 @@ AgregarProducto (GtkButton *button, gpointer data)
       //CleanEntryAndLabelData ();
       return FALSE;
     }
+  /* AHORA SE PERMITE VENTA NEGATIVA
   else if (cantidad > stock)
     {
       no_venta = TRUE;
@@ -1422,12 +1428,13 @@ AgregarProducto (GtkButton *button, gpointer data)
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), FALSE);
       gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
+  
+      //aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")); 
+      //AlertMSG (aux_widget, "Stock insuficiente, debe ingresar una cantidad igual o menor al stock disponible"); 
 
-      /* aux_widget = GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")); */
-      /* AlertMSG (aux_widget, "Stock insuficiente, debe ingresar una cantidad igual o menor al stock disponible"); */
-
-      /* return FALSE; */
+      //return FALSE; 
     }
+  */
   else if (strchr (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))), ',') != NULL ||
            strchr (gtk_entry_get_text (GTK_ENTRY (gtk_builder_get_object (builder, "cantidad_entry"))), '.') != NULL)
     {
@@ -1460,6 +1467,7 @@ AgregarProducto (GtkButton *button, gpointer data)
           nuevo = TRUE;
         }
 
+      /*AHORA SE PERMITE VENTA NEGATIVA
       if (!nuevo && (venta->product_check->product->cantidad + cantidad) > stock)
         {
           no_venta = TRUE;
@@ -1467,13 +1475,13 @@ AgregarProducto (GtkButton *button, gpointer data)
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), FALSE);
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), FALSE);
           gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), FALSE);
-
-          /* AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")), */
-          /*        "No puede vender más productos de los que tiene en stock"); */
-          /* if (nuevo) */
-          /*   EliminarDeLista (venta->product_check->product->codigo, venta->product_check->product->lugar); */
-          /* return FALSE; */
-        }
+      
+          //AlertMSG (GTK_WIDGET (gtk_builder_get_object (builder, "cantidad_entry")),
+	  //"No puede vender más productos de los que tiene en stock");
+          //if (nuevo)
+	  //EliminarDeLista (venta->product_check->product->codigo, venta->product_check->product->lugar);
+          //return FALSE;
+        }*/
 
       precio_discrecional = g_strdup (gtk_entry_get_text (GTK_ENTRY (builder_get (builder, "entry_precio"))));
 
@@ -1693,7 +1701,7 @@ EliminarProducto (GtkButton *button, gpointer data)
 
       CalcularVentas (venta->header);
 
-      habilitar_venta ();
+      //habilitar_venta ();
     }
 
   select_back_deleted_row("sell_products_list", position);
@@ -1761,7 +1769,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (monto >= rizoma_get_value_int ("VALE_MINIMO"))
+      if (monto >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -1960,6 +1968,7 @@ TipoVenta (GtkWidget *widget, gpointer data)
       if (!venta_reserva)
         gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "sell_button")), FALSE);
 
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_close_win")), TRUE);
       gtk_widget_show (GTK_WIDGET (window));
     }
   return;
@@ -2707,9 +2716,10 @@ CalcularVentas (Productos *header)
 
 
 /**
- *
+ * Actualmente el procedimiento de venta no tiene restricción de stock,
+ * admitiendo de esta forma ventas con stock negativo.
  */
-void
+/*void
 habilitar_venta (void)
 {
   gboolean valid;
@@ -2731,13 +2741,13 @@ habilitar_venta (void)
       valid = gtk_tree_model_iter_next (model, &iter);
     }
 
-  no_venta = FALSE;
+  //no_venta = FALSE;
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_invoice")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_sale")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_devolver")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_traspaso_enviar")), TRUE);
 }
-
+*/
 
 
 void
@@ -3534,7 +3544,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (tiene_limite_credito ( atoi (strtok (str_rut,"-")) ) &&
+  if (tiene_limite_credito (rut) &&
       LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_credit_out")));
@@ -3562,7 +3572,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (monto >= rizoma_get_value_int ("VALE_MINIMO"))
+      if (monto >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -4340,7 +4350,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (tiene_limite_credito ( atoi (strtok (str_rut,"-")) ) &&
+  if (tiene_limite_credito ( atoi (strtok (g_strdup(str_rut),"-")) ) &&
       LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
       widget = gtk_widget_get_ancestor(GTK_WIDGET(button),GTK_TYPE_WINDOW);
@@ -4545,7 +4555,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
       switch (tipo_documento)
         {
         case SIMPLE: case VENTA:
-          if (total >= rizoma_get_value_int ("VALE_MINIMO"))
+          if (total >= 180)
             ticket = get_ticket_number (tipo_documento);
           else
             ticket = -1;
@@ -4639,9 +4649,9 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
 
   //Primer rut
   if (tipo_pago1 == CREDITO)
-    rut_cuenta1 = pago_mixto->rut_credito1;
+    rut_cuenta1 = g_strdup (pago_mixto->rut_credito1);
   else
-    rut_cuenta1 = pago_mixto->check_rest1->rut_emisor;
+    rut_cuenta1 = g_strdup (pago_mixto->check_rest1->rut_emisor);
 
   str_splited = parse_rut (rut_cuenta1);
   rut1 = atoi (str_splited[0]);
@@ -4701,7 +4711,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (total >= rizoma_get_value_int ("VALE_MINIMO"))
+      if (total >= 180)
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -4885,7 +4895,7 @@ mixed_pay_window (void)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_cheques")), TRUE);
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "radio_btn_general")), TRUE);
 
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_cheques")), TRUE);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_credito")), TRUE);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (builder_get (builder, "radio_btn_general")), TRUE);
 
   gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "entry_rut_mixed_pay")));
@@ -5216,7 +5226,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
       break;
 
     case GDK_F8:
-      if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
+      if (/*no_venta == FALSE &&*/ venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         mixed_pay_window ();
       break;
 
@@ -5226,7 +5236,7 @@ on_ventas_gui_key_press_event(GtkWidget   *widget,
 
     //No se permiten ventas en modo PREVENTA o cuando las banderas VENTA_RESERVA o NO_VENTA esten en FALSE
     case GDK_F10:
-      if (no_venta == FALSE && venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
+      if (/*no_venta == FALSE &&*/ venta_reserva == FALSE && !rizoma_get_value_boolean ("PREVENTA"))
         on_btn_credit_clicked (NULL, NULL);
 
       // Si esta habilitada la opcion "CUENTA_RAPIDA" se selecciona automaticamente la cuenta especificada (si es valida)
@@ -6559,6 +6569,22 @@ on_entry_srch_provider_activate (GtkEntry *entry, gpointer user_data)
     gtk_tree_selection_select_path (gtk_tree_view_get_selection (GTK_TREE_VIEW (gtk_builder_get_object (builder, "tree_view_srch_provider"))), gtk_tree_path_new_from_string ("0"));
 }
 
+
+
+/**
+ *
+ */
+void
+on_sencillo_entry_activate (GtkEntry *entry, gpointer user_data)
+{
+  gtk_widget_grab_focus (GTK_WIDGET (builder_get (builder, "sell_button")));
+
+  if (gtk_widget_get_sensitive (GTK_WIDGET (builder_get (builder, "sell_button"))))
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_close_win")), FALSE);
+      abrirGaveta();
+    }
+}
 
 /**
  * Es llamada cuando se presiona enter(signal actived) en el "entry_proveedor"
