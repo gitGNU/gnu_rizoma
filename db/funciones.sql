@@ -1867,7 +1867,7 @@ create or replace function registrar_venta( IN monto integer,
 	IN vendedor integer,
 	IN tipo_documento smallint,
 	IN tipo_venta smallint,
-	IN descuento smallint,
+	IN descuento integer,
 	IN id_documento integer,
 	IN canceled boolean,
 	OUT inserted_id integer)

@@ -475,7 +475,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
   */
   id_documento = 0;
   q = g_strdup_printf( "SELECT inserted_id FROM registrar_venta( %d, %d, %d, "
-                       "%d::smallint, %d::smallint, %s::smallint, %d, '%d' )",
+                       "%d::smallint, %d::smallint, %s, %d, '%d' )",
                        total, machine, seller, tipo_documento, tipo_venta,
                        CUT(discount), id_documento, canceled);
   venta_id = atoi (GetDataByOne (q));
@@ -510,7 +510,7 @@ SaveSell (gint total, gint machine, gint seller, gint tipo_venta, gchar *rut, gc
 
   // Imprimir vale
   gdouble porcentaje_descuento = porcentaje_descuento_boleta (venta->header, strtod (PUT (discount), (char **)NULL));
-  
+
   if (vale_dir != NULL && !g_str_equal(vale_dir, "") && boleta != -1)
     {
       if (vale_continuo)
@@ -2510,7 +2510,7 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 	{
 	  PGresult *resLocal;
 	  resLocal = EjecutarSQL (g_strdup_printf ("SELECT precio FROM cliente_precio "
-						   "WHERE rut_cliente = %d AND barcode = '%s'", 
+						   "WHERE rut_cliente = %d AND barcode = '%s'",
 						   rut_cliente_pre_factura, products->product->barcode));
 	  if (resLocal != NULL)
 	    {
@@ -2523,19 +2523,19 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 		  // Si el precio obtenido es distinto del precio actual, se actualiza
 		  if (precio_cliente != precio)
 		    EjecutarSQL (g_strdup_printf ("UPDATE cliente_precio SET precio = %s"
-						  "WHERE rut_cliente = %d AND barcode = '%s'", 
+						  "WHERE rut_cliente = %d AND barcode = '%s'",
 						  CUT (g_strdup_printf ("%.3f", precio)),
-						  rut_cliente_pre_factura, 
+						  rut_cliente_pre_factura,
 						  products->product->barcode));
 		}
 	      else
 		{
 		  EjecutarSQL (g_strdup_printf ("INSERT INTO cliente_precio VALUES (DEFAULT, %d, '%s', %s) ",
-						rut_cliente_pre_factura, 
+						rut_cliente_pre_factura,
 						products->product->barcode,
 						CUT (g_strdup_printf ("%.3f", precio))) );
 		}
-	      
+
 	    }
 	}
 

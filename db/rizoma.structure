@@ -913,7 +913,7 @@ create table venta (
   vendedor                  int4,
   tipo_documento            int2,
   tipo_venta                int2,
-  descuento                 int2,
+  descuento                 int4,
   id_documento              int4,
   canceled                  bool default false,
   constraint pk_venta primary key (id)
