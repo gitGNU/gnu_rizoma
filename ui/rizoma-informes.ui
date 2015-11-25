@@ -9,7 +9,7 @@
   </object>
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="wnd_reports">
-    <property name="width_request">800</property>
+    <property name="width_request">900</property>
     <property name="can_focus">False</property>
     <property name="window_position">center-always</property>
     <signal name="delete-event" handler="gtk_main_quit" swapped="no"/>
@@ -36,6 +36,10 @@
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -48,7 +52,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <signal name="clicked" handler="display_calendar" object="entry_date_begin" swapped="yes"/>
                         <child>
                           <object class="GtkArrow" id="arrow1">
@@ -72,6 +75,9 @@
                   </packing>
                 </child>
                 <child>
+                  <placeholder/>
+                </child>
+                <child>
                   <object class="GtkHBox" id="hbox3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -81,6 +87,11 @@
                         <property name="can_focus">True</property>
                         <property name="editable">False</property>
                         <property name="invisible_char">●</property>
+                        <property name="invisible_char_set">True</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -93,7 +104,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <signal name="clicked" handler="display_calendar" object="entry_date_end" swapped="yes"/>
                         <child>
                           <object class="GtkArrow" id="arrow2">
@@ -113,24 +123,11 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="btn_get_stat">
-                    <property name="label">gtk-execute</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_btn_get_stat_clicked" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">2</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <object class="GtkComboBox" id="cmb_family_filter">
@@ -169,15 +166,11 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
-                </child>
-                <child>
                   <object class="GtkButton" id="btn_apply_family_filter">
                     <property name="label" translatable="yes">Filtrar</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <signal name="clicked" handler="on_btn_apply_family_filter_clicked" swapped="no"/>
                   </object>
                   <packing>
@@ -193,7 +186,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <signal name="clicked" handler="on_btn_get_stat_clicked" swapped="no"/>
                   </object>
                   <packing>
@@ -209,7 +201,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="use_action_appearance">False</property>
                     <signal name="clicked" handler="on_btn_filter_stores_clicked" swapped="no"/>
                   </object>
                   <packing>
@@ -220,7 +211,19 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkButton" id="btn_get_stat">
+                    <property name="label">gtk-execute</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_btn_get_stat_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">10</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -228,6 +231,137 @@
                 <property name="fill">False</property>
                 <property name="padding">5</property>
                 <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hboxHourFilter">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkHBox" id="hbox_hora_ini">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="label63">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Desde Hora</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spnBtnHourIni">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spnBtnMinIni">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox_hora_fin">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="label64">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Hasta Hora</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spnBtnHourFin">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spnBtnMinFin">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="numeric">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
               </packing>
             </child>
           </object>
@@ -293,7 +427,6 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
                                 <signal name="clicked" handler="on_btn_primero_clicked" swapped="no"/>
                               </object>
@@ -310,7 +443,6 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
                                 <signal name="clicked" handler="on_btn_atras_clicked" swapped="no"/>
                               </object>
@@ -327,7 +459,6 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
                                 <signal name="clicked" handler="on_btn_adelante_clicked" swapped="no"/>
                               </object>
@@ -344,7 +475,6 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                                <property name="use_action_appearance">False</property>
                                 <property name="use_stock">True</property>
                                 <signal name="clicked" handler="on_btn_ultimo_clicked" swapped="no"/>
                               </object>
@@ -365,7 +495,6 @@
 ideal para exportar a una plantilla.
 Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                                 <property name="double_buffered">False</property>
-                                <property name="use_action_appearance">False</property>
                                 <signal name="toggled" handler="on_togglebtn_clicked" swapped="no"/>
                                 <child>
                                   <object class="GtkHBox" id="hbox15">
@@ -951,7 +1080,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -1176,7 +1304,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -1191,7 +1318,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -1206,7 +1332,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -1420,6 +1545,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">•</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked" swapped="no"/>
                       </object>
                       <packing>
@@ -1445,6 +1574,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">•</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked" swapped="no"/>
                       </object>
                       <packing>
@@ -1470,6 +1603,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">•</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked" swapped="no"/>
                       </object>
                       <packing>
@@ -1613,7 +1750,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -1782,6 +1918,48 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <property name="border_width">15</property>
                     <property name="n_rows">9</property>
                     <property name="n_columns">5</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
                     <child>
                       <object class="GtkLabel" id="lbl_mbox_payed_money">
                         <property name="visible">True</property>
@@ -2168,48 +2346,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                     <child>
                       <placeholder/>
                     </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2227,7 +2363,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="print_cash_box_selected" swapped="no"/>
                       </object>
@@ -2401,7 +2536,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -2478,7 +2612,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -2548,7 +2681,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -2566,7 +2698,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                         <signal name="clicked" handler="on_btn_save_cuadratura_clicked" swapped="no"/>
                       </object>
@@ -2758,7 +2889,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -2785,7 +2915,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -3032,7 +3161,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -3047,7 +3175,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -3062,7 +3189,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">False</property>
                             <property name="use_stock">True</property>
                           </object>
                           <packing>
@@ -3398,7 +3524,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -3470,6 +3595,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="invisible_char">●</property>
                             <property name="width_chars">4</property>
                             <property name="invisible_char_set">True</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                             <signal name="activate" handler="fill_inmovilizados" swapped="no"/>
                           </object>
                           <packing>
@@ -3536,6 +3665,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                             <property name="invisible_char">●</property>
                             <property name="width_chars">4</property>
                             <property name="invisible_char_set">True</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                             <signal name="activate" handler="fill_inmovilizados" swapped="no"/>
                           </object>
                           <packing>
@@ -3576,7 +3709,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <signal name="clicked" handler="fill_inmovilizados" swapped="no"/>
                       </object>
                       <packing>
@@ -3630,7 +3762,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -3689,7 +3820,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -3705,7 +3835,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">rdbtn_mov_todos</property>
@@ -3734,6 +3863,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                         <signal name="activate" handler="on_btn_get_stat_clicked" swapped="no"/>
                       </object>
                       <packing>
@@ -3782,7 +3915,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="use_action_appearance">False</property>
                         <property name="use_stock">True</property>
                       </object>
                       <packing>
@@ -3834,7 +3966,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="gtk_main_quit" swapped="no"/>
               </object>
@@ -3893,6 +4024,10 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
                 <signal name="activate" handler="on_entry_srch_provider_activate" swapped="no"/>
               </object>
               <packing>
@@ -3907,7 +4042,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_entry_srch_provider_activate" object="entry_srch_provider" swapped="yes"/>
               </object>
@@ -3955,7 +4089,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="gtk_widget_hide" object="wnd_srch_provider" swapped="yes"/>
               </object>
@@ -3971,7 +4104,6 @@ Si se desactiva podra visualizar las ventas cada 100 ventas</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_btn_ok_srch_provider_clicked" object="tree_view_srch_provider" swapped="yes"/>
               </object>

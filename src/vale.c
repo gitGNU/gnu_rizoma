@@ -73,7 +73,13 @@ PrintVale (Productos *header, gint venta_id, gchar *rut_cliente, gint boleta, gi
   else
     mesa = g_strdup ("");
 
-  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, strtok( g_strdup(rut_cliente) , "-"));
+  gchar **str_splited, *rut;
+  if (rut_cliente!=NULL) {
+    str_splited = parse_rut(rut_cliente);
+    rut = str_splited[0];
+  } else rut = NULL;
+
+  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, rut);
 
   if (boleta != -1)
     set_ticket_number (boleta, tipo_documento);
@@ -231,7 +237,13 @@ PrintValeContinuo (Productos *header, gint venta_id, gchar *rut_cliente, gint bo
       is_imp2 = (pago_mixto->tipo_pago2 == CHEQUE_RESTAURANT) ? FALSE : TRUE;
     }
 
-  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, strtok( g_strdup(rut_cliente),"-"));
+  gchar **str_splited, *rut;
+  if (rut_cliente!=NULL) {
+    str_splited = parse_rut(rut_cliente);
+    rut = str_splited[0];
+  } else rut = NULL;
+  
+  id_documento = InsertNewDocument (venta_id, tipo_documento, tipo_pago, rut);
 
   if (boleta != -1)
     set_ticket_number (boleta, tipo_documento);

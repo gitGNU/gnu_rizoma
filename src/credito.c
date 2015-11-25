@@ -3116,10 +3116,7 @@ gint
 LimiteCredito (const gchar *rut)
 {
   PGresult *res;
-  gchar *rut2;
-
-  rut2 = g_strdup(rut);
-  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente WHERE rut=%s", strtok(rut2,"-")));
+  res = EjecutarSQL (g_strdup_printf ("SELECT credito FROM cliente WHERE rut=%s", strtok(g_strdup(rut),"-")));
 
   if (res != NULL)
     return atoi(PQgetvalue (res, 0, 0));

@@ -956,28 +956,42 @@ actualizar_preventa (gint id_venta, gint id_preventa)
  * @param: gint begin year
  * @param: gint begin month
  * @param: gint begin day
+ * @param: gint begin hour
+ * @param: gint begin min
  * @param: gint end year
  * @param: gint end month
  * @param: gint end day
+ * @param: gint end hour
+ * @param: gint end min
  * @param: gchar date colum
  * @param: gchar fields
  * @param: gchar grupo, "Anuladas", "Ingresadas", "TODAS"
  */
 PGresult *
-SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
-                    gint to_year, gint to_month, gint to_day,
+SearchTuplesByDate (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                    gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min,
                     gchar *date_column, gchar *fields, gchar *grupo)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+
+  
   q = g_strdup_printf ("SELECT %s FROM venta WHERE "
-                       "%s>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') AND "
-                       "%s<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
-                       fields, date_column, from_day, from_month, from_year,
-                       date_column, to_day+1, to_month, to_year);
+                       "%s>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') AND "
+                       "%s<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')",
+                       fields,
+                       date_column,
+                       from_day, from_month, from_year, from_hour, from_min,
+                       date_column,
+                       to_day, to_month, to_year, to_hour, to_min);
 
-
+  //printf("%s\n",q);
+  
   if (g_str_equal (grupo, "TODAS"))
     printf ("Todas las ventas\n");
 
@@ -997,13 +1011,20 @@ SearchTuplesByDate (gint from_year, gint from_month, gint from_day,
     return NULL;
 }
 
+
+
 PGresult *
-exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
-                      gint to_year, gint to_month, gint to_day)
+exempt_sells_on_date (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+    
   q = g_strdup_printf ("SELECT v.id, v.maquina, v.vendedor, v.tipo_venta, "
                        "       (SELECT SUM (vd.cantidad * vd.precio) "
                        "               FROM venta_detalle vd "
@@ -1011,16 +1032,16 @@ exempt_sells_on_date (gint from_year, gint from_month, gint from_day,
                        "               AND vd.impuestos = false) AS monto, "
                        "       to_char (fecha, 'DD/MM/YY HH24:MI:SS') AS fmt_fecha "
                        "FROM venta v "
-                       "WHERE v.fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                       "AND v.fecha<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
+                       "WHERE v.fecha>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                       "AND v.fecha<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
                        "AND v.id NOT IN (SELECT id_sale FROM venta_anulada) "
                        "AND (SELECT SUM (vd.cantidad * vd.precio) "
                        "            FROM venta_detalle vd "
                        "            WHERE vd.id_venta = v.id "
                        "            AND vd.impuestos = false) IS NOT NULL "
                        "ORDER BY v.fecha DESC",
-                       from_day, from_month, from_year,
-                       to_day+1, to_month, to_year);
+                       from_day, from_month, from_year, from_hour, from_min,
+                       to_day, to_month, to_year, to_hour, to_min);
 
   res = EjecutarSQL (q);
 
@@ -1075,21 +1096,28 @@ inmovilizados_en_periodo (gint from_year, gint from_month, gint from_day, gchar 
 
 
 gint
-GetTotalCashSell (guint from_year, guint from_month, guint from_day,
-                  guint to_year, guint to_month, guint to_day, gint *total)
+GetTotalCashSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                  guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total)
 {
   PGresult *res;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+   
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT round (SUM(vd.precio * vd.cantidad)), "
       "count (Distinct(v.id)) "
       "FROM venta v,venta_detalle vd "
-      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-      "AND fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+      "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND fecha<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND v.id = id_venta "
       "AND tipo_venta = %d "
       "AND v.id NOT IN (select id_sale from venta_anulada)",
-      from_day, from_month, from_year, to_day+1, to_month, to_year, CASH));
+      from_day, from_month, from_year, from_hour, from_min,
+      to_day, to_month, to_year, to_hour, to_min, CASH));
 
   if (res == NULL)
     return 0;
@@ -1100,21 +1128,27 @@ GetTotalCashSell (guint from_year, guint from_month, guint from_day,
 }
 
 gint
-GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
-                    guint to_year, guint to_month, guint to_day, gint *total)
+GetTotalCreditSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                    guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total)
 {
   PGresult *res;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT COALESCE (SUM ((SELECT SUM(cantidad * precio) FROM venta_detalle WHERE id_venta=venta.id)), 0), "
       "       COALESCE (count (*), 0) "
       "FROM venta "
-      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
-      "AND fecha<to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND fecha<=to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
       "AND ((tipo_venta)=%d OR (tipo_venta)=%d) "
       "AND venta.id NOT IN (SELECT id_sale FROM venta_anulada)",
-      from_day, from_month, from_year, to_day+1, to_month, to_year, CREDITO, TARJETA));
+      from_day, from_month, from_year, from_hour, from_min,
+      to_day, to_month, to_year, to_hour, to_min, CREDITO, TARJETA));
 
   if (res == NULL)
     return 0;
@@ -1135,21 +1169,27 @@ GetTotalCreditSell (guint from_year, guint from_month, guint from_day,
  * @param: gdouble *total_otros: In which to store the result (Others total)
  */
 void
-total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
-                              guint to_year, guint to_month, guint to_day,
+total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+                              guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min,
                               gint *total_iva, gint *total_otros)
 {
   PGresult *res;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   res = EjecutarSQL
     (g_strdup_printf
      ("SELECT ROUND (SUM((SELECT SUM(iva)   FROM venta_detalle WHERE id_venta=v.id))) AS total_iva, "
       "       ROUND (SUM((SELECT SUM(otros) FROM venta_detalle WHERE id_venta=v.id))) AS total_otros "
       "FROM venta v "
-      "WHERE fecha >= TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
-      "AND fecha   <  TO_TIMESTAMP ('%.2d %.2d %.4d', 'DD MM YYYY') "
+      "WHERE fecha >= TO_TIMESTAMP ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+      "AND fecha   <= TO_TIMESTAMP ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
       "AND v.id NOT IN (SELECT id_sale FROM venta_anulada)",
-      from_day, from_month, from_year, to_day+1, to_month, to_year));
+      from_day, from_month, from_year, from_hour, from_min,
+      to_day, to_month, to_year, to_hour, to_min));
 
   if (res == NULL)
     return;
@@ -1160,19 +1200,26 @@ total_taxes_on_time_interval (guint from_year, guint from_month, guint from_day,
 
 
 gint
-GetTotalSell (guint from_year, guint from_month, guint from_day,
-              guint to_year, guint to_month, guint to_day, gint *total)
+GetTotalSell (guint from_year, guint from_month, guint from_day, guint from_hour, guint from_min,
+              guint to_year, guint to_month, guint to_day, guint to_hour, guint to_min, gint *total)
 {
   PGresult *res;
-
+  
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   res = EjecutarSQL (g_strdup_printf
                      ("SELECT COALESCE (ROUND(SUM(vd.precio * vd.cantidad)), 0), "
                       "       COALESCE (COUNT(DISTINCT(v.id)), 0) "
                       "FROM venta v, venta_detalle vd "
-                      "WHERE fecha>=to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') "
-                      "AND fecha<to_timestamp('%.2d %.2d %.4d', 'DD MM YYYY') and v.id = id_venta "
+                      "WHERE fecha >= to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                      "AND fecha   <= to_timestamp('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                      "AND v.id = id_venta "
                       "AND  v.id NOT IN (select id_sale from venta_anulada)",
-                      from_day, from_month, from_year, to_day+1, to_month, to_year));
+                      from_day, from_month, from_year, from_hour, from_min,
+                      to_day, to_month, to_year, to_hour, to_min));
 
   if (res == NULL)
     return 0;
@@ -1234,7 +1281,7 @@ RutExist (const gchar *rut)
   PGresult *res;
   gchar *q;
   gchar *rut2 = g_strdup(rut);
-  q = g_strdup_printf ("SELECT * FROM cliente WHERE rut=%s", strtok(rut2,"-"));
+  q = g_strdup_printf ("SELECT * FROM cliente WHERE rut=%s", strtok(g_strdup(rut2),"-"));
   res = EjecutarSQL (q);
   g_free (q);
 
@@ -2549,19 +2596,27 @@ SaveProductsSell (Productos *products, gint id_venta, gint tipo_venta)
 /*--------- TRANSFER RANK START -------------------*/
 
 PGresult *
-ReturnTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio)
+ReturnTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                    gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gboolean traspaso_envio)
 {
   PGresult *res;
   gchar *q, *traspaso_envio_q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   if (traspaso_envio == TRUE)
     traspaso_envio_q = g_strdup ("'t'");
   else
     traspaso_envio_q = g_strdup("'f'");
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_traspaso (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, traspaso_envio_q);
+    ("SELECT * FROM ranking_traspaso (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                     "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, %s)",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, traspaso_envio_q);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2573,10 +2628,16 @@ ReturnTransferRank (gint from_year, gint from_month, gint from_day, gint to_year
 }
 
 PGresult *
-ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio)
+ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gboolean traspaso_envio)
 {
   PGresult *res;
   gchar *q, *traspaso_envio_q;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   if (traspaso_envio == TRUE)
     traspaso_envio_q = g_strdup ("'t'");
@@ -2584,8 +2645,10 @@ ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint to_ye
     traspaso_envio_q = g_strdup ("'f'");
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_traspaso_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, traspaso_envio_q);
+    ("SELECT * FROM ranking_traspaso_mp (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                        "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, %s)",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, traspaso_envio_q);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2597,10 +2660,16 @@ ReturnMpTransferRank (gint from_year, gint from_month, gint from_day, gint to_ye
 }
 
 PGresult *
-ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gboolean traspaso_envio)
+ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gboolean traspaso_envio)
 {
   PGresult *res;
   gchar *q, *traspaso_envio_q;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   if (traspaso_envio == TRUE)
     traspaso_envio_q = g_strdup ("'t'");
@@ -2608,8 +2677,10 @@ ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint to_ye
     traspaso_envio_q = g_strdup ("'f'");
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_traspaso_mc (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, %s)",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, traspaso_envio_q);
+    ("SELECT * FROM ranking_traspaso_mc (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                        "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, %s)",
+     from_day, from_month, from_year, to_day, from_hour, from_min,
+     to_month, to_year, to_hour, to_min, traspaso_envio_q);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2624,10 +2695,16 @@ ReturnMcTransferRank (gint from_year, gint from_month, gint from_day, gint to_ye
 
 
 PGresult *
-ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                    gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family)
 {
   PGresult *res;
   gchar *q, *family_filter;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   if (family == 0)
     family_filter = g_strdup ("");
@@ -2635,8 +2712,10 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+    ("SELECT * FROM ranking_ventas (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                   "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone) %s",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2648,10 +2727,16 @@ ReturnProductsRank (gint from_year, gint from_month, gint from_day, gint to_year
 }
 
 PGresult *
-ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family)
 {
   PGresult *res;
   gchar *q, *family_filter;
+
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   if (family == 0)
     family_filter = g_strdup ("");
@@ -2659,8 +2744,10 @@ ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+    ("SELECT * FROM ranking_ventas_mp (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                      "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone) %s",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2672,19 +2759,27 @@ ReturnMpProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
 }
 
 PGresult *
-ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gint family)
+ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                      gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gint family)
 {
   PGresult *res;
   gchar *q, *family_filter;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   if (family == 0)
     family_filter = g_strdup ("");
   else
     family_filter = g_strdup_printf("WHERE familia = %d", family);
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_mc (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date) %s",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, family_filter);
+    ("SELECT * FROM ranking_ventas_mc (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                      "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone) %s",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, family_filter);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2703,14 +2798,22 @@ ReturnMcProductsRank (gint from_year, gint from_month, gint from_day, gint to_ye
  *
  */
 PGresult *
-ReturnDerivTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+ReturnDerivTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                         gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   q = g_strdup_printf
-    ("SELECT * FROM ranking_traspaso_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+    ("SELECT * FROM ranking_traspaso_deriv (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                           "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, '%s')",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2727,14 +2830,22 @@ ReturnDerivTransferRank (gint from_year, gint from_month, gint from_day, gint to
  *
  */
 PGresult *
-ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                        gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   q = g_strdup_printf
-    ("SELECT * FROM ranking_traspaso_comp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+    ("SELECT * FROM ranking_traspaso_comp (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                          "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, '%s')",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2752,14 +2863,22 @@ ReturnCompTransferRank (gint from_year, gint from_month, gint from_day, gint to_
  *
  */
 PGresult *
-ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                         gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre)
 {
   PGresult *res;
   gchar *q;
+  
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
 
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+    ("SELECT * FROM ranking_ventas_deriv (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                         "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, '%s')",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -2776,14 +2895,22 @@ ReturnDerivProductsRank (gint from_year, gint from_month, gint from_day, gint to
  *
  */
 PGresult *
-ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint to_year, gint to_month, gint to_day, gchar *barcode_madre)
+ReturnCompProductsRank (gint from_year, gint from_month, gint from_day, gint from_hour, gint from_min,
+                        gint to_year, gint to_month, gint to_day, gint to_hour, gint to_min, gchar *barcode_madre)
 {
   PGresult *res;
   gchar *q;
 
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA")) {
+    from_hour = from_min = 0;
+    to_hour = 23; to_min = 59;
+  }
+  
   q = g_strdup_printf
-    ("SELECT * FROM ranking_ventas_comp (to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')::date, '%s')",
-     from_day, from_month, from_year, to_day+1, to_month, to_year, barcode_madre);
+    ("SELECT * FROM ranking_ventas_comp (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                                        "to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, '%s')",
+     from_day, from_month, from_year, from_hour, from_min,
+     to_day, to_month, to_year, to_hour, to_min, barcode_madre);
 
   res = EjecutarSQL (q);
   g_free (q);
@@ -3746,7 +3873,7 @@ provider_exist (const gchar *rut)
   PGresult *res;
   gchar *q;
   gchar *rut2 = g_strdup(rut);
-  q = g_strdup_printf ("SELECT count(*) FROM proveedor WHERE rut=%s", strtok(rut2,"-"));
+  q = g_strdup_printf ("SELECT count(*) FROM proveedor WHERE rut=%s", strtok(g_strdup(rut2),"-"));
   res = EjecutarSQL (q);
   g_free (q);
   g_free (rut2);

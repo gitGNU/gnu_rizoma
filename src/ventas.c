@@ -1769,7 +1769,7 @@ on_sell_button_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (monto >= 180)
+      if (monto >= rizoma_get_value_int ("VALE_MINIMO"))
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -3544,7 +3544,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (tiene_limite_credito ( atoi (strtok (str_rut,"-")) ) &&
+  if (tiene_limite_credito (rut) &&
       LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
       gtk_widget_show (GTK_WIDGET (builder_get (builder, "msg_credit_out")));
@@ -3572,7 +3572,7 @@ on_btn_credit_sale_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (monto >= 180)
+      if (monto >= rizoma_get_value_int ("VALE_MINIMO"))
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;
@@ -4350,7 +4350,7 @@ on_btn_make_invoice_clicked (GtkButton *button, gpointer data)
       return;
     }
 
-  if (tiene_limite_credito ( atoi (strtok (str_rut,"-")) ) &&
+  if (tiene_limite_credito ( atoi (strtok (g_strdup(str_rut),"-")) ) &&
       LimiteCredito (str_rut) < (DeudaTotalCliente (rut) + monto))
     {
       widget = gtk_widget_get_ancestor(GTK_WIDGET(button),GTK_TYPE_WINDOW);
@@ -4555,7 +4555,7 @@ on_btn_accept_mixed_pay_clicked (GtkButton *button, gpointer data)
       switch (tipo_documento)
         {
         case SIMPLE: case VENTA:
-          if (total >= 180)
+          if (total >= rizoma_get_value_int ("VALE_MINIMO"))
             ticket = get_ticket_number (tipo_documento);
           else
             ticket = -1;
@@ -4711,7 +4711,7 @@ on_btn_accept_mixed_pay2_clicked (GtkButton *button, gpointer data)
   switch (tipo_documento)
     {
     case SIMPLE: case VENTA:
-      if (total >= 180)
+      if (total >= rizoma_get_value_int ("VALE_MINIMO"))
         ticket = get_ticket_number (tipo_documento);
       else
         ticket = -1;

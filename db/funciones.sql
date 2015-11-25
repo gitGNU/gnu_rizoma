@@ -2575,8 +2575,8 @@ end; $$ language plpgsql;
 -- Se obtienen los detalles de cada venta
 -- (agrupados por producto) para el ranking de ventas.
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas (IN starts date,
-       	  	  	   		   IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas (IN starts timestamp,
+       	  	  	   		   IN ends timestamp,
        					   OUT barcode varchar,
        					   OUT descripcion varchar,
        					   OUT marca varchar,
@@ -2612,7 +2612,7 @@ BEGIN
        INNER JOIN venta_detalle vd
        ON vd.id_venta = v.id
   WHERE (vd.tipo = corriente_l OR vd.tipo = derivada_l)
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   GROUP BY vd.barcode;
 
@@ -2627,7 +2627,7 @@ BEGIN
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id
   WHERE (vmcd.tipo_componente = corriente_l OR vmcd.tipo_componente = derivada_l)
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   GROUP BY vmcd.barcode_componente;
 
@@ -2675,8 +2675,8 @@ END; $$ language plpgsql;
 -- Ranking de ventas de las materias primas
 -- (ventas indirectas).
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts date,
-       	  	  	   		      IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_mp (IN starts timestamp,
+       	  	  	   		      IN ends timestamp,
 					      OUT barcode varchar,
 					      OUT descripcion varchar,
 					      OUT marca varchar,
@@ -2711,7 +2711,7 @@ BEGIN
 			       		   --CASE WHEN vmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN vmcd.barcode_hijo
 	     	 	       		   --	WHEN vmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN vmcd.barcode_madre
 					   --END
-		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha <= $S$ || quote_literal(ends) || $S$
 		       AND vmcd.tipo_componente = $S$||materia_prima_l||$S$ -- OR vmcd.tipo_complejo = $S$||materia_prima_l||$S$
 		       AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
 		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
@@ -2737,8 +2737,8 @@ END; $$ LANGUAGE plpgsql;
 -- Ranking de ventas de los productos derivados
 -- (ventas indirectas).
 --
-CREATE OR REPLACE FUNCTION ranking_ventas_deriv (IN starts date,
-       	  	  	   		      	 IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_deriv (IN starts timestamp,
+       	  	  	   		      	 IN ends timestamp,
 						 IN barcode_mp varchar,
 					      	 OUT barcode varchar,
 					      	 OUT descripcion varchar,
@@ -2771,7 +2771,7 @@ BEGIN
   INNER JOIN venta_detalle vd
   ON vd.id_venta = v.id
   WHERE vd.tipo = derivada_l
-  AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
   AND vd.barcode IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente=barcode_mp::bigint)
   GROUP BY vd.barcode;
@@ -2787,7 +2787,7 @@ BEGIN
        INNER JOIN venta_mc_detalle vmcd
        ON vmcd.id_venta_vd = v.id
   WHERE vmcd.tipo_componente = derivada_l
-  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<quote_literal(ends)::timestamp
+  	AND v.fecha>=quote_literal(starts)::timestamp AND v.fecha<=quote_literal(ends)::timestamp
   	AND v.id NOT IN (SELECT id_sale FROM venta_anulada)
 	AND vmcd.barcode_complejo IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente = barcode_mp::bigint)
   GROUP BY vmcd.barcode_complejo;
@@ -2834,8 +2834,8 @@ END; $$ LANGUAGE plpgsql;
 -- Ranking de ventas de los componentes de un producto compuesto
 -- (ventas indirectas).
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas_comp (IN starts date,
-       	  	  	   		      	IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_comp (IN starts timestamp,
+       	  	  	   		      	IN ends timestamp,
 						IN barcode_mc varchar,
 					      	OUT barcode varchar,
 					      	OUT descripcion varchar,
@@ -2872,7 +2872,7 @@ BEGIN
 			INNER JOIN venta v
 			ON venta_mc_detalle.id_venta_vd = v.id
 		   WHERE barcode_complejo = $S$ || barcode_mc || $S$
-			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha <= $S$ || quote_literal(ends) || $S$
         	   UNION ALL
         	   SELECT vmcd.id_venta_vd, vmcd.barcode_complejo, vmcd.id_mh, vmcd.tipo_complejo,
 		      	  vmcd.barcode_componente, vmcd.tipo_componente, vmcd.cantidad,
@@ -2922,8 +2922,8 @@ END; $$ LANGUAGE plpgsql;
 ---
 -- Ranking de ventas de las mercaderías compuestas
 ---
-CREATE OR REPLACE FUNCTION ranking_ventas_mc (IN starts date,
-       	  	  	   		      IN ends date,
+CREATE OR REPLACE FUNCTION ranking_ventas_mc (IN starts timestamp,
+       	  	  	   		      IN ends timestamp,
 					      OUT barcode varchar,
 					      OUT descripcion varchar,
 					      OUT marca varchar,
@@ -2951,7 +2951,7 @@ BEGIN
 		 ON v.id = vd.id_venta
 		 INNER JOIN producto p
 		 ON p.barcode = vd.barcode
-		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<$S$ || quote_literal(ends) || $S$
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<=$S$ || quote_literal(ends) || $S$
 		 AND vd.tipo=$S$ || compuesta_l || $S$
 		 GROUP BY 1,2,3,4,5,6 ORDER BY p.descripcion ASC $S$;
 
@@ -2981,8 +2981,8 @@ END; $$ LANGUAGE plpgsql;
 -- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
 -- TODOO:: revisar, se deben mostrar las materias primas????
 ---
-CREATE OR REPLACE FUNCTION ranking_traspaso (IN starts date,
-       	  	  	   		     IN ends date,
+CREATE OR REPLACE FUNCTION ranking_traspaso (IN starts timestamp,
+       	  	  	   		     IN ends timestamp,
 					     IN traspaso_envio boolean,
        					     OUT barcode varchar,
        					     OUT descripcion varchar,
@@ -3024,7 +3024,7 @@ BEGIN
        INNER JOIN traspaso_detalle td
        ON td.id_traspaso = t.id
   WHERE (td.tipo = corriente_l OR td.tipo = derivada_l)
-  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<=quote_literal(ends)::timestamp
   GROUP BY td.barcode, t.origen;
 
   -- Incluye en la tabla temporal venta_detalle_completa el detalle de los componentes de una merc. compleja
@@ -3037,7 +3037,7 @@ BEGIN
        INNER JOIN traspaso_mc_detalle tmcd
        ON tmcd.id_traspaso = t.id
   WHERE (tmcd.tipo_componente = corriente_l OR tmcd.tipo_componente = derivada_l) --Incluir las materias primas??
-  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<=quote_literal(ends)::timestamp
   GROUP BY tmcd.barcode_componente, t.origen;
 
   q := $S$
@@ -3082,8 +3082,8 @@ END; $$ language plpgsql;
 --
 -- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
 ---
-CREATE OR REPLACE FUNCTION ranking_traspaso_mp (IN starts date,
-       	  	  	   		        IN ends date,
+CREATE OR REPLACE FUNCTION ranking_traspaso_mp (IN starts timestamp,
+       	  	  	   		        IN ends timestamp,
 					        IN traspaso_envio boolean,
 					        OUT barcode varchar,
 					        OUT descripcion varchar,
@@ -3127,7 +3127,7 @@ BEGIN
 			       		   --CASE WHEN tmcd.tipo_hijo = $S$||materia_prima_l||$S$ THEN tmcd.barcode_hijo
 	     	 	       		   --	WHEN tmcd.tipo_madre = $S$||materia_prima_l||$S$ THEN tmcd.barcode_madre
 					   --END
-		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<= $S$ || quote_literal(ends) || $S$
 		       --AND (tmcd.tipo_hijo = $S$||materia_prima_l||$S$ OR tmcd.tipo_madre = $S$||materia_prima_l||$S$)
 		       AND tmcd.tipo_componente = $S$||materia_prima_l||$S$
 		       AND $S$ ||filtro|| $S$
@@ -3152,8 +3152,8 @@ END; $$ LANGUAGE plpgsql;
 -- Ranking de traspaso de los productos derivados
 -- (traspasos indirectos).
 ---
-CREATE OR REPLACE FUNCTION ranking_traspaso_deriv (IN starts date,
-       	  	  	   		      	   IN ends date,
+CREATE OR REPLACE FUNCTION ranking_traspaso_deriv (IN starts timestamp,
+       	  	  	   		      	   IN ends timestamp,
 						   IN barcode_mp varchar,
 					      	   OUT barcode varchar,
 					      	   OUT descripcion varchar,
@@ -3181,7 +3181,7 @@ BEGIN
        INNER JOIN traspaso_detalle td
        ON td.id_traspaso = t.id
   WHERE td.tipo = derivada_l
-  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<=quote_literal(ends)::timestamp
   	AND td.barcode IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente=barcode_mp::bigint)
   GROUP BY td.barcode;
 
@@ -3194,7 +3194,7 @@ BEGIN
        INNER JOIN traspaso_mc_detalle tmcd
        ON tmcd.id_traspaso = t.id
   WHERE tmcd.tipo_componente = derivada_l
-  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<quote_literal(ends)::timestamp
+  	AND t.fecha>=quote_literal(starts)::timestamp AND t.fecha<=quote_literal(ends)::timestamp
 	AND tmcd.barcode_complejo IN (SELECT barcode_complejo FROM componente_mc WHERE barcode_componente = barcode_mp::bigint)
   GROUP BY tmcd.barcode_complejo;
 
@@ -3236,8 +3236,8 @@ END; $$ LANGUAGE plpgsql;
 -- Ranking de traspaso de los componentes de un producto compuesto
 -- (traspasos indirectos).
 ---
-CREATE OR REPLACE FUNCTION ranking_traspaso_comp (IN starts date,
-       	  	  	   		      	  IN ends date,
+CREATE OR REPLACE FUNCTION ranking_traspaso_comp (IN starts timestamp,
+       	  	  	   		      	  IN ends timestamp,
 						  IN barcode_mc varchar,
 					      	  OUT barcode varchar,
 					      	  OUT descripcion varchar,
@@ -3268,7 +3268,7 @@ BEGIN
 			INNER JOIN traspaso t
 			ON traspaso_mc_detalle.id_traspaso = t.id
 		   WHERE barcode_complejo = $S$ || barcode_mc || $S$
-			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha< $S$ || quote_literal(ends) || $S$
+			 AND fecha>=$S$ || quote_literal(starts) || $S$ AND fecha <= $S$ || quote_literal(ends) || $S$
         	   UNION ALL
         	   SELECT tmcd.id_traspaso, tmcd.barcode_complejo, tmcd.id_mh, tmcd.tipo_complejo,
 		      	  tmcd.barcode_componente, tmcd.tipo_componente, tmcd.cantidad, tmcd.costo_promedio
@@ -3313,8 +3313,8 @@ END; $$ LANGUAGE plpgsql;
 --
 -- NOTA: traspaso_envio = TRUE (enviados); ELSE (recibidos)
 ---
-CREATE OR REPLACE FUNCTION ranking_traspaso_mc (IN starts date,
-       	  	  	   		        IN ends date,
+CREATE OR REPLACE FUNCTION ranking_traspaso_mc (IN starts timestamp,
+       	  	  	   		        IN ends timestamp,
 						IN traspaso_envio boolean,
 					        OUT barcode varchar,
 					      	OUT descripcion varchar,
@@ -3351,7 +3351,7 @@ BEGIN
 		 ON t.id = td.id_traspaso
 		 INNER JOIN producto p
 		 ON p.barcode = td.barcode
-		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<$S$ || quote_literal(ends) || $S$
+		 WHERE fecha>=$S$ || quote_literal(starts) || $S$ AND fecha<=$S$ || quote_literal(ends) || $S$
 		 AND td.tipo=$S$ || compuesta_l || $S$
 		 AND $S$||filtro|| $S$
 		 GROUP BY 1,2,3,4,5,6,7 ORDER BY p.descripcion ASC $S$;
@@ -4165,7 +4165,12 @@ begin
 
         current_stock = current_stock + stock_add;
 
-        fifo = (suma / current_stock);
+	
+	if current_stock > 0 AND suma > 0 then
+            fifo = (suma / current_stock);
+	else
+	    fifo = current_fifo;
+        end if;
 
         return fifo;
 end; $$ language plpgsql;
@@ -4187,10 +4192,10 @@ declare
        l record;
 begin
 	--Tipo Venta = 0 (es en efectivo), tipo_venta debería llamarse "tipo_pago"
-        select COALESCE (SUM (descuento), 0) into total_cash_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
+        select COALESCE (SUM (descuento), 0) into total_cash_discount from venta where fecha >= starts and fecha <= ends and descuento!=0
                 and tipo_venta=0 and venta.id not in (select id_sale from venta_anulada);
 
-        select COALESCE (count(*), 0) into total_discount from venta where fecha >= starts and fecha < ends+'1 days' and descuento!=0
+        select COALESCE (count(*), 0) into total_discount from venta where fecha >= starts and fecha <= ends and descuento!=0
                 and tipo_venta=0 and venta.id not in (select id_sale from venta_anulada);
 return next;
 return;

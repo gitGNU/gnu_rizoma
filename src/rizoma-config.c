@@ -115,6 +115,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "EMITIR_DOCUMENTO", "1"); //Emite documentos aunque no se imprima
   g_key_file_set_string (file, "RIZOMA", "VALE_SELECTIVO", "NO");
   g_key_file_set_string (file, "RIZOMA", "VALE_CONTINUO", "0");
+  g_key_file_set_string (file, "RIZOMA", "VALE_MINIMO", "180");
   g_key_file_set_string (file, "RIZOMA", "LOGO", "");
   g_key_file_set_string (file, "RIZOMA", "FULLSCREEN", "0");
   g_key_file_set_string (file, "RIZOMA", "CAJA", "0");
@@ -133,6 +134,7 @@ create_config (GtkAssistant *asistente, gpointer data_user)
   g_key_file_set_string (file, "RIZOMA", "BAR_NUM_DECIMAL", "1");
   g_key_file_set_string (file, "RIZOMA", "MONTO_BASE_CAJA", "0");
   g_key_file_set_string (file, "RIZOMA", "MODO_INVENTARIO", "0");
+  g_key_file_set_string (file, "RIZOMA", "INFORME_FILTRO_HORA", "0");
   g_key_file_set_string (file, "RIZOMA", "PRECIO_DISCRECIONAL", "0");
   g_key_file_set_string (file, "RIZOMA", "GANANCIA_MINIMA", "0"); //En terminos porcentuales
   g_key_file_set_string (file, "RIZOMA", "MODO_GUIA_FACTURA", "0"); //Modo para visualización en venta

@@ -45,6 +45,7 @@ PGresult *res_sells;
 gint contador, fin;
 GDate *date_begin;
 GDate *date_end;
+gint hrIni, hrFin, minIni, minFin;
 //int flagProgress;
 
 /**
@@ -233,8 +234,8 @@ change_sell_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *stock
 
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_deriv));
 
-      res = ReturnDerivProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnDerivProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -282,8 +283,8 @@ change_sell_rank_mc (GtkCellRendererText *cell, gchar *path_string, gchar *stock
 
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_comp));
 
-      res = ReturnCompProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnCompProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -333,8 +334,8 @@ change_transfer_rank_mp (GtkCellRendererText *cell, gchar *path_string, gchar *s
 
       gtk_list_store_clear (GTK_LIST_STORE (store_sr_deriv));
 
-      res = ReturnDerivTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnDerivTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -379,8 +380,8 @@ change_transfer_rank_mc (GtkCellRendererText *cell, gchar *path_string, gchar *s
 
       gtk_list_store_clear (GTK_LIST_STORE (store_tr_comp));
 
-      res = ReturnCompTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), barcode_producto);
+      res = ReturnCompTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+				    g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, barcode_producto);
 
       tuples = PQntuples (res);
 
@@ -1080,6 +1081,29 @@ reports_win (void)
   gtk_builder_connect_signals (builder, NULL);
 
 
+  /*Inicializando SpinButton de Horas*/
+  GtkSpinButton *spnBtnHourIni = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourIni"));
+  GtkSpinButton *spnBtnMinIni  = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinIni" ));
+  GtkSpinButton *spnBtnHourFin = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourFin"));
+  GtkSpinButton *spnBtnMinFin  = GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinFin" ));
+
+  /*Setting Range*/
+  gtk_spin_button_set_range(spnBtnHourIni, 0, 23);
+  gtk_spin_button_set_range(spnBtnMinIni,  0, 59);
+
+  gtk_spin_button_set_range(spnBtnHourFin, 0, 23);
+  gtk_spin_button_set_range(spnBtnMinFin,  0, 59);
+
+  /*Setting Increments*/
+  gtk_spin_button_set_increments (spnBtnHourIni, 1, 0);
+  gtk_spin_button_set_increments (spnBtnMinIni,  1, 0);
+  gtk_spin_button_set_increments (spnBtnHourFin, 1, 0);
+  gtk_spin_button_set_increments (spnBtnMinFin,  1, 0);
+
+  /*Set Init Value*/
+  gtk_spin_button_set_value (spnBtnHourFin, 23);
+  gtk_spin_button_set_value (spnBtnMinFin,  59);
+  
   /* Sells */
   store = gtk_list_store_new (7,
                               G_TYPE_STRING,  //Fecha
@@ -4218,6 +4242,11 @@ reports_win (void)
   // Se inicializan con la fecha actual
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_begin"), CurrentDate(1));
   gtk_entry_set_text ((GtkEntry *) gtk_builder_get_object (builder,"entry_date_end"), CurrentDate(1));
+
+  /*Set filter hour visibility*/
+  if (!rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
+    gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+
 }
 
 /**
@@ -4754,14 +4783,14 @@ fill_sells_list ()
 
   /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
      retorna los datos de ventas en un intervalo de fechas*/
-  res_sells = SearchTuplesByDate
-    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
-     "fecha", " id, maquina, "
-              " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
-              " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
-              " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
-     store_combo);
+    res_sells = SearchTuplesByDate
+      (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
+       "fecha", " id, maquina, "
+                " (SELECT usuario FROM users WHERE id = vendedor) AS vendedor, "
+                " monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
+                " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
+       store_combo);
 
   tuples = PQntuples (res_sells);
 
@@ -4909,8 +4938,8 @@ on_togglebtn_clicked()
       /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
 	 retorna los datos de ventas en un intervalo de fechas*/
       res_sells = SearchTuplesByDate
-	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-	 g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end),
+	(g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+         g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
 	 "fecha", " id, maquina, vendedor, monto, to_char (fecha, 'DD/MM/YY HH24:MI:SS') as fmt_fecha, tipo_venta,"
 	          " (SELECT id_sale FROM venta_anulada WHERE id_sale = id) id_null_sell",
 	 store_combo);
@@ -5016,8 +5045,8 @@ fill_exempt_sells ()
   /* esta funcion  SearchTuplesByDate() llama a una consulta de sql, que
      retorna los datos de ventas en un intervalo de fechas */
   res = exempt_sells_on_date
-    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+    (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin);
 
   tuples = PQntuples (res);
   nventas = PutPoints (g_strdup_printf ("%d", tuples));
@@ -5080,10 +5109,10 @@ fill_exempt_sells ()
 		       "date_part ('day', fecha_vencimiento) AS fvto_day "
 
 		       "FROM cheque_rest cr INNER JOIN venta v ON cr.id_venta = v.id "
-		       "WHERE v.fecha >= to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-		       "AND v.fecha <= to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')",
-		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-		       g_date_get_day (date_end)+1, g_date_get_month (date_end), g_date_get_year (date_end));
+		       "WHERE v.fecha >= to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+		       "AND v.fecha <= to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')",
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni,
+		       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   res = EjecutarSQL (q);
   tuples = PQntuples (res);
@@ -5195,10 +5224,11 @@ fill_devolucion ()
 
   /* consulta de sql que retorna los datos necesarios de una devolucion en
      un intrevalo de tiempo*/
-  query = g_strdup_printf ("select fecha, id, monto, proveedor from devolucion where fecha>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-                           "and fecha<to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY')  order by id"
-                           , g_date_get_day (date_begin),g_date_get_month (date_begin), g_date_get_year (date_begin)
-                           , g_date_get_day (date_end) + 1,g_date_get_month (date_end),  g_date_get_year (date_end));
+  query = g_strdup_printf ("SELECT fecha, id, monto, proveedor from devolucion "
+                           "WHERE fecha>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                           "AND fecha<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') ORDER BY id"
+                           , g_date_get_day (date_begin),g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+                           , g_date_get_day (date_end),g_date_get_month (date_end),  g_date_get_year (date_end), hrFin, minFin);
 
 
   res = EjecutarSQL (query);
@@ -5312,23 +5342,24 @@ void
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
 
   /* funcion que retorna el total de la ventas al contado en un intervalo de tiempo*/
-  total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
-				      g_date_get_day (date_begin),  g_date_get_year (date_end),
-				      g_date_get_month (date_end), g_date_get_day (date_end),
+  total_cash_sell = GetTotalCashSell (g_date_get_year (date_begin), g_date_get_month (date_begin),  g_date_get_day (date_begin), hrIni, minIni,
+                                      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
                                       &total_cash);
 
   /*Esta funcion entrega el total del iva y otros dentro del rango de fecha entregado*/
-  total_taxes_on_time_interval (g_date_get_year (date_begin), g_date_get_month (date_begin),
-				g_date_get_day (date_begin),  g_date_get_year (date_end),
-				g_date_get_month (date_end), g_date_get_day (date_end),
+  total_taxes_on_time_interval (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                                g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
 				&total_iva, &total_otros);
 
   /* Consulta que retorna el numero de ventas con descuento y la suma total
      con descuento en un intervalo de tiempo */
+  
+  //NOTA: Por defecto hrIni = minIni = 0 | HrFin = 23 minFin = 59 (este o no habilitada la opcion de la hora)
   res = EjecutarSQL
-    (g_strdup_printf ("SELECT * FROM sells_get_totals (to_date ('%.2d %.2d %.4d', 'DD MM YYYY'), to_date ('%.2d %.2d %.4d', 'DD MM YYYY'))",
-                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin),
-                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end)));
+    (g_strdup_printf ("SELECT * FROM sells_get_totals (to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone, "
+                      "                                to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp without time zone )",
+                      g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni,
+                      g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin));
 
   if (res != NULL)
     {
@@ -5337,16 +5368,14 @@ void
     }
 
   /* Funcion que retorna el total de ventas a credito en un intervarlo de tiempo */
-  total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
-					  g_date_get_day (date_begin), g_date_get_year (date_end),
-					  g_date_get_month (date_end), g_date_get_day (date_end),
+  total_credit_sell = GetTotalCreditSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                                          g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
                                           &total_credit);
 
   /* Funcion que retorna el total de todas las ventas(al contado, con
      descuento y a credito ) en un intervarlo de tiempo */
-  total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin),
-			     g_date_get_day (date_begin), g_date_get_year (date_end),
-			     g_date_get_month (date_end), g_date_get_day (date_end),
+  total_sell = GetTotalSell (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			     g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin,
                              &total_ventas);
 
   /*Taxes*/
@@ -5460,8 +5489,8 @@ fill_transfer_rank (gboolean traspaso_envio)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+  res = ReturnTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, traspaso_envio);
 
   tuples = PQntuples (res);
 
@@ -5517,8 +5546,8 @@ fill_transfer_rank_mp (gboolean traspaso_envio)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMpTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+  res = ReturnMpTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, traspaso_envio);
 
   tuples = PQntuples (res);
 
@@ -5577,8 +5606,8 @@ fill_transfer_rank_mc (gboolean traspaso_envio)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMcTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), traspaso_envio);
+  res = ReturnMcTransferRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, traspaso_envio);
 
   tuples = PQntuples (res);
 
@@ -5638,8 +5667,8 @@ fill_products_rank (gint familia)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
+  res = ReturnProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+                            g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, familia);
 
   tuples = PQntuples (res);
 
@@ -5730,8 +5759,8 @@ fill_products_rank_mp (gint familia)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMpProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
+  res = ReturnMpProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),  hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, familia);
 
   tuples = PQntuples (res);
 
@@ -5829,8 +5858,8 @@ fill_products_rank_mc (gint familia)
   gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "btn_get_stat")), FALSE);
   /* funcion que llama una funcion sql que retorna los productos vendidos y
      los ordena por mas vendidos ademas de agregarle otros parametros */
-  res = ReturnMcProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), familia);
+  res = ReturnMcProductsRank (g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin), hrIni, minIni,
+			      g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end), hrFin, minFin, familia);
 
   tuples = PQntuples (res);
 
@@ -5926,11 +5955,11 @@ fill_cash_box_list ()
   query = g_strdup_printf ("SELECT id, fecha_inicio, inicio, fecha_termino, termino, perdida, "
 			   "       (SELECT cash_close_outcome FROM cash_box_report (id)) AS monto_pre_cierre "
 			   "FROM caja "
-			   "WHERE fecha_inicio>=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') "
-			   "AND (fecha_termino<=to_timestamp ('%.2d %.2d %.4d', 'DD MM YYYY') OR fecha_termino IS NULL) "
+			   "WHERE fecha_inicio>=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp "
+			   "AND (fecha_termino<=to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI')::timestamp OR fecha_termino IS NULL) "
 			   "ORDER BY id"
-			   , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin)
-			   , g_date_get_day (date_end) + 1, g_date_get_month (date_end), g_date_get_year (date_end));
+			   , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+			   , g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   res = EjecutarSQL (query);
   g_free (query);
@@ -6140,11 +6169,12 @@ fill_traspaso (gchar *local)
 			    "ON t.destino = b.id "
 			    "WHERE destino != 1 "
 			    "%s "
-			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    "AND fecha BETWEEN to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                            "              AND to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
 			    "ORDER BY fecha ASC"
 			    , local_consulta
-			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
-			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+			    , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+			    , g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
   else
     sql = g_strdup_printf ( "SELECT fecha, t.id, b.nombre AS origen, monto "
 			    "FROM traspaso t "
@@ -6152,11 +6182,12 @@ fill_traspaso (gchar *local)
 			    "ON t.origen = b.id "
 			    "WHERE origen != 1 "
 			    "%s "
-			    "AND fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59' "
+			    "AND fecha BETWEEN to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                            "              AND to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
 			    "ORDER BY fecha ASC"
 			    , local_consulta
-			    , g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin)
-			    , g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+                            , g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni
+			    , g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   res = EjecutarSQL (sql);
   tuples = PQntuples (res);
@@ -6381,9 +6412,10 @@ fill_purchases_list (GtkWidget *widget, gpointer user_data)
 	AlertMSG (widget, "No existen proveedores con el nombre o rut que ha especificado");
     }
 
-  q = g_strdup_printf (" %s AND c.fecha BETWEEN '%.4d-%.2d-%.2d' AND '%.4d-%.2d-%.2d 23:59:59'", q,
-		       g_date_get_year (date_begin), g_date_get_month (date_begin), g_date_get_day (date_begin),
-		       g_date_get_year (date_end), g_date_get_month (date_end), g_date_get_day (date_end));
+  q = g_strdup_printf (" %s AND c.fecha BETWEEN to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') "
+                       "                    AND to_timestamp ('%.2d %.2d %.4d %d:%d', 'DD MM YYYY HH24:MI') ", q,
+		       g_date_get_day (date_begin), g_date_get_month (date_begin), g_date_get_year (date_begin), hrIni, minIni,
+		       g_date_get_day (date_end), g_date_get_month (date_end), g_date_get_year (date_end), hrFin, minFin);
 
   q = g_strdup_printf (" %s GROUP BY c.id, c.fecha, c.rut_proveedor, c.anulada_pi", q);
 
@@ -6455,7 +6487,8 @@ progress_timeout(gpointer data)
  *
  * @param progreso widget de gtk_progress_bar
  */
-gint
+//gint
+void
 avanzar_barra_progreso (GtkWidget * progreso)
 {
   GtkAdjustment *adj;
@@ -6550,6 +6583,16 @@ on_btn_get_stat_clicked (GtkWidget *widget, gpointer user_data)
   GtkNotebook *sub_notebook;
   gint sub_page_num;
 
+
+  //gint hrIni, hrFin, minIni, minFin;
+  hrIni  = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourIni")));
+  minIni = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinIni" )));
+  hrFin  = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnHourFin")));
+  minFin = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (builder_get (builder, "spnBtnMinFin" )));
+
+  //printf("%d:%d  -  %d:%d\n", hrIni, minIni, hrFin, minFin);
+
+  
   if (page_num == 5)
     {
       /* Informe de proveedores */
@@ -6761,6 +6804,18 @@ on_ntbk_reports_switch_page (GtkNotebook *notebook, GtkNotebookPage *page, guint
   PGresult *res;
   GtkNotebook *sub_notebook;
 
+
+  /*Set filter hour visibility*/
+  if (page_num == 0 || page_num == 1 || page_num == 2 || page_num == 3 ||
+      page_num == 4 || page_num == 7 || page_num == 8 || page_num == 9  ) {
+    if (rizoma_get_value_boolean ("INFORME_FILTRO_HORA"))
+      gtk_widget_show (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+    else
+      gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+  } else {
+     gtk_widget_hide (GTK_WIDGET(builder_get (builder, "hboxHourFilter")));
+  }
+  
 
   //NOTA: Cada página se preocupa SOLO de sus PROPIOS widgets (mostrarlos, rellenarlos y ocultarlos)
   /*Paginas 1 y 6*/
