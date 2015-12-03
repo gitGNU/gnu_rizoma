@@ -239,6 +239,7 @@ CalcularSoloAfecto (Productos *header)
   return total;
 }
 
+//TODO: Que sepa si tiene impuestos sin llamar a la base de datos
 gdouble
 CalcularSoloNoAfecto (Productos *header)
 {

@@ -78,8 +78,8 @@ typedef struct _product
 
   /* Impuestos */
   gboolean impuestos; //Se usa en venta
-  gint iva;
-  gint otros;
+  gdouble iva;
+  gdouble otros;
   gint otros_id;
 
   /* En ventas Mixtas, su proporción de impuesto 

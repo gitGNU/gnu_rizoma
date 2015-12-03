@@ -1965,6 +1965,11 @@ TipoVenta (GtkWidget *widget, gpointer data)
         gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_monto_pagado")), g_strdup_printf ("<span size=\"20000\">%s</span>",
 												      PutPoints (g_strdup_printf ("%d",venta->total_pagado)) ));
 
+
+      gint afecto_impuesto = CalcularSoloAfecto(venta->header);
+      gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_afecto_impuesto")), g_strdup_printf ("<span size=\"20000\">%s</span>",
+												       PutPoints (g_strdup_printf ("%d",afecto_impuesto)) ));
+
       if (!venta_reserva)
         gtk_widget_set_sensitive (GTK_WIDGET (builder_get (builder, "sell_button")), FALSE);
 
