@@ -268,6 +268,40 @@ CalcularSoloNoAfecto (Productos *header)
   return total;
 }
 
+//TODO: Que sepa si tiene impuestos sin llamar a la base de datos
+gdouble
+CalcularNetoSoloAfecto (Productos *header)
+{
+  Productos *cal = header;
+  gdouble total = 0;
+  gdouble iva, otros, total_impuesto;
+
+  if (cal == NULL)
+    return total;
+
+  do
+    {
+      iva = GetIVA (cal->product->barcode);
+      otros = GetOtros (cal->product->barcode);
+
+      if (iva != 0)
+	{
+	  total_impuesto = ((iva + otros)/100)+1;
+	  if (cal->product->mayorista == FALSE && cal->product->cantidad < cal->product->cantidad_mayorista)
+	    total += (gdouble)((cal->product->precio/total_impuesto) * cal->product->cantidad);
+	  else if (cal->product->mayorista == TRUE && cal->product->cantidad >= cal->product->cantidad_mayorista)
+	    total += (gdouble)((cal->product->precio_mayor/total_impuesto) * cal->product->cantidad);
+	  else
+	    total += (gdouble)((cal->product->precio/total_impuesto) * cal->product->cantidad);
+	}
+      
+      cal = cal->next;
+    }
+  while (cal != header);
+
+  return total;
+}
+
 
 gdouble
 CalcularTotalProporcionAfecta (Productos *header)

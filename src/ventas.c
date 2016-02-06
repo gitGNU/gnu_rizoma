@@ -1987,7 +1987,7 @@ CalcularVuelto (void)
   gint total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (gtk_builder_get_object (builder, "label_total"))))));
   gint resto;
   gchar *resto_t;
-
+      
   /* if (strcmp (pago, "c") == 0) */
   /*   PagoCheque (); */
   if (paga_con > 0)
@@ -2643,16 +2643,38 @@ FillSellData (GtkTreeView *treeview, GtkTreePath *arg1, GtkTreeViewColumn *arg2,
     }
 }
 
+
+void
+CalcularAfectoImpuestoConDescuento(gint money_discount, gint total)
+{
+  gint afecto_impuesto = CalcularSoloAfecto(venta->header);
+  //gdouble valor_neto_afecto = CalcularNetoSoloAfecto(venta->header);
+  gdouble proporcional_afecto_impuesto = 0;
+  gdouble descuento_afecto = 0;
+  gint afecto_impuesto_con_descuento;
+
+  //Se obtiene el total afecto a impuesto (teniendo en cuenta el descuento)
+  proporcional_afecto_impuesto = (gdouble)afecto_impuesto / total;
+  descuento_afecto = money_discount * proporcional_afecto_impuesto;
+  afecto_impuesto_con_descuento = lround(afecto_impuesto - descuento_afecto);
+
+  
+  gtk_label_set_markup (GTK_LABEL (builder_get (builder, "lbl_afecto_impuesto")),
+			g_strdup_printf ("<span size=\"20000\">%s</span>",
+					 PutPoints (g_strdup_printf ("%d",afecto_impuesto_con_descuento)) ));
+}
+
+
 void
 Descuento (GtkWidget *widget, gpointer data)
 {
   gchar *widget_name = g_strdup (gtk_buildable_get_name (GTK_BUILDABLE (widget)));
 
   gint amount = atoi (gtk_entry_get_text (GTK_ENTRY (widget)));
-  gint total;
+  gint total = CalcularTotal(venta->header);
   gint money_discount = 0;
   gint percent_discount = 0;
-
+  
   if (block_discount) return;
 
   block_discount = TRUE;
@@ -2662,6 +2684,7 @@ Descuento (GtkWidget *widget, gpointer data)
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_money")), "");
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_percent")), "");
 
+      CalcularAfectoImpuestoConDescuento(money_discount, total);
       CalcularVentas (venta->header);
       block_discount = FALSE;
       return;
@@ -2669,8 +2692,8 @@ Descuento (GtkWidget *widget, gpointer data)
 
 
   CalcularVentas (venta->header);
-  total = atoi (CutPoints (g_strdup (gtk_label_get_text (GTK_LABEL (builder_get (builder, "label_total"))))));
 
+  //Si se ingresa el decuento en dinero
   if (g_str_equal (widget_name, "entry_discount_money"))
     {
       if (amount > total)
@@ -2679,12 +2702,14 @@ Descuento (GtkWidget *widget, gpointer data)
           return;
         }
 
+      //Se calcula el porcentaje de descuento
       money_discount = amount;
       percent_discount = lround ( (gdouble) (money_discount * 100) / total);
 
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_percent")),
                           g_strdup_printf ("%d", percent_discount));
     }
+  //Si se ingresa el decuento en porcentaje
   else if (g_str_equal (widget_name, "entry_discount_percent"))
     {
       if (amount > 100)
@@ -2692,7 +2717,7 @@ Descuento (GtkWidget *widget, gpointer data)
           block_discount = FALSE;
           return;
         }
-
+      
       money_discount = lround ( (gdouble) (total * amount) / 100);
       gtk_entry_set_text (GTK_ENTRY (builder_get (builder, "entry_discount_money")),
                           g_strdup_printf ("%d", money_discount));
@@ -2700,8 +2725,10 @@ Descuento (GtkWidget *widget, gpointer data)
 
   block_discount = FALSE;
 
+  CalcularAfectoImpuestoConDescuento(money_discount, total);
   gtk_label_set_markup (GTK_LABEL (gtk_builder_get_object (builder, "label_total")),
                         g_strdup_printf ("<span size=\"40000\">%s</span>", PutPoints (g_strdup_printf ("%u", total - money_discount))));
+
 }
 
 

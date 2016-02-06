@@ -57,6 +57,8 @@ gboolean LookCanjeable (Productos *header);
 
 gdouble CalcularSoloAfecto (Productos *header);
 
+gdouble CalcularNetoSoloAfecto (Productos *header);
+
 gdouble CalcularSoloNoAfecto (Productos *header);
 
 gdouble CalcularTotalProporcionAfecta (Productos *header);
