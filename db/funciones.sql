@@ -3577,6 +3577,7 @@ declare
 	id_termino int;
 	last_caja int;
 	arqueo bigint;
+	mixto_efectivo bigint;
 	egresos bigint;
 	ingresos bigint;
 	monto_apertura bigint;
@@ -3611,23 +3612,34 @@ if id_termino is null then
    select last_value into id_termino from venta_id_seq;
 end if;
 
+-- --
+-- NOTA: *id_inicio = id_termino (caja anterior).
+--       *id_inicio = 1 en la primera caja
+--       *La clausula 'where id > id_inicio' no puede
+--        ser '>=' debido al punto 1.
+-- --
 if id_inicio = 1 then
-   select sum(monto) into arqueo
-          from venta
-          where id > 0 and id <= id_termino
-          and tipo_documento = 0
-          and tipo_venta = 0;
-else
-   select sum(monto) into arqueo
-          from venta
-          where id > id_inicio and id <= id_termino
-          and tipo_documento = 0
-          and tipo_venta = 0;
+ id_inicio := 0; -- En este caso, se deja en 0 para que tome del id 1 en adelante
 end if;
+
+-- Venta efectivo
+select sum(monto) into arqueo
+from venta
+where id > id_inicio and id <= id_termino
+  and tipo_documento = 0
+  and tipo_venta = 0;
+
+--Venta Mixta parte efectivo
+select sum (pm.monto2) into mixto_efectivo
+  from pago_mixto pm 
+  where pm.tipo_pago2 = 0 --Efectivo
+  and pm.id_sale > id_inicio and pm.id_sale <= id_termino;
 
 
 if arqueo is null then
    arqueo := 0;
+else
+   arqueo := arqueo + mixto_efectivo;
 end if;
 
 egresos := 0;
