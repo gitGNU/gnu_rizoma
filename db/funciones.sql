@@ -3635,6 +3635,10 @@ select sum (pm.monto2) into mixto_efectivo
   where pm.tipo_pago2 = 0 --Efectivo
   and pm.id_sale > id_inicio and pm.id_sale <= id_termino;
 
+--Si no existe ninguna parte efectivo de venta mixta
+if mixto_efectivo is null then
+   mixto_efectivo := 0;
+end if;
 
 if arqueo is null then
    arqueo := 0;
